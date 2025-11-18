@@ -1,4 +1,4 @@
-name: Guarddog
+name: GuardDog
 files:
 - name: guarddog.yaml
   options:
@@ -11,7 +11,7 @@ files:
     options:
     - name: guarddog_path
       required: true
-      description: "Absolute path to the Guarddog file."
+      description: "Absolute path to the GuardDog file."
       value:
         type: string
         example: <ABSOLUTE_PATH_OF_GUARDDOG>

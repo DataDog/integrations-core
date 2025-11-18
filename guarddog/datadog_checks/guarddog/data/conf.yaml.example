@@ -23,7 +23,7 @@
 init_config:
 
     ## @param guarddog_path - string - required
-    ## Absolute path to the Guarddog file.
+    ## Absolute path to the GuardDog file.
     #
     guarddog_path: <ABSOLUTE_PATH_OF_GUARDDOG>
 

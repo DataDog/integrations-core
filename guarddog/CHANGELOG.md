@@ -1,4 +1,4 @@
-# CHANGELOG - Guarddog
+# CHANGELOG - GuardDog
 
 <!-- towncrier release notes start -->
 

@@ -8,21 +8,21 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Guarddog logs.",
-    "title": "Guarddog",
+    "description": "Gain insights into GuardDog logs.",
+    "title": "GuardDog",
     "media": [
       {
-        "caption": "Guarddog Rules Overview",
+        "caption": "GuardDog Rules Overview",
         "image_url": "images/guarddog_rules_overview.png",
         "media_type": "image"
       },
       {
-        "caption": "Guarddog Scan & Ecosystem Overview - 1",
+        "caption": "GuardDog Scan & Ecosystem Overview - 1",
         "image_url": "images/guarddog_scan_ecosystem_overview_1.png",
         "media_type": "image"
       },
       {
-        "caption": "Guarddog Scan & Ecosystem Overview - 2",
+        "caption": "GuardDog Scan & Ecosystem Overview - 2",
         "image_url": "images/guarddog_scan_ecosystem_overview_2.png",
         "media_type": "image"
       }
@@ -41,7 +41,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 57376922,
-      "source_type_name": "Guarddog",
+      "source_type_name": "GuardDog",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -50,8 +50,8 @@
       }
     },
     "dashboards": {
-      "Guarddog Scan & Ecosystem Overview": "assets/dashboards/guarddog_scan_and_ecosystem_overview.json",
-      "Guarddog Rules Overview": "assets/dashboards/guarddog_rules_overview.json"
+      "GuardDog Scan & Ecosystem Overview": "assets/dashboards/guarddog_scan_and_ecosystem_overview.json",
+      "GuardDog Rules Overview": "assets/dashboards/guarddog_rules_overview.json"
     },
     "logs": {
       "source": "guarddog"

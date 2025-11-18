@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-guarddog"
-description = "The Guarddog check"
+description = "The GuardDog check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.12"

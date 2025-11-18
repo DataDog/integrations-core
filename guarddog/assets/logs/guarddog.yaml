@@ -4,7 +4,7 @@ backend_only: false
 facets: null
 pipeline:
   type: pipeline
-  name: Guarddog
+  name: GuardDog
   enabled: true
   filter:
     query: source:guarddog

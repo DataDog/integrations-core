@@ -1,5 +1,5 @@
 {
-    "title": "Guarddog Rules Overview",
+    "title": "GuardDog Rules Overview",
     "description": "This dashboard shows results from GuardDog scans across ecosystems like PyPI, npm, Go modules, and GitHub Actions. It helps spot malicious or suspicious packages based on GuardDog’s rules.\n",
     "widgets": [
         {
@@ -25,7 +25,7 @@
             "id": 3511835564008071,
             "definition": {
                 "type": "note",
-                "content": "[GuardDog](https://github.com/DataDog/guarddog) is a CLI tool that allows identifying malicious PyPI and npm packages, Go modules, and GitHub actions. It runs a set of heuristics on the package source code (through Semgrep rules) and on the package metadata.\n\nThis dashboard shows results from GuardDog scans across ecosystems like PyPI, npm, Go modules, and GitHub Actions. It helps spot malicious or suspicious packages based on GuardDog’s rules.\n\nFor more information, see the [Guarddog Integration Documentation](https://docs.datadoghq.com/integrations/guarddog/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "[GuardDog](https://github.com/DataDog/guarddog) is a CLI tool that allows you to identify malicious PyPI and npm packages, Go modules, and GitHub actions. It runs a set of heuristics on the package source code (through Semgrep rules) and on the package metadata.\n\nThis dashboard shows results from GuardDog scans across ecosystems like PyPI, npm, Go modules, and GitHub Actions. It helps spot malicious or suspicious packages based on GuardDog’s rules.\n\nFor more information, see the [GuardDog Integration Documentation](https://docs.datadoghq.com/integrations/guarddog/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "16",
                 "text_align": "left",
@@ -57,7 +57,6 @@
                             "title": "Total scans",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -290,6 +289,7 @@
                             "title": "Issues rate",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -301,7 +301,7 @@
                                                     "unit_name": "percent"
                                                 }
                                             },
-                                            "formula": "default_zero(query1) * 100 / (default_zero(query2) * 5 / 3)"
+                                            "formula": "default_zero(query1) * 100 / default_zero(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -2703,7 +2703,7 @@
                         "id": 4877782158829162,
                         "definition": {
                             "type": "note",
-                            "content": "\nDatadog Cloud SIEM analyzes and correlates **Guarddog** events to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates **GuardDog** events to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
                             "background_color": "vivid_blue",
                             "font_size": "14",
                             "text_align": "center",

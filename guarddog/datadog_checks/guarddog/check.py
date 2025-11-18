@@ -33,7 +33,7 @@ class GuarddogCheck(AgentCheck):
             cmd_output_with_abs_path = subprocess.run(cmd_with_abs_path.split(), capture_output=True, text=True)
             return cmd_output_with_abs_path
         except FileNotFoundError as cmd_error:
-            err_message = "Guarddog is not found at configured path."
+            err_message = "GuardDog is not found at configured path."
             self.log.error(err_message)
             raise cmd_error
 
@@ -47,7 +47,7 @@ class GuarddogCheck(AgentCheck):
         if not self.path:
             err_message = (
                 "Dependency File Path is required for package ecosystem: "
-                f"{self.package_ecosystem} to run the guarddog scan",
+                f"{self.package_ecosystem} to run the GuardDog scan",
             )
             self.log.error(err_message)
             raise ConfigurationError(err_message)
@@ -76,7 +76,7 @@ class GuarddogCheck(AgentCheck):
             )
             cmd_result = self.get_guarddog_output(self.guarddog_path + " " + guarddog_command)
             if cmd_result.returncode != 0:
-                cmd_result_err_message = f"Guarddog command failed: {cmd_result.stderr}"
+                cmd_result_err_message = f"GuardDog command failed: {cmd_result.stderr}"
                 self.log.error(cmd_result_err_message)
                 raise RuntimeError(cmd_result.stderr)
 
@@ -94,7 +94,7 @@ class GuarddogCheck(AgentCheck):
                     data = {"timestamp": get_timestamp(current_time), "message": json.dumps(event)}
                     self.send_log(data)
             except json.JSONDecodeError as e:
-                self.log.warning("Unable to decode guarddog output: %s", str(e))
+                self.log.warning("Unable to decode GuardDog output: %s", str(e))
                 raise
         except Exception as e:
             err_message = f"Some error occurred during the check operation: {str(e)}"

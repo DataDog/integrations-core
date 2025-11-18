@@ -93,7 +93,7 @@ def test_validate_configurations_with_empty_dependency_file_path(config, instanc
     empty_path = ""
     package_ecosystem = "pypi"
     err_message = (
-        f"Dependency File Path is required for package ecosystem: {package_ecosystem} to run the guarddog scan"
+        f"Dependency File Path is required for package ecosystem: {package_ecosystem} to run the GuardDog scan"
     )
     with pytest.raises(ConfigurationError, match=err_message):
         check.package_ecosystem = package_ecosystem
@@ -240,7 +240,7 @@ def test_check_abs_path_guarddog_not_found(config, datadog_agent, example_depend
     mocker.patch("os.access", return_value=True)
     mocker.patch(
         "subprocess.run",
-        side_effect=[FileNotFoundError("Guarddog Not Found")],
+        side_effect=[FileNotFoundError("GuardDog Not Found")],
     )
     with pytest.raises(FileNotFoundError):
         check.check(None)
@@ -257,9 +257,9 @@ def test_check_both_guarddog_command_fails_with_not_found(config, instance, mock
     mocker.patch(
         "subprocess.run",
         side_effect=[
-            FileNotFoundError("Guarddog Not Found"),
-            FileNotFoundError("Guarddog Not Found"),
+            FileNotFoundError("GuardDog Not Found"),
+            FileNotFoundError("GuardDog Not Found"),
         ],
     )
-    with pytest.raises(FileNotFoundError, match="Guarddog Not Found"):
+    with pytest.raises(FileNotFoundError, match="GuardDog Not Found"):
         check.check(None)

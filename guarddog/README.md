@@ -1,10 +1,10 @@
-# Guarddog
+# GuardDog
 
 ## Overview
 
-[GuardDog][4] is a CLI tool that allows identifying malicious PyPI and npm packages, Go modules, and GitHub actions. It runs a set of heuristics on the package source code (through Semgrep rules) and on the package metadata.
+[GuardDog][4] is a CLI tool that allows you to identify malicious PyPI and npm packages, Go modules, and GitHub actions. It runs a set of heuristics on the package source code (through Semgrep rules) and on the package metadata.
 
-This integration monitors configured dependency files using Guarddog scans and sends the scan output to Datadog for analysis, providing visual insights through out-of-the-box dashboards and the Log Explorer. It also helps monitor and respond to security threats with ready-to-use Cloud SIEM detection rules.
+This integration monitors configured dependency files using GuardDog scans and sends the scan output to Datadog for analysis, providing visual insights through out-of-the-box dashboards and the Log Explorer. It also helps monitor and respond to security threats with ready-to-use Cloud SIEM detection rules.
 
 **Note:**
 - **Minimum Agent version:** 7.73.0
@@ -13,21 +13,21 @@ This integration monitors configured dependency files using Guarddog scans and s
 
 ### Installation
 
-The Guarddog check is already included with the [Datadog Agent][7] package, so no extra installation is required.
+The GuardDog check is already included with the [Datadog Agent][7] package, so no extra installation is required.
 
 ### Configuration
 
-#### Install Guarddog
+#### Install GuardDog
 
   Note: 
-      - Guarddog requires python version 3.10 or higher.
-      - The Datadog Agent must have access to the Guarddog executable path.
+      - GuardDog requires python version 3.10 or higher.
+      - The Datadog Agent must have access to the GuardDog executable path.
 
-1. Install Guarddog using pip:
+1. Install GuardDog using pip:
     ```shell
     pip3 install guarddog
     ```
-2. Run this command to find the Guarddog executable path:
+2. Run this command to find the GuardDog executable path:
     ```shell
     which guarddog
     ```
@@ -42,7 +42,7 @@ The Guarddog check is already included with the [Datadog Agent][7] package, so n
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `guarddog.d/conf.yaml` file to start monitoring dependency files using guarddog. See the sample [guarddog.d/conf.yaml][6] for available configuration options.
+2. Add this configuration block to your `guarddog.d/conf.yaml` file to start monitoring dependency files using GuardDog. See the sample [guarddog.d/conf.yaml][6] for available configuration options.
 
       ```yaml
       logs:
@@ -52,7 +52,7 @@ The Guarddog check is already included with the [Datadog Agent][7] package, so n
 
       init_config:
           ## @param guarddog_path - string - required
-          ## Absolute path to the Guarddog file. Example: /usr/local/bin/guarddog
+          ## Absolute path to the GuardDog file. Example: /usr/local/bin/guarddog
           #
           guarddog_path: <ABSOLUTE_PATH_OF_GUARDDOG>
 
@@ -102,19 +102,19 @@ The Guarddog check is already included with the [Datadog Agent][7] package, so n
 
 ### Logs
 
-The Guarddog integration collects scan logs.
+The GuardDog integration collects scan logs.
 
 ### Metrics
 
-The Guarddog integration does not include any metrics.
+The GuardDog integration does not include any metrics.
 
 ### Events
 
-The Guarddog integration does not include any events.
+The GuardDog integration does not include any events.
 
 ## Troubleshooting
 
-In case of a **Permission denied** error, run the following command to give the Datadog Agent permission for the Guarddog executable:
+In case of a **Permission denied** error, run the following command to give the Datadog Agent permission for the GuardDog executable:
   ```shell
   chmod o+rx /path/to/guarddog
   ```
