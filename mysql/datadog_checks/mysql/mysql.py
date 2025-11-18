@@ -218,7 +218,7 @@ class MySql(DatabaseCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
-    
+
     @property
     def cloud_metadata(self):
         return self._cloud_metadata

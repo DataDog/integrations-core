@@ -333,7 +333,7 @@ class SQLServer(DatabaseCheck):
     @property
     def cloud_metadata(self):
         return self._cloud_metadata
-        
+
     @property
     def reported_hostname(self):
         # type: () -> str
