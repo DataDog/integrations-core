@@ -5,7 +5,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Iterable, Sized, TypedDict, Union
+=======
+from typing import TYPE_CHECKING, TypedDict
+>>>>>>> origin/master
 
 from datadog_checks.base.utils.serialization import json
 
@@ -37,6 +41,7 @@ class SchemaCollectorConfig:
     def __init__(self):
         self.collection_interval = 3600
         self.payload_chunk_size = 10_000
+<<<<<<< HEAD
         self.max_tables = 300
         self.max_columns = 50
         self.include_databases = None
@@ -45,6 +50,8 @@ class SchemaCollectorConfig:
         self.exclude_schemas = None
         self.include_tables = None
         self.exclude_tables = None
+=======
+>>>>>>> origin/master
 
 
 class SchemaCollector(ABC):
@@ -82,11 +89,17 @@ class SchemaCollector(ABC):
                     self._log.warning("database has no name %v", database)
                     continue
                 with self._get_cursor(database_name) as cursor:
-                    row_count = len(cursor)
-                    for i, row in enumerate(cursor):
-                        self._queued_rows.append(self._map_row(database, row))
+                    # Get the next row from the cursor
+                    # We need to know when we've reached the last row so we can efficiently flush the last payload
+                    # without an empty final payload
+                    next_row = self._get_next(cursor)
+                    while next_row:
+                        self._queued_rows.append(self._map_row(database, next_row))
                         self._total_rows_count += 1
-                        is_last_payload = database == databases[-1] and i == row_count - 1
+                        # Because we're iterating over a cursor we need to try to get
+                        # the next row to see if we've reached the last row
+                        next_row = self._get_next(cursor)
+                        is_last_payload = database == databases[-1] and next_row is None
                         self.maybe_flush(is_last_payload)
                 self._log.debug("Completed collection of schemas for database %s", database_name)
         except Exception as e:
@@ -167,7 +180,11 @@ class SchemaCollector(ABC):
         raise NotImplementedError("Subclasses must implement _get_databases")
 
     @abstractmethod
+<<<<<<< HEAD
     def _get_cursor(self, database) -> Union[Sized, Iterable[dict]]:
+=======
+    def _get_cursor(self, database):
+>>>>>>> origin/master
         """
         Returns a cursor for the given database.
         Subclasses should override this method to return the cursor for the given database.
