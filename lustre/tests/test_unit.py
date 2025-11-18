@@ -7,8 +7,8 @@ from typing import ChainMap
 
 import mock
 import pytest
-from datadog_checks.dev.utils import get_metadata_metrics
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
 from datadog_checks.lustre.constants import (
     CURATED_PARAMS,
