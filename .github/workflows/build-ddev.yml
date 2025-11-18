@@ -80,7 +80,7 @@ jobs:
           os: windows-2022
         # macOS
         - target: aarch64-apple-darwin
-          os: macos-14-xlarge
+          os: macos-14
         - target: x86_64-apple-darwin
           os: macos-14-large
 
