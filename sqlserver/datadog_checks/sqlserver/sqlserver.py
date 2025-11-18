@@ -188,7 +188,7 @@ class SQLServer(DatabaseCheck):
         self._query_manager = None
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
-        
+
         self._submit_initialization_health_event()
 
     def initialize_xe_session_handlers(self):
@@ -342,10 +342,6 @@ class SQLServer(DatabaseCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
-
-    @property
-    def tags(self):
-        return self.tag_manager.get_tags()
 
     @property
     def database_identifier(self):
