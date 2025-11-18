@@ -40,9 +40,10 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "EdgeTransport.exe",
-        "MSExchangeTransport.exe",
-        "Microsoft.Exchange.ServiceHost.exe"
+        "Microsoft.Exchange.Directory.TopologyService.exe",
+        "Microsoft.Exchange.ServiceHost.exe",
+        "hostcontrollerservice.exe",
+        "Microsoft.Exchange.RpcClientAccess.Service.exe"
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
