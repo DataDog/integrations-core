@@ -258,7 +258,7 @@ coverage:
         target: 75
         flags:
         - go_expvar
-      Guarddog:
+      GuardDog:
         target: 75
         flags:
         - guarddog
