@@ -15,12 +15,8 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 import pymysql
 from cachetools import TTLCache
 
-<<<<<<< HEAD
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.checks.db import DatabaseCheck
-=======
-from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
->>>>>>> origin/master
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
@@ -91,7 +87,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError, connect_with_session_variables
+from .util import connect_with_session_variables
 from .version_utils import parse_version
 
 try:
@@ -102,7 +98,7 @@ except ImportError:
     PSUTIL_AVAILABLE = False
 
 try:
-    import datadog_agent # type: ignore
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
@@ -223,10 +219,6 @@ class MySql(DatabaseCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
-
-    @property
-    def tags(self):
-        return self.tag_manager.get_tags()
 
     @property
     def cloud_metadata(self):

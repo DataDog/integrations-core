@@ -7,6 +7,7 @@ from __future__ import annotations
 import contextlib
 from contextlib import closing
 from typing import TYPE_CHECKING, TypedDict
+
 import orjson as json
 
 if TYPE_CHECKING:
@@ -199,9 +200,30 @@ class MySqlSchemaCollector(SchemaCollector):
             columns_query = SQL_COLUMNS
             indexes_query = SQL_INDEXES
             constraints_query = SQL_FOREIGN_KEYS
-            column_columns = "'name', columns.name, 'column_type', columns.column_type, 'default', columns.default, 'nullable', columns.nullable, 'ordinal_position', columns.ordinal_position, 'column_key', columns.column_key"
-            index_columns = "'name', indexes.name, 'collation', indexes.collation, 'cardinality', indexes.cardinality, 'index_type', indexes.index_type, 'seq_in_index', indexes.seq_in_index, 'column_name', indexes.column_name, 'sub_part', indexes.sub_part, 'packed', indexes.packed, 'nullable', indexes.nullable, 'non_unique', indexes.non_unique"
-            constraint_columns = "'name', constraints.name, 'constraint_schema', constraints.constraint_schema, 'table_name', constraints.table_name, 'referenced_table_schema', constraints.referenced_table_schema, 'referenced_table_name', constraints.referenced_table_name, 'referenced_column_names', constraints.referenced_column_names"
+            column_columns = """'name', columns.name,
+            'column_type', columns.column_type,
+            'default', columns.default,
+            'nullable', columns.nullable,
+            'ordinal_position', columns.ordinal_position,
+            'column_key', columns.column_key"""
+            index_columns = """'name', indexes.name,
+            'collation', indexes.collation,
+             'cardinality', indexes.cardinality,
+            'index_type', indexes.index_type,
+            'seq_in_index', indexes.seq_in_index,
+            'column_name', indexes.column_name,
+            'sub_part', indexes.sub_part,
+            'packed', indexes.packed,
+            'nullable', indexes.nullable,
+            'non_unique', indexes.non_unique
+             """
+            constraint_columns = """'name', constraints.name,
+            'constraint_schema', constraints.constraint_schema,
+            'table_name', constraints.table_name,
+            'referenced_table_schema', constraints.referenced_table_schema,
+            'referenced_table_name', constraints.referenced_table_name,
+            'referenced_column_names', constraints.referenced_column_names
+            """
             # partition_ctes = (
             #     f"""
             #     ,
@@ -247,7 +269,8 @@ class MySqlSchemaCollector(SchemaCollector):
                     {tables_query}
                 ),
                 schema_tables AS (
-                    SELECT `schemas`.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
+                    SELECT `schemas`.schema_name, `schemas`.default_character_set_name,
+                    `schemas`.default_collation_name,
                     tables.table_name, tables.engine, tables.row_format, tables.create_time
                     FROM `schemas`
                     LEFT JOIN tables ON `schemas`.schema_name = tables.schema_name
@@ -271,9 +294,12 @@ class MySqlSchemaCollector(SchemaCollector):
                     json_arrayagg(json_object({constraint_columns})) foreign_keys
                     {partition_selects}
                 FROM schema_tables
-                    LEFT JOIN columns ON schema_tables.table_name = columns.table_name and schema_tables.schema_name = columns.schema_name
-                    LEFT JOIN indexes ON schema_tables.table_name = indexes.table_name and schema_tables.schema_name = indexes.schema_name
-                    LEFT JOIN constraints ON schema_tables.table_name = constraints.table_name and schema_tables.schema_name = constraints.schema_name
+                    LEFT JOIN columns ON schema_tables.table_name = columns.table_name and
+                      schema_tables.schema_name = columns.schema_name
+                    LEFT JOIN indexes ON schema_tables.table_name = indexes.table_name and
+                      schema_tables.schema_name = indexes.schema_name
+                    LEFT JOIN constraints ON schema_tables.table_name = constraints.table_name and
+                      schema_tables.schema_name = constraints.schema_name
                     {partition_joins}
                 GROUP BY schema_tables.schema_name, schema_tables.table_name
                 ) t
@@ -306,12 +332,16 @@ class MySqlSchemaCollector(SchemaCollector):
                     # The query can create duplicates of the joined tables
                     "columns": list({v and v['name']: v for v in json.loads(cursor_row.get("columns")) or []}.values()),
                     "indexes": list({v and v['name']: v for v in json.loads(cursor_row.get("indexes")) or []}.values()),
-                    "foreign_keys": list({v and v['name']: v for v in json.loads(cursor_row.get("foreign_keys")) or []}.values()),
+                    "foreign_keys": list(
+                        {v and v['name']: v for v in json.loads(cursor_row.get("foreign_keys")) or []}.values()
+                    ),
                     # "toast_table": cursor_row.get("toast_table"),
                     # "num_partitions": cursor_row.get("num_partitions"),
                     # "partition_key": cursor_row.get("partition_key"),
                 }.items()
                 if v is not None
-            } if cursor_row.get("table_name") is not None else None
-        ] 
+            }
+            if cursor_row.get("table_name") is not None
+            else None
+        ]
         return object

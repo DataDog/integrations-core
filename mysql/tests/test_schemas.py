@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Callable, Optional
+
 import pytest
 
-from datadog_checks.mysql.schemas import MySqlSchemaCollector
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.schemas import MySqlSchemaCollector
+
 from . import common
 
 # from datadog_checks.postgres.version_utils import VersionUtils
@@ -26,6 +28,7 @@ def dbm_instance(instance_basic):
     instance_basic['collect_settings'] = {'enabled': False, 'run_sync': True}
     instance_basic['collect_schemas'] = {'enabled': True, 'run_sync': True}
     return instance_basic
+
 
 @pytest.fixture(scope="function")
 def integration_check() -> Callable[[dict, Optional[dict]], MySql]:
@@ -67,7 +70,16 @@ def test_tables(dbm_instance, integration_check):
             if row['table_name']:
                 tables.append(row['table_name'])
 
-    assert set(tables) =={'cities', 'RestaurantReviews', 'cities_partitioned', 'users', 'Restaurants', 'ϑings', 'landmarks', 'ts'} 
+    assert set(tables) == {
+        'cities',
+        'RestaurantReviews',
+        'cities_partitioned',
+        'users',
+        'Restaurants',
+        'ϑings',
+        'landmarks',
+        'ts',
+    }
 
 
 # def test_columns(dbm_instance, integration_check):
