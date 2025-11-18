@@ -9,6 +9,7 @@ from ipaddress import ip_address
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
+
 from datadog_checks.base import AgentCheck, is_affirmative
 
 from .constants import (
