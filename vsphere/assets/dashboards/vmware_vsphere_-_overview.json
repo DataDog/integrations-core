@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server. For further reading on monitoring vSphere: \n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/) \n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/#pagetitle). \n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
+    "description": "This dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server. For further reading on monitoring vSphere: \n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/) \n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/#pagetitle). \n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "free",
     "template_variables": [
         {
