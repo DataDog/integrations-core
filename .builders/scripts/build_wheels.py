@@ -227,8 +227,8 @@ def main():
             'pip',
             '-vvv',
             'wheel',
-            # '--config-settings',
-            # f'--build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
+            '--config-settings',
+            f'--build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
             '-r',
             str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir',
@@ -274,7 +274,7 @@ def main():
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
-            
+
             sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
 
     output_path = MOUNT_DIR / 'sizes.json'
