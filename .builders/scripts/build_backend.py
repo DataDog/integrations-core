@@ -3,9 +3,26 @@ from __future__ import annotations
 
 import os
 import shutil
+from functools import lru_cache
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Optional
+
+
+@lru_cache(maxsize=1)
+def _load_excluded_spec():
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+
+    import pathspec
+
+    cfg = Path(__file__).parent / "files_to_remove.toml"
+    with cfg.open("rb") as f:
+        data = tomllib.load(f)
+    patterns = data.get("excluded_paths", [])
+    return pathspec.PathSpec.from_lines("gitignore", patterns)
 
 
 # PEP 517 functions
@@ -57,19 +74,9 @@ def build_wheel(
 
     # 3) strip tests using same logic as in your PR:
     #    - check against files_to_remove.toml or a spec
-    def _load_excluded_spec():
-        import tomllib
-
-        import pathspec
-
-        cfg = Path(__file__).parent / "files_to_remove.toml"
-        with cfg.open("rb") as f:
-            data = tomllib.load(f)
-        patterns = data.get("excluded_paths", [])
-        return pathspec.PathSpec.from_lines("gitignore", patterns)
+    spec = _load_excluded_spec()
 
     def _is_excluded(member: str) -> bool:
-        spec = _load_excluded_spec()
         rel = Path(member).as_posix()
         return spec.match_file(rel) or spec.match_file(rel + "/")
 
