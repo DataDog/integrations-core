@@ -219,7 +219,7 @@ jobs:
         - arch: x86_64
           os: macos-14-large
         - arch: aarch64
-          os: macos-14-xlarge # "macOS 14 Arm64" as per https://github.com/actions/runner-images/blob/main/README.md
+          os: macos-14 # "macOS 14 Arm64" as per https://github.com/actions/runner-images/blob/main/README.md
     env:
       TARGET_NAME: macos-${{ matrix.job.arch }}
       OUT_DIR: output/macos-${{ matrix.job.arch }}
