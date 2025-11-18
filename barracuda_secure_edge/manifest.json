@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "SecureEdge is a unified SASE platform that includes NGFW, zero trust and secure SD-WAN",
-    "title": "Barracuda Secure Edge",
+    "title": "Barracuda SecureEdge",
     "media": [
       {
         "media_type": "image",
@@ -18,8 +18,8 @@
       },
       {
         "media_type": "image",
-        "caption": "Barracuda SecureEdge Overview Dark Mode",
-        "image_url": "images/secure_edge_overview_dark.png"
+        "caption": "Barracuda SecureEdge Overview Bottom Light Mode",
+        "image_url": "images/secure_edge_overview_bottom_section_light.png"
       }
     ],
     "classifier_tags": [

@@ -149,6 +149,11 @@ The Slurm integration does not include any events.
 
 Need help? Contact [Datadog support][7].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Optimize HPC jobs and cluster utilization with Datadog][14]
 
 [1]: https://slurm.schedmd.com/overview.html
 [2]: /account/settings/agent/latest
@@ -163,3 +168,4 @@ Need help? Contact [Datadog support][7].
 [11]: https://slurm.schedmd.com/sdiag.html
 [12]: https://slurm.schedmd.com/sshare.html
 [13]: https://slurm.schedmd.com/scontrol.html
+[14]: https://www.datadoghq.com/blog/hpc-monitoring/

@@ -28,7 +28,7 @@ The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. 
 
 Configure this check on a container running the Kafka Consumer.
 See the [Autodiscovery Integration Templates][17] for guidance on applying the parameters below.
-In Kubernetes, if a single consumers is running on many containers, you can setup this check as a [Cluster Check][20] to avoid having multiple checks collecting the same metrics.
+In Kubernetes, if a single consumer is running on many containers, you can set up this check as a [Cluster Check][20] to avoid having multiple checks collecting the same metrics.
 
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
@@ -87,7 +87,7 @@ The Kafka-consumer check does not include any service checks.
 - [Troubleshooting and Deep Dive for Kafka][10]
 - [Agent failed to retrieve RMIServer stub][11]
 
-**Kerberos GSSAPI Authentication**
+### Kerberos GSSAPI Authentication
 
 Depending on your Kafka cluster's Kerberos setup, you may need to configure the following:
 
@@ -99,32 +99,32 @@ Depending on your Kafka cluster's Kerberos setup, you may need to configure the 
 * `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (for example, `KRB5CCNAME=/tmp/krb5cc_xxx`)
 * If the Datadog Agent is unable to access the environment variables, configure the environment variables in a Datadog Agent service configuration override file for your operating system. The procedure for modifying the Datadog Agent service unit file may vary for different Linux operating systems. For example, in a Linux `systemd` environment: 
 
-**Linux Systemd Example**
+### Linux Systemd Example
 
 1. Configure the environment variables in an environment file.
    For example: `/path/to/environment/file`
 
-  ```
-  KRB5_CLIENT_KTNAME=/etc/krb5.keytab
-  KRB5CCNAME=/tmp/krb5cc_xxx
-  ```
+   ```
+   KRB5_CLIENT_KTNAME=/etc/krb5.keytab
+   KRB5CCNAME=/tmp/krb5cc_xxx
+   ```
 
 2. Create a Datadog Agent service configuration override file: `sudo systemctl edit datadog-agent.service`
 
 3. Configure the following in the override file:
 
-  ```
-  [Service]
-  EnvironmentFile=/path/to/environment/file
-  ```
+   ```
+   [Service]
+   EnvironmentFile=/path/to/environment/file
+   ```
 
 4. Run the following commands to reload the systemd daemon, datadog-agent service, and Datadog Agent:
 
-```
-sudo systemctl daemon-reload
-sudo systemctl restart datadog-agent.service
-sudo service datadog-agent restart
-```
+   ```
+   sudo systemctl daemon-reload
+   sudo systemctl restart datadog-agent.service
+   sudo service datadog-agent restart
+   ```
 
 ## Further Reading
 

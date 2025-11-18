@@ -1,1 +1,0 @@
-Add KindLoad wrapper utility that allows to load Docker images into kind for testing

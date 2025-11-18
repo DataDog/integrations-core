@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TypedDict
 
-import orjson as json
+from datadog_checks.base.utils.serialization import json
 
 from .utils import now_ms
 
@@ -42,25 +42,16 @@ class SchemaCollectorConfig:
 class SchemaCollector(ABC):
     """
     Abstract base class for DBM schema collectors.
-
-    Attributes:
-        _collection_started_at (int): Timestamp in whole milliseconds
-            when the current collection started.
     """
-
-    _collection_started_at: int | None = None
 
     def __init__(self, check: DatabaseCheck, config: SchemaCollectorConfig):
         self._check = check
         self._log = check.log
         self._config = config
-        self._dbms = check.__class__.__name__.lower()
-        if self._dbms == 'postgresql':
-            # Backwards compatibility for metrics namespacing
-            self._dbms = 'postgres'
         self._reset()
 
     def _reset(self):
+        # Timestamp in whole milliseconds when the current collection started.
         self._collection_started_at = None
         self._collection_payloads_count = 0
         self._queued_rows = []
@@ -70,53 +61,53 @@ class SchemaCollector(ABC):
         """
         Collects and submits all applicable schema metadata to the agent.
         This class relies on the owning check to handle scheduling this method.
-
-        This method will enforce non-overlapping invocations and
-        returns False if the previous collection was still in progress when invoked again.
         """
-        if self._collection_started_at is not None:
-            return False
         status = "success"
         try:
             self._collection_started_at = now_ms()
             databases = self._get_databases()
+            self._log.debug("Collecting schemas for %d databases", len(databases))
             for database in databases:
+                self._log.debug("Starting collection of schemas for database %s", database['name'])
                 database_name = database['name']
                 if not database_name:
                     self._log.warning("database has no name %v", database)
                     continue
                 with self._get_cursor(database_name) as cursor:
                     # Get the next row from the cursor
-                    next = self._get_next(cursor)
-                    while next:
-                        self._queued_rows.append(self._map_row(database, next))
+                    # We need to know when we've reached the last row so we can efficiently flush the last payload
+                    # without an empty final payload
+                    next_row = self._get_next(cursor)
+                    while next_row:
+                        self._queued_rows.append(self._map_row(database, next_row))
                         self._total_rows_count += 1
                         # Because we're iterating over a cursor we need to try to get
                         # the next row to see if we've reached the last row
-                        next = self._get_next(cursor)
-                        is_last_payload = database is databases[-1] and next is None
+                        next_row = self._get_next(cursor)
+                        is_last_payload = database == databases[-1] and next_row is None
                         self.maybe_flush(is_last_payload)
+                self._log.debug("Completed collection of schemas for database %s", database_name)
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema: %s", e)
             raise e
         finally:
             self._check.histogram(
-                f"dd.{self._dbms}.schema.time",
+                f"dd.{self._check.dbms}.schema.time",
                 now_ms() - self._collection_started_at,
                 tags=self._check.tags + ["status:" + status],
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
-                f"dd.{self._dbms}.schema.tables_count",
+                f"dd.{self._check.dbms}.schema.tables_count",
                 self._total_rows_count,
                 tags=self._check.tags + ["status:" + status],
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
-                f"dd.{self._dbms}.schema.payloads_count",
+                f"dd.{self._check.dbms}.schema.payloads_count",
                 self._collection_payloads_count,
                 tags=self._check.tags + ["status:" + status],
                 hostname=self._check.reported_hostname,
@@ -134,6 +125,7 @@ class SchemaCollector(ABC):
             "kind": self.kind,
             "agent_version": datadog_agent.get_version(),
             "collection_interval": self._config.collection_interval,
+            "dbms": self._check.dbms,
             "dbms_version": str(self._check.dbms_version),
             "tags": self._check.tags,
             "cloud_metadata": self._check.cloud_metadata,
@@ -142,7 +134,7 @@ class SchemaCollector(ABC):
 
     def maybe_flush(self, is_last_payload):
         if is_last_payload or len(self._queued_rows) >= self._config.payload_chunk_size:
-            event = self.base_event.copy()
+            event = self.base_event
             event["timestamp"] = now_ms()
             # DBM backend expects metadata to be an array of database objects
             event["metadata"] = self._queued_rows
@@ -164,6 +156,7 @@ class SchemaCollector(ABC):
         """
         raise NotImplementedError("Subclasses must implement kind")
 
+    @abstractmethod
     def _get_databases(self) -> list[DatabaseInfo]:
         """
         Returns a list of database dictionaries.

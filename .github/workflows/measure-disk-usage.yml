@@ -1,4 +1,5 @@
 name: Measure Disk Usage
+run-name: "Measure Disk Usage [${{ github.event.workflow_run.head_sha }}]"
 
 on:
   workflow_run:
@@ -36,16 +37,18 @@ jobs:
 
     - name: Define command
       id: cmd
+      env:
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        EVENT_NAME: ${{ github.event.workflow_run.event }}
+        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
-        cmd="ddev -v size status \
-        --commit ${{ github.event.workflow_run.head_sha }} \
-        --format json"
+        cmd="ddev -v size status --commit \"$HEAD_SHA\" --format json"
 
-        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.event.workflow_run.head_branch }}" = "master" ]; then 
+        if [ "$EVENT_NAME" = "push" ] && [ "$HEAD_BRANCH" = "master" ]; then 
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
-
         echo "cmd=$cmd" >> $GITHUB_OUTPUT
+    
 
     - name: Measure disk usage (Uncompressed)
       env:
