@@ -9,12 +9,12 @@ from ipaddress import ip_address
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
-
 from datadog_checks.base import AgentCheck, is_affirmative
 
 from .constants import (
     CURATED_PARAMS,
     DEFAULT_STATS,
+    DEVICE_ATTR_NAMES,
     EXTRA_STATS,
     FILESYSTEM_DISCOVERY_PARAM_MAPPING,
     IGNORED_LNET_GROUPS,
@@ -117,6 +117,7 @@ class LustreCheck(AgentCheck):
         self.filesystems: List[str] = self.instance.get('filesystems', [])
         # If filesystems were provided by the instance, do not update the filesystem list
         self.filesystem_discovery: bool = False if self.filesystems else True
+        self._use_yaml: bool = True  # Older versions of Lustre (<2.15.5) do not support yaml as an output
         self.node_type: str = self.instance.get('node_type', self._find_node_type())
 
         self.tags: List[str] = self.instance.get('tags', [])
@@ -172,9 +173,30 @@ class LustreCheck(AgentCheck):
         Find devices using the lctl dl command.
         '''
         self.log.debug('Updating device list...')
-        output = self._run_command('lctl', 'dl', '-y')
-        device_data = yaml.safe_load(output)
-        self.devices = device_data.get('devices', [])
+        if self._use_yaml:
+            try:
+                output = self._run_command('lctl', 'dl', '-y')
+                device_data = yaml.safe_load(output)
+                devices = device_data.get('devices', [])
+            except:
+                self.log.debug('Device update failed with yaml flag, retrying without it.')
+                self._use_yaml = False
+                self._update_devices()
+                return
+        else:
+            devices = []
+            output = self._run_command('lctl', 'dl')
+            try:
+                assert output
+                for device_line in output.splitlines():
+                    device_attr = device_line.split()
+                    assert len(device_attr) == len(DEVICE_ATTR_NAMES)
+                    devices.append(dict(zip(DEVICE_ATTR_NAMES, device_attr)))
+            except AssertionError:
+                self.log.error('Could not parse device list output: %s', output)
+                return
+        self.devices = devices
+        self.log.debug('Devices successfully updated.')
 
     def _update_filesystems(self) -> None:
         '''
