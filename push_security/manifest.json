@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5adddeb6-b278-49b7-b124-e67642e76f51",
   "app_id": "push-security",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
