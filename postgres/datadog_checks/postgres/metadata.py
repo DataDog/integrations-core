@@ -812,13 +812,13 @@ class PostgresMetadata(DBMAsyncJob):
                         if row['schemaname'] in ['pg_catalog', 'public']:
                             query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
                         else:
-                            self._log.warning(
+                            self._log.debug(
                                 "unable to collect settings for extension %s in schema %s",
                                 extension,
                                 row['schemaname'],
                             )
                     else:
-                        self._log.warning("unable to collect settings for unknown extension %s", extension)
+                        self._log.debug("unable to collect settings for unknown extension %s", extension)
 
                 if self.pg_settings_ignored_patterns:
                     query = query + " WHERE name NOT LIKE ALL(%s)"

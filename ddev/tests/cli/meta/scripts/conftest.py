@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import shutil
-
 import pytest
 
 from ddev.repo.core import Repository
-from ddev.utils.fs import Path
 from ddev.utils.git import GitRepository
 
 # Whenenever we bump python version, we also need to bump the python
@@ -146,24 +143,72 @@ classifiers = [
 """,
     )
 
-    # Copy actual Dockerfiles from the real repository for Python upgrade tests
-    dockerfiles_to_copy = [
-        '.builders/images/linux-aarch64/Dockerfile',
-        '.builders/images/linux-x86_64/Dockerfile',
-        '.builders/images/windows-x86_64/Dockerfile',
-    ]
+    # Create fake Dockerfiles for Python upgrade tests
+    # These are minimal versions with just the patterns the upgrade script looks for
+    write_file(
+        repo_path / '.builders' / 'images' / 'linux-aarch64',
+        'Dockerfile',
+        """ARG BASE_IMAGE=quay.io/pypa/manylinux2014_aarch64
+FROM ${BASE_IMAGE}
 
-    for dockerfile_path in dockerfiles_to_copy:
-        source = Path(local_repo) / dockerfile_path
-        dest = repo_path / dockerfile_path
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, dest)
+# Compile and install Python 3
+ENV PYTHON3_VERSION=3.13.7
+RUN DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \\
+VERSION="${PYTHON3_VERSION}" \\
+SHA256="c061fe2ed5209161ac32e55e570cf8fd84bcd05c0ebc80e6b86daa4f2d75b0ee" \\
+RELATIVE_PATH="Python-{{version}}" \\
+bash install-from-source.sh
+""",
+    )
 
-    # Copy actual macOS workflow file for Python upgrade tests
-    workflow_source = Path(local_repo) / '.github' / 'workflows' / 'resolve-build-deps.yaml'
-    workflow_dest = repo_path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
-    workflow_dest.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(workflow_source, workflow_dest)
+    write_file(
+        repo_path / '.builders' / 'images' / 'linux-x86_64',
+        'Dockerfile',
+        """ARG BASE_IMAGE=quay.io/pypa/manylinux2014_x86_64
+FROM ${BASE_IMAGE}
+
+# Compile and install Python 3
+ENV PYTHON3_VERSION=3.13.7
+RUN DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \\
+VERSION="${PYTHON3_VERSION}" \\
+SHA256="c061fe2ed5209161ac32e55e570cf8fd84bcd05c0ebc80e6b86daa4f2d75b0ee" \\
+RELATIVE_PATH="Python-{{version}}" \\
+bash install-from-source.sh
+""",
+    )
+
+    write_file(
+        repo_path / '.builders' / 'images' / 'windows-x86_64',
+        'Dockerfile',
+        """FROM mcr.microsoft.com/windows/servercore:ltsc2022
+
+ENV PYTHON_VERSION="3.13.7"
+RUN Get-RemoteFile `
+      -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
+      -Path python-$Env:PYTHON_VERSION-amd64.exe `
+      -Hash 'b3dfdb2b9f43defb9c6c6d2dd679072dcc04e2c5d52ceaa4c0a001f39c3fa9a4'; `
+    Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'
+""",
+    )
+
+    # Create fake macOS workflow file for Python upgrade tests
+    write_file(
+        repo_path / '.github' / 'workflows',
+        'resolve-build-deps.yaml',
+        """name: Resolve build dependencies
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Install Python
+        env:
+          PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.13.7/python-3.13.7-macos11.pkg"
+        run: |-
+          curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
+          sudo installer -pkg python3.pkg -target /
+""",
+    )
 
     yield repo
 

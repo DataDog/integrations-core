@@ -5,6 +5,10 @@
 
 def test_update_python_version_success(fake_repo, ddev, mocker):
     """Test successful Python version update."""
+    # Mock the constants that get imported by the upgrade script
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION_FULL', '3.13.7')
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION', '3.13')
+
     # Mock network calls
     mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.9')
     mocker.patch(
@@ -50,6 +54,10 @@ def test_update_python_version_success(fake_repo, ddev, mocker):
 
 
 def test_update_python_version_already_latest(fake_repo, ddev, mocker):
+    # Mock the constants that get imported by the upgrade script
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION_FULL', '3.13.7')
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION', '3.13')
+
     mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.7')
 
     result = ddev('meta', 'scripts', 'upgrade-python-version')
@@ -68,6 +76,10 @@ def test_update_python_version_no_new_version_found(fake_repo, ddev, mocker):
 
 
 def test_update_python_version_invalid_hash_format(fake_repo, ddev, mocker):
+    # Mock the constants that get imported by the upgrade script
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION_FULL', '3.13.7')
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION', '3.13')
+
     mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.9')
     # Hash validation happens inside get_python_sha256_hashes, so it raises ValueError
     mocker.patch(

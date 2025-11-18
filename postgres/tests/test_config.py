@@ -381,3 +381,168 @@ def test_relations_validation_fails_if_schemas_is_wrong_type():
 def test_relations_validation_fails_if_relkind_is_wrong_type():
     with pytest.raises(ConfigurationError):
         RelationsManager.validate_relations_config([{"relation_name": "person", "relkind": "foo"}])
+
+
+def test_autodiscovery_dbname_defaults_to_global_view_db(mock_check):
+    # When autodiscovery is enabled and dbname is not explicitly set,
+    # dbname should default to global_view_db
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'database_autodiscovery': {
+            'enabled': True,
+            'global_view_db': 'main',
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.dbname == 'main'
+
+
+def test_autodiscovery_dbname_respects_explicit_value(mock_check):
+    # When autodiscovery is enabled and dbname IS explicitly set,
+    # the explicit value should be used, even if it's in the exclude list
+    # This allows users to connect to a database for global operations
+    # while excluding it from per-database metric collection
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'dbname': 'postgres',
+        'database_autodiscovery': {
+            'enabled': True,
+            'global_view_db': 'postgres',
+            'exclude': ['postgres'],
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    # Should be valid - user explicitly set dbname, so they know what they're doing
+    assert result.valid
+    assert config.dbname == 'postgres'
+
+
+def test_autodiscovery_excluded_default_dbname_fails(mock_check):
+    # When autodiscovery is enabled, default dbname postgres is used,
+    # and postgres is in the exclude list, should fail validation
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'database_autodiscovery': {
+            'enabled': True,
+            'exclude': ['postgres'],
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert not result.valid
+    assert any('is excluded by autodiscovery pattern' in str(e) for e in result.errors)
+    assert any('global_view_db' in str(e) for e in result.errors)
+
+
+def test_autodiscovery_with_regex_exclude_pattern(mock_check):
+    # Test that regex patterns work correctly in exclude validation
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'database_autodiscovery': {
+            'enabled': True,
+            'global_view_db': 'test_main',
+            'exclude': ['test_.*'],
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert not result.valid
+    assert any('is excluded by autodiscovery pattern' in str(e) for e in result.errors)
+
+
+def test_autodiscovery_with_non_excluded_global_view_db_succeeds(mock_check):
+    # When autodiscovery is enabled with exclude patterns,
+    # but global_view_db doesn't match any of them, should succeed
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'database_autodiscovery': {
+            'enabled': True,
+            'global_view_db': 'production',
+            'exclude': ['postgres', 'test_.*'],
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.dbname == 'production'
+
+
+def test_autodiscovery_case_sensitive_exclude_matching(mock_check):
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'database_autodiscovery': {
+            'enabled': True,
+            'global_view_db': 'POSTGRES',
+            'exclude': ['postgres'],
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    # Should be valid - case-sensitive matching means POSTGRES != postgres
+    assert result.valid
+    assert config.dbname == 'POSTGRES'
+
+
+def test_autodiscovery_invalid_regex_pattern_warns(mock_check):
+    # Invalid regex patterns should generate warnings
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'database_autodiscovery': {
+            'enabled': True,
+            'global_view_db': 'main',
+            'exclude': ['[invalid'],  # Invalid regex
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    # Should have a warning about invalid regex
+    assert any('Invalid regex pattern' in w for w in result.warnings)
+
+
+def test_autodiscovery_exclude_none_does_not_error(mock_check):
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'database_autodiscovery': {
+            'enabled': True,
+            'global_view_db': 'main',
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.dbname == 'main'
