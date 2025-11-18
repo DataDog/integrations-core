@@ -223,7 +223,7 @@ def is_excluded_from_wheel(path: str | Path) -> bool:
     return False
 
 
-def add_dependency(dependencies: dict[str, str], wheel: Path) -> None:
+def add_dependency(dependencies: dict[str, str],sizes: dict[str, WheelSizes],wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
     project_name = normalize_project_name(project_metadata['Name'])
     project_version = project_metadata['Version']
