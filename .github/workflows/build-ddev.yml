@@ -80,9 +80,9 @@ jobs:
           os: windows-2022
         # macOS
         - target: aarch64-apple-darwin
-          os: macos-13
+          os: macos-14-xlarge
         - target: x86_64-apple-darwin
-          os: macos-13
+          os: macos-14-large
 
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -361,7 +361,7 @@ jobs:
     name: Build macOS installer and sign/notarize artifacts
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     needs: binaries
-    runs-on: macos-13
+    runs-on: macos-14-large
 
     env:
       VERSION: ${{ needs.binaries.outputs.version }}

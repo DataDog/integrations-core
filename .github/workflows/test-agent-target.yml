@@ -50,7 +50,7 @@ jobs:
 
       job-name: "${{ inputs.integration }}-${{ inputs.platform }}-${{ inputs.environment }}"
       platform: ${{ inputs.platform }}
-      runner: ${{ inputs.platform == 'linux' && '["ubuntu-22.04"]' || inputs.platform == 'windows' && '["windows-2022"]' || '["macos-13"]' }}
+      runner: ${{ inputs.platform == 'linux' && '["ubuntu-22.04"]' || inputs.platform == 'windows' && '["windows-2022"]' || '["macos-14-large"]' }}
 
       target: ${{ inputs.integration }}
 
