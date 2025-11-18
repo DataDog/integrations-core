@@ -327,6 +327,10 @@ class SQLServer(DatabaseCheck):
         return self.tag_manager.get_tags()
 
     @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
+
+    @property
     def reported_hostname(self):
         # type: () -> str
         if self._config.exclude_hostname:
@@ -383,10 +387,6 @@ class SQLServer(DatabaseCheck):
         if self._database_hostname is None:
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
-
-    @property
-    def cloud_metadata(self):
-        return self._cloud_metadata
 
     @property
     def dbms_version(self):
