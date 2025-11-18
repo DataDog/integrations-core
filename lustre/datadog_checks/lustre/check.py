@@ -9,7 +9,6 @@ from ipaddress import ip_address
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
-
 from datadog_checks.base import AgentCheck, is_affirmative
 
 from .constants import (
@@ -174,7 +173,7 @@ class LustreCheck(AgentCheck):
         Find devices using the lctl dl command.
         '''
         self.log.debug('Updating device list...')
-        devices = self.devices
+        devices = []
         if self._use_yaml:
             try:
                 output = self._run_command('lctl', 'dl', '-y')
@@ -184,7 +183,6 @@ class LustreCheck(AgentCheck):
                 self.log.debug('Device update failed with yaml flag, retrying without it.')
                 self._use_yaml = False
         if not self._use_yaml:
-            devices = []
             output = self._run_command('lctl', 'dl')
             for device_line in output.splitlines():
                 device_attr = device_line.split()
