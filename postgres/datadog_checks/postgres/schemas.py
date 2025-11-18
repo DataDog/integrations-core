@@ -196,6 +196,7 @@ class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
     include_tables: list[str]
     max_columns: int
 
+
 class PostgresSchemaCollector(SchemaCollector):
     _check: PostgreSql
 

@@ -12,9 +12,9 @@ import psycopg
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
-from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
