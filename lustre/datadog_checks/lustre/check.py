@@ -174,28 +174,27 @@ class LustreCheck(AgentCheck):
         Find devices using the lctl dl command.
         '''
         self.log.debug('Updating device list...')
+        devices = self.devices
         if self._use_yaml:
             try:
                 output = self._run_command('lctl', 'dl', '-y')
                 device_data = yaml.safe_load(output)
                 devices = device_data.get('devices', [])
-            except:
+            except AttributeError:
                 self.log.debug('Device update failed with yaml flag, retrying without it.')
                 self._use_yaml = False
-                self._update_devices()
-                return
-        else:
+        if not self._use_yaml:
             devices = []
             output = self._run_command('lctl', 'dl')
-            try:
-                assert output
-                for device_line in output.splitlines():
-                    device_attr = device_line.split()
-                    assert len(device_attr) == len(DEVICE_ATTR_NAMES)
-                    devices.append(dict(zip(DEVICE_ATTR_NAMES, device_attr)))
-            except AssertionError:
-                self.log.error('Could not parse device list output: %s', output)
-                return
+            for device_line in output.splitlines():
+                device_attr = device_line.split()
+                if not len(device_attr) == len(DEVICE_ATTR_NAMES):
+                    self.log.error('Could not parse device info: %s', device_line)
+                    continue
+                devices.append(dict(zip(DEVICE_ATTR_NAMES, device_attr)))
+        if devices == []:
+            self.log.error("No devices detected.")
+            return
         self.devices = devices
         self.log.debug('Devices successfully updated.')
 
