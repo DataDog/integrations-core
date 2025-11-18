@@ -5,11 +5,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-<<<<<<< HEAD
-from typing import TYPE_CHECKING, Iterable, Sized, TypedDict, Union
-=======
 from typing import TYPE_CHECKING, TypedDict
->>>>>>> origin/master
 
 from datadog_checks.base.utils.serialization import json
 
@@ -41,17 +37,6 @@ class SchemaCollectorConfig:
     def __init__(self):
         self.collection_interval = 3600
         self.payload_chunk_size = 10_000
-<<<<<<< HEAD
-        self.max_tables = 300
-        self.max_columns = 50
-        self.include_databases = None
-        self.exclude_databases = None
-        self.include_schemas = None
-        self.exclude_schemas = None
-        self.include_tables = None
-        self.exclude_tables = None
-=======
->>>>>>> origin/master
 
 
 class SchemaCollector(ABC):
@@ -180,11 +165,7 @@ class SchemaCollector(ABC):
         raise NotImplementedError("Subclasses must implement _get_databases")
 
     @abstractmethod
-<<<<<<< HEAD
-    def _get_cursor(self, database) -> Union[Sized, Iterable[dict]]:
-=======
     def _get_cursor(self, database):
->>>>>>> origin/master
         """
         Returns a cursor for the given database.
         Subclasses should override this method to return the cursor for the given database.
