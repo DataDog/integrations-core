@@ -228,7 +228,7 @@ def main():
             '-vvv',
             'wheel',
             '--config-settings',
-            f'--build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
+            f'build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
             '-r',
             str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir',
