@@ -196,7 +196,7 @@ def main():
         env_vars['DD_ENV_FILE'] = str(ENV_FILE)
 
         # Off is on, see: https://github.com/pypa/pip/issues/5735
-        env_vars['PIP_NO_BUILD_ISOLATION'] = '0'
+        # env_vars['PIP_NO_BUILD_ISOLATION'] = '0'
 
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:
         # https://github.com/pypa/pip/issues/10114#issuecomment-1880125475
@@ -227,8 +227,8 @@ def main():
             'pip',
             '-vvv',
             'wheel',
-            '--config-settings',
-            f'--build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
+            # '--config-settings',
+            # f'--build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
             '-r',
             str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir',
