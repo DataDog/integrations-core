@@ -14,7 +14,7 @@ import pytest
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics
 from .utils import requires_over_13, run_one_check
-from datadog_checks.postgres.config_models.dict_defaults import EXCLUDE_DB_DEFAULTS
+from datadog_checks.postgres.config_models.dict_defaults import instance_database_autodiscovery
 
 DISCOVERY_CONFIG = {
     "enabled": True,
@@ -291,11 +291,11 @@ def test_database_autodiscovery_exclude_defaults(aggregator, integration_check, 
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
 
-    databases = check.autodiscovery.get_items()
-    shouldve_be_exclude = list(filter(lambda db: db in EXCLUDE_DB_DEFAULTS, databases))
+    databases_excluded_by_default = instance_database_autodiscovery().exclude
+    check_excludes = check._config.database_autodiscovery.exclude 
 
+    assert databases_excluded_by_default == check_excludes
     assert check.autodiscovery is not None
-    assert len(shouldve_be_exclude) == 0
 
 
 def test_database_autodiscovery_exclude_defaults_overrided(aggregator, integration_check, pg_instance):
