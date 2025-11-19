@@ -14,6 +14,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -50,14 +51,17 @@ from datadog_checks.sqlserver.database_metrics import (
     SQLServerXESessionMetrics,
 )
 from datadog_checks.sqlserver.deadlocks import Deadlocks
+from datadog_checks.sqlserver.health import SqlServerHealth
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
+from .config import sanitize
+
 try:
-    import datadog_agent
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
@@ -124,6 +128,8 @@ class SQLServer(DatabaseCheck):
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
+        self.health = SqlServerHealth(self)
+
         self.static_info_cache = TTLCache(
             maxsize=100,
             # cache these for a full day
@@ -142,6 +148,8 @@ class SQLServer(DatabaseCheck):
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
         self._cloud_metadata = self._config.cloud_metadata
+        self._initialized_at = int(time.time() * 1000)
+
         self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
@@ -181,6 +189,8 @@ class SQLServer(DatabaseCheck):
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
 
+        self._submit_initialization_health_event()
+
     def initialize_xe_session_handlers(self):
         """Initialize the XE session handlers without starting them"""
         # Initialize XE session handlers if not already initialized
@@ -214,6 +224,22 @@ class SQLServer(DatabaseCheck):
             self.log.warning(
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
+
+    def _submit_initialization_health_event(self):
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            # TODO: Validate the config once it has been refactored
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.OK,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={
+                    "initialized_at": self._initialized_at,
+                    "instance": sanitize(self.instance),
+                },
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
 
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
         tags = self.tag_manager.get_tags() + (extra_tags or [])
@@ -295,6 +321,14 @@ class SQLServer(DatabaseCheck):
 
     def resolve_db_host(self):
         return agent_host_resolver(self.host)
+
+    @property
+    def tags(self):
+        return self.tag_manager.get_tags()
+
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
 
     @property
     def reported_hostname(self):
@@ -839,6 +873,8 @@ class SQLServer(DatabaseCheck):
             self._check_connections_by_use_db()
 
     def check(self, _):
+        self._submit_initialization_health_event()
+
         if self.do_check:
             self.load_static_information()
             # configure custom queries for the check

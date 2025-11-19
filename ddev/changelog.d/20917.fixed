@@ -1,1 +1,0 @@
-Fix agent image normalization on `ddev env start` that would force `-py3` suffix in `agent:latest` and confuse `servercore` with a release candidate.

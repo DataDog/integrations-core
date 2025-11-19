@@ -56,10 +56,45 @@ def ci(app: Application, sync: bool):
 
     is_core = app.repo.name == 'core'
     is_marketplace = app.repo.name == 'marketplace'
+
+    # For non-core repos, extract the workflow reference from existing workflow files
+    # This allows using either @master or @<commit-sha>
+    workflow_ref = 'master'  # default
+    windows_workflow_ref = 'master'  # default
+    if not is_core:
+        jobs_workflow_path_temp = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
+        windows_jobs_workflow_path_temp = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
+
+        # Extract reference from Linux workflow file
+        if jobs_workflow_path_temp.is_file():
+            existing_workflow = jobs_workflow_path_temp.read_text()
+            # Look for pattern like: DataDog/integrations-core/.github/workflows/test-target.yml@<ref>
+            # <ref> can be a branch name (alphanumeric + dots/dashes/underscores) or commit SHA (hex only)
+            match = re.search(
+                r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)', existing_workflow
+            )
+            if match:
+                workflow_ref = match.group(1)
+
+        # Extract reference from Windows workflow file
+        if windows_jobs_workflow_path_temp.is_file():
+            existing_windows_workflow = windows_jobs_workflow_path_temp.read_text()
+            match = re.search(
+                r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)',
+                existing_windows_workflow,
+            )
+            if match:
+                windows_workflow_ref = match.group(1)
+
     test_workflow = (
         './.github/workflows/test-target.yml'
         if app.repo.name == 'core'
-        else 'DataDog/integrations-core/.github/workflows/test-target.yml@master'
+        else f'DataDog/integrations-core/.github/workflows/test-target.yml@{workflow_ref}'
+    )
+    windows_test_workflow = (
+        './.github/workflows/test-target.yml'
+        if app.repo.name == 'core'
+        else f'DataDog/integrations-core/.github/workflows/test-target.yml@{windows_workflow_ref}'
     )
     jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
     windows_jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
@@ -145,7 +180,9 @@ def ci(app: Application, sync: bool):
         job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
         job_id = f'j{job_id}'
 
-        job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
+        # Use the appropriate workflow reference based on platform
+        workflow_to_use = windows_test_workflow if 'windows' in data['platform'] else test_workflow
+        job_config = {'uses': workflow_to_use, 'with': config, 'secrets': 'inherit'}
         if 'target-env' in config:
             job_config['strategy'] = {
                 'matrix': {'target-env': data['target-env']},

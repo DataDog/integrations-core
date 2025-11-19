@@ -26,24 +26,28 @@ class DatabaseCheck(AgentCheck):
     @property
     @abstractmethod
     def reported_hostname(self) -> str | None:
-        raise NotImplementedError("reported_hostname is not implemented for this check")
+        pass
 
     @property
     @abstractmethod
     def database_identifier(self) -> str:
-        raise NotImplementedError("database_identifier is not implemented for this check")
+        pass
+
+    @property
+    def dbms(self) -> str:
+        return self.__class__.__name__.lower()
 
     @property
     @abstractmethod
     def dbms_version(self) -> str:
-        raise NotImplementedError("dbms_version is not implemented for this check")
+        pass
 
     @property
     @abstractmethod
     def tags(self) -> list[str]:
-        raise NotImplementedError("tags is not implemented for this check")
+        pass
 
     @property
     @abstractmethod
     def cloud_metadata(self) -> dict:
-        raise NotImplementedError("cloud_metadata is not implemented for this check")
+        pass
