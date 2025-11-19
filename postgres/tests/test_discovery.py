@@ -298,7 +298,7 @@ def test_database_autodiscovery_exclude_defaults(aggregator, integration_check, 
     assert check.autodiscovery is not None
 
 
-def test_database_autodiscovery_exclude_defaults_overrided(aggregator, integration_check, pg_instance):
+def test_database_autodiscovery_exclude_defaults_overriden(aggregator, integration_check, pg_instance):
     """
     Test that the exclude defaults for database autodiscovery can be overriden
     """
