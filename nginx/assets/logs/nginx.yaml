@@ -168,9 +168,16 @@ pipeline:
         - type: string-builder-processor
           name: Add ocsf.metadata.product.name
           enabled: true
-          template: nginx
+          template: "nginx"
           target: ocsf.metadata.product.name
           replaceMissing: false
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.vendor_name
+          enabled: true
+          template: "F5"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+
         - type: schema-processor
           name: Apply OCSF schema for 4002
           enabled: true
@@ -219,7 +226,7 @@ pipeline:
                   name: Other
                   id: 99
               targets:
-                name: ocsf.activity_id
+                name: ocsf.activity_name
                 id: ocsf.activity_id
             - type: schema-category-mapper
               name: ocsf.severity_id
@@ -229,7 +236,7 @@ pipeline:
                   name: Informational
                   id: 1
               targets:
-                name: ocsf.severity_id
+                name: ocsf.severity
                 id: ocsf.severity_id
             - type: schema-category-mapper
               name: ocsf.status_id
@@ -247,7 +254,7 @@ pipeline:
                   name: Unknown
                   id: 99
               targets:
-                name: ocsf.status_id
+                name: ocsf.status
                 id: ocsf.status_id
             - type: schema-remapper
               name: Map `host` to `ocsf.dst_endpoint.ip`
@@ -345,6 +352,13 @@ pipeline:
               sources:
                 - ocsf.metadata.product.name
               target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
