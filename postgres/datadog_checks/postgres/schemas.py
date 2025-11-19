@@ -269,6 +269,9 @@ class PostgresSchemaCollector(SchemaCollector):
                     if is_at_least_11
                     else ""
                 )
+                # There should only ever by one partition key and one partition count
+                # so we can use the array_agg to get the first element and avoid complicating
+                # the group by
                 parition_selects = (
                     """
                 ,
