@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
-from datadog_checks.postgres.version_utils import VersionUtils
+from datadog_checks.postgres.version_utils import V10, V11, VersionUtils
 
 
 class DatabaseInfo(TypedDict):
@@ -265,7 +265,7 @@ class PostgresSchemaCollector(SchemaCollector):
         return query
 
     def _get_tables_query(self):
-        if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
+        if VersionUtils.parse_version(str(self._check.version)) < V10:
             query = PG_TABLES_QUERY_V9
         else:
             query = PG_TABLES_QUERY_V10_PLUS
@@ -283,7 +283,7 @@ class PostgresSchemaCollector(SchemaCollector):
         columns_query = COLUMNS_QUERY
         indexes_query = PG_INDEXES_QUERY
         constraints_query = PG_CONSTRAINTS_QUERY
-        is_at_least_11 = VersionUtils.transform_version(str(self._check.version))["version.major"] >= "11"
+        is_at_least_11 = VersionUtils.parse_version(str(self._check.version)) >= V11
         partitions_ctes = (
             f"""
             ,
