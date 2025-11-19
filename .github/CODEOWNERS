@@ -702,6 +702,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /push_security/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /push_security/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/forescout/                                                           @DataDog/agent-integrations
+/forescout/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/forescout/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/forescout/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+
 /obsidian_security/                                                  @DataDog/saas-integrations
 /obsidian_security/*.md                                              @DataDog/saas-integrations @DataDog/documentation
 /obsidian_security/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
