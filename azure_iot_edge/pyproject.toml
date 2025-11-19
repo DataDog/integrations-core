@@ -29,6 +29,7 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=37.21.0",
+    "argo>=0.1.0",
 ]
 dynamic = [
     "version",
