@@ -198,6 +198,7 @@ class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
     max_columns: int
     max_query_duration: int
 
+
 class PostgresSchemaCollector(SchemaCollector):
     _check: PostgreSql
     _config: PostgresSchemaCollectorConfig
