@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollecto
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_MAJOR_VERSION,
     SWITCH_DB_STATEMENT,
 )
 
@@ -202,7 +203,9 @@ class SQLServerSchemaCollector(SchemaCollector):
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         config.max_tables = check._config.schema_config.get('max_tables', 300)
-        engine_edition = check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        major_version = check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
+        is_2019_or_later = major_version >= 15
+        is_2016_or_earlier = major_version <= 13
         super().__init__(check, config)
 
     @property
