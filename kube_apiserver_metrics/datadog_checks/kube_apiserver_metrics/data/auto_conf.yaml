@@ -29,7 +29,7 @@ instances:
     #
     # prometheus_url: https://%%host%%:6443/metrics
 
-    ## @param bearer_token_auth - boolean or string - optional - default: true
+    ## @param bearer_token_auth - boolean or string - optional - default: tls_only
     ## Used if you are using RBACs and need the Agent to authenticate
     ## against the APIServer to retrieve metrics. Default to true.
     #
