@@ -14,6 +14,7 @@ import pytest
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics
 from .utils import requires_over_13, run_one_check
+from datadog_checks.postgres.config_models.dict_defaults import EXCLUDE_DB_DEFAULTS
 
 DISCOVERY_CONFIG = {
     "enabled": True,
@@ -276,3 +277,43 @@ def test_handle_cannot_connect(aggregator, integration_check, pg_instance):
     expected_tags = _get_expected_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
     _set_allow_connection(db_to_disable, True)
+
+
+def test_database_autodiscovery_exclude_defaults(aggregator, integration_check, pg_instance):
+    """
+    Test that the exclude defaults for database autodiscovery filters the excluded databases
+    """
+
+    pg_instance["database_autodiscovery"] = {
+        "enabled": True,
+    }
+    del pg_instance['dbname']
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+
+    databases = check.autodiscovery.get_items()
+    shouldve_be_exclude = list(filter(lambda db: db in EXCLUDE_DB_DEFAULTS, databases))
+
+    assert check.autodiscovery is not None
+    assert len(shouldve_be_exclude) == 0
+
+
+def test_database_autodiscovery_exclude_defaults_overrided(aggregator, integration_check, pg_instance):
+    """
+    Test that the exclude defaults for database autodiscovery can be overriden
+    """
+
+    excluded_db = "dogs_2"
+
+    pg_instance["database_autodiscovery"] = {
+        "enabled": True,
+        "exclude": [f"{excluded_db}$"]
+    }
+    del pg_instance['dbname']
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+
+    databases = check.autodiscovery.get_items()
+
+    assert check.autodiscovery is not None
+    assert excluded_db not in databases

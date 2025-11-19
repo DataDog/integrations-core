@@ -7,6 +7,7 @@
 
 from . import instance
 
+EXCLUDE_DB_DEFAULTS=["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"]
 
 def instance_database_identifier():
     return instance.DatabaseIdentifier(
@@ -20,7 +21,7 @@ def instance_database_autodiscovery():
         global_view_db="postgres",
         max_databases=100,
         include=[".*"],
-        exclude=["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"],
+        exclude=EXCLUDE_DB_DEFAULTS,
         refresh=600,
     )
 
