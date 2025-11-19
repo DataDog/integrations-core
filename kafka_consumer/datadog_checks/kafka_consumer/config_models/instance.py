@@ -68,7 +68,13 @@ class InstanceConfig(BaseModel):
     sasl_oauth_token_provider: Optional[SaslOauthTokenProvider] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
+    schema_registry_password: Optional[str] = None
+    schema_registry_tls_ca_cert: Optional[str] = None
+    schema_registry_tls_cert: Optional[str] = None
+    schema_registry_tls_key: Optional[str] = None
+    schema_registry_tls_verify: Optional[bool] = None
     schema_registry_url: Optional[str] = None
+    schema_registry_username: Optional[str] = None
     security_protocol: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

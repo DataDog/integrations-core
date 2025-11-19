@@ -316,9 +316,8 @@ instances:
     #
     # enable_cluster_monitoring: false
 
-    ## @param schema_registry_url - string - optional
+    ## @param schema_registry_url - string - optional - default: http://localhost:8081
     ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
-    ## Example: http://localhost:8081 or https://schema-registry:8081
     #
     # schema_registry_url: http://localhost:8081
 
@@ -340,19 +339,19 @@ instances:
     #
     # schema_registry_tls_verify: true
 
-    ## @param schema_registry_tls_ca_cert - string - optional
+    ## @param schema_registry_tls_ca_cert - string - optional - default: /path/to/ca_cert.pem
     ## Path to a custom CA certificate file for Schema Registry TLS verification.
     ## If not specified, uses the system's default CA bundle.
     #
     # schema_registry_tls_ca_cert: /path/to/ca_cert.pem
 
-    ## @param schema_registry_tls_cert - string - optional
+    ## @param schema_registry_tls_cert - string - optional - default: /path/to/client_cert.pem
     ## Path to the client certificate file for Schema Registry mutual TLS authentication.
     ## Must be used in combination with schema_registry_tls_key.
     #
     # schema_registry_tls_cert: /path/to/client_cert.pem
 
-    ## @param schema_registry_tls_key - string - optional
+    ## @param schema_registry_tls_key - string - optional - default: /path/to/client_key.pem
     ## Path to the client private key file for Schema Registry mutual TLS authentication.
     ## Must be used in combination with schema_registry_tls_cert.
     #
