@@ -76,7 +76,7 @@ files:
             value:
               type: boolean
               example: false
-              display_default: false
+              default: false
           - name: database_identifier
             description: |
               Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -91,7 +91,7 @@ files:
               - name: template
                 value:
                   type: string
-                  display_default: "$resolved_hostname"
+                  default: "$resolved_hostname"
                   example: "$env-$resolved_hostname:$port"
                 description: |
                   The template to use for the database identifier. The default value is `$resolved_hostname`.

@@ -77,7 +77,7 @@ files:
       value:
         type: boolean
         example: false
-        display_default: false
+        default: false
     - name: database_identifier
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
