@@ -196,10 +196,11 @@ class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
     exclude_tables: list[str]
     include_tables: list[str]
     max_columns: int
-
+    max_query_duration: int
 
 class PostgresSchemaCollector(SchemaCollector):
     _check: PostgreSql
+    _config: PostgresSchemaCollectorConfig
 
     def __init__(self, check: PostgreSql):
         config = PostgresSchemaCollectorConfig()
@@ -212,6 +213,7 @@ class PostgresSchemaCollector(SchemaCollector):
         config.exclude_tables = check._config.collect_schemas.exclude_tables
         config.include_tables = check._config.collect_schemas.include_tables
         config.max_columns = int(check._config.collect_schemas.max_columns)
+        config.max_query_duration = int(check._config.collect_schemas.max_query_duration)
         super().__init__(check, config)
 
     @property
@@ -242,92 +244,8 @@ class PostgresSchemaCollector(SchemaCollector):
     def _get_cursor(self, database_name):
         with self._check.db_pool.get_connection(database_name) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
-                schemas_query = self._get_schemas_query()
-                tables_query = self._get_tables_query()
-                columns_query = COLUMNS_QUERY
-                indexes_query = PG_INDEXES_QUERY
-                constraints_query = PG_CONSTRAINTS_QUERY
-                is_at_least_11 = VersionUtils.transform_version(str(self._check.version))["version.major"] >= "11"
-                partitions_ctes = (
-                    f"""
-                    ,
-                    partition_keys AS (
-                        {PARTITION_KEY_QUERY}
-                    ),
-                    num_partitions AS (
-                        {NUM_PARTITIONS_QUERY}
-                    )
-                """
-                    if is_at_least_11
-                    else ""
-                )
-                partition_joins = (
-                    """
-                    LEFT JOIN partition_keys ON schema_tables.table_id = partition_keys.table_id
-                    LEFT JOIN num_partitions ON schema_tables.table_id = num_partitions.table_id
-                """
-                    if is_at_least_11
-                    else ""
-                )
-                # There should only ever by one partition key and one partition count
-                # so we can use the array_agg to get the first element and avoid complicating
-                # the group by
-                parition_selects = (
-                    """
-                ,
-                    (array_agg(partition_keys.partition_key))[1] partition_key,
-                    (array_agg(num_partitions.num_partitions))[1] num_partitions
-                """
-                    if is_at_least_11
-                    else ""
-                )
-                limit = int(self._config.max_tables or 1_000_000)
-
-                query = f"""
-                    WITH
-                    schemas AS(
-                        {schemas_query}
-                    ),
-                    tables AS (
-                        {tables_query}
-                    ),
-                    schema_tables AS (
-                        SELECT schemas.schema_id, schemas.schema_name,
-                        tables.table_id, tables.table_name
-                        FROM schemas
-                        LEFT JOIN tables ON schemas.schema_id = tables.schema_id
-                        ORDER BY schemas.schema_name, tables.table_name
-                        LIMIT {limit}
-                    ),
-                    columns AS (
-                        {columns_query}
-                    ),
-                    indexes AS (
-                        {indexes_query}
-                    ),
-                    constraints AS (
-                        {constraints_query}
-                    )
-                    {partitions_ctes}
-
-                    SELECT schema_tables.schema_id, schema_tables.schema_name,
-                    schema_tables.table_id, schema_tables.table_name,
-                        array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
-                        array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
-                        array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
-                          as foreign_keys
-                        {parition_selects}
-                    FROM schema_tables
-                        LEFT JOIN columns ON schema_tables.table_id = columns.table_id
-                        LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
-                        LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
-                        {partition_joins}
-                    GROUP BY schema_tables.schema_id, schema_tables.schema_name,
-                        schema_tables.table_id, schema_tables.table_name
-                    ;
-                """
-                print(query)
-                cursor.execute("SET statement_timeout = '60s';")
+                query = self.get_rows_query()
+                cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s';")
                 cursor.execute(query)
                 yield cursor
 
@@ -356,6 +274,94 @@ class PostgresSchemaCollector(SchemaCollector):
             query += f" AND ({
                 ' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)
             })"
+        return query
+
+    def get_rows_query(self):
+        schemas_query = self._get_schemas_query()
+        tables_query = self._get_tables_query()
+        columns_query = COLUMNS_QUERY
+        indexes_query = PG_INDEXES_QUERY
+        constraints_query = PG_CONSTRAINTS_QUERY
+        is_at_least_11 = VersionUtils.transform_version(str(self._check.version))["version.major"] >= "11"
+        partitions_ctes = (
+            f"""
+            ,
+            partition_keys AS (
+                {PARTITION_KEY_QUERY}
+            ),
+            num_partitions AS (
+                {NUM_PARTITIONS_QUERY}
+            )
+        """
+            if is_at_least_11
+            else ""
+        )
+        partition_joins = (
+            """
+            LEFT JOIN partition_keys ON schema_tables.table_id = partition_keys.table_id
+            LEFT JOIN num_partitions ON schema_tables.table_id = num_partitions.table_id
+        """
+            if is_at_least_11
+            else ""
+        )
+        # There should only ever by one partition key and one partition count
+        # so we can use the array_agg to get the first element and avoid complicating
+        # the group by
+        parition_selects = (
+            """
+        ,
+            (array_agg(partition_keys.partition_key))[1] partition_key,
+            (array_agg(num_partitions.num_partitions))[1] num_partitions
+        """
+            if is_at_least_11
+            else ""
+        )
+        limit = int(self._config.max_tables or 1_000_000)
+
+        query = f"""
+            WITH
+            schemas AS(
+                {schemas_query}
+            ),
+            tables AS (
+                {tables_query}
+            ),
+            schema_tables AS (
+                SELECT schemas.schema_id, schemas.schema_name,
+                tables.table_id, tables.table_name
+                FROM schemas
+                LEFT JOIN tables ON schemas.schema_id = tables.schema_id
+                ORDER BY schemas.schema_name, tables.table_name
+                LIMIT {limit}
+            ),
+            columns AS (
+                {columns_query}
+            ),
+            indexes AS (
+                {indexes_query}
+            ),
+            constraints AS (
+                {constraints_query}
+            )
+            {partitions_ctes}
+
+            SELECT schema_tables.schema_id, schema_tables.schema_name,
+            schema_tables.table_id, schema_tables.table_name,
+                array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
+                array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
+                array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
+                    as foreign_keys
+                {parition_selects}
+            FROM schema_tables
+                LEFT JOIN columns ON schema_tables.table_id = columns.table_id
+                LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
+                LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
+                {partition_joins}
+            GROUP BY schema_tables.schema_id, schema_tables.schema_name,
+                schema_tables.table_id, schema_tables.table_name
+            ;
+        """
+
         return query
 
     def _get_next(self, cursor):
