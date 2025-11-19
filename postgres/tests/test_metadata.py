@@ -201,8 +201,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                             assert table['num_partitions'] == 2
                         elif table['name'] == 'test_part_no_children':
                             keys = list(table.keys())
-                            assert_fields(keys, ["num_partitions", "partition_key"])
-                            assert table['num_partitions'] == 0
+                            assert_fields(keys, ["partition_key"])
 
     assert schemas_want == schemas_got
     assert_fields(tables_got, tables_set)

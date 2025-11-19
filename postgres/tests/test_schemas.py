@@ -91,7 +91,7 @@ def test_tables(dbm_instance, integration_check):
             if row['table_name']:
                 tables.append(row['table_name'])
 
-    assert set(tables) == {
+    expected_tables = {
         'persons',
         'personsdup1',
         'personsdup2',
@@ -112,6 +112,10 @@ def test_tables(dbm_instance, integration_check):
         'cities',
         'sample_foreign_d73a8c',
     }
+    if float(POSTGRES_VERSION) >= 11:
+        expected_tables.update({'test_part', 'test_part_no_children', 'test_part_no_activity'})
+
+    assert set(tables) == expected_tables
 
 
 # def test_columns(dbm_instance, integration_check):

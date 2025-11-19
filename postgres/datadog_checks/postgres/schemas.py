@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import contextlib
+import pprint
 from typing import TYPE_CHECKING, TypedDict
 
 from psycopg.rows import dict_row
@@ -136,7 +137,7 @@ FROM   pg_class
 NUM_PARTITIONS_QUERY = """
 SELECT count(inhrelid :: regclass) AS num_partitions, inhparent as table_id
 FROM   pg_inherits
-GROUP BY inhparent;
+GROUP BY inhparent
 """
 
 PARTITION_ACTIVITY_QUERY = """
@@ -246,6 +247,7 @@ class PostgresSchemaCollector(SchemaCollector):
                 columns_query = COLUMNS_QUERY
                 indexes_query = PG_INDEXES_QUERY
                 constraints_query = PG_CONSTRAINTS_QUERY
+                is_at_least_11 = VersionUtils.transform_version(str(self._check.version))["version.major"] >= "11"
                 partitions_ctes = (
                     f"""
                     ,
@@ -256,24 +258,24 @@ class PostgresSchemaCollector(SchemaCollector):
                         {NUM_PARTITIONS_QUERY}
                     )
                 """
-                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                    if is_at_least_11
                     else ""
                 )
                 partition_joins = (
                     """
-                    LEFT JOIN partition_keys ON tables.table_id = partition_keys.table_id
-                    LEFT JOIN num_partitions ON tables.table_id = num_partitions.table_id
+                    LEFT JOIN partition_keys ON schema_tables.table_id = partition_keys.table_id
+                    LEFT JOIN num_partitions ON schema_tables.table_id = num_partitions.table_id
                 """
-                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                    if is_at_least_11
                     else ""
                 )
                 parition_selects = (
                     """
                 ,
-                    partition_keys.partition_key,
-                    num_partitions.num_partitions
+                    (array_agg(partition_keys.partition_key))[1] partition_key,
+                    (array_agg(num_partitions.num_partitions))[1] num_partitions
                 """
-                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                    if is_at_least_11
                     else ""
                 )
                 limit = int(self._config.max_tables or 1_000_000)
@@ -321,7 +323,7 @@ class PostgresSchemaCollector(SchemaCollector):
                         schema_tables.table_id, schema_tables.table_name
                     ;
                 """
-                # print(query)
+                print(query)
                 cursor.execute("SET statement_timeout = '60s';")
                 cursor.execute(query)
                 yield cursor
@@ -361,6 +363,7 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
+        pprint.pprint(cursor_row)
         # Map the cursor row to the expected schema, and strip out None values
         object["schemas"] = [
             {
