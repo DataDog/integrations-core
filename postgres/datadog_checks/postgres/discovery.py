@@ -14,8 +14,6 @@ from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
-DEFAULT_EXCLUDES = ["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"]
-
 
 class PostgresAutodiscovery(Discovery):
     def __init__(
