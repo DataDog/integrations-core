@@ -329,7 +329,7 @@ pipeline:
             - type: schema-remapper
               name: Map `http.status_code` to `ocsf.status_code`
               sources:
-                - http.status_category
+                - http.status_code
               target: ocsf.status_code
               preserveSource: true
               overrideOnConflict: true
