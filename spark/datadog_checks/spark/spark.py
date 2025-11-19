@@ -83,8 +83,12 @@ class SparkCheck(AgentCheck):
             raise ConfigurationError('The cluster_name must be specified in the instance configuration')
 
         self.master_address = self._get_master_address()
+        self._connection_error_seen = False
+        self._debounced_this_run = False
 
     def check(self, _):
+        self._debounced_this_run = False
+
         tags = list(self.tags)
 
         tags.append('spark_cluster:%s' % self.cluster_name)
@@ -192,6 +196,8 @@ class SparkCheck(AgentCheck):
     def _collect_version(self, base_url, tags):
         try:
             version_json = self._rest_request_to_json(base_url, SPARK_VERSION_PATH, SPARK_SERVICE_CHECK, tags)
+            if version_json is None:
+                return False
             version = version_json['spark']
         except Exception as e:
             self.log.debug("Failed to collect version information: %s", e)
@@ -206,9 +212,17 @@ class SparkCheck(AgentCheck):
         """
         self._collect_version(self.master_address, tags)
         running_apps = {}
+
+        # A request earlier in this check run already hit a debounced connection failure.
+        # Skip the remaining driver queries so we only retry on the next scheduled run.
+        if self._debounced_this_run:
+            return running_apps
         metrics_json = self._rest_request_to_json(
             self.master_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
         )
+
+        if metrics_json is None:
+            return running_apps
 
         for app_json in metrics_json:
             app_id = app_json.get('id')
@@ -231,6 +245,9 @@ class SparkCheck(AgentCheck):
             self.master_address, SPARK_MASTER_STATE_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags
         )
 
+        if metrics_json is None:
+            return {}
+
         running_apps = {}
         version_set = False
 
@@ -251,10 +268,11 @@ class SparkCheck(AgentCheck):
                             applist = self._rest_request_to_json(
                                 app_url, SPARK_APPS_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags
                             )
-                            for appl in applist:
-                                aid = appl.get('id')
-                                aname = appl.get('name')
-                                running_apps[aid] = (aname, app_url)
+                            if applist:
+                                for appl in applist:
+                                    aid = appl.get('id')
+                                    aname = appl.get('name')
+                                    running_apps[aid] = (aname, app_url)
                         else:
                             running_apps[app_id] = (app_name, app_url)
                 except Exception:
@@ -278,6 +296,9 @@ class SparkCheck(AgentCheck):
         running_apps = {}
 
         metrics_json = self._rest_request_to_json(self.master_address, MESOS_MASTER_APP_PATH, MESOS_SERVICE_CHECK, tags)
+
+        if metrics_json is None:
+            return running_apps
 
         if metrics_json.get('frameworks'):
             for app_json in metrics_json.get('frameworks'):
@@ -330,6 +351,9 @@ class SparkCheck(AgentCheck):
             self.master_address, SPARK_MASTER_APP_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags, appId=app_id
         )
 
+        if app_page is None:
+            return None
+
         dom = BeautifulSoup(app_page.text, 'html.parser')
         app_detail_ui_links = dom.find_all('a', string='Application Detail UI')
 
@@ -351,6 +375,9 @@ class SparkCheck(AgentCheck):
             states=APPLICATION_STATES,
             applicationTypes=YARN_APPLICATION_TYPES,
         )
+
+        if metrics_json is None:
+            return {}
 
         running_apps = {}
 
@@ -379,6 +406,8 @@ class SparkCheck(AgentCheck):
                 if not version_set:
                     version_set = self._collect_version(tracking_url, tags)
                 response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
+                if response is None:
+                    continue
             except Exception as e:
                 self.log.warning("Exception happened when fetching app ids for %s: %s", tracking_url, e)
                 continue
@@ -405,6 +434,8 @@ class SparkCheck(AgentCheck):
                 response = self._rest_request(
                     base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, property
                 )
+                if response is None:
+                    continue
             except HTTPError:
                 self.log.debug("Got an error collecting %s", property, exc_info=True)
                 continue
@@ -512,6 +543,8 @@ class SparkCheck(AgentCheck):
                 response = self._rest_request_to_json(
                     base_url, self.metricsservlet_path, SPARK_SERVICE_CHECK, addl_tags
                 )
+                if response is None:
+                    continue
                 self.log.debug('Structured streaming metrics: %s', response)
                 response = {
                     metric_name: v['value']
@@ -611,6 +644,10 @@ class SparkCheck(AgentCheck):
             self.log.debug('Spark check URL: %s', url)
             response = self.http.get(url, cookies=self.proxy_redirect_cookies)
             response.raise_for_status()
+
+            # Reset connection errors on success
+            self._connection_error_seen = False
+
             content = response.text
             proxy_redirect_url = self._parse_proxy_redirect_url(content)
             if proxy_redirect_url:
@@ -633,6 +670,9 @@ class SparkCheck(AgentCheck):
             raise
 
         except (HTTPError, InvalidURL, ConnectionError) as e:
+            if isinstance(e, ConnectionError) and self._should_suppress_connection_error(e, tags):
+                return None
+
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
@@ -654,6 +694,9 @@ class SparkCheck(AgentCheck):
         """
         response = self._rest_request(address, object_path, service_name, tags, *args, **kwargs)
 
+        if response is None:
+            return None
+
         try:
             response_json = response.json()
 
@@ -667,6 +710,42 @@ class SparkCheck(AgentCheck):
             raise
 
         return response_json
+
+    def _should_suppress_connection_error(self, exception, tags):
+        """Suppress kubernetes-only connection false positives during pod shutdown."""
+        pod_phase = self._get_pod_phase(tags)
+        if pod_phase is None:
+            return False
+
+        if pod_phase in ('failed', 'succeeded', 'unknown'):
+            self.log.debug("Pod phase is terminal, suppressing request error: %s", exception)
+            return True
+
+        if (
+            not self._connection_error_seen
+            and not self._debounced_this_run
+            and ("Connection refused" in str(exception) or "No route to host" in str(exception))
+        ):
+            self._connection_error_seen = True
+            self._debounced_this_run = True
+            self.log.warning(
+                "Connection failed. Suppressing error once to ensure driver is running. Error: %s",
+                exception,
+            )
+            return True
+
+        return False
+
+    def _is_pod_in_terminal_state(self, tags):
+        pod_phase = self._get_pod_phase(tags)
+        return pod_phase in ('failed', 'succeeded', 'unknown') if pod_phase is not None else False
+
+    @staticmethod
+    def _get_pod_phase(tags):
+        for tag in tags or []:
+            if tag.startswith('pod_phase:'):
+                return tag.split(':', 1)[1].strip().lower()
+        return None
 
     @classmethod
     def _join_url_dir(cls, url, *args):
