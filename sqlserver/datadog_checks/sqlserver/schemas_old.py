@@ -420,7 +420,7 @@ class Schemas(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_ids, table_id_to_table_data, cursor):
         index_query = INDEX_QUERY
-        if self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) <= 2016:
+        if self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) <= 13:
             index_query = INDEX_QUERY_PRE_2017
         rows = execute_query(index_query.format(table_ids), cursor)
         for row in rows:
@@ -440,7 +440,7 @@ class Schemas(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_ids, table_id_to_table_data, cursor):
         foreign_key_query = FOREIGN_KEY_QUERY
-        if self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) <= 2016:
+        if self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) <= 13:
             foreign_key_query = FOREIGN_KEY_QUERY_PRE_2017
         rows = execute_query(foreign_key_query.format(table_ids), cursor)
         for row in rows:

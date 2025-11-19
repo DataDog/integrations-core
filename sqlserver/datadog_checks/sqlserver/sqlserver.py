@@ -55,7 +55,7 @@ from datadog_checks.sqlserver.health import SqlServerHealth
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
-from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
+from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_year
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
 from .config import sanitize
@@ -91,6 +91,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_FULL_SERVERNAME,
     STATIC_INFO_INSTANCENAME,
     STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_YEAR,
     STATIC_INFO_RDS,
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
@@ -423,17 +424,18 @@ class SQLServer(DatabaseCheck):
                         if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
                             version = results[0][0]
                             self.static_info_cache[STATIC_INFO_VERSION] = version
-                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = parse_sqlserver_major_version(version)
-                            if not self.static_info_cache[STATIC_INFO_MAJOR_VERSION]:
-                                cursor.execute(
-                                    "SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion"
-                                )
-                                result = cursor.fetchone()
-                                if result:
-                                    self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
-                                else:
-                                    self.log.warning("failed to load version static information due to empty results")
-                                self.log.warning("failed to parse SQL Server major version from version: %s", version)
+                            self.static_info_cache[STATIC_INFO_YEAR] = parse_sqlserver_year(version)
+                            if not self.static_info_cache[STATIC_INFO_YEAR]:
+                                self.log.warning("failed to parse SQL Server year from version: %s", version)
+                        else:
+                            self.log.warning("failed to load version static information due to empty results")
+                    if not STATIC_INFO_MAJOR_VERSION in self.static_info_cache:
+                        cursor.execute(
+                            "SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion"
+                        )
+                        result = cursor.fetchone()
+                        if result:
+                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
                         else:
                             self.log.warning("failed to load version static information due to empty results")
                     if STATIC_INFO_SERVERNAME not in self.static_info_cache:

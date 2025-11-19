@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
+    STATIC_INFO_ENGINE_EDITION,
     SWITCH_DB_STATEMENT,
 )
 
@@ -201,6 +202,7 @@ class SQLServerSchemaCollector(SchemaCollector):
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         config.max_tables = check._config.schema_config.get('max_tables', 300)
+        engine_edition = check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         super().__init__(check, config)
 
     @property
