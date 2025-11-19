@@ -1,14 +1,15 @@
 {
-    "title": "Push Security - Entity",
-    "description": "This dashboard offers a comprehensive summary of key entities such as accounts, applications, browsers, employees, and findings to provide insight into your security environment.",
+    "title": "Forescout User Operations",
+    "description": "This dashboard provides insights into user operations, including license management and segment configuration changes.",
     "widgets": [
         {
-            "id": 4319665486602869,
+            "id": 6881983027928314,
             "definition": {
                 "type": "image",
-                "url": "https://static.datadoghq.com/static/images/logos/push-security_small.svg",
-                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/push-security_reversed_small.svg",
+                "url": "/static/images/logos/foresout_large.svg",
+                "url_dark_theme": "/static/images/logos/foresout_reversed_large.svg",
                 "sizing": "contain",
+                "margin": "md",
                 "has_background": true,
                 "has_border": true,
                 "vertical_align": "center",
@@ -22,14 +23,14 @@
             }
         },
         {
-            "id": 10546878817969,
+            "id": 982040765925043,
             "definition": {
                 "type": "note",
-                "content": "This dashboard offers a comprehensive summary of key entities such as accounts, applications, browsers, employees, and findings to provide insight into your security environment.\n\nFor more information, see the [Push Security Documentation](https://docs.datadoghq.com/integrations/push_security/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
-                "background_color": "orange",
+                "content": "This dashboard provides a detailed summary of user operations, covering license management activities and segment configuration changes for effective system administration and control.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
-                "vertical_align": "center",
+                "vertical_align": "top",
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "left",
@@ -43,18 +44,18 @@
             }
         },
         {
-            "id": 3569705310123999,
+            "id": 351046506538009,
             "definition": {
-                "title": "Overview",
-                "background_color": "vivid_orange",
+                "title": "License Management",
+                "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 2783930304552371,
+                        "id": 8340119907013017,
                         "definition": {
-                            "title": "Total Entity Events",
+                            "title": "Total events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -66,7 +67,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:ENTITY $event_name $type"
+                                                "query": "source:forescout service:user-operations @target:\"License Management\" $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -87,7 +88,8 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_yellow"
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#b9dcfa"
                                         }
                                     ]
                                 }
@@ -95,8 +97,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "yaxis": {},
-                                "type": "bars"
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -107,9 +109,9 @@
                         }
                     },
                     {
-                        "id": 6964842732912243,
+                        "id": 8905769981960266,
                         "definition": {
-                            "title": "Entity Events over Time",
+                            "title": "Events over time by outcome",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -124,31 +126,27 @@
                             "type": "timeseries",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Entity Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:ENTITY $event_name $type"
+                                                "query": "source:forescout service:user-operations @target:\"License Management\" $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@evt.name",
+                                                    "facet": "@evt.outcome",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -157,7 +155,17 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "timeseries",
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic",
                                         "order_by": "values",
@@ -176,32 +184,34 @@
                         }
                     },
                     {
-                        "id": 3823652230992030,
+                        "id": 4478095316180677,
                         "definition": {
-                            "title": "Entity Events by Operation",
-                            "title_size": "16",
+                            "title": "Events failures by operations",
+                            "title_size": "10",
                             "title_align": "left",
                             "requests": [
                                 {
+                                    "response_format": "scalar",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:ENTITY $event_name $type"
+                                                "query": "source:forescout service:user-operations @target:\"License Management\" @evt.outcome:failed $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@type",
+                                                    "facet": "@action",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -210,7 +220,6 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
                                     "style": {
                                         "palette": "datadog16"
                                     },
@@ -220,7 +229,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -232,85 +241,97 @@
                                 }
                             ],
                             "type": "sunburst",
+                            "hide_total": false,
                             "legend": {
-                                "type": "automatic"
+                                "type": "table"
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 12,
+                            "width": 6,
                             "height": 4
                         }
                     },
                     {
-                        "id": 1872359295516518,
+                        "id": 305454916128190,
                         "definition": {
-                            "title": "Entity Event Details",
+                            "title": "Events over time by operations",
                             "title_size": "16",
                             "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:pushsecurity service:ENTITY $event_name $type",
-                                        "indexes": [
-                                            "*"
-                                        ],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
+                                    "response_format": "timeseries",
+                                    "queries": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "@evt.name",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "auto"
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:user-operations @target:\"License Management\" $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
                                         }
-                                    ]
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
-                            ],
-                            "type": "list_stream"
+                            ]
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 7,
-                            "width": 12,
-                            "height": 3
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 4
                         }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 3,
-                "width": 12,
-                "height": 11
-            }
-        },
-        {
-            "id": 4468118218361704,
-            "definition": {
-                "title": "Entity Creation Insights",
-                "background_color": "vivid_orange",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+                    },
                     {
-                        "id": 5153838165887277,
+                        "id": 6899341319650280,
                         "definition": {
-                            "title": "Top Entity Types by Entity Creation",
+                            "title": "Top failure reasons",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -321,14 +342,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:ENTITY @type:CREATE $event_name $type"
+                                                "query": "source:forescout service:user-operations @target:\"License Management\" @evt.outcome:failed $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@evt.name",
+                                                    "facet": "@error",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -366,54 +387,38 @@
                                 "display": {
                                     "type": "stacked",
                                     "legend": "automatic"
-                                },
-                                "palette": "dog_classic"
+                                }
                             }
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 3
+                            "y": 7,
+                            "width": 6,
+                            "height": 4
                         }
                     },
                     {
-                        "id": 8777482221943838,
+                        "id": 8129329956235792,
                         "definition": {
-                            "title": "Created Entity over Time",
+                            "title": "Top appliance IP by events",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
+                            "type": "toplist",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Entity Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:ENTITY @type:CREATE $event_name $type"
+                                                "query": "source:forescout service:user-operations @target:\"License Management\" $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@evt.name",
+                                                    "facet": "@network.client.ip",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -429,44 +434,181 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 8,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 2642063133234640,
-                        "definition": {
-                            "title": "Total Findings Created",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
+                                    "response_format": "scalar",
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 653927775448185,
+                        "definition": {
+                            "title": "Top users by events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:ENTITY @object:FINDING $event_name $type"
+                                                "query": "source:forescout service:user-operations @target:\"License Management\" $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7295785343035285,
+                        "definition": {
+                            "title": "License upload session details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:forescout service:user-operations @target:\"License Management\" @action:upload $Appliance $Identifier",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 11,
+                            "width": 9,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 16
+            }
+        },
+        {
+            "id": 2504959016495571,
+            "definition": {
+                "title": "Segment Configurations",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2850927459248075,
+                        "definition": {
+                            "title": "Total events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:user-operations @target:\"Segment Configuration\" $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -478,12 +620,17 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_yellow"
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#b9dcfa"
                                         }
                                     ]
                                 }
@@ -497,19 +644,19 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 3,
-                            "width": 4,
+                            "y": 0,
+                            "width": 3,
                             "height": 3
                         }
                     },
                     {
-                        "id": 1478707274199892,
+                        "id": 5804319990363451,
                         "definition": {
-                            "title": "Findings Created over Time",
+                            "title": "Events over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -520,18 +667,13 @@
                             "type": "timeseries",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Entity Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:ENTITY @object:FINDING $event_name $type"
+                                                "query": "source:forescout service:user-operations @target:\"Segment Configuration\" $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -543,7 +685,17 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "timeseries",
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic",
                                         "order_by": "values",
@@ -555,80 +707,16 @@
                             ]
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 3,
-                            "width": 8,
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
                             "height": 3
                         }
                     },
                     {
-                        "id": 4035203141697471,
+                        "id": 6847179242797462,
                         "definition": {
-                            "title": "Entity Create Details",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:pushsecurity service:ENTITY @type:CREATE $event_name $type",
-                                        "indexes": [
-                                            "*"
-                                        ],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "@evt.name",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 12,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 14,
-                "width": 12,
-                "height": 10
-            }
-        },
-        {
-            "id": 4284715746919810,
-            "definition": {
-                "title": "Entity Update Insights",
-                "background_color": "vivid_orange",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 1975824819118761,
-                        "definition": {
-                            "title": "Top Entity Types by Entity Update",
+                            "title": "Top users by events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -639,14 +727,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:ENTITY @type:UPDATE $event_name $type"
+                                                "query": "source:forescout service:user-operations @target:\"Segment Configuration\" $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@evt.name",
+                                                    "facet": "@usr.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -684,91 +772,20 @@
                                 "display": {
                                     "type": "stacked",
                                     "legend": "automatic"
-                                },
-                                "palette": "dog_classic"
+                                }
                             }
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 3
+                            "y": 3,
+                            "width": 3,
+                            "height": 4
                         }
                     },
                     {
-                        "id": 2218593469124732,
+                        "id": 4042734048355455,
                         "definition": {
-                            "title": "Updated Entity over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Entity Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:ENTITY @type:UPDATE $event_name $type"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@evt.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 8,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8487069185914559,
-                        "definition": {
-                            "title": "Entity Update Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -776,7 +793,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:pushsecurity service:ENTITY @type:UPDATE $event_name $type",
+                                        "query_string": "source:forescout service:user-operations @target:\"Segment Configuration\" $Appliance $Identifier",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -790,10 +807,6 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@evt.name",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "content",
                                             "width": "auto"
                                         }
@@ -803,234 +816,33 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 0,
+                            "x": 3,
                             "y": 3,
-                            "width": 12,
-                            "height": 3
+                            "width": 9,
+                            "height": 4
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 24,
+                "y": 19,
                 "width": 12,
-                "height": 7
-            }
-        },
-        {
-            "id": 8725467750734877,
-            "definition": {
-                "title": "Entity Deletion Insights",
-                "background_color": "vivid_orange",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 3157284420378315,
-                        "definition": {
-                            "title": "Top Entity Types by Entity Deletion",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:ENTITY @type:DELETE $event_name $type"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@evt.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "dog_classic"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8598226404415819,
-                        "definition": {
-                            "title": "Deleted Entity over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Entity Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:ENTITY @type:DELETE $event_name $type"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@evt.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 8,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 1629224454888312,
-                        "definition": {
-                            "title": "Entity Deletion Details",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:pushsecurity service:ENTITY @type:DELETE $event_name $type",
-                                        "indexes": [],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "@evt.name",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 12,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 31,
-                "width": 12,
-                "height": 7
+                "height": 8,
+                "is_column_break": true
             }
         }
     ],
     "template_variables": [
         {
-            "name": "event_name",
-            "prefix": "@evt.name",
+            "name": "Appliance",
+            "prefix": "@appliance",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "type",
-            "prefix": "@type",
+            "name": "Identifier",
+            "prefix": "@identifier",
             "available_values": [],
             "default": "*"
         }

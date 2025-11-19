@@ -1,14 +1,15 @@
 {
-    "title": "Push Security - Detections",
-    "description": "This dashboard offers a comprehensive summary of blocked URLs, phishing attacks, and stolen credential detections, providing clear visibility into active threats and security incidents.",
+    "title": "Forescout System Logs and Events",
+    "description": "This dashboard provides insights into system logs, license alerts, login activity, and system status.",
     "widgets": [
         {
-            "id": 5855672698156055,
+            "id": 568000312198360,
             "definition": {
                 "type": "image",
-                "url": "https://static.datadoghq.com/static/images/logos/push-security_small.svg",
-                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/push-security_reversed_small.svg",
+                "url": "/static/images/logos/foresout_large.svg",
+                "url_dark_theme": "/static/images/logos/foresout_reversed_large.svg",
                 "sizing": "contain",
+                "margin": "md",
                 "has_background": true,
                 "has_border": true,
                 "vertical_align": "center",
@@ -22,14 +23,14 @@
             }
         },
         {
-            "id": 10546878817969,
+            "id": 5728525392188572,
             "definition": {
                 "type": "note",
-                "content": "This dashboard offers a comprehensive summary of blocked URLs, phishing attacks, and stolen credential detections, providing clear visibility into active threats and security incidents.\n\nFor more information, see the [Push Security Documentation](https://docs.datadoghq.com/integrations/push_security/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
-                "background_color": "orange",
+                "content": "This dashboard offers a comprehensive overview of system logs and events, including license alerts, login activity, and overall system status to ensure continuous monitoring and operational health.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
-                "vertical_align": "center",
+                "vertical_align": "top",
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "left",
@@ -43,18 +44,18 @@
             }
         },
         {
-            "id": 3569705310123999,
+            "id": 8332210139213454,
             "definition": {
                 "title": "Overview",
-                "background_color": "vivid_orange",
+                "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 2783930304552371,
+                        "id": 4489236436548263,
                         "definition": {
-                            "title": "Total Detection Events",
+                            "title": "Total logs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -66,7 +67,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -87,7 +88,8 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_yellow"
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#b9dcfa"
                                         }
                                     ]
                                 }
@@ -95,8 +97,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "yaxis": {},
-                                "type": "bars"
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -107,13 +109,13 @@
                         }
                     },
                     {
-                        "id": 5138577513957007,
+                        "id": 8812841324238605,
                         "definition": {
-                            "title": "Detection Events over Time",
+                            "title": "Logs over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -124,18 +126,13 @@
                             "type": "timeseries",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Detection Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -147,7 +144,17 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "timeseries",
+                                    "formulas": [
+                                        {
+                                            "alias": "abc",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic",
                                         "order_by": "values",
@@ -166,87 +173,20 @@
                         }
                     },
                     {
-                        "id": 5410647026976859,
+                        "id": 211060289607598,
                         "definition": {
-                            "title": "Events by Severity",
-                            "title_size": "16",
+                            "title": "Distribution of events by type",
+                            "title_size": "10",
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@severity",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
                                     "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5412020082353573,
-                        "definition": {
-                            "title": "Detection Events by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -259,7 +199,8 @@
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -268,7 +209,6 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
                                     "style": {
                                         "palette": "datadog16"
                                     },
@@ -290,6 +230,77 @@
                                 }
                             ],
                             "type": "sunburst",
+                            "hide_total": false,
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8755111550365272,
+                        "definition": {
+                            "title": "Distribution of events by severity",
+                            "title_size": "10",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "hide_total": false,
                             "legend": {
                                 "type": "table"
                             }
@@ -302,9 +313,9 @@
                         }
                     },
                     {
-                        "id": 3857982523484888,
+                        "id": 1293027319313244,
                         "definition": {
-                            "title": "Top Employees by Detections",
+                            "title": "Top appliances by activity",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -315,14 +326,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@usr.email",
+                                                    "facet": "@appliance",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -361,20 +372,20 @@
                                     "type": "stacked",
                                     "legend": "automatic"
                                 },
-                                "palette": "datadog16"
+                                "scaling": "relative"
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 7,
-                            "width": 4,
+                            "width": 3,
                             "height": 4
                         }
                     },
                     {
-                        "id": 3127344240923313,
+                        "id": 4550377222743950,
                         "definition": {
-                            "title": "Detection Event Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -382,10 +393,8 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:pushsecurity service:DETECTION $user_email $severity $event_outcome",
-                                        "indexes": [
-                                            "*"
-                                        ],
+                                        "query_string": "source:forescout service:system-logs $Appliance $Identifier",
+                                        "indexes": [],
                                         "storage": "hot"
                                     },
                                     "columns": [
@@ -398,10 +407,6 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@evt.name",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "content",
                                             "width": "auto"
                                         }
@@ -411,9 +416,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 4,
+                            "x": 3,
                             "y": 7,
-                            "width": 8,
+                            "width": 9,
                             "height": 4
                         }
                     }
@@ -427,18 +432,18 @@
             }
         },
         {
-            "id": 8344641485849564,
+            "id": 4331317910837890,
             "definition": {
-                "title": "Blocked URL Detection",
-                "background_color": "vivid_orange",
+                "title": "License Alert",
+                "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 8101040829664152,
+                        "id": 3378031042964512,
                         "definition": {
-                            "title": "Total Blocked URL Events",
+                            "title": "Total alerts",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -450,7 +455,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:BLOCKED_URL $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @evt.name:system-log-events @activity_type:\"License alert\" $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -471,7 +476,8 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_red"
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#b9dcfa"
                                         }
                                     ]
                                 }
@@ -479,8 +485,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "yaxis": {},
-                                "type": "bars"
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -491,13 +497,13 @@
                         }
                     },
                     {
-                        "id": 6692167947772074,
+                        "id": 7415053057953813,
                         "definition": {
-                            "title": "Blocked URL Events over Time",
+                            "title": "Alerts over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -508,18 +514,13 @@
                             "type": "timeseries",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Blocked URL Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:BLOCKED_URL $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @evt.name:system-log-events @activity_type:\"License alert\" $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -531,7 +532,17 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "timeseries",
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic",
                                         "order_by": "values",
@@ -550,353 +561,9 @@
                         }
                     },
                     {
-                        "id": 5002677574522957,
+                        "id": 5911484297829210,
                         "definition": {
-                            "title": "Blocked URL Events by type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:BLOCKED_URL $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@type",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 1793899745468669,
-                        "definition": {
-                            "title": "Blocked URL Events Detected by Severity",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:BLOCKED_URL @type:CREATE $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@severity",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 3,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4622844163276551,
-                        "definition": {
-                            "title": "Blocked URL Events Detected by Department",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:BLOCKED_URL @type:CREATE $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@new.employee.department",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 7,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4500619413404481,
-                        "definition": {
-                            "title": "Blocked URL Detection Response Types",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:BLOCKED_URL @type:CREATE $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@evt.outcome",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 7,
-                            "width": 8,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4843736653364139,
-                        "definition": {
-                            "title": "Top Employees by Blocked URL Events Detected",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:BLOCKED_URL @type:CREATE $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@usr.email",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 11,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5850275418774684,
-                        "definition": {
-                            "title": "Blocked URL Detection Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -904,7 +571,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:pushsecurity service:DETECTION @object:BLOCKED_URL $user_email $severity $event_outcome",
+                                        "query_string": "source:forescout service:system-logs @evt.name:system-log-events @activity_type:\"License alert\" $Appliance $Identifier",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -927,9 +594,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 11,
-                            "width": 8,
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
                             "height": 4
                         }
                     }
@@ -939,22 +606,22 @@
                 "x": 0,
                 "y": 15,
                 "width": 12,
-                "height": 16
+                "height": 8
             }
         },
         {
-            "id": 3079320136215618,
+            "id": 5576050595834946,
             "definition": {
-                "title": "Phishing Attack Detection",
-                "background_color": "vivid_orange",
+                "title": "Login Activity",
+                "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 6438802293116291,
+                        "id": 4143608658565981,
                         "definition": {
-                            "title": "Total Phishing Events",
+                            "title": "Total successful logins",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -966,7 +633,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:PHISHING $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:success $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -987,7 +654,7 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_red"
+                                            "palette": "white_on_green"
                                         }
                                     ]
                                 }
@@ -995,8 +662,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "yaxis": {},
-                                "type": "bars"
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -1007,13 +674,13 @@
                         }
                     },
                     {
-                        "id": 1056274768693752,
+                        "id": 7032219319060791,
                         "definition": {
-                            "title": "Phishing Events over Time",
+                            "title": "Successful logins over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1024,18 +691,13 @@
                             "type": "timeseries",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Phishing Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:PHISHING $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:success $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1047,7 +709,21 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "timeseries",
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "style": {
+                                                "palette": "green",
+                                                "palette_index": 5
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic",
                                         "order_by": "values",
@@ -1066,79 +742,211 @@
                         }
                     },
                     {
-                        "id": 1511637790697542,
+                        "id": 6096003298501547,
                         "definition": {
-                            "title": "Phishing Events by Type",
+                            "title": "Total failed logins",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
+                                    "response_format": "scalar",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:PHISHING $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:failed $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@type",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 6,
-                            "height": 4
+                            "width": 3,
+                            "height": 3
                         }
                     },
                     {
-                        "id": 5876016952515269,
+                        "id": 5284060443463181,
                         "definition": {
-                            "title": "Phishing Events by Severity",
+                            "title": "Failed logins over time",
                             "title_size": "16",
                             "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:failed $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "style": {
+                                                "palette": "warm",
+                                                "palette_index": 4
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8522588033749910,
+                        "definition": {
+                            "title": "Login failure rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:failed $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:success $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query2 * 100 / (query1 + query2)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1143757696508750,
+                        "definition": {
+                            "title": "Failed login details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
                                     "queries": [
@@ -1146,14 +954,34 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:PHISHING @type:CREATE $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:failed $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@severity",
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@appliance",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1170,16 +998,8 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 100,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1187,25 +1007,29 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    }
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ]
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
+                            "has_search_bar": "auto"
                         },
                         "layout": {
-                            "x": 6,
-                            "y": 3,
-                            "width": 6,
-                            "height": 4
+                            "x": 3,
+                            "y": 6,
+                            "width": 9,
+                            "height": 3
                         }
                     },
                     {
-                        "id": 3253810053953305,
+                        "id": 8689055584670456,
                         "definition": {
-                            "title": "Phishing Events by Department",
+                            "title": "Top users from failed login attempted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1216,14 +1040,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:PHISHING @type:CREATE $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:failed $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@new.employee.department",
+                                                    "facet": "@usr.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1240,13 +1064,20 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1261,23 +1092,23 @@
                                 "display": {
                                     "type": "stacked",
                                     "legend": "automatic"
-                                },
-                                "palette": "datadog16"
+                                }
                             }
                         },
                         "layout": {
                             "x": 0,
-                            "y": 7,
+                            "y": 9,
                             "width": 6,
                             "height": 4
                         }
                     },
                     {
-                        "id": 1487454036562927,
+                        "id": 7495958236196026,
                         "definition": {
-                            "title": "Phishing Detection Response Types",
+                            "title": "Top users from successful login attempted",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "bar_chart",
                             "requests": [
                                 {
                                     "queries": [
@@ -1285,14 +1116,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:PHISHING @type:CREATE $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:success $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@evt.outcome",
+                                                    "facet": "@usr.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1309,16 +1140,13 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1326,25 +1154,33 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    }
+                                    },
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
                             }
                         },
                         "layout": {
                             "x": 6,
-                            "y": 7,
+                            "y": 9,
                             "width": 6,
                             "height": 4
                         }
                     },
                     {
-                        "id": 8849687569436134,
+                        "id": 5195716645956812,
                         "definition": {
-                            "title": "Top Employees by Phishing Events",
+                            "title": "Top IP addresses from failed login attempted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1355,14 +1191,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:PHISHING @type:CREATE $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:failed $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@usr.email",
+                                                    "facet": "@network.client.ip",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1379,13 +1215,20 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1400,21 +1243,246 @@
                                 "display": {
                                     "type": "stacked",
                                     "legend": "automatic"
-                                },
-                                "palette": "datadog16"
+                                }
                             }
                         },
                         "layout": {
                             "x": 0,
-                            "y": 11,
-                            "width": 4,
+                            "y": 13,
+                            "width": 6,
                             "height": 4
                         }
                     },
                     {
-                        "id": 5809588344253718,
+                        "id": 5612890611508673,
                         "definition": {
-                            "title": "Phishing Detection Details",
+                            "title": "Top IP addresses from successful login attempted",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:success $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2613129597884190,
+                        "definition": {
+                            "title": "Top appliance from failed login attempted",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:failed $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@appliance",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 17,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2704752839353060,
+                        "definition": {
+                            "title": "Top appliance from successful login attempted",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs @activity_type:Login @evt.outcome:success $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@appliance",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 17,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5611231552610330,
+                        "definition": {
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1422,7 +1490,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:pushsecurity service:DETECTION @object:PHISHING $user_email $severity $event_outcome",
+                                        "query_string": "source:forescout service:system-logs @activity_type:Login $Appliance $Identifier",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1445,9 +1513,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 11,
-                            "width": 8,
+                            "x": 0,
+                            "y": 21,
+                            "width": 12,
                             "height": 4
                         }
                     }
@@ -1455,25 +1523,24 @@
             },
             "layout": {
                 "x": 0,
-                "y": 31,
+                "y": 23,
                 "width": 12,
-                "height": 16,
-                "is_column_break": true
+                "height": 26
             }
         },
         {
-            "id": 4437491025853666,
+            "id": 794761096508125,
             "definition": {
-                "title": "Stolen Credentials Detection",
-                "background_color": "vivid_orange",
+                "title": "System Status",
+                "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 5093179049079633,
+                        "id": 2992615192965102,
                         "definition": {
-                            "title": "Total Stolen Credentials Events",
+                            "title": "Avg. CPU usage",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1485,38 +1552,62 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:STOLEN_CREDENTIALS $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @evt.name:system-status-messages $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@cpu_usage",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "avg",
+                                                        "order": "desc",
+                                                        "metric": "@cpu_usage"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
                                             "compute": {
-                                                "aggregation": "count"
+                                                "aggregation": "avg",
+                                                "metric": "@cpu_usage"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
+                                            "value": 85,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 50,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_yellow"
+                                            "palette": "white_on_green"
                                         }
                                     ]
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "yaxis": {},
-                                "type": "bars"
-                            }
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -1526,13 +1617,119 @@
                         }
                     },
                     {
-                        "id": 2418825306345170,
+                        "id": 7018363149273063,
                         "definition": {
-                            "title": "Stolen Credentials Events over Time",
+                            "title": "Avg. memory utilization",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs @evt.name:system-status-messages $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@available_memory",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "avg",
+                                                        "order": "desc",
+                                                        "metric": "@used_memory"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@used_memory"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forescout service:system-logs @evt.name:system-status-messages $Appliance $Identifier"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@available_memory",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "avg",
+                                                        "order": "desc",
+                                                        "metric": "@available_memory"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@available_memory"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "kilobyte"
+                                                }
+                                            },
+                                            "formula": "query2 * 100 / (query1 + query2)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 85,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 50,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 628267346585357,
+                        "definition": {
+                            "title": "CPU usage over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1543,30 +1740,41 @@
                             "type": "timeseries",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Event",
-                                            "formula": "query1"
-                                        }
-                                    ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:STOLEN_CREDENTIALS $user_email $severity $event_outcome"
+                                                "query": "source:forescout service:system-logs @evt.name:system-status-messages $Appliance $Identifier"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [],
                                             "compute": {
-                                                "aggregation": "count"
+                                                "aggregation": "avg",
+                                                "metric": "@cpu_usage"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "timeseries",
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "style": {
+                                                "palette": "orange",
+                                                "palette_index": 5
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic",
                                         "order_by": "values",
@@ -1578,362 +1786,16 @@
                             ]
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 6,
                             "y": 0,
-                            "width": 9,
+                            "width": 6,
                             "height": 3
                         }
                     },
                     {
-                        "id": 1630693271520938,
+                        "id": 5939271575753447,
                         "definition": {
-                            "title": "Stolen Credentials Events by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:STOLEN_CREDENTIALS $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@type",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4568101725802397,
-                        "definition": {
-                            "title": "Stolen Credentials Events by Severity",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:STOLEN_CREDENTIALS @type:CREATE $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@severity",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 3,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3131201005270690,
-                        "definition": {
-                            "title": "Stolen Credentials Events by Department",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:STOLEN_CREDENTIALS @type:CREATE $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@new.employee.department",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 7,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6274884578550747,
-                        "definition": {
-                            "title": "Stolen Credentials Detection Response Types",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:STOLEN_CREDENTIALS @type:CREATE $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@evt.outcome",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 7,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6575686189608812,
-                        "definition": {
-                            "title": "Top Employees by Stolen Credentials Events",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:pushsecurity service:DETECTION @object:STOLEN_CREDENTIALS @type:CREATE $user_email $severity $event_outcome"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@usr.email",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 11,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 1121827070495615,
-                        "definition": {
-                            "title": "Stolen Credentials Detection Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1941,7 +1803,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:pushsecurity service:DETECTION @object:STOLEN_CREDENTIALS $user_email $severity $event_outcome",
+                                        "query_string": "source:forescout service:system-logs @evt.name:system-status-messages $Appliance $Identifier",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1964,9 +1826,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 11,
-                            "width": 8,
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
                             "height": 4
                         }
                     }
@@ -1974,28 +1836,22 @@
             },
             "layout": {
                 "x": 0,
-                "y": 47,
+                "y": 49,
                 "width": 12,
-                "height": 16
+                "height": 8
             }
         }
     ],
     "template_variables": [
         {
-            "name": "user_email",
-            "prefix": "@usr.email",
+            "name": "Appliance",
+            "prefix": "@appliance",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "severity",
-            "prefix": "@severity",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "event_outcome",
-            "prefix": "@evt.outcome",
+            "name": "Identifier",
+            "prefix": "@identifier",
             "available_values": [],
             "default": "*"
         }
