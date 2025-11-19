@@ -19,6 +19,7 @@ tests:
             ip: "127.0.0.1"
         ocsf:
           activity_id: 3
+          activity_name: "Get"
           category_name: "Network Activity"
           category_uid: 4
           class_name: "HTTP Activity"
@@ -33,8 +34,9 @@ tests:
           metadata:
             event_code: "GET"
             product:
-              name: "nginx"
+              name: "F5"
             version: "1.5.0"
+          severity: "Informational"
           severity_id: 1
           src_endpoint:
             ip: "127.0.0.1"
@@ -81,6 +83,7 @@ tests:
             ip: "172.17.0.1"
         ocsf:
           activity_id: 3
+          activity_name: "Get"
           category_name: "Network Activity"
           category_uid: 4
           class_name: "HTTP Activity"
@@ -97,8 +100,9 @@ tests:
           metadata:
             event_code: "GET"
             product:
-              name: "nginx"
+              name: "F5"
             version: "1.5.0"
+          severity: "Informational"
           severity_id: 1
           src_endpoint:
             ip: "172.17.0.1"
@@ -145,6 +149,7 @@ tests:
             ip: "172.17.0.1"
         ocsf:
           activity_id: 3
+          activity_name: "Get"
           category_name: "Network Activity"
           category_uid: 4
           class_name: "HTTP Activity"
@@ -161,8 +166,9 @@ tests:
           metadata:
             event_code: "GET"
             product:
-              name: "nginx"
+              name: "F5"
             version: "1.5.0"
+          severity: "Informational"
           severity_id: 1
           src_endpoint:
             ip: "172.17.0.1"
@@ -197,6 +203,7 @@ tests:
             ip: "217.92.148.44"
         ocsf:
           activity_id: 4
+          activity_name: "Head"
           category_name: "Network Activity"
           category_uid: 4
           class_name: "HTTP Activity"
@@ -211,12 +218,13 @@ tests:
           metadata:
             event_code: "HEAD"
             product:
-              name: "nginx"
+              name: "F5"
             version: "1.5.0"
+          severity: "Informational"
           severity_id: 1
           src_endpoint:
             ip: "217.92.148.44"
-          status: Unknown
+          status: "Unknown"
           status_id: 99
           time: 1506436610000
         request: "HEAD http://174.138.82.103:80/sql/sql-admin/ HTTP/1.1"
@@ -276,6 +284,7 @@ tests:
             ip: "127.0.0.1"
         ocsf:
           activity_id: 3
+          activity_name: "Get"
           category_name: "Network Activity"
           category_uid: 4
           class_name: "HTTP Activity"
@@ -293,8 +302,9 @@ tests:
           metadata:
             event_code: "GET"
             product:
-              name: "nginx"
+              name: "F5"
             version: "1.5.0"
+          severity: "Informational"
           severity_id: 1
           src_endpoint:
             ip: "127.0.0.1"
