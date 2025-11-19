@@ -1,6 +1,7 @@
-# (C) Datadog, Inc. 2023-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import pytest
 
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
