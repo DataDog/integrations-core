@@ -16,7 +16,19 @@ Key metrics such as request/response counts, latency, error rates, token usage, 
 
 ## Setup
 
-You can configure this integration either as a standalone integration via LLM Observability, or as an agent check:
+You can configure this integration either as a standalone integration via LLM Observability, or as an agent check.
+
+Use it as an integration via LLM Observability to:
+
+- Monitor LLM agents and applications that use LiteLLM
+- Debug and troubleshoot every single operation, including calls to LiteLLM
+- See contextual visibility across prompt, model or provider selection, latency, error, token usage and cost, and more
+
+Use it as an agent check to:
+
+- Monitor the LiteLLM proxy service itself directly at the infrastructure level
+- Capture metrics like request volume, latency, error and fallback rates, token usage, and costs for the LiteLLM service
+- Support platform and SREs to ensure overall reliability of LiteLLM deployment
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "LLM Observability" xxx -->
