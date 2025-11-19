@@ -144,9 +144,7 @@ TILE_LINKS = """\
 
 EVENT_TILE_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-[4]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
+[2]: https://docs.datadoghq.com/help/
 """
 
 integration_type_links = {
