@@ -303,17 +303,20 @@ def test_database_autodiscovery_exclude_defaults_overriden(aggregator, integrati
     Test that the exclude defaults for database autodiscovery can be overriden
     """
 
-    excluded_db = "dogs_2"
+    exclude_reg = "dogs_2$"
 
     pg_instance["database_autodiscovery"] = {
         "enabled": True,
-        "exclude": [f"{excluded_db}$"]
+        "exclude": [exclude_reg]
     }
     del pg_instance['dbname']
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
 
-    databases = check.autodiscovery.get_items()
+    databases_excluded_by_default = instance_database_autodiscovery().exclude
+    check_excludes = check._config.database_autodiscovery.exclude 
 
     assert check.autodiscovery is not None
-    assert excluded_db not in databases
+    assert check_excludes != databases_excluded_by_default
+    assert exclude_reg in check_excludes
+    assert len(check_excludes) == 1
