@@ -1858,6 +1858,5 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed",
-    "pause_auto_refresh": false
+    "reflow_type": "fixed"
 }
