@@ -6,8 +6,8 @@
             "id": 8674021217066805,
             "definition": {
                 "type": "image",
-                "url": "https://www.forescout.com/wp-content/uploads/2019/01/forescout-logo.svg",
-                "url_dark_theme": "https://docs.forescout.com/assets/img/logo-forescout.svg",
+                "url": "/static/images/logos/foresout_large.svg",
+                "url_dark_theme": "/static/images/logos/foresout_reversed_large.svg",
                 "sizing": "contain",
                 "margin": "md",
                 "has_background": true,
@@ -391,5 +391,6 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed"
+    "reflow_type": "fixed",
+    "pause_auto_refresh": false
 }
