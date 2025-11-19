@@ -859,8 +859,8 @@ def test_fetch_throws(instance_docker):
     schemas = Schemas(check, check._config)
     with (
         mock.patch('time.time', side_effect=[0, 9999999]),
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}),
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]),
+        mock.patch('datadog_checks.sqlserver.schemas_old.Schemas._query_schema_information', return_value={"id": 1}),
+        mock.patch('datadog_checks.sqlserver.schemas_old.Schemas._get_tables', return_value=[1, 2]),
     ):
         with pytest.raises(StopIteration):
             schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
@@ -873,7 +873,7 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
     mock_cursor = mock.MagicMock()
     with (
         mock.patch(
-            'datadog_checks.sqlserver.schemas.Schemas._fetch_schema_data', side_effect=Exception("Can't connect to DB")
+            'datadog_checks.sqlserver.schemas_old.Schemas._fetch_schema_data', side_effect=Exception("Can't connect to DB")
         ),
         mock.patch('datadog_checks.sqlserver.sqlserver.SQLServer.get_databases', return_value=["db1"]),
         mock.patch('cachetools.TTLCache.get', return_value="dummy"),
