@@ -157,13 +157,16 @@ def dd_environment(get_instance):
         condition = [condition_non_tls]
 
     with docker_run(compose_file, conditions=condition, sleep=5):
-        yield get_instance, {
-            'docker_volumes': [
-                '{}:/conf/private_key.pem'.format(private_key),
-                '{}:/conf/cert.pem'.format(cert),
-                '{}:/conf/ca_cert.pem'.format(ca_cert),
-            ]
-        }
+        yield (
+            get_instance,
+            {
+                'docker_volumes': [
+                    '{}:/conf/private_key.pem'.format(private_key),
+                    '{}:/conf/cert.pem'.format(cert),
+                    '{}:/conf/ca_cert.pem'.format(ca_cert),
+                ]
+            },
+        )
 
 
 @pytest.fixture()

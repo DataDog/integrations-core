@@ -6,6 +6,7 @@ from pyVmomi import vim
 SOURCE_TYPE = 'vsphere'
 
 BOTH = 'both'
+NONE = 'None'
 HISTORICAL = 'historical'
 REALTIME = 'realtime'
 
@@ -67,6 +68,8 @@ DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL = 1800
 DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL = 300
 
 REFERENCE_METRIC = "cpu.usage.avg"
+
+DEFAULT_INFRASTRUCTURE_MODE = "full"
 
 DEFAULT_VSPHERE_TAG_PREFIX = ""
 DEFAULT_VSPHERE_ATTR_PREFIX = ""
@@ -218,4 +221,13 @@ PER_RESOURCE_EVENTS = [
     'ScheduledTaskEvent',
 ]
 
+VSAN_EVENT_IDS = [
+    'vsan.health.test.cluster.consistentconfig.event',
+    'vsan.health.test.network.hostdisconnected.event',
+]
+
+VSAN_EVENT_PREFIX = 'vsan'
+
 HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']
+
+INFRA_MODE_METRIC = 'cpu.usage.avg'

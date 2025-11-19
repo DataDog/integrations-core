@@ -1,0 +1,320 @@
+{
+    "slug": "openai-prompter",
+    "definition": {
+        "components": [
+            {
+                "events": [],
+                "name": "grid0",
+                "properties": {
+                    "backgroundColor": "gray",
+                    "children": [
+                        {
+                            "events": [],
+                            "name": "gridCell0",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [
+                                            {
+                                                "name": "submit",
+                                                "type": "setStateVariableValue",
+                                                "value": "${(() => {\n    const prevData = jsonInput0.value;\n    const newRow = {role: \"user\", content: textInput0.value};\n    const nextData = [...prevData, newRow];\n    return JSON.stringify(nextData);\n})()}",
+                                                "variableName": "chatHistory"
+                                            },
+                                            {
+                                                "componentName": "textInput0",
+                                                "name": "submit",
+                                                "stateFunction": "setValue",
+                                                "type": "setComponentState",
+                                                "value": ""
+                                            },
+                                            {
+                                                "name": "submit",
+                                                "queryName": "aiQuery",
+                                                "type": "triggerQuery"
+                                            }
+                                        ],
+                                        "name": "textInput0",
+                                        "properties": {
+                                            "defaultValue": "How are you?",
+                                            "isDisabled": false,
+                                            "isVisible": "true",
+                                            "label": "Prompt",
+                                            "placeholder": ""
+                                        },
+                                        "type": "textInput"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 8,
+                                        "width": 6,
+                                        "x": 1,
+                                        "y": 1
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell1",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "table0",
+                                        "properties": {
+                                            "columns": [
+                                                {
+                                                    "dataPath": "role",
+                                                    "disableSortBy": false,
+                                                    "formatter": {
+                                                        "options": [
+                                                            {
+                                                                "level": "success",
+                                                                "value": "user"
+                                                            }
+                                                        ],
+                                                        "type": "pill"
+                                                    },
+                                                    "header": "role",
+                                                    "id": "47a02e8f-fd76-4587-a0cb-b5a17a25c8cc",
+                                                    "isDeleted": false
+                                                },
+                                                {
+                                                    "dataPath": "content",
+                                                    "disableSortBy": false,
+                                                    "formatter": {
+                                                        "type": "markdown"
+                                                    },
+                                                    "header": "content",
+                                                    "id": "ef0e162f-07fb-4af7-ae6e-d537bbc414b9",
+                                                    "isDeleted": false
+                                                },
+                                                {
+                                                    "dataPath": "Column 0",
+                                                    "header": "Column 0",
+                                                    "id": "91cdc7d8-70ad-4b0c-8368-e07b40f77a35",
+                                                    "isDeleted": true,
+                                                    "isHidden": false
+                                                }
+                                            ],
+                                            "data": "${[...chatHistory.value].reverse()}",
+                                            "isLoading": "false",
+                                            "isScrollable": "vertical",
+                                            "isVisible": "true",
+                                            "isWrappable": true,
+                                            "pageSize": "100",
+                                            "paginationType": "client_side",
+                                            "rowButtons": [],
+                                            "summary": false,
+                                            "totalCount": 20
+                                        },
+                                        "type": "table"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 73,
+                                        "width": 10,
+                                        "x": 1,
+                                        "y": 11
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell2",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [
+                                            {
+                                                "name": "click",
+                                                "type": "setStateVariableValue",
+                                                "value": "${(() => {\n    const prevData = chatHistory.value;\n    const newRow = {role: \"user\", content: textInput0.value};\n    const nextData = [...prevData, newRow];\n    return nextData;\n})()}",
+                                                "variableName": "chatHistory"
+                                            },
+                                            {
+                                                "componentName": "textInput0",
+                                                "name": "click",
+                                                "stateFunction": "setValue",
+                                                "type": "setComponentState",
+                                                "value": ""
+                                            },
+                                            {
+                                                "name": "click",
+                                                "queryName": "aiQuery",
+                                                "type": "triggerQuery"
+                                            }
+                                        ],
+                                        "name": "button0",
+                                        "properties": {
+                                            "integrationIcon": "openai",
+                                            "isBorderless": false,
+                                            "isDisabled": "${aiQuery.isLoading}",
+                                            "isLoading": "${aiQuery.isLoading}",
+                                            "isPrimary": false,
+                                            "isVisible": "true",
+                                            "label": "Submit",
+                                            "level": "default"
+                                        },
+                                        "type": "button"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 4,
+                                        "width": 2,
+                                        "x": 7,
+                                        "y": 4
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell4",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [
+                                            {
+                                                "modalName": "viewMessagesModal",
+                                                "name": "click",
+                                                "type": "openModal"
+                                            }
+                                        ],
+                                        "name": "button1",
+                                        "properties": {
+                                            "isBorderless": true,
+                                            "isDisabled": false,
+                                            "isLoading": "false",
+                                            "isPrimary": false,
+                                            "isVisible": "true",
+                                            "label": "Messages",
+                                            "level": "default"
+                                        },
+                                        "type": "button"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 4,
+                                        "width": 2,
+                                        "x": 9,
+                                        "y": 4
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "viewMessagesModal",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "grid1",
+                                        "properties": {
+                                            "children": [
+                                                {
+                                                    "events": [],
+                                                    "name": "gridCell3",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "jsonInput0",
+                                                                "properties": {
+                                                                    "defaultValue": "${chatHistory?.value}",
+                                                                    "isVisible": "true",
+                                                                    "label": "",
+                                                                    "readOnly": true
+                                                                },
+                                                                "type": "jsonInput"
+                                                            }
+                                                        ],
+                                                        "isVisible": "true",
+                                                        "layout": {
+                                                            "default": {
+                                                                "height": 83,
+                                                                "width": 12,
+                                                                "x": 0,
+                                                                "y": 1
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "gridCell"
+                                                }
+                                            ]
+                                        },
+                                        "type": "grid"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "size": "lg",
+                                "title": "Messages"
+                            },
+                            "type": "modal"
+                        }
+                    ]
+                },
+                "type": "grid"
+            }
+        ],
+        "queries": [
+            {
+                "name": "chatHistory",
+                "type": "stateVariable",
+                "properties": {
+                    "defaultValue": "${[{ \"role\": \"system\", \"content\": \"You are a helpful assistant.\" }]}"
+                }
+            },
+            {
+                "name": "aiQuery",
+                "type": "action",
+                "properties": {
+                    "onlyTriggerManually": true,
+                    "spec": {
+                        "connectionId": "INTEGRATION_DEMO",
+                        "fqn": "com.datadoghq.openai.chatCompletion",
+                        "inputs": {
+                            "maxTokens": 4000,
+                            "messages": "${chatHistory.value}",
+                            "model": "gpt-4"
+                        }
+                    }
+                },
+                "events": [
+                    {
+                        "name": "executionFinished",
+                        "type": "setStateVariableValue",
+                        "value": "${(() => {\n    const prevData = chatHistory.value;\n    const newRows = [aiQuery.rawOutputs.message];\n    const nextData = [...prevData, ...newRows];\n    return nextData;\n})()}",
+                        "variableName": "chatHistory"
+                    }
+                ]
+            }
+        ],
+        "name": "OpenAI Prompter",
+        "description": "Prompt OpenAI and get responses from a text inputs",
+        "rootInstanceName": "grid0"
+    },
+    "mocked_outputs": {},
+    "description": "Prompt OpenAI and get responses from a text inputs",
+    "tile_background": "table",
+    "tile_icon_action_fqn": "com.datadoghq.openai.generateText",
+    "tags": ["uses_ai"],
+    "name": "Prompt OpenAI",
+    "embedded_workflow_blueprints": {},
+    "embedded_datastore_blueprints": {}
+}

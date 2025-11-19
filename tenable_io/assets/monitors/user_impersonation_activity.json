@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-12-23",
+	"last_updated_at": "2024-12-23",
+	"title": "Multiple user impersonation activities detected",
+	"description": "User impersonation occurs when one user stimulates being logged in as another user. This monitor tracks impersonation activities by a user and helps prevent any misuse of the impersonation feature.",
+	"definition": {
+		"id": 159876509,
+		"name": "Multiple user impersonation activities detected",
+		"type": "log alert",
+		"query": "logs(\"source:tenable-io service:activity @evt.name:user.impersonation.start\").index(\"*\").rollup(\"cardinality\", \"@target.name\").by(\"@usr.name\").last(\"1d\") > 5",
+		"message": "{{eval \"int(value)\"}} user impersonation activities by {{[@usr.name].name}} detected.\n\n@email@example.com",
+		"tags": [
+			"tenable-io"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 5,
+				"warning": 3
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:tenable-io"
+	]
+}

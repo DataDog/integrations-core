@@ -1,0 +1,895 @@
+{
+    "title": "Oracle Kubernetes Engine (OKE) Overview",
+    "description": "Oracle Kubernetes Engine metrics help you monitor Kubernetes clusters, along with node pools and individual worker nodes. You can use metrics data to diagnose and troubleshoot cluster and node pool issues.\n\nTo learn more about best practices, including instructions for deploying the Datadog Agent into your OKE clusters for even deeper container-level visibility see:\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n- [Monitor OKE with Datadog](https://www.datadoghq.com/blog/monitor-oracle-kubernetes-engine/)\n- [Kubernetes agent documentation](https://docs.datadoghq.com/agent/kubernetes/)\n- [Cluster agent documentation](https://docs.datadoghq.com/agent/cluster_agent/) \n\n",
+    "widgets": [
+        {
+            "id": 2405112297671218,
+            "definition": {
+                "title": "",
+                "banner_img": "/static/images/integration_dashboard/oke_hero_1.png",
+                "show_title": false,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2807847512540782,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard provides you with immediate visibility into the health and performance of your OKE clusters, node pools, and nodes.\n\nThis dashboard uses a mix of metrics from the `oci_oke` [namespace](https://docs.oracle.com/en-us/iaas/Content/ContEng/Reference/contengmetrics.htm) and the `oci_computeagent` [namespace](https://docs.oracle.com/en-us/iaas/Content/Compute/References/computemetrics.htm#Availabl).\n\nTo learn more about best practices, including instructions for deploying the Datadog Agent into your OKE clusters for even deeper container-level visibility see:\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n- [Monitor OKE with Datadog](https://www.datadoghq.com/blog/monitor-oracle-kubernetes-engine/)\n- [Kubernetes Agent documentation](https://docs.datadoghq.com/agent/kubernetes/)\n- [Cluster Agent documentation](https://docs.datadoghq.com/agent/cluster_agent/) ",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 5,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 7
+            }
+        },
+        {
+            "id": 6931527532829810,
+            "definition": {
+                "title": "Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7622150679166304,
+                        "definition": {
+                            "title": "OKE Monitors",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "metric:oci.oke*",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1604952434786098,
+                        "definition": {
+                            "title": "OKE Node Pools",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:oci.oke.node_state{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {node_pool_id}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4614161980864744,
+                        "definition": {
+                            "title": "Total OKE Nodes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Nodes",
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:oci.computeagent.cpu_utilization{name:oke-c*,$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {name}.weighted()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 4,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6862883406769302,
+                        "definition": {
+                            "title": "OKE Clusters",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:oci.oke.node_state{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {cluster_id}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 2,
+                            "height": 1
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 7
+            }
+        },
+        {
+            "id": 6146709980956162,
+            "definition": {
+                "title": "Clusters",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6692496221348548,
+                        "definition": {
+                            "type": "note",
+                            "content": "`APIServerRequestCount` helps monitor the overall health and activity of the API server. \n\nA sudden spike in requests may indicate unusual activity, such as a misbehaving application or a potential denial-of-service (DoS) attack. Tracking trends in request volumes can assist in capacity planning, ensuring the API server scales appropriately to meet demand. Additionally, correlating request patterns with application or user activity can help debug issues and maintain cluster stability.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8717173335769420,
+                        "definition": {
+                            "type": "note",
+                            "content": "`APIServerResponseCount` can track the number of error responses (non-200 responses) sent by the API server, helping to diagnose potential issues that could affect cluster stability, such as authentication failures, resource quota limits, or misconfigurations. \n\nA high number of errors may signal API server overload, connectivity problems, or application misbehavior. \n\nCreating a monitor on this metric can help to detect error spikes, enabling proactive troubleshooting.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3659474116215830,
+                        "definition": {
+                            "title": "API Server Request Count",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:oci.oke.apiserver_request_count{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 898412659804228,
+                        "definition": {
+                            "title": "API Server Response Count",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:oci.oke.apiserver_response_count{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3716755092099148,
+                        "definition": {
+                            "title": "Unschedulable Pods",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "query": "sum:oci.oke.unschedulable_pods{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "red",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7391711041976306,
+                        "definition": {
+                            "type": "note",
+                            "content": "`UnschedulablePods` highlight pods that the Kubernetes scheduler cannot place on any node due to resource constraints or misconfigured scheduling rules. \n\nPersistent unschedulable pods indicate insufficient cluster resources or configuration issues, signaling the need for scaling or adjustments to pod scheduling rules. Monitoring this metric ensures cluster health by identifying resource bottlenecks and troubleshooting misconfigurations to improve workload distribution.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 2518574643744346,
+            "definition": {
+                "title": "Node Pools",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6851433680540506,
+                        "definition": {
+                            "title": "OKE Node State and Condition",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "query": "avg:oci.oke.node_state{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {node_pool_id,node_state,node_condition,cluster_id,compartment_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Count",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3867722900644854,
+                        "definition": {
+                            "title": "CPU by Node Pool (%)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:oci.computeagent.cpu_utilization{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {okenode_pool_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7399094222067194,
+                        "definition": {
+                            "title": "Memory by Node Pool (%)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:oci.computeagent.memory_utilization{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {okenode_pool_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 7,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 5671303523827226,
+            "definition": {
+                "title": "Nodes",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4333182175115396,
+                        "definition": {
+                            "type": "note",
+                            "content": "`NodeState` provides critical insights into cluster stability and the health of the underlying infrastructure. A high number of nodes facing conditions such as `DiskPressure`, `MemoryPressure`, or `NetworkUnavailable` can disrupt workloads and require immediate investigation.\n\n Monitoring node states also helps track infrastructure availability across fault and availability domains. Alerts based on unhealthy node states enable quick responses to potential failures or degraded performance.",
+                            "background_color": "blue",
+                            "font_size": "14"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 553098240527436,
+                        "definition": {
+                            "title": "OKE Node State and Condition",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "query": "avg:oci.oke.node_state{$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {name,node_condition,node_state,node_pool_id,compartment_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "order_by": [
+                                            {
+                                                "type": "group",
+                                                "name": "node_condition",
+                                                "order": "asc"
+                                            }
+                                        ],
+                                        "count": 500
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2791816908667884,
+                        "definition": {
+                            "type": "note",
+                            "content": "Managed nodes follow the below format:\n\noke-c<part-of-cluster-OCID>-n<part-of-node-pool-OCID>-s<part-of-subnet-OCID>-<slot>\n\nTo view additional node-level metrics, you can filter `oci.computeagent` metrics by `name:oke-c*`.",
+                            "background_color": "blue",
+                            "font_size": "14"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2308699818164614,
+                        "definition": {
+                            "title": "CPU Usage by OKE Nodes (%)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:oci.computeagent.cpu_utilization{name:oke-c*,$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1687556512732084,
+                        "definition": {
+                            "title": "OKE Nodes with Highest CPU Usage (%)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:oci.computeagent.cpu_utilization{name:oke-c*,$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4658260292587104,
+                        "definition": {
+                            "title": "OKE Nodes with Highest Memory Usage (%)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:oci.computeagent.memory_utilization{name:oke-c*,$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 6,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5811212433005038,
+                        "definition": {
+                            "title": "OKE Nodes with Highest Network Egress (bytes)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:oci.computeagent.networks_bytes_out{name:oke-c*,$tenancy_name,$oke_node_pool_name,$region,$resource_name,$compartment_name} by {name}.as_count()",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 6,
+                            "width": 4,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 12,
+                "height": 11
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "tenancy_name",
+            "prefix": "tenancy_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "compartment_name",
+            "prefix": "compartment_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "region",
+            "prefix": "region",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "resource_name",
+            "prefix": "name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "oke_node_pool_name",
+            "prefix": "okenode_pool_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

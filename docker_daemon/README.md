@@ -15,6 +15,8 @@ Configure this Agent check to get metrics from the Docker_daemon service in real
 * Visualize and monitor Docker_daemon states.
 * Be notified about Docker_daemon failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 ### Installation
 
@@ -161,7 +163,7 @@ Need help? Contact [Datadog support][22].
 * [How to Monitor Docker Resource Metrics][26]
 * [How to Collect Docker Metrics][27]
 * [8 Surprising Facts about Real Docker Adoption][28]
-* [Monitor Docker on AWS ECS][29]
+* [Monitor Docker on Amazon ECS][29]
 * [Dockerize Datadog][30]
 * [Monitor Docker with Datadog][31]
 
@@ -169,11 +171,11 @@ Need help? Contact [Datadog support][22].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/docker.png
 [2]: https://github.com/DataDog/docker-dd-agent
 [3]: https://github.com/DataDog/docker-dd-agent#cgroups
-[4]: https://app.datadoghq.com/account/settings/agent/latest
-[5]: https://app.datadoghq.com/account/settings#integrations/docker
+[4]: /account/settings/agent/latest
+[5]: /account/settings#integrations/docker
 [6]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example
 [7]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/integrations-docker-dockerps.png
-[8]: https://app.datadoghq.com/account/settings/agent/latest?platform=docker
+[8]: /account/settings/agent/latest?platform=docker
 [9]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-the-agent-as-a-proxy
 [10]: https://github.com/DataDog/dd-agent/wiki/Network-Traffic-and-Proxy-Configuration
 [11]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy

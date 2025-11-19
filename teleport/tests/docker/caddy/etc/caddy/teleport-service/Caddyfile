@@ -1,0 +1,35 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @metrics {
+        method GET
+        path /metrics
+    }
+    route @metrics {
+        rewrite * /{http.request.uri.path}/get.txt
+        file_server
+    }
+
+    @healthz {
+        method GET
+        path /healthz
+    }
+    route @healthz {
+        rewrite * /{http.request.uri.path}/get.json
+        file_server
+    }
+
+      @readyz {
+        method GET
+        path /readyz
+    }
+    route @readyz {
+        rewrite * /{http.request.uri.path}/get.json
+        file_server
+    }
+
+    file_server browse
+}

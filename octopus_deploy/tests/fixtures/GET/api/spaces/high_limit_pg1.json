@@ -1,0 +1,41 @@
+{
+    "ItemType": "Space",
+    "TotalResults": 1,
+    "ItemsPerPage": 30,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "Items": [
+      {
+        "Id": "Spaces-1",
+        "Name": "Default",
+        "Slug": "default",
+        "Description": null,
+        "IsDefault": true,
+        "IsPrivate": false,
+        "TaskQueueStopped": false,
+        "SpaceManagersTeams": [
+          "teams-administrators",
+          "teams-managers",
+          "teams-spacemanagers-Spaces-1"
+        ],
+        "SpaceManagersTeamMembers": [],
+        "Icon": null,
+        "ExtensionSettings": [],
+        "LastModifiedOn": "0001-01-01T00:00:00.000+00:00",
+        "Links": {
+          "Self": "/api/spaces/Spaces-1",
+          "SpaceHome": "/api/Spaces-1",
+          "Web": "/app#/spaces/Spaces-1",
+          "Logo": "/api/spaces/Spaces-1/logo?cb=2024.2.9409",
+          "Search": "/api/spaces/Spaces-1/search"
+        }
+      }
+    ],
+    "Links": {
+      "Self": "/api/spaces?skip=0&take=30",
+      "Template": "/api/spaces{?skip,take,ids,partialName}",
+      "Page.All": "/api/spaces?skip=0&take=2147483647",
+      "Page.Current": "/api/spaces?skip=0&take=30",
+      "Page.Last": "/api/spaces?skip=0&take=30"
+    }
+}

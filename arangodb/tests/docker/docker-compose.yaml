@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   arangodb:
     container_name: arangodb

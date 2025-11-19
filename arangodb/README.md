@@ -10,6 +10,8 @@ Enable the Datadog-ArangoDB integration to:
 - Understand the impact of a long request and troubleshoot latency issues.
 - Monitor underlying RocksDB memory, disk, and cache limits.
 
+**Minimum Agent version:** 7.36.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] to apply these instructions.
@@ -87,7 +89,7 @@ Need help? Contact [Datadog Support][9].
 
 
 [1]: https://www.arangodb.com/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/arangodb/datadog_checks/arangodb/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

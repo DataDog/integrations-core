@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "9497c2d8-63cb-4d90-b73c-f32065349fe1",
   "app_id": "tomcat",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -58,7 +59,8 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "java tomcat"
+        "java tomcat",
+        "java org.apache.catalina.startup.Bootstrap"
       ],
       "source_type_id": 43,
       "auto_install": true

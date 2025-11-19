@@ -102,14 +102,10 @@ def find_cpy(data):
             return cpy
 
 
-def get_extra_license_files(app):
-    import os
-
-    for path in app.repo.path.iterdir():
-        if not os.path.isfile(os.path.join('', path, 'manifest.json')):
-            continue
-        extra_license_file = os.path.join('', path, '3rdparty-extra-LICENSE.csv')
-        if os.path.isfile(extra_license_file):
+def get_extra_license_files(app: Application):
+    for integration in app.repo.integrations.iter('all'):
+        extra_license_file = integration.path / '3rdparty-extra-LICENSE.csv'
+        if extra_license_file.is_file():
             yield extra_license_file
 
 
@@ -245,6 +241,9 @@ def scrape_license_data(urls, app):
                     data['classifiers'].add(extract_classifier_value(package_license))
                 else:
                     data['licenses'].add(package_license)
+
+            if license_expressions := info.get('license_expression'):
+                data['licenses'].add(license_expressions)
 
             if home_page := info['home_page']:
                 data['home_page'] = home_page
@@ -439,7 +438,14 @@ def licenses(app: Application, sync: bool):
                     license_ids.add(known_spdx_licenses[normalized_license])
                 else:
                     license_ids.add(expanded_license)
-                    package_license_errors[package_name].append(f'unknown license: {expanded_license}')
+                    package_license_errors[package_name].append(
+                        'Encountered unknown license. Options to fix this error:\n'
+                        '- If it is truly a new license type, add it to exclusions '
+                        'or known licenses in ddev/cli/validate/license_utils.py\n'
+                        '- If it is known but formatted in a way that we cannot parse it, '
+                        'hard-code a known version of it .ddev/config.toml\n\n'
+                        f'Here is the license for reference:\n{expanded_license}'
+                    )
 
         for classifier in data['classifiers']:
             if classifier in licenses_utils.KNOWN_CLASSIFIERS:
@@ -460,7 +466,7 @@ def licenses(app: Application, sync: bool):
         for package_name, package_errors in package_license_errors.items():
             for error in package_errors:
                 error_message += error + '\n'
-            validation_tracker.error((package_name), message=error_message)
+            validation_tracker.error((package_name,), message=error_message)
 
         validation_tracker.display()
         app.abort()

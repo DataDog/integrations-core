@@ -1,22 +1,58 @@
+# Container for valid and broken json are defined for testing the
+# the integration with both type of payloads.
+# More info: https://github.com/DataDog/integrations-core/pull/19936
 services:
-  mock-standalone:
+  mock-standalone-valid-json:
     build: .
-    container_name: mock-xenserver-standalone
+    container_name: mock-xenserver-standalone-valid-json
     volumes:
       - ../fixtures/standalone:/usr/share/responses
     ports:
       - 8081:5000
-  mock-pool-slave:
+    environment:
+      - RRD_UPDATES_FILE=rrd_updates_valid_json.json
+  mock-pool-slave-valid-json:
     build: .
-    container_name: mock-xenserver-pool-slave
+    container_name: mock-xenserver-pool-slave-valid-json
     volumes:
       - ../fixtures/slave:/usr/share/responses
     ports:
       - 8082:5000
-  mock-pool-master:
+    environment:
+      - RRD_UPDATES_FILE=rrd_updates_valid_json.json
+  mock-pool-master-valid-json:
     build: .
-    container_name: mock-xenserver-pool-master
+    container_name: mock-xenserver-pool-master-valid-json
     volumes:
       - ../fixtures/master:/usr/share/responses
     ports:
       - 8083:5000
+    environment:
+      - RRD_UPDATES_FILE=rrd_updates_valid_json.json
+  mock-standalone-broken-json:
+    build: .
+    container_name: mock-xenserver-standalone-broken-json
+    volumes:
+      - ../fixtures/standalone:/usr/share/responses
+    ports:
+      - 9081:5000
+    environment:
+      - RRD_UPDATES_FILE=rrd_updates_broken_json.json
+  mock-pool-slave-broken-json:
+    build: .
+    container_name: mock-xenserver-pool-slave-broken-json
+    volumes:
+      - ../fixtures/slave:/usr/share/responses
+    ports:
+      - 9082:5000
+    environment:
+      - RRD_UPDATES_FILE=rrd_updates_broken_json.json
+  mock-pool-master-broken-json:
+    build: .
+    container_name: mock-xenserver-pool-master-broken-json
+    volumes:
+      - ../fixtures/master:/usr/share/responses
+    ports:
+      - 9083:5000
+    environment:
+      - RRD_UPDATES_FILE=rrd_updates_broken_json.json

@@ -1,0 +1,65 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "0973c912-7ad3-4cf3-ad50-d43660e031dd",
+  "app_id": "cisco-secure-web-appliance",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Web Proxy filtering and scanning activity and Layer-4 Traffic Monitor activity",
+    "title": "Cisco Secure Web Appliance",
+    "media": [
+      {
+        "caption": "Cisco Secure Web Appliance - Access Logs",
+        "image_url": "images/cisco_secure_web_appliance_access_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Web Appliance - L4TM Logs",
+        "image_url": "images/cisco_secure_web_appliance_l4tm_logs.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 27607355,
+      "source_type_name": "Cisco Secure Web Appliance",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Cisco Secure Web Appliance: Access Logs": "assets/dashboards/cisco_secure_web_appliance_access_logs.json",
+      "Cisco Secure Web Appliance: L4TM Logs": "assets/dashboards/cisco_secure_web_appliance_l4tm_logs.json"
+    },
+    "logs": {
+      "source": "cisco-secure-web-appliance"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

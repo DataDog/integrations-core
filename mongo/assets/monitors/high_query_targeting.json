@@ -1,0 +1,134 @@
+{
+	"version": 2,
+	"created_at": "2024-10-29",
+	"last_updated_at": "2024-10-29",
+	"title": "High query targeting",
+	"description": "This monitor tracks the ratio of keys examined, documents examined vs. documents returned by MongoDB queries to alert when the query targeting is high. Database Monitoring for MongoDB is required.",
+	"definition": {
+		"name": "MongoDB query targeting is high on cluster {{clustername.name}} ",
+		"type": "database-monitoring alert",
+		"query": "formula(\"default_zero(query1) / default_zero(query2) + default_zero(query3) / default_zero(query2)\").last(\"15m\") > 1000",
+		"message": "MongoDB operation {{[@db.query_signature].name}} query targeting is high on MongoDB cluster {{clustername.name}}. \nQuery targeting measures the ratio of keys examined, documents examined vs. documents returned by MongoDB queries. \nHigh query targeting can indicate that queries are not using indexes effectively. \nThe ratio is {{value}}, exceeding the threshold of {{threshold}}.",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 1000
+			},
+			"enable_logs_sample": true,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"variables": [
+				{
+					"data_source": "database_queries",
+					"name": "query1",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "avg",
+						"metric": "@mongodb.keys_examined"
+					},
+					"group_by": [
+						{
+							"facet": "@db.query_signature",
+							"limit": 10,
+							"sort": {
+								"order": "desc",
+								"aggregation": "avg",
+								"metric": "@mongodb.keys_examined"
+							}
+						},
+						{
+							"facet": "clustername",
+							"limit": 10,
+							"sort": {
+								"order": "desc",
+								"aggregation": "avg",
+								"metric": "@mongodb.keys_examined"
+							}
+						}
+					],
+					"search": {
+						"query": "dbm_type:slow_query source:mongo"
+					},
+					"storage": "hot"
+				},
+				{
+					"data_source": "database_queries",
+					"name": "query2",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "avg",
+						"metric": "@mongodb.nreturned"
+					},
+					"group_by": [
+						{
+							"facet": "@db.query_signature",
+							"limit": 10,
+							"sort": {
+								"order": "desc",
+								"aggregation": "avg",
+								"metric": "@mongodb.nreturned"
+							}
+						},
+						{
+							"facet": "clustername",
+							"limit": 10,
+							"sort": {
+								"order": "desc",
+								"aggregation": "avg",
+								"metric": "@mongodb.nreturned"
+							}
+						}
+					],
+					"search": {
+						"query": "dbm_type:slow_query source:mongo"
+					},
+					"storage": "hot"
+				},
+				{
+					"data_source": "database_queries",
+					"name": "query3",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "avg",
+						"metric": "@mongodb.docs_examined"
+					},
+					"group_by": [
+						{
+							"facet": "@db.query_signature",
+							"limit": 10,
+							"sort": {
+								"order": "desc",
+								"aggregation": "avg",
+								"metric": "@mongodb.docs_examined"
+							}
+						},
+						{
+							"facet": "clustername",
+							"limit": 10,
+							"sort": {
+								"order": "desc",
+								"aggregation": "avg",
+								"metric": "@mongodb.docs_examined"
+							}
+						}
+					],
+					"search": {
+						"query": "dbm_type:slow_query source:mongo"
+					},
+					"storage": "hot"
+				}
+			]
+		}
+	},
+	"tags": [
+		"integration:mongodb"
+	]
+}

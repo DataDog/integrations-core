@@ -10,7 +10,6 @@ from datadog_checks.base import AgentCheck
 
 
 class Marathon(AgentCheck):
-
     DEFAULT_TIMEOUT = 5
     SERVICE_CHECK_NAME = 'marathon.can_connect'
     ACS_TOKEN = None

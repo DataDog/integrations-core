@@ -4,13 +4,15 @@
 
 This check monitors [Kubernetes Cluster Autoscaler][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.54.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 ### Installation
 
-The Kubernetes Cluster Autoscaler check is included in the [Datadog Agent][2] package.
+The Kubernetes Cluster Autoscaler check is included in the [Datadog Agent][2] package. (Agent >= 7.55.x)
 No additional installation is needed on your server.
 
 ### Configuration
@@ -45,7 +47,12 @@ prometheus.io/scrape: true
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. 
 
-The only parameter required for configuring the `kubernetes_cluster_autoscaler` check is `openmetrics_endpoint`. This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8085`. To configure a different port, use the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+The only parameters required for configuring the `kubernetes_cluster_autoscaler` check are:
+
+* CONTAINER_NAME
+  Name of the container of the cluster autoscaler controller.
+* `openmetrics_endpoint`
+  This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8085`. To configure a different port, use the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
 
 ```yaml
 apiVersion: v1
@@ -54,7 +61,7 @@ kind: Pod
 metadata:
   name: '<POD_NAME>'
   annotations:
-    ad.datadoghq.com/controller.checks: |
+    ad.datadoghq.com/<CONTAINER_NAME>.checks: |
       {
         "kubernetes_cluster_autoscaler": {
           "init_config": {},
@@ -68,7 +75,7 @@ metadata:
     # (...)
 spec:
   containers:
-    - name: 'controller'
+    - name: '<CONTAINER_NAME>'
 # (...)
 ```
 
@@ -99,7 +106,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://docs.datadoghq.com/integrations/kubernetes_cluster_autoscaler/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

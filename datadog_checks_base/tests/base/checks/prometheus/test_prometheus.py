@@ -5,13 +5,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 import os
+import ssl
 from collections import OrderedDict
 
 import mock
 import pytest
 import requests
-from six import iteritems, iterkeys
-from six.moves import range
 
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
@@ -242,11 +241,11 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
         _h = _histo.metric.add()
         _h.histogram.sample_count = _data['ct']
         _h.histogram.sample_sum = _data['sum']
-        for k, v in list(iteritems(_data['lbl'])):
+        for k, v in _data['lbl'].items():
             _lh = _h.label.add()
             _lh.name = k
             _lh.value = v
-        for _b in sorted(iterkeys(_data['buckets'])):
+        for _b in sorted(_data['buckets']):
             _subh = _h.histogram.bucket.add()
             _subh.upper_bound = _b
             _subh.cumulative_count = _data['buckets'][_b]
@@ -336,7 +335,7 @@ def test_poll_protobuf(mocked_prometheus_check, bin_data):
     """Tests poll using the protobuf format"""
     check = mocked_prometheus_check
     mock_response = mock.MagicMock(status_code=200, content=bin_data, headers={'Content-Type': protobuf_content_type})
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
         assert len(messages) == 61
@@ -349,7 +348,7 @@ def test_poll_text_plain(mocked_prometheus_check, text_data):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
         messages.sort(key=lambda x: x.name)
@@ -370,10 +369,10 @@ def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
     _l3.value = 'my_labél_value'
     _l4 = ref_gauge.metric[0].label.add()
     _l4.name = 'labél_mix'
-    _l4.value = u'my_labél_value🇫🇷🇪🇸🇺🇸'
+    _l4.value = 'my_labél_value🇫🇷🇪🇸🇺🇸'
     _l5 = ref_gauge.metric[0].label.add()
-    _l5.name = u'labél_unicode'
-    _l5.value = u'my_labél_value'
+    _l5.name = 'labél_unicode'
+    _l5.value = 'my_labél_value'
     check = mocked_prometheus_check
     check._submit(check.metrics_mapper[ref_gauge.name], ref_gauge)
     check.gauge.assert_called_with(
@@ -1286,7 +1285,7 @@ def test_label_joins(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {
@@ -1636,7 +1635,7 @@ def test_label_joins_gc(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1686,7 +1685,7 @@ def test_label_joins_gc(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process("http://fake.endpoint:10055/metrics")
         assert 'dd-agent-1337' in check._label_mapping['pod']
         assert 'dd-agent-62bgh' not in check._label_mapping['pod']
@@ -1702,7 +1701,7 @@ def test_label_joins_missconfigured(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}}
@@ -1755,7 +1754,7 @@ def test_label_join_not_existing(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1794,7 +1793,7 @@ def test_label_join_metric_not_existing(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1833,7 +1832,7 @@ def test_label_join_with_hostname(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}}
@@ -1885,7 +1884,7 @@ def mock_get():
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_get = mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),
@@ -1968,7 +1967,7 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data
 
     check = mocked_prometheus_check
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.get', return_value=MockResponse('httpbin.org')):
+    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
         resp = check.poll('https://httpbin.org/get')
 
     assert 'httpbin.org' in resp.content.decode('utf-8')
@@ -1984,7 +1983,7 @@ def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.get', return_value=MockResponse('httpbin.org')):
+    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
         resp = check.poll('https://httpbin.org/get')
 
     assert 'httpbin.org' in resp.content.decode('utf-8')
@@ -2020,29 +2019,32 @@ def test_requests_wrapper_config():
         ]
     )
 
-    with mock.patch("requests.get") as get:
-        check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
-        get.assert_called_with(
-            instance_http['prometheus_endpoint'],
-            stream=False,
-            headers=expected_headers,
-            auth=requests.auth.HTTPDigestAuth('data', 'dog'),
-            cert='/path/to/cert',
-            timeout=(42.0, 42.0),
-            proxies=None,
-            verify=True,
-            allow_redirects=True,
-        )
+    with mock.patch("requests.Session.get") as get:
+        with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
+            mock_load_cert_chain.return_value = None
 
-        check.poll(instance_http['prometheus_endpoint'])
-        get.assert_called_with(
-            instance_http['prometheus_endpoint'],
-            stream=False,
-            headers=expected_headers,
-            auth=requests.auth.HTTPDigestAuth('data', 'dog'),
-            cert='/path/to/cert',
-            timeout=(42.0, 42.0),
-            proxies=None,
-            verify=True,
-            allow_redirects=True,
-        )
+            check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
+            get.assert_called_with(
+                instance_http['prometheus_endpoint'],
+                stream=False,
+                headers=expected_headers,
+                auth=requests.auth.HTTPDigestAuth('data', 'dog'),
+                cert='/path/to/cert',
+                timeout=(42.0, 42.0),
+                proxies=None,
+                verify=True,
+                allow_redirects=True,
+            )
+
+            check.poll(instance_http['prometheus_endpoint'])
+            get.assert_called_with(
+                instance_http['prometheus_endpoint'],
+                stream=False,
+                headers=expected_headers,
+                auth=requests.auth.HTTPDigestAuth('data', 'dog'),
+                cert='/path/to/cert',
+                timeout=(42.0, 42.0),
+                proxies=None,
+                verify=True,
+                allow_redirects=True,
+            )

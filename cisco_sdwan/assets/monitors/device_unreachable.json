@@ -11,7 +11,7 @@
 	"name": "[Cisco SD-WAN] Device unreachable alert on {{device_hostname.name}} in namespace {{device_namespace.name}}",
 	"type": "query alert",
 	"query": "avg(last_5m):max:cisco_sdwan.device.reachable{*} by {device_hostname,device_ip,device_namespace,device_id} < 0.8",
-	"message": "{{#is_alert}}\nA network device {{device_hostname.name}} with IP {{device_ip.name}} in namespace {{device_namespace.name}} is unreachable.\n{{/is_alert}}\n{{#is_alert_recovery}}\nA network device {{device_hostname.name}} with IP {{device_ip.name}} in namespace {{device_namespace.name}} is reachable again.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
+	"message": "{{#is_alert}}\nA network device {{device_hostname.name}} with IP {{device_ip.name}} in namespace {{device_namespace.name}} is unreachable.\n{{/is_alert}}\n{{#is_alert_recovery}}\nA network device {{device_hostname.name}} with IP {{device_ip.name}} in namespace {{device_namespace.name}} is reachable again.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/devices?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
 	"tags": [],
 	"options": {
 		"thresholds": {

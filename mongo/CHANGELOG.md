@@ -2,7 +2,199 @@
 
 <!-- towncrier release notes start -->
 
-## 7.0.0 / 2024-10-01
+## 10.5.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 10.4.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 10.3.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Collect index stats metric `mongodb.collection.indexes.accesses.opsps` on replica set secondary nodes. ([#20819](https://github.com/DataDog/integrations-core/pull/20819))
+
+***Fixed***:
+
+* Fix incorrect UTC timestamp parsing for system.profile slow queries when the agent runs in non-UTC timezones. ([#20834](https://github.com/DataDog/integrations-core/pull/20834))
+
+## 10.2.1 / 2025-07-21 / Agent 7.69.0
+
+***Fixed***:
+
+* Add deprecated `schemas` option to `config.yaml.example`. This config option is deprecated in Agent 7.69.0 and will be removed in a future release. ([#20783](https://github.com/DataDog/integrations-core/pull/20783))
+
+## 10.2.0 / 2025-07-10
+
+***Added***:
+
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* Add new `collect_schemas` configuration to replace deprecated `schemas` while maintaining backward compatibility. ([#20603](https://github.com/DataDog/integrations-core/pull/20603))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 10.1.1 / 2025-06-26 / Agent 7.68.0
+
+***Fixed***:
+
+* Add `maxTimeMS` to limit agent resource consumption and prevent operations from running indefinitely on the server side. ([#20515](https://github.com/DataDog/integrations-core/pull/20515))
+
+## 10.1.0 / 2025-06-12
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+## 10.0.0 / 2025-05-15 / Agent 7.67.0
+
+***Changed***:
+
+* Bump datadog-checks-base to 37.10.1 and python to 3.12 ([#20271](https://github.com/DataDog/integrations-core/pull/20271))
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+
+***Fixed***:
+
+* Skips explaining serverStatus command. ([#20149](https://github.com/DataDog/integrations-core/pull/20149))
+
+## 9.1.0 / 2025-04-25 / Agent 7.66.0
+
+***Added***:
+
+* [mongo] Provide a way to optionally disable collecting free storage metrics ([#20135](https://github.com/DataDog/integrations-core/pull/20135))
+
+## 9.0.1 / 2025-04-17
+
+***Fixed***:
+
+* Skip collect explain plan for shardCollection operation. ([#19990](https://github.com/DataDog/integrations-core/pull/19990))
+* Skip dbstats metrics on shards primary because `db.stats` cannot run on shards. ([#19996](https://github.com/DataDog/integrations-core/pull/19996))
+
+## 9.0.0 / 2025-03-19 / Agent 7.65.0
+
+***Changed***:
+
+* Change MongoDB default explain verbosity from executionStats to queryPlanner (DBM only). ([#19855](https://github.com/DataDog/integrations-core/pull/19855))
+
+***Added***:
+
+* Added support for configuring explain verbosity mode in MongoDB integration via `operation_samples.explain_verbosity` and `slow_operations.explain_verbosity` options. ([#19232](https://github.com/DataDog/integrations-core/pull/19232))
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Added `system_database_stats` to control system database stats collection and `metrics_collection_interval.db_stats`, `metrics_collection_interval.session_stats` for customizable collection intervals. ([#19756](https://github.com/DataDog/integrations-core/pull/19756))
+* Skip running explain on aggregation pipelines that contain $mergeCursors to prevent potential MongoDB crashes. ([#19798](https://github.com/DataDog/integrations-core/pull/19798))
+* Increased default collection stats and collection index stats collect interval to 5 mins. ([#19856](https://github.com/DataDog/integrations-core/pull/19856))
+
+***Fixed***:
+
+* Revert "[mongo] add service tag to agent operations (#19456)" ([#19768](https://github.com/DataDog/integrations-core/pull/19768))
+
+## 8.6.0 / 2025-03-25 / Agent 7.64.2
+
+***Added***:
+
+* Skip running explain on aggregation pipelines that contain $mergeCursors to prevent potential MongoDB crashes. ([#19798](https://github.com/DataDog/integrations-core/pull/19798)) This release is for the 7.64.x Agent series.
+
+## 8.5.1 / 2025-03-12 / Agent 7.64.0
+
+***Fixed***:
+
+* Revert "bump pymongo to 4.11 (#19610)". This brings pymongo back to v4.8. ([#19814](https://github.com/DataDog/integrations-core/pull/19814))
+
+## 8.5.0 / 2025-02-20
+
+***Added***:
+
+* Collect `lsid` and `transaction` details from `$currentOp` for MongoDB activity sampling. ([#19553](https://github.com/DataDog/integrations-core/pull/19553))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+* Bump `pymongo` to 4.11. ([#19610](https://github.com/DataDog/integrations-core/pull/19610))
+
+***Fixed***:
+
+* Skip host info system metrics collection on arbiter node due to `HostInfo` command cannot not be ran on arbiter without admin access. ([#19571](https://github.com/DataDog/integrations-core/pull/19571))
+
+## 8.4.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Add support for `zlib` network compression in the MongoDB integration client with fallback to uncompressed connections. ([#19395](https://github.com/DataDog/integrations-core/pull/19395))
+* Make MongoDB Atlas search indexes collection configurable and disable it by default for improved performance. ([#19396](https://github.com/DataDog/integrations-core/pull/19396))
+* Increased the default collection interval for MongoDB inferred schema and index definitions to 1 hour to reduce resource overhead. ([#19445](https://github.com/DataDog/integrations-core/pull/19445))
+* Include explain operations in MongoDB activity samples. ([#19450](https://github.com/DataDog/integrations-core/pull/19450))
+* Add `service=datadog-agent` comment to MongoDB integration operations for tagging integration operations. ([#19456](https://github.com/DataDog/integrations-core/pull/19456))
+
+***Fixed***:
+
+* Fix error `CommandCursor is not subscriptable` in replication oplog size and oplog window collection. ([#19444](https://github.com/DataDog/integrations-core/pull/19444))
+
+## 8.3.1 / 2024-12-26 / Agent 7.62.0
+
+***Fixed***:
+
+* Skip unauthorized `local` database collections `system.replset`, `replset.election`, and `replset.minvalid` in collection and index stats gathering to avoid permission errors. ([#19244](https://github.com/DataDog/integrations-core/pull/19244))
+
+## 8.3.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Add `metrics_collection_interval` config option to customize the collection interval for collection stats, index stats, and sharded data distribution metrics.
+  The default collection interval for collection stats and index stats remains unchanged at check min collection interval of 15 seconds.
+  The default collection interval for sharded data distribution metrics is 300 seconds. ([#19098](https://github.com/DataDog/integrations-core/pull/19098))
+
+***Fixed***:
+
+* Fixes timezone parsing bug in slow query log, preventing incorrect timestamp conversions on non-UTC servers. ([#19057](https://github.com/DataDog/integrations-core/pull/19057))
+* Fix crash in DBM operation samples collection when a node is in recovering mode. ([#19080](https://github.com/DataDog/integrations-core/pull/19080))
+* Resolved deprecation warning for `collStats` by using `$collStats` aggregation pipeline to collect oplog size in MongoDB 6.2+. ([#19133](https://github.com/DataDog/integrations-core/pull/19133))
+
+## 8.2.1 / 2024-11-06 / Agent 7.60.0
+
+***Fixed***:
+
+* Fix bug in parsing database name from namespace when no collection name is present, affecting database-level commands in MongoDB versions 5 and earlier. ([#18953](https://github.com/DataDog/integrations-core/pull/18953))
+
+## 8.2.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied, query samples, slow queries and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+* Add `aws` to the instance configuration to allow cloud resource linking with Amazon DocumentDB. ([#18921](https://github.com/DataDog/integrations-core/pull/18921))
+
+***Fixed***:
+
+* Skip explain plan collection for mongo administrative aggregation pipeline, including `$collStats`, `$currentOp`, `$indexStats`, `$listSearchIndexes`, `$sample` and `$shardedDataDistribution`. ([#18844](https://github.com/DataDog/integrations-core/pull/18844))
+
+## 8.1.0 / 2024-10-16 / Agent 7.59.0
+
+***Added***:
+
+* Apply `timeoutMS` to integration connection to ensure client-side operation timeouts terminate the server processes. ([#18843](https://github.com/DataDog/integrations-core/pull/18843))
+
+## 8.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+* Bump datadog-checks-base dependency ([#18583](https://github.com/DataDog/integrations-core/pull/18583))
+* Add `mongodb.system.cpu.percent` metric to track total CPU usage of the MongoDB process on self-hosted instances (only available on self-hosted MongoDB running on the same host as the Agent). ([#18618](https://github.com/DataDog/integrations-core/pull/18618))
+* Always emit `database_instance` metadata regardless of DBM status; previously emitted only when DBM was enabled. ([#18750](https://github.com/DataDog/integrations-core/pull/18750))
+* Include tag `clustername` & `database_instance` in mongo service check tags ([#18751](https://github.com/DataDog/integrations-core/pull/18751))
+* Add `resolved_views`, `working_millis`, and `queues` fields to the slow query (dbm only) event payload
+  - resolved_views: contains view details for slow queries on views (MongoDB 5.0+)
+  - working_millis: the amount of time that MongoDB spends working on the operation (MongoDB 8.0+)
+  - queues: contains information about the operation's queues (MongoDB 8.0+) ([#18761](https://github.com/DataDog/integrations-core/pull/18761))
+
+## 7.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
@@ -10,6 +202,7 @@
 
 ***Added***:
 
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 * Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
 
 ## 6.11.0 / 2024-09-10
@@ -151,8 +344,8 @@
 * Add cursor object to sampled activities and explain plan payload. cursor contains the cursor information for idleCursor and getmore operations. ([#17840](https://github.com/DataDog/integrations-core/pull/17840))
 * Add tag `clustername` to mongo metrics. This tag is set only when `cluster_name` is provided in the integration configuration. ([#17876](https://github.com/DataDog/integrations-core/pull/17876))
 * Update mongo conf.yaml.example to include DBM for MongoDB config options. The new config options includes `dbm`, `cluster_name`, `operation_samples.enabled` & `operation_samples.collection_interval`. ([#17940](https://github.com/DataDog/integrations-core/pull/17940))
-* Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance. 
-  By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery. 
+* Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance.
+  By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery.
   When enabled, the integration will automatically discover the databases available in the monitored mongodb instance and refresh the list of databases every 10 minutes.
   Use `database_autodiscovery.include` and `database_autodiscovery.exclude` to filter the list of databases to monitor. ([#17959](https://github.com/DataDog/integrations-core/pull/17959))
 * Added new collection latency and query execution stats metrics.

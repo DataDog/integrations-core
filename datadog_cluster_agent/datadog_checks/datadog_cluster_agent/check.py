@@ -6,11 +6,13 @@ from datadog_checks.base import OpenMetricsBaseCheck
 
 DEFAULT_METRICS = {
     'admission_webhooks_certificate_expiry': 'admission_webhooks.certificate_expiry',
-    'admission_webhooks_cws_exec_instrumentation_attempts': 'admission_webhooks.cws_exec_instrumentation_attempts',
-    'admission_webhooks_cws_pod_instrumentation_attempts': 'admission_webhooks.cws_pod_instrumentation_attempts',
+    'admission_webhooks_cws_exec_mutation_attempts': 'admission_webhooks.cws_exec_mutation_attempts',
+    'admission_webhooks_cws_pod_mutation_attempts': 'admission_webhooks.cws_pod_mutation_attempts',
+    'admission_webhooks_cws_response_duration': 'admission_webhooks.cws_response_duration',
     'admission_webhooks_library_injection_attempts': 'admission_webhooks.library_injection_attempts',
     'admission_webhooks_library_injection_errors': 'admission_webhooks.library_injection_errors',
     'admission_webhooks_mutation_attempts': 'admission_webhooks.mutation_attempts',
+    'admission_webhooks_validation_attempts': 'admission_webhooks.validation_attempts',
     'admission_webhooks_patcher_attempts': 'admission_webhooks.patcher.attempts',
     'admission_webhooks_patcher_completed': 'admission_webhooks.patcher.completed',
     'admission_webhooks_patcher_errors': 'admission_webhooks.patcher.errors',
@@ -20,6 +22,7 @@ DEFAULT_METRICS = {
     'admission_webhooks_reconcile_success': 'admission_webhooks.reconcile_success',
     'admission_webhooks_response_duration': 'admission_webhooks.response_duration',
     'admission_webhooks_webhooks_received': 'admission_webhooks.webhooks_received',
+    'admission_webhooks_image_resolution_attempts': 'admission_webhooks.image_resolution_attempts',
     'autoscaling_workload_autoscaler_conditions': 'autoscaling.workload.autoscaler_conditions',
     'autoscaling_workload_horizontal_scaling_actions': 'autoscaling.workload.horizontal_scaling_actions',
     'autoscaling_workload_horizontal_scaling_applied_replicas': 'autoscaling.workload.horizontal_scaling_applied_replicas',  # noqa: E501
@@ -34,6 +37,11 @@ DEFAULT_METRICS = {
     'autoscaling_workload_vertical_rollout_triggered': 'autoscaling.workload.vertical_rollout_triggered',
     'autoscaling_workload_vertical_scaling_received_limits': 'autoscaling.workload.vertical_scaling_received_limits',
     'autoscaling_workload_vertical_scaling_received_requests': 'autoscaling.workload.vertical_scaling_received_requests',  # noqa: E501
+    'autoscaling_workload_store_load_entities': 'autoscaling.workload.store_load_entities',
+    'autoscaling_workload_store_job_queue_length': 'autoscaling.workload.store_job_queue_length',
+    'autoscaling_workload_local_horizontal_scaling_recommended_replicas': 'autoscaling.workload.local.horizontal_scaling_recommended_replicas',  # noqa: E501
+    'autoscaling_workload_local_horizontal_utilization_pct': 'autoscaling.workload.local.horizontal_utilization_pct',
+    'autoscaling_workload_local_fallback_enabled': 'autoscaling.workload.local.fallback_enabled',
     'aggregator__flush': 'aggregator.flush',
     'aggregator__processed': 'aggregator.processed',
     'api_requests': 'api_requests',
@@ -43,6 +51,7 @@ DEFAULT_METRICS = {
     'cluster_checks_busyness': 'cluster_checks.busyness',
     'cluster_checks_configs_dangling': 'cluster_checks.configs_dangling',
     'cluster_checks_configs_dispatched': 'cluster_checks.configs_dispatched',
+    'cluster_checks_unscheduled_check': 'cluster_checks.unscheduled_check',
     'cluster_checks_configs_info': 'cluster_checks.configs_info',
     'cluster_checks_failed_stats_collection': 'cluster_checks.failed_stats_collection',
     'cluster_checks_nodes_reporting': 'cluster_checks.nodes_reporting',

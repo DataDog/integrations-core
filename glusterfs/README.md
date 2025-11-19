@@ -5,6 +5,8 @@
 This check monitors [Red Hat Gluster Storage][1] cluster health, volume, and brick status through the Datadog Agent. 
 This GlusterFS integration is compatible with both Red Hat vendored and open-source versions of GlusterFS.
 
+**Minimum Agent version:** 7.25.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -103,7 +105,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://www.redhat.com/en/technologies/storage/gluster
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/datadog_checks/glusterfs/data/conf.yaml.example
 [5]: https://github.com/gluster/gstatus#install
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

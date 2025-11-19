@@ -28,7 +28,6 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-*.zip
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -51,7 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .benchmarks/
-.junit/
+junit/
 .docker/
 
 # Translations
@@ -99,6 +98,7 @@ tmp
 .python-version
 
 # Common IDEs & editors
+.cursor/
 .idea/
 .vscode/
 *.iml
@@ -127,5 +127,14 @@ benchmark_*.svg
 ## Direnv
 .envrc
 
-# Auto-generated during builds
-/ddev/src/ddev/_version.py
+## Local overrides for ddev
+.ddev.toml
+
+## Size metrics
+size-uncompressed.txt
+size-compressed.txt
+*compressed_status.csv
+*compressed_status.md
+*compressed_status.png
+*compressed_status.json
+treemap*.png

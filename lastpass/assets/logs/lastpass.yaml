@@ -1,3 +1,5 @@
+# bypass-global-grok-parser-rules-checks
+# bypass-global-missing-date-remapper-checks
 id: lastpass
 metric_id: lastpass
 backend_only: false
@@ -52,6 +54,71 @@ facets:
     name: User Name
     path: usr.name
     source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Email Address
+    path: ocsf.actor.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Target Name
+    path: ocsf.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
 pipeline:
   type: pipeline
   name: LastPass
@@ -67,7 +134,7 @@ pipeline:
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `Username` to `usr.name`
@@ -77,7 +144,7 @@ pipeline:
       sourceType: attribute
       target: usr.name
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `Action` to `evt.name`
@@ -87,7 +154,7 @@ pipeline:
       sourceType: attribute
       target: evt.name
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: geo-ip-parser
       name: Define `network.client.ip` as default geoip attribute for source
@@ -139,7 +206,7 @@ pipeline:
           samples:
             - Testing_data
             - "VID: 8931324857103585383 to Testing_data"
-            - "'Testing_data' 'test@abc.com' 'Read only:no Admin:yes Hide PW:yes"
+            - "'Testing_data' 'test@abc.com' 'Read only:no Admin:yes Hide PW:yes'"
             - "'Testing_data' 'test@abc.com'"
             - "VID: 4364210409355695795"
           grok:
@@ -149,7 +216,7 @@ pipeline:
               \'%{notSpace:shared_folder.modified_user}\' \'Read
               only\:%{word:shared_folder.permissions.read_only}
               Admin\:%{word:shared_folder.permissions.is_admin} Hide
-              PW\:%{word:shared_folder.permissions.hide_password}
+              PW\:%{word:shared_folder.permissions.hide_password}\'
 
               move_to VID\: %{numberStr:shared_folder.VID} to %{greedyData:shared_folder.name}
 
@@ -223,3 +290,1031 @@ pipeline:
               login_sharedfolder VID\: %{numberStr:VID} from %{greedyData:shared_folder.name}
 
               Site_added_deleted_login_changed_Password_Username_changed VID\: %{numberStr:VID}
+
+    # OCSF transformations
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: string-builder-processor
+          name: Add version
+          enabled: true
+          template: 1.5.0
+          target: ocsf.metadata.version
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: LastPass reporting events
+          target: ocsf.metadata.product.name
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: LastPass
+          target: ocsf.metadata.product.vendor_name
+        - type: string-builder-processor
+          name: Add severity
+          enabled: true
+          template: "1"
+          target: ocsf.severity_id
+        - type: string-builder-processor
+          name: Add severity name
+          enabled: true
+          template: Informational
+          target: ocsf.severity
+        - type: attribute-remapper
+          name: Map `timestamp` to `ocsf.time`
+          enabled: true
+          sources:
+            - timestamp
+          sourceType: attribute
+          target: ocsf.time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Action` to `ocsf.metadata.event_code`
+          enabled: true
+          sources:
+            - Action
+          sourceType: attribute
+          target: ocsf.metadata.event_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.message`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.message
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class Account Change [3001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:("Created LastPass account" OR "Master password changed" OR "Disabled Google Authenticator" OR "Disabled Microsoft Authenticated" OR "Disabled Multifactor Authentication" OR "Disabled Toopher" OR "Disabled YubiKey" OR "Multifactor enabled" OR "Username changed" OR "Change password failed" OR "Change password success" OR "Created pending user" OR "Creating user" OR "Deactivated user" OR "Deactivating user" OR "Deleting user" OR "Employee account created" OR "Employee account deleted" OR "Employee account disabled" OR "Employee account requires activation" OR "Employee invited" OR "master password reset by super admin" OR "master password reuse" OR "Reactivated user" OR "Reactivating user" OR "Remove user from company" OR "Removing user from LastPass Business" OR "Reset master password" OR "Set user name" OR "User deprovisioned" OR "User provisioned" OR "Account lockout") -@Username:""'
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:("Created LastPass account" OR "Created pending user" OR "Creating user" OR "Employee account created")'
+              name: "1"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Reactivated user" OR "Reactivating user" OR "User provisioned")'
+              name: "2"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Master password changed" OR "Change password failed" OR "Change password success" OR "Reset master password")'
+              name: "3"
+            - filter:
+                query: '@ocsf.metadata.event_code:("master password reset by super admin")'
+              name: "4"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Deactivated user" OR "Deactivating user" OR "Employee account disabled" OR "User deprovisioned")'
+              name: "5"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Deleting user" OR "Employee account deleted" OR "Remove user from company" OR "Removing user from LastPass Business")'
+              name: "6"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Account lockout")'
+              name: "9"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Multifactor enabled")'
+              name: "10"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Disabled Google Authenticator" OR "Disabled Microsoft Authenticated" OR "Disabled Multifactor Authentication" OR "Disabled Toopher" OR "Disabled YubiKey")'
+              name: "11"
+            - filter:
+                query: '@ocsf.metadata.event_code:*'
+              name: "99"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.activity_id:1'
+              name: "Create"
+            - filter:
+                query: '@ocsf.activity_id:2'
+              name: "Enable"
+            - filter:
+                query: '@ocsf.activity_id:3'
+              name: "Password Change"
+            - filter:
+                query: '@ocsf.activity_id:4'
+              name: "Password Reset"
+            - filter:
+                query: '@ocsf.activity_id:5'
+              name: "Disable"
+            - filter:
+                query: '@ocsf.activity_id:6'
+              name: "Delete"
+            - filter:
+                query: '@ocsf.activity_id:9'
+              name: "Lock"
+            - filter:
+                query: '@ocsf.activity_id:10'
+              name: "MFA Factor Enable"
+            - filter:
+                query: '@ocsf.activity_id:11'
+              name: "MFA Factor Disable"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Identity & Access Management
+          target: ocsf.category_name
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3001"
+          target: ocsf.class_uid
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: Account Change
+          target: ocsf.class_name
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parsing user name from Data
+          enabled: true
+          source: Data
+          samples:
+            - "test@example.com"
+          grok:
+            supportRules: ""
+            matchRules: user_extraction %{regex("[^@]*@[^@]*"):ocsf.user.name}
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.user.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `IP_Address` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - IP_Address
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class Authentication [3002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:("Failed login attempt" OR "Log in" OR "Login verification email sent" OR "SAML login" OR "Authentication failed" OR "Login to admin console" OR "Successful authentication") -@Username:""'
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add activity id
+          enabled: true
+          template: "1"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add activity name
+          enabled: true
+          template: Logon
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Identity & Access Management
+          target: ocsf.category_name
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3002"
+          target: ocsf.class_uid
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: Authentication
+          target: ocsf.class_name
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add service name
+          enabled: true
+          template: LastPass
+          target: ocsf.service.name
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.user.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: status
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:("Log in" OR "SAML login" OR "Login to admin console" OR "Successful authentication")'
+              name: "Success"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Failed login attempt" OR "Authentication failed")'
+              name: "Failure"
+          target: ocsf.status
+        - type: category-processor
+          name: status_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:("Log in" OR "SAML login" OR "Login to admin console" OR "Successful authentication")'
+              name: "1"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Failed login attempt" OR "Authentication failed")'
+              name: "2"
+          target: ocsf.status_id
+        - type: attribute-remapper
+          name: Map `ocsf.status_id` to `ocsf.status_id`
+          enabled: true
+          sources:
+            - ocsf.status_id
+          sourceType: attribute
+          target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `IP_Address` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - IP_Address
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class User Access Management [3005]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:("Made admin" OR "Make admin" OR "Remove admin") -@Username:""'
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:("Made admin" OR "Make admin")'
+              name: "1"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Remove admin")'
+              name: "2"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.activity_id:1'
+              name: "Assign Privileges"
+            - filter:
+                query: '@ocsf.activity_id:2'
+              name: "Revoke Privileges"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Identity & Access Management
+          target: ocsf.category_name
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3005"
+          target: ocsf.class_uid
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: User Access Management
+          target: ocsf.class_name
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parsing user name from Data
+          enabled: true
+          source: Data
+          samples:
+            - "test@example.com"
+          grok:
+            supportRules: ""
+            matchRules: user_extraction %{regex("[^@]*@[^@]*"):ocsf.user.name}
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.user.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `IP_Address` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - IP_Address
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class User Access Management [3005]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:("Made admin" OR "Make admin") -@Username:""'
+      processors:
+        - type: string-builder-processor
+          name: Add privileges
+          enabled: true
+          template: "[ADMIN,ADMIN_PRIVILEGES_ASSIGNED]"
+          target: ocsf.privileges
+        - type: grok-parser
+          name: Profiles string to array
+          enabled: true
+          source: ocsf.privileges
+          samples:
+            - "[ADMIN_PRIVILEGES_ASSIGNED]"
+          grok:
+            supportRules: ""
+            matchRules: ProfileStrToArray %{data:ocsf.privileges:array("[]",",")}
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class User Access Management [3005]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:("Remove admin") -@Username:""'
+      processors:
+        - type: string-builder-processor
+          name: Add privileges
+          enabled: true
+          template: "[ADMIN]"
+          target: ocsf.privileges
+        - type: grok-parser
+          name: Profiles string to array
+          enabled: true
+          source: ocsf.privileges
+          samples:
+            - "[ADMIN_PRIVILEGES_ASSIGNED]"
+          grok:
+            supportRules: ""
+            matchRules: ProfileStrToArray %{data:ocsf.privileges:array("[]",",")}
+
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class Group Management [3006]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:("Add to group" OR "Adding user to group" OR "Create group" OR "Delete group" OR "Group addition" OR "Group removal" OR "Removing user from group" OR "Remove from group" OR "Rename group") -@Username:""'
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:("Add to group" OR "Adding user to group" OR "Group addition")'
+              name: "3"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Group removal" OR "Removing user from group" OR "Remove from group")'
+              name: "4"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Create group")'
+              name: "5"
+            - filter:
+                query: '@ocsf.metadata.event_code:("Delete group")'
+              name: "6"
+            - filter:
+                query: '@ocsf.metadata.event_code:*'
+              name: "99"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.activity_id:3'
+              name: "Add User"
+            - filter:
+                query: '@ocsf.activity_id:4'
+              name: "Remove User"
+            - filter:
+                query: '@ocsf.activity_id:5'
+              name: "Create"
+            - filter:
+                query: '@ocsf.activity_id:6'
+              name: "Delete"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Identity & Access Management
+          target: ocsf.category_name
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3006"
+          target: ocsf.class_uid
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: Group Management
+          target: ocsf.class_name
+        - type: attribute-remapper
+          name: Map `group.name` to `ocsf.group.name`
+          enabled: true
+          sources:
+            - group.name
+          sourceType: attribute
+          target: ocsf.group.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `group.modified_user` to `ocsf.user.name`
+          enabled: true
+          sources:
+            - group.modified_user
+          sourceType: attribute
+          target: ocsf.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `group.modified_user` to `ocsf.user.email_addr`
+          enabled: true
+          sources:
+            - group.modified_user
+          sourceType: attribute
+          target: ocsf.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `IP_Address` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - IP_Address
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class Web Resources Activity [6001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:("Data export") -@Username:""'
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:("Data export")'
+              name: "7"
+            - filter:
+                query: '@ocsf.metadata.event_code:*'
+              name: "99"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.activity_id:7'
+              name: "Export"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "6"
+          target: ocsf.category_uid
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Application Activity
+          target: ocsf.category_name
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "6001"
+          target: ocsf.class_uid
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: Web Resources Activity
+          target: ocsf.class_name
+        - type: attribute-remapper
+          name: Map `IP_Address` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - IP_Address
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add OCSF profiles
+          enabled: true
+          template: "[host]"
+          target: ocsf.metadata.profiles
+        - type: grok-parser
+          name: Profiles string to array
+          enabled: true
+          source: ocsf.metadata.profiles
+          samples:
+            - "[host]"
+          grok:
+            supportRules: ""
+            matchRules: ProfileStrToArray %{data:ocsf.metadata.profiles:array("[]",",")}
+        - type: string-builder-processor
+          name: Add web resource name
+          enabled: true
+          template: LastPass vault
+          target: ocsf.web_resource.name
+        - type: string-builder-processor
+          name: Add web resource type
+          enabled: true
+          template: PASSWORD_MANAGER_VAULT
+          target: ocsf.web_resource.type
+        - type: array-processor
+          name: Move attributes into web_resources array
+          enabled: true
+          operation:
+            source: ocsf.web_resource
+            target: ocsf.web_resources
+            preserveSource: false
+            type: append
+
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class API Activity [6003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '-@ocsf.category_uid:* -@Username:""'
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:(*create* OR *add* OR *Create* OR *Add*)'
+              name: "1"
+            - filter:
+                query: '@ocsf.metadata.event_code:(*view* OR *read* OR *View* OR *Read*)'
+              name: "2"
+            - filter:
+                query: '@ocsf.metadata.event_code:(*update* OR *change* OR *convert* OR *edit* OR *patch* OR *Update* OR *Change* OR *Convert* OR *Edit* OR *Patch*)'
+              name: "3"
+            - filter:
+                query: '@ocsf.metadata.event_code:(*delete* OR *remove* OR *destroy* OR *Delete* OR *Remove* OR *Destroy*)'
+              name: "4"
+            - filter:
+                query: '@ocsf.metadata.event_code:*'
+              name: "99"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.activity_id:1'
+              name: "Create"
+            - filter:
+                query: '@ocsf.activity_id:2'
+              name: "Read"
+            - filter:
+                query: '@ocsf.activity_id:3'
+              name: "Update"
+            - filter:
+                query: '@ocsf.activity_id:4'
+              name: "Delete"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "6"
+          target: ocsf.category_uid
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Application Activity
+          target: ocsf.category_name
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "6003"
+          target: ocsf.class_uid
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: API Activity
+          target: ocsf.class_name
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.api.operation`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.api.operation
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `IP_Address` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - IP_Address
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class Base Event [0]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '-@ocsf.category_uid:* @Username:""'
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:*'
+              name: "99"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "0"
+          target: ocsf.category_uid
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Uncategorized
+          target: ocsf.category_name
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "0"
+          target: ocsf.class_uid
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: Base Event
+          target: ocsf.class_name
+
+    # OCSF post transformations
+    - type: pipeline
+      name: OCSF post transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.category_uid` to `ocsf.category_uid`
+          enabled: true
+          sources:
+            - ocsf.category_uid
+          sourceType: attribute
+          target: ocsf.category_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.status_id` to `ocsf.status_id`
+          enabled: true
+          sources:
+            - ocsf.status_id
+          sourceType: attribute
+          target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.class_uid` to `ocsf.class_uid`
+          enabled: true
+          sources:
+            - ocsf.class_uid
+          sourceType: attribute
+          target: ocsf.class_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.severity_id` to `ocsf.severity_id`
+          enabled: true
+          sources:
+            - ocsf.severity_id
+          sourceType: attribute
+          target: ocsf.severity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: arithmetic-processor
+          name: Type ID calculator
+          enabled: true
+          expression: (ocsf.class_uid * 100) + ocsf.activity_id
+          target: ocsf.type_uid_float
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.type_uid_float` to `ocsf.type_uid`
+          enabled: true
+          sources:
+            - ocsf.type_uid_float
+          sourceType: attribute
+          target: ocsf.type_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false

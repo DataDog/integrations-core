@@ -1,0 +1,61 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "98802736-bf53-4d20-bf5c-9e7936212a14",
+  "app_id": "openvpn",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into OpenVPN events",
+    "title": "OpenVPN",
+    "media": [
+      {
+        "caption": "OpenVPN - Overview 1",
+        "image_url": "images/openvpn_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "OpenVPN - Overview 2",
+        "image_url": "images/openvpn_overview_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 40374141,
+      "source_type_name": "OpenVPN",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "OpenVPN - Overview":"assets/dashboards/openvpn_overview.json"
+    },
+    "logs": {
+      "source": "openvpn"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

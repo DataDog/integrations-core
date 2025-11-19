@@ -81,4 +81,4 @@ Additional helpful documentation, links, and articles:
 [4]: https://www.datadoghq.com/blog/monitor-jmeter-test-results-datadog/
 [5]: https://github.com/DataDog/jmeter-datadog-backend-listener/releases
 [6]: https://jmeter-plugins.org/wiki/PluginsManager/
-[7]: https://app.datadoghq.com/account/settings#api
+[7]: /account/settings#api

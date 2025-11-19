@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  falco:
+    image: falcosecurity/falco:latest
+    privileged: true
+    container_name: falco
+    network_mode: host
+    pid: host
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - SYS_PTRACE
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - /dev:/host/dev
+      - /etc:/host/etc:ro
+      - /usr:/host/usr:ro
+      - /proc:/host/proc:ro
+      - /lib/modules:/host/lib/modules:ro
+      - ./falco.yaml:/etc/falco/falco.yaml:ro  # Your custom config with metrics enabled
+    environment:
+      - FALCO_LOG_LEVEL=debug
+      - FALCO_BPF_PROBE_AUTOLOAD=true
+      - FALCO_DRIVER_LOADER=modern-bpf

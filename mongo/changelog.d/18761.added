@@ -1,4 +1,0 @@
-Add `resolved_views`, `working_millis`, and `queues` fields to the slow query (dbm only) event payload
-- resolved_views: contains view details for slow queries on views (MongoDB 5.0+)
-- working_millis: the amount of time that MongoDB spends working on the operation (MongoDB 8.0+)
-- queues: contains information about the operation's queues (MongoDB 8.0+)

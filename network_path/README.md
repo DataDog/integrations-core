@@ -4,6 +4,8 @@
 
 Network Path integration collects traceroute data.
 
+**Minimum Agent version:** 7.55.0
+
 ## Setup
 
 ### Installation
@@ -54,7 +56,7 @@ Network Path does not include any events.
 
 Need help? Contact [Datadog support][2].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 
 [2]: https://docs.datadoghq.com/help/
 

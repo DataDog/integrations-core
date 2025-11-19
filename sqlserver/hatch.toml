@@ -2,17 +2,25 @@
 base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 os = ["linux"]
-version = ["2017", "2019", "2022"]
+driver = ["FreeTDS", "odbc"]
+version = ["2019", "2022"]
 setup = ["single", "ha"]
+
+# test the compatibility of sqlserver running on non-utc timezone
+[[envs.default.matrix]]
+python = ["3.13"]
+os = ["linux"]
+version = ["2022"]
+tz = ["newyork", "tokyo"]
 
 # test the full combination of python-version/driver against a the latest sql server version
 # ideally we'd test this against all sql server versions but that makes the test take too long and time out.
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
 # sqlserver version
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 os = ["windows"]
 driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
 version = ["2019", "2022"]
@@ -32,16 +40,13 @@ setup = ["single"]
 [envs.default.env-vars]
 ODBCSYSINI = "{root}{/}tests{/}odbc"
 COMPOSE_FOLDER = "compose"
+TZ="UTC"
 PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
 
 [envs.default.overrides]
 env.GITHUB_ACTIONS.e2e-env = { value = false, if = ["true"], platform = ["windows"] }
 platform.windows.env-vars = [
   "COMPOSE_FOLDER=compose-windows",
-  # we need SETUPTOOLS_USE_DISTUTILS=stdlib for setuptools versions 60+ in order for adodbapi to be able to install
-  # correctly for python3 on windows. If not set installation fails with the following error:
-  #    in ImportError: cannot import name 'build_py_2to3' from 'distutils.command.build_py'
-  "SETUPTOOLS_USE_DISTUTILS=stdlib",
 ]
 matrix.os.platforms = [
   { value = "windows", if = ["windows"] },
@@ -61,6 +66,11 @@ matrix.version.env-vars = [
 ]
 matrix.driver.env-vars = [
   { key = "WINDOWS_SQLSERVER_DRIVER", platform = ["windows"] },
+  { key = "LINUX_SQLSERVER_DRIVER", platform = ["linux"] },
+]
+matrix.tz.env-vars = [
+  { key = "TZ", value = "America/New_York", if = ["newyork"] },
+  { key = "TZ", value = "Asia/Tokyo", if = ["tokyo"] },
 ]
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"

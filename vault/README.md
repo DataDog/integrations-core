@@ -4,6 +4,8 @@
 
 This check monitors [Vault][1] cluster health and leader changes.
 
+**Minimum Agent version:** 6.3.2
+
 ## Setup
 
 ### Installation
@@ -163,7 +165,7 @@ _Available for Agent versions >6.0_
      ...
      [Service]
      ...
-     ExecStart=/bin/sh -c '/home/vagrant/bin/vault server -config=/home/vagrant/vault_nano/config/vault -log-level="trace" > /var/log/vault.log
+     ExecStart=/bin/sh -c '/home/vagrant/bin/vault server -config=/home/vagrant/vault_nano/config/vault -log-level="trace" > /var/log/vault.log'
      ...
      ```
 
@@ -220,7 +222,7 @@ Additional helpful documentation, links, and articles:
 - [How to monitor HashiCorp Vault with Datadog][20]
 
 [1]: https://www.vaultproject.io
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://www.vaultproject.io/docs/configuration/telemetry#prometheus
 [4]: https://www.vaultproject.io/docs/configuration/listener/tcp#unauthenticated_metrics_access
 [5]: https://www.vaultproject.io/docs/auth

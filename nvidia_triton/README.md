@@ -4,6 +4,8 @@
 
 This check monitors [Nvidia Triton][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.50.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -129,7 +131,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://www.nvidia.com/en-us/ai-data-science/products/triton-inference-server/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/nvidia_triton/datadog_checks/nvidia_triton/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

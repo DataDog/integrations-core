@@ -4,10 +4,11 @@
 
 This check monitors [Appgate SDP][1] through the Datadog Agent. 
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+- Monitors the health and performance of Appgate SDP appliances, controllers, and gateways by collecting key metrics.
+- Provides visibility into resource utilization, active connections, session counts, and license usage to help ensure secure and efficient access management.
+- Enables proactive alerting and troubleshooting by tracking critical indicators such as CPU, memory, disk usage, and system events across distributed environments.
+
+**Minimum Agent version:** 7.59.0
 
 ## Setup
 
@@ -20,7 +21,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `appgate_sdp.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your appgate_sdp performance data. See the [sample appgate_sdp.d/conf.yaml][4] for all available configuration options.
+1. Edit the `appgate_sdp.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Appgate SDP performance data. See the [sample appgate_sdp.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -50,7 +51,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://sdphelp.appgate.com/adminguide/v6.3/introduction.html
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/appgate_sdp/datadog_checks/appgate_sdp/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

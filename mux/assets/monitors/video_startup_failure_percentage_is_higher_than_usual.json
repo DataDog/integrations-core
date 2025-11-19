@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2024-09-24",
+    "last_updated_at": "2024-09-24",
+    "title": "Video Startup Failure Percentage is higher than usual",
+    "description": "Video startup failures happen when a video fails to start for users. This monitor tracks the percentage of these failures to identify issues in delivery. High rates can lead to poor user experience and increased churn, making timely alerts essential for maintaining viewer satisfaction.",
+    "definition": {
+        "id": 154118482,
+        "name": "[Mux] Video Startup Failure Percentage is higher than usual",
+        "type": "query alert",
+        "query": "max(last_4h):max:mux.metric.video_startup_failure_percentage{*} by {video_id} > 20",
+        "message": "{{#is_warning}}  \nThe Video Startup Failure Percentage for video id: {{video_id.name}} has exceeded the threshold.  \nCurrent Video Startup Failure Percentage: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe Video Startup Failure Percentage for video id: {{video_id.name}} has exceeded the threshold.    \nCurrent Video Startup Failure Percentage: {{value}}%    \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n@example@example.com",
+        "tags": [
+            "integration:mux"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 20,
+                "warning": 10
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": 2,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:mux"
+    ]
+}

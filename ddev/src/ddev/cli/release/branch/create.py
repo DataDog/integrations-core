@@ -41,7 +41,16 @@ def create(app: Application, branch_name):
     app.display_success("Done.")
 
     app.display_waiting(f"Creating the release branch `{branch_name}`...")
-    app.repo.git.run('checkout', '-b', branch_name)
+    app.repo.git.run('checkout', '-B', branch_name)
+    app.display_success("Done.")
+
+    app.display_waiting("Updating the .gitlab/build_agent.yaml file...")
+    update_build_agent_yaml(app, branch_name)
+    app.display_success("Done.")
+
+    app.display_waiting("Adding and committing the changes...")
+    app.repo.git.run('add', '.gitlab/build_agent.yaml')
+    app.repo.git.run('commit', '-m', f"Update build_agent.yaml to use agent branch: {branch_name}")
     app.display_success("Done.")
 
     app.display_waiting(f"Pushing the release branch `{branch_name}`...")
@@ -53,3 +62,41 @@ def create(app: Application, branch_name):
     app.display_success("Done.")
 
     app.display_success("All done.")
+
+
+def update_build_agent_yaml(app: Application, branch_name: str) -> None:
+    """
+    Update the .gitlab/build_agent.yaml file to use the correct agent branch for release builds.
+
+    Args:
+        branch_name: The release branch name (e.g., '7.45.x')
+    """
+    from ddev.utils.fs import Path
+
+    build_agent_yaml = Path('.gitlab/build_agent.yaml')
+
+    if not build_agent_yaml.exists():
+        app.display_warning(f'Warning: {build_agent_yaml} not found')
+        return
+
+    # Read the current content
+    with open(build_agent_yaml, 'r') as f:
+        content = f.read()
+
+    # Update the build-agent-manual-release job to use the correct agent branch
+    # Find the line with 'branch: main' and replace it
+    old_pattern = r'(\s+branch:\s+)main'
+
+    def replacement(match):
+        return match.group(1) + branch_name
+
+    if re.search(old_pattern, content):
+        updated_content = re.sub(old_pattern, replacement, content)
+
+        # Write the updated content back
+        with open(build_agent_yaml, 'w') as f:
+            f.write(updated_content)
+
+        app.display_success(f'Updated build_agent.yaml file to use Agent branch: {branch_name}')
+    else:
+        app.display_warning(f'Warning: Could not find branch pattern to update in {build_agent_yaml}')

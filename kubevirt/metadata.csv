@@ -1,0 +1,4 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+kubevirt_api.process.cpu_seconds.count,count,,second,,Total user and system CPU time spent in seconds.,0,kubevirt,cpu time total,,
+kubevirt_controller.virt_controller.ready_status,gauge,,,,Indication for a virt-controller that is ready to take the lead.,0,kubevirt,ready_status,,
+kubevirt_handler.vmi.cpu_system_usage_seconds.count,count,,second,,Total CPU time spent in system mode.,0,kubevirt,cpu system usage,,

@@ -298,6 +298,27 @@ rabbitmq_queue_disk_reads_total 0
 # TYPE rabbitmq_queue_disk_writes_total counter
 # HELP rabbitmq_queue_disk_writes_total Total number of times queue wrote messages to disk
 rabbitmq_queue_disk_writes_total 0
+# TYPE rabbitmq_queue_get_ack_total counter
+# HELP rabbitmq_queue_get_ack_total Total number of messages fetched from a queue with basic.get in manual acknowledgement mode
+rabbitmq_queue_get_ack_total 0
+# TYPE rabbitmq_queue_get_total counter
+# HELP rabbitmq_queue_get_total Total number of messages fetched from a queue with basic.get in automatic acknowledgement mode
+rabbitmq_queue_get_total 0
+# TYPE rabbitmq_queue_messages_delivered_ack_total counter
+# HELP rabbitmq_queue_messages_delivered_ack_total Total number of messages delivered from a queue to consumers in manual acknowledgement mode
+rabbitmq_queue_messages_delivered_ack_total 17217348
+# TYPE rabbitmq_queue_messages_delivered_total counter
+# HELP rabbitmq_queue_messages_delivered_total Total number of messages delivered from a queue to consumers in automatic acknowledgement mode
+rabbitmq_queue_messages_delivered_total 0
+# TYPE rabbitmq_queue_messages_redelivered_total counter
+# HELP rabbitmq_queue_messages_redelivered_total Total number of messages redelivered from a queue to consumers
+rabbitmq_queue_messages_redelivered_total 67170
+# TYPE rabbitmq_queue_messages_acked_total counter
+# HELP rabbitmq_queue_messages_acked_total Total number of messages acknowledged by consumers on a queue
+rabbitmq_queue_messages_acked_total 17148315
+# TYPE rabbitmq_queue_get_empty_total counter
+# HELP rabbitmq_queue_get_empty_total Total number of times basic.get operations fetched no message on a queue
+rabbitmq_queue_get_empty_total 0
 # TYPE rabbitmq_channel_consumers gauge
 # HELP rabbitmq_channel_consumers Consumers on a channel
 rabbitmq_channel_consumers 0

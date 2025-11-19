@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import mmh3
 
 from datadog_checks.base import ensure_bytes
-from datadog_checks.base.utils.serialization import json, sort_keys_kwargs
+from datadog_checks.base.utils.format import json
 
 # Unicode character "Arabic Decimal Separator" (U+066B) is a character which looks like an ascii
 # comma, but is not treated like a comma when parsing metrics tags. This is used to replace
@@ -52,5 +52,5 @@ def compute_exec_plan_signature(normalized_json_plan):
     """
     if not normalized_json_plan:
         return None
-    with_sorted_keys = json.dumps(json.loads(normalized_json_plan), **sort_keys_kwargs)
+    with_sorted_keys = json.encode(json.decode(normalized_json_plan), sort_keys=True)
     return format(mmh3.hash64(with_sorted_keys, signed=False)[0], 'x')

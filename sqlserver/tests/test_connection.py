@@ -74,8 +74,7 @@ def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, us
     instance_minimal_defaults["connection_string"] = cs
     instance_minimal_defaults["username"] = username
     instance_minimal_defaults["password"] = password
-    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
-    connection = Connection(check.resolved_hostname, {}, instance_minimal_defaults, None)
+    connection = Connection({}, instance_minimal_defaults, None)
     connection.log = mock.MagicMock()
     connection._connection_options_validation('somekey', 'somedb')
     if expect_warning:
@@ -97,8 +96,7 @@ def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, us
 )
 def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults, connector, param):
     instance_minimal_defaults.update({'connector': connector, param: 'foo'})
-    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
-    connection = Connection(check.resolved_hostname, {}, instance_minimal_defaults, None)
+    connection = Connection({}, instance_minimal_defaults, None)
     connection.log = mock.MagicMock()
     connection._connection_options_validation('somekey', 'somedb')
     connection.log.warning.assert_called_once_with(
@@ -130,8 +128,7 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
 )
 def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector, cs, param, should_fail):
     instance_minimal_defaults.update({'connector': connector, param: 'foo', 'connection_string': cs + "=foo"})
-    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
-    connection = Connection(check.resolved_hostname, {}, instance_minimal_defaults, None)
+    connection = Connection({}, instance_minimal_defaults, None)
     if should_fail:
         match = (
             "%s has been provided both in the connection string and as a configuration option (%s), "
@@ -162,8 +159,7 @@ def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector
 def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minimal_defaults, connector, cs):
     instance_minimal_defaults.update({'connector': connector, 'connection_string': cs + '=foo'})
     other_connector = 'odbc' if connector != 'odbc' else 'adodbapi'
-    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
-    connection = Connection(check.resolved_hostname, {}, instance_minimal_defaults, None)
+    connection = Connection({}, instance_minimal_defaults, None)
     match = (
         "%s has been provided in the connection string. "
         "This option is only available for %s connections, however %s has been selected"
@@ -212,10 +208,7 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
                 },
             },
             True,
-            (
-                "Azure Managed Identity Authentication is not properly configured "
-                "missing required property, client_id"
-            ),
+            ("Azure Managed Identity Authentication is not properly configured missing required property, client_id"),
         ),
     ],
 )
@@ -226,8 +219,7 @@ def test_managed_auth_config_valid(instance_minimal_defaults, name, managed_iden
         for k, v in managed_identity_config.items():
             instance_minimal_defaults[k] = v
     instance_minimal_defaults.update({'connector': 'odbc'})
-    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
-    connection = Connection(check.resolved_hostname, {}, instance_minimal_defaults, None)
+    connection = Connection({}, instance_minimal_defaults, None)
     if should_fail:
         with pytest.raises(ConfigurationError, match=re.escape(expected_err)):
             connection._connection_options_validation('somekey', 'somedb')
@@ -287,12 +279,12 @@ def test_managed_auth_config_valid(instance_minimal_defaults, name, managed_iden
 def test_config_with_and_without_port(instance_minimal_defaults, host, port, expected_host):
     instance_minimal_defaults["host"] = host
     instance_minimal_defaults["port"] = port
-    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
-    connection = Connection(check.resolved_hostname, {}, instance_minimal_defaults, None)
+    connection = Connection({}, instance_minimal_defaults, None)
     _, result_host, _, _, _, _ = connection._get_access_info('somekey', 'somedb')
     assert result_host == expected_host
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
@@ -369,9 +361,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
 
     try:
         # Break the connection
-        check.connection = Connection(
-            check.resolved_hostname, {}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check
-        )
+        check.connection = Connection({}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check)
         dd_run_check(check)
     except Exception:
         aggregator.assert_service_check(
@@ -388,7 +378,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
     )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "test_case_name,instance_overrides,expected_error_patterns,expected_error",
     [
@@ -404,8 +394,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             {
                 "odbc-linux": "TCP-connection\\(OK\\).*"
                 "Can't open lib .* file not found .* configured odbc driver .* not in list of installed drivers",
-                "odbc-windows": "TCP-connection\\(OK\\).*"
-                "Data source name not found.* and no default driver specified",
+                "odbc-windows": "TCP-connection\\(OK\\).*Data source name not found.* and no default driver specified",
             },
             ConnectionErrorCode.driver_not_found,
         ),
@@ -436,8 +425,8 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             "failed_tcp_connection",
             {"host": "localhost,9999"},
             {
-                "odbc-windows|MSOLEDBSQL": "TCP Provider: No connection could be made"
-                " because the target machine actively refused it",
+                "odbc-windows|MSOLEDBSQL": "(TCP Provider: No connection could be made"
+                " because the target machine actively refused it|TCP Provider: The wait operation timed out)",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(ERROR: No connection could be made "
                 "because the target machine actively refused it\\).*"
                 "could not open database requested by login",
@@ -495,7 +484,7 @@ def test_connection_error_reporting(
     expected_error_pattern = matching_patterns[0]
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    connection = Connection(check.resolved_hostname, check.init_config, check.instance, check.handle_service_check)
+    connection = Connection(check.init_config, check.instance, check.handle_service_check)
     with pytest.raises(SQLConnectionError) as excinfo:
         with connection.open_managed_default_connection():
             pytest.fail("connection should not have succeeded")

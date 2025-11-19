@@ -5,7 +5,6 @@ import copy
 from collections import defaultdict
 
 import click
-from packaging.markers import Marker
 from packaging.requirements import Requirement
 from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_name
@@ -52,29 +51,22 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
         elif batch_size is not None and len(updated_packages) >= batch_size:
             break
 
-        new_python_versions = package_data[name]
-        dropped_py2 = len(set(new_python_versions.values())) > 1
-        for python_version, package_version in new_python_versions.items():
-            dependency_definitions = python_versions[python_version]
-            if not dependency_definitions or package_version is None:
-                continue
-            dependency_definition, checks = dependency_definitions.popitem()
+        python_version = 'py3'
+        package_version = package_data[name][python_version]
+        dependency_definitions = python_versions[python_version]
+        if not dependency_definitions or package_version is None:
+            continue
+        dependency_definition, checks = dependency_definitions.popitem()
 
-            requirement = Requirement(dependency_definition)
-            requirement.specifier = SpecifierSet(f'=={package_version}')
-            if dropped_py2 and 'python_version' not in dependency_definition:
-                python_marker = f'python_version {"<" if python_version == "py2" else ">"} "3.0"'
-                if not requirement.marker:
-                    requirement.marker = Marker(python_marker)
-                else:
-                    requirement.marker = Marker(f'{requirement.marker} and {python_marker}')
+        requirement = Requirement(dependency_definition)
+        requirement.specifier = SpecifierSet(f'=={package_version}')
 
-            new_dependency_definition = get_normalized_dependency(requirement)
+        new_dependency_definition = get_normalized_dependency(requirement)
 
-            dependency_definitions[new_dependency_definition] = checks
-            if dependency_definition != new_dependency_definition:
-                version_updates[name][package_version].add(python_version)
-                updated_packages.add(name)
+        dependency_definitions[new_dependency_definition] = checks
+        if dependency_definition != new_dependency_definition:
+            version_updates[name][package_version].add(python_version)
+            updated_packages.add(name)
 
     if sync_dependencies:
         if updated_packages:
@@ -87,8 +79,7 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
             for name, versions in version_updates.items():
                 for package_version, python_versions in versions.items():
                     app.display_error(
-                        f'{name} can be updated to version {package_version} '
-                        f'on {" and ".join(sorted(python_versions))}'
+                        f'{name} can be updated to version {package_version} on {" and ".join(sorted(python_versions))}'
                     )
             app.abort()
         else:

@@ -717,7 +717,7 @@ def test_profile_by_file(aggregator):
     instance['profile'] = 'profile1'
     with temp_dir() as tmp:
         profile_file = os.path.join(tmp, 'profile1.yaml')
-        with open(profile_file, 'wb') as f:
+        with open(profile_file, 'w') as f:
             f.write(yaml.safe_dump({'metrics': common.SUPPORTED_METRIC_TYPES}))
         init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         check = SnmpCheck('snmp', init_config, [instance])
@@ -865,7 +865,7 @@ def test_profile_sys_object_unknown(aggregator, caplog):
     # Via network discovery...
 
     host = socket.gethostbyname(common.HOST)
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     instance = {
         'name': 'snmp_conf',
         'network_address': network,
@@ -898,7 +898,7 @@ def test_profile_sys_object_no_metrics():
 
 def test_discovery(aggregator):
     host = socket.gethostbyname(common.HOST)
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     check_tags = [
         'snmp_device:{}'.format(host),
         'snmp_profile:profile1',
@@ -949,7 +949,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     read_mock.return_value = '["192.168.0.1","192.168.0.2"]'
 
     host = socket.gethostbyname(common.HOST)
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     check_tags = [
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]

@@ -4,6 +4,8 @@
 
 This check monitors [Kube_metrics_server][1] v0.3.0+, a component used by the Kubernetes control plane.
 
+**Minimum Agent version:** 6.12.0
+
 ## Setup
 
 ### Installation
@@ -73,7 +75,7 @@ Need help? Contact [Datadog support][10].
 
 
 [1]: https://github.com/kubernetes-incubator/metrics-server
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/datadog_checks/kube_metrics_server/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
 [5]: https://docs.datadoghq.com/agent/kubernetes/integrations/

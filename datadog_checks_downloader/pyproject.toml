@@ -23,7 +23,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
 ]
 dynamic = [
@@ -34,7 +34,7 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "in-toto==2.0.0",
-    "packaging==24.1",
+    "packaging==25.0",
     "securesystemslib[crypto,pynacl]==0.28.0",
     "tuf==4.0.0",
 ]

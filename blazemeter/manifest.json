@@ -1,0 +1,85 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "8c52001a-e57a-4979-a50b-cda6252050e4",
+  "app_id": "blazemeter",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into your BlazeMeter functional and performance test results",
+    "title": "BlazeMeter",
+    "media": [
+        {
+            "caption": "BlazeMeter - Functional Test Results",
+            "image_url": "images/blazemeter_functional_test_results.png",
+            "media_type": "image"
+          },
+          {
+            "caption": "BlazeMeter - Performance Test Results",
+            "image_url": "images/blazemeter_performance_test_results_1.png",
+            "media_type": "image"
+          },
+          {
+            "caption": "BlazeMeter - Performance Test Results",
+            "image_url": "images/blazemeter_performance_test_results_2.png",
+            "media_type": "image"
+          },
+          {
+            "caption": "BlazeMeter - Performance Test Results",
+            "image_url": "images/blazemeter_performance_test_results_3.png",
+            "media_type": "image"
+          },
+          {
+            "caption": "BlazeMeter - Performance Test Results",
+            "image_url": "images/blazemeter_performance_test_results_4.png",
+            "media_type": "image"
+          },
+          {
+            "caption": "BlazeMeter - Performance Test Results",
+            "image_url": "images/blazemeter_performance_test_results_5.png",
+            "media_type": "image"
+          }
+    ],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 33188074,
+      "source_type_name": "BlazeMeter",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "blazemeter.",
+        "check": "blazemeter.functional.gridSummary_testCasesCount",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "BlazeMeter - Functional Test Results" : "assets/dashboards/blazemeter_functional_test_results.json",
+      "BlazeMeter - Performance Test Results" : "assets/dashboards/blazemeter_performance_test_results.json"
+    },
+    "monitors": {
+      "High broken rate for functional test results" : "assets/monitors/high_broken_rate_for_functional_test_results.json",
+      "High failure rate for functional test results" : "assets/monitors/high_failure_rate_for_functional_test_results.json",
+      "High failure rate for performance test results" : "assets/monitors/high_failure_rate_for_performance_test_results.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

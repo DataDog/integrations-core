@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+import time
+from functools import wraps
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.mongo.metrics import CASE_SENSITIVE_METRIC_NAME_SUFFIXES
@@ -23,6 +25,11 @@ class MongoCollector(object):
         self.gauge = self.check.gauge
         self.base_tags = tags
         self.metrics_to_collect = self.check.metrics_to_collect
+        self._collection_interval = None
+        self._collector_key = (self.__class__.__name__,)
+        self._system_collections_skip_stats = {
+            "local": frozenset(["system.replset", "replset.election", "replset.minvalid"])
+        }
 
     def collect(self, api):
         """The main method exposed by the collector classes, needs to be implemented by every subclass.
@@ -32,6 +39,15 @@ class MongoCollector(object):
     def compatible_with(self, deployment):
         """Whether or not this specific collector is compatible with this specific deployment type."""
         raise NotImplementedError()
+
+    def should_skip_system_collection(self, coll_name):
+        """Whether or not the collection should be skipped because collStats or indexStats
+        is not authorized to run on certain system collections.
+        """
+        db_name = getattr(self, "db_name", None)
+        if not db_name or db_name not in self._system_collections_skip_stats:
+            return False
+        return coll_name in self._system_collections_skip_stats[db_name]
 
     def _normalize(self, metric_name, submit_method, prefix=None):
         """Replace case-sensitive metric name characters, normalize the metric name,
@@ -45,7 +61,7 @@ class MongoCollector(object):
             metric_name = re.compile(pattern).sub(repl, metric_name)
 
         # Normalize, and wrap
-        return u"{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
+        return "{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
             normalized_metric_name=self.check.normalize(metric_name.lower()),
             metric_prefix=metric_prefix,
             metric_suffix=metric_suffix,
@@ -90,7 +106,7 @@ class MongoCollector(object):
             # value is now status[x][y][z]
             if not isinstance(value, (int, float)):
                 raise TypeError(
-                    u"{0} value is a {1}, it should be an int, or a float instead.".format(metric_name, type(value))
+                    "{0} value is a {1}, it should be an int, or a float instead.".format(metric_name, type(value))
                 )
 
             # Submit the metric
@@ -126,3 +142,32 @@ class MongoCollector(object):
                 # Keep old incorrect metric name
                 # 'top' and 'index', 'collectionscans' metrics are affected
                 self.gauge(metric_name_alias[:-2], value, tags=tags)
+
+    def get_last_collection_timestamp(self):
+        return self.check.metrics_last_collection_timestamp.get(self._collector_key)
+
+    def set_last_collection_timestamp(self, timestamp):
+        self.check.metrics_last_collection_timestamp[self._collector_key] = timestamp
+
+
+def collection_interval_checker(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        current_time = time.time()
+        # If _collection_interval not set or set to the check default, call the function to collect the metrics
+        if (
+            self._collection_interval is None
+            or self._collection_interval <= self.check._config.min_collection_interval  # Ensure the interval is valid
+        ):
+            self.set_last_collection_timestamp(current_time)
+            return func(self, *args, **kwargs)
+
+        # Check if enough time has passed since the last collection
+        last_collection_timestamp = self.get_last_collection_timestamp()
+        if not last_collection_timestamp or current_time - last_collection_timestamp >= self._collection_interval:
+            self.set_last_collection_timestamp(current_time)
+            return func(self, *args, **kwargs)
+        else:
+            self.log.debug("%s skipped: collection interval not reached yet.", self.__class__.__name__)
+
+    return wrapper

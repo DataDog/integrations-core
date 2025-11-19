@@ -1,8 +1,21 @@
 # Squid Integration
 
 ## Overview
+[Squid][1] is an open-source caching and forwarding web proxy server that operates as an intermediary between clients and servers on a network. It acts as a gateway, enabling clients to access various internet resources such as websites, files, and other content from servers.
+
+This integration provides enrichment and visualization for Squid logs. It helps you visualize detailed insights into Squid log analysis through the out-of-the-box dashboards and detection rules, enhancing detection and response capabilities.
+
+Additionally, it includes pre-configured monitors for proactive notifications on the following:
+
+1. High rate of server errors
+2. CPU usage exceeded
+3. High latency requests
+4. High rate of client HTTP errors
+
 
 This check monitors [Squid][1] metrics from the Cache Manager through the Datadog Agent.
+
+**Minimum Agent version:** 6.0.0
 
 ## Setup
 
@@ -87,6 +100,38 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ## Data Collected
 
+### Logs
+The Squid integration collects access and cache logs.
+
+#### Supported Access Log Formats
+|Name                 | Format Specification|
+|---------------------|------------------------------|
+| squid      |`%ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %[un %Sh/%<a %mt`|
+| common     |`%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %Ss:%Sh`|
+| combined   |`%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh`|
+
+For more information, refer to [Squid log formats][12].
+
+**Note**: The default `logformat` type is `squid`. You can update the supported log format in `/etc/squid/squid.conf`, then restart Squid.
+
+To use the `combined` type for `logformat`, add the following lines to your `/etc/squid/squid.conf` file:
+
+```
+logformat combined   %>a %[ui %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh
+access_log /var/log/squid/access.log combined
+```
+Next, restart the `squid` service using the following command:
+
+```shell
+sudo systemctl restart squid
+```  
+
+**Note**:
+
+- The `Top Avg Request Duration by URL Host` panel will be loaded only if the default `squid` type of `logformat` is configured.
+- The `Top Browsers` and `Top HTTP Referrer` panels will be loaded only if the `combined` type of `logformat` is configured.
+
+
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this check.
@@ -105,7 +150,7 @@ Need help? Contact [Datadog support][11].
 
 
 [1]: http://www.squid-cache.org/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/squid/datadog_checks/squid/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -115,3 +160,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/squid/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/squid/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
+[12]: https://www.squid-cache.org/Doc/config/logformat/

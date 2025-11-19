@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+
 import mock
 import pytest
 
@@ -388,7 +390,7 @@ def test_valid_version_and_critical_certificate_validation_due_to_socket_excepti
         status=c.CRITICAL,
         tags=c._tags,
         count=1,
-        message='Exception with secure_sock.getpeercert(binary_form=True)',
+        message=re.escape('Exception with secure_sock.getpeercert(binary_form=True)'),
     )
     aggregator.assert_service_check(SERVICE_CHECK_VERSION, status=c.OK, tags=c._tags, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, count=0)

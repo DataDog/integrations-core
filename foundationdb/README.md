@@ -6,6 +6,8 @@ This check monitors [FoundationDB][1] through the Datadog Agent. Aside from
 checking that the FoundationDB cluster is healthy, it also collects numerous metrics
 and, optionally, FoundationDB transaction logs.
 
+**Minimum Agent version:** 7.35.0
+
 ## Setup
 
 Both the check and metrics apply to the FoundationDB cluster as a whole,
@@ -133,14 +135,14 @@ The FoundationDB check does not include any events.
 Need help? Contact [Datadog support][7].
 
 [1]: https://www.foundationdb.org/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/foundationdb/datadog_checks/foundationdb/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/foundationdb/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://apple.github.io/foundationdb/downloads.html
-[9]: https://app.datadoghq.com/account/settings/agent/latest
+[9]: /account/settings/agent/latest
 [10]: https://apple.github.io/foundationdb/administration.html#default-cluster-file
 [11]: https://apple.github.io/foundationdb/tls.html
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/

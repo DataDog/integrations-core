@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "54cca53a-3c87-4b53-beb4-fce95d1fcfb5",
   "app_id": "mongodb",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -63,7 +64,14 @@
       "mongodb": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Connection pool is reaching saturation": "assets/monitors/high_connections.json"
+      "Connection pool is reaching saturation": "assets/monitors/high_connections.json",
+      "High query targeting": "assets/monitors/high_query_targeting.json",
+      "High queued readers": "assets/monitors/high_queued_readers.json",
+      "High queued writers": "assets/monitors/high_queued_writers.json",
+      "High replication lag": "assets/monitors/high_replication_lag.json",
+      "Low oplog window": "assets/monitors/low_oplog_window.json",
+      "Unhealthy replica set member": "assets/monitors/unhealthy_repliset_member.json",
+      "Used file system storage is reaching capacity": "assets/monitors/high_fsstorage_usage.json"
     },
     "saved_views": {
       "operations_by_type_overview": "assets/saved_views/operations_by_type_overview.json",

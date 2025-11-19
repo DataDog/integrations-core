@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
+import pytest
 
 from datadog_checks.dev.tooling.constants import set_root
 from datadog_checks.dev.tooling.git import (
@@ -9,6 +10,7 @@ from datadog_checks.dev.tooling.git import (
     get_commits_since,
     get_current_branch,
     git_commit,
+    git_fetch,
     git_show_file,
     git_tag,
     git_tag_list,
@@ -200,3 +202,20 @@ def test_tracked_by_git():
             tracked_by_git('bar')
             chdir.assert_called_once_with('/foo/')
             run.assert_called_once_with('git ls-files --error-unmatch bar', capture=True)
+
+
+@pytest.mark.parametrize(
+    'tags, expected_command',
+    [
+        (True, ['git', 'fetch', 'origin', '--tags']),
+        (False, ['git', 'fetch', 'origin']),
+    ],
+    ids=['with_tags', 'without_tags'],
+)
+def test_git_fetch(tags: bool, expected_command: list[str]):
+    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
+        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+            set_root('/foo/')
+            git_fetch(tags=tags)
+            chdir.assert_called_once_with('/foo/')
+            run.assert_called_once_with(expected_command, capture=True)

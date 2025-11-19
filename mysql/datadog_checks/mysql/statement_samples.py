@@ -17,7 +17,7 @@ from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
@@ -33,8 +33,8 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import (
     DatabaseConfigurationError,
+    ManagedAuthConnectionMixin,
     StatementTruncationState,
-    connect_with_autocommit,
     get_truncation_state,
     warning_with_tags,
 )
@@ -61,6 +61,7 @@ EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS = {
     'current_schema',
     # used for signature
     'digest_text',
+    'end_event_id',
     'uptime',
     'now',
     'timer_end',
@@ -79,6 +80,7 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
         sql_text,
         digest,
         digest_text,
+        end_event_id,
         timer_start,
         @uptime as uptime,
         unix_timestamp() as now,
@@ -166,6 +168,9 @@ class DBExplainErrorCode(Enum):
     # database error i.e connection error
     database_error = 'database_error'
 
+    # failed to collect explain plan because the function is missing or invalid permissions
+    failed_function = 'failed_function'
+
     # this could be the result of a missing EXPLAIN function
     invalid_schema = 'invalid_schema'
 
@@ -186,12 +191,12 @@ ExplainState = namedtuple('ExplainState', ['strategy', 'error_code', 'error_mess
 EMPTY_EXPLAIN_STATE = ExplainState(strategy=None, error_code=None, error_message=None)
 
 
-class MySQLStatementSamples(DBMAsyncJob):
+class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
     """
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config, connection_args):
+    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
         collection_interval = float(config.statement_metrics_config.get('collection_interval', 1))
         if collection_interval <= 0:
             collection_interval = 1
@@ -208,7 +213,9 @@ class MySQLStatementSamples(DBMAsyncJob):
         )
         self._config = config
         self._version_processed = False
-        self._connection_args = connection_args
+        self._connection_args_provider = connection_args_provider
+        self._uses_managed_auth = uses_managed_auth
+        self._db_created_at = 0
         self._last_check_run = 0
         self._db = None
         self._check = check
@@ -271,16 +278,6 @@ class MySQLStatementSamples(DBMAsyncJob):
                 self._global_status_table = "performance_schema.global_status"
             self._version_processed = True
 
-    def _get_db_connection(self):
-        """
-        lazy reconnect db
-        pymysql connections are not thread safe so we can't reuse the same connection from the main check
-        :return:
-        """
-        if not self._db:
-            self._db = connect_with_autocommit(**self._connection_args)
-        return self._db
-
     def _close_db_conn(self):
         if self._db:
             try:
@@ -307,10 +304,11 @@ class MySQLStatementSamples(DBMAsyncJob):
         except pymysql.err.DatabaseError as e:
             if len(e.args) != 2:
                 raise
+            error_msg = f"{e.args[0]}: {e.args[1]}" if len(e.args) >= 2 else str(e)
             error_state = ExplainState(
                 strategy=None,
                 error_code=DBExplainErrorCode.use_schema_error,
-                error_message=str(type(e)),
+                error_message=error_msg,
             )
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[explain_state_cache_key] = error_state
@@ -329,7 +327,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 "dd.mysql.db.error",
                 1,
                 tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
             )
             raise
 
@@ -352,10 +350,10 @@ class MySQLStatementSamples(DBMAsyncJob):
                 "dd.mysql.get_new_events_statements.time",
                 (time.time() - start) * 1000,
                 tags=tags,
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
             )
             self._check.histogram(
-                "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
+                "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.reported_hostname
             )
             self._log.debug("Read %s rows from %s", len(rows), EVENTS_STATEMENTS_TABLE)
             return rows
@@ -391,7 +389,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 "dd.mysql.query_samples.error",
                 1,
                 tags=self._tags + ["error:sql-obfuscate"] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
             )
             return None
 
@@ -417,7 +415,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "dd.mysql.query_samples.error",
                     1,
                     tags=self._tags + [error_tag] + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
+                    hostname=self._check.reported_hostname,
                 )
                 collection_errors.append(
                     {
@@ -440,10 +438,15 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
+            event_timestamp = time.time() * 1000
+
+            if self._has_sampled_since_completion(row, event_timestamp):
+                return None
+
             return {
-                "timestamp": self._calculate_timer_end(row),
+                "timestamp": event_timestamp,
                 "dbm_type": "plan",
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": self._tags_str,
@@ -454,6 +457,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     }
                 },
                 "cloud_metadata": self._config.cloud_metadata,
+                'service': self._config.service,
                 "db": {
                     "instance": row['current_schema'],
                     "plan": {
@@ -542,14 +546,14 @@ class MySQLStatementSamples(DBMAsyncJob):
                     'troubleshooting/#%s for more details.',
                     DatabaseConfigurationError.events_statements_consumer_missing.value,
                     code=DatabaseConfigurationError.events_statements_consumer_missing.value,
-                    host=self._check.resolved_hostname,
+                    host=self._check.reported_hostname,
                 ),
             )
             self._check.count(
                 "dd.mysql.query_samples.error",
                 1,
                 tags=self._tags + ["error:no-enabled-events-statements-consumers"] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
             )
             return None, None
         self._log.debug("Found enabled performance_schema statements consumers: %s", enabled_consumers)
@@ -597,31 +601,31 @@ class MySQLStatementSamples(DBMAsyncJob):
             "dd.mysql.collect_statement_samples.time",
             (time.time() - start_time) * 1000,
             tags=tags,
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
         )
         self._check.count(
             "dd.mysql.collect_statement_samples.events_submitted.count",
             submitted_count,
             tags=tags,
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
         )
         self._check.gauge(
             "dd.mysql.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
             tags=tags,
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
         )
         self._check.gauge(
             "dd.mysql.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
             tags=tags,
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
         )
         self._check.gauge(
             "dd.mysql.collect_statement_samples.collection_strategy_cache.len",
             len(self._collection_strategy_cache),
             tags=tags,
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
         )
 
     def _explain_statement(self, cursor, statement, schema, obfuscated_statement, query_signature):
@@ -657,8 +661,13 @@ class MySQLStatementSamples(DBMAsyncJob):
         self._log.debug('explaining statement. schema=%s, statement="%s"', schema, obfuscated_statement)
         error_state = self._use_schema(cursor, schema, explain_state_cache_key)
         if error_state:
-            self._log.debug(
-                'Failed to collect execution plan because schema could not be accessed. schema=%s error=%s: %s',
+            self._log.warning(
+                'Failed to collect execution plan. '
+                'Check that the `explain_statement` function exists in the schema `%s`. '
+                'See '
+                'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting/'
+                '#explain-plan-fq-procedure-missing. '
+                'error=%s: %s',
                 schema,
                 error_state,
                 obfuscated_statement,
@@ -718,15 +727,21 @@ class MySQLStatementSamples(DBMAsyncJob):
                         "dd.mysql.run_explain.time",
                         (time.time() - start_time) * 1000,
                         tags=self._tags + ["strategy:{}".format(strategy)] + self._check._get_debug_tags(),
-                        hostname=self._check.resolved_hostname,
+                        hostname=self._check.reported_hostname,
                     )
                     return plan, None
             except pymysql.err.DatabaseError as e:
                 if len(e.args) != 2:
                     raise
-                error_state = ExplainState(
-                    strategy=strategy, error_code=DBExplainErrorCode.database_error, error_message=str(type(e))
+                mysql_error_code = e.args[0] if len(e.args) > 0 else None
+                error_msg = f"{e.args[0]}: {e.args[1]}" if len(e.args) >= 2 else str(e)
+                error_code = (
+                    DBExplainErrorCode.failed_function
+                    if mysql_error_code
+                    in (pymysql.constants.ER.TABLEACCESS_DENIED_ERROR, pymysql.constants.ER.PROCACCESS_DENIED_ERROR)
+                    else DBExplainErrorCode.database_error
                 )
+                error_state = ExplainState(strategy=strategy, error_code=error_code, error_message=error_msg)
                 error_states.append(error_state)
                 self._log.debug(
                     'Failed to collect execution plan. error=%s, strategy=%s, schema=%s, statement="%s"',
@@ -781,7 +796,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                         e.args[0],
                         str(err_msg),
                         code=DatabaseConfigurationError.explain_plan_procedure_missing.value,
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                         schema=schema,
                     ),
                 )
@@ -810,10 +825,24 @@ class MySQLStatementSamples(DBMAsyncJob):
                         e.args[0],
                         str(err_msg),
                         code=DatabaseConfigurationError.explain_plan_fq_procedure_missing.value,
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                     ),
                 )
             raise
+
+    def _has_sampled_since_completion(self, row, event_timestamp):
+        # If the query has finished end_event_id will be set
+        if row['end_event_id']:
+            query_end_time = self._calculate_timer_end(row)
+            time_diff = abs(event_timestamp - query_end_time)
+            window_ms = self._seen_samples_ratelimiter.ttl * 1000
+            # When some clients hold a connection open they also hold a server thread open.
+            # If the client issues queries infrequently we will sample the same query multiple times
+            # since it will still exist in events_statements_current table.
+            # This check ensures we only emit an event for a completed query on the first sample check after completion.
+            if time_diff > window_ms:
+                return True
+        return False
 
     @staticmethod
     def _can_explain(obfuscated_statement):

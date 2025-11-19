@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ca08ac68-f4a4-4d84-9c21-8f645733d62c",
   "app_id": "otel",
+  "owner": "team-opentelemetry",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

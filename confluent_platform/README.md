@@ -14,6 +14,10 @@ This integration collects JMX metrics for the following components:
 - Streams
 - REST Proxy
 
+Consider [Data Streams Monitoring][11] to enhance your Confluent Platform integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
+
+**Minimum Agent version:** 7.19.0
+
 ## Setup
 
 
@@ -117,7 +121,7 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][10].
 
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://github.com/DataDog/jmxfetch
 [3]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/conf.yaml.example
 [4]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/metrics.yaml
@@ -127,3 +131,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
+[11]: https://docs.datadoghq.com/data_streams/

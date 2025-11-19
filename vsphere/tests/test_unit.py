@@ -4,14 +4,14 @@
 import contextlib
 import logging
 
-import mock
 import pytest
+from mock import MagicMock, mock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
+from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS, PROPERTY_METRICS_BY_RESOURCE_TYPE
 
 from .common import (
     EVENTS,
@@ -26,6 +26,13 @@ pytestmark = [pytest.mark.unit]
 @contextlib.contextmanager
 def does_not_raise(enter_result=None):
     yield enter_result
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 def test_log_deprecation_warning(dd_run_check, caplog, default_instance):
@@ -2314,7 +2321,7 @@ def test_max_query_metrics(
             },
             pytest.raises(
                 ConfigurationError,
-                match="Your configuration is incorrectly attempting to " "set the `collection_type` to ",
+                match="Your configuration is incorrectly attempting to set the `collection_type` to ",
             ),
             None,
             id='\'collection_type\' set to invalid value',
@@ -2830,6 +2837,29 @@ def test_datastore_property_metrics(aggregator, historical_instance, dd_run_chec
     aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags)
 
 
+def test_historical_property_metrics_empty_hostname(
+    aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex
+):
+    historical_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    # assert historical metrics sent with empty hostname
+    # these can be submitted with the agent hostname if empty_default_hostname is False, but that logic is
+    # in the agent code https://github.com/DataDog/datadog-agent/blob/7.65.x/pkg/aggregator/sender.go#L209-L211
+    aggregator.assert_metric('vsphere.cluster.configuration.drsConfig.enabled', hostname='')
+    aggregator.assert_metric('vsphere.datastore.summary.capacity', hostname='')
+
+    historical_resources_with_property_metrics = ['cluster', 'datastore']
+    for resource_type in historical_resources_with_property_metrics:
+        metrics = PROPERTY_METRICS_BY_RESOURCE_TYPE[resource_type]
+        for metric in metrics:
+            aggregator.assert_metric(f"vsphere.{resource_type}.{metric}", hostname='')
+
+
 def test_property_metrics_resource_filters(
     aggregator,
     realtime_instance,
@@ -2916,7 +2946,6 @@ def test_property_metrics_metric_filters(
     service_instance,
     vm_properties_ex,
 ):
-
     default_instance['collection_type'] = 'both'
     default_instance['collect_property_metrics'] = True
     default_instance['metric_filters'] = {
@@ -3033,9 +3062,7 @@ def test_property_metrics_expired_cache(
     service_instance,
     vm_properties_ex,
 ):
-
     with mock.patch('datadog_checks.vsphere.cache.time') as time:
-
         realtime_instance['collect_property_metrics'] = True
 
         service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
@@ -3329,7 +3356,6 @@ def test_make_batch_historical(
     metrics_per_query,
     max_historical_metrics,
 ):
-
     # based on PERF_COUNTER_INFO: there are 7 metrics- counter IDs 100- 106
     # 1 cluster metric, 1 datacenter metric, and 3 datastore metrics
     #
@@ -3423,7 +3449,6 @@ def test_make_batch_realtime(
     metrics_per_query,
     max_historical_metrics,
 ):
-
     if max_query_metrics is not None:
         service_instance.content.setting.QueryOptions = mock.MagicMock(
             return_value=[mock.MagicMock(value=max_query_metrics)]
@@ -3453,6 +3478,143 @@ def test_make_batch_realtime(
         hostname='vm1',
         tags=['vcenter_server:FAKE'],
     )
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_check, caplog):
+    realtime_instance['collect_vsan_data'] = True
+    caplog.set_level(logging.DEBUG)
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    mock_cluster = MagicMock()
+    mock_host = MagicMock()
+    mock_cluster.name = 'hello'
+    mock_cluster.configurationEx.vsanConfigInfo.enabled = True
+    mock_cluster.host = [mock_host]
+    mock_host.name = 'world'
+    mock_host.configManager.vsanSystem.config.clusterInfo.nodeUuid = 'TestHostUUID'
+    mock_infrastructure_cache = MagicMock()
+    check.infrastructure_cache = mock_infrastructure_cache
+    mock_infrastructure_cache.get_mors.return_value = [mock_cluster, mock_host]
+    mock_infrastructure_cache.get_mor_tags.return_value = ['random:tags']
+    mock_infrastructure_cache.get_mor_props.return_value = {
+        'tags': ['vsphere_host:world', 'vsphere_folder:example_folder', 'vsphere_cluster:hello']
+    }
+
+    dd_run_check(check)
+
+    assert "No information returned for entity type" in caplog.text
+    aggregator.assert_metric('datadog.vsphere.vsan.cluster.time', metric_type=aggregator.GAUGE, count=1)
+    aggregator.assert_metric('vsphere.vsan.cluster.health.count', count=1)
+    aggregator.assert_metric('vsphere.vsan.cluster.oio', count=1, tags=[])
+    aggregator.assert_metric(
+        'vsphere.vsan.host.congestion',
+        count=0,
+        value=0.03,
+        tags=[],
+    )
+
+    assert "Skipping metric unmapCongestion because it is not in the list of metrics to collect" in caplog.text
+    assert "Skipping metric latencyStddev because it is not in the list of metrics to collect" in caplog.text
+    aggregator.assert_metric('vsphere.vsan.cluster.unmapCongestion', count=0)
+    aggregator.assert_metric('vsphere.vsan.host.latencyStddev', count=0)
+    aggregator.assert_metric('vsphere.vsan.cluster.example_cluster_metric', count=0)
+    aggregator.assert_metric(
+        'vsphere.vsan.host.example_host_metric',
+        count=0,
+    )
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_vsan_excluded_host_tags(aggregator, realtime_instance, dd_run_check):
+    realtime_instance['collect_vsan_data'] = True
+    realtime_instance['excluded_host_tags'] = ['vsphere_host', 'vsphere_folder']
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    mock_cluster = MagicMock()
+    mock_host = MagicMock()
+    mock_cluster.name = 'hello'
+    mock_cluster.configurationEx.vsanConfigInfo.enabled = True
+    mock_cluster.host = [mock_host]
+    mock_host.name = 'world'
+    mock_host.configManager.vsanSystem.config.clusterInfo.nodeUuid = 'TestHostUUID'
+    mock_infrastructure_cache = MagicMock()
+    check.infrastructure_cache = mock_infrastructure_cache
+    mock_infrastructure_cache.get_mors.return_value = [mock_cluster, mock_host]
+    mock_infrastructure_cache.get_mor_tags.return_value = ['random:tags']
+    mock_infrastructure_cache.get_mor_props.return_value = {
+        'tags': ['vsphere_host:world', 'vsphere_folder:example_folder', 'vsphere_cluster:hello']
+    }
+
+    dd_run_check(check)
+    aggregator.assert_metric('datadog.vsphere.vsan.cluster.time', metric_type=aggregator.GAUGE, count=1)
+    aggregator.assert_metric('vsphere.vsan.cluster.health.count', count=1)
+    aggregator.assert_metric('vsphere.vsan.cluster.oio', count=1, tags=[])
+    aggregator.assert_metric(
+        'vsphere.vsan.host.congestion',
+        count=1,
+        value=0.01,
+        tags=['vcenter_server:FAKE', 'vsphere_folder:example_folder', 'vsphere_host:world'],
+        hostname='world',
+    )
+    aggregator.assert_metric(
+        'vsphere.vsan.host.congestion',
+        count=0,
+        value=0.01,
+        tags=['vcenter_server:FAKE', 'vsphere_folder:example_folder', 'vsphere_host:world', 'vsphere_cluster:hello'],
+        hostname='world',
+    )
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_vsan_metrics_exception(realtime_instance, dd_run_check, caplog):
+    with mock.patch('datadog_checks.vsphere.VSphereCheck.query_vsan_metrics', side_effect=Exception):
+        realtime_instance['collect_vsan_data'] = True
+        caplog.set_level(logging.WARNING)
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        dd_run_check(check)
+        assert "Unable to fetch vSAN metrics" in caplog.text
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_non_vsan_cluster(realtime_instance, dd_run_check, caplog):
+    realtime_instance['collect_vsan_data'] = True
+    caplog.set_level(logging.DEBUG)
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    mock_cluster = MagicMock()
+    mock_infrastructure_cache = MagicMock()
+    check.infrastructure_cache = mock_infrastructure_cache
+    mock_infrastructure_cache.get_mors.return_value = [mock_cluster]
+    mock_cluster.name = 'hello'
+    mock_cluster.configurationEx.vsanConfigInfo.enabled = False
+
+    dd_run_check(check)
+    assert "Skipping vsan metrics for cluster hello because it is not a vsan cluster" in caplog.text
+    assert "There are no vsan clusters to collect metrics from, skipping vsan collection" in caplog.text
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_vsan_cluster_with_host_filtered(realtime_instance, dd_run_check, caplog):
+    realtime_instance['collect_vsan_data'] = True
+    realtime_instance['resource_filters'] = [
+        {'resource': 'host', 'property': 'name', 'type': 'blacklist', 'patterns': [r'.*']},
+    ]
+    caplog.set_level(logging.DEBUG)
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    mock_cluster = MagicMock()
+    mock_host = MagicMock()
+    mock_infrastructure_cache = MagicMock()
+    check.infrastructure_cache = mock_infrastructure_cache
+    mock_infrastructure_cache.get_mors.return_value = [mock_cluster]
+    mock_cluster.name = 'hello'
+    mock_cluster.configurationEx.vsanConfigInfo.enabled = True
+    mock_cluster.host = [mock_host]
+    mock_host.name = 'world'
+
+    dd_run_check(check)
+    assert "Skipping host world because it was filtered" in caplog.text
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
@@ -3822,3 +3984,16 @@ def test_hostname_case_invalid_value(realtime_instance):
     realtime_instance['hostname_transform'] = 'something else'
     with pytest.raises(ConfigurationError):
         _ = VSphereCheck('vsphere', {}, [realtime_instance])
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
+def test_infra_mode_tag(aggregator, realtime_instance, dd_run_check):
+    # Enable infra_mode in the instance
+    realtime_instance['infrastructure_mode'] = 'basic'
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    dd_run_check(check)
+
+    for metric in aggregator.metrics('vsphere.cpu.usage.avg'):
+        tags = metric.tags
+        assert 'infra_mode:basic' in tags, f"infra_mode:basic tag missing from metric {metric}"

@@ -11,7 +11,7 @@ from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
 
 
 class MongoConfig(object):
-    def __init__(self, instance, log):
+    def __init__(self, instance, log, init_config):
         self.log = log
         self.min_collection_interval = int(instance.get('min_collection_interval', 15))
 
@@ -95,6 +95,9 @@ class MongoConfig(object):
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])
+        self._metrics_collection_interval = instance.get("metrics_collection_interval", {})
+        self.system_database_stats = is_affirmative(instance.get('system_database_stats', True))
+        self.free_storage_metrics = is_affirmative(instance.get('free_storage_metrics', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
 
@@ -102,9 +105,11 @@ class MongoConfig(object):
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
         self.cluster_name = instance.get('cluster_name', None)
+        self.cloud_metadata = self._compute_cloud_metadata(instance)
         self._operation_samples_config = instance.get('operation_samples', {})
         self._slow_operations_config = instance.get('slow_operations', {})
-        self._schemas_config = instance.get('schemas', {})
+        # Backward compatibility: check new names first, then fall back to old names
+        self._schemas_config = instance.get('collect_schemas', instance.get('schemas', {}))
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
@@ -119,6 +124,7 @@ class MongoConfig(object):
         # TODO: service check and metric tags should be updated to be dynamic with auto-discovered databases
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
+        self.service = instance.get('service') or init_config.get('service') or ''
 
     def _get_clean_server_name(self):
         try:
@@ -158,6 +164,15 @@ class MongoConfig(object):
             tags.append('clustername:%s' % self.cluster_name)
         return tags
 
+    def _compute_cloud_metadata(self, instance):
+        cloud_metadata = {}
+        if aws := instance.get('aws'):
+            cloud_metadata['aws'] = {
+                'instance_endpoint': aws.get('instance_endpoint'),
+                'cluster_identifier': aws.get('cluster_identifier') or self.cluster_name,
+            }
+        return cloud_metadata
+
     @property
     def operation_samples(self):
         enabled = False
@@ -168,6 +183,7 @@ class MongoConfig(object):
             'enabled': enabled,
             'collection_interval': self._operation_samples_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._operation_samples_config.get('run_sync', False)),
+            'explain_verbosity': self._operation_samples_config.get('explain_verbosity', 'queryPlanner'),
             'explained_operations_cache_maxsize': int(
                 self._operation_samples_config.get('explained_operations_cache_maxsize', 5000)
             ),
@@ -187,6 +203,7 @@ class MongoConfig(object):
             'collection_interval': self._slow_operations_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
             'max_operations': int(self._slow_operations_config.get('max_operations', 1000)),
+            'explain_verbosity': self._slow_operations_config.get('explain_verbosity', 'queryPlanner'),
             'explained_operations_cache_maxsize': int(
                 self._slow_operations_config.get('explained_operations_cache_maxsize', 5000)
             ),
@@ -204,11 +221,12 @@ class MongoConfig(object):
         max_collections = self._schemas_config.get('max_collections')
         return {
             'enabled': enabled,
-            'collection_interval': self._schemas_config.get('collection_interval', 600),
+            'collection_interval': self._schemas_config.get('collection_interval', 3600),
             'run_sync': is_affirmative(self._schemas_config.get('run_sync', True)),
             'sample_size': int(self._schemas_config.get('sample_size', 10)),
             'max_collections': int(max_collections) if max_collections else None,
             'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
+            'collect_search_indexes': is_affirmative(self._schemas_config.get('collect_search_indexes', False)),
         }
 
     def _get_database_autodiscovery_config(self, instance):
@@ -245,3 +263,19 @@ class MongoConfig(object):
             database_autodiscovery_config.get("max_collections_per_database", 100)
         )
         return database_autodiscovery_config
+
+    @property
+    def metrics_collection_interval(self):
+        '''
+        metrics collection interval is used to customize how often to collect different types of metrics
+        by default, metrics are collected on every check run with default interval of 15 seconds
+        '''
+        return {
+            # $collStats and $indexStats are collected on every check run but they can get expensive on large databases
+            'collection': int(self._metrics_collection_interval.get('collection', 300)),
+            'collections_indexes_stats': int(self._metrics_collection_interval.get('collections_indexes_stats', 300)),
+            # $shardDataDistribution stats are collected every 5 minutes by default due to the high resource usage
+            'sharded_data_distribution': int(self._metrics_collection_interval.get('sharded_data_distribution', 300)),
+            'db_stats': int(self._metrics_collection_interval.get('db_stats', self.min_collection_interval)),
+            'session_stats': int(self._metrics_collection_interval.get('session_stats', self.min_collection_interval)),
+        }

@@ -82,6 +82,11 @@ instances:
     #
     empty_default_hostname: true
 
+    ## @param infrastructure_mode - string - optional - default: full
+    ## The infrastructure mode to use. Valid values are 'full' (default) and 'basic'.
+    #
+    # infrastructure_mode: full
+
     ## @param collection_level - integer - optional - default: 1
     ## A number between 1 and 4 to specify how many metrics will be sent
     ## 1: Only basic metrics - 4: every metric available.
@@ -173,6 +178,7 @@ instances:
     ##         resources do not have realtime metrics
     ## Note2: 'host' filters are ignored when collecting historical metrics as this resource does not have
     ##         historical metrics
+    ## Note3: If no filters are set for a resource type, all resources of that resource type are collected.
     #
     # resource_filters:
     #   - resource: vm
@@ -266,19 +272,20 @@ instances:
     #   - datacenter
     #   - cluster
     #   - storage_pod
-    #   - vcenter_object_manager
+    #   - vstorage_object_manager
 
     ## @param include_events - list of mappings - optional
     ## The events that should be collected by the vSphere integration.
     ##
-    ## The "event" specifies the event type you want to include, and the "excluded_messages" is a list of
-    ## messages of that event type you do not want to collect. For example, if the key
+    ## The "event" specifies the event type you want to include, and optionally, the "excluded_messages" is
+    ## a list of messages of that event type you do not want to collect. For example, if the key
     ## is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
     ## then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
     ## and 'Green to Gray' will be included.
     ##
-    ## Currently, events can only be collected from the following resources:
-    ## VMs, hosts, datacenters, datastores, and clusters.
+    ## Events can only be collected if their event type ID is in the 'vim.event' class:
+    ## https://vdc-repo.vmware.com/vmwb-repository/dcr-public/d1902b0e-d479-46bf-8ac9-cee0e31e8ec0/
+    ## 07ce8dbd-db48-4261-9b8f-c6d3ad8ba472/vim.event.Event.html
     ##
     ## The default events reported are listed here:
     ## https://github.com/DataDog/integrations-core/tree/master/vsphere#events
@@ -338,6 +345,14 @@ instances:
     ## very CPU intensive and put pressure on the vCenter Server.
     #
     # collect_property_metrics: false
+
+    ## @param collect_vsan_data - boolean - optional - default: false
+    ## If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+    ## Ensure that you have the vSAN Performance Service enabled:
+    ## https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan-monitoring.doc/
+    ## GUID-02F67DC3-3D5A-48A4-A445-D2BD6AF2862C.html
+    #
+    # collect_vsan_data: false
 
     ## @param attributes_prefix - string - optional
     ## Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
@@ -493,7 +508,7 @@ instances:
 
         ## @param auth_type - string - optional - default: basic
         ## The type of authentication to use. The available types (and related options) are:
-        ##
+        ## ```
         ##   - basic
         ##     |__ username
         ##     |__ password
@@ -516,7 +531,7 @@ instances:
         ##     |__ aws_region
         ##     |__ aws_host
         ##     |__ aws_service
-        ##
+        ## ```
         ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
         ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
         #
@@ -715,6 +730,16 @@ instances:
         #   - SSLv3
         #   - TLSv1.2
         #   - TLSv1.3
+
+        ## @param tls_ciphers - list of strings - optional
+        ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+        ## `ALL` ciphers are used. For list of ciphers see: 
+        ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+        #
+        # tls_ciphers:
+        #   - TLS_AES_256_GCM_SHA384
+        #   - TLS_CHACHA20_POLY1305_SHA256
+        #   - TLS_AES_128_GCM_SHA256
 
         ## @param headers - mapping - optional
         ## The headers parameter allows you to send specific headers with every request.

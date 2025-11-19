@@ -4,7 +4,6 @@
 
 import functools
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 
 from .base import SqlserverDatabaseMetricsBase
@@ -13,25 +12,27 @@ INDEX_USAGE_STATS_QUERY = {
     "name": "sys.dm_db_index_usage_stats",
     "query": """
     SELECT
-         DB_NAME(ixus.database_id) as db,
-         CASE
-            WHEN ind.name IS NULL THEN 'HeapIndex_' + OBJECT_NAME(ind.object_id)
-            ELSE ind.name
-         END AS index_name,
-         OBJECT_NAME(ind.object_id) as table_name,
-        user_seeks,
-        user_scans,
-        user_lookups,
-        user_updates
+        DB_NAME(ixus.database_id) AS db,
+        COALESCE(ind.name, 'HeapIndex_' + OBJECT_NAME(ind.object_id)) AS index_name,
+        OBJECT_SCHEMA_NAME(ind.object_id, ixus.database_id) AS "schema",
+        OBJECT_NAME(ind.object_id) AS table_name,
+        ixus.user_seeks as user_seeks,
+        ixus.user_scans as user_scans,
+        ixus.user_lookups as user_lookups,
+        ixus.user_updates as user_updates
     FROM sys.indexes ind
-             INNER JOIN sys.dm_db_index_usage_stats ixus
-             ON ixus.index_id = ind.index_id AND ixus.object_id = ind.object_id
-    WHERE OBJECTPROPERTY(ind.object_id, 'IsUserTable') = 1 AND DB_NAME(ixus.database_id) = db_name()
-    GROUP BY ixus.database_id, OBJECT_NAME(ind.object_id), ind.name, user_seeks, user_scans, user_lookups, user_updates
+    JOIN sys.dm_db_index_usage_stats ixus
+        ON ixus.index_id = ind.index_id
+        AND ixus.object_id = ind.object_id
+        AND ixus.database_id = DB_ID()
+    JOIN sys.objects o
+        ON ind.object_id = o.object_id
+        AND o.type = 'U'
 """,
     "columns": [
         {"name": "db", "type": "tag"},
         {"name": "index_name", "type": "tag"},
+        {"name": "schema", "type": "tag"},
         {"name": "table", "type": "tag"},
         {"name": "index.user_seeks", "type": "monotonic_count"},
         {"name": "index.user_scans", "type": "monotonic_count"},
@@ -45,18 +46,11 @@ INDEX_USAGE_STATS_QUERY = {
 class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_index_usage_metrics(self) -> bool:
-        return is_affirmative(self.instance_config.get('include_index_usage_metrics', True))
+        return self.config.database_metrics_config["index_usage_metrics"]["enabled"]
 
     @property
     def include_index_usage_metrics_tempdb(self) -> bool:
-        return is_affirmative(self.instance_config.get('include_index_usage_metrics_tempdb', False))
-
-    @property
-    def _default_collection_interval(self) -> int:
-        '''
-        Returns the default interval in seconds at which to collect index usage metrics.
-        '''
-        return 5 * 60  # 5 minutes
+        return self.config.database_metrics_config["index_usage_metrics"]["enabled_tempdb"]
 
     @property
     def collection_interval(self) -> int:
@@ -64,7 +58,7 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
         Returns the interval in seconds at which to collect index usage metrics.
         Note: The index usage metrics query can be expensive, so it is recommended to set a higher interval.
         '''
-        return int(self.instance_config.get('index_usage_stats_interval', self._default_collection_interval))
+        return self.config.database_metrics_config["index_usage_metrics"]["collection_interval"]
 
     @property
     def databases(self):

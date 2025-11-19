@@ -4,6 +4,8 @@
 
 This check monitors [VoltDB][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.26.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -129,7 +131,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://voltdb.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/voltdb/datadog_checks/voltdb/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php

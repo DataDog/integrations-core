@@ -556,7 +556,7 @@ class MongoClient(common.BaseObject):
     def _cached(self, dbname, coll, index):
         """Test if `index` is cached."""
         cache = self.__index_cache
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         with self.__index_cache_lock:
             return (dbname in cache and
                     coll in cache[dbname] and
@@ -565,7 +565,7 @@ class MongoClient(common.BaseObject):
 
     def _cache_index(self, dbname, collection, index, cache_for):
         """Add an index to the index cache for ensure_index operations."""
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         expire = datetime.timedelta(seconds=cache_for) + now
 
         with self.__index_cache_lock:

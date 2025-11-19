@@ -4,8 +4,6 @@
 from copy import deepcopy
 from typing import Any, Dict, List, Tuple  # noqa: F401
 
-from six import raise_from
-
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
 from datadog_checks.base.utils.time import get_timestamp
 
@@ -165,7 +163,7 @@ class Query(object):
                 #
                 # When an exception is raised in the context of another one, both will be printed. To avoid
                 # this we set the context to None. https://www.python.org/dev/peps/pep-0409/
-                raise_from(type(e)(error), None)
+                raise type(e)(error) from None
             else:
                 if __column_type_is_tag:
                     column_data.append((column_name, (column_type, transformer)))
@@ -216,9 +214,7 @@ class Query(object):
             elif extra_type not in extra_transformers and extra_type not in submission_transformers:
                 raise ValueError('unknown type `{}` for extra {} of {}'.format(extra_type, extra_name, query_name))
 
-            transformer_factory = extra_transformers.get(
-                extra_type, submission_transformers.get(extra_type)
-            )  # type: TransformerFactory
+            transformer_factory = extra_transformers.get(extra_type, submission_transformers.get(extra_type))  # type: TransformerFactory
 
             extra_source = extra.get('source')
             if extra_type in submission_transformers:
@@ -235,7 +231,7 @@ class Query(object):
             except Exception as e:
                 error = 'error compiling type `{}` for extra {} of {}: {}'.format(extra_type, extra_name, query_name, e)
 
-                raise_from(type(e)(error), None)
+                raise type(e)(error) from None
             else:
                 if extra_type in submission_transformers:
                     transformer = create_extra_transformer(transformer, extra_source)

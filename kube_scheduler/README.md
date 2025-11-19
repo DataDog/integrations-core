@@ -8,6 +8,8 @@ This check monitors [Kubernetes Scheduler][2], part of the Kubernetes control pl
 
 **Note**: This check does not collect data for Amazon EKS clusters, as those services are not exposed.
 
+**Minimum Agent version:** 6.11.0
+
 ## Setup
 
 ### Installation
@@ -57,7 +59,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kube_scheduler/images/kube_scheduler_screenshot.jpeg
 [2]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [5]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/datadog_checks/kube_scheduler/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent

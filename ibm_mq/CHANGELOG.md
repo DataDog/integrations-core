@@ -2,7 +2,56 @@
 
 <!-- towncrier release notes start -->
 
-## 7.0.0 / 2024-10-01
+## 8.5.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.4.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Make queue discovery logic more resilient and add new metric to track broken queues ([#20549](https://github.com/DataDog/integrations-core/pull/20549))
+
+***Fixed***:
+
+* Lift `pymqi` dependency exclusion for macOS on AArch64/ARM64 ([#20815](https://github.com/DataDog/integrations-core/pull/20815))
+
+## 8.3.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Add ibm_mq.channel.conn_status and ibm_mq.channel.connections_active metrics with channel and connection metric tests ([#20519](https://github.com/DataDog/integrations-core/pull/20519))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 8.2.0 / 2025-04-17 / Agent 7.66.0
+
+***Added***:
+
+* Allow timezone config option to be used in metric collection ([#19912](https://github.com/DataDog/integrations-core/pull/19912))
+
+## 8.1.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 8.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 7.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
@@ -10,6 +59,7 @@
 
 ***Added***:
 
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 * Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
 
 ## 6.4.0 / 2024-09-05

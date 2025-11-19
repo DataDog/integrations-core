@@ -2,11 +2,90 @@
 
 <!-- towncrier release notes start -->
 
-## 7.0.0 / 2024-10-01
+## 8.6.1 / 2025-10-15 / Agent 7.72.0
+
+***Fixed***:
+
+* Always connect to pgbouncer using ClientCursor and simple query protocol. ([#21649](https://github.com/DataDog/integrations-core/pull/21649))
+
+## 8.6.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.5.1 / 2025-09-24 / Agent 7.71.0
+
+***Fixed***:
+
+* Updated to build psycopg from source to fix a problem with FIPS compatibility ([#21074](https://github.com/DataDog/integrations-core/pull/21074))
+
+## 8.5.0 / 2025-09-04 / Agent 7.70.1
+
+***Added***:
+
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+
+## 8.4.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Revert upgrade to psycopg3 ([#20884](https://github.com/DataDog/integrations-core/pull/20884))
+
+## 8.3.0 / 2025-07-29 / Agent 7.69.0
+
+***Added***:
+
+* Revert upgrade to psycopg3 ([#20884](https://github.com/DataDog/integrations-core/pull/20884))
+
+## 8.2.0 / 2025-07-10
+
+***Added***:
+
+* Upgrade to psycopg3 ([#20550](https://github.com/DataDog/integrations-core/pull/20550))
+
+## 8.1.2 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Close connections on exceptions, and, when connection caching is disabled, after each check iteration. ([#19839](https://github.com/DataDog/integrations-core/pull/19839))
+
+## 8.1.1 / 2025-01-29 / Agent 7.63.0
+
+***Fixed***:
+
+* Revert "Upgrade PGBouncer to psycopg3" due to instability in testing ([#19497](https://github.com/DataDog/integrations-core/pull/19497))
+
+## 8.1.0 / 2025-01-25
+
+***Security***:
+
+* Removed dependency on psycopg2 ([#19325](https://github.com/DataDog/integrations-core/pull/19325))
+
+***Added***:
+
+* Upgrade pgbouncer to psycopg3 ([#19325](https://github.com/DataDog/integrations-core/pull/19325))
+
+## 8.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 7.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 6.2.0 / 2024-01-05 / Agent 7.51.0
 

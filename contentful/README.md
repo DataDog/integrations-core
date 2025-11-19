@@ -1,3 +1,5 @@
+# Contentful
+
 ## Overview
 
 [Contentful][1] is a content (articles, photos, and videos) management platform that allows businesses to create, manage, and deliver digital content across various channels like websites and mobile apps through its intuitive interface and robust APIs or SDKs.
@@ -61,4 +63,4 @@ Need help? Contact [Datadog support][4].
 [2]: https://www.contentful.com/developers/docs/webhooks/overview/
 [3]: https://be.contentful.com/login/
 [4]: https://docs.datadoghq.com/help/
-[5]: https://app.datadoghq.com/integrations/contentful
+[5]: /integrations/contentful

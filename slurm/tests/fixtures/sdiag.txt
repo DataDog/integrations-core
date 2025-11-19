@@ -1,0 +1,61 @@
+*******************************************************
+sdiag output at Tue Sep 17 02:01:26 2024 (1726538486)
+Data since      Tue Sep 17 00:11:10 2024 (1726531870)
+*******************************************************
+Server thread count:  1
+Agent queue size:     2
+Agent count:          3
+Agent thread count:   4
+DBD Agent queue size: 5
+
+Jobs submitted: 6
+Jobs started:   7
+Jobs completed: 8
+Jobs canceled:  9
+Jobs failed:    10
+Job states ts:  Tue Sep 17 02:00:56 2024 (1726538456)
+Jobs pending:   11
+Jobs running:   12
+
+Main schedule statistics (microseconds):
+	Last cycle:   144
+	Max cycle:    3605
+	Total cycles: 88
+	Mean cycle:   198
+	Mean depth cycle:  13
+	Cycles per minute: 14
+	Last queue length: 15
+
+Backfilling stats
+	Total backfilled jobs (since last slurm start): 16
+	Total backfilled jobs (since last stats cycle start): 17
+	Total backfilled heterogeneous job components: 18
+	Total cycles: 19
+	Last cycle when: Fri Sep 13 06:11:52 2024 (1726207912)
+	Last cycle: 20
+	Max cycle:  21
+	Mean cycle: 2411
+	Last depth cycle: 22
+	Last depth cycle (try sched): 23
+	Depth Mean: 26
+	Depth Mean (try depth): 27
+	Last queue length: 24
+	Queue length mean: 28
+	Last table size: 25
+	Mean table size: 29
+
+Latency for 1000 calls to gettimeofday(): 18 microseconds
+
+Remote Procedure Call statistics by message type
+	MESSAGE_NODE_REGISTRATION_STATUS        ( 1002) count:198    ave_time:475    total_time:94145
+	REQUEST_PARTITION_INFO                  ( 2009) count:59     ave_time:273    total_time:16127
+	REQUEST_JOB_INFO                        ( 2003) count:51     ave_time:330    total_time:16833
+	REQUEST_SUBMIT_BATCH_JOB                ( 4003) count:20     ave_time:1421   total_time:28422
+	REQUEST_COMPLETE_BATCH_SCRIPT           ( 5018) count:19     ave_time:1189   total_time:22603
+	REQUEST_NODE_INFO                       ( 2007) count:13     ave_time:434    total_time:5643
+	REQUEST_STATS_INFO                      ( 2035) count:3      ave_time:616    total_time:1850
+Remote Procedure Call statistics by user
+	root            (       0) count:363    ave_time:511    total_time:185623
+
+Pending RPC statistics
+	No pending RPCs

@@ -18,6 +18,12 @@ def load_toml_file(path):
         return tomllib.loads(f.read())
 
 
+def dumps_toml_data(data):
+    import tomli_w
+
+    return tomli_w.dumps(data)
+
+
 def dump_toml_data(data, path):
     import tomli_w
 

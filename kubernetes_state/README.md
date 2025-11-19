@@ -7,6 +7,8 @@ Get metrics from kubernetes_state service in real time to:
 - Visualize and monitor kubernetes_state states
 - Be notified about kubernetes_state failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -40,7 +42,7 @@ See [../kubernetes/assets/service_checks.json][6] for a list of service checks p
 Need help? Contact [Datadog support][7].
 
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/datadog_checks/kubernetes_state/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

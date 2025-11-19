@@ -132,11 +132,11 @@ instances:
         #   - config$
         #   - local$
 
-        ## @param max_collection_per_database - integer - optional - default: 100
+        ## @param max_collections_per_database - integer - optional - default: 100
         ## The maximum number of collections to collect metrics from per database.
         ## Defaults to 100.
         #
-        # max_collection_per_database: 100
+        # max_collections_per_database: 100
 
         ## @param refresh_interval - integer - optional - default: 600
         ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.
@@ -145,9 +145,6 @@ instances:
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` enable Database Monitoring.
-    ##
-    ## NOTE: Database Monitoring for MongoDB is currently in private beta.
-    ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
     #
     # dbm: false
 
@@ -182,6 +179,18 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param explain_verbosity - string - optional - default: queryPlanner
+        ## Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+        ## 'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'queryPlanner'.
+        ## Use 'executionStats' to collect the execution details of the winning plan.
+        ## Use 'allPlansExecution' to include partial execution data captured during plan selection.
+        ## To disable explain plans completely, set this option to 'disabled'.
+        ##
+        ## NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
+        ## as it requires the execution of the query to collect additional execution and plan data.
+        #
+        # explain_verbosity: queryPlanner
+
     ## Configure collection of MongoDB slow operations.
     #
     # slow_operations:
@@ -202,20 +211,32 @@ instances:
         #
         # max_operations: 1000
 
+        ## @param explain_verbosity - string - optional - default: queryPlanner
+        ## Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+        ## 'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'queryPlanner'.
+        ## Use 'executionStats' to collect the execution details of the winning plan.
+        ## Use 'allPlansExecution' to include partial execution data captured during plan selection.
+        ## To disable explain plans completely, set this option to 'disabled'.
+        ##
+        ## NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
+        ## as it requires the execution of the query to collect additional execution and plan data.
+        #
+        # explain_verbosity: queryPlanner
+
     ## Configure collection of MongoDB schemas (inferred) by sampling documents.
     #
-    # schemas:
+    # collect_schemas:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of schemas. Requires `dbm: true`.
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 600
+        ## @param collection_interval - number - optional - default: 3600
         ## Set the schemas collection interval in seconds. Each collection involves sampling documents
         ## from collections and inferring schemas.
         #
-        # collection_interval: 600
+        # collection_interval: 3600
 
         ## @param sample_size - number - optional - default: 10
         ## Set the sample size for each collection. The sample size is the number of documents to sample
@@ -226,7 +247,7 @@ instances:
 
         ## @param max_collections - number - optional
         ## Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
-        ## per database is bounded by `database_autodiscovery.max_collection_per_database`. By setting this option, you
+        ## per database is bounded by `database_autodiscovery.max_collections_per_database`. By setting this option, you
         ## are adding an additional limit to the total number of collections across all monitored databases that schemas
         ## will be collected from. By default, this option is not set.
         #
@@ -237,6 +258,60 @@ instances:
         #
         # max_depth: 5
 
+        ## @param collect_search_indexes - boolean - optional - default: false
+        ## Set to `true` to collect search indexes for each collection.
+        ## NOTE: This option is only applicable to MongoDB Atlas clusters.
+        #
+        # collect_search_indexes: false
+
+    ## DEPRECATED: Use `collect_schemas` instead.
+    ## Configure collection of MongoDB schemas (inferred) by sampling documents.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.69.0
+    ## Migration: Use `collect_schemas` instead.
+    #
+    # schemas:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of schemas. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 3600
+        ## Set the schemas collection interval in seconds. Each collection involves sampling documents
+        ## from collections and inferring schemas.
+        #
+        # collection_interval: 3600
+
+        ## @param sample_size - number - optional - default: 10
+        ## Set the sample size for each collection. The sample size is the number of documents to sample
+        ## from each collection.
+        ## NOTE: Increasing the sample size for better schema inference accuracy may impact performance.
+        #
+        # sample_size: 10
+
+        ## @param max_collections - number - optional
+        ## Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
+        ## per database is bounded by `database_autodiscovery.max_collections_per_database`. By setting this option, you
+        ## are adding an additional limit to the total number of collections across all monitored databases that schemas
+        ## will be collected from. By default, this option is not set.
+        #
+        # max_collections: 300
+
+        ## @param max_depth - number - optional - default: 5
+        ## Set the maximum depth of nested documents to sample.
+        #
+        # max_depth: 5
+
+        ## @param collect_search_indexes - boolean - optional - default: false
+        ## Set to `true` to collect search indexes for each collection.
+        ## NOTE: This option is only applicable to MongoDB Atlas clusters.
+        #
+        # collect_search_indexes: false
+
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
     ## Disable this if any replicas are inaccessible to the Agent. This option is not supported for sharded clusters.
@@ -244,8 +319,8 @@ instances:
     # replica_check: true
 
     ## @param timeout - integer - optional - default: 30
-    ## Controls connectTimeoutMS, serverSelectionTimeoutMS and socketTimeoutMS
-    ## see http://api.mongodb.com/python/3.4.0/api/pymongo/mongo_client.html
+    ## Controls connectTimeoutMS, serverSelectionTimeoutMS, socketTimeoutMS and timeoutMS
+    ## see https://pymongo.readthedocs.io/en/stable/api/pymongo/mongo_client.html
     #
     # timeout: 30
 
@@ -324,6 +399,25 @@ instances:
     #
     # collections_indexes_stats: false
 
+    ## @param system_database_stats - boolean - optional - default: true
+    ## Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+    ## (`admin`, `local`, and `config`).
+    ## By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+    ## Set to `false` to disable collection of stats for all system databases.
+    #
+    # system_database_stats: true
+
+    ## @param free_storage_metrics - boolean - optional - default: true
+    ## Enabled or disable the collection of free storage metrics.
+    ## By default, this option is enabled (`true`), meaning free storage metrics are collected. 
+    ## Set to `false` to disable collection of free storage metrics.
+    ##
+    ## Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause 
+    ## processing delays and high CPU usage on the instance.
+    ## https://www.mongodb.com/docs/manual/reference/command/dbStats/#std-label-dbStats-freeStorage
+    #
+    # free_storage_metrics: true
+
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo
     ## Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
@@ -345,6 +439,34 @@ instances:
     #       type: <METRIC_TYPE>
     #     tags:
     #     - test:mongodb
+
+    ## This block defines the configuration for Amazon DocumentDB instances.
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
+    ## with DocumentDB integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydocdb.c0xa1xvklawc.us-east-1.docdb.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to.
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints,
+        ## see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_Endpoint.html
+        #
+        # instance_endpoint: mydocdb.c0xa1xvklawc.us-east-1.docdb.amazonaws.com
+
+        ## @param cluster_identifier - string - optional - default: mydocdb
+        ## Equal to the Cluster identifier of the instance the agent is connecting to.
+        ## This value is optional if the value of `cluster_name` is already configured to the cluster identifier.
+        ##
+        ## For more information on cluster identifiers,
+        ## see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_DBCluster.html
+        #
+        # cluster_identifier: mydocdb
 
     ## @param server - string - optional
     ## Specify the MongoDB URI, with database to use for reporting (defaults to "admin")

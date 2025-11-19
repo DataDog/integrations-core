@@ -12,12 +12,12 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
-from . import defaults, validators
+from . import defaults, deprecations, validators
 
 
 class AgentJobs(BaseModel):
@@ -43,8 +43,37 @@ class Azure(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    aggregate_sql_databases: Optional[bool] = None
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
+
+
+class CollectDeadlocks(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_deadlocks: Optional[float] = None
+
+
+class CollectRawQueryStatement(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
 
 
 class CollectSettings(BaseModel):
@@ -54,6 +83,36 @@ class CollectSettings(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+
+
+class QueryCompletions(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_events: Optional[int] = Field(None, examples=[1000])
+
+
+class QueryErrors(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_events: Optional[int] = Field(None, examples=[1000])
+
+
+class CollectXe(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    debug_sample_events: Optional[int] = None
+    query_completions: Optional[QueryCompletions] = None
+    query_errors: Optional[QueryErrors] = None
 
 
 class CustomQuery(BaseModel):
@@ -66,6 +125,183 @@ class CustomQuery(BaseModel):
     metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+
+
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
+class AoMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    ao_database: Optional[str] = None
+    availability_group: Optional[str] = None
+    enabled: Optional[bool] = Field(None, examples=[False])
+    only_emit_local: Optional[bool] = Field(None, examples=[False])
+
+
+class DbBackupMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[300])
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
+class DbFilesMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
+class DbFragmentationMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[300])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    enabled_tempdb: Optional[bool] = Field(None, examples=[False])
+
+
+class DbStatsMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
+class FciMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class FileStatsMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
+class IndexUsageMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[300])
+    enabled: Optional[bool] = Field(None, examples=[True])
+    enabled_tempdb: Optional[bool] = Field(None, examples=[False])
+
+
+class InstanceMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
+class MasterFilesMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class PrimaryLogShippingMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class SecondaryLogShippingMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class ServerStateMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
+class TableSizeMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[600])
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class TaskSchedulerMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class TempdbFileSpaceUsageMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
+class XeMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class DatabaseMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    ao_metrics: Optional[AoMetrics] = None
+    db_backup_metrics: Optional[DbBackupMetrics] = None
+    db_files_metrics: Optional[DbFilesMetrics] = None
+    db_fragmentation_metrics: Optional[DbFragmentationMetrics] = None
+    db_stats_metrics: Optional[DbStatsMetrics] = None
+    fci_metrics: Optional[FciMetrics] = None
+    file_stats_metrics: Optional[FileStatsMetrics] = None
+    index_usage_metrics: Optional[IndexUsageMetrics] = None
+    instance_metrics: Optional[InstanceMetrics] = None
+    master_files_metrics: Optional[MasterFilesMetrics] = None
+    primary_log_shipping_metrics: Optional[PrimaryLogShippingMetrics] = None
+    secondary_log_shipping_metrics: Optional[SecondaryLogShippingMetrics] = None
+    server_state_metrics: Optional[ServerStateMetrics] = None
+    table_size_metrics: Optional[TableSizeMetrics] = None
+    task_scheduler_metrics: Optional[TaskSchedulerMetrics] = None
+    tempdb_file_space_usage_metrics: Optional[TempdbFileSpaceUsageMetrics] = None
+    xe_metrics: Optional[XeMetrics] = None
 
 
 class DeadlocksCollection(BaseModel):
@@ -113,6 +349,7 @@ class ObfuscatorOptions(BaseModel):
     collect_commands: Optional[bool] = None
     collect_comments: Optional[bool] = None
     collect_metadata: Optional[bool] = None
+    collect_procedures: Optional[bool] = None
     collect_tables: Optional[bool] = None
     keep_boolean: Optional[bool] = None
     keep_identifier_quotation: Optional[bool] = None
@@ -122,6 +359,7 @@ class ObfuscatorOptions(BaseModel):
     keep_trailing_semicolon: Optional[bool] = None
     obfuscation_mode: Optional[str] = None
     remove_space_between_parentheses: Optional[bool] = None
+    replace_bind_parameter: Optional[bool] = None
     replace_digits: Optional[bool] = None
 
 
@@ -155,6 +393,7 @@ class QueryMetrics(BaseModel):
     dm_exec_query_stats_row_limit: Optional[int] = None
     enabled: Optional[bool] = None
     enforce_collection_interval_deadline: Optional[bool] = None
+    lookback_window: Optional[int] = None
     max_queries: Optional[int] = None
     samples_per_hour_per_query: Optional[int] = None
 
@@ -169,6 +408,16 @@ class SchemasCollection(BaseModel):
     max_execution_time: Optional[float] = None
 
 
+class XeCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    debug_sample_events: Optional[int] = None
+    query_completions: Optional[QueryCompletions] = None
+    query_errors: Optional[QueryErrors] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -177,14 +426,16 @@ class InstanceConfig(BaseModel):
     )
     adoprovider: Optional[str] = None
     agent_jobs: Optional[AgentJobs] = None
-    ao_database: Optional[str] = None
     autodiscovery_db_service_check: Optional[bool] = None
     autodiscovery_exclude: Optional[tuple[str, ...]] = None
     autodiscovery_include: Optional[tuple[str, ...]] = None
-    availability_group: Optional[str] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
+    collect_deadlocks: Optional[CollectDeadlocks] = None
+    collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
+    collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
+    collect_xe: Optional[CollectXe] = None
     command_timeout: Optional[int] = None
     connection_string: Optional[str] = None
     connector: Optional[str] = None
@@ -192,7 +443,9 @@ class InstanceConfig(BaseModel):
     database: Optional[str] = None
     database_autodiscovery: Optional[bool] = None
     database_autodiscovery_interval: Optional[int] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
+    database_metrics: Optional[DatabaseMetrics] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
     deadlocks_collection: Optional[DeadlocksCollection] = None
@@ -200,22 +453,10 @@ class InstanceConfig(BaseModel):
     driver: Optional[str] = None
     dsn: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
+    exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: str
     ignore_missing_database: Optional[bool] = None
-    include_ao_metrics: Optional[bool] = None
-    include_db_fragmentation_metrics: Optional[bool] = None
-    include_db_fragmentation_metrics_tempdb: Optional[bool] = None
-    include_fci_metrics: Optional[bool] = None
-    include_index_usage_metrics: Optional[bool] = None
-    include_index_usage_metrics_tempdb: Optional[bool] = None
-    include_instance_metrics: Optional[bool] = None
-    include_master_files_metrics: Optional[bool] = None
-    include_primary_log_shipping_metrics: Optional[bool] = None
-    include_secondary_log_shipping_metrics: Optional[bool] = None
-    include_task_scheduler_metrics: Optional[bool] = None
-    include_tempdb_file_space_usage_metrics: Optional[bool] = None
-    index_usage_metrics_interval: Optional[int] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     managed_identity: Optional[ManagedIdentity] = None
@@ -223,7 +464,6 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     obfuscator_options: Optional[ObfuscatorOptions] = None
     only_custom_queries: Optional[bool] = None
-    only_emit_local: Optional[bool] = None
     password: Optional[str] = None
     proc_only_if: Optional[str] = None
     proc_only_if_database: Optional[str] = None
@@ -240,6 +480,13 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
+    xe_collection: Optional[XeCollection] = None
+
+    @model_validator(mode='before')
+    def _handle_deprecations(cls, values, info):
+        fields = info.context['configured_fields']
+        validation.utils.handle_deprecations('instances', deprecations.instance(), fields, info.context)
+        return values
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fab40264-45aa-434b-9f9f-dc0ab609dd49",
   "app_id": "cisco-aci",
+  "owner": "network-device-monitoring-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,6 +16,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
+      "Category::Log Collection",
       "Category::Network",
       "Offering::Integration"
     ]
@@ -50,7 +52,12 @@
     },
     "monitors": {
       "CPU usage is high for Cisco ACI device": "assets/monitors/cpu_high.json",
-      "Health score of device is critical": "assets/monitors/critical_health_score.json"
+      "Health score of device is critical": "assets/monitors/critical_health_score.json",
+      "Interface for a Cisco ACI device is down": "assets/monitors/interface_down.json",
+      "Cisco ACI critical severity fault": "assets/monitors/critical_fault.json"
+    },
+    "logs": {
+      "source": "cisco-aci"
     }
   }
 }

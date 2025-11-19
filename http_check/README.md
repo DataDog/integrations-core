@@ -4,6 +4,8 @@
 
 Monitor the up and down status of local or remote HTTP endpoints. The HTTP check can detect bad response codes (such as 404), identify soon-to-expire SSL certificates, search responses for specific text, and much more. The check also submits HTTP response times as a metric.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -79,13 +81,13 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 To disable `http.ssl_cert`, set `check_certificate_expiration` to false.
 
-**Note:** To set an alert on these service checks, create a [Network Monitor][11].
+**Note:** To monitor HTTP error codes (such as 404) or view the first 400 characters of an HTTP response, create a [Network Monitor][11] based on these service checks.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][12].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/developers/write_agent_check/#collection-interval

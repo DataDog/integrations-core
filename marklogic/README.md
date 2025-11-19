@@ -4,6 +4,8 @@
 
 This check monitors [MarkLogic][1] through the Datadog Agent. MarkLogic Server is a multi-model database designed to be a data hub for operational and analytical data.
 
+**Minimum Agent version:** 7.23.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -116,7 +118,7 @@ Need help? Contact [Datadog support][13].
 
 [1]: https://www.marklogic.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.marklogic.com/guide/admin/pre_def_roles#id_64197
 [5]: https://docs.marklogic.com/guide/admin/pre_def_roles#id_28243
 [6]: https://docs.marklogic.com/REST/POST/manage/v2/users

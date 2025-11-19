@@ -9,6 +9,8 @@ Get metrics from Fluentd to:
 - Visualize Fluentd performance.
 - Correlate the performance of Fluentd with the rest of your applications.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -54,7 +56,7 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-You can use the [Datadog FluentD plugin][6] to forward the logs directly from FluentD to your Datadog account.
+You can use the [Datadog Fluentd plugin][6] to forward the logs directly from Fluentd to your Datadog account.
 
 ###### Add metadata to your logs
 
@@ -132,7 +134,7 @@ If your logs contain any of the following attributes, these attributes are autom
 - `kubernetes.pod_name`
 - `docker.container_id`
 
-While the Datadog Agent collects Docker and Kubernetes metadata automatically, FluentD requires a plugin for this. Datadog recommends using [fluent-plugin-kubernetes_metadata_filter][12] to collect this metadata.
+While the Datadog Agent collects Docker and Kubernetes metadata automatically, Fluentd requires a plugin for this. Datadog recommends using [fluent-plugin-kubernetes_metadata_filter][12] to collect this metadata.
 
 Configuration example:
 
@@ -173,7 +175,7 @@ See [metadata.csv][15] for a list of metrics provided by this integration.
 
 ### Events
 
-The FluentD check does not include any events.
+The Fluentd check does not include any events.
 
 ### Service Checks
 
@@ -188,7 +190,7 @@ Need help? Contact [Datadog support][17].
 - [How to monitor Fluentd with Datadog][18]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -197,7 +199,7 @@ Need help? Contact [Datadog support][17].
 [8]: https://docs.datadoghq.com/integrations/#cat-log-collection
 [9]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [10]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/
-[11]: https://app.datadoghq.com/infrastructure
+[11]: /infrastructure
 [12]: https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter
 [13]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

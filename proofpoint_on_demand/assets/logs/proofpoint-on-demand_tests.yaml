@@ -1,0 +1,263 @@
+id: proofpoint-on-demand
+tests:
+  - sample: |-
+      {
+        "msgParts": [],
+        "guid": "AAaaA1a30A6A5AA6aaacAAa11a1aAAAA",
+        "filter": {
+          "suborgs": {
+            "rcpts": [
+              "0"
+            ],
+            "sender": "0"
+          },
+          "routeDirection": "outbound",
+          "actions": [
+            {
+              "module": "access",
+              "action": "accept",
+              "isFinal": "True",
+              "rule": "system"
+            }
+          ],
+          "delivered": {
+            "rcpts": [
+              "james@abc.com"
+            ]
+          },
+          "durationSecs": 0.049325,
+          "disposition": "accept",
+          "routes": [
+            "allow_relay",
+            "firewallsafe"
+          ],
+          "verified": {
+            "rcpts": [
+              "james@abc.com"
+            ]
+          },
+          "msgSizeBytes": 1777,
+          "qid": "11AAa1AA1111111"
+        },
+        "ts": "2025-05-11T07:05:02.318134-0700",
+        "metadata": {
+          "origin": {
+            "data": {
+              "version": "8.22.0.1767",
+              "theater": "us",
+              "agent": "a0072552.ppops.net",
+              "cid": "pod_hosted"
+            }
+          }
+        },
+        "envelope": {
+          "from": "netflip@abc.com",
+          "rcpts": [
+            "james@abc.com"
+          ]
+        },
+        "connection": {
+          "sid": "11a3aa1aaa",
+          "host": "localhost",
+          "ip": "100.0.0.0",
+          "protocol": "smtp:smtp",
+          "country": "**",
+          "tls": {
+            "inbound": {
+              "version": "TLSv1.3",
+              "cipher": "TLS_AES_256_GCM_SHA384",
+              "cipherBits": 256
+            }
+          },
+          "helo": "local@abc.com",
+          "resolveStatus": "ok"
+        },
+        "msg": {
+          "header": {
+            "to": [
+              "james@abc.com"
+            ],
+            "message-id": [
+              "111111111111.11AA111A110111@a0011111.abc.net"
+            ],
+            "from": [
+              "netflip@abc.com"
+            ],
+            "subject": [
+              "Entertainment"
+            ]
+          },
+          "lang": "",
+          "sizeBytes": 1777,
+          "parsedAddresses": {},
+          "normalizedHeader": {
+            "to": [
+              "james@abc.com"
+            ],
+            "message-id": [
+              "111111111111.11AA111A110111@a0011111.abc.net"
+            ],
+            "from": [
+              "netflip@abc.com"
+            ],
+            "subject": [
+              "About Entertainment"
+            ]
+          }
+        }
+      }
+    result:
+      custom:
+        connection:
+          country: "**"
+          helo: "local@abc.com"
+          host: "localhost"
+          protocol: "smtp:smtp"
+          resolveStatus: "ok"
+          sid: "11a3aa1aaa"
+          tls:
+            inbound:
+              cipher: "TLS_AES_256_GCM_SHA384"
+              cipherBits: 256
+              version: "TLSv1.3"
+        envelope:
+          from: "netflip@abc.com"
+          rcpts:
+          - "james@abc.com"
+        filter:
+          actions:
+          -
+            module: "access"
+            action: "accept"
+            rule: "system"
+            isFinal: "True"
+          delivered:
+            rcpts:
+            - "james@abc.com"
+          disposition: "accept"
+          durationSecs: 0.049325
+          msgSizeBytes: 1777
+          qid: "11AAa1AA1111111"
+          routeDirection: "outbound"
+          routes:
+          - "allow_relay"
+          - "firewallsafe"
+          suborgs:
+            rcpts:
+            - "0"
+            sender: "0"
+          verified:
+            rcpts:
+            - "james@abc.com"
+        guid: "AAaaA1a30A6A5AA6aaacAAa11a1aAAAA"
+        metadata:
+          origin:
+            data:
+              agent: "a0072552.ppops.net"
+              cid: "pod_hosted"
+              theater: "us"
+              version: "8.22.0.1767"
+        msg:
+          header:
+            from:
+            - "netflip@abc.com"
+            message-id:
+            - "111111111111.11AA111A110111@a0011111.abc.net"
+            subject:
+            - "Entertainment"
+            to:
+            - "james@abc.com"
+          lang: ""
+          normalizedHeader:
+            from:
+            - "netflip@abc.com"
+            message-id:
+            - "111111111111.11AA111A110111@a0011111.abc.net"
+            subject:
+            - "About Entertainment"
+            to:
+            - "james@abc.com"
+          sizeBytes: 1777
+        network:
+          client:
+            geoip: {}
+            ip: "100.0.0.0"
+        ts: "2025-05-11T07:05:02.318134-0700"
+      message: |-
+        {
+          "filter" : {
+            "routes" : [ "allow_relay", "firewallsafe" ],
+            "disposition" : "accept",
+            "suborgs" : {
+              "sender" : "0",
+              "rcpts" : [ "0" ]
+            },
+            "durationSecs" : 0.049325,
+            "routeDirection" : "outbound",
+            "verified" : {
+              "rcpts" : [ "james@abc.com" ]
+            },
+            "delivered" : {
+              "rcpts" : [ "james@abc.com" ]
+            },
+            "actions" : [ {
+              "module" : "access",
+              "action" : "accept",
+              "rule" : "system",
+              "isFinal" : "True"
+            } ],
+            "msgSizeBytes" : 1777,
+            "qid" : "11AAa1AA1111111"
+          },
+          "msg" : {
+            "normalizedHeader" : {
+              "subject" : [ "About Entertainment" ],
+              "message-id" : [ "111111111111.11AA111A110111@a0011111.abc.net" ],
+              "from" : [ "netflip@abc.com" ],
+              "to" : [ "james@abc.com" ]
+            },
+            "header" : {
+              "subject" : [ "Entertainment" ],
+              "message-id" : [ "111111111111.11AA111A110111@a0011111.abc.net" ],
+              "from" : [ "netflip@abc.com" ],
+              "to" : [ "james@abc.com" ]
+            },
+            "lang" : "",
+            "sizeBytes" : 1777
+          },
+          "metadata" : {
+            "origin" : {
+              "data" : {
+                "agent" : "a0072552.ppops.net",
+                "theater" : "us",
+                "version" : "8.22.0.1767",
+                "cid" : "pod_hosted"
+              }
+            }
+          },
+          "envelope" : {
+            "from" : "netflip@abc.com",
+            "rcpts" : [ "james@abc.com" ]
+          },
+          "guid" : "AAaaA1a30A6A5AA6aaacAAa11a1aAAAA",
+          "connection" : {
+            "helo" : "local@abc.com",
+            "country" : "**",
+            "protocol" : "smtp:smtp",
+            "ip" : "100.0.0.0",
+            "host" : "localhost",
+            "tls" : {
+              "inbound" : {
+                "cipher" : "TLS_AES_256_GCM_SHA384",
+                "cipherBits" : 256,
+                "version" : "TLSv1.3"
+              }
+            },
+            "resolveStatus" : "ok",
+            "sid" : "11a3aa1aaa"
+          },
+          "ts" : "2025-05-11T07:05:02.318134-0700"
+        }
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1746972302318

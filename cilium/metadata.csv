@@ -1,5 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-cilium.,gauge,,event,,[OpenMetrics V1 and V2] How many seconds has the longest running processor for workqueue been running.,0,cilium,k8s workqueue running processor,,
 cilium.agent.api_process_time.seconds.bucket,count,,second,,[OpenMetrics V2] Amount of processing time for all API calls,0,cilium,api proc time bucket,,
 cilium.agent.api_process_time.seconds.count,count,,request,,[OpenMetrics V1 and V2] Count of processing time for all API calls,0,cilium,api proc time count,,
 cilium.agent.api_process_time.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of processing time for all API calls,0,cilium,api proc time sum,,
@@ -64,8 +63,10 @@ cilium.fqdn.active_names,gauge,,item,,"Number of domains inside the DNS cache th
 cilium.fqdn.alive_zombie_connections,gauge,,item,,"Number of IPs associated with domains that have expired (by TTL) yet still associated with an active connection (aka zombie), per endpoint. Available in Cilium v1.12+",0,cilium,fdqn alive zombie connections,,
 cilium.fqdn.gc_deletions.count,count,,event,,[OpenMetrics V2] Total number of FQDNs cleaned in FQDN garbage collector job.,0,cilium,fdqn total,,
 cilium.fqdn.gc_deletions.total,count,,event,,[OpenMetrics V1] Total number of FQDNs cleaned in FQDN garbage collector job.,0,cilium,fdqn total,,
+cilium.fqdn.selectors,gauge,,item,,Number of registered ToFQDN selectors. Available in Cilium v1.16+,0,cilium,fdqn selectors,,
 cilium.hive.status,gauge,,item,,[OpenMetrics V1 and V2] Counts of health status levels of Hive components,0,cilium,hive status,,
 cilium.identity.count,gauge,,unit,,[OpenMetrics V1 and V2] Number of identities allocate.,0,cilium,id count,,
+cilium.identity.label_sources,gauge,,item,,Number of identities which contain at least one label from the given label source. Available in Cilium v1.16+,0,cilium,id label sources,,
 cilium.ip_addresses.count,gauge,,unit,,[OpenMetrics V1 and V2] Number of allocated ip_addresses,0,cilium,ip count,,
 cilium.ipam.capacity,gauge,,event,,[OpenMetrics V1 and V2] Total number of IPs in the IPAM pool labeled by family,0,cilium,ipam capacity,,
 cilium.ipam.events.count,count,,event,,[OpenMetrics V2] Number of IPAM events received by action and datapath family type,0,cilium,ipam total,,

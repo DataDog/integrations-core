@@ -18,6 +18,7 @@ from ddev.cli.docs import docs
 from ddev.cli.env import env
 from ddev.cli.meta import meta
 from ddev.cli.release import release
+from ddev.cli.size import size
 from ddev.cli.status import status
 from ddev.cli.test import test
 from ddev.cli.validate import validate
@@ -94,9 +95,9 @@ def ddev(
 
     if config_file:
         app.config_file.path = Path(config_file).resolve()
-        if not app.config_file.path.is_file():
+        if not app.config_file.global_path.is_file():
             app.abort(f'The selected config file `{str(app.config_file.path)}` does not exist.')
-    elif not app.config_file.path.is_file():
+    elif not app.config_file.global_path.is_file():
         if app.verbose:
             app.display_waiting('No config file found, creating one with default settings now...')
 
@@ -106,8 +107,14 @@ def ddev(
                 app.display_success('Success! Please see `ddev config`.')
         except OSError:  # no cov
             app.abort(
-                f'Unable to create config file located at `{str(app.config_file.path)}`. Please check your permissions.'
+                f'Unable to create config file located at `{str(app.config_file.global_path)}`.'
+                'Please check your permissions.'
             )
+
+    if app.verbose:
+        if app.config_file.overrides_available():
+            app.display_info('Local override config file found. Values from this file will override global values.')
+
     if org is not None:
         app.config.org = org
 
@@ -149,6 +156,7 @@ ddev.add_command(run)
 ddev.add_command(status)
 ddev.add_command(test)
 ddev.add_command(validate)
+ddev.add_command(size)
 
 __management_command = os.environ.get('PYAPP_COMMAND_NAME', '')
 if __management_command:

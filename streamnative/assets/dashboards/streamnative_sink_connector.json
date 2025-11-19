@@ -1,0 +1,774 @@
+{
+    "title": "StreamNative - Sink Connector",
+    "description": "",
+    "widgets": [
+        {
+            "id": 4904783609376248,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn.prod.website-files.com/638a1dc72083d166ed6e3d76/63926c17a52727a15e13decd_Logo-streamnative-150px.svg",
+                "url_dark_theme": "https://cdn.prod.website-files.com/638a1dc72083d166ed6e3d76/66503b265696d89c26062701_Group%2021.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 8995860272844608,
+            "definition": {
+                "type": "note",
+                "content": "**[StreamNative](https://www.streamnative.com/)** provides an enterprise-grade messaging platform built on Apache Pulsar, offering scalable real-time data streaming with multi-tenancy, geo-replication, and cloud integration.\n\nThis Sink Connector dashboard provides insights into sink operations, data flow, exceptions, and JVM resource management for efficient Pulsar performance.\n\nFor more information, see the [StreamNative Integration Documentation](https://docs.datadoghq.com/integrations/streamnative/).",
+                "background_color": "orange",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 5920141165566776,
+            "definition": {
+                "type": "note",
+                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured on sink connector statistics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 9,
+                "y": 0,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 8920403223435398,
+            "definition": {
+                "title": "Messages Written",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit"
+                                    }
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:streamnative.sink_connector.pulsar_sink_written_total{$Sink_Name,$Organization,$Instance}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_green",
+                                "custom_bg_color": "#f0d999"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1093006653689844,
+            "definition": {
+                "title": "Messages Written over time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Pulsar Sink Written",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:streamnative.sink_connector.pulsar_sink_written_total{$Sink_Name,$Organization,$Instance}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 3,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 7549091675650990,
+            "definition": {
+                "title": "Messages Received",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit"
+                                    }
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:streamnative.sink_connector.pulsar_sink_received_total{$Sink_Name,$Organization,$Instance}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_yellow",
+                                "custom_bg_color": "#c7dcda"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "text_align": "center",
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 7401087282347594,
+            "definition": {
+                "title": "Messages Received over time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Pulsar Sink Received",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:streamnative.sink_connector.pulsar_sink_received_total{$Sink_Name,$Organization,$Instance}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 6,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 3549300876223298,
+            "definition": {
+                "title": "User and System CPU Time",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "second"
+                                    }
+                                },
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:streamnative.sink_connector.process_cpu_seconds_total{$Sink_Name,$Organization,$Instance}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "yellow_on_white",
+                                "custom_bg_color": "#e5c7f0"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 1900009483847726,
+            "definition": {
+                "title": "Last Invocation Time",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:streamnative.sink_connector.pulsar_sink_last_invocation{$Sink_Name,$Organization,$Instance}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "yellow_on_white",
+                                "custom_bg_color": "#c9e69e"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 6,
+                "y": 9,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 7809318879280602,
+            "definition": {
+                "title": "Sink Exceptions",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:streamnative.sink_connector.pulsar_sink_sink_exceptions_total{$Sink_Name,$Organization,$Instance}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_red"
+                            },
+                            {
+                                "comparator": "=",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 6707352404639228,
+            "definition": {
+                "title": "System Exceptions",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:streamnative.sink_connector.pulsar_sink_system_exceptions_total{$Sink_Name,$Organization,$Instance}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_red",
+                                "custom_bg_color": "#eedef7"
+                            },
+                            {
+                                "comparator": "=",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 8445989619646756,
+            "definition": {
+                "title": "JVM Statistics",
+                "background_color": "purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8970146552931028,
+                        "definition": {
+                            "title": "Max Memory Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:streamnative.sink_connector.jvm_memory_bytes_max{$Organization,$Instance,$Sink_Name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4546078437502932,
+                        "definition": {
+                            "title": "Memory Space over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Committed Memory Bytes Bytes",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Max Memory Bytes",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Initial Memory Bytes ",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:streamnative.sink_connector.jvm_memory_bytes_committed{$Sink_Name,$Organization,$Instance}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:streamnative.sink_connector.jvm_memory_bytes_max{$Sink_Name,$Organization,$Instance}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:streamnative.sink_connector.jvm_memory_bytes_init{$Sink_Name,$Organization,$Instance}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 983596439967046,
+                        "definition": {
+                            "title": "Committed Memory Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:streamnative.sink_connector.jvm_memory_bytes_committed{$Organization,$Instance,$Sink_Name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2285216008395834,
+                        "definition": {
+                            "title": "Time Spent In JVM Garbage Collector",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "GC Time",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:streamnative.sink_connector.jvm_gc_collection_seconds_sum{$Sink_Name,$Organization,$Instance}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Organization",
+            "prefix": "kubernetes_namespace",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Instance",
+            "prefix": "cloud_streamnative_io_pulsar_instance",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Sink_Name",
+            "prefix": "pulsar_component",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

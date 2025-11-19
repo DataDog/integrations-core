@@ -1,0 +1,233 @@
+{
+    debug
+    admin :2019
+}
+:8080 {
+    root * /usr/share/caddy/
+    @get_spaces {
+        method GET
+        path /api/spaces
+    }
+    route @get_spaces {
+        rewrite * /GET/api/spaces/high_limit_pg1.json
+        file_server
+    }
+    @get_projectgroups {
+        method GET
+        path /api/Spaces-1/projectgroups
+    }
+    route @get_projectgroups {
+        rewrite * /GET/api/Spaces-1/projectgroups/high_limit_pg1.json
+        file_server
+    }
+    @get_projectgroups_1_projects {
+        method GET
+        path /api/Spaces-1/projectgroups/ProjectGroups-1/projects
+    }
+    route @get_projectgroups_1_projects {
+        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-1/projects/high_limit_pg1.json
+        file_server
+    }
+    @get_projectgroups_2_projects {
+        method GET
+        path /api/Spaces-1/projectgroups/ProjectGroups-2/projects
+    }
+    route @get_projectgroups_2_projects {
+        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-2/projects/high_limit_pg1.json
+        file_server
+    }
+    @get_projectgroups_3_projects {
+        method GET
+        path /api/Spaces-1/projectgroups/ProjectGroups-3/projects
+    }
+    route @get_projectgroups_3_projects {
+        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-3/projects/high_limit_pg1.json
+        file_server
+    }
+    @get_running_tasks_project_1 {
+        method GET
+        path /api/Spaces-1/tasks
+        expression {query.project}.contains("Projects-1") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
+    }
+    route @get_running_tasks_project_1 {
+        rewrite * /GET/api/Spaces-1/tasks/project_1_in_progress_high_limit_pg1.json
+        file_server
+    }
+    @get_running_tasks_project_2 {
+        method GET
+        path /api/Spaces-1/tasks
+        expression {query.project}.contains("Projects-2") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
+    }
+    route @get_running_tasks_project_2 {
+        rewrite * /GET/api/Spaces-1/tasks/project_2_in_progress_high_limit_pg1.json
+        file_server
+    }
+    @get_running_tasks_project_3 {
+        method GET
+        path /api/Spaces-1/tasks
+        expression {query.project}.contains("Projects-3") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
+    }
+    route @get_running_tasks_project_3 {
+        rewrite * /GET/api/Spaces-1/tasks/project_3_in_progress_high_limit_pg1.json
+        file_server
+    }
+    @get_running_tasks_project_4 {
+        method GET
+        path /api/Spaces-1/tasks
+        expression {query.project}.contains("Projects-4") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
+    }
+    route @get_running_tasks_project_4 {
+        rewrite * /GET/api/Spaces-1/tasks/project_4_in_progress_high_limit_pg1.json
+        file_server
+    }
+    @get_completed_tasks_project_1 {
+        method GET
+        path /api/Spaces-1/tasks*
+        expression {query.project}.contains("Projects-1") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+    }
+    route @get_completed_tasks_project_1 {
+        rewrite * /GET/api/Spaces-1/tasks/project_1_completed_high_limit_pg1.json
+        file_server
+    }
+    @get_completed_tasks_project_2 {
+        method GET
+        path /api/Spaces-1/tasks*
+        expression {query.project}.contains("Projects-2") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+    }
+    route @get_completed_tasks_project_2 {
+        rewrite * /GET/api/Spaces-1/tasks/project_2_completed_high_limit_pg1.json
+        file_server
+    }
+    @get_completed_tasks_project_3 {
+        method GET
+        path /api/Spaces-1/tasks*
+        expression {query.project}.contains("Projects-3") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+    }
+    route @get_completed_tasks_project_3 {
+        rewrite * /GET/api/Spaces-1/tasks/project_3_completed_high_limit_pg1.json
+        file_server
+    }
+    @get_completed_tasks_project_4 {
+        method GET
+        path /api/Spaces-1/tasks*
+        expression {query.project}.contains("Projects-4") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+    }
+    route @get_completed_tasks_project_4 {
+        rewrite * /GET/api/Spaces-1/tasks/project_4_completed_high_limit_pg1.json
+        file_server
+    }
+    @get_octopusservernodes {
+        method GET
+        path /api/octopusservernodes
+    }
+    route @get_octopusservernodes {
+        rewrite * /GET/api/octopusservernodes/high_limit_pg1.json
+        file_server
+    }
+    @get_machines {
+        method GET
+        path /api/Spaces-1/machines
+    }
+    route @get_machines {
+        rewrite * /GET/api/Spaces-1/machines/high_limit_pg1.json
+        file_server
+    }
+    @get_tasks_1844 {
+        method GET
+        path /api/Spaces-1/tasks/ServerTasks-1844/details
+    }
+    route @get_tasks_1844 {
+        rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1844/details/response.json
+        file_server
+    }
+    @get_tasks_1845 {
+        method GET
+        path /api/Spaces-1/tasks/ServerTasks-1845/details
+    }
+    route @get_tasks_1845 {
+        rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1845/details/response.json
+        file_server
+    }
+    @get_tasks_1846 {
+        method GET
+        path /api/Spaces-1/tasks/ServerTasks-1846/details
+    }
+    route @get_tasks_1846 {
+        rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1846/details/response.json
+        file_server
+    }
+    @get_tasks_1847 {
+        method GET
+        path /api/Spaces-1/tasks/ServerTasks-1847/details
+    }
+    route @get_tasks_1847 {
+        rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1847/details/response.json
+        file_server
+    }
+    @get_environments {
+        method GET
+        path /api/Spaces-1/environments
+    }
+    route @get_environments {
+        rewrite * /GET/api/Spaces-1/environments/high_limit_pg1.json
+        file_server
+    }
+    @get_releases_1 {
+        method GET
+        path /api/Spaces-1/releases/Releases-1
+    }
+    route @get_releases_1 {
+        rewrite * /GET/api/Spaces-1/releases/Releases-1/response.json
+        file_server
+    }
+    @get_releases_2 {
+        method GET
+        path /api/Spaces-1/releases/Releases-2
+    }
+    route @get_releases_2 {
+        rewrite * /GET/api/Spaces-1/releases/Releases-2/response.json
+        file_server
+    }
+    @get_releases_3 {
+        method GET
+        path /api/Spaces-1/releases/Releases-3
+    }
+    route @get_releases_3 {
+        rewrite * /GET/api/Spaces-1/releases/Releases-3/response.json
+        file_server
+    }
+    @get_deployments_16 {
+        method GET
+        path /api/Spaces-1/deployments/Deployments-16
+    }
+    route @get_deployments_16 {
+        rewrite * /GET/api/Spaces-1/deployments/Deployments-16/response.json
+        file_server
+    }
+    @get_deployments_17 {
+        method GET
+        path /api/Spaces-1/deployments/Deployments-17
+    }
+    route @get_deployments_17 {
+        rewrite * /GET/api/Spaces-1/deployments/Deployments-17/response.json
+        file_server
+    }
+    @get_deployments_18 {
+        method GET
+        path /api/Spaces-1/deployments/Deployments-18
+    }
+    route @get_deployments_18 {
+        rewrite * /GET/api/Spaces-1/deployments/Deployments-18/response.json
+        file_server
+    }
+    @get_deployments_19 {
+        method GET
+        path /api/Spaces-1/deployments/Deployments-19
+    }
+    route @get_deployments_19 {
+        rewrite * /GET/api/Spaces-1/deployments/Deployments-19/response.json
+        file_server
+    }
+
+    file_server browse
+}

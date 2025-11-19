@@ -1,0 +1,105 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "36f45cb9-4d2f-4c0b-90b0-947623e2534f",
+  "app_id": "bitdefender",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Provides insights about the logs Bitdefender Agent generated.",
+    "title": "Bitdefender",
+    "media": [
+      {
+        "caption": "Bitdefender - Advanced Threat Control Events",
+        "image_url": "images/bitdefender_advanced_threat_control_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Bitdefender - Antiphishing Events",
+        "image_url": "images/bitdefender_antiphishing_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Bitdefender - Hyper Detect Events",
+        "image_url": "images/bitdefender_hyper_detect_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Bitdefender - Incident Details",
+        "image_url": "images/bitdefender_incident_details.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Bitdefender - Malware Events",
+        "image_url": "images/bitdefender_malware_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Bitdefender - Network Attack Defense Event Details",
+        "image_url": "images/bitdefender_network_attack_defense_event_details.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Bitdefender - Overview",
+        "image_url": "images/bitdefender_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Bitdefender - User Control Event Details",
+        "image_url": "images/bitdefender_user_control_event_details.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 30248677,
+      "source_type_name": "Bitdefender",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Bitdefender - Advanced Threat Control Events": "assets/dashboards/bitdefender_advanced_threat_control_events.json",
+      "Bitdefender - Antiphishing Events": "assets/dashboards/bitdefender_antiphishing_events.json",
+      "Bitdefender - Hyper Detect Events": "assets/dashboards/bitdefender_hyper_detect_events.json",
+      "Bitdefender - Incident Details": "assets/dashboards/bitdefender_incident_details.json",
+      "Bitdefender - Malware Events": "assets/dashboards/bitdefender_malware_events.json",
+      "Bitdefender - Network Attack Defense Event Details": "assets/dashboards/bitdefender_network_attack_defense_event_details.json",
+      "Bitdefender - Overview": "assets/dashboards/bitdefender_overview.json",
+      "Bitdefender - User Control Event Details": "assets/dashboards/bitdefender_user_control_event_details.json",
+      "Bitdefender - Firewall Event Details": "assets/dashboards/bitdefender_firewall_event_details.json",
+      "Bitdefender - Data Protection Events": "assets/dashboards/bitdefender_data_protection_events.json",
+      "Bitdefender - Ransomware Activity Detection Event Details": "assets/dashboards/bitdefender_ransomware_activity_detection_event_details.json",
+      "Bitdefender - Antiexploit Events": "assets/dashboards/bitdefender_antiexploit_events.json"
+    },
+    "logs": {
+      "source": "bitdefender"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -1,8 +1,14 @@
 # Agent Check: KubeVirt Controller
 
+<div class="alert alert-warning">
+This integration is in public beta and should be enabled on production workloads with caution.
+</div>
+
 ## Overview
 
 This check monitors [KubeVirt Controller][1] through the Datadog Agent.
+
+**Minimum Agent version:** 7.59.0
 
 ## Setup
 
@@ -80,7 +86,7 @@ The KubeVirt Controller integration does not include any service checks.
 Need help? Contact [Datadog support][7].
 
 [1]: https://docs.datadoghq.com/integrations/kubevirt_controller
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=datadogoperator
 [5]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent

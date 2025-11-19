@@ -38,7 +38,6 @@ class Vault(OpenMetricsBaseCheck):
         instance = instances[0]
 
         if is_affirmative(instance.get('use_openmetrics', False)):
-
             return VaultCheckV2(name, init_config, instances)
         else:
             return super(Vault, cls).__new__(cls)

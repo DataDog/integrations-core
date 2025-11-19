@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "3733c24e-8466-4f3b-8411-59ef85c28302",
   "app_id": "solr",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -51,7 +52,7 @@
       "auto_install": true
     },
     "dashboards": {
-      "solr": "assets/dashboards/solr_dashboard.json"
+      "solr": "assets/dashboards/solr_overview.json"
     },
     "saved_views": {
       "solr_processes": "assets/saved_views/solr_processes.json"

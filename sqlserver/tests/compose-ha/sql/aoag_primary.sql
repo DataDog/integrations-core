@@ -77,7 +77,9 @@ GO
 -- Create table with a foreign key
 CREATE TABLE datadog_test_schemas.test_schema.landmarks (name varchar(255), city_id int DEFAULT 0);
 GO
-ALTER TABLE datadog_test_schemas.test_schema.landmarks ADD CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES datadog_test_schemas.test_schema.cities(id);
+ALTER TABLE datadog_test_schemas.test_schema.landmarks ADD CONSTRAINT FK_CityId FOREIGN KEY (city_id)
+REFERENCES datadog_test_schemas.test_schema.cities(id)
+ON DELETE SET NULL;
 GO
 
 -- Create table with unique constraint
@@ -94,7 +96,10 @@ CREATE TABLE datadog_test_schemas.test_schema.RestaurantReviews (
     RestaurantName VARCHAR(255),
     District VARCHAR(100),
     Review VARCHAR(MAX),
-    CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District) REFERENCES datadog_test_schemas.test_schema.Restaurants(RestaurantName, District)
+    CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
+        REFERENCES datadog_test_schemas.test_schema.Restaurants(RestaurantName, District)
+        ON DELETE CASCADE
+        ON UPDATE SET NULL
 );
 GO
 
@@ -110,6 +115,69 @@ CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 CREATE CLUSTERED INDEX thingsindex ON datadog_test_schemas_second.dbo.ϑings (name);
 GO
+
+-- Create an alternate collation database to test handling of case sensitivity
+CREATE DATABASE datadog_test_collation
+    COLLATE Latin1_General_100_BIN2;
+GO
+USE datadog_test_collation;
+GO
+
+CREATE SCHEMA test_schema;
+GO
+
+-- Create the partition function
+CREATE PARTITION FUNCTION CityPartitionFunction (INT)
+AS RANGE LEFT FOR VALUES (100, 200, 300); -- Define your partition boundaries here
+
+-- Create the partition scheme
+CREATE PARTITION SCHEME CityPartitionScheme
+AS PARTITION CityPartitionFunction ALL TO ([PRIMARY]); -- Assign partitions to filegroups
+
+-- Create the partitioned table
+CREATE TABLE datadog_test_collation.test_schema.cities (
+    id INT NOT NULL DEFAULT 0,
+    name VARCHAR(255),
+    population INT NOT NULL DEFAULT 0,
+    CONSTRAINT PK_Cities PRIMARY KEY (id)
+) ON CityPartitionScheme(id); -- Assign the partition scheme to the table
+
+-- Create indexes
+CREATE INDEX two_columns_index ON datadog_test_collation.test_schema.cities (id, name);
+CREATE INDEX single_column_index ON datadog_test_collation.test_schema.cities (population);
+
+INSERT INTO datadog_test_collation.test_schema.cities  VALUES (1, 'yey', 100), (2, 'bar', 200);
+GO
+
+-- Create table with a foreign key
+CREATE TABLE datadog_test_collation.test_schema.landmarks (name varchar(255), city_id int DEFAULT 0);
+GO
+ALTER TABLE datadog_test_collation.test_schema.landmarks ADD CONSTRAINT FK_CityId FOREIGN KEY (city_id)
+REFERENCES datadog_test_collation.test_schema.cities(id)
+ON DELETE SET NULL;
+GO
+
+-- Create table with unique constraint
+CREATE TABLE datadog_test_collation.test_schema.Restaurants (
+    RestaurantName VARCHAR(255),
+    District VARCHAR(100),
+    Cuisine VARCHAR(100),
+    CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District)
+);
+GO
+
+-- Create table with a foreign key on two columns
+CREATE TABLE datadog_test_collation.test_schema.RestaurantReviews (
+    RestaurantName VARCHAR(255),
+    District VARCHAR(100),
+    Review VARCHAR(MAX),
+    CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
+        REFERENCES datadog_test_collation.test_schema.Restaurants(RestaurantName, District)
+        ON DELETE CASCADE
+        ON UPDATE SET NULL
+);
+GO
+
 
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
@@ -154,8 +222,15 @@ BEGIN
 END;
 GO
 
+CREATE PROCEDURE fredProcParams @Name nvarchar(8) = NULL AS
+BEGIN
+    SELECT * FROM ϑings WHERE name like @Name;
+END;
+GO
+
 GRANT EXECUTE on bobProcParams to bob;
 GRANT EXECUTE on bobProc to bob;
+GRANT EXECUTE on fredProcParams to fred;
 GRANT EXECUTE on bobProc to fred;
 GO
 
@@ -363,3 +438,125 @@ GO
 WAITFOR DELAY '00:00:10'
 ALTER AVAILABILITY GROUP [AG1] ADD DATABASE [datadog_test-1]
 GO
+
+CREATE EVENT SESSION datadog
+ON SERVER
+ADD EVENT sqlserver.xml_deadlock_report 
+ADD TARGET package0.ring_buffer 
+WITH (
+    MAX_MEMORY = 1024 KB, 
+    EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS, 
+    MAX_DISPATCH_LATENCY = 120 SECONDS, 
+    STARTUP_STATE = ON 
+);
+GO
+
+ALTER EVENT SESSION datadog ON SERVER STATE = START;
+GO
+
+-- 1. Query completions (grouped)
+-- Includes RPC completions, batch completions, and stored procedure completions
+IF EXISTS (
+    SELECT * FROM sys.server_event_sessions WHERE name = 'datadog_query_completions'
+)
+    DROP EVENT SESSION datadog_query_completions ON SERVER;
+GO
+
+CREATE EVENT SESSION datadog_query_completions ON SERVER
+ADD EVENT sqlserver.rpc_completed (
+    ACTION (
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+    WHERE (
+        sql_text <> '' AND
+        duration > 1000000 -- in microseconds, 1 second
+    )
+),
+ADD EVENT sqlserver.sql_batch_completed(
+    ACTION (
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+    WHERE (
+        sql_text <> '' AND
+        duration > 1000000
+    )
+),
+ADD EVENT sqlserver.module_end(
+    SET collect_statement = (1)
+    ACTION (
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+    WHERE (
+        sql_text <> '' AND
+        duration > 1000000
+    )
+)
+ADD TARGET package0.ring_buffer
+WITH (
+    MAX_MEMORY = 2048 KB,
+    TRACK_CAUSALITY = ON,
+    EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS,
+    MAX_DISPATCH_LATENCY = 3 SECONDS,
+    STARTUP_STATE = ON
+);
+GO
+
+-- 2. Errors and Attentions (grouped)
+IF EXISTS (
+    SELECT * FROM sys.server_event_sessions WHERE name = 'datadog_query_errors'
+)
+    DROP EVENT SESSION datadog_query_errors ON SERVER;
+GO
+CREATE EVENT SESSION datadog_query_errors ON SERVER
+-- Low-frequency events: send to ring_buffer
+ADD EVENT sqlserver.error_reported(
+    ACTION(
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+    WHERE severity >= 11
+),
+ADD EVENT sqlserver.attention(
+    ACTION(
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+)
+ADD TARGET package0.ring_buffer
+WITH (
+    MAX_MEMORY = 2048 KB,
+    EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS,
+    MAX_DISPATCH_LATENCY = 30 SECONDS,
+    STARTUP_STATE = ON
+);
+
+ALTER EVENT SESSION datadog_query_completions ON SERVER STATE = START;
+ALTER EVENT SESSION datadog_query_errors ON SERVER STATE = START;

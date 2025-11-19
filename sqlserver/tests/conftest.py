@@ -99,11 +99,26 @@ def instance_minimal_defaults():
 def instance_docker(instance_docker_defaults):
     instance_docker_defaults.update(
         {
-            'include_task_scheduler_metrics': True,
-            'include_db_fragmentation_metrics': True,
-            'include_fci_metrics': True,
-            'include_ao_metrics': False,
-            'include_master_files_metrics': True,
+            'database_metrics': {
+                'ao_metrics': {
+                    'enabled': False,
+                },
+                'task_scheduler_metrics': {
+                    'enabled': True,
+                },
+                'db_fragmentation_metrics': {
+                    'enabled': True,
+                },
+                'fci_metrics': {
+                    'enabled': True,
+                },
+                'master_files_metrics': {
+                    'enabled': True,
+                },
+                'table_size_metrics': {
+                    'enabled': True,
+                },
+            },
             'disable_generic_tags': True,
         }
     )
@@ -233,21 +248,21 @@ def instance_e2e(instance_docker):
 
 @pytest.fixture
 def instance_ao_docker_primary(instance_docker):
-    instance_docker['include_ao_metrics'] = True
+    instance_docker['database_metrics']['ao_metrics']['enabled'] = True
     return instance_docker
 
 
 @pytest.fixture
 def instance_ao_docker_primary_local_only(instance_ao_docker_primary):
     instance = deepcopy(instance_ao_docker_primary)
-    instance['only_emit_local'] = True
+    instance['database_metrics']['ao_metrics']['only_emit_local'] = True
     return instance
 
 
 @pytest.fixture
 def instance_ao_docker_primary_non_existing_ag(instance_ao_docker_primary):
     instance = deepcopy(instance_ao_docker_primary)
-    instance['availability_group'] = 'AG2'
+    instance['database_metrics']['ao_metrics']['availability_group'] = 'AG2'
     return instance
 
 
@@ -319,7 +334,7 @@ def dd_environment(full_e2e_config):
     completion_message = 'INFO: setup.sql completed.'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
         completion_message = (
-            'Always On Availability Groups connection with primary database established ' 'for secondary database'
+            'Always On Availability Groups connection with primary database established for secondary database'
         )
     if 'compose-high-cardinality' in os.environ["COMPOSE_FOLDER"]:
         # This env is a highly loaded database and is expected to take a while to setup.
@@ -328,5 +343,7 @@ def dd_environment(full_e2e_config):
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 
-    with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3):
+    with docker_run(
+        compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3, capture=False
+    ):
         yield full_e2e_config, E2E_METADATA

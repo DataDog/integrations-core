@@ -55,6 +55,14 @@ files:
       value:
         example: <KEY_FILE_PATH>
         type: string
+    - name: pools_size
+      description: |
+        Number of connection pools to cache before discarding the least recently used pool.
+      hidden: true
+      value:
+        default: 4
+        type: integer
+        example: 10
     - name: max_parallel_requests
       description: |
         The maximum number of requests to Cloudera Manager that are allowed in parallel.

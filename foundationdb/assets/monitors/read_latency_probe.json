@@ -15,9 +15,8 @@
       "include_tags": true,
       "locked": false,
       "new_host_delay": 300,
-      "no_data_timeframe": 15,
       "notify_audit": false,
-      "notify_no_data": true,
+      "on_missing_data": "show_and_notify_no_data",
       "renotify_interval": "0",
       "require_full_window": true,
       "thresholds": {

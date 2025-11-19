@@ -4,6 +4,8 @@
 
 This check monitors [JBoss][1] and [WildFly][2] applications.
 
+**Minimum Agent version:** 6.11.0
+
 ## Setup
 
 ### Installation
@@ -110,7 +112,7 @@ Need help? Contact [Datadog support][5].
 
 [1]: https://developers.redhat.com/products/eap/overview
 [2]: http://wildfly.org
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/integrations/java/
 [5]: https://docs.datadoghq.com/help/
 [6]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/datadog_checks/jboss_wildfly/data/conf.yaml.example

@@ -4,6 +4,8 @@
 
 This check monitors two parts of [Hive][1]: Hive Metastore and HiveServer2.
 
+**Minimum Agent version:** 6.11.3
+
 ## Setup
 
 ### Installation
@@ -130,7 +132,7 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][6].
 
 [1]: https://cwiki.apache.org/confluence/display/Hive/Home
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://cwiki.apache.org/confluence/display/Hive/Configuration+Properties#ConfigurationProperties-Metrics
 [4]: https://github.com/DataDog/integrations-core/blob/master/hive/datadog_checks/hive/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/java/

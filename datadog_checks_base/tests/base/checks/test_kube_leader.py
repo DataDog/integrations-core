@@ -3,14 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import mock
 import pytest
 from kubernetes.client.models.v1_lease import V1Lease
 from kubernetes.client.models.v1_lease_spec import V1LeaseSpec
 from kubernetes.config.dateutil import format_rfc3339
-from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation, ElectionRecordLease
@@ -86,7 +85,7 @@ def mock_read_configmap():
 
 def make_record(holder=None, duration=None, transitions=None, acquire=None, renew=None):
     def format_time(date_time):
-        if isinstance(date_time, string_types):
+        if isinstance(date_time, str):
             return date_time
         return format_rfc3339(date_time)
 
@@ -161,7 +160,9 @@ class TestElectionRecord:
             make_record(
                 holder="me", duration=30, renew="2018-12-18T12:32:22Z"
             ): "Invalid record: no acquire time recorded",
-            make_record(holder="me", duration=30, renew=datetime.utcnow(), acquire="2018-12-18T12:32:22Z"): None,
+            make_record(
+                holder="me", duration=30, renew=datetime.now(timezone.utc), acquire="2018-12-18T12:32:22Z"
+            ): None,
             make_record(
                 holder="me", duration=30, renew="invalid", acquire="2018-12-18T12:32:22Z"
             ): "Invalid record: bad format for renewTime field",
@@ -170,7 +171,7 @@ class TestElectionRecord:
             ): "Invalid record: bad format for acquireTime field",
         }
 
-        for raw, expected_reason in iteritems(cases):
+        for raw, expected_reason in cases.items():
             valid, reason = ElectionRecordAnnotation("endpoints", raw).validate()
             assert reason == expected_reason
             if expected_reason is None:
@@ -180,7 +181,10 @@ class TestElectionRecord:
 
     def test_seconds_until_renew(self):
         raw = make_record(
-            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() + timedelta(seconds=20)
+            holder="me",
+            duration=30,
+            acquire="2018-12-18T12:32:22Z",
+            renew=datetime.now(timezone.utc) + timedelta(seconds=20),
         )
 
         record = ElectionRecordAnnotation("endpoints", raw)
@@ -188,7 +192,10 @@ class TestElectionRecord:
         assert record.seconds_until_renew < 21
 
         raw = make_record(
-            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() - timedelta(seconds=5)
+            holder="me",
+            duration=30,
+            acquire="2018-12-18T12:32:22Z",
+            renew=datetime.now(timezone.utc) - timedelta(seconds=5),
         )
 
         record = ElectionRecordAnnotation("endpoints", raw)
@@ -247,7 +254,7 @@ class TestBaseCheck:
 
     def test_ok_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object(
-            make_record(holder="me", duration=30, renew=datetime.utcnow(), acquire="2018-12-18T12:32:22Z")
+            make_record(holder="me", duration=30, renew=datetime.now(timezone.utc), acquire="2018-12-18T12:32:22Z")
         )
         c = KubeLeaderElectionBaseCheck()
         c.check(CM_INSTANCE)

@@ -1392,6 +1392,41 @@ rabbitmq_queue_messages_unacked{vhost="/",queue="queue2"} 0
 rabbitmq_queue_messages{vhost="/",queue="queue3"} 0
 rabbitmq_queue_messages{vhost="/",queue="queue1"} 0
 rabbitmq_queue_messages{vhost="/",queue="queue2"} 1
+# TYPE rabbitmq_queue_get_ack_total counter
+# HELP rabbitmq_queue_get_ack_total Total number of messages fetched from a queue with basic.get in manual acknowledgement mode
+rabbitmq_queue_get_ack_total{vhost="/",queue="queue3"} 0
+rabbitmq_queue_get_ack_total{vhost="/",queue="queue1"} 0
+rabbitmq_queue_get_ack_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_queue_get_total counter
+# HELP rabbitmq_queue_get_total Total number of messages fetched from a queue with basic.get in automatic acknowledgement mode
+rabbitmq_queue_get_total{vhost="/",queue="queue3"} 10
+rabbitmq_queue_get_total{vhost="/",queue="queue1"} 0
+rabbitmq_queue_get_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_queue_messages_delivered_ack_total counter
+# HELP rabbitmq_queue_messages_delivered_ack_total Total number of messages delivered from a queue to consumers in manual acknowledgement mode
+rabbitmq_queue_messages_delivered_ack_total{vhost="/",queue="queue3"} 12
+rabbitmq_queue_messages_delivered_ack_total{vhost="/",queue="queue1"} 0
+rabbitmq_queue_messages_delivered_ack_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_queue_messages_delivered_total counter
+# HELP rabbitmq_queue_messages_delivered_total Total number of messages delivered from a queue to consumers in automatic acknowledgement mode
+rabbitmq_queue_messages_delivered_total{vhost="/",queue="queue3"} 10
+rabbitmq_queue_messages_delivered_total{vhost="/",queue="queue1"} 0
+rabbitmq_queue_messages_delivered_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_queue_messages_redelivered_total counter
+# HELP rabbitmq_queue_messages_redelivered_total Total number of messages redelivered from a queue to consumers
+rabbitmq_queue_messages_redelivered_total{vhost="/",queue="queue3"} 67170
+rabbitmq_queue_messages_redelivered_total{vhost="/",queue="queue1"} 0
+rabbitmq_queue_messages_redelivered_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_queue_messages_acked_total counter
+# HELP rabbitmq_queue_messages_acked_total Total number of messages acknowledged by consumers on a queue
+rabbitmq_queue_messages_acked_total{vhost="/",queue="queue3"} 17148315
+rabbitmq_queue_messages_acked_total{vhost="/",queue="queue1"} 0
+rabbitmq_queue_messages_acked_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_queue_get_empty_total counter
+# HELP rabbitmq_queue_get_empty_total Total number of times basic.get operations fetched no message on a queue
+rabbitmq_queue_get_empty_total{vhost="/",queue="queue3"} 0
+rabbitmq_queue_get_empty_total{vhost="/",queue="queue2"} 0
+rabbitmq_queue_get_empty_total{vhost="/",queue="queue1"} 0
 # TYPE rabbitmq_queue_process_reductions_total counter
 # HELP rabbitmq_queue_process_reductions_total Total number of queue process reductions
 rabbitmq_queue_process_reductions_total{vhost="/",queue="queue3"} 30020

@@ -87,10 +87,17 @@ def test_mongo_schemas_arbiter(aggregator, instance_arbiter, check, dd_run_check
 
 @mock_now(1715911398.1112723)
 @common.standalone
-def test_mongo_schemas_standalone_atlas(aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check):
+@pytest.mark.parametrize("collect_search_indexes", [True, False])
+def test_mongo_schemas_standalone_atlas(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check, collect_search_indexes
+):
     instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
     instance_integration_cluster_autodiscovery['dbm'] = True
-    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster_autodiscovery['schemas'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collect_search_indexes': collect_search_indexes,
+    }
     instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
     instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
     instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
@@ -105,8 +112,25 @@ def test_mongo_schemas_standalone_atlas(aggregator, instance_integration_cluster
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     mongodb_databases = [e for e in dbm_metadata if e['kind'] == 'mongodb_databases']
 
-    with open(os.path.join(HERE, "results", "schemas-standalone-atlas.json"), 'r') as f:
+    expected_result = (
+        "schemas-standalone-atlas-search-indexes.json" if collect_search_indexes else "schemas-standalone-atlas.json"
+    )
+    with open(os.path.join(HERE, "results", expected_result), 'r') as f:
         expected_mongodb_databases = json.load(f)
         assert len(mongodb_databases) == len(expected_mongodb_databases)
         for i, db in enumerate(mongodb_databases):
             assert db == expected_mongodb_databases[i]
+
+
+@pytest.mark.unit
+def test_mongo_schemas_config_deprecations(instance_integration_cluster_autodiscovery, check):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': True}
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    assert mongo_check._config.schemas['enabled'] is True
+
+    instance_integration_cluster_autodiscovery.pop('schemas')
+    instance_integration_cluster_autodiscovery['collect_schemas'] = {'enabled': True}
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    assert mongo_check._config.schemas['enabled'] is True

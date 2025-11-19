@@ -5,10 +5,11 @@ import os
 
 import click
 
-from ...fs import basepath, dir_exists, resolve_path
-from ..clean import DELETE_EVERYWHERE, DELETE_IN_ROOT, clean_package, remove_compiled_scripts
-from ..constants import get_root
-from ..utils import complete_testable_checks
+from datadog_checks.dev.fs import basepath, dir_exists, resolve_path
+from datadog_checks.dev.tooling.clean import DELETE_EVERYWHERE, DELETE_IN_ROOT, clean_package, remove_compiled_scripts
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.utils import complete_testable_checks
+
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 

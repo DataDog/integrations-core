@@ -12,12 +12,21 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
-from . import defaults, validators
+from . import defaults, deprecations, validators
+
+
+class ManagedAuthentication(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+    role_arn: Optional[str] = Field(None, examples=['arn:aws:iam::123456789012:role/MyRole'])
 
 
 class Aws(BaseModel):
@@ -26,6 +35,8 @@ class Aws(BaseModel):
         frozen=True,
     )
     instance_endpoint: Optional[str] = None
+    managed_authentication: Optional[ManagedAuthentication] = None
+    region: Optional[str] = None
 
 
 class Azure(BaseModel):
@@ -35,6 +46,16 @@ class Azure(BaseModel):
     )
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
+
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
 
 
 class CollectSettings(BaseModel):
@@ -58,6 +79,14 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class Gcp(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -65,6 +94,16 @@ class Gcp(BaseModel):
     )
     instance_id: Optional[str] = None
     project_id: Optional[str] = None
+
+
+class IndexMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    limit: Optional[int] = None
 
 
 class MetricPatterns(BaseModel):
@@ -108,7 +147,6 @@ class Options(BaseModel):
     galera_cluster: Optional[bool] = None
     replication: Optional[bool] = None
     replication_channel: Optional[str] = None
-    replication_non_blocking_status: Optional[bool] = None
     schema_size_metrics: Optional[bool] = None
     system_table_size_metrics: Optional[bool] = None
     table_rows_stats_metrics: Optional[bool] = None
@@ -120,6 +158,7 @@ class QueryActivity(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_blocking_queries: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
 
@@ -129,8 +168,10 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_prepared_statements: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    only_query_recent_statements: Optional[bool] = None
 
 
 class QuerySamples(BaseModel):
@@ -185,16 +226,20 @@ class InstanceConfig(BaseModel):
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     charset: Optional[str] = None
+    collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     defaults_file: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: Optional[str] = None
+    index_metrics: Optional[IndexMetrics] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     max_custom_queries: Optional[int] = None
@@ -219,6 +264,12 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
+
+    @model_validator(mode='before')
+    def _handle_deprecations(cls, values, info):
+        fields = info.context['configured_fields']
+        validation.utils.handle_deprecations('instances', deprecations.instance(), fields, info.context)
+        return values
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

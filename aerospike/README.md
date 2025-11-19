@@ -7,6 +7,8 @@ Get metrics from Aerospike Database in real time to:
 - Visualize and monitor Aerospike states.
 - Be notified about Aerospike failovers and events.
 
+**Minimum Agent version:** 6.10.0
+
 ## Setup
 
 NOTE: The current aerospike integration is only compatible with Aerospike server v4.9 or above, see Aerospike's [Python Client Library Release Notes][1] for more info.
@@ -75,10 +77,10 @@ For containerized environments, see [Configure integrations with Autodiscovery o
 
 **Example**
 
-Apply the following annotation to your pod, where `<CONTAINER_IDENTIFIER>` is the Aerospike container image name or a [custom identifier][15]:
+Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
 
 ```
-ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks: |
+ad.datadoghq.com/<CONTAINER_NAME>.checks: |
   {
     "aerospike": {
       "init_config": {},
@@ -100,10 +102,10 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 **Example**
 
-Apply the following annotation to your pod, where `<CONTAINER_IDENTIFIER>` is the Aerospike container image name or a [custom identifier][15]:
+Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
 
 ```
-ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs: |
+ad.datadoghq.com/<CONTAINER_NAME>.logs: |
   [
     {
       "type": "file",
@@ -139,7 +141,7 @@ Aerospike does not include any events.
 Need help? Contact [Datadog support][9].
 
 [1]: https://download.aerospike.com/download/client/python/notes.html#5.0.0
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/aerospike/datadog_checks/aerospike/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/containers/kubernetes/integrations/

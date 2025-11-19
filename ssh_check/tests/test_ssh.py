@@ -19,10 +19,15 @@ pytestmark = pytest.mark.unit
 CONNECTION_SUCCEEDED = None
 
 
-def _setup_check_with_mock_client(instance, connect_result):
+def _setup_check_with_mock_client(instance, connect_result, authentication_result):
+    mock_transport = MagicMock()
+    mock_transport.remote_version = 'SSH-2.0-OpenSSH_8.1'
+    mock_transport.is_authenticated.return_value = authentication_result
+
     client = create_autospec(paramiko.SSHClient)
     client.connect.side_effect = [connect_result]
-    client.get_transport.return_value = namedtuple('Transport', ['remote_version'])('SSH-2.0-OpenSSH_8.1')
+
+    client.get_transport.return_value = mock_transport
 
     ssh = CheckSSH('ssh_check', {}, [instance])
     ssh.initialize_client = MagicMock(return_value=client)
@@ -30,14 +35,23 @@ def _setup_check_with_mock_client(instance, connect_result):
     return client, ssh
 
 
-def test_ssh(aggregator):
+@pytest.mark.parametrize(
+    'authenticated,service_check_result',
+    [
+        pytest.param(True, CheckSSH.OK, id='authenticated'),
+        pytest.param(False, CheckSSH.CRITICAL, id='not authenticated'),
+    ],
+)
+def test_ssh(aggregator, authenticated, service_check_result):
     instance = common.INSTANCES['main']
-    client, check = _setup_check_with_mock_client(instance, connect_result=CONNECTION_SUCCEEDED)
+    client, check = _setup_check_with_mock_client(
+        instance, connect_result=CONNECTION_SUCCEEDED, authentication_result=authenticated
+    )
 
     check.check({})
 
     for sc in aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
-        assert sc.status == CheckSSH.OK
+        assert sc.status == service_check_result
         for tag in sc.tags:
             assert tag in ('instance:io.netgarage.org-22', 'optional:tag1')
 
@@ -74,7 +88,7 @@ def test_ssh(aggregator):
 )
 def test_ssh_bad_config(aggregator, instance_name, error, error_msg):
     instance = common.INSTANCES[instance_name]
-    client, check = _setup_check_with_mock_client(instance, connect_result=error)
+    client, check = _setup_check_with_mock_client(instance, connect_result=error, authentication_result=False)
 
     with pytest.raises(Exception, match=error_msg):
         check.check({})
@@ -161,7 +175,9 @@ def test_collect_bad_metadata(datadog_agent):
 def test_force_sha1_disabled(aggregator, dd_run_check, settings):
     inst = deepcopy(common.INSTANCES['main'])
     inst.update(settings)
-    client, ssh = _setup_check_with_mock_client(inst, connect_result=paramiko.ssh_exception.AuthenticationException)
+    client, ssh = _setup_check_with_mock_client(
+        inst, connect_result=paramiko.ssh_exception.AuthenticationException, authentication_result=False
+    )
 
     with pytest.raises(Exception, match='AuthenticationException'):
         dd_run_check(ssh)
@@ -181,7 +197,7 @@ def test_force_sha1_enabled(aggregator, dd_run_check):
     settings = {'force_sha1': True}
     inst = deepcopy(common.INSTANCES['main'])
     inst.update(settings)
-    client, ssh = _setup_check_with_mock_client(inst, connect_result=CONNECTION_SUCCEEDED)
+    client, ssh = _setup_check_with_mock_client(inst, connect_result=CONNECTION_SUCCEEDED, authentication_result=True)
 
     dd_run_check(ssh)
 

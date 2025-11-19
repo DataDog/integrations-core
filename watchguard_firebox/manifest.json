@@ -1,0 +1,91 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "5e035b0b-faa2-4465-baab-6565046f6c1c",
+  "app_id": "watchguard-firebox",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into WatchGuard Firebox events",
+    "title": "WatchGuard Firebox",
+    "media": [
+      {
+        "caption": "WatchGuard Firebox - Overview",
+        "image_url": "images/watchguard_firebox_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Firewall",
+        "image_url": "images/watchguard_firebox_firewall.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Networking Events",
+        "image_url": "images/watchguard_firebox_networking_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Proxy Policy 1",
+        "image_url": "images/watchguard_firebox_proxy_policy_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Proxy Policy 2",
+        "image_url": "images/watchguard_firebox_proxy_policy_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - VPN",
+        "image_url": "images/watchguard_firebox_vpn.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Management Activity Monitor",
+        "image_url": "images/watchguard_firebox_management_activity_monitor.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 43652159,
+      "source_type_name": "WatchGuard Firebox",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "WatchGuard Firebox - Overview": "assets/dashboards/watchguard_firebox_overview.json",
+      "WatchGuard Firebox - Firewall": "assets/dashboards/watchguard_firebox_firewall.json",
+      "WatchGuard Firebox - Networking Events": "assets/dashboards/watchguard_firebox_networking_events.json",
+      "WatchGuard Firebox - Management Activity Monitor": "assets/dashboards/watchguard_firebox_management_activity_monitor.json",
+      "WatchGuard Firebox - Proxy Policy": "assets/dashboards/watchguard_firebox_proxy_policy.json",
+      "WatchGuard Firebox - VPN": "assets/dashboards/watchguard_firebox_vpn.json"
+    },
+    "logs": {
+      "source": "watchguard-firebox"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

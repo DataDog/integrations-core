@@ -47,6 +47,7 @@ class TestKubeAPIServerMetrics:
         'admission_controller_admission_duration_seconds.count',
         'request_duration_seconds.sum',
         'request_duration_seconds.count',
+        'process_cpu_total',
         'process_resident_memory_bytes',
         'process_virtual_memory_bytes',
         'etcd_request_duration_seconds.sum',
@@ -72,6 +73,8 @@ class TestKubeAPIServerMetrics:
         'flowcontrol_request_concurrency_limit',
         'flowcontrol_current_inqueue_requests',
         'flowcontrol_dispatched_requests_total',
+        'flowcontrol_request_wait_duration_seconds.sum',
+        'flowcontrol_request_wait_duration_seconds.count',
     ]
     COUNT_METRICS = [
         'audit_event.count',

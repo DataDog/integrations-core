@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d4315abc-0191-40e9-a14c-e3efafc41c1e",
   "app_id": "trellix-endpoint-security",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -10,7 +11,13 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Trellix Endpoint Security logs",
     "title": "Trellix Endpoint Security (ENS)",
-    "media": [],
+    "media": [
+      {
+        "caption": "Trellix Endpoint Security (ENS) - Threat Events",
+        "image_url": "images/trellix_endpoint_security_threat_events.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -29,6 +36,12 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Trellix Endpoint Security (ENS) - Threat Events": "assets/dashboards/trellix_endpoint_security_threat_events.json"
+    },
+    "logs": {
+      "source": "trellix-endpoint-security"
     }
   },
   "author": {

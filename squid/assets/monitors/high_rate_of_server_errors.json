@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2024-09-12",
+    "last_updated_at": "2024-09-12",
+    "title": "High rate of server errors",
+    "description": "High rate of server errors is monitored.",
+    "definition": {
+        "id": 153451847,
+        "name": "High rate of server errors",
+        "type": "query alert",
+        "query": "max(last_5m):sum:squid.cachemgr.server.all.errors{*} / sum:squid.cachemgr.server.all.requests{*} * 100 >= 15",
+        "message": "{{#is_warning}}  \nToo many server errors exceeded the threshold.  \nThreshold: {{warn_threshold}} % \n{{/is_warning}}\n\n{{#is_alert}}  \nToo many server errors exceeded the threshold.  \nCurrent errors : {{value}} % \nThreshold: {{threshold}} % \n{{/is_alert}}",
+        "tags": [ "squid" ],
+        "options": {
+            "thresholds": {
+                "critical": 15,
+                "warning": 10
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": false,
+            "new_host_delay": 300,
+            "silenced": { }
+        },
+        "priority": 4,
+        "restriction_policy": {
+            "bindings": [ ]
+        }
+    },
+    "tags": [
+        "integration:squid"
+    ]
+}

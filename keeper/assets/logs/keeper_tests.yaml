@@ -1,0 +1,341 @@
+id: keeper
+tests:
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "share",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "app_uid" : "Dm_l4bk34Rj62ef-XUPv3g",
+        "audit_event" : "ext_share_added",
+        "remote_address" : "10.10.10.10",
+        "category" : "share",
+        "client_version" : "Web App.17.2.2",
+        "enterprise_id" : 260753,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "xakemaukubri-2168@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"Dm_l4bk34Rj62ef-XUPv3g\",\"audit_event\":\"ext_share_added\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"Web App.17.2.2\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "Web App.17.2.2"
+      enterprise_id: 260753
+      evt:
+        category: "share"
+        name: "ext_share_added"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      record_uid: "Dm_l4bk34Rj62ef-XUPv3g"
+      service: "share"
+      source: "keeper"
+      timestamp: 1749643454772
+      usr:
+        email: "xakemaukubri-2168@company.com"
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"Dm_l4bk34Rj62ef-XUPv3g\",\"audit_event\":\"ext_share_added\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"Web App.17.2.2\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
+    service: "share"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "share",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "app_uid" : "Dm_l4bk34Rj62ef-XUPv3g",
+        "audit_event" : "ext_share_expired",
+        "category" : "share",
+        "client_version" : "Server.0.0.0",
+        "enterprise_id" : 260753,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "xakemaukubri-2168@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"Dm_l4bk34Rj62ef-XUPv3g\",\"audit_event\":\"ext_share_expired\",\"category\":\"share\",\"client_version\":\"Server.0.0.0\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "Server.0.0.0"
+      enterprise_id: 260753
+      evt:
+        category: "share"
+        name: "ext_share_expired"
+      hostname: "keepersecurity.com"
+      record_uid: "Dm_l4bk34Rj62ef-XUPv3g"
+      service: "share"
+      source: "keeper"
+      timestamp: 1749643454772
+      usr:
+        email: "xakemaukubri-2168@company.com"
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"Dm_l4bk34Rj62ef-XUPv3g\",\"audit_event\":\"ext_share_expired\",\"category\":\"share\",\"client_version\":\"Server.0.0.0\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
+    service: "share"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "share",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "app_uid" : "L2Dbp4JkF8m-qPgwU1yFwQ",
+        "audit_event" : "ext_share_access",
+        "remote_address" : "10.10.10.10",
+        "category" : "share",
+        "client_version" : "SecretsManager/JS.16.6.2",
+        "enterprise_id" : 261822,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "graucakafamme-1489@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_access\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"SecretsManager/JS.16.6.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "SecretsManager/JS.16.6.2"
+      enterprise_id: 261822
+      evt:
+        category: "share"
+        name: "ext_share_access"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      record_uid: "L2Dbp4JkF8m-qPgwU1yFwQ"
+      service: "share"
+      source: "keeper"
+      timestamp: 1749643454772
+      usr:
+        email: "graucakafamme-1489@company.com"
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_access\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"SecretsManager/JS.16.6.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    service: "share"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "share",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "app_uid" : "L2Dbp4JkF8m-qPgwU1yFwQ",
+        "audit_event" : "ext_share_connected",
+        "remote_address" : "10.10.10.10",
+        "category" : "share",
+        "client_version" : "SecretsManager/JS.16.6.2",
+        "enterprise_id" : 261822,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "graucakafamme-1489@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_connected\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"SecretsManager/JS.16.6.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "SecretsManager/JS.16.6.2"
+      enterprise_id: 261822
+      evt:
+        category: "share"
+        name: "ext_share_connected"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      record_uid: "L2Dbp4JkF8m-qPgwU1yFwQ"
+      service: "share"
+      source: "keeper"
+      timestamp: 1749643454772
+      usr:
+        email: "graucakafamme-1489@company.com"
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_connected\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"SecretsManager/JS.16.6.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    service: "share"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "share",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "app_uid" : "L2Dbp4JkF8m-qPgwU1yFwQ",
+        "audit_event" : "ext_share_removed",
+        "remote_address" : "10.10.10.10",
+        "category" : "share",
+        "client_version" : "Web App.17.2.2",
+        "enterprise_id" : 261822,
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "graucakafamme-1489@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_removed\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"Web App.17.2.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "Web App.17.2.2"
+      enterprise_id: 261822
+      evt:
+        category: "share"
+        name: "ext_share_removed"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      record_uid: "L2Dbp4JkF8m-qPgwU1yFwQ"
+      service: "share"
+      source: "keeper"
+      timestamp: 1749643454772
+      usr:
+        email: "graucakafamme-1489@company.com"
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"app_uid\":\"L2Dbp4JkF8m-qPgwU1yFwQ\",\"audit_event\":\"ext_share_removed\",\"remote_address\":\"10.10.10.10\",\"category\":\"share\",\"client_version\":\"Web App.17.2.2\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    service: "share"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "security",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "pending_added_to_role",
+        "role_id" : "1119925607333893",
+        "remote_address" : "10.10.10.10",
+        "category" : "security",
+        "client_version" : "EMConsole.17.3.0",
+        "enterprise_id" : 260753,
+        "value" : "beiprogohefre-9771@company.com",
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "xakemaukubri-2168@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"pending_added_to_role\",\"role_id\":\"1119925607333893\",\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"value\":\"beiprogohefre-9771@company.com\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "EMConsole.17.3.0"
+      enterprise_id: 260753
+      evt:
+        category: "security"
+        name: "pending_added_to_role"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      role_id: "1119925607333893"
+      service: "security"
+      source: "keeper"
+      timestamp: 1749643454772
+      to_username: "beiprogohefre-9771@company.com"
+      usr:
+        email: "xakemaukubri-2168@company.com"
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"pending_added_to_role\",\"role_id\":\"1119925607333893\",\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"value\":\"beiprogohefre-9771@company.com\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
+    service: "security"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "security",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "pending_removed_from_role",
+        "role_id" : "261822/1124516927373322",
+        "remote_address" : "10.10.10.10",
+        "category" : "security",
+        "client_version" : "EMConsole.17.3.0",
+        "enterprise_id" : 261822,
+        "value" : "feuddinemeiyi-3706@company.com",
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "graucakafamme-1489@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"pending_removed_from_role\",\"role_id\":\"261822/1124516927373322\",\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"value\":\"feuddinemeiyi-3706@company.com\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "EMConsole.17.3.0"
+      enterprise_id: 261822
+      evt:
+        category: "security"
+        name: "pending_removed_from_role"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      role_id: "261822/1124516927373322"
+      service: "security"
+      source: "keeper"
+      timestamp: 1749643454772
+      to_username: "feuddinemeiyi-3706@company.com"
+      usr:
+        email: "graucakafamme-1489@company.com"
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"pending_removed_from_role\",\"role_id\":\"261822/1124516927373322\",\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"value\":\"feuddinemeiyi-3706@company.com\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    service: "security"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "security",
+      "source" : "keeper",
+      "additionalProperties" : {
+        "audit_event" : "vault_transferred",
+        "from_username" : 20365479,
+        "remote_address" : "10.10.10.10",
+        "category" : "security",
+        "client_version" : "EMConsole.17.3.0",
+        "enterprise_id" : 261822,
+        "to_username" : "zigedducrouqua-5815@company.com",
+        "email" : "feuddinemeiyi-3706@company.com",
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "graucakafamme-1489@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"vault_transferred\",\"from_username\":20365479,\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"to_username\":\"zigedducrouqua-5815@company.com\",\"email\":\"feuddinemeiyi-3706@company.com\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "EMConsole.17.3.0"
+      enterprise_id: 261822
+      evt:
+        category: "security"
+        name: "vault_transferred"
+      from_user: "feuddinemeiyi-3706@company.com"
+      from_username: 20365479
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      service: "security"
+      source: "keeper"
+      timestamp: 1749643454772
+      to_user: "zigedducrouqua-5815@company.com"
+      usr:
+        email: "graucakafamme-1489@company.com"
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"vault_transferred\",\"from_username\":20365479,\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"to_username\":\"zigedducrouqua-5815@company.com\",\"email\":\"feuddinemeiyi-3706@company.com\",\"username\":\"graucakafamme-1489@company.com\",\"enterprise_id\":261822}"
+    service: "security"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749643454772

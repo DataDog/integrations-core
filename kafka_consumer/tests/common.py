@@ -19,6 +19,16 @@ TOPICS = ['marvel', 'dc', 'unconsumed_topic']
 PARTITIONS = [0, 1]
 BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
+
+POSSIBLE_CONSUMER_GROUP_STATES = {
+    'EMPTY',
+    'STABLE',
+    'UNKNOWN',
+    'DEAD',
+    'PREPARING_REBALANCING',
+    'COMPLETING_REBALANCING',
+}
+
 AUTHENTICATION = os.environ.get('AUTHENTICATION', 'noauth')
 DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', AUTHENTICATION, "docker-compose.yaml")
 
@@ -111,13 +121,6 @@ def assert_check_kafka(aggregator, consumer_groups):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def assert_check_kafka_has_consumer_group_state_tag(aggregator, consumer_groups):
-    for _, _ in consumer_groups.items():
-        for mname in CONSUMER_METRICS:
-            # Check for the tag prefix consumer_group_state
-            aggregator.assert_metric_has_tag_prefix(mname, tag_prefix='consumer_group_state')
-
-
 def get_authentication_configuration(instance):
     config = {}
 
@@ -131,6 +134,7 @@ def get_authentication_configuration(instance):
                     "ssl.certificate.location": instance.get("tls_cert"),
                     "ssl.key.location": instance.get("tls_private_key"),
                     "ssl.key.password": instance.get("tls_private_key_password"),
+                    "ssl.endpoint.identification.algorithm": "https",
                 }
             )
 

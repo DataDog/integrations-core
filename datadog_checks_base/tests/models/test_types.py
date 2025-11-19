@@ -1,14 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from types import MappingProxyType
+
+from datadog_checks.base.utils.models.validation.utils import make_immutable
 
 
 def test_make_immutable():
-    # TODO: move imports up top when we drop Python 2
-    from types import MappingProxyType
-
-    from datadog_checks.base.utils.models.validation.utils import make_immutable
-
     obj = make_immutable(
         {
             'string': 'foo',

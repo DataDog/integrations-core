@@ -52,6 +52,36 @@ def test_xdr_metrics(aggregator):
         aggregator.assert_metric(metric, tags=['datacenter:test'])
 
 
+def test_sindex_metrics(aggregator, dd_run_check):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    original_get_info = check.get_info
+
+    def mock_get_info(command, separator=";"):
+        if command == "sindex/test":
+            return [
+                "ns=test:indexname=idx_characters_name:set=characters:bin=name:type=string:indextype=default:context=null:state=RW"
+            ]
+        elif command == "sindex/test/idx_characters_name":
+            return common.MOCK_INDEXES_METRICS
+        elif command.startswith("sets/"):
+            return []
+        return original_get_info(command, separator)
+
+    check.get_info = mock_get_info
+    check._tags = []
+    check._client = mock.MagicMock()
+    check._client.get_node_names = mock.MagicMock(
+        return_value={'address': common.HOST, 'port': common.PORT, 'node_name': 'test'}
+    )
+    check.get_namespaces = mock.MagicMock(return_value=['test'])
+    check.collect_throughput = mock.MagicMock()
+    check.collect_latency = mock.MagicMock()
+    dd_run_check(check)
+
+    for metric in common.INDEXES_METRICS:
+        aggregator.assert_metric(metric, tags=['namespace:test', 'sindex:idx_characters_name'])
+
+
 def test_multiple_xdr_metrics(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     check.get_info = mock.MagicMock(

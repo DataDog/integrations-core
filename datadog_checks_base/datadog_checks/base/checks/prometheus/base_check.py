@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import string_types
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.common import to_native_string
 
-from ...errors import CheckException
-from ...utils.common import to_native_string
-from .. import AgentCheck
 from .mixins import PrometheusScraperMixin
 
 
@@ -145,7 +144,7 @@ class GenericPrometheusCheck(AgentCheck):
         # We merge list and dictionaries from optional defaults & instance settings
         metrics = default_instance.get("metrics", []) + instance.get("metrics", [])
         for metric in metrics:
-            if isinstance(metric, string_types):
+            if isinstance(metric, str):
                 metrics_mapper[metric] = metric
             else:
                 metrics_mapper.update(metric)

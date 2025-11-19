@@ -7,6 +7,8 @@ Get metrics from ASP.NET in real time to:
 - Visualize and monitor ASP.NET states.
 - Be notified about ASP.NET failovers and events.
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 ### Installation
@@ -49,7 +51,7 @@ The ASP.NET check does not include any service checks.
 
 Need help? Contact [Datadog support][8].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/aspdotnet/datadog_checks/aspdotnet/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

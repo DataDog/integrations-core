@@ -1,6 +1,9 @@
 # Profile for HP iLO devices.
 # For HP iLO4 devices, a separate hp-ilo4 profile is used
 
+# HP iLO5 devices support a maximum bulk size of 5, so they should be configured with oid_batch_size: 5.
+# For more information, check: https://support.hpe.com/hpesc/public/docDisplay?docId=a00129448en_us&docLocale=en_US
+
 extends:
   - _hp.yaml
   - _hp-base.yaml

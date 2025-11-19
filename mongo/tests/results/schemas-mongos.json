@@ -4,8 +4,9 @@
         "agent_version": "0.0.0",
         "dbms": "mongo",
         "kind": "mongodb_databases",
-        "collection_interval": 600,
+        "collection_interval": 3600,
         "dbms_version": "4.1.13",
+        "cloud_metadata": {},
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
@@ -594,8 +595,9 @@
         "agent_version": "0.0.0",
         "dbms": "mongo",
         "kind": "mongodb_databases",
-        "collection_interval": 600,
+        "collection_interval": 3600,
         "dbms_version": "4.1.13",
+        "cloud_metadata": {},
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",

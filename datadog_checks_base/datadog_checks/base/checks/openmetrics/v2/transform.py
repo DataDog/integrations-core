@@ -4,9 +4,8 @@
 import re
 from copy import deepcopy
 
-from six import raise_from
+from datadog_checks.base.config import is_affirmative
 
-from ....config import is_affirmative
 from . import transformers
 
 DEFAULT_METRIC_TYPE = 'native'
@@ -53,7 +52,7 @@ class MetricTransformer:
                     self.transformer_data[raw_metric_name] = self.compile_transformer(config)
                 except Exception as e:
                     error = f'Error compiling transformer for metric `{raw_metric_name}`: {e}'
-                    raise_from(type(e)(error), None)
+                    raise type(e)(error) from None
 
     def get(self, metric):
         metric_name = metric.name

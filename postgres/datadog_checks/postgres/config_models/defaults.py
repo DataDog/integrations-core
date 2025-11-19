@@ -53,7 +53,7 @@ def instance_collect_function_metrics():
 
 
 def instance_collect_wal_metrics():
-    return False
+    return True
 
 
 def instance_data_directory():
@@ -61,7 +61,7 @@ def instance_data_directory():
 
 
 def instance_database_instance_collection_interval():
-    return False
+    return 300
 
 
 def instance_dbm():
@@ -84,12 +84,32 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_exclude_hostname():
+    return False
+
+
+def instance_host():
+    return 'localhost'
+
+
 def instance_idle_connection_timeout():
     return 60000
 
 
 def instance_ignore_databases():
-    return ['template%', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin']
+    return [
+        'template0',
+        'template1',
+        'rdsadmin',
+        'azure_maintenance',
+        'cloudsqladmin',
+        'alloydbadmin',
+        'alloydbmetadata',
+    ]
+
+
+def instance_ignore_schemas_owned_by():
+    return ['rds_superuser', 'rdsadmin']
 
 
 def instance_log_unobfuscated_plans():
@@ -116,6 +136,10 @@ def instance_only_custom_queries():
     return False
 
 
+def instance_pg_stat_activity_view():
+    return 'pg_stat_activity'
+
+
 def instance_pg_stat_statements_view():
     return 'pg_stat_statements'
 
@@ -128,12 +152,40 @@ def instance_propagate_agent_tags():
     return False
 
 
+def instance_query_encodings():
+    return ['utf8']
+
+
 def instance_query_timeout():
     return 5000
 
 
+def instance_relations():
+    return []
+
+
+def instance_reported_hostname():
+    return None
+
+
 def instance_ssl():
     return 'allow'
+
+
+def instance_ssl_cert():
+    return None
+
+
+def instance_ssl_key():
+    return None
+
+
+def instance_ssl_password():
+    return None
+
+
+def instance_ssl_root_cert():
+    return None
 
 
 def instance_table_count_limit():
@@ -141,8 +193,12 @@ def instance_table_count_limit():
 
 
 def instance_tag_replication_role():
-    return False
+    return True
 
 
 def instance_use_global_custom_queries():
     return 'true'
+
+
+def instance_username():
+    return 'datadog'

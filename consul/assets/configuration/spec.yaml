@@ -9,11 +9,11 @@ files:
   - template: instances
     options:
     - name: url
+      display_priority: 2
       required: true
       description: |
-        Where your Consul HTTP server lives,
-        point the URL at the leader to get metrics about your Consul cluster.
-        Use HTTPS instead of HTTP if your Consul setup is configured to do so.
+        The URL of your Consul HTTP server. Point it at the leader to get metrics
+        about your Consul cluster. Use HTTPS if your Consul setup supports it.
       value:
         type: string
         example: http://localhost:8500
@@ -31,8 +31,8 @@ files:
         example: false
     - name: network_latency_checks
       description: |
-        Whether to enable network latency metrics collection. When enabled
-        Consul network coordinates is retrieved and latency calculated for
+        Whether to enable network latency metric collection. When enabled, Consul
+        network coordinates are retrieved and latency is calculated for
         each node and between data centers.
         See https://www.consul.io/docs/internals/coordinates.html
       value:
@@ -51,33 +51,34 @@ files:
 
     - name: self_leader_check
       description: |
-        Whether to enable self leader checks. Each instance with this enabled
-        watches for itself to become the leader and emits an event when that
-        happens. It is safe/expected to enable this on all nodes in a Consul
-        cluster since only the new leader emits the (single) event. This
-        flag takes precedence over new_leader_checks.
+        Whether to enable self-leader checks. Each enabled instance watches for
+        when it becomes the leader and emits an event when that happens. It is
+        safe and expected to enable this on all nodes in a Consul cluster since
+        only the new leader emits the event. This flag takes precedence over
+        new_leader_checks.
       value:
         type: boolean
         example: false
 
     - name: acl_token
       description: ACL token to use for authentication.
+      secret: true
       value:
         type: string
 
     - name: single_node_install
       description: |
-        Whether or not to perform the full check even when not the leader. Useful
-        if you don't want to install the Agent on every node in a data center.
+        Whether to perform the full check even when this node is not the leader.
+        Useful if you don't want to install the Agent on every node in a data center.
       value:
         type: boolean
         example: false
 
     - name: new_leader_checks
       description: |
-        Whether to enable new leader checks from this instance
-        Note: If this is set on multiple instances or Agents in the same cluster
-        you receive one event per leader change per instance. See
+        Whether to enable new-leader checks from this instance.
+        Note: If this is set on multiple instances or Agents in the same cluster,
+        you will receive one event per leader change per instance. See
         self_leader_check for a more robust option.
       value:
         type: boolean
@@ -85,9 +86,9 @@ files:
 
     - name: services_include
       description: |
-        Services to restrict catalog querying to
-        the default settings query up to 50 services. If you have more than
-        services in your Consul service catalog, use this include list.
+        Services to which catalog querying is restricted. By default, the check
+        queries up to 50 services. If you have more than 50 services in your
+        Consul service catalog, use this include list.
       value:
         type: array
         items:
@@ -118,20 +119,30 @@ files:
 
     - name: threads_count
       description: |
-        Increase the number of threads to collect consul services checks.
+        Increase the number of threads used to collect Consul service checks.
       value:
         type: number
         example: 1
 
     - name: disable_legacy_service_tag
+      display_priority: 1
       description: |
-        Whether or not to stop submitting the tag `service` that has been renamed
-        to `consul_service` and disable the associated deprecation warning.
+        Whether to stop submitting the `service` tag, which has been renamed to `consul_service`, and to disable 
+        the associated deprecation warning. Datadog recommends setting this to `true`.
       value:
         type: boolean
         display_default: false
         example: true
       enabled: true
+
+    - name: collect_health_checks
+      description: |
+        Whether to enable new service health checks from this instance. Enabling this will
+        also emit an event for every failed service health check.
+      value:
+        type: boolean
+        display_default: false
+        example: true
 
     - template: instances/http
     - template: instances/default

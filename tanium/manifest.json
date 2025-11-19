@@ -1,0 +1,65 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "acd85f97-d968-4fd9-9a36-0f131ddafe38",
+  "app_id": "tanium",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Tanium threat response alerts and audit activities",
+    "title": "Tanium",
+    "media": [
+      {
+        "caption": "Tanium - Threat Response Alerts",
+        "image_url": "images/tanium_threat_response_alerts.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Tanium - Threat Response Audit Logs",
+        "image_url": "images/tanium_threat_response_audit_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Tanium - Platform Audit Logs",
+        "image_url": "images/tanium_platform_audit_logs.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 35701756,
+      "source_type_name": "Tanium",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Tanium - Threat Response Alerts": "assets/dashboards/tanium_threat_response_alerts.json",
+      "Tanium - Threat Response Audit Logs": "assets/dashboards/tanium_threat_response_audit_logs.json",
+      "Tanium - Platform Audit Logs": "assets/dashboards/tanium_platform_audit_logs.json"
+    },
+    "logs": {
+      "source": "tanium"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

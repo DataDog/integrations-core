@@ -2,15 +2,75 @@
 
 <!-- towncrier release notes start -->
 
-## 8.0.0 / 2024-09-25
+## 9.1.1 / 2025-10-31
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 9.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 9.0.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 9.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 8.3.0 / 2025-04-17 / Agent 7.66.0
+
+***Added***:
+
+* Add failover support with Agent High Availability feature ([#19987](https://github.com/DataDog/integrations-core/pull/19987))
+
+***Fixed***:
+
+* Don't submit property metrics with unknown hostname. ([#19944](https://github.com/DataDog/integrations-core/pull/19944))
+
+## 8.2.1 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Submit non-VM or ESXI events with an empty hostname. ([#19393](https://github.com/DataDog/integrations-core/pull/19393))
+
+## 8.2.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 8.1.0 / 2024-11-20 / Agent 7.61.0
+
+***Added***:
+
+* Added support for vSAN metric/event collection in the vSphere integration ([#18117](https://github.com/DataDog/integrations-core/pull/18117))
+
+## 8.0.1 / 2024-10-31 / Agent 7.60.0
+
+***Fixed***:
+
+* Add debug log line for host tags. ([#18774](https://github.com/DataDog/integrations-core/pull/18774))
+
+## 8.0.0 / 2024-09-25 / Agent 7.59.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 * Added the hostname_transform config option ([#18652](https://github.com/DataDog/integrations-core/pull/18652))
 
 ***Fixed***:
@@ -23,6 +83,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 7.6.0 / 2024-07-05 / Agent 7.56.0
 

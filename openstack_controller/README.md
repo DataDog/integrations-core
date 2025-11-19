@@ -6,6 +6,8 @@
 
 This check monitors [OpenStack][2] from the controller node.
 
+**Minimum Agent version:** 6.10.0
+
 ## Setup
 
 ### Installation
@@ -89,7 +91,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://docs.datadoghq.com/integrations/openstack/
 [2]: https://www.openstack.org
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

@@ -1,0 +1,62 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6aee88c6-c3b2-43b2-8f1e-5ba7c6011cb6",
+  "app_id": "celery",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of Celery workers.",
+    "title": "Celery",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Message Queues",
+      "Offering::Integration",
+      "Product::Data Streams Monitoring",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 41308776,
+      "source_type_name": "Celery",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "celery.flower.",
+        "check": "celery.flower.events.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "celery"
+      ]
+    },
+    "dashboards": {
+      "Celery Overview": "assets/dashboards/celery_overview.json"
+    },
+    "monitors": {
+      "Celery workers are idle": "assets/monitors/celery_exection_idle.json",
+      "Celery workers are offline": "assets/monitors/celery_workers_down.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

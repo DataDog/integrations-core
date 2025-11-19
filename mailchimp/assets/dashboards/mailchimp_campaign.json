@@ -1,0 +1,1923 @@
+{
+    "title": "Mailchimp - Campaigns",
+    "description": "",
+    "widgets": [
+        {
+            "id": 7269144025338304,
+            "definition": {
+                "type": "image",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2XxdAHl6OwmybeKmWlbGY1mz01aNF-KadbQ&s",
+                "url_dark_theme": "https://www.signpost.com/wp-content/uploads/2021/03/Mailchimp_Logo-Horizontal_White.png",
+                "sizing": "contain",
+                "margin": "sm",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 5767466155604808,
+            "definition": {
+                "title": "Campaign Monitors Summary",
+                "type": "manage_status",
+                "display_format": "countsAndList",
+                "color_preference": "background",
+                "hide_zero_counts": true,
+                "show_status": true,
+                "last_triggered_format": "relative",
+                "query": "tag:mailchimp",
+                "sort": "status,asc",
+                "count": 50,
+                "start": 0,
+                "summary_type": "monitors",
+                "show_priority": false,
+                "show_last_triggered": false
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 6313935354679546,
+            "definition": {
+                "type": "note",
+                "content": "**Mailchimp** is an all-in-one marketing platform that helps businesses create, send, and analyze email campaigns. It provides tools for audience management, marketing automation, and insights to drive engagement and grow your business.\n\nThis Mailchimp **Campaign** Dashboard provides comprehensive insights, including total campaigns, email performance, click rates, open rates, bounce rates, unsubscriptions, and abuse reports, with latest metrics showcasing consolidated statistics for the campaigns sent in last 30 days.\n\nFor more information, see the [Mailchimp Integration Documentation](https://docs.datadoghq.com/integrations/mailchimp/).",
+                "background_color": "gray",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "right",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 6624839806670414,
+            "definition": {
+                "type": "note",
+                "content": "**Note**:\n- The dashboard widgets show the latest metric values captured for each campaign sent during the last 30 days.\n- Campaigns sent before 30 days will not tracked in the dashboard.\n\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "right",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 3,
+                "y": 2,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 1808881518882150,
+            "definition": {
+                "title": "Total Campaigns (Last 30 days)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.campaigns.count{*}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "custom_bg",
+                                "custom_bg_color": "#71c6ea"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 6,
+                "y": 3,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 4240626142953546,
+            "definition": {
+                "title": "Email Sent (Last 30 days)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.campaigns.emails_sent{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 9,
+                "y": 3,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 6425641590319608,
+            "definition": {
+                "title": "Top Campaigns by Email Sent (Last 30 days)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.campaigns.emails_sent{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type} by {campaign_title}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 100,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Email Sent",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4281018966859162,
+            "definition": {
+                "title": "Email Sent by Type (Last 30 days)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.campaigns.emails_sent{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type} by {campaign_type}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "style": {
+                            "palette": "semantic"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "inline"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 6,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4644526884571892,
+            "definition": {
+                "title": "Email Click Statistics",
+                "background_color": "vivid_yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5692327934652966,
+                        "definition": {
+                            "title": "Email Clicks (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.clicks_total{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8722029256613548,
+                        "definition": {
+                            "title": "Email Clicks Overview",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Clicks",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Unique Clicks",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Unique Subscriber Clicks",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.clicks_total{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type}"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_clicks{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type}"
+                                        },
+                                        {
+                                            "name": "query4",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_subscriber_clicks{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "min": "0"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3768876635759904,
+                        "definition": {
+                            "title": "Unique Clicks (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_clicks{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1354873438975362,
+                        "definition": {
+                            "title": "Unique Subscriber Clicks (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_subscriber_clicks{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4110196203440266,
+                        "definition": {
+                            "title": "Email Clicks Rate Overview (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Click Rate %",
+                                            "formula": "query4 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query4",
+                                            "data_source": "metrics",
+                                            "query": "avg:mailchimp.campaigns.click_rate{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "min": "0"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 4,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6343560015017732,
+                        "definition": {
+                            "title": "Avg Click Rate (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:mailchimp.campaigns.click_rate{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6031362335214820,
+                        "definition": {
+                            "title": "Email Clicks Summary (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.clicks_total{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_clicks{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_subscriber_clicks{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query4",
+                                            "data_source": "metrics",
+                                            "query": "avg:mailchimp.campaigns.click_rate{$campaign_title,$campaign_id,$audience_id,$audience,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Total Clicks",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "value": 0,
+                                                    "palette": "green_on_white"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Unique Clicks",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Unique Subscriber Clicks",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Click Rate %",
+                                            "cell_display_mode": "bar",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "value": 0,
+                                                    "palette": "yellow_on_white"
+                                                }
+                                            ],
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query4 * 100"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 12
+            }
+        },
+        {
+            "id": 4550142041718742,
+            "definition": {
+                "title": "Email Open Statistics ",
+                "background_color": "vivid_yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7206538490992142,
+                        "definition": {
+                            "title": "Email Opens (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.opens_total{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 930966042886172,
+                        "definition": {
+                            "title": "Open Email Overview",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Opens",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Unique Opens",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.opens_total{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_opens{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "min": "0"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6978005040596892,
+                        "definition": {
+                            "title": "Unique Email Opens (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_opens{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3200072343299192,
+                        "definition": {
+                            "title": "Open Rate Overview (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Open Rate %",
+                                            "formula": "query3 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:mailchimp.campaigns.open_rate{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "min": "0"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7444432481298510,
+                        "definition": {
+                            "title": "Avg Email Open Rate (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:mailchimp.campaigns.open_rate{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 92694678168276,
+                        "definition": {
+                            "title": "Email Open Summary (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.opens_total{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unique_opens{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type} by {campaign_title,campaign_list_name,campaign_id,campaign_list_id,campaign_type}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:mailchimp.campaigns.open_rate{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Total Open",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "value": 0,
+                                                    "palette": "green_on_white"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Unique Open",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Open Rate %",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "value": 0,
+                                                    "palette": "yellow_on_white"
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar",
+                                            "formula": "query3 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 12,
+                "height": 10
+            }
+        },
+        {
+            "id": 1999385738092616,
+            "definition": {
+                "title": "Bounce Email Statistics",
+                "background_color": "vivid_yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4328682026084472,
+                        "definition": {
+                            "title": "Total Bounce Emails (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 + query2 + query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.hard_bounces{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.soft_bounces{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.syntax_errors{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7159546002263096,
+                        "definition": {
+                            "title": "Email Bounces Overview",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Hard bounces",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Soft bounces",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Syntax Error",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Total Bounce",
+                                            "formula": "query1 + query2 + query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.hard_bounces{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.soft_bounces{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.syntax_errors{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2506135217540958,
+                        "definition": {
+                            "title": "Hard Bounce (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.hard_bounces{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8514539593786768,
+                        "definition": {
+                            "title": "Soft Bounce (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.soft_bounces{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8969392464926428,
+                        "definition": {
+                            "title": "Email Bounce Summary (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.hard_bounces{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.soft_bounces{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.syntax_errors{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Hard bounces",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Soft bounces",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Syntax Error",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query3",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "red_on_white"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 4,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5664588642191456,
+                        "definition": {
+                            "title": "Syntax Errors (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.syntax_errors{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "red_on_white"
+                                        },
+                                        {
+                                            "comparator": "=",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 3,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 32,
+                "width": 12,
+                "height": 9,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 1053170537382320,
+            "definition": {
+                "title": "Email Unsubscribe Statistics ",
+                "background_color": "vivid_yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3963079171715214,
+                        "definition": {
+                            "title": "Total Unsubscriptions (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unsubscribed{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        },
+                                        {
+                                            "comparator": "=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1617194869801440,
+                        "definition": {
+                            "title": "Unsubscriptions Overview",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Email Unsubscribe ",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unsubscribed{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8623206661229914,
+                        "definition": {
+                            "title": "Campaign Unsubscription Summary (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.unsubscribed{$audience,$audience_id,$campaign_type,$campaign_title,$campaign_id} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Unsubscription ",
+                                            "formula": "query1",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "red_on_white"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 41,
+                "width": 12,
+                "height": 7
+            }
+        },
+        {
+            "id": 7124104183881532,
+            "definition": {
+                "title": "Abuse Report Statistics ",
+                "background_color": "vivid_yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4235369984970156,
+                        "definition": {
+                            "title": "Abuse Reports (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.abuse_reports{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1027047966812606,
+                        "definition": {
+                            "title": "Abuse Reports Overview (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Abuse Reports",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.abuse_reports{$campaign_title,$campaign_id,$audience,$audience_id,$campaign_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3991806177502008,
+                        "definition": {
+                            "title": "Top 10 Abuse Reports By Campaign (Last 30 days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:mailchimp.campaigns.abuse_reports{$audience,$audience_id,$campaign_type,$campaign_title,$campaign_id} by {campaign_title,campaign_list_name,campaign_type,campaign_id,campaign_list_id}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Abuse Reported",
+                                            "formula": "query1",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "red_on_white"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 48,
+                "width": 12,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "campaign_title",
+            "prefix": "campaign_title",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "campaign_id",
+            "prefix": "campaign_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "audience",
+            "prefix": "campaign_list_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "audience_id",
+            "prefix": "campaign_list_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "campaign_type",
+            "prefix": "campaign_type",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

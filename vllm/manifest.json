@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "355886f0-31ae-44a9-9638-6951ad0f3039",
   "app_id": "vllm",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -19,6 +20,12 @@
       "Category::AI/ML",
       "Submitted Data Type::Metrics",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/vllm-integration/"
+      }
     ]
   },
   "assets": {

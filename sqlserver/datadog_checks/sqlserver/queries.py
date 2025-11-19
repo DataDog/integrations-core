@@ -2,146 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.sqlserver.const import ENGINE_EDITION_SQL_DATABASE
-from datadog_checks.sqlserver.utils import is_azure_database
-
-QUERY_SERVER_STATIC_INFO = {
-    "name": "sys.dm_os_sys_info",
-    "query": """
-        SELECT (os.ms_ticks/1000) AS [Server Uptime]
-        ,os.cpu_count AS [CPU Count]
-        ,(os.physical_memory_kb*1024) AS [Physical Memory Bytes]
-        ,os.virtual_memory_kb AS [Virtual Memory Bytes]
-        ,(os.committed_kb*1024) AS [Total Server Memory Bytes]
-        ,(os.committed_target_kb*1024) AS [Target Server Memory Bytes]
-      FROM sys.dm_os_sys_info os""".strip(),
-    "columns": [
-        {"name": "server.uptime", "type": "gauge"},
-        {"name": "server.cpu_count", "type": "gauge"},
-        {"name": "server.physical_memory", "type": "gauge"},
-        {"name": "server.virtual_memory", "type": "gauge"},
-        {"name": "server.committed_memory", "type": "gauge"},
-        {"name": "server.target_memory", "type": "gauge"},
-    ],
-}
-
-QUERY_AO_FAILOVER_CLUSTER = {
-    "name": "sys.dm_hadr_cluster",
-    "query": """
-        SELECT
-            1,
-            LOWER(quorum_type_desc) AS quorum_type_desc,
-            1,
-            LOWER(quorum_state_desc) AS quorum_state_desc,
-            cluster_name
-        FROM sys.dm_hadr_cluster
-    """.strip(),
-    "columns": [
-        {"name": "ao.quorum_type", "type": "gauge"},
-        {"name": "quorum_type", "type": "tag"},
-        {"name": "ao.quorum_state", "type": "gauge"},
-        {"name": "quorum_state", "type": "tag"},
-        {"name": "failover_cluster", "type": "tag"},
-    ],
-}
-
-QUERY_AO_FAILOVER_CLUSTER_MEMBER = {
-    "name": "sys.dm_hadr_cluster_members",
-    "query": """
-        SELECT
-            member_name,
-            1,
-            LOWER(member_type_desc) AS member_type_desc,
-            1,
-            LOWER(member_state_desc) AS member_state_desc,
-            number_of_quorum_votes,
-            FC.cluster_name
-        FROM sys.dm_hadr_cluster_members
-        -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-        -- `cluster_name` column to every row by multiplying all the rows in the left table against
-        -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
-        CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
-    """.strip(),
-    "columns": [
-        {"name": "member_name", "type": "tag"},
-        {"name": "ao.member.type", "type": "gauge"},
-        {"name": "member_type", "type": "tag"},
-        {"name": "ao.member.state", "type": "gauge"},
-        {"name": "member_state", "type": "tag"},
-        {"name": "ao.member.number_of_quorum_votes", "type": "gauge"},
-        {"name": "failover_cluster", "type": "tag"},
-    ],
-}
-
-QUERY_FAILOVER_CLUSTER_INSTANCE = {
-    "name": "sys.dm_os_cluster_nodes",
-    "query": """
-        SELECT
-            NodeName AS node_name,
-            status,
-            LOWER(status_description) AS status_description,
-            is_current_owner,
-            FC.cluster_name
-        FROM sys.dm_os_cluster_nodes
-        -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-        -- `cluster_name` column to every row by multiplying all the rows in the left table against
-        -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
-        CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
-    """.strip(),
-    "columns": [
-        {"name": "node_name", "type": "tag"},
-        {"name": "fci.status", "type": "gauge"},
-        {"name": "status", "type": "tag"},
-        {"name": "fci.is_current_owner", "type": "gauge"},
-        {"name": "failover_cluster", "type": "tag"},
-    ],
-}
-
-QUERY_LOG_SHIPPING_PRIMARY = {
-    "name": "msdb.dbo.log_shipping_monitor_primary",
-    "query": """
-        SELECT primary_id
-            ,primary_server
-            ,primary_database
-            ,DATEDIFF(SECOND, last_backup_date, GETDATE()) AS time_since_backup
-            ,backup_threshold*60 as backup_threshold
-        FROM msdb.dbo.log_shipping_monitor_primary
-    """.strip(),
-    "columns": [
-        {"name": "primary_id", "type": "tag"},
-        {"name": "primary_server", "type": "tag"},
-        {"name": "primary_db", "type": "tag"},
-        {"name": "log_shipping_primary.time_since_backup", "type": "gauge"},
-        {"name": "log_shipping_primary.backup_threshold", "type": "gauge"},
-    ],
-}
-
-QUERY_LOG_SHIPPING_SECONDARY = {
-    "name": "msdb.dbo.log_shipping_monitor_secondary",
-    "query": """
-        SELECT secondary_server
-            ,secondary_database
-            ,secondary_id
-            ,primary_server
-            ,primary_database
-            ,DATEDIFF(SECOND, last_restored_date, GETDATE()) AS time_since_restore
-            ,DATEDIFF(SECOND, last_copied_date, GETDATE()) AS time_since_copy
-            ,last_restored_latency*60 as last_restored_latency
-            ,restore_threshold*60 as restore_threshold
-        FROM msdb.dbo.log_shipping_monitor_secondary
-    """.strip(),
-    "columns": [
-        {"name": "secondary_server", "type": "tag"},
-        {"name": "secondary_db", "type": "tag"},
-        {"name": "secondary_id", "type": "tag"},
-        {"name": "primary_server", "type": "tag"},
-        {"name": "primary_db", "type": "tag"},
-        {"name": "log_shipping_secondary.time_since_restore", "type": "gauge"},
-        {"name": "log_shipping_secondary.time_since_copy", "type": "gauge"},
-        {"name": "log_shipping_secondary.last_restored_latency", "type": "gauge"},
-        {"name": "log_shipping_secondary.restore_threshold", "type": "gauge"},
-    ],
-}
+from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_RING_BUFFER
 
 DB_QUERY = """
 SELECT
@@ -171,7 +32,7 @@ COLUMN_QUERY = """
 SELECT
     column_name AS name, data_type, column_default, is_nullable AS nullable , table_name, ordinal_position
 FROM
-    information_schema.columns
+    INFORMATION_SCHEMA.COLUMNS
 WHERE
     table_name IN ({}) and table_schema='{}';
 """
@@ -197,262 +58,159 @@ WHERE
     i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled;
 """
 
+INDEX_QUERY_PRE_2017 = """
+SELECT
+    i.object_id AS id,
+    i.name,
+    i.type,
+    i.is_unique,
+    i.is_primary_key,
+    i.is_unique_constraint,
+    i.is_disabled,
+    STUFF((
+        SELECT ',' + c.name
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS column_names
+FROM
+    sys.indexes i
+WHERE
+    i.object_id IN ({})
+GROUP BY
+    i.object_id,
+    i.name,
+    i.index_id,
+    i.type,
+    i.is_unique,
+    i.is_primary_key,
+    i.is_unique_constraint,
+    i.is_disabled;
+"""
+
 FOREIGN_KEY_QUERY = """
 SELECT
-    FK.parent_object_id AS id,
+    FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
     OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
-    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column
+    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column,
+    FK.delete_referential_action_desc AS delete_action,
+    FK.update_referential_action_desc AS update_action
 FROM
     sys.foreign_keys AS FK
     JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
 WHERE
     FK.parent_object_id IN ({})
 GROUP BY
-    FK.name, FK.parent_object_id, FK.referenced_object_id;
+    FK.name,
+    FK.parent_object_id,
+    FK.referenced_object_id,
+    FK.delete_referential_action_desc,
+    FK.update_referential_action_desc;
 """
+
+FOREIGN_KEY_QUERY_PRE_2017 = """
+SELECT
+    FK.parent_object_id AS table_id,
+    FK.name AS foreign_key_name,
+    OBJECT_NAME(FK.parent_object_id) AS referencing_table,
+    STUFF((
+        SELECT ',' + COL_NAME(FKC.parent_object_id, FKC.parent_column_id)
+        FROM sys.foreign_key_columns AS FKC
+        WHERE FKC.constraint_object_id = FK.object_id
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referencing_column,
+    OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
+    STUFF((
+        SELECT ',' + COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id)
+        FROM sys.foreign_key_columns AS FKC
+        WHERE FKC.constraint_object_id = FK.object_id
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referenced_column,
+    FK.delete_referential_action_desc AS delete_action,
+    FK.update_referential_action_desc AS update_action
+FROM
+    sys.foreign_keys AS FK
+WHERE
+    FK.parent_object_id IN ({})
+GROUP BY
+    FK.name,
+    FK.object_id,
+    FK.parent_object_id,
+    FK.referenced_object_id,
+    FK.delete_referential_action_desc,
+    FK.update_referential_action_desc;
+"""
+
+DEFAULT_DM_XE_TARGETS = "sys.dm_xe_session_targets"
+DEFAULT_DM_XE_SESSIONS = "sys.dm_xe_sessions"
+XE_SESSION_DATADOG = "datadog"
+XE_SESSION_SYSTEM = "system_health"
+
+
+def get_xe_sessions_query(dm_xe_targets=DEFAULT_DM_XE_TARGETS, dm_xe_sessions=DEFAULT_DM_XE_SESSIONS):
+    return f"""
+SELECT
+    s.name AS session_name, t.target_name AS target_name
+FROM
+    {dm_xe_sessions} s
+JOIN
+    {dm_xe_targets} t
+    ON s.address = t.event_session_address
+WHERE
+    s.name IN ('{XE_SESSION_DATADOG}', '{XE_SESSION_SYSTEM}');
+"""
+
 
 DEADLOCK_TIMESTAMP_ALIAS = "timestamp"
 DEADLOCK_XML_ALIAS = "event_xml"
 
 
-def get_deadlocks_query(convert_xml_to_str=False):
+def get_deadlocks_query(
+    convert_xml_to_str=False,
+    xe_session_name=XE_SESSION_DATADOG,
+    xe_target_name=XE_RING_BUFFER,
+    dm_xe_targets=DEFAULT_DM_XE_TARGETS,
+    dm_xe_sessions=DEFAULT_DM_XE_SESSIONS,
+    level="",
+):
     """
     Construct the query to fetch deadlocks from the system_health extended event session
-    :param convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
-        that can't convert XML to str
+    :params:
+        convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
+            that can't convert XML to str
+        xe_session_name: The name of the extended event session to query
+        xe_target_name: The name of the extended event target to query
+        dm_xe_targets: The name of the DMV to query for extended event targets
+        dm_xe_sessions: The name of the DMV to query for extended event sessions
+        level: 'database_' for Azure database, '' for all other versions
     :return: The query to fetch deadlocks
     """
     xml_expression = "xdr.query('.')"
     if convert_xml_to_str:
         xml_expression = "CAST(xdr.query('.') AS NVARCHAR(MAX))"
 
-    return f"""
-    SELECT TOP(?) xdr.value('@timestamp', 'datetime') AS [{DEADLOCK_TIMESTAMP_ALIAS}],
-        {xml_expression} AS [{DEADLOCK_XML_ALIAS}]
+    if xe_target_name == XE_RING_BUFFER:
+        return f"""SELECT TOP(?) xdr.value('@timestamp', 'datetime') AS [{DEADLOCK_TIMESTAMP_ALIAS}],
+            {xml_expression} AS [{DEADLOCK_XML_ALIAS}]
     FROM (SELECT CAST([target_data] AS XML) AS Target_Data
-                FROM sys.dm_xe_session_targets AS xt
-                INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
-                WHERE xs.name = N'system_health'
-                AND xt.target_name = N'ring_buffer'
+                FROM {dm_xe_targets} AS xt
+                INNER JOIN {dm_xe_sessions} AS xs ON xs.address = xt.event_session_address
+                WHERE xs.name = N'{xe_session_name}'
+                AND xt.target_name = N'{XE_RING_BUFFER}'
         ) AS XML_Data
-    CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
-    WHERE xdr.value('@timestamp', 'datetime') >= DATEADD(SECOND, ?, GETDATE())
+    CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="{level}xml_deadlock_report"]') AS XEventData(xdr)
+    WHERE xdr.value('@timestamp', 'datetime')
+        >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC')
     ;"""
 
-
-def get_query_ao_availability_groups(sqlserver_major_version):
-    """
-    Construct the sys.availability_groups QueryExecutor configuration based on the SQL Server major version
-
-    :params sqlserver_major_version: SQL Server major version (i.e. 2012, 2019, ...)
-    :return: a QueryExecutor query config object
-    """
-    column_definitions = {
-        # AG - sys.availability_groups
-        "AG.group_id AS availability_group": {
-            "name": "availability_group",
-            "type": "tag",
-        },
-        "AG.name AS availability_group_name": {
-            "name": "availability_group_name",
-            "type": "tag",
-        },
-        # AR - sys.availability_replicas
-        "AR.replica_server_name": {"name": "replica_server_name", "type": "tag"},
-        "LOWER(AR.failover_mode_desc) AS failover_mode_desc": {
-            "name": "failover_mode",
-            "type": "tag",
-        },
-        "LOWER(AR.availability_mode_desc) AS availability_mode_desc": {
-            "name": "availability_mode",
-            "type": "tag",
-        },
-        # ADC - sys.availability_databases_cluster
-        "ADC.database_name": {"name": "database_name", "type": "tag"},
-        # DRS - sys.dm_hadr_database_replica_states
-        "DRS.replica_id": {"name": "replica_id", "type": "tag"},
-        "DRS.database_id": {"name": "database_id", "type": "tag"},
-        "LOWER(DRS.database_state_desc) AS database_state_desc": {
-            "name": "database_state",
-            "type": "tag",
-        },
-        "LOWER(DRS.synchronization_state_desc) AS synchronization_state_desc": {
-            "name": "synchronization_state",
-            "type": "tag",
-        },
-        "(DRS.log_send_queue_size * 1024) AS log_send_queue_size": {
-            "name": "ao.log_send_queue_size",
-            "type": "gauge",
-        },
-        "(DRS.log_send_rate * 1024) AS log_send_rate": {
-            "name": "ao.log_send_rate",
-            "type": "gauge",
-        },
-        "(DRS.redo_queue_size * 1024) AS redo_queue_size": {
-            "name": "ao.redo_queue_size",
-            "type": "gauge",
-        },
-        "(DRS.redo_rate * 1024) AS redo_rate": {
-            "name": "ao.redo_rate",
-            "type": "gauge",
-        },
-        "DRS.low_water_mark_for_ghosts": {
-            "name": "ao.low_water_mark_for_ghosts",
-            "type": "gauge",
-        },
-        "(DRS.filestream_send_rate * 1024) AS filestream_send_rate": {
-            "name": "ao.filestream_send_rate",
-            "type": "gauge",
-        },
-        # FC - sys.dm_hadr_cluster
-        "FC.cluster_name": {
-            "name": "failover_cluster",
-            "type": "tag",
-        },
-        # Other
-        "1 AS replica_sync_topology_indicator": {
-            "name": "ao.replica_status",
-            "type": "gauge",
-        },
-    }
-
-    # Include metrics based on version
-    if sqlserver_major_version >= 2016:
-        column_definitions["DRS.secondary_lag_seconds"] = {
-            "name": "ao.secondary_lag_seconds",
-            "type": "gauge",
-        }
-    if sqlserver_major_version >= 2014:
-        column_definitions["DRS.is_primary_replica"] = {
-            "name": "ao.is_primary_replica",
-            "type": "gauge",
-        }
-        column_definitions[
-            """
-        CASE
-            WHEN DRS.is_primary_replica = 1 THEN 'primary'
-            WHEN DRS.is_primary_replica = 0 THEN 'secondary'
-        END AS replica_role_desc
-        """
-        ] = {"name": "replica_role", "type": "tag"}
-
-    # Sort columns to ensure a static column order
-    sql_columns = []
-    metric_columns = []
-    for column in sorted(column_definitions.keys()):
-        sql_columns.append(column)
-        metric_columns.append(column_definitions[column])
-
-    return {
-        "name": "sys.availability_groups",
-        "query": """
-        SELECT
-            {sql_columns}
-        FROM
-            sys.availability_groups AS AG
-            INNER JOIN sys.availability_replicas AS AR ON AG.group_id = AR.group_id
-            INNER JOIN sys.availability_databases_cluster AS ADC ON AG.group_id = ADC.group_id
-            INNER JOIN sys.dm_hadr_database_replica_states AS DRS ON AG.group_id = DRS.group_id
-                AND ADC.group_database_id = DRS.group_database_id
-                AND AR.replica_id = DRS.replica_id
-            -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-            -- `cluster_name` column to every row by multiplying all the rows in the left table against
-            -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
-            CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
-    """.strip().format(
-            sql_columns=", ".join(sql_columns),
-        ),
-        "columns": metric_columns,
-    }
-
-
-def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
-    """
-    Construct the dm_io_virtual_file_stats QueryExecutor configuration based on the SQL Server major version
-
-    :param sqlserver_engine_edition: The engine version (i.e. 5 for Azure SQL DB...)
-    :param sqlserver_major_version: SQL Server major version (i.e. 2012, 2019, ...)
-    :return: a QueryExecutor query config object
-    """
-
-    column_definitions = {
-        "size_on_disk_bytes": {"name": "files.size_on_disk", "type": "gauge"},
-        "num_of_reads": {"name": "files.reads", "type": "monotonic_count"},
-        "num_of_bytes_read": {"name": "files.read_bytes", "type": "monotonic_count"},
-        "io_stall_read_ms": {"name": "files.read_io_stall", "type": "monotonic_count"},
-        "io_stall_queued_read_ms": {
-            "name": "files.read_io_stall_queued",
-            "type": "monotonic_count",
-        },
-        "num_of_writes": {"name": "files.writes", "type": "monotonic_count"},
-        "num_of_bytes_written": {
-            "name": "files.written_bytes",
-            "type": "monotonic_count",
-        },
-        "io_stall_write_ms": {
-            "name": "files.write_io_stall",
-            "type": "monotonic_count",
-        },
-        "io_stall_queued_write_ms": {
-            "name": "files.write_io_stall_queued",
-            "type": "monotonic_count",
-        },
-        "io_stall": {"name": "files.io_stall", "type": "monotonic_count"},
-    }
-
-    if sqlserver_major_version <= 2012 and not is_azure_database(sqlserver_engine_edition):
-        column_definitions.pop("io_stall_queued_read_ms")
-        column_definitions.pop("io_stall_queued_write_ms")
-
-    # sort columns to ensure a static column order
-    sql_columns = []
-    metric_columns = []
-    for column in sorted(column_definitions.keys()):
-        sql_columns.append("fs.{}".format(column))
-        metric_columns.append(column_definitions[column])
-
-    query_filter = ""
-    if sqlserver_major_version == 2022:
-        query_filter = "WHERE DB_NAME(fs.database_id) not like 'model_%'"
-
-    query = """
-    SELECT
-        DB_NAME(fs.database_id),
-        mf.state_desc,
-        mf.name,
-        mf.physical_name,
-        {sql_columns}
-    FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
-        LEFT JOIN sys.master_files mf
-            ON mf.database_id = fs.database_id
-            AND mf.file_id = fs.file_id {filter};
-    """
-
-    if sqlserver_engine_edition == ENGINE_EDITION_SQL_DATABASE:
-        # Azure SQL DB does not have access to the sys.master_files view
-        query = """
-        SELECT
-            DB_NAME(DB_ID()),
-            df.state_desc,
-            df.name,
-            df.physical_name,
-            {sql_columns}
-        FROM sys.dm_io_virtual_file_stats(DB_ID(), NULL) fs
-            LEFT JOIN sys.database_files df
-                ON df.file_id = fs.file_id;
-        """
-
-    return {
-        "name": "sys.dm_io_virtual_file_stats",
-        "query": query.strip().format(sql_columns=", ".join(sql_columns), filter=query_filter),
-        "columns": [
-            {"name": "db", "type": "tag"},
-            {"name": "state", "type": "tag"},
-            {"name": "logical_name", "type": "tag"},
-            {"name": "file_location", "type": "tag"},
-        ]
-        + metric_columns,
-    }
+    return f"""SELECT TOP(?)
+event_data AS [{DEADLOCK_XML_ALIAS}],
+CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[1]','datetime')
+    AS [{DEADLOCK_TIMESTAMP_ALIAS}]
+FROM
+sys.fn_xe_file_target_read_file
+('system_health*.xel', null, null, null)
+WHERE object_name = 'xml_deadlock_report'
+  and CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[1]','datetime')
+    >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC');"""

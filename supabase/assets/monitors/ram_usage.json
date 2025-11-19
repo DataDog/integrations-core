@@ -1,0 +1,33 @@
+{
+	"version": 2,
+	"created_at": "2025-02-03",
+	"last_updated_at": "2025-02-03",
+	"title": "Supabase RAM Usage",
+	"description": "Alert on high RAM usage for Supabase",
+	"definition": {
+		"id": 163931264,
+		"name": "[Supabase] High RAM Usage",
+		"type": "query alert",
+		"query": "avg(last_5m):100 - (avg:supabase.node.memory.mem_available_bytes{*} by {supabase_project_ref} * 100 / avg:supabase.node.memory.mem_total_bytes{*} by {supabase_project_ref}) >= 90",
+		"message": "{{#is_alert}}\n  Please check project {{supabase_project_ref.name}}, as it reports usage of more than {{threshold}}% of available RAM for the last hour.\n{{/is_alert}}\n\n{{#is_recovery}}\n  RAM usage has recovered below {{threshold}}%. \n{{/is_recovery}}",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 90,
+				"warning": 80
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:supabase"
+	]
+}

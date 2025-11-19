@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fc23bf70-2992-4e07-96db-c65c167f25d6",
   "app_id": "elasticsearch",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -9,7 +10,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor overall cluster status down to JVM heap usage and everything in between.",
-    "title": "ElasticSearch",
+    "title": "Elasticsearch",
     "media": [],
     "classifier_tags": [
       "Category::Data Stores",

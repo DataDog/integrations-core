@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -16,12 +16,18 @@ import pytest
 from mock import patch
 
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_EVENT_FILE, XE_RING_BUFFER
 from datadog_checks.sqlserver.deadlocks import (
     PAYLOAD_QUERY_SIGNATURE,
     PAYLOAD_TIMESTAMP,
     Deadlocks,
 )
-from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
+from datadog_checks.sqlserver.queries import (
+    DEADLOCK_TIMESTAMP_ALIAS,
+    DEADLOCK_XML_ALIAS,
+    XE_SESSION_DATADOG,
+    XE_SESSION_SYSTEM,
+)
 
 from .common import CHECK_NAME
 
@@ -66,13 +72,13 @@ def _get_deadlocks_payload(dbm_activity):
     return matched
 
 
-def _get_conn_for_user(instance_docker, user):
+def _get_conn_for_user(instance_docker, user, password="Password12!"):
     conn_str = (
         f"DRIVER={instance_docker['driver']};"
         f"Server={instance_docker['host']};"
         "Database=master;"
         f"UID={user};"
-        "PWD=Password12!;"
+        f"PWD={password};"
         "TrustServerCertificate=yes;"
     )
     conn = pyodbc.connect(conn_str, autocommit=False)
@@ -91,7 +97,6 @@ def _run_first_deadlock_query(conn, event1, event2):
         # Exception is expected due to a deadlock
         exception_text = str(e)
         pass
-    conn.commit()
     return exception_text
 
 
@@ -107,7 +112,6 @@ def _run_second_deadlock_query(conn, event1, event2):
         # Exception is expected due to a deadlock
         exception_text = str(e)
         pass
-    conn.commit()
     return exception_text
 
 
@@ -136,16 +140,25 @@ def _create_deadlock(dd_environment, dbm_instance):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.usefixtures('_create_deadlock')
 @pytest.mark.parametrize("convert_xml_to_str", [False, True])
-def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str):
+@pytest.mark.parametrize(
+    "xe_session_name, xe_session_target",
+    [
+        [XE_SESSION_DATADOG, XE_RING_BUFFER],
+        [XE_SESSION_SYSTEM, XE_EVENT_FILE],
+    ],
+)
+def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, xe_session_name, xe_session_target):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.deadlocks._force_convert_xml_to_str = convert_xml_to_str
+    check.deadlocks._xe_session_name = xe_session_name
+    check.deadlocks._xe_session_target = xe_session_target
 
     dbm_instance['dbm_enabled'] = True
     deadlock_payloads = _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator)
     try:
-        assert (
-            len(deadlock_payloads) == 1
-        ), f"Should have collected one deadlock payload, but collected: {len(deadlock_payloads)}"
+        assert len(deadlock_payloads) == 1, (
+            f"Should have collected one deadlock payload, but collected: {len(deadlock_payloads)}"
+        )
     except AssertionError as e:
         raise e
     deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
@@ -163,9 +176,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str):
             if process.find('inputbuf').text == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;":
                 found += 1
     try:
-        assert (
-            found == 1
-        ), "Should have collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
+        assert found == 1, (
+            "Should have collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
+        )
     except AssertionError as e:
         logging.error("deadlock payload: %s", str(deadlocks))
         raise e
@@ -179,9 +192,9 @@ def test_no_empty_deadlocks_payloads(dd_run_check, init_config, dbm_instance, ag
         '_query_deadlocks',
         return_value=[],
     ):
-        assert not _run_check_and_get_deadlock_payloads(
-            dd_run_check, check, aggregator
-        ), "shouldn't have sent an empty payload"
+        assert not _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator), (
+            "shouldn't have sent an empty payload"
+        )
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -197,6 +210,13 @@ def test_deadlocks_behind_dbm(dd_run_check, init_config, dbm_instance):
     ) as mocked_function:
         dd_run_check(check)
         mocked_function.assert_not_called()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_xe_session(dd_run_check, dbm_instance):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    assert check.deadlocks._xe_session_name == XE_SESSION_DATADOG
 
 
 DEADLOCKS_PLAN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deadlocks")
@@ -344,3 +364,15 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         result_string = result_string.replace('\t', '').replace('\n', '')
         result_string = re.sub(r'\s{2,}', ' ', result_string)
         assert expected_xml_string == result_string
+
+
+@pytest.mark.unit
+def test_collect_deadlocks_config(dbm_instance):
+    dbm_instance['collect_deadlocks'] = {"enabled": True, 'collection_interval': 0.2}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.deadlocks_config == {"enabled": True, 'collection_interval': 0.2}
+
+    dbm_instance.pop('collect_deadlocks')
+    dbm_instance['deadlocks_collection'] = {"enabled": True, 'collection_interval': 0.3}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.deadlocks_config == {"enabled": True, 'collection_interval': 0.3}

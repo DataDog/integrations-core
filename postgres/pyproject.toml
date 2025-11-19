@@ -23,12 +23,12 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=36.14.0",
+    "datadog-checks-base>=37.24.0",
 ]
 dynamic = [
     "version",
@@ -37,11 +37,11 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "azure-identity==1.17.1",
-    "boto3==1.35.10",
-    "cachetools==5.5.0",
-    "psycopg2-binary==2.9.9",
-    "semver==3.0.2",
+    "azure-identity==1.24.0",
+    "boto3==1.40.21",
+    "cachetools==6.2.0",
+    "psycopg[c,pool]==3.2.10",
+    "semver==3.0.4",
 ]
 
 [project.urls]

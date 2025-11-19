@@ -4,6 +4,8 @@
 
 This check monitors [SAP HANA][1] 2.0, SPS 2 through the Datadog Agent.
 
+**Minimum Agent version:** 7.16.1
+
 ## Setup
 
 ### Installation
@@ -93,6 +95,13 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 #### Log collection
 
+1. In your SAP HANA database, to make sure you can read audit logs, run the following command:
+
+    ```shell
+    GRANT AUDIT READ TO DD_MONITOR;
+    GRANT SELECT ON SYS.AUDIT_LOG TO DD_MONITOR
+    ```
+
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
    ```yaml
@@ -136,7 +145,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://www.sap.com/products/hana.html
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.02/en-US/d12c86af7cb442d1b9f8520e2aba7758.html
 [4]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/datadog_checks/sap_hana/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent

@@ -17,6 +17,7 @@ from datadog_checks.vsphere.constants import (
     BOTH,
     DEFAULT_BATCH_COLLECTOR_SIZE,
     DEFAULT_EVENT_RESOURCES,
+    DEFAULT_INFRASTRUCTURE_MODE,
     DEFAULT_MAX_QUERY_METRICS,
     DEFAULT_METRICS_PER_QUERY,
     DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL,
@@ -85,6 +86,7 @@ class VSphereConfig(object):
         # Check option
         self.threads_count = instance.get("threads_count", DEFAULT_THREAD_COUNT)
         self.metrics_per_query = instance.get("metrics_per_query", DEFAULT_METRICS_PER_QUERY)
+        self.infrastructure_mode = instance.get("infrastructure_mode", DEFAULT_INFRASTRUCTURE_MODE)
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
         self.batch_tags_collector_size = instance.get('batch_tags_collector_size', DEFAULT_TAGS_COLLECTOR_SIZE)
         self.collect_events_only = is_affirmative(instance.get("collect_events_only", False))
@@ -94,8 +96,10 @@ class VSphereConfig(object):
         self.tags_prefix = instance.get("tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
         self.should_collect_attributes = is_affirmative(instance.get("collect_attributes", False))
         self.collect_property_metrics = is_affirmative(instance.get("collect_property_metrics", False))
+        self.collect_vsan = is_affirmative(instance.get("collect_vsan_data", False))
         self.attr_prefix = instance.get("attributes_prefix", DEFAULT_VSPHERE_ATTR_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
+        self.empty_default_hostname = instance.get("empty_default_hostname", False)
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
         self.refresh_infrastructure_cache_interval = instance.get(
             'refresh_infrastructure_cache_interval', DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL
@@ -133,7 +137,7 @@ class VSphereConfig(object):
             self.exclude_filters = {}
             for item in self.include_events:
                 event_name = item["event"]
-                excluded_messages = [r'{}'.format(msg) for msg in item["excluded_messages"]]
+                excluded_messages = [r'{}'.format(msg) for msg in item.get("excluded_messages", [])]
                 self.exclude_filters[event_name] = excluded_messages
 
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
@@ -182,8 +186,9 @@ class VSphereConfig(object):
         for resource_type in self.event_resource_filters:
             if resource_type not in all_valid_resource_types:
                 raise ConfigurationError(
-                    "Invalid resource type specified in `event_resource_filters`: {}. "
-                    "Valid resource types: {}".format(resource_type, all_valid_resource_types),
+                    "Invalid resource type specified in `event_resource_filters`: {}. Valid resource types: {}".format(
+                        resource_type, all_valid_resource_types
+                    ),
                 )
 
     def _parse_resource_filters(self, all_resource_filters):
@@ -243,8 +248,7 @@ class VSphereConfig(object):
 
             if resource_filter['property'] not in allowed_prop_names:
                 self.log.warning(
-                    "Ignoring filter %r because property '%s' is not valid "
-                    "for resource type %s. Should be one of %r.",
+                    "Ignoring filter %r because property '%s' is not valid for resource type %s. Should be one of %r.",
                     resource_filter,
                     resource_filter['property'],
                     resource_filter['resource'],

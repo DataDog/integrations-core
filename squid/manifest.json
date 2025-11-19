@@ -1,50 +1,74 @@
 {
-  "manifest_version": "2.0.0",
-  "app_uuid": "de18c581-69ee-48cf-ba23-7794bfb7a4bd",
-  "app_id": "squid",
-  "display_on_public_website": true,
-  "tile": {
-    "overview": "README.md#Overview",
-    "configuration": "README.md#Setup",
-    "support": "README.md#Support",
-    "changelog": "CHANGELOG.md",
-    "description": "Track metrics from your squid-cache servers with Datadog",
-    "title": "Squid",
-    "media": [],
-    "classifier_tags": [
-      "Category::Caching",
-      "Category::Log Collection",
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Offering::Integration"
-    ]
-  },
-  "author": {
-    "support_email": "help@datadoghq.com",
-    "name": "Datadog",
-    "homepage": "https://www.datadoghq.com",
-    "sales_email": "info@datadoghq.com"
-  },
-  "assets": {
-    "integration": {
-      "source_type_name": "Squid",
-      "configuration": {
-        "spec": "assets/configuration/spec.yaml"
-      },
-      "events": {
-        "creates_events": false
-      },
-      "metrics": {
-        "prefix": "squid.",
-        "check": "squid.cachemgr.cpu_time",
-        "metadata_path": "metadata.csv"
-      },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
-      },
-      "source_type_id": 10022,
-      "auto_install": true
+    "manifest_version": "2.0.0",
+    "app_uuid": "de18c581-69ee-48cf-ba23-7794bfb7a4bd",
+    "app_id": "squid",
+    "owner": "agent-integrations",
+    "display_on_public_website": true,
+    "tile": {
+        "overview": "README.md#Overview",
+        "configuration": "README.md#Setup",
+        "support": "README.md#Support",
+        "changelog": "CHANGELOG.md",
+        "description": "Track metrics from your squid-cache servers with Datadog",
+        "title": "Squid",
+        "media": [
+            {
+                "caption": "Squid - 1",
+                "image_url": "images/squid_1.png",
+                "media_type": "image"
+            },
+            {
+                "caption": "Squid - 2",
+                "image_url": "images/squid_2.png",
+                "media_type": "image"
+            }
+        ],
+        "classifier_tags": [
+            "Category::Caching",
+            "Category::Log Collection",
+            "Supported OS::Linux",
+            "Supported OS::Windows",
+            "Supported OS::macOS",
+            "Offering::Integration"
+        ]
+    },
+    "author": {
+        "support_email": "help@datadoghq.com",
+        "name": "Datadog",
+        "homepage": "https://www.datadoghq.com",
+        "sales_email": "info@datadoghq.com"
+    },
+    "assets": {
+        "integration": {
+            "source_type_name": "Squid",
+            "configuration": {
+                "spec": "assets/configuration/spec.yaml"
+            },
+            "events": {
+                "creates_events": false
+            },
+            "metrics": {
+                "prefix": "squid.",
+                "check": "squid.cachemgr.cpu_time",
+                "metadata_path": "metadata.csv"
+            },
+            "service_checks": {
+                "metadata_path": "assets/service_checks.json"
+            },
+            "source_type_id": 10022,
+            "auto_install": true
+        },
+        "dashboards": {
+            "Squid": "assets/dashboards/squid.json"
+        },
+        "monitors": {
+            "CPU usage exceeded": "assets/monitors/cpu_usage_exceeded.json",
+            "High latency requests": "assets/monitors/high_latency_requests.json",
+            "High rate of client HTTP errors": "assets/monitors/high_rate_of_client_http_errors.json",
+            "High rate of server errors": "assets/monitors/high_rate_of_server_errors.json"
+        },
+        "logs": {
+            "source": "squid"
+        }
     }
-  }
 }

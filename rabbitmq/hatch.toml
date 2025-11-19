@@ -2,15 +2,14 @@
 
 [envs.default]
 dependencies = [
-  "pika==0.13.0; python_version < '3.0'",
-  "pika==1.3.2; python_version > '3.0'",
+  "pika==1.3.2",
 ]
 
 # Rabbitmq versions 3.8+ introduce the Prometheus plugin. This is the preferred way to collect metrics.
 # We still support metrics from management plugin as a legacy option.
 [[envs.default.matrix]]
-python = ["3.12"]
-version = ["3.7", "3.11"]
+python = ["3.13"]
+version = ["3.7", "3.11","4.0"]
 flavor = ["mgmt", "openmetrics"]
 
 [envs.default.overrides]

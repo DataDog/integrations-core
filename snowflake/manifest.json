@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "23e9084d-5801-4a71-88fe-f62b7c1bb289",
   "app_id": "snowflake",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -51,11 +52,12 @@
         "metadata_path": "assets/service_checks.json"
       },
       "source_type_id": 10123,
-      "auto_install": true
+      "auto_install": false
     },
     "dashboards": {
       "Snowflake": "assets/dashboards/snowflake.json",
-      "Snowflake Organization Metrics": "assets/dashboards/organization_metrics.json"
+      "Snowflake Organization Metrics": "assets/dashboards/organization_metrics.json",
+      "Snowflake Cloud Cost Management Overview": "assets/dashboards/snowflake_costs.json"
     },
     "monitors": {
       "Failed login attempts are increasing": "assets/monitors/snowflake_failed_logins.json"

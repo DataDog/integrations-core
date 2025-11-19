@@ -4,11 +4,13 @@
 
 This check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog Agent format. For more information on NVIDIA Data Center GPU Manager (DCGM), see [NVIDIA DCGM][15].
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 ### Installation
 
-Starting from Agent release 7.47.0, the DCGM check is included in the [Datadog Agent][1] package. However, you need to spin up the DCGM Exporter container to expose the GPU metrics in order for the Agent to collect this data. As the default counters are not sufficient, Datadog recommends using the following DCGM configuration to cover the same ground as the NVML integration in addition to having useful metrics.
+Starting from Agent release 7.47.0, the DCGM check is included in the [Datadog Agent][1] package. However, you need to spin up the DCGM Exporter container to expose the GPU metrics in order for the Agent to collect this data. As the default counters are not sufficient, Datadog recommends using the following DCGM configuration to cover the same ground as the NVML integration in addition to having useful metrics. This integration is fully supported by Agent 7.59+. Some telemetry may not be available for older agent versions.
 
 ```
 # Format
@@ -174,7 +176,7 @@ The DCGM exporter can quickly be installed in a Kubernetes environment using the
    helm install dcgm-datadog gpu-helm-charts/dcgm-exporter -n default -f dcgm-values.yaml
    ```
 
-**Note**: You can modify the release name `dcgm-datadog` as well as the namespace, but you must modify accordingly the manifest from step 1.
+**Note**: You can modify the release name `dcgm-datadog` as well as the namespace, but you must modify accordingly the manifest from step 2.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Operator" xxx -->
@@ -386,7 +388,7 @@ Contact [Datadog support][8].
 
 Additional helpful documentation, links, and articles:
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/dcgm/datadog_checks/dcgm/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

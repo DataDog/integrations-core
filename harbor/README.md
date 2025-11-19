@@ -4,6 +4,8 @@
 
 This check monitors [Harbor][1] through the Datadog Agent.
 
+**Minimum Agent version:** 6.13.0
+
 ## Setup
 
 ### Installation
@@ -101,7 +103,7 @@ Need help? Contact [Datadog support][11].
 
 
 [1]: https://goharbor.io
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [4]: https://github.com/DataDog/integrations-core/blob/master/harbor/datadog_checks/harbor/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

@@ -9,6 +9,8 @@ Integration that allows to:
 
 For more information about the GitLab Runner and its integration with Prometheus, see the [GitLab Runner documentation][1].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -78,7 +80,7 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://docs.gitlab.com/runner/monitoring/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/datadog_checks/gitlab_runner/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

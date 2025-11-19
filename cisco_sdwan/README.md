@@ -1,4 +1,3 @@
-<div class="alert alert-info">The Cisco SD-WAN NDM integration is in Preview.</div>
 
 # Agent Check: Cisco SD-WAN
 
@@ -8,7 +7,7 @@ The Cisco SD-WAN integration lets you monitor your Cisco SD-WAN environment with
 
 ## Setup
 
-**The Cisco SD-WAN NDM integration is in Beta and will not be billed until it is Generally Available.**
+**The Cisco SD-WAN NDM integration is in Preview and will not be billed until it is Generally Available.**
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
@@ -44,8 +43,8 @@ The Cisco SD-WAN check does not include any service checks.
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://app.datadoghq.com/devices
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /devices
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/cisco_sdwan.d/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

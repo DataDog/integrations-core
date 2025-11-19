@@ -101,7 +101,22 @@ files:
         example: default
     - name: send_ndm_metadata
       description: |
-        Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
+        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent
+        and to allow Cisco ACI fault collection to be enabled.
+      value:
+        type: boolean
+        example: False
+        display_default: False
+    - name: send_faultinst_faults
+      description: |
+        Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
+      value:
+        type: boolean
+        example: False
+        display_default: False
+    - name: send_faultdelegate_faults
+      description: |
+        Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
       value:
         type: boolean
         example: False

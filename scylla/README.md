@@ -6,6 +6,8 @@ This Datadog-[Scylla][1] integration collects a majority of the exposed metrics 
 
 Scylla is an open-source NoSQL data store that can act as "a drop-in Apache Cassandra alternative." It has rearchitected the Cassandra model tuned for modern hardware, reducing the size of required clusters while improving theoretical throughput and performance.
 
+**Minimum Agent version:** 7.17.2
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.
@@ -73,7 +75,7 @@ Need help? Contact [Datadog support][10].
 
 
 [1]: https://scylladb.com
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.scylladb.com/getting-started/logging/

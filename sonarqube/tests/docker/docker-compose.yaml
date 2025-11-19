@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   sonarqube:
     container_name: sonarqube

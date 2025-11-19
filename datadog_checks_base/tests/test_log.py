@@ -4,11 +4,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import sys
 import warnings
 
 import mock
 import pytest
+from ddtrace import tracer
 
 from datadog_checks import log
 from datadog_checks.base import AgentCheck
@@ -19,9 +19,9 @@ def test_get_py_loglevel():
     # default value for invalid input
     assert log._get_py_loglevel(None) == logging.INFO
     # default value for valid unicode input encoding into an invalid key
-    assert log._get_py_loglevel(u'dèbùg') == logging.INFO
+    assert log._get_py_loglevel('dèbùg') == logging.INFO
     # check unicode works
-    assert log._get_py_loglevel(u'crit') == logging.CRITICAL
+    assert log._get_py_loglevel('crit') == logging.CRITICAL
     # check string works
     assert log._get_py_loglevel('crit') == logging.CRITICAL
 
@@ -36,10 +36,7 @@ def test_logging_capture_warnings():
 
         warnings.warn("hello-world")  # noqa: B028
         assert log_warning.call_count == 1
-        # _showwarning provides only one parameter to Logger.warning on py3.11+ but two before
-        # See https://github.com/python/cpython/pull/30975
-        # TODO: remove when python 2 is dropped
-        warning_arg_index = 0 if sys.version_info >= (3, 11) else 1
+        warning_arg_index = 0
         msg = log_warning.mock_calls[0].args[warning_arg_index]
         assert "hello-world" in msg
 
@@ -101,7 +98,7 @@ def test_log_trace_context_injection(integration_tracing_enabled):
     def _tracing_enabled():
         return integration_tracing_enabled, False
 
-    with mock.patch('datadog_checks.base.log.tracing_enabled', _tracing_enabled):
+    with mock.patch('datadog_checks.base.log.tracing_enabled', side_effect=_tracing_enabled):
         logger = logging.getLogger("test_log_trace_context_injection")
         logger.handlers = []
         handler = MockAgentLogHandler()
@@ -109,12 +106,22 @@ def test_log_trace_context_injection(integration_tracing_enabled):
 
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
-        logger.info("hello", extra={'dd.trace_id': 1, 'dd.span_id': 2})
-
-        assert len(handler.records) == 1
-        record = handler.records[0]
 
         if integration_tracing_enabled:
-            assert "dd.trace_id=1 dd.span_id=2" in record
+            # ddtrace.auto patches the standard logging library to inject trace context.
+            # We import it here directly to ensure this test is self-contained and does not
+            # depend on test execution order or global state.
+            # This is also the behavior found on the AgentCheck when decorated with @traced_class
+            import ddtrace.auto  # noqa: F401
+
+            with tracer.trace("test") as span:
+                logger.info("hello")
+                assert len(handler.records) == 1
+                record = handler.records[0]
+                trace_id_hex = format(span.trace_id, 'x')
+                assert f"dd.trace_id={trace_id_hex} dd.span_id={span.span_id}" in record
         else:
+            logger.info("hello", extra={'dd.trace_id': 1, 'dd.span_id': 2})
+            assert len(handler.records) == 1
+            record = handler.records[0]
             assert "dd.trace_id=1 dd.span_id=2" not in record

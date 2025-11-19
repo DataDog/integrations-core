@@ -168,6 +168,13 @@ files:
         value:
           example: false
           type: boolean
+      - name: auto_discover_queues_via_names
+        description: |
+          Autodiscover queues via names. Discovers all queue names, then collects metrics per queue. More resilient to
+          individual queue failures (e.g., permissions, broken queues), but uses more resources than bulk collection.
+        value:
+          example: false
+          type: boolean
       - name: collect_statistics_metrics
         description: |
           Collect metrics from Statistics Messages. Statistics collected are:
@@ -186,6 +193,17 @@ files:
           https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
         value:
           example: true
+          type: boolean
+      - name: collect_connection_metrics
+        description: |
+          Collect connection-related metrics. Metrics collected are:
+            - connection status metrics (ibm_mq.channel.conn_status)
+
+          Note: Enabling this option increases tag cardinality, as the ibm_mq.channel.conn_status
+          metric creates a new `connection` tag for each unique connection. This can lead to high
+          cardinality if you have many active connections.
+        value:
+          example: false
           type: boolean
       - name: mqcd_version
         description: |
@@ -215,6 +233,14 @@ files:
           example: Etc/UTC
           type: string
           minLength: 1
+      - name: use_qm_tz_for_metrics
+        description: |
+          Use the `queue_manager_timezone` parameter to collect metrics. Metrics can be skipped sometimes if the 
+          timezone is not in UTC. The queried data that the agent retrieves is timezone naive and is expected to 
+          be in UTC. Use this setting if the queue manager has a different timezone setting.
+        value:
+          example: false
+          type: boolean
       - name: timeout
         description: |
           The number of seconds to wait for IBM MQ to respond.

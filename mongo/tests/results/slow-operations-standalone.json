@@ -10,7 +10,9 @@
             "clustername:my_cluster",
             "hosting_type:self-hosted"
         ],
+        "cloud_metadata": {},
         "timestamp": 1715911398111.2722,
+        "service": "my_service",
         "mongodb_slow_queries": [
             {
                 "timestamp": 1720550483298.0,
@@ -635,7 +637,7 @@
                 "plan_cache_key": "0D12DCDF",
                 "query_framework": "classic",
                 "comment": "query customers by subscription status",
-                "mills": 12,
+                "mills": 66666,
                 "num_yields": 0,
                 "response_length": 14089,
                 "nreturned": 101,
@@ -676,7 +678,7 @@
                 "plan_cache_key": "0D12DCDF",
                 "query_framework": "classic",
                 "comment": "query customers by subscription status",
-                "mills": 14,
+                "mills": 77777,
                 "num_yields": 0,
                 "response_length": 110,
                 "nreturned": 0,

@@ -80,6 +80,38 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
+    ## @param exclude_hostname - boolean - optional - default: false
+    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+    #
+    # exclude_hostname: false
+
+    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## - azure_name: The resolved hostname of the instance, which respects the `reported_hostname` option,
+        ##   but removes `.database.windows.net`
+        ## - database: The connection database.
+        ## - server_name: The resolved server name of the instance.
+        ## - instance_name: The resolved instance name of the instance.
+        ## - full_server_name: The resolved full server name of the instance i.e. the value returned by `@@SERVERNAME`.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname-$full_server_name
+
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check.
     ## If `true`, overrides `database` option.
@@ -127,12 +159,149 @@ instances:
     #
     autodiscovery_db_service_check: false
 
-    ## @param include_ao_metrics - boolean - optional - default: false
-    ## Include AlwaysOn availability group metrics.
+    ## Configure the collection of database metrics
     #
-    # include_ao_metrics: false
+    # database_metrics:
 
-    ## Configure collection of agent jobs events and metrics
+        ## @param ao_metrics - mapping - optional
+        ## Configure collection of AlwaysOn availability group metrics.
+        ##
+        ## Set `ao_metrics.enabled` to true to enable collection of AlwaysOn metrics. Defaults to false.
+        ##
+        ## When `ao_metrics.enabled` is True, use `ao_metrics.availability_group` to specify the
+        ## resource group id of a specific availability group that you would like to monitor.
+        ## If no availability group is specified, then we will collect AlwaysOn metrics for all
+        ## availability groups on the current replica.
+        ##
+        ## Primary replicas may emit metrics for remote secondary replicas
+        ## in the same availability group. If `ao_metrics.only_emit_local` is set to true,
+        ## the primary replica will only emit information local to itself.
+        ##
+        ## If `ao_metrics.ao_database` is set, AlwaysOn metrics are only emitted for the selected `ao_database`.
+        #
+        # ao_metrics: {}
+
+        ## @param db_fragmentation_metrics - mapping - optional
+        ## Configure collection of database fragmentation metrics.
+        ## Note these queries can be resource intensive on large datasets. Recommend to limit these via
+        ## autodiscovery or specific database instances.
+        ##
+        ## Set `db_fragmentation_metrics.enabled` to true to enable collection of
+        ## database index fragmentation statistics. Defaults to false.
+        ##
+        ## Use `db_fragmentation_metrics.enabled_tempdb` to enable collection of database index fragmentation statistics
+        ## in tempdb database from the `sys.dm_db_index_physical_stats` DMF.
+        ## By default, we do not collect index fragmentation statistics in the tempdb database, as those queries
+        ## might cause blocking. This configuration parameter allows enabling the collection of this metric.
+        ## This parameter is ignored if the 'enabled' option for 'db_fragmentation_metrics' is set to false.
+        ##
+        ## Use `db_fragmentation_metrics.collection_interval` to set the interval (in seconds) for the collection of
+        ## database fragmentation metrics from the `sys.dm_db_index_physical_stats` DMF.
+        ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
+        ## to use a consistent value throughout all SQL Server agent deployments.
+        #
+        # db_fragmentation_metrics: {}
+
+        ## @param fci_metrics - mapping - optional
+        ## Configure collection of Failover Cluster Instance metrics. Note that these metrics
+        ## requires a SQLServer set up with Failover Clustering enabled.
+        ##
+        ## Set `fci_metrics.enabled` to true to enable collection of Failover Cluster Instance metrics.
+        ## Defaults to false.
+        #
+        # fci_metrics: {}
+
+        ## @param index_usage_metrics - mapping - optional
+        ## Configure collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
+        ## Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable
+        ## `database_autodiscovery` or set `database`.
+        ##
+        ## Set `index_usage_metrics.enabled` to true to enable collection of user table index usage statistics.
+        ## Defaults to true.
+        ##
+        ## Use `index_usage_metrics.enabled_tempdb` to enable collection of user table index usage statistics in tempdb
+        ## database from the `sys.dm_db_index_usage_stats` DMV.
+        ## By default, we do not collect index usage statistics in the tempdb database, as those queries
+        ## might cause blocking. This configuration parameter allows enabling the collection of this metric.
+        ## This parameter is ignored if 'index_usage_metrics.enabled' is set to false.
+        ##
+        ## Use `index_usage_metrics.collection_interval` to set the interval (in seconds) for the collection of index
+        ## usage statistics from the `sys.dm_db_index_usage_stats` DMV.
+        ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
+        ## to use a consistent value throughout all SQL Server agent deployments.
+        #
+        # index_usage_metrics: {}
+
+        ## @param instance_metrics - mapping - optional
+        ## Configure collection of server-level instance metrics.  When setting up multiple instances for
+        ## different databases on the same host these metrics will be duplicated unless this option is turned off.
+        ##
+        ## Set `instance_metrics.enabled` to true to enable collection of server-level instance metrics.
+        ## Defaults to true.
+        #
+        # instance_metrics: {}
+
+        ## @param master_files_metrics - mapping - optional
+        ## Configure collection of database file size and state from `sys.master_files`
+        ##
+        ## Set `master_files_metrics.enabled` to true to enable collection of database file size and state metrics.
+        ## Defaults to false.
+        #
+        # master_files_metrics: {}
+
+        ## @param primary_log_shipping_metrics - mapping - optional
+        ## Configure collection of metrics for a log shipping setup. Required to run against the
+        ## primary instance in a transaction log shipping configuration. Note that
+        ## the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+        ##
+        ## Set `primary_log_shipping_metrics.enabled` to true to enable collection of primary log shipping metrics.
+        ## Defaults to false.
+        #
+        # primary_log_shipping_metrics: {}
+
+        ## @param secondary_log_shipping_metrics - mapping - optional
+        ## Configure collection of metrics for a log shipping setup. Required to run against the
+        ## secondary instance in a transaction log shipping configuration. Note that
+        ## the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+        ##
+        ## Set `secondary_log_shipping_metrics.enabled` to true to enable collection of secondary log shipping metrics.
+        ## Defaults to false.
+        #
+        # secondary_log_shipping_metrics: {}
+
+        ## @param task_scheduler_metrics - mapping - optional
+        ## Configure collection of additional Task and Scheduler metrics.
+        ##
+        ## Set `task_scheduler_metrics.enabled` to true to enable collection of additional Task and Scheduler metrics.
+        ## Defaults to false.
+        #
+        # task_scheduler_metrics: {}
+
+        ## @param tempdb_file_space_usage_metrics - mapping - optional
+        ## Configure collection of tempdb file space usage metrics for how space is used in tempdb data files.
+        ##
+        ## Set `tempdb_file_space_usage_metrics.enabled` to true to enable collection of
+        ## tempdb file space usage metrics. Defaults to true.
+        #
+        # tempdb_file_space_usage_metrics: {}
+
+        ## @param xe_metrics - mapping - optional
+        ## Configure collection of extended events (XE) metrics.
+        ##
+        ## Set `xe_metrics.enabled` to true to enable collection of extended events metrics. Defaults to false.
+        #
+        # xe_metrics: {}
+
+        ## @param table_size_metrics - mapping - optional
+        ## Configure collection of table size metrics.
+        ##
+        ## Set `table_size_metrics.enabled` to true to enable collection of table size metrics. 
+        ## Does not collect tempdb metrics.
+        ## Defaults to false.
+        #
+        # table_size_metrics: {}
+
+    ## Configure collection of SQL Server Agent jobs events and metrics
     #
     # agent_jobs:
 
@@ -152,115 +321,12 @@ instances:
         #
         # history_row_limit: 10000
 
-    ## @param availability_group - string - optional
-    ## When `include_ao_metrics` is enabled, you can provide the resource 
-    ## group id of a specific availability group that you would like to monitor.
-    ## If no availability group is specified, then we will collect AlwaysOn metrics 
-    ## for all availability groups on the current replica.
-    #
-    # availability_group: <AVAILABILITY_GROUP>
-
-    ## @param only_emit_local - boolean - optional - default: false
-    ## Primary replicas may emit metrics for remote secondary replicas
-    ## in the same availability group. If this option is set to true,
-    ## the primary replica will only emit information local to itself.
-    #
-    # only_emit_local: false
-
-    ## @param ao_database - string - optional
-    ## AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
-    #
-    # ao_database: <AO_DATABASE>
-
-    ## @param include_master_files_metrics - boolean - optional - default: false
-    ## Include database file size and state from `sys.master_files`.
-    #
-    # include_master_files_metrics: false
-
-    ## @param include_fci_metrics - boolean - optional - default: false
-    ## Include Failover Cluster Instance metrics. Note that these metrics
-    ## requires a SQLServer set up with Failover Clustering enabled.
-    #
-    # include_fci_metrics: false
-
-    ## @param include_primary_log_shipping_metrics - boolean - optional - default: false
-    ## Include log_shipping_primary metrics for a log shipping setup. Required to run
-    ## against the primary instance in a transaction log shipping configuration. Note that
-    ## the Datadog user needs to be present in msdb and must be added to the db_datareader role.
-    #
-    # include_primary_log_shipping_metrics: false
-
-    ## @param include_secondary_log_shipping_metrics - boolean - optional - default: false
-    ## Include log_shipping_secondary metrics for a log shipping setup. Required to run
-    ## against a secondary instance in a transaction log shipping configuration. Note that
-    ## the Datadog user needs to be present in msdb and must be added to the db_datareader role.
-    #
-    # include_secondary_log_shipping_metrics: false
-
-    ## @param include_instance_metrics - boolean - optional - default: true
-    ## Include server-level instance metrics.  When setting up multiple instances for
-    ## different databases on the same host these metrics will be duplicated unless this option is turned off.
-    #
-    # include_instance_metrics: true
-
-    ## @param include_task_scheduler_metrics - boolean - optional - default: false
-    ## Include additional Task and Scheduler metrics.
-    #
-    # include_task_scheduler_metrics: false
-
-    ## @param include_db_fragmentation_metrics - boolean - optional - default: false
-    ## Include database fragmentation metrics. Note these queries can be resource intensive on large datasets.
-    ## Recommend to limit these via autodiscovery or specific database instances.
-    #
-    # include_db_fragmentation_metrics: false
-
-    ## @param include_db_fragmentation_metrics_tempdb - boolean - optional - default: false
-    ## Configure the collection of database index fragmentation statistics in tempdb database from the
-    ## `sys.dm_db_index_physical_stats` DMF.
-    ##
-    ## By default, we do not collect index fragmentation statistics in the tempdb database, as those queries
-    ## might cause blocking. This configuration parameter allows enabling the collection of this metric.
-    ## This parameter is ignored if 'include_db_fragmentation_metrics' is set to false.
-    #
-    # include_db_fragmentation_metrics_tempdb: false
-
-    ## @param include_index_usage_metrics - boolean - optional - default: true
-    ## Configure the collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
-    ##
-    ## Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable
-    ## `database_autodiscovery` or set `database`.
-    #
-    # include_index_usage_metrics: true
-
-    ## @param include_index_usage_metrics_tempdb - boolean - optional - default: false
-    ## Configure the collection of user table index usage statistics in tempdb database from the
-    ## `sys.dm_db_index_usage_stats` DMV.
-    ##
-    ## By default, we do not collect index usage statistics in the tempdb database, as those queries
-    ## might cause blocking. This configuration parameter allows enabling the collection of this metric.
-    ## This parameter is ignored if 'include_index_usage_metrics' is set to false.
-    #
-    # include_index_usage_metrics_tempdb: false
-
-    ## @param index_usage_metrics_interval - integer - optional - default: 300
-    ## Configure the interval (in seconds) for the collection of index usage statistics from the
-    ## `sys.dm_db_index_usage_stats` DMV.
-    ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
-    ## to use a consistent value throughout all SQL Server agent deployments.
-    #
-    # index_usage_metrics_interval: 300
-
     ## @param db_fragmentation_object_names - list of strings - optional
     ## Fragmentation metrics normally emit metrics for all objects within a database.
     ## This option allows you to specify database object names to query for fragmentation metrics.
     ## Note: Each object name is unique to each database.
     #
     # db_fragmentation_object_names: []
-
-    ## @param include_tempdb_file_space_usage_metrics - boolean - optional - default: true
-    ## Include tempdb file space usage metrics for how space is used in tempdb data files.
-    #
-    # include_tempdb_file_space_usage_metrics: true
 
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
@@ -310,10 +376,10 @@ instances:
     #
     # collect_settings:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of sys.configurations. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -348,6 +414,13 @@ instances:
         #
         # samples_per_hour_per_query: 4
 
+        ## @param lookback_window - integer - optional - default: 2 * collection_interval
+        ## Queries whose last execution completed after the lookback window are excluded from
+        ## metrics collection. Set a longer lookback window (in seconds) to capture infrequently
+        ## run queries.
+        #
+        # lookback_window: 600
+
     ## Configure collection of procedure metrics
     #
     # procedure_metrics:
@@ -378,14 +451,6 @@ instances:
         ## Enable collection of active sessions. Requires `dbm: true`.
         #
         # enabled: true
-
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the activity collection interval in seconds. Each collection involves querying several
-        ## different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
-        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance.
-        ## Running different instances with different collection intervals is not supported.
-        #
-        # collection_interval: 10
 
     ## @param stored_procedure_characters_limit - integer - optional - default: 500
     ## Limit the number of characters of the text of a stored procedure that is collected.
@@ -471,6 +536,14 @@ instances:
         #
         # fully_qualified_domain_name: my-sqlserver-database.database.windows.net
 
+        ## @param aggregate_sql_databases - boolean - optional - default: false
+        ## Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
+        ## Only applicable when `deployment_type` is set to `sql_database`.
+        ##
+        ## Deprecated.
+        #
+        # aggregate_sql_databases: false
+
     ## Configuration section used for Azure AD Authentication.
     ##
     ## This supports using System or User assigned managed identities.
@@ -516,7 +589,7 @@ instances:
 
         ## @param collect_metadata - boolean - optional - default: true
         ## Set to `false` to disable the collection of metadata in your SQL statements.
-        ## Metadata includes things such as tables, commands, and comments.
+        ## Metadata includes things such as tables, commands, comments, and procedure names.
         #
         # collect_metadata: true
 
@@ -537,8 +610,16 @@ instances:
         ## @param collect_comments - boolean - optional - default: true
         ## Set to `false` to disable the collection of comments in your SQL statements.
         ## Requires `collect_metadata: true`.
+        ## Note: This option must be `true` in order to correlate Database Monitoring samples and APM traces.
+        ## See https://docs.datadoghq.com/database_monitoring/connect_dbm_and_apm
         #
         # collect_comments: true
+
+        ## @param collect_procedures - boolean - optional - default: true
+        ## Set to `false` to disable the collection of procedure names in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_procedures: true
 
         ## @param keep_sql_alias - boolean - optional - default: true
         ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
@@ -567,6 +648,11 @@ instances:
         #
         # keep_positional_parameter: false
 
+        ## @param replace_bind_parameter - boolean - optional - default: false
+        ## Set to `true` to replace bind parameters (e.g. `@p1`) with `?` in your obfuscated SQL statements.
+        #
+        # replace_bind_parameter: false
+
         ## @param keep_trailing_semicolon - boolean - optional - default: false
         ## Set to `true` to keep trailing semicolons in your normalized SQL statements.
         #
@@ -576,6 +662,25 @@ instances:
         ## Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
         #
         # keep_identifier_quotation: false
+
+    ## Configure the collection of raw query statements in query activity, and XE events.
+    ## To collect raw query statements from XE events, set `collect_xe.query_completions.enabled` and
+    ## `collect_xe.query_errors.enabled` to `true`.
+    ## Raw query statements may contain sensitive information (e.g., passwords)
+    ## or personally identifiable information in query text.
+    ## Enabling this option will allow the collection and ingestion of raw query statements 
+    ## into Datadog, which can then become viewable in query samples.
+    ## This option is disabled by default.
+    ## Note: Collection of raw query statements is currently in preview.
+    ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
+    ## This option only applies when dbm is enabled.
+    #
+    # collect_raw_query_statement:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Set to `true` to collect the raw query statements.
+        #
+        # enabled: false
 
     ## @param command_timeout - integer - optional - default: 10
     ## Timeout in seconds for the connection and each command run
@@ -601,51 +706,48 @@ instances:
     ## Each query must have 2 fields, and can have a third optional field:
     ##
     ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-    ##            Use the pipe `|` if you require a multi-line script.
+    ##     Use the pipe `|` if you require a multi-line script.
     ## 2. columns - The list representing each column, ordered sequentially from left to right.
-    ##              The number of columns must equal the number of columns returned in the query.
-    ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is a `tag` type, this column is
-    ##                          considered a tag and applied to every
-    ##                          metric collected by this particular query.
-    ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to the following `tag` types to
-    ##                          tag each metric in the row with the name and value
-    ##                          of the item in this column:
-    ##                           i. tag           - This is the default tag type
-    ##                           ii. tag_list     - This allows multiple values to be attached
-    ##                                             to the tag name. For example: 
-    ##
-    ##                                             query = {
-    ##                                               "name": "example",
-    ##                                               "query": "...",
-    ##                                               "columns": [
-    ##                                                 {"name": "server_tag", "type": "tag_list"},
-    ##                                                 {"name": "foo", "type": "gauge"},
-    ##                                               ]
-    ##                                             }
-    ##
-    ##                                             May result in:
-    ##                                             gauge("foo", tags=[
-    ##                                                                 "server_tag:us",
-    ##                                                                 "server_tag:primary",
-    ##                                                                 "server_tag:default"
-    ##                                                               ])
-    ##                                             gauge("foo", tags=["server_tag:eu"])
-    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
-    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
-    ##                          You can use the `count` type to perform aggregation
-    ##                          for queries that return multiple rows with the same or no tags.
-    ##              Columns without a name are ignored. To skip a column, enter:
-    ##                - {}
+    ##     The number of columns must equal the number of columns returned in the query.
+    ##     There are 2 required pieces of data:
+    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
+    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
+    ##           to every metric collected by this particular query.
+    ##       2. type - The submission method (gauge, monotonic_count, etc.).
+    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
+    ##           and value of the item in this column:
+    ##             1. tag - This is the default tag type
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##                 ```
+    ##                 query = {
+    ##                   "name": "example",
+    ##                   "query": "...",
+    ##                   "columns": [
+    ##                     {"name": "server_tag", "type": "tag_list"},
+    ##                     {"name": "foo", "type": "gauge"},
+    ##                   ]
+    ##                 }
+    ##                 ```
+    ##                 May result in:
+    ##                 ```
+    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
+    ##                 gauge("foo", tags=["server_tag:eu"])
+    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                 ```
+    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
+    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
+    ##           the same or no tags.
+    ##     Columns without a name are ignored. To skip a column, enter:
+    ##     ```
+    ##       - {}
+    ##     ```
     ## 3. tags (optional) - A list of tags to apply to each metric.
     ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
     ##     If collection_interval is not set, the query will be run every check run.
-    ##     If the collection interval is less than check collection interval, 
-    ##     the query will be run every check run.
-    ##     If the collection interval is greater than check collection interval, 
-    ##     the query will NOT BE RUN exactly at the collection interval.
+    ##     If the collection interval is less than check collection interval, the query will be run every check
+    ##     run.
+    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
+    ##     exactly at the collection interval.
     ##     The query will be run at the next check run after the collection interval has passed.
     ## 5. metric_prefix (optional) - The prefix to apply to each metric.
     #
@@ -685,6 +787,55 @@ instances:
     #
     # ignore_missing_database: false
 
+    ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
+    ## only for the database configured with `database` parameter.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 10
+        ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
+        ## Capped by `collect_schemas.collection_interval`
+        #
+        # max_execution_time: 10
+
+    ## DEPRECATED: Use `collect_schemas` instead.
+    ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
+    ## only for the database configured with `database` parameter.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.70.0
+    ## Migration: Use `collect_schemas` instead.
+    #
+    # schemas_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 10
+        ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
+        ## Capped by `schemas_collection.collection_interval`
+        #
+        # max_execution_time: 10
+
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
     ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
@@ -692,7 +843,112 @@ instances:
     #
     # propagate_agent_tags: false
 
-    ## Configure the collection of deadlock data. The feature is supported for odbc connector only.
+    ## Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
+    ##
+    ## Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
+    #
+    # collect_xe:
+
+        ## @param query_completions - mapping - optional
+        ## Configure the collection of completed queries from the `datadog_query_completions` XE session.
+        ##
+        ## Set `query_completions.enabled` to `true` to enable the collection of query completion events.
+        ##
+        ## Use `query_completions.collection_interval` to set the interval (in seconds) for the collection of
+        ## query completion events. Defaults to 10 seconds. If you intend on updating this value,
+        ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+        ##
+        ## Use `query_completions.max_events` to set the maximum number of query completion events to process
+        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query,
+        ## so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
+        #
+        # query_completions: {}
+
+        ## @param query_errors - mapping - optional
+        ## Configure the collection of query errors from the `datadog_query_errors` XE session.
+        ##
+        ## Set `query_errors.enabled` to `true` to enable the collection of query error events.
+        ##
+        ## Use `query_errors.collection_interval` to set the interval (in seconds) for the collection of
+        ## query error events. Defaults to 10 seconds. If you intend on updating this value,
+        ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+        ##
+        ## Use `query_errors.max_events` to set the maximum number of query error events to process
+        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query,
+        ## so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
+        #
+        # query_errors: {}
+
+    ## DEPRECATED: Use `collect_xe` instead.
+    ## Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
+    ##
+    ## Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.70.0
+    ## Migration: Use `collect_xe` instead.
+    #
+    # xe_collection:
+
+        ## @param query_completions - mapping - optional
+        ## Configure the collection of completed queries from the `datadog_query_completions` XE session.
+        ##
+        ## Set `query_completions.enabled` to `true` to enable the collection of query completion events.
+        ##
+        ## Use `query_completions.collection_interval` to set the interval (in seconds) for the collection of
+        ## query completion events. Defaults to 10 seconds. If you intend on updating this value,
+        ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+        ##
+        ## Use `query_completions.max_events` to set the maximum number of query completion events to process
+        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query,
+        ## so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
+        #
+        # query_completions: {}
+
+        ## @param query_errors - mapping - optional
+        ## Configure the collection of query errors from the `datadog_query_errors` XE session.
+        ##
+        ## Set `query_errors.enabled` to `true` to enable the collection of query error events.
+        ##
+        ## Use `query_errors.collection_interval` to set the interval (in seconds) for the collection of
+        ## query error events. Defaults to 10 seconds. If you intend on updating this value,
+        ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+        ##
+        ## Use `query_errors.max_events` to set the maximum number of query error events to process
+        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query,
+        ## so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
+        #
+        # query_errors: {}
+
+    ## Configure the collection of deadlock data.
+    #
+    # collect_deadlocks:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_deadlocks - number - optional - default: 100
+        ## Set the maximum number of deadlocks to retrieve per collection.
+        #
+        # max_deadlocks: 100
+
+    ## DEPRECATED: Use `collect_deadlocks` instead.
+    ## Configure the collection of deadlock data.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.70.0
+    ## Migration: Use `collect_deadlocks` instead.
     #
     # deadlocks_collection:
 

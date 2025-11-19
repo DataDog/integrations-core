@@ -1,0 +1,52 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "dbf0f387-cef7-4694-9001-b7bb5c1c1274",
+  "app_id": "wlan",
+  "owner": "windows-products",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Wi-Fi metrics such as signal strength, connection status, and more.",
+    "title": "wlan (Wi-Fi)",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Windows",
+      "Category::Metrics",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 45933791,
+      "source_type_name": "wlan",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "system.wlan.",
+        "check": "system.wlan.rssi",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "dashboards": {
+        "Wi-Fi Overview": "assets/dashboards/wlan_overview.json"
+    },
+    "monitors": {
+      "Many channel swap events detected": "assets/monitors/wlan_excessive_channel_swap.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

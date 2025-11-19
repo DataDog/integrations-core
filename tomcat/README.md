@@ -10,6 +10,8 @@ This check collects Tomcat metrics, for example:
 - Thread pool metrics: thread count, number of threads busy, etc.
 - Servlet processing times
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -252,7 +254,7 @@ Additional helpful documentation, links, and articles:
 - [Analyzing Tomcat logs and metrics with Datadog][17]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard_2.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://tomcat.apache.org/tomcat-10.1-doc/monitoring.html
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example

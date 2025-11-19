@@ -1,15 +1,32 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, List  # noqa: F401
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List  # noqa: F401
 from xmlrpc.client import ServerProxy
 
 import yaml
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.ddyaml import yaml_load_force_loader
+from datadog_checks.base.utils.http import requests
 
 from .metrics import build_metric
+
+if TYPE_CHECKING:
+    from datadog_checks.base.utils.http import ResponseWrapper
+
+
+def _safely_process_metrics_response(data: ResponseWrapper) -> dict[str, dict]:
+    # Responses can be wrongly formatted for older versions of the hypervisor,
+    # it's missing double quotes " around the field names. Use yaml to parse the response
+    # if json parsing fails.
+    # Explicitly use the python safe loader, the C binding is failing
+    # See https://github.com/yaml/pyyaml/issues/443
+    try:
+        return data.json()
+    except requests.exceptions.JSONDecodeError:
+        return yaml.load(data.content, Loader=yaml.SafeLoader)
 
 
 class CitrixHypervisorCheck(AgentCheck):
@@ -48,12 +65,11 @@ class CitrixHypervisorCheck(AgentCheck):
             'host': 'true',
             'json': 'true',
         }
+        # by default, returns json response
         r = self.http.get(self._base_url + '/rrd_updates', params=params)
         r.raise_for_status()
-        # Response is not formatted for simplejson, it's missing double quotes " around the field names
-        # Explicitly use the python safe loader, the C binding is failing
-        # See https://github.com/yaml/pyyaml/issues/443
-        data = yaml_load_force_loader(r.content, Loader=yaml.SafeLoader)
+
+        data = _safely_process_metrics_response(r)
 
         if data['meta'].get('end') is not None:
             self._last_timestamp = int(data['meta']['end'])

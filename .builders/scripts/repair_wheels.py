@@ -6,10 +6,12 @@ import re
 import shutil
 import sys
 import time
+from fnmatch import fnmatch
 from functools import cache
 from hashlib import sha256
 from pathlib import Path
 from typing import Iterator, NamedTuple
+from zipfile import ZipFile
 
 import urllib3
 from utils import extract_metadata, normalize_project_name
@@ -20,7 +22,11 @@ def get_wheel_hashes(project) -> dict[str, str]:
     retry_wait = 2
     while True:
         try:
-            response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
+            response = urllib3.request(
+                'GET',
+                f'https://pypi.org/simple/{project}',
+                headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            )
         except urllib3.exceptions.HTTPError as e:
             err_msg = f'Failed to fetch hashes for `{project}`: {e}'
         else:
@@ -35,16 +41,12 @@ def get_wheel_hashes(project) -> dict[str, str]:
         retry_wait *= 2
         continue
 
-    html = response.data.decode('utf-8')
-    hashes: dict[str, str] = {}
-    for line in html.splitlines():
-        match = re.search(r'<a href="(?:.+?/)?([^"]+)#sha256=([^"]+)"[^>]*>\1</a>', line)
-        if match:
-            file_name, file_hash = match.groups()
-            if file_name.endswith('.whl'):
-                hashes[file_name] = file_hash
-
-    return hashes
+    data = response.json()
+    return {
+        file['filename']: file['hashes']['sha256']
+        for file in data['files']
+        if file['filename'].endswith('.whl') and 'sha256' in file['hashes']
+    }
 
 
 def iter_wheels(source_dir: str) -> Iterator[Path]:
@@ -62,6 +64,14 @@ def wheel_was_built(wheel: Path) -> bool:
 
     file_hash = sha256(wheel.read_bytes()).hexdigest()
     return file_hash != wheel_hashes[wheel.name]
+
+
+def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
+    """Returns all found files inside `wheel` that match the given glob-style pattern"""
+    with ZipFile(wheel) as zf:
+        names = zf.namelist()
+
+    return [name for name in names for pat in patterns if fnmatch(name, pat)]
 
 
 class WheelName(NamedTuple):
@@ -87,6 +97,21 @@ class WheelName(NamedTuple):
         ]) + '.whl'
 
 
+def check_unacceptable_files(
+    wheel: Path,
+    invalid_file_patterns: list[str],
+):
+    """Check if a wheel contains any unacceptable files and exit if found."""
+    unacceptable_files = find_patterns_in_wheel(wheel, invalid_file_patterns)
+    if unacceptable_files:
+        print(
+            f"Found copies of unacceptable files in external wheel '{wheel.name}'",
+            f'(matching {invalid_file_patterns}): ',
+            unacceptable_files,
+        )
+        sys.exit(1)
+
+
 def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     from auditwheel.patcher import Patchelf
     from auditwheel.policy import WheelPolicies
@@ -97,6 +122,12 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
         # pymqi
         'libmqic_r.so',
     })
+
+    external_invalid_file_patterns = [
+        # We don't accept OpenSSL in external wheels
+        '*.libs/libssl*.so.3',
+        '*.libs/libcrypto*.so.3',
+    ]
 
     # Hardcoded policy to the minimum we need to currently support
     policies = WheelPolicies()
@@ -109,8 +140,14 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
 
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
+
         if not wheel_was_built(wheel):
             print('Using existing wheel')
+
+            check_unacceptable_files(
+                wheel,
+                invalid_file_patterns=external_invalid_file_patterns,
+            )
             shutil.move(wheel, external_dir)
             continue
 
@@ -140,11 +177,22 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
     exclusions = ['mqic.dll']
 
+    external_invalid_file_patterns = [
+        # We don't accept OpenSSL in external wheels
+        '*.libs/libssl-3*.dll',
+        '*.libs/libcrypto-3*.dll',
+    ]
+
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
 
         if not wheel_was_built(wheel):
             print('Using existing wheel')
+
+            check_unacceptable_files(
+                wheel,
+                invalid_file_patterns=external_invalid_file_patterns,
+            )
             shutil.move(wheel, external_dir)
             continue
 
@@ -168,6 +216,8 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
 def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     from delocate import delocate_wheel
+    from packaging.version import Version
+
     exclusions = [re.compile(s) for s in [
         # pymqi
         r'pymqe\.cpython-\d+-darwin\.so',
@@ -202,24 +252,30 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     def copy_filt_func(libname):
         return not any(excl.search(libname) for excl in exclusions)
 
+    min_macos_version = Version(os.environ["MACOSX_DEPLOYMENT_TARGET"])
+
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
         if not wheel_was_built(wheel):
             print('Using existing wheel')
+
             shutil.move(wheel, external_dir)
             continue
 
         # Platform independent wheels: move and rename to make platform specific
         wheel_name = WheelName.parse(wheel.name)
         if wheel_name.platform_tag == 'any':
-            dest = str(wheel_name._replace(platform_tag='macosx_10_12_universal2'))
+            dest = str(wheel_name._replace(platform_tag=f'macosx_{min_macos_version.major}_{min_macos_version.minor}_universal2'))
             shutil.move(wheel, Path(built_dir) / dest)
             continue
 
+        # Platform dependent wheels: prune excluded files, verify target architecture & macOS version
         copied_libs = delocate_wheel(
             str(wheel),
             os.path.join(built_dir, wheel.name),
             copy_filt_func=copy_filt_func,
+            require_archs=[os.uname().machine],
+            require_target_macos_version=min_macos_version,
         )
         print('Repaired wheel')
         if copied_libs:

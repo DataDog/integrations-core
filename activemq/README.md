@@ -4,9 +4,11 @@
 
 The ActiveMQ check collects metrics for brokers, queues, producers, consumers, and more.
 
-**Note:** This check also supports ActiveMQ Artemis (future ActiveMQ version `6`) and reports metrics under the `activemq.artemis` namespace. See [metadata.csv][1] for a list of metrics provided by this integration.
+**Note:** This check also supports ActiveMQ Artemis (future ActiveMQ version `6`) and reports metrics under the `activemq.artemis` namespace. See the [Metrics section](#metrics) for a list of available metrics.
 
 **Note**: If you are running an ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][2].
+
+**Minimum Agent version:** 6.0.0
 
 ## Setup
 
@@ -128,7 +130,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
 [2]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/jmxfetch
 [5]: https://activemq.apache.org/jmx.html
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

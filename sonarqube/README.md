@@ -4,6 +4,8 @@
 
 This check monitors [SonarQube][1].
 
+**Minimum Agent version:** 7.24.0
+
 ## Setup
 
 ### Installation
@@ -323,9 +325,9 @@ Need help? Contact [Datadog support][8].
 
 
 [1]: https://www.sonarqube.org
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/datadog_checks/sonarqube/data/metrics.yaml
-[4]: https://docs.sonarqube.org/latest/instance-administration/monitoring/
+[4]: https://docs.sonarqube.org/latest/server-upgrade-and-maintenance/monitoring/instance/#exposed-jmx-mbeans
 [5]: https://docs.sonarsource.com/sonarqube/latest/instance-administration/monitoring/instance/#how-do-i-activate-jmx
 [6]: https://docs.datadoghq.com/integrations/java/
 [7]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/datadog_checks/sonarqube/data/conf.yaml.example

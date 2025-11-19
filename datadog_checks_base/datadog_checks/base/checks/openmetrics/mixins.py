@@ -12,19 +12,14 @@ from re import compile
 
 import requests
 from prometheus_client.samples import Sample
-from six import PY3, iteritems, string_types
 
 from datadog_checks.base.agent import datadog_agent
-
-from ...config import is_affirmative
-from ...errors import CheckException
-from ...utils.common import to_native_string
-from ...utils.http import RequestsWrapper
-from .. import AgentCheck
-from ..libs.prometheus import text_fd_to_metric_families
-
-if PY3:
-    long = int
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.http import RequestsWrapper
 
 
 class OpenMetricsScraperMixin(object):
@@ -110,7 +105,7 @@ class OpenMetricsScraperMixin(object):
         # We merge list and dictionaries from optional defaults & instance settings
         metrics = default_instance.get('metrics', []) + instance.get('metrics', [])
         for metric in metrics:
-            if isinstance(metric, string_types):
+            if isinstance(metric, str):
                 metrics_mapper[metric] = metric
             else:
                 metrics_mapper.update(metric)
@@ -273,7 +268,7 @@ class OpenMetricsScraperMixin(object):
         config['_type_override_patterns'] = {}
 
         with_wildcards = set()
-        for metric, type in iteritems(config['type_overrides']):
+        for metric, type in config['type_overrides'].items():
             if '*' in metric:
                 config['_type_override_patterns'][compile(translate(metric))] = type
                 with_wildcards.add(metric)
@@ -468,7 +463,7 @@ class OpenMetricsScraperMixin(object):
             if type_override:
                 metric.type = type_override
             elif scraper_config['_type_override_patterns']:
-                for pattern, new_type in iteritems(scraper_config['_type_override_patterns']):
+                for pattern, new_type in scraper_config['_type_override_patterns'].items():
                     if pattern.search(metric.name):
                         metric.type = new_type
                         break
@@ -518,7 +513,7 @@ class OpenMetricsScraperMixin(object):
                 watched['sets'] = {}
                 watched['keys'] = {}
                 watched['singles'] = set()
-                for key, val in iteritems(scraper_config['label_joins']):
+                for key, val in scraper_config['label_joins'].items():
                     labels = []
                     if 'labels_to_match' in val:
                         labels = val['labels_to_match']
@@ -542,7 +537,7 @@ class OpenMetricsScraperMixin(object):
             # Set dry run off
             scraper_config['_dry_run'] = False
             # Garbage collect unused mapping and reset active labels
-            for metric, mapping in list(iteritems(scraper_config['_label_mapping'])):
+            for metric, mapping in scraper_config['_label_mapping'].items():
                 for key in list(mapping):
                     if (
                         metric in scraper_config['_active_label_mapping']
@@ -599,7 +594,7 @@ class OpenMetricsScraperMixin(object):
 
     def transform_metadata(self, metric, scraper_config):
         labels = metric.samples[0][self.SAMPLE_LABELS]
-        for metadata_name, label_name in iteritems(scraper_config['metadata_label_map']):
+        for metadata_name, label_name in scraper_config['metadata_label_map'].items():
             if label_name in labels:
                 self.set_metadata(metadata_name, labels[label_name])
 
@@ -662,7 +657,7 @@ class OpenMetricsScraperMixin(object):
                 label_dict = {}
 
                 if get_all:
-                    for label_name, label_value in iteritems(sample_labels):
+                    for label_name, label_value in sample_labels.items():
                         if label_name in matching_labels:
                             continue
                         label_dict[label_name] = label_value
@@ -717,7 +712,7 @@ class OpenMetricsScraperMixin(object):
                     sample_labels.update(label_mapping[mapping_key][mapping_value])
 
             # Match with tuples of labels
-            for key, mapping_key in iteritems(keys):
+            for key, mapping_key in keys.items():
                 if mapping_key in matching_single_labels:
                     continue
 
@@ -806,7 +801,7 @@ class OpenMetricsScraperMixin(object):
 
                 return
             # check for wildcards in transformers
-            for transformer_name, transformer in iteritems(metric_transformers):
+            for transformer_name, transformer in metric_transformers.items():
                 if transformer_name.endswith('*') and metric.name.startswith(transformer_name[:-1]):
                     transformer(metric, scraper_config, transformer_name)
 
@@ -1058,7 +1053,7 @@ class OpenMetricsScraperMixin(object):
     def _compute_bucket_hash(self, tags):
         # we need the unique context for all the buckets
         # hence we remove the "le" tag
-        return hash(frozenset(sorted((k, v) for k, v in iteritems(tags) if k != 'le')))
+        return hash(frozenset(sorted((k, v) for k, v in tags.items() if k != 'le')))
 
     def _decumulate_histogram_buckets(self, metric):
         """
@@ -1174,7 +1169,7 @@ class OpenMetricsScraperMixin(object):
         custom_tags = scraper_config['custom_tags']
         _tags = list(custom_tags)
         _tags.extend(scraper_config['_metric_tags'])
-        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+        for label_name, label_value in sample[self.SAMPLE_LABELS].items():
             if label_name not in scraper_config['exclude_labels']:
                 if label_name in scraper_config['include_labels'] or len(scraper_config['include_labels']) == 0:
                     tag_name = scraper_config['labels_mapper'].get(label_name, label_name)

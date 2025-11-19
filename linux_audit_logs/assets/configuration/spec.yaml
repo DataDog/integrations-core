@@ -1,0 +1,10 @@
+name: Linux Audit Logs
+files:
+- name: linux_audit_logs.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/audit/audit.log
+      source: linux-audit-logs
+      service: linux-audit-logs

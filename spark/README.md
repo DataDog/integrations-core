@@ -16,6 +16,8 @@ This check monitors [Spark][2] through the Datadog Agent. Collect Spark metrics 
 - Tasks: number of tasks active, skipped, failed, and total.
 - Job state: number of jobs active, completed, skipped, and failed.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -59,7 +61,7 @@ To configure this check for an Agent running on a host:
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+For containerized environments, see the Autodiscovery Integration Templates, either for [Docker][17] or [Kubernetes][7], for guidance on applying the parameters below.
 
 | Parameter            | Value                                                             |
 | -------------------- | ----------------------------------------------------------------- |
@@ -117,9 +119,9 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-### Spark on AWS EMR
+### Spark on Amazon EMR
 
-To receive metrics for Spark on AWS EMR, [use bootstrap actions][12] to install the [Datadog Agent][13]:
+To receive metrics for Spark on Amazon EMR, [use bootstrap actions][12] to install the [Datadog Agent][13]:
 
 For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][14].
 
@@ -138,7 +140,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
 [2]: https://spark.apache.org/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -151,4 +153,5 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/agent/
 [14]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [15]: https://www.datadoghq.com/blog/monitoring-spark
-[16]: https://www.datadoghq.com/blog/spark-emr-monitoring/ 
+[16]: https://www.datadoghq.com/blog/spark-emr-monitoring/
+[17]: https://docs.datadoghq.com/containers/docker/integrations/

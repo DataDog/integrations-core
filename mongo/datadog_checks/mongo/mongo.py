@@ -32,6 +32,7 @@ from datadog_checks.mongo.collectors.conn_pool_stats import ConnPoolStatsCollect
 from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
 from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import (
+    MONGODB_SYSTEM_DATABASES,
     SERVICE_CHECK_NAME,
     HostingType,
     MongosDeployment,
@@ -49,7 +50,7 @@ from . import metrics
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 long = int
 
@@ -82,9 +83,11 @@ class MongoDb(AgentCheck):
       Connectivity health to the instance.
     """
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances=None):
         super(MongoDb, self).__init__(name, init_config, instances)
-        self._config = MongoConfig(self.instance, self.log)
+        self._config = MongoConfig(self.instance, self.log, self.init_config)
 
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
@@ -93,6 +96,7 @@ class MongoDb(AgentCheck):
         self.metrics_to_collect = self._build_metric_list_to_collect()
         self.collectors = []
         self.last_states_by_server = {}
+        self.metrics_last_collection_timestamp = {}
 
         self.deployment_type = None
         self._mongo_version = None
@@ -154,6 +158,8 @@ class MongoDb(AgentCheck):
             # DbStatCollector is always collected on all monitored databases (filtered by db_names config option)
             # For backward compatibility, we keep collecting from all monitored databases
             # regardless of the auto-discovery settings.
+            if db_name in MONGODB_SYSTEM_DATABASES and not self._config.system_database_stats:
+                continue
             potential_collectors.append(DbStatCollector(self, db_name, dbstats_tag_dbname, tags))
 
         # When autodiscovery is enabled, we collect collstats and indexstats for all auto-discovered databases
@@ -161,6 +167,8 @@ class MongoDb(AgentCheck):
         for db_name in self.databases_monitored:
             # For backward compatibility, coll_names is ONLY applied when autodiscovery is not enabled
             # Otherwise, we collect collstats & indexstats for all auto-discovered databases and authorized collections
+            if db_name in MONGODB_SYSTEM_DATABASES and not self._config.system_database_stats:
+                continue
             coll_names = None if self._database_autodiscovery.autodiscovery_enabled else self._config.coll_names
             if 'collection' in self._config.additional_metrics:
                 potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
@@ -210,15 +218,15 @@ class MongoDb(AgentCheck):
             if option not in metrics.AVAILABLE_METRICS:
                 if option in metrics.DEFAULT_METRICS:
                     self.log.warning(
-                        u"`%s` option is deprecated. The corresponding metrics are collected by default.", option
+                        "`%s` option is deprecated. The corresponding metrics are collected by default.", option
                     )
                 else:
                     self.log.warning(
-                        u"Failed to extend the list of metrics to collect: unrecognized `%s` option", option
+                        "Failed to extend the list of metrics to collect: unrecognized `%s` option", option
                     )
                 continue
             additional_metrics = metrics.AVAILABLE_METRICS[option]
-            self.log.debug(u"Adding `%s` corresponding metrics to the list of metrics to collect.", option)
+            self.log.debug("Adding `%s` corresponding metrics to the list of metrics to collect.", option)
             metrics_to_collect.update(additional_metrics)
 
         return metrics_to_collect
@@ -246,9 +254,16 @@ class MongoDb(AgentCheck):
         '''
         Return the internal resource tags for the database instance.
         '''
-        if not self._resolved_hostname:
-            return []
-        return [f"dd.internal.resource:database_instance:{self._resolved_hostname}"]
+        tags = []
+        if self._resolved_hostname:
+            tags.append(f"dd.internal.resource:database_instance:{self._resolved_hostname}")
+        if self._config.cloud_metadata:
+            aws = self._config.cloud_metadata.get('aws')
+            if instance_endpoint := aws.get('instance_endpoint'):
+                tags.append(f"dd.internal.resource:aws_docdb_instance:{instance_endpoint}")
+            if cluster_identifier := aws.get('cluster_identifier'):
+                tags.append(f"dd.internal.resource:aws_docdb_cluster:{cluster_identifier}")
+        return tags
 
     def _get_tags(self, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)

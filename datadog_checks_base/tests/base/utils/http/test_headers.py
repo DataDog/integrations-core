@@ -5,7 +5,6 @@ from collections import OrderedDict
 
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.base.utils.http import RequestsWrapper
@@ -37,7 +36,7 @@ def test_config_headers():
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    assert list(iteritems(http.options['headers'])) == list(iteritems(headers))
+    assert list(http.options['headers'].items()) == list(headers.items())
 
 
 def test_config_headers_string_values():
@@ -56,7 +55,7 @@ def test_config_extra_headers():
 
     complete_headers = OrderedDict(DEFAULT_OPTIONS['headers'])
     complete_headers.update(headers)
-    assert list(iteritems(http.options['headers'])) == list(iteritems(complete_headers))
+    assert list(http.options['headers'].items()) == list(complete_headers.items())
 
 
 def test_config_extra_headers_string_values():
@@ -78,7 +77,7 @@ def test_extra_headers_on_http_method_call():
     complete_headers.update({'answer': '42'})
 
     extra_headers = {"foo": "bar"}
-    with mock.patch("requests.get") as get:
+    with mock.patch("requests.Session.get") as get:
         http.get("http://example.com/hello", extra_headers=extra_headers)
 
         expected_options = dict(complete_headers)

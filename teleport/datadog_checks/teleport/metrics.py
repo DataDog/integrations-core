@@ -61,6 +61,8 @@ AUTH_SERVICE_METRICS_MAP = {
     "teleport_migrations": "auth.migrations",
     "watcher_event_sizes": "auth.watcher_event_sizes",
     "watcher_events": "auth.watcher_events",
+    "heartbeat_connections_received": "auth.heartbeat_connections_received",
+    "teleport_roles_total": "auth.roles",
 }
 
 AUTH_AUDIT_LOG_METRICS_MAP = {
@@ -206,10 +208,10 @@ METRIC_MAP = {
 }
 
 METRIC_MAP_BY_SERVICE = {
-    **{metric: "teleport" for metric in COMMON_METRICS_MAP.keys()},
-    **{metric: "proxy" for metric in PROXY_METRICS_MAP.keys()},
-    **{metric: "auth" for metric in AUTH_METRICS_MAP.keys()},
-    **{metric: "ssh" for metric in SSH_METRICS_MAP.keys()},
-    **{metric: "kubernetes" for metric in KUBERNETES_METRICS_MAP.keys()},
-    **{metric: "database" for metric in DATABASE_METRICS_MAP.keys()},
+    **dict.fromkeys(COMMON_METRICS_MAP.keys(), "teleport"),
+    **dict.fromkeys(PROXY_METRICS_MAP.keys(), "proxy"),
+    **dict.fromkeys(AUTH_METRICS_MAP.keys(), "auth"),
+    **dict.fromkeys(SSH_METRICS_MAP.keys(), "ssh"),
+    **dict.fromkeys(KUBERNETES_METRICS_MAP.keys(), "kubernetes"),
+    **dict.fromkeys(DATABASE_METRICS_MAP.keys(), "database"),
 }

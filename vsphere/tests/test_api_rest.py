@@ -17,6 +17,13 @@ from .common import build_rest_api_client
 logger = logging.getLogger()
 
 
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
+
+
 @pytest.mark.usefixtures("mock_rest_api", "mock_type")
 def test_get_resource_tags(realtime_instance):
     config = VSphereConfig(realtime_instance, {}, logger)
@@ -37,7 +44,6 @@ def test_get_resource_tags(realtime_instance):
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api", "mock_threadpool")
 def test_tagging_tags_get_exception(realtime_instance, dd_run_check, caplog, aggregator):
-
     instance = copy.deepcopy(realtime_instance)
     instance['collect_tags'] = True
     instance['excluded_host_tags'] = ['my_cat_name_1']
@@ -58,7 +64,6 @@ def test_tagging_tags_get_exception(realtime_instance, dd_run_check, caplog, agg
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api", "mock_threadpool")
 def test_tagging_category_get_exception(realtime_instance, dd_run_check, caplog, aggregator):
-
     instance = copy.deepcopy(realtime_instance)
     instance['collect_tags'] = True
     instance['excluded_host_tags'] = ['my_cat_name_1']
@@ -79,7 +84,6 @@ def test_tagging_category_get_exception(realtime_instance, dd_run_check, caplog,
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_threadpool", "mock_api")
 def test_get_tags_log(realtime_instance, dd_run_check, caplog, aggregator):
-
     instance = copy.deepcopy(realtime_instance)
     instance['collect_tags'] = True
     instance['excluded_host_tags'] = ['my_cat_name_1']

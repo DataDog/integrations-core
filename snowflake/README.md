@@ -10,6 +10,8 @@ Note: This integration is now deprecated and replaced by the new API-based integ
 <div class="alert alert-info"><bold>Note</bold>: Metrics are collected with queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</div>
 
 
+**Minimum Agent version:** 7.23.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.
@@ -303,7 +305,7 @@ Additional helpful documentation, links, and articles:
 
 
 [1]: https://www.snowflake.com/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=hostagent
 [4]: https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
 [5]: https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example

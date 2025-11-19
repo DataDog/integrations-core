@@ -154,30 +154,21 @@ pipeline:
           user_kind:1 events/emitter.go:288
       grok:
         supportRules: >-
-          _log_prefix
-          %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):date}\s+%{word:log.level}\s+(\[%{notSpace:teleport.component}\])?\s+%{notSpace}
-
+          _log_prefix %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):date}\s+%{word:log.level}\s+(\[%{notSpace:teleport.component}\])?\s+%{notSpace}
 
           _log_common_attr %{_log_prefix}\s+(addr.local:%{ipOrHost:network.client.ip}:%{port:network.client.port}\s+)?(addr.remote:%{ipOrHost:network.destination.ip}:%{port:network.destination.port}\s+)?+cluster_name:%{notSpace:teleport.cluster_name}\s+code:%{notSpace:teleport.code}\s+ei:%{notSpace:teleport.eid}
         matchRules: >-
-          parse_audit_user_login
-          %{_log_common_attr}\s+event:%{notSpace:teleport.event_type}\s+method:%{notSpace:teleport.method}\s+mfa_device_name:%{notSpace:teleport.mfa_device_name}\s+mfa_device_type:%{notSpace:teleport.mfa_device_type}\s+mfa_device_uuid:%{notSpace:teleport.mfa_device_uuid}\s+required_private_key_policy:%{notSpace:teleport.required_private_key_policy}\s+success:%{notSpace:teleport.success}\s+time:%{notSpace:teleport.time}\s+uid:%{notSpace:teleport.uid}\s+user:%{notSpace:teleport.user}\s+user_agent:%{regex("[a-zA-Z/0-9. 
-           (;_),]+"):http.useragent}\s%{notSpace}
+          parse_audit_user_login %{_log_common_attr}\s+event:%{notSpace:teleport.event_type}\s+method:%{notSpace:teleport.method}\s+mfa_device_name:%{notSpace:teleport.mfa_device_name}\s+mfa_device_type:%{notSpace:teleport.mfa_device_type}\s+mfa_device_uuid:%{notSpace:teleport.mfa_device_uuid}\s+required_private_key_policy:%{notSpace:teleport.required_private_key_policy}\s+success:%{notSpace:teleport.success}\s+time:%{notSpace:teleport.time}\s+uid:%{notSpace:teleport.uid}\s+user:%{notSpace:teleport.user}\s+user_agent:%{regex("[a-zA-Z/0-9. (;_),]+"):http.useragent}\s%{notSpace}
 
           parse_audit_session_start %{_log_common_attr}\s+event:%{notSpace:teleport.event_type}\s+initial_command:%{notSpace:teleport.initial_command}\s+login:%{notSpace:teleport.login}\s+namespace:%{notSpace:teleport.namespace}\s+private_key_policy:%{notSpace:teleport.private_key_policy}\s+proto:%{notSpace:teleport.proto}\s+server_addr:%{notSpace:teleport.server_addr}\s+server_hostname:%{notSpace:network.host.name}\s+server_id:%{notSpace:teleport.server_id}\s+session_recording:%{notSpace:teleport.session_recording}\s+sid:%{notSpace:teleport.sid}\s+size:%{notSpace:teleport.size}\s+time:%{notSpace:teleport.time}\s+uid:%{notSpace:teleport.uid}\s+user:%{notSpace:teleport.user}\s+user_kind:%{notSpace:teleport.user_kind}\s+%{regex("[^:]*"):log.file}:%{number:log.line_number}.*
 
-
           parse_audit_session_leave %{_log_common_attr}\s+event:%{notSpace:teleport.event_type}\s+login:%{notSpace:teleport.login}\s+namespace:%{notSpace:teleport.namespace}\s+private_key_policy:%{notSpace:teleport.private_key_policy}\s+server_addr:%{notSpace:teleport.server_addr}\s+%{data::keyvalue(":","a-zA-Z-_.<>")}\s+%{regex("[^:]*"):log.file}:%{number:log.line_number}.*
-
 
           parse_audot_session_end %{_log_common_attr}\s+enhanced_recording:%{notSpace:teleport.enhanced_recording}\s+event:%{notSpace:teleport.event_type}\s+interactive:%{notSpace:teleport.interactive}\s+login:%{notSpace:teleport.login}\s+namespace:%{notSpace:teleport.namespace}\s+participants:%{notSpace:teleport.participants}\s+private_key_policy:%{notSpace:teleport.private_key_policy}\s+proto:%{notSpace:teleport.proto}\s+server_addr:%{notSpace:teleport.server_addr}\s+server_hostname:%{notSpace:network.host.name}\s+server_id:%{notSpace:teleport.server_id}\s+session_recording:%{notSpace:teleport.session_recording}\s+session_start:%{notSpace:teleport.session_start}\s+session_stop:%{notSpace:teleport.session_stop}\s+sid:%{notSpace:teleport.sid}\s+time:%{notSpace:teleport.time}\s+uid:%{notSpace:teleport.uid}\s+user:%{notSpace:teleport.user}\s+user_kind:%{notSpace:teleport.user_kind}\s+%{regex("[^:]*"):log.file}:%{number:log.line_number}.*
 
-
           parse_audit_session_data %{_log_common_attr}\s+event:%{notSpace:teleport.event_type}\s+login:%{notSpace:teleport.login}\s+namespace:%{notSpace:teleport.namespace}\s+private_key_policy:%{notSpace:teleport.private_key_policy}\s+rx:%{notSpace:teleport.bytes_read}\s+server_hostname:%{notSpace:network.host.name}\s+server_id:%{notSpace:teleport.server_id}\s+sid:%{notSpace:teleport.sid}\s+time:%{notSpace:teleport.time}\s+tx:%{notSpace:network.bytes_written}\s+uid:%{notSpace:teleport.uid}\s+user:%{notSpace:teleport.user}\s+user_kind:%{notSpace:teleport.user_kind}\s+%{regex("[^:]*"):log.file}:%{number:log.line_number}.*
 
-
-          parse_user_login %{_log_common_attr}\s+error:%{regex("[\\[]*.*\\]"):teleport.event_error}\s+event:%{notSpace:teleport.event_type}\s+method:%{notSpace:teleport.method}\s+success:%{notSpace:teleport.success}\s+time:%{notSpace:teleport.time}\s+uid:%{notSpace:teleport.uid}\s+user:%{notSpace:teleport.user}\s+user_agent:%{regex("[a-zA-Z/0-9. 
-           (;_),]+"):http.useragent}\s%{notSpace}
+          parse_user_login %{_log_common_attr}\s+error:%{regex("[\\[]*.*\\]"):teleport.event_error}\s+event:%{notSpace:teleport.event_type}\s+method:%{notSpace:teleport.method}\s+success:%{notSpace:teleport.success}\s+time:%{notSpace:teleport.time}\s+uid:%{notSpace:teleport.uid}\s+user:%{notSpace:teleport.user}\s+user_agent:%{regex("[a-zA-Z/0-9. (;_),]+"):http.useragent}\s%{notSpace}
 
           parse_common_prefix %{_log_prefix}.*
     - type: user-agent-parser

@@ -742,3 +742,219 @@ karpenter_workqueue_work_duration_seconds_bucket{name="eviction.workqueue",le="1
 karpenter_workqueue_work_duration_seconds_bucket{name="eviction.workqueue",le="+Inf"} 1491
 karpenter_workqueue_work_duration_seconds_sum{name="eviction.workqueue"} 120.47046982900007
 karpenter_workqueue_work_duration_seconds_count{name="eviction.workqueue"} 1491
+# HELP aws_sdk_go_request_attempt_duration_seconds Latency of AWS SDK Go request attempts
+# TYPE aws_sdk_go_request_attempt_duration_seconds histogram
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.01"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.015"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.0225"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.03375"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.050625"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.0759375"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.11390625000000001"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.17085937500000004"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.25628906250000005"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.3844335937500001"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.5766503906250001"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="0.8649755859375001"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="1.2974633789062502"} 0
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="1.9461950683593754"} 824
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="2.919292602539063"} 1468
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="4.378938903808595"} 1473
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="6.568408355712892"} 1473
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="9.852612533569339"} 1473
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="14.778918800354008"} 1473
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="22.168378200531013"} 1473
+aws_sdk_go_request_attempt_duration_seconds_bucket{action="CreateFleet",code="200",le="+Inf"} 1473
+aws_sdk_go_request_attempt_duration_seconds_sum{action="CreateFleet",code="200"} 2815.704
+aws_sdk_go_request_attempt_duration_seconds_count{action="CreateFleet",code="200"} 1473
+# HELP aws_sdk_go_request_attempt_total The total number of AWS SDK Go request attempts
+# TYPE aws_sdk_go_request_attempt_total counter
+aws_sdk_go_request_attempt_total{action="CreateFleet",code="200"} 1473
+# HELP aws_sdk_go_request_duration_seconds Latency of AWS SDK Go requests
+# TYPE aws_sdk_go_request_duration_seconds histogram
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.01"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.015"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.0225"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.03375"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.050625"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.0759375"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.11390625000000001"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.17085937500000004"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.25628906250000005"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.3844335937500001"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.5766503906250001"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="0.8649755859375001"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="1.2974633789062502"} 0
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="1.9461950683593754"} 821
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="2.919292602539063"} 1468
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="4.378938903808595"} 1473
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="6.568408355712892"} 1473
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="9.852612533569339"} 1473
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="14.778918800354008"} 1473
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="22.168378200531013"} 1473
+aws_sdk_go_request_duration_seconds_bucket{action="CreateFleet",code="200",le="+Inf"} 1473
+aws_sdk_go_request_duration_seconds_sum{action="CreateFleet",code="200"} 2816.694999999998
+aws_sdk_go_request_duration_seconds_count{action="CreateFleet",code="200"} 1473
+# HELP aws_sdk_go_request_retry_count The total number of AWS SDK Go retry attempts per request
+# TYPE aws_sdk_go_request_retry_count histogram
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="0"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="1"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="2"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="3"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="4"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="5"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="6"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="7"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="8"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="9"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="10"} 1473
+aws_sdk_go_request_retry_count_bucket{action="CreateFleet",code="200",le="+Inf"} 1473
+aws_sdk_go_request_retry_count_sum{action="CreateFleet",code="200"} 0
+aws_sdk_go_request_retry_count_count{action="CreateFleet",code="200"} 1473
+# HELP aws_sdk_go_request_total The total number of AWS SDK Go requests
+# TYPE aws_sdk_go_request_total counter
+aws_sdk_go_request_total{action="CreateFleet",code="200"} 1473
+# HELP controller_runtime_reconcile_panics_total Total number of reconciliation panics per controller
+# TYPE controller_runtime_reconcile_panics_total counter
+controller_runtime_reconcile_panics_total{controller="disruption"} 0
+# HELP controller_runtime_terminal_reconcile_errors_total Total number of terminal reconciliation errors per controller
+# TYPE controller_runtime_terminal_reconcile_errors_total counter
+controller_runtime_terminal_reconcile_errors_total{controller="disruption"} 0
+# HELP karpenter_nodeclaims_instance_termination_duration_seconds Duration of CloudProvider Instance termination in seconds.
+# TYPE karpenter_nodeclaims_instance_termination_duration_seconds histogram
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="1"} 26
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="2"} 29
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="4"} 29
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="8"} 29
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="16"} 29
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="32"} 45
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="64"} 639
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="128"} 1171
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="256"} 1171
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="512"} 1171
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="1024"} 1174
+karpenter_nodeclaims_instance_termination_duration_seconds_bucket{nodepool="amd-spot",le="+Inf"} 1174
+karpenter_nodeclaims_instance_termination_duration_seconds_sum{nodepool="amd-spot"} 76312.3866401892
+karpenter_nodeclaims_instance_termination_duration_seconds_count{nodepool="amd-spot"} 1174
+# HELP karpenter_nodeclaims_termination_duration_seconds Duration of NodeClaim termination in seconds.
+# TYPE karpenter_nodeclaims_termination_duration_seconds histogram
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="1"} 0
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="2"} 0
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="4"} 0
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="8"} 0
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="16"} 0
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="32"} 0
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="64"} 27
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="128"} 945
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="256"} 1151
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="512"} 1159
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="1024"} 1161
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="2048"} 1165
+karpenter_nodeclaims_termination_duration_seconds_bucket{nodepool="amd-spot",le="+Inf"} 1165
+karpenter_nodeclaims_termination_duration_seconds_sum{nodepool="amd-spot"} 127787.71390607278
+karpenter_nodeclaims_termination_duration_seconds_count{nodepool="amd-spot"} 1165
+# HELP karpenter_cluster_state_unsynced_time_seconds The time for which cluster state is not synced
+# TYPE karpenter_cluster_state_unsynced_time_seconds gauge
+karpenter_cluster_state_unsynced_time_seconds 0
+# HELP karpenter_cluster_utilization_percent Utilization of allocatable resources by pod requests
+# TYPE karpenter_cluster_utilization_percent gauge
+karpenter_cluster_utilization_percent{resource_type="cpu"} 71.75612836557782
+karpenter_cluster_utilization_percent{resource_type="memory"} 66.96278752283565
+# HELP operator_ec2nodeclass_status_condition_transitions_total The count of transitions of a given object, type and status.
+# TYPE operator_ec2nodeclass_status_condition_transitions_total counter
+operator_ec2nodeclass_status_condition_transitions_total{reason="AMIsReady",status="True",type="AMIsReady"} 11
+# HELP operator_ec2nodeclass_status_condition_current_status_seconds The current amount of time in seconds that a status condition has been in a specific state. Alarm := P99(Updated=Unknown) > 5 minutes
+# TYPE operator_ec2nodeclass_status_condition_current_status_seconds gauge
+operator_ec2nodeclass_status_condition_current_status_seconds{name="amd-spot",namespace="",reason="AMIsReady",status="True",type="AMIsReady"} 1.840194566670329e+06
+# HELP operator_ec2nodeclass_status_condition_count The number of an condition for a given object, type and status. e.g. Alarm := Available=False > 0
+# TYPE operator_ec2nodeclass_status_condition_count gauge
+operator_ec2nodeclass_status_condition_count{name="amd-spot",namespace="",reason="AMIsReady",status="True",type="AMIsReady"} 1
+# HELP operator_node_status_condition_transitions_total The count of transitions of a given object, type and status.
+# TYPE operator_node_status_condition_transitions_total counter
+operator_node_status_condition_transitions_total{karpenter_k8s_aws_ec2nodeclass="",karpenter_sh_initialized="",karpenter_sh_nodepool="",reason="KubeletHasNoDiskPressure",status="False",type="DiskPressure"} 14
+operator_node_status_condition_transitions_total{karpenter_k8s_aws_ec2nodeclass="",karpenter_sh_initialized="",karpenter_sh_nodepool="",reason="KubeletHasSufficientMemory",status="False",type="MemoryPressure"} 14
+# HELP operator_node_status_condition_transition_seconds The amount of time a condition was in a given state before transitioning. e.g. Alarm := P99(Updated=False) > 5 minutes
+# TYPE operator_node_status_condition_transition_seconds histogram
+operator_node_status_condition_transition_seconds_bucket{karpenter_k8s_aws_ec2nodeclass="",karpenter_sh_initialized="",karpenter_sh_nodepool="",status="False",type="DiskPressure",le="0.005"} 0
+operator_node_status_condition_transition_seconds_bucket{karpenter_k8s_aws_ec2nodeclass="",karpenter_sh_initialized="",karpenter_sh_nodepool="",status="False",type="DiskPressure",le="0.01"} 0
+# HELP operator_node_status_condition_current_status_seconds The current amount of time in seconds that a status condition has been in a specific state. Alarm := P99(Updated=Unknown) > 5 minutes
+# TYPE operator_node_status_condition_current_status_seconds gauge
+operator_node_status_condition_current_status_seconds{karpenter_k8s_aws_ec2nodeclass="",karpenter_sh_initialized="",karpenter_sh_nodepool="",name="ip-11-11-111-111.us-west-2.compute.internal",namespace="",reason="KubeletHasNoDiskPressure",status="False",type="DiskPressure"} 22640.470348112
+operator_node_status_condition_current_status_seconds{karpenter_k8s_aws_ec2nodeclass="",karpenter_sh_initialized="",karpenter_sh_nodepool="",name="ip-11-11-111-111.us-west-2.compute.internal",namespace="",reason="KubeletHasSufficientMemory",status="False",type="MemoryPressure"} 22640.470309571
+# HELP operator_node_status_condition_count The number of an condition for a given object, type and status. e.g. Alarm := Available=False > 0
+# TYPE operator_node_status_condition_count gauge
+operator_node_status_condition_count{karpenter_k8s_aws_ec2nodeclass="",karpenter_sh_initialized="",karpenter_sh_nodepool="",name="ip-11-11-111-111.us-west-2.compute.internal",namespace="",reason="KubeletHasNoDiskPressure",status="False",type="DiskPressure"} 1
+operator_node_status_condition_count{karpenter_k8s_aws_ec2nodeclass="",karpenter_sh_initialized="",karpenter_sh_nodepool="",name="ip-11-11-111-111.us-west-2.compute.internal",namespace="",reason="KubeletHasSufficientMemory",status="False",type="MemoryPressure"} 1
+# HELP operator_node_termination_duration_seconds The amount of time taken by an object to terminate completely.
+# TYPE operator_node_termination_duration_seconds histogram
+operator_node_termination_duration_seconds_bucket{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_initialized="true",karpenter_sh_nodepool="amd-spot",le="0.005"} 0
+operator_node_termination_duration_seconds_bucket{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_initialized="true",karpenter_sh_nodepool="amd-spot",le="0.01"} 0
+# HELP operator_nodeclaim_status_condition_transitions_total The count of transitions of a given object, type and status.
+# TYPE operator_nodeclaim_status_condition_transitions_total counter
+operator_nodeclaim_status_condition_transitions_total{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",reason="ConsistentStateFound",status="True",type="ConsistentStateFound"} 47
+operator_nodeclaim_status_condition_transitions_total{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",reason="Consolidatable",status="True",type="Consolidatable"} 49
+# HELP operator_nodeclaim_status_condition_transition_seconds The amount of time a condition was in a given state before transitioning. e.g. Alarm := P99(Updated=False) > 5 minutes
+# TYPE operator_nodeclaim_status_condition_transition_seconds histogram
+operator_nodeclaim_status_condition_transition_seconds_bucket{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",status="Unknown",type="Initialized",le="0.005"} 0
+operator_nodeclaim_status_condition_transition_seconds_bucket{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",status="Unknown",type="Initialized",le="0.01"} 0
+# HELP operator_nodeclaim_status_condition_current_status_seconds The current amount of time in seconds that a status condition has been in a specific state. Alarm := P99(Updated=Unknown) > 5 minutes
+# TYPE operator_nodeclaim_status_condition_current_status_seconds gauge
+operator_nodeclaim_status_condition_current_status_seconds{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",name="amd-spot-22tmk",namespace="",reason="ConsistentStateFound",status="True",type="ConsistentStateFound"} 279830.527949843
+operator_nodeclaim_status_condition_current_status_seconds{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",name="amd-spot-22tmk",namespace="",reason="Consolidatable",status="True",type="Consolidatable"} 280341.527937337
+# HELP operator_nodeclaim_status_condition_count The number of an condition for a given object, type and status. e.g. Alarm := Available=False > 0
+# TYPE operator_nodeclaim_status_condition_count gauge
+operator_nodeclaim_status_condition_count{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",name="amd-spot-22tmk",namespace="",reason="ConsistentStateFound",status="True",type="ConsistentStateFound"} 1
+operator_nodeclaim_status_condition_count{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",name="amd-spot-22tmk",namespace="",reason="Consolidatable",status="True",type="Consolidatable"} 1
+# HELP operator_nodeclaim_termination_duration_seconds The amount of time taken by an object to terminate completely.
+# TYPE operator_nodeclaim_termination_duration_seconds histogram
+operator_nodeclaim_termination_duration_seconds_bucket{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",le="0.005"} 0
+operator_nodeclaim_termination_duration_seconds_bucket{karpenter_k8s_aws_ec2nodeclass="default-tier1",karpenter_sh_nodepool="amd-spot",le="0.01"} 0
+# HELP operator_nodepool_status_condition_transitions_total The count of transitions of a given object, type and status.
+# TYPE operator_nodepool_status_condition_transitions_total counter
+operator_nodepool_status_condition_transitions_total{reason="NodeClassReady",status="True",type="NodeClassReady"} 28
+operator_nodepool_status_condition_transitions_total{reason="Ready",status="True",type="Ready"} 28
+operator_nodepool_status_condition_transitions_total{reason="ValidationSucceeded",status="True",type="ValidationSucceeded"} 28
+# HELP operator_nodepool_status_condition_current_status_seconds The current amount of time in seconds that a status condition has been in a specific state. Alarm := P99(Updated=Unknown) > 5 minutes
+# TYPE operator_nodepool_status_condition_current_status_seconds gauge
+operator_nodepool_status_condition_current_status_seconds{name="amd-spot",namespace="",reason="NodeClassReady",status="True",type="NodeClassReady"} 2.78386089979731e+06
+operator_nodepool_status_condition_current_status_seconds{name="amd-spot",namespace="",reason="Ready",status="True",type="Ready"} 2.351538899806397e+06
+# HELP operator_nodepool_status_condition_count The number of an condition for a given object, type and status. e.g. Alarm := Available=False > 0
+# TYPE operator_nodepool_status_condition_count gauge
+operator_nodepool_status_condition_count{name="amd-spot",namespace="",reason="NodeClassReady",status="True",type="NodeClassReady"} 1
+operator_nodepool_status_condition_count{name="amd-spot",namespace="",reason="Ready",status="True",type="Ready"} 1
+# HELP operator_ec2nodeclass_status_condition_transition_seconds Measures the time in seconds that a condition has been in a particular true/false/unknown state before transitioning. e.g. Alarm := P99(Updated=Unknown) > 5 minutes
+# TYPE operator_ec2nodeclass_status_condition_transition_seconds histogram
+operator_ec2nodeclass_status_condition_transition_seconds_bucket{type="AMIsReady",status="True",le="0.005"} 0
+operator_ec2nodeclass_status_condition_transition_seconds_bucket{type="AMIsReady",status="True",le="+Inf"} 5
+operator_ec2nodeclass_status_condition_transition_seconds_sum{type="AMIsReady",status="True"} 2.5
+operator_ec2nodeclass_status_condition_transition_seconds_count{type="AMIsReady",status="True"} 5
+# HELP operator_ec2nodeclass_termination_current_time_seconds The current time in seconds since the start of ec2nodeclass termination
+# TYPE operator_ec2nodeclass_termination_current_time_seconds gauge
+operator_ec2nodeclass_termination_current_time_seconds{name="default"} 0
+# HELP operator_ec2nodeclass_termination_duration_seconds Duration of ec2nodeclass termination in seconds
+# TYPE operator_ec2nodeclass_termination_duration_seconds histogram
+operator_ec2nodeclass_termination_duration_seconds_bucket{name="default",le="0.005"} 0
+operator_ec2nodeclass_termination_duration_seconds_bucket{name="default",le="+Inf"} 1
+operator_ec2nodeclass_termination_duration_seconds_sum{name="default"} 0.5
+operator_ec2nodeclass_termination_duration_seconds_count{name="default"} 1
+# HELP operator_node_termination_current_time_seconds The current time in seconds since the start of node termination
+# TYPE operator_node_termination_current_time_seconds gauge
+operator_node_termination_current_time_seconds{name="test-node"} 0
+# HELP operator_nodeclaim_termination_current_time_seconds The current time in seconds since the start of nodeclaim termination
+# TYPE operator_nodeclaim_termination_current_time_seconds gauge
+operator_nodeclaim_termination_current_time_seconds{name="test-nodeclaim"} 0
+# HELP operator_nodepool_status_condition_transition_seconds Measures the time in seconds that a condition has been in a particular true/false/unknown state before transitioning. e.g. Alarm := P99(Updated=Unknown) > 5 minutes
+# TYPE operator_nodepool_status_condition_transition_seconds histogram
+operator_nodepool_status_condition_transition_seconds_bucket{type="Ready",status="True",le="0.005"} 0
+operator_nodepool_status_condition_transition_seconds_bucket{type="Ready",status="True",le="+Inf"} 10
+operator_nodepool_status_condition_transition_seconds_sum{type="Ready",status="True"} 5.0
+operator_nodepool_status_condition_transition_seconds_count{type="Ready",status="True"} 10
+# HELP operator_nodepool_termination_current_time_seconds The current time in seconds since the start of nodepool termination
+# TYPE operator_nodepool_termination_current_time_seconds gauge
+operator_nodepool_termination_current_time_seconds{name="default"} 0
+# HELP operator_nodepool_termination_duration_seconds Duration of nodepool termination in seconds
+# TYPE operator_nodepool_termination_duration_seconds histogram
+operator_nodepool_termination_duration_seconds_bucket{name="default",le="0.005"} 0
+operator_nodepool_termination_duration_seconds_bucket{name="default",le="+Inf"} 1
+operator_nodepool_termination_duration_seconds_sum{name="default"} 0.5
+operator_nodepool_termination_duration_seconds_count{name="default"} 1

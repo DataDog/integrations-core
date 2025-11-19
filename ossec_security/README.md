@@ -16,6 +16,8 @@ This integration ingests the following types of logs:
 
 Visualize detailed insights into these logs through the out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 ### Installation
@@ -185,7 +187,7 @@ Make sure that traffic is bypassed from the configured port if the firewall is e
 For further assistance, contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://www.ossec.net/
 [5]: https://github.com/DataDog/integrations-core/blob/master/ossec_security/assets/service_checks.json
@@ -193,4 +195,4 @@ For further assistance, contact [Datadog support][1].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/ossec_security/datadog_checks/ossec_security/data/conf.yaml.example
 [9]: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-[10]: https://app.datadoghq.com/logs/pipelines
+[10]: /logs/pipelines

@@ -11,7 +11,9 @@
             "hosting_type:self-hosted",
             "sharding_cluster_role:mongos"
         ],
+        "cloud_metadata": {},
         "timestamp": 1715911398111.2722,
+        "service": "my_service",
         "mongodb_slow_queries": [
             {
                 "timestamp": 32479987543991.0,

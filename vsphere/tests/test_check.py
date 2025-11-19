@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2019-present
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
@@ -7,9 +7,8 @@ import logging
 import os
 import time
 
-import mock
 import pytest
-from mock import MagicMock
+from mock import MagicMock, mock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base import to_string
@@ -21,6 +20,13 @@ from tests.legacy.utils import mock_alarm_event
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
@@ -177,7 +183,6 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
 def test_collect_metric_instance_values_historical(aggregator, dd_run_check, historical_instance):
-
     historical_instance.update(
         {
             'collect_per_instance_filters': {
@@ -277,7 +282,7 @@ def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_inst
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.log = MagicMock()
 
-    with mock.patch('requests.post', side_effect=Exception, autospec=True):
+    with mock.patch('requests.Session.post', side_effect=Exception, autospec=True):
         dd_run_check(check)
 
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')
@@ -579,9 +584,10 @@ def test_vm_hostname_suffix_tag_same_key(aggregator, dd_run_check, realtime_inst
 
 
 def test_no_infra_cache(aggregator, realtime_instance, dd_run_check, caplog):
-    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
-        'pyVmomi.vmodl.query.PropertyCollector'
-    ) as mock_property_collector:
+    with (
+        mock.patch('pyVim.connect.SmartConnect') as mock_connect,
+        mock.patch('pyVmomi.vmodl.query.PropertyCollector') as mock_property_collector,
+    ):
         mock_si = mock.MagicMock()
         mock_si.content.eventManager.QueryEvents.return_value = []
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
@@ -632,9 +638,10 @@ def test_no_infra_cache(aggregator, realtime_instance, dd_run_check, caplog):
 
 
 def test_no_infra_cache_events(aggregator, realtime_instance, dd_run_check, caplog):
-    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
-        'pyVmomi.vmodl.query.PropertyCollector'
-    ) as mock_property_collector:
+    with (
+        mock.patch('pyVim.connect.SmartConnect') as mock_connect,
+        mock.patch('pyVmomi.vmodl.query.PropertyCollector') as mock_property_collector,
+    ):
         event = vim.event.VmReconfiguredEvent()
         event.userName = "datadog"
         event.createdTime = get_current_datetime()
@@ -699,10 +706,10 @@ def test_no_infra_cache_events(aggregator, realtime_instance, dd_run_check, capl
 
 
 def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_check, caplog):
-    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
-        'pyVmomi.vmodl.query.PropertyCollector'
-    ) as mock_property_collector:
-
+    with (
+        mock.patch('pyVim.connect.SmartConnect') as mock_connect,
+        mock.patch('pyVmomi.vmodl.query.PropertyCollector') as mock_property_collector,
+    ):
         event = vim.event.VmReconfiguredEvent()
         event.userName = "datadog"
         event.createdTime = get_current_datetime()

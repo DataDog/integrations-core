@@ -2,11 +2,120 @@
 
 <!-- towncrier release notes start -->
 
-## 5.0.0 / 2024-10-01
+## 6.9.1 / 2025-10-31
+
+***Fixed***:
+
+* Correctly support schema registry bytes in Avro & Protobuf messages ([#21632](https://github.com/DataDog/integrations-core/pull/21632))
+
+## 6.9.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump `confluent-kafka` to 2.11.1 ([#21259](https://github.com/DataDog/integrations-core/pull/21259))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Set ruff formatting rules in pyproject.toml to inherit from the global ones of the repo. ([#21206](https://github.com/DataDog/integrations-core/pull/21206))
+
+## 6.8.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+***Fixed***:
+
+* Improve kafka consumer highwater offset collection time ([#20716](https://github.com/DataDog/integrations-core/pull/20716))
+* Improve check efficiency with many topics or partitions per consumer group when `collect_consumer_group_state` is enabled. ([#21221](https://github.com/DataDog/integrations-core/pull/21221))
+* Fix undercount of contexts for the max_partition_contexts configuration option. ([#21223](https://github.com/DataDog/integrations-core/pull/21223))
+
+## 6.7.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Add support for Avro and Protobuf formats for Data Streams messages feature. ([#20862](https://github.com/DataDog/integrations-core/pull/20862))
+
+***Fixed***:
+
+* data streams: Don't retrieve messages for untracked topics and cleanup consumer groups used for Data Streams messages feature. ([#20948](https://github.com/DataDog/integrations-core/pull/20948))
+
+## 6.6.1 / 2025-07-25 / Agent 7.69.0
+
+***Fixed***:
+
+* Lowercase Kafka cluster in data streams messages feature. ([#20842](https://github.com/DataDog/integrations-core/pull/20842))
+
+## 6.6.0 / 2025-07-10
+
+***Added***:
+
+* kafka_consumer check can retrieve messages from Kafka and log them. ([#20512](https://github.com/DataDog/integrations-core/pull/20512))
+
+## 6.5.2 / 2025-05-15 / Agent 7.67.0
+
+***Fixed***:
+
+* Create new kafka consumer client only if needed when fetching highwater offsets. ([#20163](https://github.com/DataDog/integrations-core/pull/20163))
+
+## 6.5.1 / 2025-03-06 / Agent 7.65.0
+
+***Fixed***:
+
+* Collect consumer state tag as string name instead of int value. ([#19744](https://github.com/DataDog/integrations-core/pull/19744))
+
+## 6.5.0 / 2025-02-13 / Agent 7.63.0
+
+***Added***:
+
+* Bump OpenSSL in confluent-kafka to 3.4.1 on Windows. ([#19608](https://github.com/DataDog/integrations-core/pull/19608))
+
+## 6.4.0 / 2025-02-12
+
+***Added***:
+
+* Bump the OpenSSL version in confluent-kakfa to 3.3.3 on Linux and MacOS. ([#19591](https://github.com/DataDog/integrations-core/pull/19591))
+
+## 6.3.0 / 2025-01-25
+
+***Added***:
+
+* Bump version of `confluent-kafka` to 2.8.0 ([#19370](https://github.com/DataDog/integrations-core/pull/19370))
+* Disable collecting consumer group state by default ([#19411](https://github.com/DataDog/integrations-core/pull/19411))
+
+## 6.2.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 6.1.0 / 2024-11-25 / Agent 7.60.0
+
+***Security***:
+
+* Bump confluent-kafka to 2.6.1 ([#19099](https://github.com/DataDog/integrations-core/pull/19099))
+
+## 6.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 5.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 4.6.1 / 2024-09-05
 
@@ -18,7 +127,7 @@
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 4.5.0 / 2024-07-05 / Agent 7.56.0
 

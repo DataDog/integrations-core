@@ -50,11 +50,13 @@ files:
     - name: compression
       description: |
         The compression algorithm to use. The default is no compression.
-
+        If br is specified, the brotli library must be installed separately.
+        
         Valid values are:
-
           - lz4
-          - lz4hc
+          - zstd
+          - br
+          - gzip
       value:
         type: string
     - name: tls_ca_cert
@@ -66,6 +68,11 @@ files:
       value:
         type: boolean
         example: False
+    - name: verify
+      description: Indicates if a certificate is required and if it will be validated after a connection is established.
+      value:
+        type: boolean
+        example: True
     - template: instances/db
       overrides:
         custom_queries.value.example:

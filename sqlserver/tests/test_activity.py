@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -22,6 +22,9 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
+from datadog_checks.sqlserver.const import (
+    STATIC_INFO_SERVERNAME,
+)
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT
@@ -57,11 +60,12 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
 @pytest.mark.parametrize(
-    "database,query,match_pattern,is_proc,expected_comments",
+    "database,query,match_pattern,is_proc,comments,collect_raw_query_statement,expected_raw_statement",
     [
         [
             "datadog_test-1",
@@ -69,6 +73,8 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM ϑings",
             False,
             ["/*test=foo*/"],
+            False,
+            None,
         ],
         [
             "datadog_test-1",
@@ -76,6 +82,26 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM ϑings",
             True,
             [],
+            False,
+            None,
+        ],
+        [
+            "datadog_test-1",
+            "SELECT * FROM ϑings WHERE name = 'test'",
+            r"SELECT \* FROM \[ϑings\] WHERE \[name\]=\@1",
+            False,
+            [],
+            True,
+            "SELECT * FROM ϑings WHERE name = 'test'",
+        ],
+        [
+            "datadog_test-1",
+            "EXEC fredProcParams @Name = 'test'",
+            r"SELECT \* FROM ϑings WHERE name like \@Name",
+            True,
+            [],
+            True,
+            "EXEC fredProcParams @Name = 'test'",
         ],
     ],
 )
@@ -84,14 +110,26 @@ def test_collect_load_activity(
     instance_docker,
     dd_run_check,
     dbm_instance,
+    datadog_agent,
     use_autocommit,
     database,
     query,
     match_pattern,
     is_proc,
-    expected_comments,
+    comments,
+    collect_raw_query_statement,
+    expected_raw_statement,
 ):
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    instance = copy(dbm_instance)
+    instance_tags = set(instance.get('tags', []))
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags.add("database_hostname:stubbed.hostname")
+    expected_instance_tags.add("database_instance:stubbed.hostname")
+    expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
+    if collect_raw_query_statement:
+        instance["collect_raw_query_statement"] = {"enabled": True}
+        expected_instance_tags.add("raw_query_statement:enabled")
+    check = SQLServer(CHECK_NAME, {}, [instance])
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
     fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=use_autocommit)
     bob_conn = _get_conn_for_user(instance_docker, "bob")
@@ -104,41 +142,57 @@ def test_collect_load_activity(
         cur.execute("SET CONTEXT_INFO 0xff")
         cur.execute(q)
 
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': comments,
+                },
+            }
+        )
+
+    def _run_query_with_mock_obfuscator(c, q):
+        # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+            mock_agent.side_effect = _obfuscate_sql
+            run_test_query(c, q)
+
     # run the test query once before the blocking test to ensure that if it's
     # a procedure then it is populated in the sys.dm_exec_procedure_stats table
     # the first time a procedure is run we won't know it's a procedure because
     # it won't appear in that stats table
-    run_test_query(fred_conn, query)
+    _run_query_with_mock_obfuscator(fred_conn, query)
 
     # bob's query blocks until the tx is completed
-    run_test_query(bob_conn, blocking_query)
+    _run_query_with_mock_obfuscator(bob_conn, blocking_query)
 
     # fred's query will get blocked by bob, so it needs
     # to be run asynchronously
     executor = concurrent.futures.ThreadPoolExecutor(1)
-    f_q = executor.submit(run_test_query, fred_conn, query)
+    f_q = executor.submit(_run_query_with_mock_obfuscator, fred_conn, query)
     while not f_q.running():
         if f_q.done():
             break
-        print("waiting on fred's query to execute")
         time.sleep(1)
 
-    # both queries were kicked off, so run the check
     dd_run_check(check)
     # commit and close bob's transaction
     bob_conn.commit()
     bob_conn.close()
 
     while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
     # clean up fred's connection
     # and shutdown executor
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    instance_tags = set(dbm_instance.get('tags', []))
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags.add(
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower())
+    )
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -172,7 +226,7 @@ def test_collect_load_activity(
     assert blocked_row['now'], "missing current timestamp"
     assert blocked_row['last_request_start_time'], "missing last_request_start_time"
     assert blocked_row['now'], "missing current time"
-    assert blocked_row['dd_comments'] == expected_comments, "missing expected comments"
+    assert blocked_row['dd_comments'] == comments, "missing expected comments"
     # assert that the current timestamp is being collected as an ISO timestamp with TZ info
     assert parser.isoparse(blocked_row['now']).tzinfo, "current timestamp not formatted correctly"
     assert blocked_row["query_start"], "missing query_start"
@@ -180,6 +234,17 @@ def test_collect_load_activity(
     assert parser.isoparse(blocked_row["query_start"]).tzinfo, "query_start timestamp not formatted correctly"
     for r in DM_EXEC_REQUESTS_COLS:
         assert r in blocked_row
+    if collect_raw_query_statement:
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        rqt_events = [s for s in dbm_samples if s['dbm_type'] == "rqt"]
+        assert rqt_events is not None
+        matched_rqt_event = [s for s in rqt_events if s['db']['statement'] == expected_raw_statement]
+        assert len(matched_rqt_event) == 1
+        assert matched_rqt_event[0]['db']['query_signature'], "missing query_signature"
+        assert matched_rqt_event[0]['db']['raw_query_signature'], "missing raw_query_signature"
+        assert matched_rqt_event[0]['sqlserver']['query_hash'], "missing query_hash"
+        assert blocked_row['raw_query_signature'] == matched_rqt_event[0]['db']['raw_query_signature']
+        assert 'raw_statement' not in blocked_row
 
     # assert connections collection
     assert len(event['sqlserver_connections']) > 0
@@ -233,9 +298,7 @@ def test_activity_nested_blocking_transactions(
             id int,
             name varchar(10),
             city varchar(20)
-        )""".format(
-            TABLE_NAME
-        ),
+        )""".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1001, 'tire', 'sfo')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1002, 'wisth', 'nyc')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1003, 'tire', 'aus')".format(TABLE_NAME),
@@ -414,7 +477,6 @@ def test_activity_metadata(
     while not f_q.running():
         if f_q.done():
             break
-        print("waiting on fred's query to execute")
         time.sleep(1)
 
     dd_run_check(check)
@@ -423,7 +485,6 @@ def test_activity_metadata(
     bob_conn.close()
 
     while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
 
     fred_conn.close()
@@ -591,7 +652,11 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
         large_comment = "/* " + "a" * 5000 + " */"
         statement_text = "SELECT * FROM ϑings"
         procedure_text = f"CREATE PROCEDURE dbo.sp_test {large_comment} AS BEGIN {statement_text} END;"
-        metadata = {'tables_csv': 'ϑings', 'commands': ['SELECT'], 'comments': [large_comment]}
+        metadata = {
+            'tables_csv': 'ϑings',
+            'commands': ['SELECT'],
+            'comments': [large_comment],
+        }
         rows = [
             {
                 "user_name": "newbob",
@@ -599,6 +664,8 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
                 "statement_text": statement_text,
                 "text": procedure_text,
                 "query_start": new_time(),
+                "procedure_name": "sp_test",
+                "schema_name": "dbo",
             },
         ]
         # the first call to obfuscate query text will succeed
@@ -639,7 +706,16 @@ def test_activity_stored_procedure_characters_limit(
     def _obfuscate_sql(sql_query, options=None):
         if "PROCEDURE procedureWithLargeCommment" in sql_query and len(sql_query) >= stored_procedure_characters_limit:
             raise Exception("failed to obfuscate")
-        return json.dumps({'query': sql_query, 'metadata': {}})
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': [],
+                },
+            }
+        )
 
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
     fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=True)
@@ -662,7 +738,6 @@ def test_activity_stored_procedure_characters_limit(
     while not f_q.running():
         if f_q.done():
             break
-        print("waiting on fred's query to execute")
         time.sleep(1)
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -674,7 +749,6 @@ def test_activity_stored_procedure_characters_limit(
     bob_conn.close()
 
     while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
     # clean up fred's connection
     # and shutdown executor
@@ -698,7 +772,7 @@ def test_activity_stored_procedure_characters_limit(
                 matching_activity.append(activity)
     assert len(matching_activity) == 1
     assert matching_activity[0]['is_proc'] is True
-    assert matching_activity[0]['procedure_name'].lower() == "procedurewithlargecommment"
+    assert matching_activity[0]['procedure_name'].lower() == "dbo.procedurewithlargecommment"
     assert matching_activity[0]['text'] == "SELECT * FROM ϑings"
     # this is a hacky way of asserting that the procedure signature is present
     # when stored_procedure_characters_limit is set to a large value
@@ -724,6 +798,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
 
 
+@pytest.mark.integration
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.1
@@ -755,9 +830,15 @@ def _get_conn_for_user(instance_docker, user, _autocommit=False):
 
 
 def _expected_dbm_instance_tags(check):
-    return check._config.tags
+    return check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("activity_enabled", [True, False])
 def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
     dbm_instance['query_activity'] = {'enabled': activity_enabled, 'run_sync': False}
@@ -856,6 +937,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
                 'row_count': 1,
                 'query_hash': b'f\x8b\xa3Xc\xb3T\xfb',
                 'query_plan_hash': b'\xb0qh9\x0c\xa9\xa3\xb8',
+                'client_interface_name': 'Microsoft JDBC Driver 7.2',
             },
             id="no_statement_text",
         ),
@@ -895,6 +977,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
                 'row_count': 0,
                 'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
                 'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+                'client_interface_name': 'Microsoft JDBC Driver 7.2',
             },
             id="with_statement_text",
         ),

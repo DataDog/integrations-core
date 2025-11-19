@@ -7,6 +7,8 @@ The Agent's Marathon check lets you:
 - Track the state and health of every application: see configured memory, disk, cpu, and instances; monitor the number of healthy and unhealthy tasks
 - Monitor the number of queued applications and the number of deployments
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -156,7 +158,7 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][10].
 
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/marathon/datadog_checks/marathon/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

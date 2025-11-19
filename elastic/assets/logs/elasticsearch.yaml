@@ -79,7 +79,6 @@ pipeline:
       sources:
         - nodeId
       target: node_name
-      target_type: tag
       preserveSource: true
       overrideOnConflict: false
       sourceType: attribute

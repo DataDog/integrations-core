@@ -154,3 +154,18 @@ def test_connections_leaks(check, instance):
     check.check(instance)
     # Verify that the count is still 0
     assert count_connections(PORT) == 0
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment_ipv6')
+def test_service_ok_ipv6(instance_ipv6, aggregator, dd_run_check):
+    """
+    Service is up
+    """
+    tags = ["host:[2001:db8::2]", "port:{}".format(PORT), "foo:bar"]
+    check = Memcache('mcache', {}, [instance_ipv6])
+    dd_run_check(check)
+    assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
+    sc = aggregator.service_checks(SERVICE_CHECK)[0]
+    assert sc.status == check.OK
+    assert sc.tags == tags

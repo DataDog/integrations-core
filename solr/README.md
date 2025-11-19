@@ -6,6 +6,8 @@
 
 The Solr check tracks the state and performance of a Solr cluster. It collects metrics for the number of documents indexed, cache hits and evictions, average request times, average requests per second, and more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -210,6 +212,8 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 - Start the collection of metrics based on your current configuration and display them in the console:
   `sudo datadog-agent jmx collect`
 
+Need help? Contact [Datadog support][15].
+
 ## Further Reading
 
 ### Parsing a string value into a number
@@ -235,7 +239,7 @@ attribute:
 ```
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/solr/images/solrgraph.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/integrations/java/
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/solr/datadog_checks/solr/data/conf.yaml.example
@@ -248,3 +252,4 @@ attribute:
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
 [14]: https://github.com/DataDog/integrations-core/blob/master/solr/assets/service_checks.json
+[15]: https://docs.datadoghq.com/help/

@@ -23,13 +23,12 @@ Please refer to `checks.lib.wmi.counter_type` for more information*
 Original discussion thread: https://github.com/DataDog/dd-agent/issues/1952
 Credits to @TheCloudlessSky (https://github.com/TheCloudlessSky)
 """
+
 from copy import deepcopy
 from threading import Event, Thread
 
 import pythoncom
 import pywintypes
-from six import iteritems, string_types, with_metaclass
-from six.moves import zip
 from win32com.client import Dispatch
 
 from .counter_type import UndefinedCalculator, get_calculator, get_raw
@@ -67,7 +66,7 @@ class ProviderArchitectureMeta(type):
         return provider in cls._AVAILABLE_PROVIDER_ARCHITECTURES
 
 
-class ProviderArchitecture(with_metaclass(ProviderArchitectureMeta, object)):
+class ProviderArchitecture(metaclass=ProviderArchitectureMeta):
     """
     Enumerate WMI Provider Architectures.
     """
@@ -229,7 +228,7 @@ class WMISampler(object):
                 result = parsed_value
 
         if result is None:
-            self.logger.error(u"Invalid '%s' WMI Provider Architecture. The parameter is ignored.", value)
+            self.logger.error("Invalid '%s' WMI Provider Architecture. The parameter is ignored.", value)
 
         self._provider = result or ProviderArchitecture.DEFAULT
 
@@ -280,7 +279,7 @@ class WMISampler(object):
         """
         # No data is returned while sampling
         if self._sampling:
-            raise TypeError(u"Sampling `WMISampler` object has no len()")
+            raise TypeError("Sampling `WMISampler` object has no len()")
 
         return len(self._current_sample)
 
@@ -290,7 +289,7 @@ class WMISampler(object):
         """
         # No data is returned while sampling
         if self._sampling:
-            raise TypeError(u"Sampling `WMISampler` object is not iterable")
+            raise TypeError("Sampling `WMISampler` object is not iterable")
 
         if self.is_raw_perf_class:
             # Format required
@@ -336,7 +335,7 @@ class WMISampler(object):
             calculator = get_calculator(counter_type)
         except UndefinedCalculator:
             self.logger.warning(
-                u"Undefined WMI calculator for counter_type %s. Values are reported as RAW.", counter_type
+                "Undefined WMI calculator for counter_type %s. Values are reported as RAW.", counter_type
             )
 
         return calculator
@@ -349,7 +348,7 @@ class WMISampler(object):
         """
         formatted_wmi_object = CaseInsensitiveDict()
 
-        for property_name, property_raw_value in iteritems(current):
+        for property_name, property_raw_value in current.items():
             counter_type = self._property_counter_types.get(property_name)
             property_formatted_value = property_raw_value
 
@@ -366,7 +365,7 @@ class WMISampler(object):
         Create a new WMI connection
         """
         self.logger.debug(
-            u"Connecting to WMI server (host=%s, namespace=%s, provider=%s, username=%s).",
+            "Connecting to WMI server (host=%s, namespace=%s, provider=%s, username=%s).",
             self.host,
             self.namespace,
             self.provider,
@@ -429,7 +428,7 @@ class WMISampler(object):
         def build_where_clause(fltr):
             def add_to_bool_ops(k, v):
                 if isinstance(v, (tuple, list)):
-                    if len(v) == 2 and isinstance(v[0], string_types) and v[0].upper() in WQL_OPERATORS:
+                    if len(v) == 2 and isinstance(v[0], str) and v[0].upper() in WQL_OPERATORS:
                         # Append if: [WQL_OP, value]
                         #     PROPERTY: ['<WQL_OP>', '%bar']
                         #     PROPERTY: { <BOOL_OP>: ['<WQL_OP>', 'foo']}
@@ -473,7 +472,7 @@ class WMISampler(object):
                     #     - [WQL_OP, val]
                     #     - foo
                     #     - bar
-                    for k, v in iteritems(value):
+                    for k, v in value.items():
                         bool_op = default_bool_op
                         if k.upper() in BOOL_OPERATORS:
                             bool_op = k.upper()
@@ -481,7 +480,7 @@ class WMISampler(object):
                             # map NOT to NOR or NAND
                             bool_op = 'N{}'.format(default_bool_op)
                         add_to_bool_ops(bool_op, v)
-                elif isinstance(value, string_types) and '%' in value:
+                elif isinstance(value, str) and '%' in value:
                     # Override operator to LIKE if wildcard detected
                     # e.g.
                     # PROPERTY: 'foo%'  -> PROPERTY LIKE 'foo%'
@@ -492,7 +491,7 @@ class WMISampler(object):
                     # PROPERTY: 'bar'   -> PROPERTY = 'foo'
                     add_to_bool_ops(default_bool_op, [default_wql_op, value])
 
-                for bool_op, value in iteritems(bool_ops):
+                for bool_op, value in bool_ops.items():
                     if not len(value):
                         continue
 
@@ -501,9 +500,7 @@ class WMISampler(object):
                             (prop, x)
                             if isinstance(x, (tuple, list))
                             else (
-                                (prop, ('LIKE', x))
-                                if isinstance(x, string_types) and '%' in x
-                                else (prop, (default_wql_op, x))
+                                (prop, ('LIKE', x)) if isinstance(x, str) and '%' in x else (prop, (default_wql_op, x))
                             )
                         ),
                         value,
@@ -554,7 +551,7 @@ class WMISampler(object):
             wql = "Select {property_names} from {class_name}{filters}".format(
                 property_names=formated_property_names, class_name=self.class_name, filters=self.formatted_filters
             )
-            self.logger.debug(u"Querying WMI: %s", wql)
+            self.logger.debug("Querying WMI: %s", wql)
         except Exception as e:
             self.logger.error(str(e))
             return []
@@ -579,7 +576,7 @@ class WMISampler(object):
             results = self._parse_results(raw_results, includes_qualifiers=includes_qualifiers)
 
         except pywintypes.com_error:
-            self.logger.warning(u"Failed to execute WMI query (%s)", wql, exc_info=True)
+            self.logger.warning("Failed to execute WMI query (%s)", wql, exc_info=True)
             results = []
 
         return results
@@ -619,7 +616,6 @@ class WMISampler(object):
                 )
 
                 if should_get_qualifier_type:
-
                     # Can't index into "Qualifiers_" for keys that don't exist
                     # without getting an exception.
                     qualifiers = dict((q.Name, q.Value) for q in wmi_property.Qualifiers_)
@@ -632,14 +628,14 @@ class WMISampler(object):
                         self._property_counter_types[wmi_property.Name] = counter_type
 
                         self.logger.debug(
-                            u"Caching property qualifier CounterType: %s.%s = %s",
+                            "Caching property qualifier CounterType: %s.%s = %s",
                             self.class_name,
                             wmi_property.Name,
                             counter_type,
                         )
                     else:
                         self.logger.debug(
-                            u"CounterType qualifier not found for %s.%s", self.class_name, wmi_property.Name
+                            "CounterType qualifier not found for %s.%s", self.class_name, wmi_property.Name
                         )
 
                 try:

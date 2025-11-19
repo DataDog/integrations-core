@@ -1,108 +1,69 @@
 {
   "title": "Kafka, Zookeeper and Kafka Consumer Overview",
-  "description": "## Kafka Overview Dashboard\n\nThis dashboard provides an overview of your Kafka environment. It displays metrics from Kafka, Zookeeper, and Kafka Consumer Integrations with Datadog, giving you a complete view of the health and observability measures of your Kafka Cluster. Enabling the Kafka integration alone populates most of the dashboard widgets. To have the all groups populated with data, enable all three integrations.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).\n\nFor more information, read:\n* [Kafka integration documentation](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Monitoring Kafka blog post](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [ZooKeeper integration documentation](https://docs.datadoghq.com/integrations/zk/?tab=host)",
+  "description": "## Kafka Overview Dashboard\n\nThis dashboard provides an overview of your Kafka environment. It displays metrics from Kafka, Zookeeper, and Kafka Consumer Integrations with Datadog, giving you a complete view of the health and observability measures of your Kafka Cluster. Enabling the Kafka integration alone populates most of the dashboard widgets. To populate all groups with data, enable all three integrations.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).\n\nFor more information, read:\n* [Kafka integration documentation](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Monitoring Kafka blog post](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [ZooKeeper integration documentation](https://docs.datadoghq.com/integrations/zk/?tab=host)",
   "widgets": [
     {
-      "id": 236806910885332,
+      "id": 5924016577024848,
       "definition": {
-        "title": "",
-        "banner_img": "",
-        "show_title": false,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 5924016577024848,
-            "definition": {
-              "type": "image",
-              "url": "/static/images/logos/kafka_small.svg",
-              "url_dark_theme": "/static/images/logos/kafka_reversed_small.svg",
-              "sizing": "contain",
-              "margin": "md",
-              "has_background": false,
-              "has_border": false,
-              "vertical_align": "center",
-              "horizontal_align": "center"
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
-            "id": 2594907126478070,
-            "definition": {
-              "type": "note",
-              "content": "**Kafka Integration Overview Dashboard**\n\nThis dashboard provides an overview of your Kafka environment. It displays metrics from Kafka, Zookeeper and Kafka Consumer Integrations with Datadog, giving you a 360-view of the health and observability measures of your Kafka Cluster. To have the all groups populated with data, you will have to enable all 3 integrations. However, enabling the Kafka integration alone will populate most of the dashboard widgets.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).",
-              "background_color": "white",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "top",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 3,
-              "height": 4
-            }
-          },
-          {
-            "id": 7914240170882312,
-            "definition": {
-              "type": "note",
-              "content": "**Useful Links**\n\n* [Kafka Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [ZooKeeper Integration Doc](https://docs.datadoghq.com/integrations/zk/?tab=host)\n* [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/)",
-              "background_color": "white",
-              "font_size": "16",
-              "text_align": "left",
-              "vertical_align": "top",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 3,
-              "y": 3,
-              "width": 3,
-              "height": 4
-            }
-          }
-        ]
+        "type": "image",
+        "url": "/static/images/logos/kafka_small.svg",
+        "url_dark_theme": "/static/images/logos/kafka_reversed_small.svg",
+        "sizing": "contain",
+        "margin": "md",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
       },
       "layout": {
         "x": 0,
         "y": 0,
-        "width": 6,
-        "height": 8
+        "width": 3,
+        "height": 2
       }
     },
     {
-      "id": 1458255527068538,
+      "id": 7914240170882312,
       "definition": {
-        "title": "Overview",
+        "type": "note",
+        "content": "**Useful Links**\n\n* [Data Streams Monitoring](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka)\n* [Kafka Broker Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Consumer Integration Doc](https://docs.datadoghq.com/integrations/kafka-consumer/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [Data Streams Kafka Lag Dashboard](/dashboard/lists?q=Data%20Streams%20Monitoring%3A%20Kafka&p=1)\n* [ZooKeeper Integration Doc](https://docs.datadoghq.com/integrations/zk/?tab=host)\n",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 236806910885332,
+      "definition": {
+        "title": "Data Streams Monitoring",
         "background_color": "purple",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 493301468610914,
+            "id": 8756831542082047,
             "definition": {
               "type": "note",
-              "content": "This section provides you with an overview of your system activity.  The monitor summary alerts you of any Kafka alerts. ",
-              "background_color": "gray",
+              "content": "Visualize streaming pipelines, debug Kafka issues, and spot bottlenecks with [Data Streams Monitoring](/data-streams)",
+              "background_color": "blue",
               "font_size": "14",
               "text_align": "center",
-              "vertical_align": "top",
-              "show_tick": false,
+              "vertical_align": "center",
+              "show_tick": true,
               "tick_pos": "50%",
-              "tick_edge": "left",
+              "tick_edge": "bottom",
               "has_padding": true
             },
             "layout": {
@@ -113,12 +74,198 @@
             }
           },
           {
-            "id": 5429446961227528,
+            "id": 5768286309127768,
             "definition": {
-              "title": "Under Replicated ",
+              "title": "Kafka Topology for $topic, $env",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
+              "type": "topology_map",
+              "requests": [
+                {
+                  "request_type": "topology",
+                  "query": {
+                    "filters": [
+                      "$env"
+                    ],
+                    "service": "",
+                    "data_source": "data_streams",
+                    "query_string": "traffic_type:kafka queue:$topic.value"
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 5494449967761917,
+            "definition": {
+              "title": "Topic Health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:data_streams.latency{type:kafka AND direction:out AND (pathway_type:edge OR pathway_type:partial_edge) AND $topic AND $env} by {topic,env}.as_rate()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "count:data_streams.latency{type:kafka AND direction:in AND (pathway_type:edge OR pathway_type:partial_edge) AND $topic AND $env} by {topic,env}.as_rate()",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "max:data_streams.kafka.lag_seconds{$topic,$env} by {topic,env}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Messages In",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "msg/s"
+                        }
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Messages Out",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "msg/s"
+                        }
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Max Kafka Lag",
+                      "formula": "query3"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto",
+              "custom_links": [
+                {
+                  "label": "View in Data Streams Monitoring",
+                  "link": "/data-streams/map?query=queue:{{topic.value}}&env={{env.value}}&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=true"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 10
+      }
+    },
+    {
+      "id": 1458255527068538,
+      "definition": {
+        "title": "Clusters Health",
+        "background_color": "purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 595300252374894,
+            "definition": {
+              "title": "Offline Partitions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kafka.replication.offline_partitions_count{*}.weighted()"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 5429446961227528,
+            "definition": {
+              "title": "Under Replicated Partitions",
+              "title_size": "16",
+              "title_align": "left",
               "type": "query_value",
               "requests": [
                 {
@@ -149,7 +296,7 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.replication.under_replicated_partitions{$datacenter}.weighted()"
+                      "query": "sum:kafka.replication.under_replicated_partitions{$env}.weighted()"
                     }
                   ],
                   "response_format": "scalar"
@@ -162,33 +309,10 @@
               }
             },
             "layout": {
-              "x": 0,
-              "y": 1,
+              "x": 2,
+              "y": 0,
               "width": 2,
               "height": 1
-            }
-          },
-          {
-            "id": 7126099834297418,
-            "definition": {
-              "title": "",
-              "type": "manage_status",
-              "display_format": "countsAndList",
-              "color_preference": "text",
-              "hide_zero_counts": true,
-              "query": "Kafka",
-              "sort": "status,asc",
-              "count": 50,
-              "start": 0,
-              "summary_type": "monitors",
-              "show_priority": false,
-              "show_last_triggered": false
-            },
-            "layout": {
-              "x": 2,
-              "y": 1,
-              "width": 4,
-              "height": 6
             }
           },
           {
@@ -227,13 +351,13 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:kafka.replication.isr_expands.rate{$datacenter}"
+                      "query": "max:kafka.replication.isr_expands.rate{$env}"
                     },
                     {
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "max:kafka.replication.isr_shrinks.rate{$datacenter}"
+                      "query": "max:kafka.replication.isr_shrinks.rate{$env}"
                     }
                   ],
                   "response_format": "scalar"
@@ -249,58 +373,8 @@
               }
             },
             "layout": {
-              "x": 0,
-              "y": 2,
-              "width": 2,
-              "height": 1
-            }
-          },
-          {
-            "id": 595300252374894,
-            "definition": {
-              "title": "Offline Partitions",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_red",
-                      "value": 0
-                    },
-                    {
-                      "comparator": "<=",
-                      "palette": "white_on_green",
-                      "value": 0
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "aggregator": "avg",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kafka.replication.offline_partitions_count{$datacenter}.weighted()"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "autoscale": true,
-              "precision": 0,
-              "timeseries_background": {
-                "type": "bars"
-              }
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
+              "x": 4,
+              "y": 0,
               "width": 2,
               "height": 1
             }
@@ -308,7 +382,7 @@
           {
             "id": 6283188824779080,
             "definition": {
-              "title": "Follower Fetch",
+              "title": "Follower Fetch Latency",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -328,7 +402,13 @@
                   ],
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "label": "ms",
+                          "type": "custom_unit_label"
+                        }
+                      }
                     }
                   ],
                   "queries": [
@@ -336,14 +416,13 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kafka.request.fetch_follower.time.avg{$datacenter}"
+                      "query": "avg:kafka.request.fetch_follower.time.avg{$env}"
                     }
                   ],
                   "response_format": "scalar"
                 }
               ],
               "autoscale": false,
-              "custom_unit": "ms",
               "precision": 2,
               "timeseries_background": {
                 "type": "area"
@@ -351,7 +430,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 4,
+              "y": 1,
               "width": 2,
               "height": 1
             }
@@ -359,7 +438,7 @@
           {
             "id": 7120815629099702,
             "definition": {
-              "title": "Consumer Fetch",
+              "title": "Consumer Fetch Latency",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -379,7 +458,13 @@
                   ],
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "label": "ms",
+                          "type": "custom_unit_label"
+                        }
+                      }
                     }
                   ],
                   "queries": [
@@ -387,22 +472,21 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kafka.request.fetch_consumer.time.avg{$datacenter}"
+                      "query": "avg:kafka.request.fetch_consumer.time.avg{$env}"
                     }
                   ],
                   "response_format": "scalar"
                 }
               ],
               "autoscale": false,
-              "custom_unit": "ms",
               "precision": 2,
               "timeseries_background": {
                 "type": "area"
               }
             },
             "layout": {
-              "x": 0,
-              "y": 5,
+              "x": 2,
+              "y": 1,
               "width": 2,
               "height": 1
             }
@@ -410,7 +494,7 @@
           {
             "id": 6153358611007182,
             "definition": {
-              "title": "Produce Request Time",
+              "title": "Produce Latency",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -430,7 +514,13 @@
                   ],
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "label": "ms",
+                          "type": "custom_unit_label"
+                        }
+                      }
                     }
                   ],
                   "queries": [
@@ -438,31 +528,55 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kafka.request.produce.time.avg{$datacenter}"
+                      "query": "avg:kafka.request.produce.time.avg{$env}"
                     }
                   ],
                   "response_format": "scalar"
                 }
               ],
               "autoscale": false,
-              "custom_unit": "ms",
               "precision": 2,
               "timeseries_background": {
                 "type": "area"
               }
             },
             "layout": {
-              "x": 0,
-              "y": 6,
+              "x": 4,
+              "y": 1,
               "width": 2,
               "height": 1
+            }
+          },
+          {
+            "id": 7126099834297418,
+            "definition": {
+              "title": "Kafka Monitors",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "Kafka ",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 5
             }
           }
         ]
       },
       "layout": {
-        "x": 6,
-        "y": 0,
+        "x": 0,
+        "y": 2,
         "width": 6,
         "height": 8
       }
@@ -480,7 +594,7 @@
             "id": 3570061571959430,
             "definition": {
               "type": "note",
-              "content": "The Kafka Broker metrics here inform you of data loss/delay through unclean leader elections and network throughputs, as well as request fails through request purgatories and timeouts metrics",
+              "content": "The Kafka Broker metrics here inform you of data loss/delay through unclean leader elections, network throughputs, and request fails through request purgatories and timeouts metrics.\n\nTo access these metrics you need to have the [Kafka Broker](https://docs.datadoghq.com/integrations/kafka/?tab=host) integration enabled.",
               "background_color": "gray",
               "font_size": "14",
               "text_align": "left",
@@ -500,49 +614,58 @@
           {
             "id": 75077178454600,
             "definition": {
-                "title": "Clean and Unclean Leader Elections",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "time": {},
-                "type": "timeseries",
-                "requests": [
+              "title": "Clean and Unclean Leader Elections",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "formulas": [
-                            {
-                                "formula": "query2"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query2",
-                                "query": "sum:kafka.replication.leader_elections.rate{$datacenter}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        },
-                        "display_type": "bars"
+                      "alias": "Clean",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Unclean",
+                      "formula": "query1"
                     }
-                ]
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:kafka.replication.leader_elections.rate{$env}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kafka.replication.unclean_leader_elections.rate{$env}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
             },
             "layout": {
-                "x": 0,
-                "y": 1,
-                "width": 4,
-                "height": 2
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 2
             }
           },
           {
@@ -565,30 +688,24 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "style": {
-                        "palette": "classic",
-                        "palette_index": 0
-                      }
+                      "alias": "Bytes In",
+                      "formula": "query1"
                     },
                     {
-                      "formula": "query2",
-                      "style": {
-                        "palette": "classic",
-                        "palette_index": 3
-                      }
+                      "alias": "Bytes Out",
+                      "formula": "query2"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.net.bytes_in.rate{$datacenter}.weighted()"
+                      "query": "sum:kafka.net.bytes_in.rate{$env} by {env}.weighted()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kafka.net.bytes_out.rate{$datacenter}.weighted()"
+                      "query": "sum:kafka.net.bytes_out.rate{$env} by {env}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -628,9 +745,11 @@
                 {
                   "formulas": [
                     {
+                      "alias": "Producer",
                       "formula": "query1"
                     },
                     {
+                      "alias": "Fetch",
                       "formula": "query2"
                     }
                   ],
@@ -638,12 +757,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.request.producer_request_purgatory.size{$datacenter}.weighted()"
+                      "query": "sum:kafka.request.producer_request_purgatory.size{$env} by {env}.weighted()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kafka.request.fetch_request_purgatory.size{$datacenter}.weighted()"
+                      "query": "sum:kafka.request.fetch_request_purgatory.size{$env} by {env}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -683,30 +802,24 @@
                 {
                   "formulas": [
                     {
+                      "alias": "Produce",
                       "formula": "query1"
                     },
                     {
+                      "alias": "Fetch",
                       "formula": "query2"
-                    },
-                    {
-                      "formula": "query3"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kafka.request.produce.time.avg{$datacenter}"
+                      "query": "avg:kafka.request.produce.time.avg{$env} by {env}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:kafka.request.fetch_consumer.time.avg{$datacenter}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:kafka.request.fetch_consumer.time.avg{$datacenter}"
+                      "query": "avg:kafka.request.fetch_consumer.time.avg{$env} by {env}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -748,7 +861,7 @@
             "id": 4804179441675328,
             "definition": {
               "type": "note",
-              "content": "Kafka Producers send messages to brokers for storage and distribution by topic. These metrics inform you of the volume and rate of data sent, and the success rate of message delivery.",
+              "content": "Kafka Producers send messages to brokers for storage and distribution by topic. These metrics inform you of the volume and rate of data sent, and the success rate of message delivery.\n\nTo access these metrics you need to have the [Kafka Broker](https://docs.datadoghq.com/integrations/kafka/?tab=host) integration enabled.",
               "background_color": "gray",
               "font_size": "14",
               "text_align": "left",
@@ -792,7 +905,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.producer.bytes_out{$datacenter} by {topic}.weighted()"
+                      "query": "sum:kafka.producer.bytes_out{$env} by {topic,env}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -832,9 +945,11 @@
                 {
                   "formulas": [
                     {
+                      "alias": "Request",
                       "formula": "abs(query1)"
                     },
                     {
+                      "alias": "Response",
                       "formula": "abs(query2)"
                     }
                   ],
@@ -842,12 +957,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.producer.request_rate{$datacenter} by {host}.weighted()"
+                      "query": "sum:kafka.producer.request_rate{$env} by {host}.weighted()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kafka.producer.response_rate{$datacenter} by {host}.weighted()"
+                      "query": "sum:kafka.producer.response_rate{$env} by {host}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -894,7 +1009,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.producer.request_latency_avg{$datacenter}.weighted()"
+                      "query": "sum:kafka.producer.request_latency_avg{$env} by {env}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -941,7 +1056,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.producer.io_wait{$datacenter}.weighted()"
+                      "query": "sum:kafka.producer.io_wait{$env} by {env}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -983,7 +1098,7 @@
             "id": 2581435872418256,
             "definition": {
               "type": "note",
-              "content": "Kafka Consumer metrics provide insights into lag between message production and consumption, success rates and latency of message delivery, and the volume of data consumed.",
+              "content": "Kafka Consumer metrics provide insights into lag between message production and consumption, success rates and latency of message delivery, and the volume of data consumed.\n\nTo access these metrics you need to have the [Kafka Broker](https://docs.datadoghq.com/integrations/kafka/?tab=host) and [Kafka Consumer](https://docs.datadoghq.com/integrations/kafka-consumer/?tab=host) integrations enabled.",
               "background_color": "gray",
               "font_size": "14",
               "text_align": "left",
@@ -1020,28 +1135,30 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
                       "style": {
                         "palette": "green"
-                      }
+                      },
+                      "alias": "Lag",
+                      "formula": "query1"
                     },
                     {
-                      "formula": "query2",
                       "style": {
                         "palette": "purple"
-                      }
+                      },
+                      "alias": "Offset",
+                      "formula": "query2"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.consumer_lag{$datacenter,$consumer_group} by {host,consumer_group}"
+                      "query": "sum:kafka.consumer_lag{$env,$consumer_group} by {host,consumer_group,env}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kafka.consumer_offset{$datacenter,$consumer_group} by {host,consumer_group}"
+                      "query": "sum:kafka.consumer_offset{$env,$consumer_group} by {host,consumer_group,env}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1088,7 +1205,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.consumer.bytes_in{$datacenter,$consumer_group}.weighted()"
+                      "query": "sum:kafka.consumer.bytes_in{$env,$consumer_group} by {consumer_group,env}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1135,7 +1252,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.consumer.messages_in{$datacenter,$consumer_group} by {client-id}.weighted()"
+                      "query": "sum:kafka.consumer.messages_in{$env,$consumer_group} by {client-id,env}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1182,7 +1299,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.consumer.fetch_rate{$datacenter,$consumer_group}.weighted()"
+                      "query": "sum:kafka.consumer.fetch_rate{$env,$consumer_group} by {env,consumer_group}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1209,6 +1326,326 @@
         "y": 0,
         "width": 4,
         "height": 10
+      }
+    },
+    {
+      "id": 6246186854446866,
+      "definition": {
+        "title": "Lag, Throughput and Message Size",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8236156193990667,
+            "definition": {
+              "type": "note",
+              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. \nOpen in [Data Streams Monitoring](/data-streams) or [Learn More](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka).\n\nAssign the **topic** variable to view insights about a specific topic",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 2184446562382655,
+            "definition": {
+              "title": "Top 10 Max Kafka Lag by env",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:data_streams.kafka.lag_seconds{$topic ,$env} by {env,topic}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "top(query1, 10, 'max', 'desc')"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "custom_links": [
+                {
+                  "label": "View in Data Streams Monitoring",
+                  "link": "/data-streams/map?query=queue:{{topic.value}}&env={{env.value}}&referrer=kafka"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 1870414104649433,
+            "definition": {
+              "title": "Incoming messages by env, producing service for $topic",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "upstream_services_throughput",
+                      "query": "count(v: v>=0):data_streams.latency{direction:out,pathway_type:full,type:kafka,$topic,$env} by {service,env}.as_rate().rollup(10)"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "producer_throughput",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "message",
+                          "per_unit_name": "second"
+                        }
+                      },
+                      "formula": "default_zero(upstream_services_throughput)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "custom_links": [
+                {
+                  "label": "View in Data Streams Monitoring",
+                  "link": "/data-streams/map?query={{service}} queue:{{$queuename.value}}&referrer=kafka&env={{env.value}}"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 944656656985134,
+            "definition": {
+              "title": "Outgoing messages by env, consuming service for $topic",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "downstream_services_throughput_by_queues",
+                      "query": "count(v: v>=0):data_streams.latency{direction:in,pathway_type:full,type:kafka,$topic,$env} by {service,env}.as_rate().rollup(10)"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "consumer_throughput",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "message",
+                          "per_unit_name": "second"
+                        }
+                      },
+                      "formula": "default_zero(downstream_services_throughput_by_queues)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "custom_links": [
+                {
+                  "label": "View in Data Streams Monitoring",
+                  "link": "/data-streams/map?query={{service}} queue:{{$queuename.value}}&referrer=kafka&env={{env.value}}"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 6058441691900230,
+            "definition": {
+              "title": "Top 10 p95 message size by env for $topic",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "top(query1, 10, 'mean', 'desc')"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "p95:data_streams.payload_size{type:kafka,$topic,$env} by {topic,env}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "custom_links": [
+                {
+                  "label": "View in Data Streams Monitoring",
+                  "link": "/data-streams/map?query=queue:{{topic.value}}&referrer=kafka&env={{env.value}}"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 3284852106159467,
+            "definition": {
+              "title": "Distribution of message size for $topic",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "type": "distribution",
+              "xaxis": {
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto",
+                "include_zero": true
+              },
+              "yaxis": {
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto",
+                "include_zero": true
+              },
+              "custom_links": [
+                {
+                  "label": "View in Data Streams Monitoring",
+                  "link": "/data-streams/map?query=traffic_type%3Akafka&referrer=kafka"
+                }
+              ],
+              "requests": [
+                {
+                  "request_type": "histogram",
+                  "query": {
+                    "data_source": "metrics",
+                    "name": "query1",
+                    "aggregator": "avg",
+                    "query": "avg:data_streams.payload_size{type:kafka,$topic,$env}"
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 20,
+        "width": 12,
+        "height": 8
       }
     },
     {
@@ -1271,12 +1708,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:zookeeper.max_file_descriptor_count{$datacenter} by {host}"
+                      "query": "avg:zookeeper.max_file_descriptor_count{$env} by {host}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:zookeeper.open_file_descriptor_count{$datacenter} by {host}"
+                      "query": "avg:zookeeper.open_file_descriptor_count{$env} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1315,7 +1752,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:zookeeper.connections{$datacenter} by {service,host}"
+                      "query": "sum:zookeeper.connections{$env} by {service,host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1359,7 +1796,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:zookeeper.pending_syncs{$datacenter}"
+                      "query": "sum:zookeeper.pending_syncs{$env}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1406,7 +1843,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:zookeeper.avg_latency{$datacenter}"
+                      "query": "sum:zookeeper.avg_latency{$env}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1445,7 +1882,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:zookeeper.outstanding_requests{$datacenter} by {host}"
+                      "query": "sum:zookeeper.outstanding_requests{$env} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1489,7 +1926,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:zookeeper.commit_count{$datacenter,$consumer_group}"
+                      "query": "sum:zookeeper.commit_count{$env,$consumer_group}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1513,7 +1950,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 28,
         "width": 12,
         "height": 6,
         "is_column_break": true
@@ -1522,155 +1959,156 @@
     {
       "id": 4737895714824992,
       "definition": {
-          "title": "Broker JVM Metrics",
-          "background_color": "purple",
-          "show_title": true,
-          "type": "group",
-          "layout_type": "ordered",
-          "widgets": [
-              {
-                  "id": 5500612573375596,
-                  "definition": {
-                      "type": "note",
-                      "content": "Kafka brokers are Java applications that expose JVM metrics to inform on the broker's system health. Garbage collection metrics like those below provide key insights into free memory, broker performance, and heap size. You need to enable [new_gc_metrics](https://docs.datadoghq.com/integrations/java/?tab=host#configuration-options) for this section to populate. \n",
-                      "background_color": "gray",
-                      "font_size": "14",
-                      "text_align": "center",
-                      "vertical_align": "top",
-                      "show_tick": false,
-                      "tick_pos": "50%",
-                      "tick_edge": "left",
-                      "has_padding": true
+        "title": "Broker JVM Metrics",
+        "background_color": "purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5500612573375596,
+            "definition": {
+              "type": "note",
+              "content": "Kafka brokers are Java applications that expose JVM metrics to inform on the broker's system health. Garbage collection metrics like those below provide key insights into free memory, broker performance, and heap size. You need to enable [new_gc_metrics](https://docs.datadoghq.com/integrations/java/?tab=host#configuration-options) for this section to populate. \n",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 5260033322648958,
+            "definition": {
+              "title": "JVM GC Count by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Major GC",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Minor GC",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jvm.gc.major_collection_count{$env} by {type,env}.weighted()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:jvm.gc.minor_collection_count{$env} by {type,env}.weighted()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
                   },
-                  "layout": {
-                      "x": 0,
-                      "y": 0,
-                      "width": 12,
-                      "height": 1
-                  }
-              },
-              {
-                  "id": 5260033322648958,
-                  "definition": {
-                      "title": "JVM GC Count by Type",
-                      "title_size": "16",
-                      "title_align": "left",
-                      "show_legend": true,
-                      "legend_layout": "auto",
-                      "legend_columns": [
-                          "avg",
-                          "min",
-                          "max",
-                          "value",
-                          "sum"
-                      ],
-                      "time": {},
-                      "type": "timeseries",
-                      "requests": [
-                          {
-                              "formulas": [
-                                  {
-                                      "formula": "query1"
-                                  },
-                                  {
-                                      "formula": "query2"
-                                  }
-                              ],
-                              "queries": [
-                                  {
-                                      "data_source": "metrics",
-                                      "name": "query1",
-                                      "query": "sum:jvm.gc.major_collection_count{$datacenter} by {type}.weighted()"
-                                  },
-                                  {
-                                      "data_source": "metrics",
-                                      "name": "query2",
-                                      "query": "sum:jvm.gc.minor_collection_count{$datacenter} by {type}.weighted()"
-                                  }
-                              ],
-                              "response_format": "timeseries",
-                              "style": {
-                                  "palette": "dog_classic",
-                                  "line_type": "solid",
-                                  "line_width": "normal"
-                              },
-                              "display_type": "area"
-                          }
-                      ]
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3147053810778090,
+            "definition": {
+              "title": "JVM GC Time by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Major GC",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Minor GC",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jvm.gc.major_collection_time{$env} by {type,env}.weighted()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:jvm.gc.minor_collection_time{$env} by {type,env}.weighted()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
                   },
-                  "layout": {
-                      "x": 0,
-                      "y": 1,
-                      "width": 6,
-                      "height": 3
-                  }
-              },
-              {
-                  "id": 3147053810778090,
-                  "definition": {
-                      "title": "JVM GC Time by Type",
-                      "title_size": "16",
-                      "title_align": "left",
-                      "show_legend": true,
-                      "legend_layout": "auto",
-                      "legend_columns": [
-                          "avg",
-                          "min",
-                          "max",
-                          "value",
-                          "sum"
-                      ],
-                      "time": {},
-                      "type": "timeseries",
-                      "requests": [
-                          {
-                              "formulas": [
-                                  {
-                                      "formula": "query1"
-                                  },
-                                  {
-                                      "formula": "query2"
-                                  }
-                              ],
-                              "queries": [
-                                  {
-                                      "data_source": "metrics",
-                                      "name": "query1",
-                                      "query": "sum:jvm.gc.major_collection_time{$datacenter} by {type}.weighted()"
-                                  },
-                                  {
-                                      "data_source": "metrics",
-                                      "name": "query2",
-                                      "query": "sum:jvm.gc.minor_collection_time{$datacenter} by {type}.weighted()"
-                                  }
-                              ],
-                              "response_format": "timeseries",
-                              "style": {
-                                  "palette": "dog_classic",
-                                  "line_type": "solid",
-                                  "line_width": "normal"
-                              },
-                              "display_type": "line"
-                          }
-                      ]
-                  },
-                  "layout": {
-                      "x": 6,
-                      "y": 1,
-                      "width": 6,
-                      "height": 3
-                  }
-              }
-          ]
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
       },
       "layout": {
-          "x": 0,
-          "y": 1,
-          "width": 12,
-          "height": 5
+        "x": 0,
+        "y": 34,
+        "width": 12,
+        "height": 5
       }
-  },
-
+    },
     {
       "id": 8466685701903458,
       "definition": {
@@ -1748,7 +2186,7 @@
                       "search": {
                         "query": "source:kafka"
                       },
-                      "storage": "online_archives"
+                      "storage": "flex_tier"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1823,13 +2261,19 @@
       },
       "layout": {
         "x": 0,
-        "y": 11,
+        "y": 39,
         "width": 12,
         "height": 6
       }
     }
   ],
   "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "default": "*"
+    },
     {
       "name": "consumer_group",
       "prefix": "consumer_group",
@@ -1839,12 +2283,6 @@
     {
       "name": "topic",
       "prefix": "topic",
-      "available_values": [],
-      "default": "*"
-    },
-    {
-      "name": "datacenter",
-      "prefix": "datacenter",
       "available_values": [],
       "default": "*"
     }

@@ -12,6 +12,8 @@ from datadog_checks.mesos_slave import MesosSlave
 from . import common
 from .utils import read_fixture
 
+########### !!! THIS INTEGRATION IS NO LONGER TESTED IN CI !!! #############
+
 
 @pytest.fixture(scope='session')
 def dd_environment():

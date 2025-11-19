@@ -1,3 +1,8 @@
+"""
+This module is deprecated and will begin emitting deprecation warnings after all official
+integrations have migrated to the new `datadog_checks.base.utils.format.json` module.
+"""
+
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)

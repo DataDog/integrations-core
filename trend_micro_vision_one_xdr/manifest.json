@@ -2,15 +2,27 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5efb1591-f9ef-45a3-8b8e-9f716df68f16",
   "app_id": "trend-micro-vision-one-xdr",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into trend micro vision one xdr logs",
+    "description": "Gain insights into Trend Micro Vision One XDR logs",
     "title": "Trend Micro Vision One XDR",
-    "media": [],
+    "media": [
+      {
+        "caption": "Trend Micro Vision One XDR - Workbench Alerts",
+        "image_url": "images/trend_micro_vision_one_xdr_workbench_alerts.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Vision One XDR - Observed Attack Techniques",
+        "image_url": "images/trend_micro_vision_one_xdr_oat.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -29,6 +41,13 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Trend Micro Vision One XDR - Workbench Alerts": "assets/dashboards/trend_micro_vision_one_xdr_workbench_alerts.json",
+      "Trend Micro Vision One XDR - Observed Attack Techniques": "assets/dashboards/trend_micro_vision_one_xdr_observed_attack_techniques.json"
+    },
+    "logs": {
+      "source": "trend-micro-vision-one-xdr"
     }
   },
   "author": {
@@ -36,6 +55,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

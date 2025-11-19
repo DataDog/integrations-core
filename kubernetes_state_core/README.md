@@ -112,7 +112,7 @@ The Kubernetes State Metrics Core check is not backward compatible, be sure to r
 : In `kubernetes_state`, the `kube_job` tag value is the `CronJob` name if the `Job` had `CronJob` as an owner, otherwise it is the `Job` name. In `kubernetes_state_core`, the `kube_job` tag value is always the `Job` name, and a new `kube_cronjob` tag key is added with the `CronJob` name as the tag value. When migrating to `kubernetes_state_core`, it's recommended to use the new tag or `kube_job:foo*`, where `foo` is the `CronJob` name, for query filters.
 
 `kubernetes_state.job.succeeded`
-: In `kubernetes_state`, the `kuberenetes.job.succeeded` was `count` type. In `kubernetes_state_core` it is `gauge` type.
+: In `kubernetes_state`, the `kubernetes.job.succeeded` was `count` type. In `kubernetes_state_core` it is `gauge` type.
 
 ### Node-level tag assignment
 
@@ -305,10 +305,10 @@ Need help? Contact [Datadog support][9].
 [1]: https://kubernetes.io/blog/2021/04/13/kube-state-metrics-v-2-0/
 [2]: #migration-from-kubernetes_state-to-kubernetes_state_core
 [3]: #data-collected
-[4]: /agent/cluster_agent/
+[4]: https://docs.datadoghq.com/agent/cluster_agent/
 [5]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state_core/metadata.csv
-[6]: /getting_started/tagging/unified_service_tagging/#configuration
+[6]: https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/#configuration
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/assets/service_checks.json
-[8]: /agent/guide/agent-commands/#agent-status-and-information
-[9]: /help/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/engineering/our-journey-taking-kubernetes-state-metrics-to-the-next-level/

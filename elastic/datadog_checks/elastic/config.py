@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -26,6 +26,27 @@ ESInstanceConfig = namedtuple(
         'submit_events',
     ],
 )
+
+
+def sanitize_url(url):
+    """
+    Remove credentials from the URL and return the sanitized URL.
+    """
+    if not url:
+        return url
+
+    parsed = urlparse(url)
+    # If there's no password, nothing to sanitize
+    if not (parsed.password or parsed.username):
+        return url
+
+    # Rebuild netloc without credentials, only adding port if it exists
+    netloc = parsed.hostname
+    if parsed.port:
+        netloc = f"{netloc}:{parsed.port}"
+
+    sanitized = parsed._replace(netloc=netloc)
+    return urlunparse(sanitized)
 
 
 def from_instance(instance):
@@ -59,7 +80,7 @@ def from_instance(instance):
 
     custom_tags = instance.get('tags', [])
     if is_affirmative(instance.get('disable_legacy_service_check_tags', False)):
-        service_check_tags = ['url:{}'.format(url)]
+        service_check_tags = ['url:{}'.format(sanitize_url(url))]
     else:
         service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)]
     service_check_tags.extend(custom_tags)
@@ -70,7 +91,7 @@ def from_instance(instance):
 
     # Tag by URL so we can differentiate the metrics
     # from multiple instances
-    tags = ['url:{}'.format(url)]
+    tags = ['url:{}'.format(sanitize_url(url))]
     tags.extend(custom_tags)
 
     config = ESInstanceConfig(

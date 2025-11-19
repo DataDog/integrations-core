@@ -1,5 +1,3 @@
-version: '3.8'
-
 # https://github.com/hashicorp/boundary-reference-architecture/tree/main/deployment/docker/compose
 services:
   boundary:

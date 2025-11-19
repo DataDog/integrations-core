@@ -6,7 +6,7 @@
 import copy
 import re
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 from openstack.config.loader import OpenStackConfig
@@ -369,7 +369,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
 
         cached_servers = self.servers_cache.get('servers')
         # NOTE: updated_time need to be set at the beginning of this method in order to no miss servers changes.
-        changes_since = datetime.utcnow().isoformat()
+        changes_since = datetime.now(timezone.utc).isoformat()
         if cached_servers is None:
             updated_servers = self.get_active_servers(tenant_to_name)
         else:

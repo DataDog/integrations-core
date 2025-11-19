@@ -1,0 +1,84 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "76dd5a2d-68d8-4acf-b066-ba00c1524694",
+  "app_id": "microsoft-sysmon",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Windows system activity events.",
+    "title": "Microsoft Sysmon",
+    "media": [
+      {
+        "caption": "Microsoft Sysmon - Overview 1",
+        "image_url": "images/microsoft_sysmon_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Sysmon - Overview 2",
+        "image_url": "images/microsoft_sysmon_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Sysmon - Overview 3",
+        "image_url": "images/microsoft_sysmon_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Sysmon - Overview 4",
+        "image_url": "images/microsoft_sysmon_overview_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Sysmon - Overview 5",
+        "image_url": "images/microsoft_sysmon_overview_5.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Sysmon - Overview 6",
+        "image_url": "images/microsoft_sysmon_overview_6.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Sysmon - Overview 7",
+        "image_url": "images/microsoft_sysmon_overview_7.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 42258945,
+      "source_type_name": "Microsoft Sysmon",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Microsoft Sysmon - Overview": "assets/dashboards/microsoft_sysmon_overview.json"
+    },
+    "logs": {
+      "source": "microsoft-sysmon"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

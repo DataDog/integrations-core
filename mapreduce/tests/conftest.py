@@ -52,13 +52,13 @@ def instance():
 
 @pytest.fixture
 def mocked_request():
-    with patch("requests.get", new=requests_get_mock):
+    with patch("requests.Session.get", new=requests_get_mock):
         yield
 
 
 @pytest.fixture
 def mocked_auth_request():
-    with patch("requests.get", new=requests_auth_mock):
+    with patch("requests.Session.get", new=requests_auth_mock):
         yield
 
 
@@ -66,7 +66,7 @@ def get_custom_hosts():
     return [(host, '127.0.0.1') for host in MOCKED_E2E_HOSTS]
 
 
-def requests_get_mock(*args, **kwargs):
+def requests_get_mock(session, *args, **kwargs):
     url = args[0]
     # The parameter that creates the query params (kwargs) is an unordered dict,
     #   so the query params can be in any order
@@ -94,7 +94,7 @@ def requests_get_mock(*args, **kwargs):
     raise Exception("There is no mock request for {}".format(url))
 
 
-def requests_auth_mock(*args, **kwargs):
+def requests_auth_mock(session, *args, **kwargs):
     # Make sure we're passing in authentication
     assert 'auth' in kwargs, "Error, missing authentication"
 
@@ -102,4 +102,4 @@ def requests_auth_mock(*args, **kwargs):
     assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password"
 
     # Return mocked request.get(...)
-    return requests_get_mock(*args, **kwargs)
+    return requests_get_mock(session, *args, **kwargs)

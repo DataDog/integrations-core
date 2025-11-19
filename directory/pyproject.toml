@@ -23,22 +23,19 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.0.0",
+    "datadog-checks-base>=37.21.0",
 ]
 dynamic = [
     "version",
 ]
 
 [project.optional-dependencies]
-deps = [
-    # Starting with Python 3.5 'scandir.scandir' is in the standard library as 'os.scandir'.
-    "scandir==1.10.0; python_version < '3.5'",
-]
+deps = []
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

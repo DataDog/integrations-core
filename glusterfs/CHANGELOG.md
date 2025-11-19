@@ -2,11 +2,50 @@
 
 <!-- towncrier release notes start -->
 
-## 2.0.0 / 2024-10-01
+## 3.2.0 / 2025-10-31
+
+***Added***:
+
+* Add volume heal entries count metric ([#21634](https://github.com/DataDog/integrations-core/pull/21634))
+
+## 3.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 3.0.2 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Stop relying on hardcoded value of run_path, and use the value in the agent config ([#20574](https://github.com/DataDog/integrations-core/pull/20574))
+
+## 3.0.1 / 2024-10-10 / Agent 7.59.0
+
+***Fixed***:
+
+* Fix cmd as a string instead of a list ([#18808](https://github.com/DataDog/integrations-core/pull/18808))
+
+## 3.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 2.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 1.8.0 / 2024-09-05
 

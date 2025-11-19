@@ -1,8 +1,8 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.12"]
-version = ["1.12", "1.13", "vts"]
+python = ["3.13"]
+version = ["1.12", "1.13","1.27", "vts"]
 
 [envs.default.env-vars]
 # We need this for tests that check the "host" tag being submitted with the service check.
@@ -12,6 +12,7 @@ DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 matrix.version.env-vars = [
   { key = "NGINX_IMAGE", value = "nginx:1.12", if = ["1.12"] },
   { key = "NGINX_IMAGE", value = "nginx:1.13", if = ["1.13"] },
+  { key = "NGINX_IMAGE", value = "nginx:1.27", if = ["1.27"] },
   { key = "NGINX_IMAGE", value = "datadog/docker-library:nginx-vts", if = ["vts"] },
 ]
 

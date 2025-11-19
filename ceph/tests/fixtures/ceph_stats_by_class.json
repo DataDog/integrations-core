@@ -1,0 +1,786 @@
+{
+    "df_detail": {
+        "stats": {
+            "total_bytes": 36439169433600,
+            "total_avail_bytes": 23142874198016,
+            "total_used_bytes": 13296295235584,
+            "total_used_raw_bytes": 13296295235584,
+            "total_used_raw_ratio": 0.36489018797874451,
+            "num_osds": 12,
+            "num_per_pool_osds": 12,
+            "num_per_pool_omap_osds": 12
+        },
+        "stats_by_class": {
+            "hdd": {
+                "total_bytes": 18003517243392,
+                "total_avail_bytes": 13014070067200,
+                "total_used_bytes": 4989447176192,
+                "total_used_raw_bytes": 4989447176192,
+                "total_used_raw_ratio": 0.27713733911514282
+            },
+            "nvme": {
+                "total_bytes": 0,
+                "total_avail_bytes": 0,
+                "total_used_bytes": 0,
+                "total_used_raw_bytes": 0,
+                "total_used_raw_ratio": 0
+            }
+        },
+        "pools": [
+            {
+                "name": ".mgr",
+                "id": 1,
+                "stats": {
+                    "stored": 50767806,
+                    "stored_data": 50201360,
+                    "stored_omap": 566446,
+                    "objects": 14,
+                    "kb_used": 148744,
+                    "bytes_used": 152313356,
+                    "data_bytes_used": 150614016,
+                    "omap_bytes_used": 1699340,
+                    "percent_used": 1.8546641513239592e-05,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 74929,
+                    "rd_bytes": 222487552,
+                    "wr": 156215,
+                    "wr_bytes": 3422509056,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 152303424,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "vms",
+                "id": 3,
+                "stats": {
+                    "stored": 2358960218533,
+                    "stored_data": 2358960193536,
+                    "stored_omap": 24997,
+                    "objects": 731303,
+                    "kb_used": 6911018674,
+                    "bytes_used": 7076883121393,
+                    "data_bytes_used": 7076883046400,
+                    "omap_bytes_used": 74993,
+                    "percent_used": 0.46286872029304504,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 8530282490,
+                    "rd_bytes": 647365805489152,
+                    "wr": 6339581416,
+                    "wr_bytes": 255868462323712,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 7076880318464,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "cephfs_data",
+                "id": 5,
+                "stats": {
+                    "stored": 377417531392,
+                    "stored_data": 377417531392,
+                    "stored_omap": 0,
+                    "objects": 6557401,
+                    "kb_used": 1143483756,
+                    "bytes_used": 1170927366144,
+                    "data_bytes_used": 1170927366144,
+                    "omap_bytes_used": 0,
+                    "percent_used": 0.12478944659233093,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 1551055505,
+                    "rd_bytes": 70717964761088,
+                    "wr": 792740924,
+                    "wr_bytes": 1660277662720,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 1132252626944,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "cephfs_metadata",
+                "id": 6,
+                "stats": {
+                    "stored": 1060312848,
+                    "stored_data": 220320464,
+                    "stored_omap": 839992384,
+                    "objects": 7629,
+                    "kb_used": 3106480,
+                    "bytes_used": 3181034742,
+                    "data_bytes_used": 661057536,
+                    "omap_bytes_used": 2519977206,
+                    "percent_used": 0.00038720021257176995,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 2279737934,
+                    "rd_bytes": 857726765779968,
+                    "wr": 281347001,
+                    "wr_bytes": 1475586462720,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 3180938496,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "vms_hdd",
+                "id": 9,
+                "stats": {
+                    "stored": 1623677862458,
+                    "stored_data": 1623677861888,
+                    "stored_omap": 570,
+                    "objects": 389361,
+                    "kb_used": 4758675458,
+                    "bytes_used": 4872883668656,
+                    "data_bytes_used": 4872883666944,
+                    "omap_bytes_used": 1712,
+                    "percent_used": 0.28687688708305359,
+                    "max_avail": 4037697339392,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 85458377,
+                    "rd_bytes": 128309912636416,
+                    "wr": 9491518,
+                    "wr_bytes": 5504680538112,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 4871033454592,
+                    "avail_raw": 12113091993061
+                }
+            },
+            {
+                "name": "cephfs_data_hdd",
+                "id": 14,
+                "stats": {
+                    "stored": 8789073920,
+                    "stored_data": 8789073920,
+                    "stored_omap": 0,
+                    "objects": 671411,
+                    "kb_used": 98102016,
+                    "bytes_used": 100456464384,
+                    "data_bytes_used": 100456464384,
+                    "omap_bytes_used": 0,
+                    "percent_used": 0.0082250023260712624,
+                    "max_avail": 4037697339392,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 161858,
+                    "rd_bytes": 5307737088,
+                    "wr": 5533727,
+                    "wr_bytes": 27198046208,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 26367221760,
+                    "avail_raw": 12113091993061
+                }
+            },
+            {
+                "name": ".rgw.root",
+                "id": 15,
+                "stats": {
+                    "stored": 1478,
+                    "stored_data": 1478,
+                    "stored_omap": 0,
+                    "objects": 4,
+                    "kb_used": 48,
+                    "bytes_used": 49152,
+                    "data_bytes_used": 49152,
+                    "omap_bytes_used": 0,
+                    "percent_used": 5.9851710254577029e-09,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 105,
+                    "rd_bytes": 95232,
+                    "wr": 14,
+                    "wr_bytes": 6144,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 4434,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "default.rgw.log",
+                "id": 16,
+                "stats": {
+                    "stored": 3702,
+                    "stored_data": 3702,
+                    "stored_omap": 0,
+                    "objects": 209,
+                    "kb_used": 408,
+                    "bytes_used": 417792,
+                    "data_bytes_used": 417792,
+                    "omap_bytes_used": 0,
+                    "percent_used": 5.08739503857214e-08,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 8202121,
+                    "rd_bytes": 8426549248,
+                    "wr": 5457550,
+                    "wr_bytes": 31744,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 11106,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "default.rgw.control",
+                "id": 17,
+                "stats": {
+                    "stored": 0,
+                    "stored_data": 0,
+                    "stored_omap": 0,
+                    "objects": 8,
+                    "kb_used": 0,
+                    "bytes_used": 0,
+                    "data_bytes_used": 0,
+                    "omap_bytes_used": 0,
+                    "percent_used": 0,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 0,
+                    "rd_bytes": 0,
+                    "wr": 0,
+                    "wr_bytes": 0,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 0,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "default.rgw.meta",
+                "id": 18,
+                "stats": {
+                    "stored": 8230,
+                    "stored_data": 6666,
+                    "stored_omap": 1564,
+                    "objects": 28,
+                    "kb_used": 317,
+                    "bytes_used": 324180,
+                    "data_bytes_used": 319488,
+                    "omap_bytes_used": 4692,
+                    "percent_used": 3.9474947755024914e-08,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 4018,
+                    "rd_bytes": 3542016,
+                    "wr": 789,
+                    "wr_bytes": 377856,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 24690,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "default.rgw.buckets.index",
+                "id": 19,
+                "stats": {
+                    "stored": 1806447,
+                    "stored_data": 0,
+                    "stored_omap": 1806447,
+                    "objects": 110,
+                    "kb_used": 5293,
+                    "bytes_used": 5419341,
+                    "data_bytes_used": 0,
+                    "omap_bytes_used": 5419341,
+                    "percent_used": 6.5990519715342089e-07,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 79864,
+                    "rd_bytes": 60931072,
+                    "wr": 32439,
+                    "wr_bytes": 21912576,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 5419341,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "default.rgw.buckets.data",
+                "id": 20,
+                "stats": {
+                    "stored": 4092581632,
+                    "stored_data": 4092581632,
+                    "stored_omap": 0,
+                    "objects": 11008,
+                    "kb_used": 12041916,
+                    "bytes_used": 12330921984,
+                    "data_bytes_used": 12330921984,
+                    "omap_bytes_used": 0,
+                    "percent_used": 0.0014992681099101901,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 2932,
+                    "rd_bytes": 1632516096,
+                    "wr": 117275,
+                    "wr_bytes": 3994068992,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 12277744640,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "default.rgw.buckets.non-ec",
+                "id": 21,
+                "stats": {
+                    "stored": 0,
+                    "stored_data": 0,
+                    "stored_omap": 0,
+                    "objects": 0,
+                    "kb_used": 0,
+                    "bytes_used": 0,
+                    "data_bytes_used": 0,
+                    "omap_bytes_used": 0,
+                    "percent_used": 0,
+                    "max_avail": 2737432166400,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 234,
+                    "rd_bytes": 201728,
+                    "wr": 75,
+                    "wr_bytes": 38912,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 0,
+                    "avail_raw": 8212296638493
+                }
+            },
+            {
+                "name": "default.rgw.buckets.data_hdd",
+                "id": 22,
+                "stats": {
+                    "stored": 1438024192,
+                    "stored_data": 1438024192,
+                    "stored_omap": 0,
+                    "objects": 343,
+                    "kb_used": 4213056,
+                    "bytes_used": 4314169344,
+                    "data_bytes_used": 4314169344,
+                    "omap_bytes_used": 0,
+                    "percent_used": 0.00035603076685220003,
+                    "max_avail": 4037697339392,
+                    "quota_objects": 0,
+                    "quota_bytes": 0,
+                    "dirty": 0,
+                    "rd": 88,
+                    "rd_bytes": 0,
+                    "wr": 667,
+                    "wr_bytes": 1784054784,
+                    "compress_bytes_used": 0,
+                    "compress_under_bytes": 0,
+                    "stored_raw": 4314072576,
+                    "avail_raw": 12113091993061
+                }
+            }
+        ]
+    },
+    "mon_status": {
+        "election_epoch": 38,
+        "extra_probe_peers": [
+            "10.240.0.9:6789/0",
+            "10.240.0.10:6789/0"
+        ],
+        "monmap": {
+            "created": "0.000000",
+            "epoch": 1,
+            "fsid": "e0efcf84-e8ed-4916-8ce1-9c70242d390a",
+            "modified": "0.000000",
+            "mons": [
+                {
+                    "addr": "10.240.0.9:6789/0",
+                    "name": "ceph1",
+                    "rank": 0
+                },
+                {
+                    "addr": "10.240.0.10:6789/0",
+                    "name": "ceph2",
+                    "rank": 1
+                },
+                {
+                    "addr": "10.240.0.11:6789/0",
+                    "name": "ceph3",
+                    "rank": 2
+                }
+            ]
+        },
+        "name": "ceph3",
+        "outside_quorum": [],
+        "quorum": [
+            0,
+            1,
+            2
+        ],
+        "rank": 2,
+        "state": "peon",
+        "sync_provider": []
+    },
+    "osd_perf": {
+        "osdstats": {
+            "osd_perf_infos": [
+                {
+                    "id": 0,
+                    "perf_stats": {
+                        "apply_latency_ms": 195,
+                        "commit_latency_ms": 137
+                    }
+                },
+                {
+                    "id": 1,
+                    "perf_stats": {
+                        "apply_latency_ms": 107,
+                        "commit_latency_ms": 71
+                    }
+                },
+                {
+                    "id": 2,
+                    "perf_stats": {
+                        "apply_latency_ms": 125,
+                        "commit_latency_ms": 85
+                    }
+                }
+            ]
+        }
+    },
+    "osd_pool_stats": [
+        {
+            "client_io_rate": {},
+            "pool_id": 0,
+            "pool_name": "rbd",
+            "recovery": {},
+            "recovery_rate": {}
+        },
+        {
+            "client_io_rate": {
+                "op_per_sec": 996,
+                "read_bytes_sec": 259930926,
+                "write_bytes_sec": 378295
+            },
+            "pool_id": 1,
+            "pool_name": "pool0",
+            "recovery": {},
+            "recovery_rate": {}
+        }
+    ],
+    "status": {
+        "election_epoch": 38,
+        "fsid": "e0efcf84-e8ed-4916-8ce1-9c70242d390a",
+        "health": {
+            "detail": [],
+            "health": {
+                "health_services": [
+                    {
+                        "mons": [
+                            {
+                                "avail_percent": 67,
+                                "health": "HEALTH_OK",
+                                "kb_avail": 6903788,
+                                "kb_total": 10188088,
+                                "kb_used": 2743732,
+                                "last_updated": "2016-01-21 21:13:41.222169",
+                                "name": "ceph1",
+                                "store_stats": {
+                                    "bytes_log": 2817517,
+                                    "bytes_misc": 42214264,
+                                    "bytes_sst": 0,
+                                    "bytes_total": 45031781,
+                                    "last_updated": "0.000000"
+                                }
+                            },
+                            {
+                                "avail_percent": 81,
+                                "health": "HEALTH_OK",
+                                "kb_avail": 8254268,
+                                "kb_total": 10188088,
+                                "kb_used": 1393252,
+                                "last_updated": "2016-01-21 21:12:51.513343",
+                                "name": "ceph2",
+                                "store_stats": {
+                                    "bytes_log": 3712488,
+                                    "bytes_misc": 48652309,
+                                    "bytes_sst": 0,
+                                    "bytes_total": 52364797,
+                                    "last_updated": "0.000000"
+                                }
+                            },
+                            {
+                                "avail_percent": 81,
+                                "health": "HEALTH_OK",
+                                "kb_avail": 8338704,
+                                "kb_total": 10188088,
+                                "kb_used": 1308816,
+                                "last_updated": "2016-01-21 21:13:39.924037",
+                                "name": "ceph3",
+                                "store_stats": {
+                                    "bytes_log": 4221302,
+                                    "bytes_misc": 48642618,
+                                    "bytes_sst": 0,
+                                    "bytes_total": 52863920,
+                                    "last_updated": "0.000000"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "overall_status": "HEALTH_OK",
+            "summary": [],
+            "timechecks": {
+                "epoch": 38,
+                "mons": [
+                    {
+                        "health": "HEALTH_OK",
+                        "latency": 0.0,
+                        "name": "ceph1",
+                        "skew": 0.0
+                    },
+                    {
+                        "health": "HEALTH_OK",
+                        "latency": 0.000989,
+                        "name": "ceph2",
+                        "skew": -0.0
+                    },
+                    {
+                        "health": "HEALTH_OK",
+                        "latency": 0.003585,
+                        "name": "ceph3",
+                        "skew": -0.0
+                    }
+                ],
+                "round": 6258,
+                "round_status": "finished"
+            }
+        },
+        "mdsmap": {
+            "by_rank": [],
+            "epoch": 1,
+            "in": 0,
+            "max": 0,
+            "up": 0
+        },
+        "monmap": {
+            "created": "0.000000",
+            "epoch": 1,
+            "fsid": "e0efcf84-e8ed-4916-8ce1-9c70242d390a",
+            "modified": "0.000000",
+            "mons": [
+                {
+                    "addr": "10.240.0.9:6789/0",
+                    "name": "ceph1",
+                    "rank": 0
+                },
+                {
+                    "addr": "10.240.0.10:6789/0",
+                    "name": "ceph2",
+                    "rank": 1
+                },
+                {
+                    "addr": "10.240.0.11:6789/0",
+                    "name": "ceph3",
+                    "rank": 2
+                }
+            ]
+        },
+        "osdmap": {
+            "osdmap": {
+                "epoch": 30,
+                "full": false,
+                "nearfull": false,
+                "num_in_osds": 3,
+                "num_osds": 3,
+                "num_remapped_pgs": 0,
+                "num_up_osds": 3
+            }
+        },
+        "pgmap": {
+            "bytes_avail": 556422717440,
+            "bytes_total": 627829063680,
+            "bytes_used": 71406346240,
+            "data_bytes": 36266725508,
+            "num_pgs": 164,
+            "pgs_by_state": [
+                {
+                    "count": 164,
+                    "state_name": "active+clean"
+                }
+            ],
+            "version": 15055
+        },
+        "quorum": [
+            0,
+            1,
+            2
+        ],
+        "quorum_names": [
+            "ceph1",
+            "ceph2",
+            "ceph3"
+        ]
+    },
+    "osd_metadata": [
+        {
+            "id": 0,
+            "arch": "aarch64",
+            "back_addr": "[v2:172.17.0.3:6802/215,v1:172.17.0.3:6803/215]",
+            "back_iface": "eth0",
+            "bluefs": "1",
+            "bluefs_dedicated_db": "0",
+            "bluefs_dedicated_wal": "0",
+            "bluefs_single_shared_device": "1",
+            "bluestore_bdev_access_mode": "file",
+            "bluestore_bdev_block_size": "4096",
+            "bluestore_bdev_driver": "KernelDevice",
+            "bluestore_bdev_path": "/var/lib/ceph/osd/ceph-0/block",
+            "bluestore_bdev_rotational": "1",
+            "bluestore_bdev_size": "107374182400",
+            "bluestore_bdev_support_discard": "0",
+            "bluestore_bdev_type": "hdd",
+            "ceph_release": "octopus",
+            "ceph_version": "ceph version 15.2.8 (bdf3eebcd22d7d0b3dd4d5501bee5bac354d5b55) octopus (stable)",
+            "ceph_version_short": "15.2.8",
+            "default_device_class": "hdd",
+            "device_ids": "disk0",
+            "device_paths": "/dev/sda",
+            "devices": "/dev/sda",
+            "distro": "centos",
+            "distro_description": "CentOS Linux 8",
+            "distro_version": "8",
+            "front_addr": "[v2:172.17.0.3:6800/215,v1:172.17.0.3:6801/215]",
+            "front_iface": "eth0",
+            "hb_back_addr": "[v2:172.17.0.3:6806/215,v1:172.17.0.3:6807/215]",
+            "hb_front_addr": "[v2:172.17.0.3:6804/215,v1:172.17.0.3:6805/215]",
+            "hostname": "9f8cbfd06535",
+            "journal_rotational": "1",
+            "kernel_description": "#1 SMP PREEMPT Tue Sep 13 07:51:32 UTC 2022",
+            "kernel_version": "5.15.49-linuxkit",
+            "mem_swap_kb": "1048572",
+            "mem_total_kb": "8038896",
+            "network_numa_unknown_ifaces": "eth0",
+            "os": "Linux",
+            "osd_data": "/var/lib/ceph/osd/ceph-0",
+            "osd_objectstore": "bluestore",
+            "osdspec_affinity": "",
+            "rotational": "1"
+        },
+        {
+            "id": 1,
+            "arch": "aarch64",
+            "back_addr": "[v2:172.17.0.3:6802/215,v1:172.17.0.3:6803/215]",
+            "back_iface": "eth0",
+            "bluefs": "1",
+            "bluefs_dedicated_db": "0",
+            "bluefs_dedicated_wal": "0",
+            "bluefs_single_shared_device": "1",
+            "bluestore_bdev_access_mode": "file",
+            "bluestore_bdev_block_size": "4096",
+            "bluestore_bdev_driver": "KernelDevice",
+            "bluestore_bdev_path": "/var/lib/ceph/osd/ceph-0/block",
+            "bluestore_bdev_rotational": "1",
+            "bluestore_bdev_size": "107374182400",
+            "bluestore_bdev_support_discard": "0",
+            "bluestore_bdev_type": "hdd",
+            "ceph_release": "octopus",
+            "ceph_version": "ceph version 15.2.8 (bdf3eebcd22d7d0b3dd4d5501bee5bac354d5b55) octopus (stable)",
+            "ceph_version_short": "15.2.8",
+            "default_device_class": "hdd",
+            "device_ids": "disk1",
+            "device_paths": "/dev/sdb",
+            "devices": "/dev/sdb",
+            "distro": "centos",
+            "distro_description": "CentOS Linux 8",
+            "distro_version": "8",
+            "front_addr": "[v2:172.17.0.3:6800/215,v1:172.17.0.3:6801/215]",
+            "front_iface": "eth0",
+            "hb_back_addr": "[v2:172.17.0.3:6806/215,v1:172.17.0.3:6807/215]",
+            "hb_front_addr": "[v2:172.17.0.3:6804/215,v1:172.17.0.3:6805/215]",
+            "hostname": "9f8cbfd06535",
+            "journal_rotational": "1",
+            "kernel_description": "#1 SMP PREEMPT Tue Sep 13 07:51:32 UTC 2022",
+            "kernel_version": "5.15.49-linuxkit",
+            "mem_swap_kb": "1048572",
+            "mem_total_kb": "8038896",
+            "network_numa_unknown_ifaces": "eth0",
+            "os": "Linux",
+            "osd_data": "/var/lib/ceph/osd/ceph-0",
+            "osd_objectstore": "bluestore",
+            "osdspec_affinity": "",
+            "rotational": "1"
+        },
+        {
+            "id": 2,
+            "arch": "aarch64",
+            "back_addr": "[v2:172.17.0.3:6802/215,v1:172.17.0.3:6803/215]",
+            "back_iface": "eth0",
+            "bluefs": "1",
+            "bluefs_dedicated_db": "0",
+            "bluefs_dedicated_wal": "0",
+            "bluefs_single_shared_device": "1",
+            "bluestore_bdev_access_mode": "file",
+            "bluestore_bdev_block_size": "4096",
+            "bluestore_bdev_driver": "KernelDevice",
+            "bluestore_bdev_path": "/var/lib/ceph/osd/ceph-0/block",
+            "bluestore_bdev_rotational": "1",
+            "bluestore_bdev_size": "107374182400",
+            "bluestore_bdev_support_discard": "0",
+            "bluestore_bdev_type": "hdd",
+            "ceph_release": "octopus",
+            "ceph_version": "ceph version 15.2.8 (bdf3eebcd22d7d0b3dd4d5501bee5bac354d5b55) octopus (stable)",
+            "ceph_version_short": "15.2.8",
+            "default_device_class": "hdd",
+            "device_ids": "disk2",
+            "device_paths": "/dev/sdc",
+            "devices": "/dev/sdc",
+            "distro": "centos",
+            "distro_description": "CentOS Linux 8",
+            "distro_version": "8",
+            "front_addr": "[v2:172.17.0.3:6800/215,v1:172.17.0.3:6801/215]",
+            "front_iface": "eth0",
+            "hb_back_addr": "[v2:172.17.0.3:6806/215,v1:172.17.0.3:6807/215]",
+            "hb_front_addr": "[v2:172.17.0.3:6804/215,v1:172.17.0.3:6805/215]",
+            "hostname": "9f8cbfd06535",
+            "journal_rotational": "1",
+            "kernel_description": "#1 SMP PREEMPT Tue Sep 13 07:51:32 UTC 2022",
+            "kernel_version": "5.15.49-linuxkit",
+            "mem_swap_kb": "1048572",
+            "mem_total_kb": "8038896",
+            "network_numa_unknown_ifaces": "eth0",
+            "os": "Linux",
+            "osd_data": "/var/lib/ceph/osd/ceph-0",
+            "osd_objectstore": "bluestore",
+            "osdspec_affinity": "",
+            "rotational": "1"
+        }
+    ]
+}

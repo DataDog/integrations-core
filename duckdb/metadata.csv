@@ -1,0 +1,6 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+duckdb.memory_limit,gauge,,byte,,The maximum memory of the system.,0,duckdb,,,
+duckdb.partitioned_write_flush_threshold,gauge,,,,The threshold in number of rows after which we flush a thread state when writing using PARTITION_BY.,0,duckdb,,,
+duckdb.partitioned_write_max_open_files,gauge,,,,The maximum amount of files the system can keep open before flushing to disk when writing using PARTITION_BY.,0,duckdb,,,
+duckdb.wal_autocheckpoint,gauge,,byte,,The WAL size threshold at which to automatically trigger a checkpoint.,0,duckdb,,,
+duckdb.worker_threads,gauge,,,,The number of total threads used by the system.,0,duckdb,,,

@@ -1,0 +1,26 @@
+{
+	"version": 2,
+	"created_at": "2025-01-03",
+	"last_updated_at": "2025-01-03",
+	"title": "Request latency",
+	"description": "This monitor measures the time taken for requests to complete. High latency can indicate performance bottlenecks, such as inefficient code, resource contention, or hardware limitations. Monitoring request latency helps identify these issues.",
+	"definition": {
+		"name": "Request latency is high",
+		"type": "query alert",
+		"query": "sum(last_5m):avg:milvus.proxy.req.latency.sum{*}.as_count() > 500",
+		"message": "{{#is_alert}}Request latency exceeds {{threshold}} milliseconds.{{/is_alert}}\n{{#is_recovery}}Request latency has returned to acceptable levels.{{/is_recovery}}",
+		"tags": ["integration:milvus"],
+		"options": {
+			"thresholds": {
+				"critical": 500,
+				"warning": 400
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"avalanche_window": 10
+		},
+		"priority": null
+	},
+	"tags": ["integration:milvus"]
+}

@@ -2,32 +2,22 @@
 
 [envs.default]
 # If you bump the `confluent-kafka` version, also bump the `librdkafka` version in the `32_install_kerberos.sh` file
-# Also bump the LIBRDKAFKA_VERSION version in this file
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",
-  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.5.0",
+  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.11.1",
 ]
 
-[envs.default.env-vars]
-ZK_VERSION = "3.6.4"
-AUTHENTICATION = "noauth"
-
 [[envs.default.matrix]]
-python = ["3.12"]
-version = ["2.6", "3.3"]
-
-[[envs.default.matrix]]
-python = ["3.12"]
-version = ["3.3"]
-auth = ["ssl", "kerberos"]
+python = ["3.13"]
+kafka_version = ["3.3"]
+auth = ["ssl", "kerberos", "noauth"]
 
 [envs.default.overrides]
-matrix.version.env-vars = [
-  { key = "KAFKA_VERSION", value = "2.6.0", if = ["2.6"] },
-  { key = "KAFKA_VERSION", value = "3.3.2-debian-11-r175", if = ["3.3"] },
+# See mappings between kafka version and confluent versions here: https://docs.confluent.io/platform/current/installation/versions-interoperability.html
+matrix.kafka_version.env-vars = [
+  { key = "CONFLUENT_VERSION", value = "7.3.0", if = ["3.3"] },
 ]
 matrix.auth.env-vars = "AUTHENTICATION"
 
 [envs.latest.env-vars]
-KAFKA_VERSION = "latest"
-ZK_VERSION = "3.6.4"
+CONFLUENT_VERSION = "latest"

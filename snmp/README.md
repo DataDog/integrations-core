@@ -11,9 +11,21 @@ A MIB (Management Information Base) acts as a translator between OIDs and human 
 * `1.3.6.1.1`: (MIB-II) A standard that holds system information like uptime, interfaces, and network stack.
 * `1.3.6.1.4.1`: A standard that holds vendor specific information.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 To install and configure the SNMP integration, see the [Network Device Monitoring][1] documentation.
+
+## Data Collected
+
+### Metrics
+
+See [metadata.csv][5] for a list of metrics provided by this integration.
+
+### Service Checks
+
+See [service_checks.json][6] for a list of service checks provided by this integration.
 
 ## Further Reading
 
@@ -26,7 +38,9 @@ Additional helpful documentation, links, and articles:
 
 Need help? Contact [Datadog support][4].
 
-[1]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
+[1]: https://docs.datadoghq.com/network_monitoring/devices/setup
 [2]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [3]: https://datadoghq.dev/integrations-core/tutorials/snmp/introduction/
 [4]: https://docs.datadoghq.com/help/
+[5]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
+[6]: https://github.com/DataDog/integrations-core/blob/master/snmp/assets/service_checks.json

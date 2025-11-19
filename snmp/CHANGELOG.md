@@ -2,11 +2,100 @@
 
 <!-- towncrier release notes start -->
 
-## 8.0.0 / 2024-10-01
+## 12.1.0 / 2025-10-31
+
+***Added***:
+
+* Add `collect_vpn` config and `disabled` config in `interface_configs` to SNMP conf.yaml.example. ([#21620](https://github.com/DataDog/integrations-core/pull/21620))
+* [Juniper SRX] Update Juniper SRX SNMP profile to support new SRX models ([#21698](https://github.com/DataDog/integrations-core/pull/21698))
+
+## 12.0.0 / 2025-10-02 / Agent 7.72.0
+
+***Changed***:
+
+* Remove pycryptodomex dependency and unpin indirect dependencies. ([#21378](https://github.com/DataDog/integrations-core/pull/21378))
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 11.0.0 / 2025-09-05 / Agent 7.71.0
+
+***Changed***:
+
+* Add correct units and/or scale factor for UCD profile memory metrics ([#20818](https://github.com/DataDog/integrations-core/pull/20818))
+
+## 10.1.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 10.1.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+## 10.0.0 / 2025-04-17 / Agent 7.66.0
+
+***Changed***:
+
+* Bump the version of datadog-checks-base to 37.9.0 ([#20021](https://github.com/DataDog/integrations-core/pull/20021))
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+
+## 9.2.1 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Improve HP SNMP profiles.
+
+  PR: https://github.com/DataDog/integrations-core/pull/19711
+  Jira: https://datadoghq.atlassian.net/browse/NDMII-3342
+
+  - Fixed cpqHeTemperatureIndex OID typo in _hp-compaq-health.yaml.
+
+  - Make _hp-base.yaml extend _generic-if.yaml and _generic-host-resources.yaml and removed useless extends in child profiles of _hp-base.yaml.
+
+  - Tagged cpqHeFltTolPowerSupplyTable table with cpqHeFltTolPowerSupplyBay in _hp-compaq-health.yaml according to the MIB.
+
+  - Add a comment to precise that HP iLO5 devices support only a maximum bulk size of 5. ([#19711](https://github.com/DataDog/integrations-core/pull/19711))
+
+## 9.2.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 9.1.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* [NDMII-3147] update Cisco IP SLA metric tags and description. ([#19079](https://github.com/DataDog/integrations-core/pull/19079))
+
+## 9.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 8.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 7.5.0 / 2024-09-05
 
@@ -23,7 +112,7 @@
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 7.3.1 / 2024-06-05 / Agent 7.55.0
 

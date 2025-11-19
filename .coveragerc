@@ -55,3 +55,6 @@ exclude_lines =
 
     # Ignore non-runnable code
     if __name__ == .__main__.:
+
+    # Ignore TYPE_CHECKING blocks
+    if TYPE_CHECKING:

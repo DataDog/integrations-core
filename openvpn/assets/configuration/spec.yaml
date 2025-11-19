@@ -1,0 +1,10 @@
+name: OpenVPN
+files:
+- name: openvpn.yaml
+  options:
+  - template: logs
+    example:
+    - type: <tcp/udp>
+      port: <PORT>
+      service: openvpn
+      source: openvpn

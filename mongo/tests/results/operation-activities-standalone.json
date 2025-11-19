@@ -5,12 +5,14 @@
         "ddsource": "mongo",
         "dbm_type": "activity",
         "collection_interval": 10,
+        "cloud_metadata": {},
         "ddtags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
             "hosting_type:self-hosted"
         ],
         "timestamp": 1715911398111.2722,
+        "service": "my_service",
         "mongodb_activity": [
             {
                 "now": 1715911398.1112723,
@@ -24,11 +26,13 @@
                 "query_framework": null,
                 "current_op_time": "2024-05-16T18:06:38.419+00:00",
                 "microsecs_running": 167,
-                "transaction_time_open_micros": null,
                 "prepare_read_conflicts": 0,
                 "write_conflicts": 0,
                 "num_yields": 0,
                 "waiting_for_lock": false,
+                "lsid": {
+                    "id": "fe7f64529521475ca6263130bc2c926e"
+                },
                 "locks": {
                     "feature_compatibility_version": "r",
                     "global": "r"
@@ -62,6 +66,7 @@
                 "type": "op",
                 "op": "query",
                 "shard": null,
+                "transaction": null,
                 "dbname": "integration",
                 "application": null,
                 "collection": "products",
@@ -95,12 +100,12 @@
                 "query_framework": "classic",
                 "current_op_time": "2024-08-06T20:59:35.394+00:00",
                 "microsecs_running": 13134,
-                "transaction_time_open_micros": null,
                 "prepare_read_conflicts": 0,
                 "write_conflicts": 0,
                 "num_yields": 2,
                 "waiting_for_lock": false,
                 "locks": {},
+                "lsid": null,
                 "lock_stats": {
                     "feature_compatibility_version": {
                         "acquire_count": {
@@ -133,6 +138,7 @@
                 "type": "op",
                 "op": "getmore",
                 "shard": null,
+                "transaction": null,
                 "dbname": "local",
                 "application": "OplogFetcher",
                 "collection": "oplog.rs",

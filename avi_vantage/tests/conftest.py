@@ -4,6 +4,7 @@
 import json
 import os
 from typing import Any, AnyStr
+from urllib.parse import urlparse
 
 import mock
 import pytest
@@ -13,6 +14,10 @@ from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
+
+NO_TENANT_METRICS_FOLDER = 'no_tenant'
+ADMIN_TENANT_METRICS_FOLDER = 'admin_tenant'
+MULTIPLE_TENANTS_METRICS_FOLDER = 'multiple_tenants'
 
 
 @pytest.fixture(scope='session')
@@ -32,8 +37,8 @@ def dd_environment(integration_instance):
 
 @pytest.fixture
 def get_expected_metrics():
-    def _get_metrics(endpoint=None):
-        with open(os.path.join(HERE, 'compose', 'fixtures', "metrics.json")) as f:
+    def _get_metrics(metrics_folder=NO_TENANT_METRICS_FOLDER, endpoint=None):
+        with open(os.path.join(HERE, 'compose', 'fixtures', metrics_folder, 'metrics.json')) as f:
             expected_metrics = json.load(f)
 
         if endpoint is None:
@@ -43,7 +48,7 @@ def get_expected_metrics():
         for metric in expected_metrics:
             tags = [t.replace('https://34.123.32.255/', endpoint) for t in metric['tags']]
             transformed_expected_metrics.append(
-                {"name": metric['name'], "type": metric['type'], "value": metric['value'], "tags": tags}
+                {'name': metric['name'], 'type': metric['type'], 'value': metric['value'], 'tags': tags}
             )
 
         return transformed_expected_metrics
@@ -53,25 +58,42 @@ def get_expected_metrics():
 
 @pytest.fixture
 def mock_client():
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+    def mock_get(url: AnyStr, *__: Any, **___: Any):
+        parsed = urlparse(url)
+        resource = [part for part in parsed.path.split('/') if len(part) > 0][-1]
+        query_params = parsed.query
 
-        def get(url: AnyStr, *_: Any, **__: Any):
-            resource = url.split('/')[-1]
-            return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics'))
+        path = {}
 
-        req.Session = mock.MagicMock(return_value=mock.MagicMock(get=get))
-        yield
+        path['tenant=admin'] = ADMIN_TENANT_METRICS_FOLDER
+        path['tenant=admin%2Ctenant_a%2Ctenant_b'] = MULTIPLE_TENANTS_METRICS_FOLDER
+
+        if query_params:
+            return MockResponse(
+                file_path=os.path.join(HERE, 'compose', 'fixtures', path[query_params], f'{resource}_metrics')
+            )
+
+        return MockResponse(
+            file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics')
+        )
+
+    def mock_post(url: AnyStr, *__: Any, **___: Any):
+        return mock.MagicMock(status_code=200, content=b'{"results": []}')
+
+    with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.get', side_effect=mock_get):
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.post', new=mock_post):
+            yield
 
 
 @pytest.fixture(scope='session')
 def unit_instance():
     return {
-        "avi_controller_url": "https://34.123.32.255/",
-        "tls_verify": False,
-        "username": "admin",
+        'avi_controller_url': 'https://34.123.32.255/',
+        'tls_verify': False,
+        'username': 'admin',
     }
 
 
 @pytest.fixture(scope='session')
 def integration_instance():
-    return {"avi_controller_url": f"http://{get_docker_hostname()}:5000/", "username": "user1", "password": "dummyPass"}
+    return {'avi_controller_url': f'http://{get_docker_hostname()}:5000/', 'username': 'user1', 'password': 'dummyPass'}

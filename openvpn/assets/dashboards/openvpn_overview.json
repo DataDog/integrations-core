@@ -1,0 +1,2316 @@
+{
+    "title": "OpenVPN - Overview",
+    "description": "This dashboard provides an overview of OpenVPN logs.",
+    "experience_type": "default",
+    "widgets": [
+        {
+            "id": 5128301155972842,
+            "definition": {
+                "type": "image",
+                "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTM0IiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMTM0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMzMuODUgMy41QzEzMy44NSA0LjI0NTU4IDEzMy4yNDYgNC44NSAxMzIuNSA0Ljg1QzEzMS43NTQgNC44NSAxMzEuMTUgNC4yNDU1OCAxMzEuMTUgMy41QzEzMS4xNSAyLjc1NDQyIDEzMS43NTQgMi4xNSAxMzIuNSAyLjE1QzEzMy4yNDYgMi4xNSAxMzMuODUgMi43NTQ0MiAxMzMuODUgMy41Wk0xMzQgMy41QzEzNCA0LjMyODQzIDEzMy4zMjggNSAxMzIuNSA1QzEzMS42NzIgNSAxMzEgNC4zMjg0MyAxMzEgMy41QzEzMSAyLjY3MTU3IDEzMS42NzIgMiAxMzIuNSAyQzEzMy4zMjggMiAxMzQgMi42NzE1NyAxMzQgMy41Wk0xMzIuNDE2IDMuNzIzMkwxMzIuODM5IDQuNEgxMzMuMTQ2TDEzMi43MDIgMy43MTEyQzEzMi44NDMgMy42ODcyIDEzMi45NSAzLjYzMjggMTMzLjAyNCAzLjU0OEMxMzMuMDk5IDMuNDYzMiAxMzMuMTM2IDMuMzU0NCAxMzMuMTM2IDMuMjIxNkMxMzMuMTM2IDMuMDY2NCAxMzMuMDg2IDIuOTQxNiAxMzIuOTg1IDIuODQ3MkMxMzIuODg2IDIuNzUyOCAxMzIuNzQgMi43MDU2IDEzMi41NDYgMi43MDU2SDEzMS45NDhWNC40SDEzMi4yMjJWMy43MjMySDEzMi40MTZaTTEzMi41MjQgMy41Mjg4SDEzMi4yMjJWMi45NDA4SDEzMi41MjRDMTMyLjYzOCAyLjk0MDggMTMyLjcyMSAyLjk2NzIgMTMyLjc3NCAzLjAyQzEzMi44MjggMy4wNzEyIDEzMi44NTYgMy4xNDMyIDEzMi44NTYgMy4yMzZDMTMyLjg1NiAzLjQzMTIgMTMyLjc0NSAzLjUyODggMTMyLjUyNCAzLjUyODhaIiBmaWxsPSIjMUEzOTY3Ii8+CiAgICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQwLjAwODQgMjAuMjgxNEMzNS41NjA0IDIwLjI1MDQgMzEuOTc3OCAxNi43NDI5IDMyLjAwMDEgMTIuNDQxQzMyLjAyMjQgOC4xMzkwOSAzNS42NDEyIDQuNjY2NTIgNDAuMDg5MyA0LjY3ODY1QzQ0LjUzNzQgNC42OTA3OSA0OC4xMzU5IDguMTgzMDQgNDguMTMzMSAxMi40ODVDNDguMTI0NyAxNC41NjA5IDQ3LjI2NCAxNi41NDg1IDQ1Ljc0MDMgMTguMDEwNkM0NC4yMTY3IDE5LjQ3MjcgNDIuMTU0OCAyMC4yODk1IDQwLjAwODQgMjAuMjgxNFpNNDAuMDA4NCAxNi44MDIxQzQyLjQ2ODggMTYuNzgyNCA0NC40NDg4IDE0Ljg0MDkgNDQuNDM1MiAxMi40NjE0QzQ0LjQyMTYgMTAuMDgxOCA0Mi40MTk3IDguMTYxNTMgMzkuOTU5MiA4LjE2ODA0QzM3LjQ5ODggOC4xNzQ1NiAzNS41MDc3IDEwLjEwNTQgMzUuNTA3NiAxMi40ODVDMzUuNTExOCAxMy42MzQ5IDM1Ljk4ODUgMTQuNzM2MSAzNi44MzI4IDE1LjU0NThDMzcuNjc3IDE2LjM1NTYgMzguODE5NCAxNi44MDc2IDQwLjAwODQgMTYuODAyMVoiIGZpbGw9IiNFRDdGMjIiLz4KICAgIDxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNDkuODQ0NSA1LjE2ODg5VjE5Ljg0NzFDNDkuODQ0NSAxOS45OTEgNDkuOTY1MiAyMC4xMDc3IDUwLjExNCAyMC4xMDc3SDUzLjA2MTdDNTMuMjAwNSAyMC4xMDQ5IDUzLjMxMjQgMTkuOTk2NyA1My4zMTUyIDE5Ljg2MjRWMTQuMjExOUg1Ni40NTg0QzU2LjQ1ODQgMTQuMjExOSA2MC43ODQ4IDEzLjk5MjIgNjAuNzg0OCA5LjUxMTU1QzYwLjc4NDggNS4wMzA5NCA1Ni4zOTUgNC44Nzc2NyA1Ni4zOTUgNC44Nzc2N0g1MC4xNjY4QzUwLjA4MjkgNC44NzAzOCA0OS45OTk4IDQuODk3OTkgNDkuOTM4MyA0Ljk1MzU5QzQ5Ljg3NjggNS4wMDkxOCA0OS44NDI3IDUuMDg3NDggNDkuODQ0NSA1LjE2ODg5Wk01NS41MDc1IDcuMTc2NzJDNTYuMTQ1NSA3LjE2MDc1IDU2Ljc1OTkgNy40MDk5OCA1Ny4xOTUyIDcuODYxMjhDNTcuNjMwNSA4LjMxMjU5IDU3Ljg0NSA4LjkyMjY4IDU3Ljc4NDMgOS41MzcwOEM1Ny44MjY3IDEwLjE0NjggNTcuNjA1OSAxMC43NDYyIDU3LjE3NDQgMTEuMTkyNkM1Ni43NDI5IDExLjYzODkgNTYuMTM5MyAxMS44OTIzIDU1LjUwNzUgMTEuODkyM0g1My4yMzA3VjcuMzI5OTlDNTMuMjMwNyA3LjEyNTYzIDUzLjM4OTIgNy4xNTExNyA1My4zODkyIDcuMTUxMTdMNTUuNTA3NSA3LjE3NjcyWiIgZmlsbD0iI0VEN0YyMiIvPgogICAgPHBhdGggZD0iTTYyLjQ2NDggMTkuODYyNEM2Mi40NjQ4IDE5Ljk5NzkgNjIuNTc4NCAyMC4xMDc3IDYyLjcxODQgMjAuMTA3N0g3My4yMDQ0QzczLjI3MjYgMjAuMTA5IDczLjMzODQgMjAuMDgzOCA3My4zODcxIDIwLjAzNzdDNzMuNDM1OCAxOS45OTE1IDczLjQ2MzMgMTkuOTI4NCA3My40NjMyIDE5Ljg2MjRWMTcuNzA2NEM3My40NjA0IDE3LjU3MDIgNzMuMzQ1MyAxNy40NjEyIDczLjIwNDQgMTcuNDYxMkg2Ni4xMDQ2QzY1Ljk2NjYgMTcuNDYxMiA2NS44NTM5IDE3LjM1NDUgNjUuODUxIDE3LjIyMTFWMTMuNzcyNUM2NS44NTM4IDEzLjYzODIgNjUuOTY1NyAxMy41MyA2Ni4xMDQ2IDEzLjUyNzJINzAuNzk1NUM3MC44NjIzIDEzLjUyODYgNzAuOTI2OCAxMy41MDM5IDcwLjk3NDUgMTMuNDU4N0M3MS4wMjIyIDEzLjQxMzYgNzEuMDQ5MSAxMy4zNTE3IDcxLjA0OTEgMTMuMjg3MVYxMS4xMzExQzcxLjA1MDUgMTEuMDY1NiA3MS4wMjQzIDExLjAwMjUgNzAuOTc2NCAxMC45NTYyQzcwLjkyODYgMTAuOTA5OSA3MC44NjMyIDEwLjg4NDUgNzAuNzk1NSAxMC44ODU5SDY2LjEwNDZDNjUuOTY0NSAxMC44ODU5IDY1Ljg1MSAxMC43NzYxIDY1Ljg1MSAxMC42NDA2VjcuNzQ4OTRDNjUuODUzOCA3LjYxNDY0IDY1Ljk2NTcgNy41MDY0MiA2Ni4xMDQ2IDcuNTAzNzFINzMuMjA0NEM3My4yNzI2IDcuNTA1MDggNzMuMzM4NCA3LjQ3OTg1IDczLjM4NzEgNy40MzM3MUM3My40MzU4IDcuMzg3NTcgNzMuNDYzMyA3LjMyNDQxIDczLjQ2MzIgNy4yNTg0N1Y1LjExMjY4QzczLjQ2MDQgNC45NzM2IDczLjM0MyA0Ljg2MjMxIDczLjE5OTEgNC44NjIzNEg2Mi43MjM3QzYyLjY1NTUgNC44NjA5NyA2Mi41ODk3IDQuODg2MiA2Mi41NDEgNC45MzIzNEM2Mi40OTIzIDQuOTc4NDggNjIuNDY0OCA1LjA0MTY0IDYyLjQ2NDggNS4xMDc1N1YxOS44NjI0WiIgZmlsbD0iI0VEN0YyMiIvPgogICAgPHBhdGggZD0iTTg0LjUxNDUgNC44NzI1Nkg4Ni43Mjc5Qzg2LjczMTQgNC44NzI0OSA4Ni43MzQ5IDQuODcyNDkgODYuNzM4NSA0Ljg3MjU2Qzg2LjgwMTQgNC44NzM4NiA4Ni44NjE3IDQuODk4MjcgODYuOTA2OSA0Ljk0MTA2Qzg2Ljk1NDYgNC45ODYyNCA4Ni45ODE1IDUuMDQ4MSA4Ni45ODE0IDUuMTEyNjhWMTkuODc3OEM4Ni45ODE0IDE5Ljk0NDEgODYuOTU0MiAyMC4wMDc4IDg2LjkwNTYgMjAuMDU0OEM4Ni44NTcxIDIwLjEwMTcgODYuNzkxMiAyMC4xMjgxIDg2LjcyMjYgMjAuMTI4MUg4NC43NTc1VjIwLjA5MjNMNzguMzAyMSA5LjMwNzE5VjE5Ljg3NzhDNzguMzAyMSAxOS45NDUgNzguMjc0MSAyMC4wMDk1IDc4LjIyNDQgMjAuMDU2NkM3OC4xNzQ3IDIwLjEwMzcgNzguMTA3NSAyMC4xMjk1IDc4LjAzOCAyMC4xMjgxSDc1Ljc5ODFDNzUuNjU4MSAyMC4xMjgxIDc1LjU0NDYgMjAuMDE4MyA3NS41NDQ2IDE5Ljg4MjlWNS4xNjg4OEM3NS41NDc0IDUuMDA0NCA3NS42ODYxIDQuODcyNTQgNzUuODU2MiA0Ljg3MjU2SDc4LjU5MjZMODQuMjU1NiAxNC4yNzgzVjUuMTIyOUM4NC4yNTU2IDQuOTg0NjQgODQuMzcxNSA0Ljg3MjU2IDg0LjUxNDUgNC44NzI1NloiIGZpbGw9IiNFRDdGMjIiLz4KICAgIDxwYXRoIGQ9Ik0xMjYuNzIxIDQuODUyMjhDMTI2LjU3OCA0Ljg1MjI4IDEyNi40NjIgNC45NjQzNiAxMjYuNDYyIDUuMTAyNjJWMTQuMjU4TDEyMC43OTkgNC44NTIyOEgxMTguMDczQzExNy45ODMgNC44NTA4OCAxMTcuODk2IDQuODg0ODggMTE3LjgzMyA0Ljk0NjUxQzExNy43NjkgNS4wMDgxMyAxMTcuNzM0IDUuMDkyMTEgMTE3LjczNSA1LjE3OTI1VjE5Ljg2MjZDMTE3LjczNCAxOS45MjcxIDExNy43NTkgMTkuOTg5NSAxMTcuODA2IDIwLjAzNTdDMTE3Ljg1MyAyMC4wODE4IDExNy45MTcgMjAuMTA3OCAxMTcuOTg0IDIwLjEwNzhIMTIwLjIyOUMxMjAuMzcyIDIwLjEwNzggMTIwLjQ4OCAxOS45OTU3IDEyMC40ODggMTkuODU3NVY5LjI4NjlMMTI2Ljk2NCAyMC4wNzJWMjAuMTA3OEgxMjguOTI5QzEyOS4wNzIgMjAuMTA3OCAxMjkuMTg4IDE5Ljk5NTcgMTI5LjE4OCAxOS44NTc1VjUuMDkyNEMxMjkuMTg4IDUuMDI3ODIgMTI5LjE2MSA0Ljk2NTk2IDEyOS4xMTMgNC45MjA3N0MxMjkuMDY4IDQuODc3OTggMTI5LjAwOCA0Ljg1MzU3IDEyOC45NDUgNC44NTIyOEgxMjYuNzIxWiIgZmlsbD0iIzFBMzk2NyIvPgogICAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMDQuNzI5IDE5Ljg0MjFWNS4xNjM5M0MxMDQuNzI4IDUuMDgyNTIgMTA0Ljc2MiA1LjAwNDIyIDEwNC44MjMgNC45NDg2M0MxMDQuODg1IDQuODkzMDMgMTA0Ljk2OCA0Ljg2NTQzIDEwNS4wNTIgNC44NzI3MUgxMTEuMjg1QzExMS4yODUgNC44NzI3MSAxMTUuNjcgNS4wMjU5OCAxMTUuNjcgOS41MDY2QzExNS42NyAxMy45ODcyIDExMS4zNDMgMTQuMjA2OSAxMTEuMzQzIDE0LjIwNjlIMTA4LjE3NFYxOS44NTc1QzEwOC4xNzQgMTkuOTkyOSAxMDguMDYgMjAuMTAyNyAxMDcuOTIgMjAuMTAyN0gxMDQuOTk5QzEwNC44NSAyMC4xMDI3IDEwNC43MjkgMTkuOTg2MSAxMDQuNzI5IDE5Ljg0MjFaTTExMi4wODIgNy44NTYxN0MxMTEuNjQ2IDcuNDA1MDkgMTExLjAzMSA3LjE1NjAxIDExMC4zOTIgNy4xNzE3OUwxMDguMjc0IDcuMTQ2MjVDMTA4LjI3NCA3LjE0NjI1IDEwOC4xMTYgNy4xMjA3IDEwOC4xMTYgNy4zMjUwNlYxMS44ODc0SDExMC4zOTJDMTExLjAyNSAxMS44ODczIDExMS42MjkgMTEuNjM0MSAxMTIuMDYxIDExLjE4NzlDMTEyLjQ5MyAxMC43NDE3IDExMi43MTUgMTAuMTQyNCAxMTIuNjc0IDkuNTMyMTZDMTEyLjczNCA4LjkxNzI0IDExMi41MTggOC4zMDcyNiAxMTIuMDgyIDcuODU2MTdaIiBmaWxsPSIjMUEzOTY3Ii8+CiAgICA8cGF0aCBkPSJNMTAyLjQ2OSA1LjIwNDgxTDk2LjgwMDMgMTkuOTIzOUg5Ni44MjE1Qzk2Ljc4MDcgMjAuMDIyMSA5Ni42ODI2IDIwLjA4NjcgOTYuNTczMiAyMC4wODc0SDk0LjkwOTJDOTQuODAxNyAyMC4wODQ3IDk0LjcwNjIgMjAuMDIwNCA5NC42NjYyIDE5LjkyMzlMODguOTk3OSA1LjIwNDgxQzg4Ljk2OCA1LjEyODUxIDg4Ljk3OTMgNS4wNDI4MyA4OS4wMjggNC45NzYyMkM4OS4wNzY4IDQuOTA5NjIgODkuMTU2NiA0Ljg3MDgyIDg5LjI0MDkgNC44NzI3Mkg5MS43ODE4QzkxLjg4NzUgNC44NzI0OCA5MS45ODIyIDQuOTM1NTggOTIuMDE5NiA1LjAzMTFMOTUuNzQzOCAxNC42NzY5TDk5LjQ0MTYgNS4wMzExQzk5LjQ4MjIgNC45MzU3MSA5OS41NzggNC44NzMyMyA5OS42ODQ2IDQuODcyNzJIMTAyLjIyNkMxMDIuMzEgNC44NzA4MiAxMDIuMzkgNC45MDk2MiAxMDIuNDM4IDQuOTc2MjJDMTAyLjQ4NyA1LjA0MjgzIDEwMi40OTggNS4xMjg1MSAxMDIuNDY5IDUuMjA0ODFaIiBmaWxsPSIjMUEzOTY3Ii8+CiAgICA8cGF0aCBkPSJNMTYgMTEuNzgwNEMxNi4wMDg5IDkuODcyNjEgMTQuNDk5MyA4LjI2MDMyIDEyLjQ4NjkgOC4wMjgyM0MxMC40NzQ1IDcuNzk2MTMgOC41OTU3OSA5LjAxNzY1IDguMTE0OCAxMC44NzFDNy42MzM4MSAxMi43MjQzIDguNzAyNjYgMTQuNjIzMiAxMC42MDIzIDE1LjI5TDkuMDYzOTMgMjNIMTQuOTYzNkwxMy40NTIzIDE1LjI3NDhDMTQuOTg1OSAxNC43MTU2IDE1Ljk5NzYgMTMuMzI4IDE2IDExLjc4MDRaIiBmaWxsPSIjMUEzOTY3Ii8+CiAgICA8cGF0aCBkPSJNMjQgMTEuNzI5OEMyMy44NjQ5IDUuMjEyNzMgMTguNTMyMSAwIDEyIDBDNS40Njc5NCAwIDAuMTM1MTQyIDUuMjEyNzMgNi4yNzI4NmUtMDkgMTEuNzI5OEMtMC4wMDAxMzcxOTMgMTUuOTU0IDIuMjUwMzMgMTkuODU5NyA1LjkwODggMjEuOTg0Nkw2LjY3OTUxIDE2Ljg4OEM1LjQ5NTggMTUuNTk0OSA0LjgzOTY2IDEzLjkwNjggNC44NDAwOCAxMi4xNTU0QzQuOTQ0MDEgOC4yODM4MiA4LjExODk4IDUuMTk5MiAxMiA1LjE5OTJDMTUuODgxIDUuMTk5MiAxOS4wNTYgOC4yODM4MiAxOS4xNTk5IDEyLjE1NTRDMTkuMTYwNiAxMy45MjA3IDE4LjQ5NDYgMTUuNjIxNSAxNy4yOTQ4IDE2LjkxODdMMTguMDYwNCAyMkMyMS43Mzg2IDE5Ljg4MzMgMjQuMDAzNSAxNS45NjcgMjQgMTEuNzI5OFoiIGZpbGw9IiNFRDdGMjIiLz4KPC9zdmc+Cg==",
+                "url_dark_theme": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTM0IiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMTM0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMzMuODUgMy41QzEzMy44NSA0LjI0NTU4IDEzMy4yNDYgNC44NSAxMzIuNSA0Ljg1QzEzMS43NTQgNC44NSAxMzEuMTUgNC4yNDU1OCAxMzEuMTUgMy41QzEzMS4xNSAyLjc1NDQyIDEzMS43NTQgMi4xNSAxMzIuNSAyLjE1QzEzMy4yNDYgMi4xNSAxMzMuODUgMi43NTQ0MiAxMzMuODUgMy41Wk0xMzQgMy41QzEzNCA0LjMyODQzIDEzMy4zMjggNSAxMzIuNSA1QzEzMS42NzIgNSAxMzEgNC4zMjg0MyAxMzEgMy41QzEzMSAyLjY3MTU3IDEzMS42NzIgMiAxMzIuNSAyQzEzMy4zMjggMiAxMzQgMi42NzE1NyAxMzQgMy41Wk0xMzIuNDE2IDMuNzIzMkwxMzIuODM5IDQuNEgxMzMuMTQ2TDEzMi43MDIgMy43MTEyQzEzMi44NDMgMy42ODcyIDEzMi45NSAzLjYzMjggMTMzLjAyNCAzLjU0OEMxMzMuMDk5IDMuNDYzMiAxMzMuMTM2IDMuMzU0NCAxMzMuMTM2IDMuMjIxNkMxMzMuMTM2IDMuMDY2NCAxMzMuMDg2IDIuOTQxNiAxMzIuOTg1IDIuODQ3MkMxMzIuODg2IDIuNzUyOCAxMzIuNzQgMi43MDU2IDEzMi41NDYgMi43MDU2SDEzMS45NDhWNC40SDEzMi4yMjJWMy43MjMySDEzMi40MTZaTTEzMi41MjQgMy41Mjg4SDEzMi4yMjJWMi45NDA4SDEzMi41MjRDMTMyLjYzOCAyLjk0MDggMTMyLjcyMSAyLjk2NzIgMTMyLjc3NCAzLjAyQzEzMi44MjggMy4wNzEyIDEzMi44NTYgMy4xNDMyIDEzMi44NTYgMy4yMzZDMTMyLjg1NiAzLjQzMTIgMTMyLjc0NSAzLjUyODggMTMyLjUyNCAzLjUyODhaIiBmaWxsPSIjMUEzOTY3Ii8+CiAgICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQwLjAwODQgMjAuMjgxNEMzNS41NjA0IDIwLjI1MDQgMzEuOTc3OCAxNi43NDI5IDMyLjAwMDEgMTIuNDQxQzMyLjAyMjQgOC4xMzkwOSAzNS42NDEyIDQuNjY2NTIgNDAuMDg5MyA0LjY3ODY1QzQ0LjUzNzQgNC42OTA3OSA0OC4xMzU5IDguMTgzMDQgNDguMTMzMSAxMi40ODVDNDguMTI0NyAxNC41NjA5IDQ3LjI2NCAxNi41NDg1IDQ1Ljc0MDMgMTguMDEwNkM0NC4yMTY3IDE5LjQ3MjcgNDIuMTU0OCAyMC4yODk1IDQwLjAwODQgMjAuMjgxNFpNNDAuMDA4NCAxNi44MDIxQzQyLjQ2ODggMTYuNzgyNCA0NC40NDg4IDE0Ljg0MDkgNDQuNDM1MiAxMi40NjE0QzQ0LjQyMTYgMTAuMDgxOCA0Mi40MTk3IDguMTYxNTMgMzkuOTU5MiA4LjE2ODA0QzM3LjQ5ODggOC4xNzQ1NiAzNS41MDc3IDEwLjEwNTQgMzUuNTA3NiAxMi40ODVDMzUuNTExOCAxMy42MzQ5IDM1Ljk4ODUgMTQuNzM2MSAzNi44MzI4IDE1LjU0NThDMzcuNjc3IDE2LjM1NTYgMzguODE5NCAxNi44MDc2IDQwLjAwODQgMTYuODAyMVoiIGZpbGw9IiNFRDdGMjIiLz4KICAgIDxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNDkuODQ0NSA1LjE2ODg5VjE5Ljg0NzFDNDkuODQ0NSAxOS45OTEgNDkuOTY1MiAyMC4xMDc3IDUwLjExNCAyMC4xMDc3SDUzLjA2MTdDNTMuMjAwNSAyMC4xMDQ5IDUzLjMxMjQgMTkuOTk2NyA1My4zMTUyIDE5Ljg2MjRWMTQuMjExOUg1Ni40NTg0QzU2LjQ1ODQgMTQuMjExOSA2MC43ODQ4IDEzLjk5MjIgNjAuNzg0OCA5LjUxMTU1QzYwLjc4NDggNS4wMzA5NCA1Ni4zOTUgNC44Nzc2NyA1Ni4zOTUgNC44Nzc2N0g1MC4xNjY4QzUwLjA4MjkgNC44NzAzOCA0OS45OTk4IDQuODk3OTkgNDkuOTM4MyA0Ljk1MzU5QzQ5Ljg3NjggNS4wMDkxOCA0OS44NDI3IDUuMDg3NDggNDkuODQ0NSA1LjE2ODg5Wk01NS41MDc1IDcuMTc2NzJDNTYuMTQ1NSA3LjE2MDc1IDU2Ljc1OTkgNy40MDk5OCA1Ny4xOTUyIDcuODYxMjhDNTcuNjMwNSA4LjMxMjU5IDU3Ljg0NSA4LjkyMjY4IDU3Ljc4NDMgOS41MzcwOEM1Ny44MjY3IDEwLjE0NjggNTcuNjA1OSAxMC43NDYyIDU3LjE3NDQgMTEuMTkyNkM1Ni43NDI5IDExLjYzODkgNTYuMTM5MyAxMS44OTIzIDU1LjUwNzUgMTEuODkyM0g1My4yMzA3VjcuMzI5OTlDNTMuMjMwNyA3LjEyNTYzIDUzLjM4OTIgNy4xNTExNyA1My4zODkyIDcuMTUxMTdMNTUuNTA3NSA3LjE3NjcyWiIgZmlsbD0iI0VEN0YyMiIvPgogICAgPHBhdGggZD0iTTYyLjQ2NDggMTkuODYyNEM2Mi40NjQ4IDE5Ljk5NzkgNjIuNTc4NCAyMC4xMDc3IDYyLjcxODQgMjAuMTA3N0g3My4yMDQ0QzczLjI3MjYgMjAuMTA5IDczLjMzODQgMjAuMDgzOCA3My4zODcxIDIwLjAzNzdDNzMuNDM1OCAxOS45OTE1IDczLjQ2MzMgMTkuOTI4NCA3My40NjMyIDE5Ljg2MjRWMTcuNzA2NEM3My40NjA0IDE3LjU3MDIgNzMuMzQ1MyAxNy40NjEyIDczLjIwNDQgMTcuNDYxMkg2Ni4xMDQ2QzY1Ljk2NjYgMTcuNDYxMiA2NS44NTM5IDE3LjM1NDUgNjUuODUxIDE3LjIyMTFWMTMuNzcyNUM2NS44NTM4IDEzLjYzODIgNjUuOTY1NyAxMy41MyA2Ni4xMDQ2IDEzLjUyNzJINzAuNzk1NUM3MC44NjIzIDEzLjUyODYgNzAuOTI2OCAxMy41MDM5IDcwLjk3NDUgMTMuNDU4N0M3MS4wMjIyIDEzLjQxMzYgNzEuMDQ5MSAxMy4zNTE3IDcxLjA0OTEgMTMuMjg3MVYxMS4xMzExQzcxLjA1MDUgMTEuMDY1NiA3MS4wMjQzIDExLjAwMjUgNzAuOTc2NCAxMC45NTYyQzcwLjkyODYgMTAuOTA5OSA3MC44NjMyIDEwLjg4NDUgNzAuNzk1NSAxMC44ODU5SDY2LjEwNDZDNjUuOTY0NSAxMC44ODU5IDY1Ljg1MSAxMC43NzYxIDY1Ljg1MSAxMC42NDA2VjcuNzQ4OTRDNjUuODUzOCA3LjYxNDY0IDY1Ljk2NTcgNy41MDY0MiA2Ni4xMDQ2IDcuNTAzNzFINzMuMjA0NEM3My4yNzI2IDcuNTA1MDggNzMuMzM4NCA3LjQ3OTg1IDczLjM4NzEgNy40MzM3MUM3My40MzU4IDcuMzg3NTcgNzMuNDYzMyA3LjMyNDQxIDczLjQ2MzIgNy4yNTg0N1Y1LjExMjY4QzczLjQ2MDQgNC45NzM2IDczLjM0MyA0Ljg2MjMxIDczLjE5OTEgNC44NjIzNEg2Mi43MjM3QzYyLjY1NTUgNC44NjA5NyA2Mi41ODk3IDQuODg2MiA2Mi41NDEgNC45MzIzNEM2Mi40OTIzIDQuOTc4NDggNjIuNDY0OCA1LjA0MTY0IDYyLjQ2NDggNS4xMDc1N1YxOS44NjI0WiIgZmlsbD0iI0VEN0YyMiIvPgogICAgPHBhdGggZD0iTTg0LjUxNDUgNC44NzI1Nkg4Ni43Mjc5Qzg2LjczMTQgNC44NzI0OSA4Ni43MzQ5IDQuODcyNDkgODYuNzM4NSA0Ljg3MjU2Qzg2LjgwMTQgNC44NzM4NiA4Ni44NjE3IDQuODk4MjcgODYuOTA2OSA0Ljk0MTA2Qzg2Ljk1NDYgNC45ODYyNCA4Ni45ODE1IDUuMDQ4MSA4Ni45ODE0IDUuMTEyNjhWMTkuODc3OEM4Ni45ODE0IDE5Ljk0NDEgODYuOTU0MiAyMC4wMDc4IDg2LjkwNTYgMjAuMDU0OEM4Ni44NTcxIDIwLjEwMTcgODYuNzkxMiAyMC4xMjgxIDg2LjcyMjYgMjAuMTI4MUg4NC43NTc1VjIwLjA5MjNMNzguMzAyMSA5LjMwNzE5VjE5Ljg3NzhDNzguMzAyMSAxOS45NDUgNzguMjc0MSAyMC4wMDk1IDc4LjIyNDQgMjAuMDU2NkM3OC4xNzQ3IDIwLjEwMzcgNzguMTA3NSAyMC4xMjk1IDc4LjAzOCAyMC4xMjgxSDc1Ljc5ODFDNzUuNjU4MSAyMC4xMjgxIDc1LjU0NDYgMjAuMDE4MyA3NS41NDQ2IDE5Ljg4MjlWNS4xNjg4OEM3NS41NDc0IDUuMDA0NCA3NS42ODYxIDQuODcyNTQgNzUuODU2MiA0Ljg3MjU2SDc4LjU5MjZMODQuMjU1NiAxNC4yNzgzVjUuMTIyOUM4NC4yNTU2IDQuOTg0NjQgODQuMzcxNSA0Ljg3MjU2IDg0LjUxNDUgNC44NzI1NloiIGZpbGw9IiNFRDdGMjIiLz4KICAgIDxwYXRoIGQ9Ik0xMjYuNzIxIDQuODUyMjhDMTI2LjU3OCA0Ljg1MjI4IDEyNi40NjIgNC45NjQzNiAxMjYuNDYyIDUuMTAyNjJWMTQuMjU4TDEyMC43OTkgNC44NTIyOEgxMTguMDczQzExNy45ODMgNC44NTA4OCAxMTcuODk2IDQuODg0ODggMTE3LjgzMyA0Ljk0NjUxQzExNy43NjkgNS4wMDgxMyAxMTcuNzM0IDUuMDkyMTEgMTE3LjczNSA1LjE3OTI1VjE5Ljg2MjZDMTE3LjczNCAxOS45MjcxIDExNy43NTkgMTkuOTg5NSAxMTcuODA2IDIwLjAzNTdDMTE3Ljg1MyAyMC4wODE4IDExNy45MTcgMjAuMTA3OCAxMTcuOTg0IDIwLjEwNzhIMTIwLjIyOUMxMjAuMzcyIDIwLjEwNzggMTIwLjQ4OCAxOS45OTU3IDEyMC40ODggMTkuODU3NVY5LjI4NjlMMTI2Ljk2NCAyMC4wNzJWMjAuMTA3OEgxMjguOTI5QzEyOS4wNzIgMjAuMTA3OCAxMjkuMTg4IDE5Ljk5NTcgMTI5LjE4OCAxOS44NTc1VjUuMDkyNEMxMjkuMTg4IDUuMDI3ODIgMTI5LjE2MSA0Ljk2NTk2IDEyOS4xMTMgNC45MjA3N0MxMjkuMDY4IDQuODc3OTggMTI5LjAwOCA0Ljg1MzU3IDEyOC45NDUgNC44NTIyOEgxMjYuNzIxWiIgZmlsbD0iIzFBMzk2NyIvPgogICAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMDQuNzI5IDE5Ljg0MjFWNS4xNjM5M0MxMDQuNzI4IDUuMDgyNTIgMTA0Ljc2MiA1LjAwNDIyIDEwNC44MjMgNC45NDg2M0MxMDQuODg1IDQuODkzMDMgMTA0Ljk2OCA0Ljg2NTQzIDEwNS4wNTIgNC44NzI3MUgxMTEuMjg1QzExMS4yODUgNC44NzI3MSAxMTUuNjcgNS4wMjU5OCAxMTUuNjcgOS41MDY2QzExNS42NyAxMy45ODcyIDExMS4zNDMgMTQuMjA2OSAxMTEuMzQzIDE0LjIwNjlIMTA4LjE3NFYxOS44NTc1QzEwOC4xNzQgMTkuOTkyOSAxMDguMDYgMjAuMTAyNyAxMDcuOTIgMjAuMTAyN0gxMDQuOTk5QzEwNC44NSAyMC4xMDI3IDEwNC43MjkgMTkuOTg2MSAxMDQuNzI5IDE5Ljg0MjFaTTExMi4wODIgNy44NTYxN0MxMTEuNjQ2IDcuNDA1MDkgMTExLjAzMSA3LjE1NjAxIDExMC4zOTIgNy4xNzE3OUwxMDguMjc0IDcuMTQ2MjVDMTA4LjI3NCA3LjE0NjI1IDEwOC4xMTYgNy4xMjA3IDEwOC4xMTYgNy4zMjUwNlYxMS44ODc0SDExMC4zOTJDMTExLjAyNSAxMS44ODczIDExMS42MjkgMTEuNjM0MSAxMTIuMDYxIDExLjE4NzlDMTEyLjQ5MyAxMC43NDE3IDExMi43MTUgMTAuMTQyNCAxMTIuNjc0IDkuNTMyMTZDMTEyLjczNCA4LjkxNzI0IDExMi41MTggOC4zMDcyNiAxMTIuMDgyIDcuODU2MTdaIiBmaWxsPSIjMUEzOTY3Ii8+CiAgICA8cGF0aCBkPSJNMTAyLjQ2OSA1LjIwNDgxTDk2LjgwMDMgMTkuOTIzOUg5Ni44MjE1Qzk2Ljc4MDcgMjAuMDIyMSA5Ni42ODI2IDIwLjA4NjcgOTYuNTczMiAyMC4wODc0SDk0LjkwOTJDOTQuODAxNyAyMC4wODQ3IDk0LjcwNjIgMjAuMDIwNCA5NC42NjYyIDE5LjkyMzlMODguOTk3OSA1LjIwNDgxQzg4Ljk2OCA1LjEyODUxIDg4Ljk3OTMgNS4wNDI4MyA4OS4wMjggNC45NzYyMkM4OS4wNzY4IDQuOTA5NjIgODkuMTU2NiA0Ljg3MDgyIDg5LjI0MDkgNC44NzI3Mkg5MS43ODE4QzkxLjg4NzUgNC44NzI0OCA5MS45ODIyIDQuOTM1NTggOTIuMDE5NiA1LjAzMTFMOTUuNzQzOCAxNC42NzY5TDk5LjQ0MTYgNS4wMzExQzk5LjQ4MjIgNC45MzU3MSA5OS41NzggNC44NzMyMyA5OS42ODQ2IDQuODcyNzJIMTAyLjIyNkMxMDIuMzEgNC44NzA4MiAxMDIuMzkgNC45MDk2MiAxMDIuNDM4IDQuOTc2MjJDMTAyLjQ4NyA1LjA0MjgzIDEwMi40OTggNS4xMjg1MSAxMDIuNDY5IDUuMjA0ODFaIiBmaWxsPSIjMUEzOTY3Ii8+CiAgICA8cGF0aCBkPSJNMTYgMTEuNzgwNEMxNi4wMDg5IDkuODcyNjEgMTQuNDk5MyA4LjI2MDMyIDEyLjQ4NjkgOC4wMjgyM0MxMC40NzQ1IDcuNzk2MTMgOC41OTU3OSA5LjAxNzY1IDguMTE0OCAxMC44NzFDNy42MzM4MSAxMi43MjQzIDguNzAyNjYgMTQuNjIzMiAxMC42MDIzIDE1LjI5TDkuMDYzOTMgMjNIMTQuOTYzNkwxMy40NTIzIDE1LjI3NDhDMTQuOTg1OSAxNC43MTU2IDE1Ljk5NzYgMTMuMzI4IDE2IDExLjc4MDRaIiBmaWxsPSIjMUEzOTY3Ii8+CiAgICA8cGF0aCBkPSJNMjQgMTEuNzI5OEMyMy44NjQ5IDUuMjEyNzMgMTguNTMyMSAwIDEyIDBDNS40Njc5NCAwIDAuMTM1MTQyIDUuMjEyNzMgNi4yNzI4NmUtMDkgMTEuNzI5OEMtMC4wMDAxMzcxOTMgMTUuOTU0IDIuMjUwMzMgMTkuODU5NyA1LjkwODggMjEuOTg0Nkw2LjY3OTUxIDE2Ljg4OEM1LjQ5NTggMTUuNTk0OSA0LjgzOTY2IDEzLjkwNjggNC44NDAwOCAxMi4xNTU0QzQuOTQ0MDEgOC4yODM4MiA4LjExODk4IDUuMTk5MiAxMiA1LjE5OTJDMTUuODgxIDUuMTk5MiAxOS4wNTYgOC4yODM4MiAxOS4xNTk5IDEyLjE1NTRDMTkuMTYwNiAxMy45MjA3IDE4LjQ5NDYgMTUuNjIxNSAxNy4yOTQ4IDE2LjkxODdMMTguMDYwNCAyMkMyMS43Mzg2IDE5Ljg4MzMgMjQuMDAzNSAxNS45NjcgMjQgMTEuNzI5OFoiIGZpbGw9IiNFRDdGMjIiLz4KPC9zdmc+Cg==",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6980405278649262,
+            "definition": {
+                "type": "note",
+                "content": "OpenVPN is a free, open-source protocol that creates secure connections between devices over the internet. It's used to create virtual private networks (VPNs).\n\n\nThe OpenVPN Overview dashboard provides insights into the logs generated by OpenVPN.\n\n\nFor more information, see the [OpenVPN Integration Documentation](https://docs.datadoghq.com/integrations/openvpn/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 3199366113094822,
+            "definition": {
+                "title": "Datadog Cloud SIEM",
+                "title_align": "center",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 849757788175700,
+                        "definition": {
+                            "type": "note",
+                            "content": "Datadog Cloud SIEM analyzes and correlates the OpenVPN logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security).",
+                            "background_color": "vivid_blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2525358113144420,
+                        "definition": {
+                            "title": "CRITICALs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:openvpn status:critical"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#bc303c"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3185895093779766,
+                        "definition": {
+                            "title": "HIGHs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:openvpn status:high"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#d33043"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5035002585947108,
+                        "definition": {
+                            "title": "Critical Security Signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:openvpn status:critical"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#bc303c"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1776816054704386,
+                        "definition": {
+                            "title": "MEDIUMs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:openvpn status:medium"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5517607185870874,
+                        "definition": {
+                            "title": "LOWs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:openvpn status:low"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#ffb52b"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6239972357185070,
+                        "definition": {
+                            "title": "INFOs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:openvpn status:info"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#84c1e0"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 4,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8701718476249416,
+                        "definition": {
+                            "title": "High Security Signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:openvpn status:high"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#d33043"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7305144020883176,
+                        "definition": {
+                            "title": "Medium Security Signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:openvpn status:medium"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 10
+            }
+        },
+        {
+            "id": 234735012286588,
+            "definition": {
+                "title": "Overview",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5151514656998292,
+                        "definition": {
+                            "title": "Total OpenVPN Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @syslog.process_name:openvpnas $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3497719803283602,
+                        "definition": {
+                            "title": "Top OpenVPN Log Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5793853177104614,
+                        "definition": {
+                            "title": "OpenVPN Logs Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "openvpn_logs",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @syslog.process_name:openvpnas $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3762650802140286,
+                        "definition": {
+                            "title": "Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:openvpn @syslog.process_name:openvpnas $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 12,
+                "height": 13
+            }
+        },
+        {
+            "id": 5217660444813094,
+            "definition": {
+                "title": "Client VPN Authentication and Connection Logs",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6380611790870688,
+                        "definition": {
+                            "title": "Total Successful Client VPN Logins",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"AUTH SUCCESS\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8620848088408466,
+                        "definition": {
+                            "title": "Successful Client VPN Logins Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "successful_vpn_login",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"AUTH SUCCESS\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2113262363742108,
+                        "definition": {
+                            "title": "Successful Client VPN Logins by Authentication Method",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"AUTH SUCCESS\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@auth_method",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2836136406182442,
+                        "definition": {
+                            "title": "Successful Client VPN Login Attempts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"AUTH SUCCESS\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@os",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@client_connect_version",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1832051261250332,
+                        "definition": {
+                            "title": "Total Failed Client VPN Login Attempts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"VPN Auth Failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5601566508202872,
+                        "definition": {
+                            "title": "Failed Client VPN Logins Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "failed_vpn_login",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"VPN Auth Failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 12,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 892037220315928,
+                        "definition": {
+                            "title": "Top Blocked Users",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @reason:\"DENY: user in deny list.\" @log_type:\"AUTH ERROR\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8558402412393498,
+                        "definition": {
+                            "title": "Top Users with Missing Password Digest Causing Local Auth Failures",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @reason:\"local auth failed: no stored password digest found in authcred attributes.\" @log_type:\"AUTH ERROR\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 16,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 659945948973358,
+                        "definition": {
+                            "title": "Total Peer Connection Initiated",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Peer Connection Initiated\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4477458026105630,
+                        "definition": {
+                            "title": "Peer Connection Initiated Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Peer Connection Initiated\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@network.client.port",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@server_ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 20,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6689276054520678,
+                        "definition": {
+                            "title": "Virtual IP Assigned to Clients",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Assigning virtual IP\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@virtual_ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 24,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2229600259696240,
+                        "definition": {
+                            "title": "Geo Distribution of Client IP",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Assigning virtual IP\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 250,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 250,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "palette": "hostmap_blues",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 28,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1192443444573994,
+                        "definition": {
+                            "title": "Common Reasons of Client VPN Login Failures",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"VPN Auth Failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 32,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3949609861994360,
+                        "definition": {
+                            "title": "Signal Termination Distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"client-instance exiting\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@termination_signal",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 36,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6618903770465208,
+                        "definition": {
+                            "title": "Client VPN Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:openvpn @log_type:(\"VPN Auth Failed\" OR \"AUTH SUCCESS\" OR \"AUTH ERROR\" OR \"Peer Connection Initiated\" OR \"client-instance exiting\" OR \"Assigning virtual IP\") $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "os",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "client_connect_version",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "reason",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "virtual_ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "server_ip",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 40,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 27,
+                "width": 12,
+                "height": 45
+            }
+        },
+        {
+            "id": 166072887996452,
+            "definition": {
+                "title": "Web Portal Authentication Logs",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5016493448783584,
+                        "definition": {
+                            "title": "Failed Web Portal Authentication Attempts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Web login authentication failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5691009810024244,
+                        "definition": {
+                            "title": "Top Users with Most Web Portal Login Failures",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Web login authentication failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8524427115520686,
+                        "definition": {
+                            "title": "Failed Web Portal Authentication Attempts Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "failed_web_login",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Web login authentication failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6945616568143748,
+                        "definition": {
+                            "title": "Web Portal Login Failures by Authentication Method",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Web login authentication failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@auth_method",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 21699253574070,
+                        "definition": {
+                            "title": "Web Portal Login Failure Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:openvpn @log_type:\"Web login authentication failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@auth_method",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 4929123947269502,
+                        "definition": {
+                            "title": "Web Portal Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:openvpn @log_type:\"Web login authentication failed\" $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "reason",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "auth_method",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 17,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 72,
+                "width": 12,
+                "height": 22,
+                "is_column_break": true
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Authentication-Method",
+            "prefix": "@auth_method",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Client-IP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Host-Name",
+            "prefix": "@syslog.hostname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Log-Type",
+            "prefix": "@log_type",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "OS",
+            "prefix": "@os",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "User",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

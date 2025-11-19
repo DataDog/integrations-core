@@ -1,0 +1,58 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "1af07d08-4c45-43f1-9fef-4c2653d1a0b8",
+  "app_id": "postmark",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Postmark message streams activity logs.",
+    "title": "Postmark",
+    "media": [
+      {
+        "caption": "Postmark - Overview",
+        "image_url": "images/postmark_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Postmark - Overview",
+        "image_url": "images/postmark_overview_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 28886018,
+      "source_type_name": "Postmark",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Postmark - Overview" : "assets/dashboards/postmark_overview.json"
+    },
+    "monitors": {
+      "High block rate by message stream" : "assets/monitors/postmark_high_block_rate_by_message_stream.json",
+      "High bounce rate by message stream" : "assets/monitors/postmark_high_bounce_rate_by_message_stream.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

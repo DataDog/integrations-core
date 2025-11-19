@@ -8,6 +8,10 @@ The MySQL integration tracks the performance of your MySQL instances. It collect
 
 Enable [Database Monitoring][32] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
+MySQL version 5.6, 5.7, 8.0, and MariaDB versions 10.5, 10.6, 10.11 and 11.1 are supported.
+
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 <div class="alert alert-info">This page describes the MySQL Agent standard integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -86,6 +90,14 @@ mysql> show databases like 'performance_schema';
 1 row in set (0.00 sec)
 
 mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'%';
+Query OK, 0 rows affected (0.00 sec)
+```
+
+To collect index metrics, grant the `datadog` user an additional privilege:
+
+```shell
+
+mysql> GRANT SELECT ON mysql.innodb_index_stats TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -568,7 +580,7 @@ Additional helpful documentation, links, and articles:
 - [Monitoring MySQL performance metrics][31]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd-2.png
-[4]: https://app.datadoghq.com/account/settings/agent/latest
+[4]: /account/settings/agent/latest
 [5]: https://dev.mysql.com/doc/refman/8.0/en/creating-accounts.html
 [6]: https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1/
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

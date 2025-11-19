@@ -25,6 +25,26 @@ class ReplicationOpLogCollector(MongoCollector):
 
         return True
 
+    def _get_oplog_size(self, api, oplog_collection_name):
+        try:
+            oplog_storage_stats = list(
+                api.get_collection_stats("local", oplog_collection_name, stats=["storageStats"])
+            )[0]
+        except pymongo.errors.OperationFailure as e:
+            self.log.warning(
+                "Could not collect oplog used size for collection %s: %s", oplog_collection_name, e.details
+            )
+            return
+        except Exception as e:
+            self.log.error(
+                "Unexpected error when fetch oplog used size for collection %s: %s", oplog_collection_name, e
+            )
+            return
+
+        if api.coll_stats_pipeline_supported:
+            return oplog_storage_stats.get("storageStats", {}).get("size")
+        return oplog_storage_stats.get('size')
+
     def collect(self, api):
         # Fetch information analogous to Mongo's db.getReplicationInfo()
         localdb = api["local"]
@@ -46,12 +66,20 @@ class ReplicationOpLogCollector(MongoCollector):
 
                 oplog = localdb[collection_name]
 
-                oplog_data['usedSizeMB'] = round_value(
-                    localdb.command("collstats", collection_name)['size'] / 2.0**20, 2
-                )
+                oplog_data_size = self._get_oplog_size(api, collection_name)
+                if oplog_data_size is not None:
+                    oplog_data['usedSizeMB'] = round_value(oplog_data_size / 2.0**20, 2)
 
-                op_asc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)
-                op_dsc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.DESCENDING).limit(1)
+                op_asc_cursor = (
+                    oplog.find({"ts": {"$exists": 1}}, max_time_ms=api._timeout)
+                    .sort("$natural", pymongo.ASCENDING)
+                    .limit(1)
+                )
+                op_dsc_cursor = (
+                    oplog.find({"ts": {"$exists": 1}}, max_time_ms=api._timeout)
+                    .sort("$natural", pymongo.DESCENDING)
+                    .limit(1)
+                )
 
                 try:
                     first_timestamp = op_asc_cursor[0]['ts'].as_datetime()
@@ -64,6 +92,6 @@ class ReplicationOpLogCollector(MongoCollector):
                     pass
             except KeyError:
                 # encountered an error trying to access options.size for the oplog collection
-                self.log.warning(u"Failed to record `ReplicationInfo` metrics.")
+                self.log.warning("Failed to record `ReplicationInfo` metrics.")
 
         self._submit_payload({'oplog': oplog_data})

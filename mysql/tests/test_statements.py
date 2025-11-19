@@ -14,13 +14,13 @@ import pytest
 from packaging.version import parse as parse_version
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
 from . import common
-from .common import MYSQL_VERSION_PARSED
+from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
 
@@ -103,10 +103,19 @@ def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, s
 )
 @pytest.mark.parametrize("default_schema", [None, "testdb"])
 @pytest.mark.parametrize("aurora_replication_role", [None, "writer", "reader"])
+@pytest.mark.parametrize("only_query_recent_statements", [False, True])
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics(
-    aggregator, dd_run_check, dbm_instance, query, default_schema, datadog_agent, aurora_replication_role
+    aggregator,
+    dd_run_check,
+    dbm_instance,
+    query,
+    default_schema,
+    datadog_agent,
+    aurora_replication_role,
+    only_query_recent_statements,
 ):
+    dbm_instance['query_metrics']['only_query_recent_statements'] = only_query_recent_statements
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
@@ -116,17 +125,21 @@ def test_statement_metrics(
                     cursor.execute("USE " + default_schema)
                 cursor.execute(q)
 
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql, mock.patch.object(
-        mysql_check, '_get_is_aurora', passthrough=True
-    ) as m_get_is_aurora, mock.patch.object(
-        mysql_check, '_get_runtime_aurora_tags', passthrough=True
-    ) as m_get_runtime_aurora_tags:
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql,
+        mock.patch.object(
+            mysql_check, '_get_aurora_replication_role', passthrough=True
+        ) as m_get_aurora_replication_role,
+        mock.patch(
+            'datadog_checks.mysql.global_variables.GlobalVariables.is_aurora', new_callable=mock.PropertyMock
+        ) as m_is_aurora,
+    ):
         m_obfuscate_sql.side_effect = _obfuscate_sql
-        m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = []
+        m_get_aurora_replication_role.return_value = None
+        m_is_aurora.return_value = False
         if aurora_replication_role:
-            m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
+            m_is_aurora.return_value = True
+            m_get_aurora_replication_role.return_value = aurora_replication_role
 
         # Run a query
         run_query(query)
@@ -142,14 +155,15 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
+    elif MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
+        expected_tags.add("replication_role:primary")
     assert set(event['tags']) == expected_tags
     query_signature = compute_sql_signature(query)
     matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_signature]
@@ -180,6 +194,39 @@ def test_statement_metrics(
 
 def _obfuscate_sql(query, options=None):
     return re.sub(r'\s+', ' ', query or '').strip()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize("collect_prepared_statements", [True, False])
+def test_statement_metrics_prepared_statements(
+    aggregator, dd_run_check, dbm_instance, bob_conn, collect_prepared_statements
+):
+    dbm_instance['query_metrics']['only_query_recent_statements'] = False
+    dbm_instance['query_metrics']['collect_prepared_statements'] = collect_prepared_statements
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    prepared_sql = DEFAULT_FQ_SUCCESS_QUERY
+
+    # Keep the session open so the prepared statement remains present while the check runs
+    with closing(bob_conn.cursor()) as cursor:
+        cursor.execute("PREPARE ps1 FROM '{}'".format(prepared_sql))
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        cursor.execute("DEALLOCATE PREPARE ps1")
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
+
+    query_sig = compute_sql_signature(prepared_sql)
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_sig]
+    if collect_prepared_statements:
+        assert len(matching_rows) == 1, "expected one row for prepared statement"
+    else:
+        assert len(matching_rows) == 0, "no rows for prepared statement"
 
 
 @pytest.mark.integration
@@ -332,7 +379,6 @@ def test_statement_metrics_cloud_metadata(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
@@ -353,7 +399,13 @@ def test_statement_metrics_cloud_metadata(
         (
             'information_schema',
             'select * from testdb.users',
-            [{'strategy': 'PROCEDURE', 'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"}],
+            [
+                {
+                    'strategy': 'PROCEDURE',
+                    'code': 'database_error',
+                    'message': "1044: Access denied for user 'dog'@'%' to database 'information_schema'",
+                }
+            ],
             StatementTruncationState.not_truncated.value,
         ),
         (
@@ -363,15 +415,14 @@ def test_statement_metrics_cloud_metadata(
                 {
                     'strategy': 'FQ_PROCEDURE',
                     'code': 'database_error',
-                    'message': "<class 'pymysql.err.ProgrammingError'>",
+                    'message': "1146: Table 'datadog.users' doesn't exist",
                 }
             ],
             StatementTruncationState.not_truncated.value,
         ),
         (
             'testdb',
-            'SELECT {} FROM users where '
-            'name=\'Johannes Chrysostomus Wolfgangus Theophilus Mozart\''.format(
+            'SELECT {} FROM users where name=\'Johannes Chrysostomus Wolfgangus Theophilus Mozart\''.format(
                 ", ".join("name as name{}".format(i) for i in range(244))
             ),
             [
@@ -416,18 +467,18 @@ def test_statement_samples_collect(
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
-    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
 
-    with mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora, mock.patch.object(
-        mysql_check, '_get_runtime_aurora_tags', passthrough=True
-    ) as m_get_runtime_aurora_tags:
-        m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = []
+    with (
+        mock.patch.object(
+            mysql_check, '_get_aurora_replication_role', passthrough=True
+        ) as m_get_aurora_replication_role,
+    ):
+        m_get_aurora_replication_role.return_value = None
         if aurora_replication_role:
-            m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
+            m_get_aurora_replication_role.return_value = aurora_replication_role
 
         logger.debug("running first check")
         dd_run_check(mysql_check)
@@ -458,7 +509,9 @@ def test_statement_samples_collect(
         statement[:1021] + '...'
         if len(statement) > 1024
         and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
-        else statement[:4093] + '...' if len(statement) > 4096 else statement
+        else statement[:4093] + '...'
+        if len(statement) > 4096
+        else statement
     )
 
     matching = [e for e in events if expected_statement_prefix.startswith(e['db']['statement'])]
@@ -545,6 +598,7 @@ def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, state
         'uptime': '21466230',
         'timer_end': 3019558487284095384,
         'timer_wait_ns': 12.9,
+        'end_event_id': None,
     }
 
     mysql_check._statement_samples._collect_plan_for_statement(row)
@@ -563,7 +617,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # Fake the performance schema being disabled to validate the reporting of a warning when this condition occurs
-    mysql_check.performance_schema_enabled = False
+    mysql_check.global_variables._variables = {'performance_schema': 'OFF'}
 
     # Run this twice to confirm that duplicate warnings aren't added more than once
     mysql_check._statement_metrics.collect_per_statement_metrics()
@@ -582,7 +636,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     # as we faked the performance schema being disabled, running the check should restore the flag to True
     # this is to "simulate" enabling performance schema without restarting the agent
     # as the next check run will update the flag
-    assert mysql_check.performance_schema_enabled is True
+    assert mysql_check.global_variables.performance_schema_enabled is True
 
     # clear the warnings and rerun collect_per_statement_metrics
     mysql_check.warnings.clear()
@@ -825,8 +879,12 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_samples._job_loop_future.result()
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
+        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
+        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
+            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
         aggregator.assert_metric(
-            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.inactive_stop",
+            tags=expected_tags,
         )
 
 
@@ -847,23 +905,41 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_samples._db is None, "samples db connection should be gone"
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
-        aggregator.assert_metric(
-            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
-        )
+        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
+        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
+            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
+        aggregator.assert_metric("dd.mysql.async_job.cancel", tags=expected_tags)
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance.get('tags', []) + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+def _expected_dbm_instance_tags(dbm_instance, check):
+    _tags = dbm_instance.get('tags', ()) + (
+        'database_hostname:{}'.format('stubbed.hostname'),
+        'database_instance:{}'.format('stubbed.hostname'),
+        'server:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
+    )
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
+        _tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            _tags += ('cluster_uuid:{}'.format(check.cluster_uuid),)
+    return _tags
 
 
 # the inactive job metrics are emitted from the main integrations
 # directly to metrics-intake, so they should also be properly tagged with a resource
-def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + [
+def _expected_dbm_job_err_tags(dbm_instance, check):
+    _tags = dbm_instance['tags'] + (
+        'database_hostname:{}'.format('stubbed.hostname'),
+        'database_instance:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
-    ]
+        'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
+    )
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
+        _tags += ("server_uuid:{}".format(check.server_uuid),)
+    return _tags
 
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
@@ -913,8 +989,7 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     consumer_to_disable = 'events_statements_history_long'
     with closing(root_conn.cursor()) as cursor:
         cursor.execute(
-            "UPDATE performance_schema.setup_consumers SET enabled='NO'  WHERE name = "
-            "'{}';".format(consumer_to_disable)
+            "UPDATE performance_schema.setup_consumers SET enabled='NO'  WHERE name = '{}';".format(consumer_to_disable)
         )
 
     original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
@@ -952,7 +1027,7 @@ def test_normalize_queries(dbm_instance):
             'digest': '44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb',
             'schema': 'network',
             'digest_text': 'SELECT * from table where name = ?',
-            'query_signature': u'761498b7d5f04d11',
+            'query_signature': '761498b7d5f04d11',
             'dd_commands': None,
             'dd_comments': None,
             'dd_tables': None,
@@ -1007,3 +1082,50 @@ def test_statement_samples_calculate_timer_end(dbm_instance, timer_end, now, upt
         'uptime': uptime,
     }
     assert check._statement_samples._calculate_timer_end(row) == expected_timestamp
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "end_event_id,timer_end,uptime,event_timestamp_offset,window_seconds,expected_result",
+    [
+        # Test case 1: Event timestamp is within the window (should return False)
+        pytest.param(123, 3019558487284095384, 21466230, 5000, 60, False, id="within_window"),
+        # Test case 2: Event timestamp is outside the window (should return True)
+        pytest.param(123, 3019558487284095384, 21466230, 65000, 60, True, id="outside_window"),
+        # Test case 3: No end_event_id (should return False)
+        pytest.param(None, 3019558487284095384, 21466230, 65000, 60, False, id="no_end_event_id"),
+        # Test case 4: Event timestamp is before query end time (should return False)
+        pytest.param(123, 3019558487284095384, 21466230, -5000, 60, False, id="before_query_end"),
+        # Test case 5: Edge case - exactly at window boundary (should return True)
+        pytest.param(123, 3019558487284095384, 21466230, 60000, 60, False, id="at_window_boundary"),
+    ],
+)
+def test_has_sampled_since_completion(
+    dbm_instance, end_event_id, timer_end, uptime, event_timestamp_offset, window_seconds, expected_result
+):
+    """Test the _has_sampled_since_completion method with various scenarios."""
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    now = 1708025457
+
+    # Create a mock row with the provided parameters
+    row = {
+        'end_event_id': end_event_id,
+        'timer_end': timer_end,
+        'now': now,
+        'uptime': uptime,
+    }
+
+    # Calculate the query end time
+    query_end_time = mysql_check._statement_samples._calculate_timer_end(row)
+
+    # Set the window size
+    mysql_check._statement_samples._seen_samples_ratelimiter = RateLimitingTTLCache(
+        maxsize=10000,
+        ttl=window_seconds,
+    )
+
+    # Calculate event timestamp based on offset from query end time
+    event_timestamp = query_end_time + event_timestamp_offset
+
+    assert mysql_check._statement_samples._has_sampled_since_completion(row, event_timestamp) == expected_result

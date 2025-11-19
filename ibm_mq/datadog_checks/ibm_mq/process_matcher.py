@@ -17,8 +17,7 @@ else:
     import shlex
 
     def join_command_args(command_args):
-        # TODO: when we drop Python 2 use `shlex.join`
-        return ' '.join(shlex.quote(arg) for arg in command_args)
+        return shlex.join(shlex.quote(arg) for arg in command_args)
 
 
 class QueueManagerProcessMatcher(ConditionLimiter):

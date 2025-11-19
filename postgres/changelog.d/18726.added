@@ -1,1 +1,0 @@
-Add `keep_json_path` to obfuscator_options to allow users to control whether JSON paths following JSON operators in SQL statements should be obfuscated. By default, these paths are treated as literals and are obfuscated to ?.

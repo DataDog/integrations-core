@@ -4,6 +4,8 @@
 
 This check monitors [Ignite][1].
 
+**Minimum Agent version:** 7.20.0
+
 ## Setup
 
 ### Installation
@@ -110,7 +112,7 @@ Need help? Contact [Datadog support][4].
 
 
 [1]: https://ignite.apache.org/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://apacheignite.readme.io/docs/logging#section-log4j
 [4]: https://github.com/DataDog/integrations-core/blob/master/ignite/datadog_checks/ignite/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/java/

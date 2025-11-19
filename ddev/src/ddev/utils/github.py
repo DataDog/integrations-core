@@ -69,6 +69,12 @@ class GitHubManager:
     # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#create-a-label
     LABELS_API = 'https://api.github.com/repos/{repo_id}/labels'
 
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests-files
+    PULL_REQUEST_FILES_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}/files'
+
+    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-commits-on-a-repository
+    COMMIT_API = 'https://api.github.com/repos/{repo_id}/commits/{sha}'
+
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
         self.__auth = (user, token)
@@ -89,29 +95,36 @@ class GitHubManager:
         return client
 
     def get_pull_request(self, sha: str) -> PullRequest | None:
-        from json import loads
-
         response = self.__api_get(
             self.ISSUE_SEARCH_API,
             # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
-            params={'q': f'sha:{sha} repo:{self.repo_id}'},
+            params={'q': f'sha:{sha} repo:{self.repo_id} is:pull-request'},
         )
-        data = loads(response.text)
+        data = json.loads(response.text)
+        if not data['items']:
+            return None
+
+        return PullRequest(data['items'][0])
+
+    def get_pull_request_by_number(self, number: str) -> PullRequest | None:
+        response = self.__api_get(
+            self.ISSUE_SEARCH_API,
+            params={'q': f'{number} repo:{self.repo_id} is:pull-request'},
+        )
+        data = json.loads(response.text)
         if not data['items']:
             return None
 
         return PullRequest(data['items'][0])
 
     def get_next_issue_number(self) -> int:
-        from json import loads
-
         number = 1
 
         response = self.__api_get(
             self.ISSUE_LIST_API.format(repo_id=self.repo_id),
             params={'state': 'all', 'sort': 'created', 'direction': 'desc', 'per_page': 1},
         )
-        data = loads(response.text)
+        data = json.loads(response.text)
         if data:
             number += data[0]['number']
 
@@ -120,6 +133,19 @@ class GitHubManager:
     def get_diff(self, pr: PullRequest) -> str:
         response = self.__api_get(pr.diff_url, follow_redirects=True)
         return response.text
+
+    def get_changed_files_by_pr(self, pr: PullRequest) -> list[str]:
+        response = self.__api_get(self.PULL_REQUEST_FILES_API.format(repo_id=self.repo_id, pr_number=pr.number))
+        return [file_data['filename'] for file_data in response.json()]
+
+    def get_changed_files_by_commit_sha(self, sha: str) -> list[str] | None:
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.COMMIT_API.format(repo_id=self.repo_id, sha=sha))
+        except HTTPStatusError:
+            return None
+        return [file_data['filename'] for file_data in response.json().get('files', [])]
 
     def create_label(self, name, color):
         self.__api_post(

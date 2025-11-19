@@ -33,7 +33,7 @@ class OpenMetricsHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-Type', CONTENT_TYPE)
         self.end_headers()
-        with open(f"/tmp/{self.payloads[current_payload]}", 'rb') as f:
+        with open(self.payloads[current_payload], 'rb') as f:
             self.wfile.write(f.read())
 
         # Otherwise we keep using the last one

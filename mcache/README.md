@@ -4,6 +4,8 @@
 
 The Agent's Memcache check lets you track Memcache's memory use, hits, misses, evictions, fill percent, and much more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -126,7 +128,7 @@ Need help? Contact [Datadog support][13].
 - [Instrument Memcached performance metrics with DogStatsD][15]
 - [Monitoring ElastiCache performance metrics with Redis or Memcached][16]
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/mcache/datadog_checks/mcache/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

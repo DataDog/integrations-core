@@ -139,10 +139,12 @@ files:
       description: Express warning threshold for the HTTP check in days
       value:
         type: integer
+        example: 14
     - name: days_critical
       description: Express critical threshold for the HTTP check in days
       value:
         type: integer
+        example: 7
     - name: seconds_warning
       description: |
         Alternatively to days_warning, seconds_warning expresses
@@ -186,3 +188,4 @@ files:
         tls_cert.hidden: true
         tls_ca_cert.hidden: true
         tls_private_key.hidden: true
+        tls_ciphers.hidden: true

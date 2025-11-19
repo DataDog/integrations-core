@@ -37,9 +37,11 @@ class InstanceConfig(BaseModel):
     )
     auto_discover_channels: Optional[bool] = None
     auto_discover_queues: Optional[bool] = None
+    auto_discover_queues_via_names: Optional[bool] = None
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[MappingProxyType[str, Any]] = None
     channels: Optional[tuple[str, ...]] = None
+    collect_connection_metrics: Optional[bool] = None
     collect_reset_queue_metrics: Optional[bool] = None
     collect_statistics_metrics: Optional[bool] = None
     connection_name: Optional[str] = Field(None, min_length=1)
@@ -68,6 +70,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     try_basic_auth: Optional[bool] = None
+    use_qm_tz_for_metrics: Optional[bool] = None
     username: Optional[str] = Field(None, min_length=1)
 
     @model_validator(mode='before')

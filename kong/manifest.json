@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "41e7a8cb-07b6-46cc-a087-53e87736b5c7",
   "app_id": "kong",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -45,7 +46,10 @@
       },
       "metrics": {
         "prefix": "kong.",
-        "check": "kong.total_requests",
+        "check": [
+          "kong.total_requests",
+          "kong.nginx.requests.total"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -55,6 +59,7 @@
       "auto_install": true
     },
     "dashboards": {
+      "Kong Overview Openmetrics v3+": "assets/dashboards/kong_overview_openmetrics_v3",
       "Kong Overview OpenMetrics": "assets/dashboards/kong_overview_openmetrics.json",
       "Kong Overview": "assets/dashboards/kong_overview.json",
       "Kong API": "assets/dashboards/kong_api.json"

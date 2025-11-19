@@ -1,0 +1,44 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "19af2d5a-74cc-42db-98e4-e49a9e6c1de4",
+  "app_id": "crewai",
+  "owner": "ml-observability",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor, optimize, and evaluate your LLM applications using CrewAI",
+    "title": "CrewAI",
+    "media": [],
+    "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Metrics",
+      "Submitted Data Type::Traces",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_name": "CrewAI",
+      "source_type_id": 40374142,
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

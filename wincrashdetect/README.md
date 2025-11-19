@@ -6,6 +6,8 @@ Get Datadog events upon Windows system crash to create monitors in Datadog.
 
 **Note**: The list of metrics collected by this integration may change between minor Agent versions. Such changes may not be mentioned in the Agent's changelog.
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 ### Installation
@@ -19,9 +21,9 @@ The Windows Crash Detection integration is included in the [Datadog Agent][1] pa
 2. Enable the Windows Crash Detection module in `C:\ProgramData\Datadog\system-probe.yaml` by setting the enabled flag to 'true':
 
    ```yaml
-    windows_crash_detection:
-        enabled: true
-    ```
+   windows_crash_detection:
+       enabled: true
+   ```
 3. [Restart the Agent][4].
 
 ### Validation
@@ -46,7 +48,7 @@ The Windows Kernel Memory integration does not include any service checks.
 
 Need help? Contact [Datadog support][5].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: /account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/wincrashdetect.d/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

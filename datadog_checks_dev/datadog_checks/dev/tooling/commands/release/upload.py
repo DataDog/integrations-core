@@ -5,12 +5,12 @@ import os
 
 import click
 
-from ....fs import basepath, chdir, dir_exists, resolve_path
-from ....subprocess import run_command
-from ...constants import get_root
-from ...release import build_package
-from ...utils import complete_valid_checks, get_valid_checks
-from ..console import CONTEXT_SETTINGS, abort, echo_success, echo_waiting
+from datadog_checks.dev.fs import basepath, chdir, dir_exists, resolve_path
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_success, echo_waiting
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.release import build_package
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_valid_checks
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Build and upload a check to PyPI')

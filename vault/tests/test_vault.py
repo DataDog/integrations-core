@@ -76,7 +76,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -97,7 +97,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, tags=global_tags, count=1)
@@ -135,7 +135,7 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with mock.patch('requests.get', return_value=MockResponse(status_code=500)):
+        with mock.patch('requests.Session.get', return_value=MockResponse(status_code=500)):
             with pytest.raises(
                 Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
             ):
@@ -169,7 +169,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -190,7 +190,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         expected_tags = [
@@ -212,7 +212,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -230,7 +230,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.CRITICAL, count=1)
@@ -253,7 +253,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -274,7 +274,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         expected_tags = [
@@ -296,7 +296,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -314,7 +314,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
@@ -327,7 +327,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -348,7 +348,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         expected_tags = [
@@ -368,7 +368,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -387,7 +387,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
             c.log.debug.assert_called_with(
                 "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
@@ -405,7 +405,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -426,7 +426,7 @@ class TestVault:
 
         metric_collection = 'OpenMetrics' if use_openmetrics else 'Prometheus'
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
             c.log.debug.assert_called_with(
                 "Detected vault in replication DR secondary mode but also detected that "
@@ -445,7 +445,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 if getattr(mock_requests_get, 'first_health_call', True):
                     mock_requests_get.first_health_call = False
@@ -470,7 +470,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
             assert not c._skip_dr_metric_collection
             aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
@@ -504,7 +504,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={
@@ -516,7 +516,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         assert len(aggregator.events) > 0
@@ -545,7 +545,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={
@@ -557,7 +557,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         assert len(aggregator.events) == 0
@@ -571,7 +571,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={
@@ -583,7 +583,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
@@ -597,7 +597,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={
@@ -609,7 +609,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 0)
@@ -624,7 +624,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -643,7 +643,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
@@ -658,12 +658,12 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(json_data={'errors': ["Vault is sealed"]}, status_code=503)
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', count=0)
@@ -801,20 +801,19 @@ class TestVault:
 
 
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-def test_x_vault_request_header_is_set(monkeypatch, instance, dd_run_check, use_openmetrics):
+def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
     instance = instance()
     instance['use_openmetrics'] = use_openmetrics
 
-    c = Vault(Vault.CHECK_NAME, {}, [instance])
+    def mock_requests_get(url, *args, **kwargs):
+        return requests.get(url, *args, **kwargs)
 
-    requests_get = requests.get
-    mock_get = mock.Mock(side_effect=requests_get)
-    monkeypatch.setattr(requests, 'get', mock_get)
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', side_effect=mock_requests_get) as mock_get:
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+        dd_run_check(c)
 
-    dd_run_check(c)
-
-    assert mock_get.call_count > 0
-    for call in mock_get.call_args_list:
-        headers = dict(call.kwargs['headers'])
-        assert 'X-Vault-Request' in headers
-        assert headers['X-Vault-Request'] == 'true'
+        assert mock_get.call_count > 0
+        for call in mock_get.call_args_list:
+            headers = dict(call.kwargs['headers'])
+            assert 'X-Vault-Request' in headers
+            assert headers['X-Vault-Request'] == 'true'

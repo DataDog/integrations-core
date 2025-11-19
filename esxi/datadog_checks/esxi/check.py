@@ -61,7 +61,8 @@ class EsxiCheck(AgentCheck):
         self.ssl_verify = is_affirmative(self.instance.get('ssl_verify', True))
         self.ssl_capath = self.instance.get("ssl_capath")
         self.ssl_cafile = self.instance.get("ssl_cafile")
-        self.tags = [f"esxi_url:{self.host}"]
+        self.tags = self.instance.get("tags", [])
+        self.tags.append(f"esxi_url:{self.host}")
         self.proxy_host = None
         self.proxy_port = None
         proxy = self.instance.get('proxy', init_config.get('proxy'))
@@ -188,8 +189,7 @@ class EsxiCheck(AgentCheck):
 
             if resource_filter['property'] not in allowed_prop_names:
                 self.log.warning(
-                    "Ignoring filter %r because property '%s' is not valid "
-                    "for resource type %s. Should be one of %r.",
+                    "Ignoring filter %r because property '%s' is not valid for resource type %s. Should be one of %r.",
                     resource_filter,
                     resource_filter['property'],
                     resource_filter['resource'],

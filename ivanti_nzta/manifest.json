@@ -1,0 +1,75 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "c161337b-578b-4c24-bc14-adf35e0ee0ed",
+  "app_id": "ivanti-nzta",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Ivanti nZTA Logs",
+    "title": "Ivanti nZTA",
+    "media": [
+      {
+        "caption": "Ivanti nZTA - Analytics Logs",
+        "image_url": "images/ivanti_nzta_analytics_logs_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti nZTA - Analytics Logs",
+        "image_url": "images/ivanti_nzta_analytics_logs_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti nZTA - Analytics Logs",
+        "image_url": "images/ivanti_nzta_analytics_logs_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti nZTA - Alerts",
+        "image_url": "images/ivanti_nzta_alerts.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti nZTA - Applications Access",
+        "image_url": "images/ivanti_nzta_applications_access.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 38201876,
+      "source_type_name": "Ivanti nZTA",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Ivanti nZTA - Analytics Logs": "assets/dashboards/ivanti_nzta_analytics_logs.json",
+      "Ivanti nZTA - Alerts": "assets/dashboards/ivanti_nzta_alerts.json",
+      "Ivanti nZTA - Applications Access": "assets/dashboards/ivanti_nzta_applications_access.json"
+    },
+    "logs": {
+      "source": "ivanti-nzta"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

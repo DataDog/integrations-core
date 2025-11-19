@@ -2,11 +2,40 @@
 
 <!-- towncrier release notes start -->
 
-## 2.0.0 / 2024-10-01
+## 4.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 4.0.0 / 2025-05-15 / Agent 7.67.0
+
+***Changed***:
+
+* Bump datadog-checks-base to 37.10.1 and python to 3.12 ([#20271](https://github.com/DataDog/integrations-core/pull/20271))
+
+## 3.0.1 / 2025-04-09 / Agent 7.66.0
+
+***Fixed***:
+
+* Properly support custom tags. ([#20022](https://github.com/DataDog/integrations-core/pull/20022))
+
+## 3.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+## 2.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 1.2.0 / 2024-07-05 / Agent 7.56.0
 

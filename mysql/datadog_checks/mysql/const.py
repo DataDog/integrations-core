@@ -39,6 +39,8 @@ STATUS_VARS = {
     # Table Cache Metrics
     'Open_files': ('mysql.performance.open_files', GAUGE),
     'Open_tables': ('mysql.performance.open_tables', GAUGE),
+    # Performance schema metrics
+    'Performance_schema_digest_lost': ('mysql.performance.performance_schema_digest_lost', GAUGE),
     # Network Metrics
     'Bytes_sent': ('mysql.performance.bytes_sent', RATE),
     'Bytes_received': ('mysql.performance.bytes_received', RATE),

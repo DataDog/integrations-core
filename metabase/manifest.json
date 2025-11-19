@@ -2,15 +2,57 @@
   "manifest_version": "2.0.0",
   "app_uuid": "9ff6b01e-693b-4619-9bf1-677c0dc5244f",
   "app_id": "metabase",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Metabase is a business intelligence analytics platform that can be used to ask questions about your data",
+    "description": "Gain insights into Metabase activity events, view logs and query logs.",
     "title": "Metabase",
-    "media": [],
+    "media": [
+      {
+        "caption": "Metabase - Activity Overview 1",
+        "image_url": "images/metabase_activity_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 2",
+        "image_url": "images/metabase_activity_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 3",
+        "image_url": "images/metabase_activity_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Views Overview 1",
+        "image_url": "images/metabase_views_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Views Overview 2",
+        "image_url": "images/metabase_views_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Views Overview 3",
+        "image_url": "images/metabase_views_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Query Overview 1",
+        "image_url": "images/metabase_query_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Query Overview 2",
+        "image_url": "images/metabase_query_overview_2.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Submitted Data Type::Logs",
@@ -28,6 +70,22 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Metabase - Activity Overview": "assets/dashboards/metabase_activity_overview.json",
+      "Metabase - Views Overview": "assets/dashboards/metabase_views_overview.json",
+      "Metabase - Query Overview": "assets/dashboards/metabase_query_overview.json"
+    },
+    "logs": {
+      "source": "metabase"
+    },
+    "monitors": {
+      "High number of user invites" : "assets/monitors/high_number_of_user_invites.json",
+      "High number of API Key regenerations" : "assets/monitors/high_number_of_api_key_regenerations.json",
+      "High number of user deactivations" : "assets/monitors/high_number_of_user_deactivations.json",
+      "High query error rate": "assets/monitors/high_query_error_rate.json",
+      "High query execution time": "assets/monitors/high_query_execution_time.json",
+      "Low cache hit percentage": "assets/monitors/low_cache_hit_percentage.json"
     }
   },
   "author": {

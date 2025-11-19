@@ -6,6 +6,8 @@ The Process Check lets you:
 - Collect resource usage metrics for specific running processes on any host. For example, CPU, memory, I/O, and number of threads.
 - Use [Process Monitors][1] to configure thresholds for how many instances of a specific process should be running and get alerts when the thresholds aren't met (see **Service Checks** below).
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -42,7 +44,7 @@ Run the [Agent's status subcommand][5] and look for `process` under the Checks s
 ### Metrics notes
 
 The following metrics are not available on Linux or macOS:
-- Process I/O metrics are **not** available on Linux or macOS since the files that the Agent reads (`/proc//io`) are only readable by the process's owner. For more information, [read the Agent FAQ][6].
+- Process I/O metrics are **not** available on Linux or macOS since the files that the Agent reads (`/proc/<PID>/io`) are only readable by the process's owner. For more information, [read the Agent FAQ][6].
 
 The following metrics are not available on Windows:
 - `system.cpu.iowait`
@@ -88,7 +90,7 @@ Need help? Contact [Datadog support][9].
 To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out this [series of blog posts][10] about it.
 
 [1]: https://docs.datadoghq.com/monitors/create/types/process_check/?tab=checkalert
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

@@ -4,6 +4,8 @@
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 import logging
 
+from datadog_checks.postgres.config_models import InstanceConfig
+
 from .util import (
     ACTIVITY_DD_METRICS,
     ACTIVITY_METRICS_8_3,
@@ -15,20 +17,20 @@ from .util import (
     ACTIVITY_QUERY_LT_10,
     CHECKSUM_METRICS,
     COMMON_ARCHIVER_METRICS,
-    COMMON_BGW_METRICS,
+    COMMON_BGW_METRICS_LT_17,
     COMMON_METRICS,
     DATABASE_SIZE_METRICS,
     DBM_MIGRATED_METRICS,
     NEWER_14_METRICS,
-    NEWER_91_BGW_METRICS,
-    NEWER_92_BGW_METRICS,
+    NEWER_91_BGW_METRICS_LT_17,
+    NEWER_92_BGW_METRICS_LT_17,
     NEWER_92_METRICS,
+    QUERY_PG_BGWRITER_CHECKPOINTER,
     REPLICATION_METRICS_9_1,
     REPLICATION_METRICS_9_2,
     REPLICATION_METRICS_10,
-    REPLICATION_STATS_METRICS,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V12, V14
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V12, V14, V17
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ logger = logging.getLogger(__name__)
 class PostgresMetricsCache:
     """Maintains a cache of metrics to collect"""
 
-    def __init__(self, config):
+    def __init__(self, config: InstanceConfig):
         self.config = config
         self.instance_metrics = None
         self.bgw_metrics = None
@@ -74,7 +76,7 @@ class PostgresMetricsCache:
         if metrics is None:
             # if DBM enabled, do not collect postgresql.connections metric in the main check
             c_metrics = COMMON_METRICS
-            if not self.config.dbm_enabled:
+            if not self.config.dbm:
                 c_metrics = dict(c_metrics, **DBM_MIGRATED_METRICS)
             # select the right set of metrics to collect depending on postgres version
             self.instance_metrics = dict(c_metrics)
@@ -117,14 +119,17 @@ class PostgresMetricsCache:
         depending on the postgres version.
         Uses a dictionary to save the result for each instance
         """
+        if version >= V17:
+            return QUERY_PG_BGWRITER_CHECKPOINTER
+
         # Extended 9.2+ metrics if needed
         if self.bgw_metrics is None:
-            self.bgw_metrics = dict(COMMON_BGW_METRICS)
+            self.bgw_metrics = dict(COMMON_BGW_METRICS_LT_17)
 
             if version >= V9_1:
-                self.bgw_metrics.update(NEWER_91_BGW_METRICS)
+                self.bgw_metrics.update(NEWER_91_BGW_METRICS_LT_17)
             if version >= V9_2:
-                self.bgw_metrics.update(NEWER_92_BGW_METRICS)
+                self.bgw_metrics.update(NEWER_92_BGW_METRICS_LT_17)
 
         if not self.bgw_metrics:
             return None
@@ -178,11 +183,6 @@ class PostgresMetricsCache:
                 self.replication_metrics.update(REPLICATION_METRICS_9_2)
         return self.replication_metrics
 
-    def get_replication_stats_metrics(self, version):
-        if version >= V10 and self.replication_stats_metrics is None:
-            self.replication_stats_metrics = dict(REPLICATION_STATS_METRICS)
-        return self.replication_stats_metrics
-
     def get_activity_metrics(self, version):
         """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
@@ -191,7 +191,7 @@ class PostgresMetricsCache:
         metrics_data = self.activity_metrics
 
         if metrics_data is None:
-            excluded_aggregations = self.config.activity_metrics_excluded_aggregations
+            excluded_aggregations = list(self.config.activity_metrics_excluded_aggregations)
             if version < V9:
                 excluded_aggregations.append('application_name')
 
@@ -234,7 +234,7 @@ class PostgresMetricsCache:
 
             for i, q in enumerate(metrics_query):
                 if '{dd__user}' in q:
-                    metrics_query[i] = q.format(dd__user=self.config.user)
+                    metrics_query[i] = q.format(dd__user=self.config.username)
 
             metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS))
 

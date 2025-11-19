@@ -2,13 +2,14 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f99b6e79-f50a-479d-b916-955a577e4f41",
   "app_id": "databricks",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor the performance, reliability, and cost of your Apache Spark and Databricks jobs.",
+    "description": "Monitor the reliability and cost of your Databricks environment.",
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
@@ -48,11 +49,32 @@
       "events": {
         "creates_events": false
       },
+      "metrics": {
+        "prefix": "databricks.model_serving.",
+        "check": "databricks.model_serving.provisioned_concurrent_requests_total",
+        "metadata_path": "metadata.csv"
+      },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
       "source_type_id": 10152,
+      "supports_ddr_coordinated_failover": true,
       "auto_install": true
+    },
+    "dashboards": {
+      "Databricks Overview Dashboard": "assets/dashboards/overview_dashboard.json",
+      "Databricks Clusters Dashboard": "assets/dashboards/clusters_dashboard.json",
+      "databricks_cost_overview": "assets/dashboards/databricks_cost_overview.json",
+      "Databricks Model Serving Overview": "assets/dashboards/model_serving_overview.json"
+    },
+    "monitors": {
+      "Databricks Model Serving: High count 4xx errors": "assets/monitors/4xx_errors.json",
+      "Databricks Model Serving: High count 5xx errors": "assets/monitors/5xx_errors.json",
+      "Databricks Model Serving: High CPU usage": "assets/monitors/cpu_usage_high.json",
+      "Databricks Model Serving: High CPU memory usage": "assets/monitors/cpu_memory_usage_high.json",
+      "Databricks Model Serving: High GPU usage": "assets/monitors/gpu_usage_high.json",
+      "Databricks Model Serving: High GPU memory usage": "assets/monitors/gpu_memory_usage_high.json",
+      "Databricks Model Serving: High request latency": "assets/monitors/request_latency_high.json"
     },
     "logs": {
       "source": "spark"

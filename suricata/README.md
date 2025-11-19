@@ -4,6 +4,8 @@
 
 This integration provides enrichment and visualization for Alert, Anomaly, HTTP, DNS, FTP, FTP_DATA, TLS, TFTP, SMB, SSH, Flow, RDP, DHCP, and ARP log types. It helps to visualize detailed insights into Alerts, Anomaly, network connections, DNS, and DHCP activity, as well as detailed network protocol analysis in the integration's out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 ### Installation
@@ -81,7 +83,7 @@ If you see a **Permission denied** error while monitoring the log files, give th
 For any further assistance, contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://suricata.io/
 [5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install

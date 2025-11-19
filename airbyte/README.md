@@ -4,6 +4,8 @@
 
 This check monitors [Airbyte][1]. Metrics are sent to Datadog through [DogStatsD][2].
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 ### Installation
@@ -97,7 +99,7 @@ Need help? Contact [Datadog support][4].
 
 [1]: https://airbyte.com/
 [2]: https://docs.datadoghq.com/developers/dogstatsd
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/help/
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://docs.airbyte.com/operator-guides/collecting-metrics/

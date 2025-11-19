@@ -1,0 +1,64 @@
+name: KrakenD
+files:
+- name: krakend.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+    - name: go_metrics
+      description: |
+        Collect Go runtime metrics exposed by KrakenD's Prometheus endpoint.
+
+        Set to `false` to prevent Datadog from collecting these metrics, even if
+        KrakenD is configured to expose them (for example, for use with other monitoring tools).
+        Defaults to `true`, meaning Datadog will collect these metrics if available.
+        This setting in `init_config` provides a default for all instances; it can be overridden per instance.
+      value:
+        type: boolean
+        example: true
+    - name: process_metrics
+      description: |
+        Collect process metrics exposed by KrakenD's Prometheus endpoint.
+
+        Set to `false` to prevent Datadog from collecting these metrics, even if
+        KrakenD is configured to expose them (for example, for use with other monitoring tools).
+        Defaults to `true`, meaning Datadog will collect these metrics if available.
+        This setting in `init_config` provides a default for all instances; it can be overridden per instance.
+      value:
+        type: boolean
+        example: true
+
+  - template: instances
+    options:
+    - template: instances/openmetrics
+    - name: go_metrics
+      description: |
+        Collect Go runtime metrics exposed by KrakenD's Prometheus endpoint.
+
+        Set to `false` to prevent Datadog from collecting these metrics, even if
+        KrakenD is configured to expose them (for example, for use with other monitoring tools).
+        Defaults to `true`, meaning Datadog will collect these metrics if available.
+        This setting overrides the default provided in `init_config` for this specific instance.
+
+        If this is supplied for any of the instances, it will override the default provided in `init_config`.
+      value:
+        type: boolean
+        example: true
+    - name: process_metrics
+      description: |
+        Collect process metrics exposed by KrakenD's Prometheus endpoint.
+
+        Set to `false` to prevent Datadog from collecting these metrics, even if
+        KrakenD is configured to expose them (for example, for use with other monitoring tools).
+        Defaults to `true`, meaning Datadog will collect these metrics if available.
+        This setting overrides the default provided in `init_config` for this specific instance.
+
+        If this is supplied for any of the instances, it will override the default provided in `init_config`.
+      value:
+        type: boolean
+        example: true
+  - template: logs
+    example:
+    - type: docker
+      source: krakend
+      service: <SERVICE>

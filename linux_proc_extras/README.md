@@ -7,6 +7,8 @@ Get metrics from linux_proc_extras service in real time to:
 - Visualize and monitor linux_proc_extras states
 - Be notified about linux_proc_extras failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -41,7 +43,7 @@ The Linux Proc Extras check does not include any service checks.
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/datadog_checks/linux_proc_extras/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

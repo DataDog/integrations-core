@@ -7,7 +7,7 @@ from requests.exceptions import RequestException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
-from .constants import CATEGORIES, NUMERIC_TYPES
+from .constants import CATEGORIES, MAX_PAGES, NUMERIC_TYPES
 
 
 class SonarqubeCheck(AgentCheck):
@@ -104,14 +104,20 @@ class SonarqubeCheck(AgentCheck):
         for measure in metric_data['component']['measures']:
             tags = ['{}:{}'.format(tag_name, component)]
             tags.extend(self._tags)
-            self.gauge(available_metrics[measure['metric']], measure['value'], tags=tags)
+            if 'value' in measure:
+                self.gauge(available_metrics[measure['metric']], measure['value'], tags=tags)
+            elif 'period' in measure:
+                self.gauge(available_metrics[measure['metric']], measure['period']['value'], tags=tags)
+            elif 'periods' in measure:
+                for period in measure['periods']:
+                    self.gauge(available_metrics[measure['metric']], period['value'], tags=tags)
 
     def discover_available_metrics(self):
         available_metrics = {}
         page = 1
         seen = 0
         total = -1
-        while seen != total:
+        while seen != total and page <= MAX_PAGES:
             response = self.http.get('{}/api/metrics/search'.format(self._web_endpoint), params={'p': page})
             response.raise_for_status()
             self.log.debug('/api/metrics/search response: %s', response.json())
@@ -136,7 +142,7 @@ class SonarqubeCheck(AgentCheck):
         page = 1
         seen = 0
         total = -1
-        while seen != total:
+        while seen != total and page <= MAX_PAGES:
             response = self.http.get(
                 '{}/api/components/search'.format(self._web_endpoint), params={'qualifiers': 'TRK', 'p': page}
             )
@@ -307,9 +313,4 @@ class SonarqubeCheck(AgentCheck):
 
     @staticmethod
     def is_valid_metric(metric):
-        return (
-            not metric['hidden']
-            and metric['type'] in NUMERIC_TYPES
-            # https://github.com/DataDog/integrations-core/pull/8552
-            and not metric['key'].startswith('new_')
-        )
+        return not metric['hidden'] and metric['type'] in NUMERIC_TYPES

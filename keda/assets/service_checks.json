@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.62.0",
+        "integration": "Keda",
+        "check": "keda.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Keda OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Keda OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]

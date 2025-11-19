@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2024-11-05",
+    "last_updated_at": "2024-11-05",
+    "title": "Slurm DBD Agent Queue Size",
+    "description": "Slurm queues up the messages intended for the SlurmDBD, or database, and processes them in a separate thread. If the SlurmDBD is down, this number increases. This monitor alerts when the Message size is reported to be more than half the default MaxDBDMsgs setting.",
+    "definition": {
+        "name": "[Slurm] High Number of Messages in DBD Agent Queue",
+        "type": "query alert",
+        "query": "max(last_10m):avg:slurm.sdiag.dbd_agent_queue_size{*} by {host} > 5000",
+        "message": "{{#is_alert}}\n\nHost: {{host.name}}, is reporting a high number of Messages in the DBD Agent Queue in the last 10 minutes.\n\n{{/is_alert}}\n{{#is_recovery}}\n\nHost: {{host.name}}, is no longer reporting a high number of Messages in the DBD Agent Queue.\n\n{{/is_recovery}}",
+        "tags": [
+            "integration:slurm"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 5000
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": null,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:slurm"
+    ]
+}

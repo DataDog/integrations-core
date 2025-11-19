@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e6b3c5ec-b293-4a22-9145-277a12a9abd4",
   "app_id": "postgres",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -73,7 +74,8 @@
       "process_signatures": [
         "postgres -D",
         "pg_ctl start -l logfile",
-        "postgres -c 'pg_ctl start -D -l"
+        "postgres -c 'pg_ctl start -D -l",
+        "postgres.exe"
       ],
       "source_type_id": 28,
       "auto_install": true

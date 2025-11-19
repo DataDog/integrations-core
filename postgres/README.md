@@ -8,6 +8,10 @@ The Postgres integration provides health and performance metrics for your Postgr
 
 Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
+Postgres versions 9.6-16 are supported.
+
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 <div class="alert alert-info">This page describes the standard Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -169,8 +173,6 @@ Datadog APM integrates with Postgres to see the traces across your distributed s
 2. [Instrument your application that makes requests to Postgres][6].
 
 ##### Log collection
-
-_Available for Agent versions >6.0_
 
 PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. See the PostgreSQL documentation on[Error Reporting and Logging][7] for more information.
 
@@ -382,6 +384,8 @@ To configure this check for an Agent running on ECS:
 
 Set [Autodiscovery Integrations Templates][9] as Docker labels on your application container:
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```json
 {
   "containerDefinitions": [{
@@ -391,6 +395,20 @@ Set [Autodiscovery Integrations Templates][9] as Docker labels on your applicati
       "com.datadoghq.ad.check_names": "[\"postgres\"]",
       "com.datadoghq.ad.init_configs": "[{}]",
       "com.datadoghq.ad.instances": "[{\"host\":\"%%host%%\", \"port\":5432,\"username\":\"datadog\",\"password\":\"<PASSWORD>\"}]"
+    }
+  }]
+}
+```
+
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "postgres",
+    "image": "postgres:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.checks": "{\"postgres\": {\"instances\": [{\"host\":\"%%host%%\", \"port\":5432, \"username\":\"postgres\", \"password\":\"<PASSWORD>\"}]}}"
     }
   }]
 }
@@ -476,7 +494,7 @@ Additional helpful documentation, links, and articles:
 - [How to collect and monitor PostgreSQL data with Datadog][26]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/tracing/send_traces/

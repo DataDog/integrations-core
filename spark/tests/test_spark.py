@@ -23,6 +23,7 @@ from .common import CLUSTER_NAME, CLUSTER_TAGS, INSTANCE_DRIVER_1, INSTANCE_DRIV
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
 SPARK_APP_ID = 'app_001'
+SPARK_APP2_ID = 'app_002'
 
 APP_NAME = 'PySparkShell'
 
@@ -159,29 +160,35 @@ STANDALONE_SPARK_METRICS_JSON_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, 'metri
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
+DEFAULT_RESPONSES = {
+    '/jobs': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics')),
+    '/stages': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics')),
+    '/executors': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics')),
+    '/storage/rdd': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics')),
+    '/streaming/statistics': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics')),
+    '/metrics/json': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json')),
+    '/api/v1/version': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'version')),
+}
 
-def yarn_requests_get_mock(url, *args, **kwargs):
+
+def get_default_mock(url):
+    for k, v in DEFAULT_RESPONSES.items():
+        if url.endswith(k):
+            return v
+    raise KeyError(f"{url} does not match any response fixtures.")
+
+
+def yarn_requests_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == YARN_APP_URL:
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'yarn_apps'))
     elif arg_url == YARN_SPARK_APP_URL:
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
-    elif arg_url == YARN_SPARK_JOB_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
-    elif arg_url == YARN_SPARK_STAGE_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
-    elif arg_url == YARN_SPARK_EXECUTOR_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
-    elif arg_url == YARN_SPARK_RDD_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
-    elif arg_url == YARN_SPARK_STREAMING_STATISTICS_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
-    elif arg_url == YARN_SPARK_METRICS_JSON_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+    return get_default_mock(url)
 
 
-def yarn_requests_auth_mock(*args, **kwargs):
+def yarn_requests_auth_mock(session, url, *args, **kwargs):
     # Make sure we're passing in authentication
     assert 'auth' in kwargs, "Error, missing authentication"
 
@@ -189,10 +196,10 @@ def yarn_requests_auth_mock(*args, **kwargs):
     assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password"
 
     # Return mocked request.get(...)
-    return yarn_requests_get_mock(*args, **kwargs)
+    return yarn_requests_get_mock(session, url, *args, **kwargs)
 
 
-def mesos_requests_get_mock(url, *args, **kwargs):
+def mesos_requests_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == MESOS_APP_URL:
@@ -213,7 +220,7 @@ def mesos_requests_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
-def driver_requests_get_mock(url, *args, **kwargs):
+def driver_requests_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == DRIVER_APP_URL:
@@ -234,7 +241,7 @@ def driver_requests_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
-def standalone_requests_get_mock(url, *args, **kwargs):
+def standalone_requests_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
@@ -257,7 +264,7 @@ def standalone_requests_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
-def standalone_requests_pre20_get_mock(url, *args, **kwargs):
+def standalone_requests_pre20_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
@@ -292,7 +299,7 @@ def standalone_requests_pre20_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
-def proxy_with_warning_page_mock(url, *args, **kwargs):
+def proxy_with_warning_page_mock(session, url, *args, **kwargs):
     cookies = kwargs.get('cookies') or {}
     proxy_cookie = cookies.get('proxy_cookie')
     url_parts = list(urlparse(url))
@@ -300,7 +307,7 @@ def proxy_with_warning_page_mock(url, *args, **kwargs):
     if proxy_cookie and query.get('proxyapproved') == 'true':
         del query['proxyapproved']
         url_parts[4] = urlencode(query)
-        return standalone_requests_get_mock(urlunparse(url_parts), *args[1:], **kwargs)
+        return standalone_requests_get_mock(session, urlunparse(url_parts), *args[1:], **kwargs)
     else:
         # Display the html warning page with the redirect link
         query['proxyapproved'] = 'true'
@@ -361,6 +368,15 @@ STANDALONE_CONFIG = {
     'executor_level_metrics': True,
 }
 
+STANDALONE_CONFIG_STAGE_DISABLED = {
+    'spark_url': 'http://localhost:8080',
+    'cluster_name': CLUSTER_NAME,
+    'spark_cluster_mode': 'spark_standalone_mode',
+    'executor_level_metrics': True,
+    'disable_spark_stage_metrics': True,
+    'disable_spark_job_stage_tags': True,
+}
+
 STANDALONE_CONFIG_PRE_20 = {
     'spark_url': 'http://localhost:8080',
     'cluster_name': CLUSTER_NAME,
@@ -388,7 +404,8 @@ SSL_CERT_CONFIG = {
     'spark_url': SSL_SERVER_URL,
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_standalone_mode',
-    'ssl_verify': os.path.join(CERTIFICATE_DIR, 'cert.cert'),
+    'ssl_verify': True,
+    'ssl_ca_cert': os.path.join(CERTIFICATE_DIR, 'cert.cert'),
     'executor_level_metrics': True,
 }
 
@@ -412,6 +429,11 @@ SPARK_JOB_RUNNING_METRIC_TAGS = [
     'stage_id:1',
 ] + COMMON_TAGS
 
+SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS = [
+    'status:running',
+    'job_id:0',
+] + COMMON_TAGS
+
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
     'spark.job.num_tasks': 1000,
@@ -430,6 +452,11 @@ SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
     'job_id:0',
     'stage_id:0',
     'stage_id:1',
+] + COMMON_TAGS
+
+SPARK_JOB_SUCCEEDED_NO_STAGE_METRIC_TAGS = [
+    'status:succeeded',
+    'job_id:0',
 ] + COMMON_TAGS
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
@@ -662,7 +689,7 @@ def _assert(aggregator, values_and_tags):
 
 @pytest.mark.unit
 def test_yarn(aggregator, dd_run_check):
-    with mock.patch('requests.get', yarn_requests_get_mock):
+    with mock.patch('requests.Session.get', yarn_requests_get_mock):
         c = SparkCheck('spark', {}, [YARN_CONFIG])
         dd_run_check(c)
 
@@ -717,7 +744,7 @@ def test_yarn(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_auth_yarn(aggregator, dd_run_check):
-    with mock.patch('requests.get', yarn_requests_auth_mock):
+    with mock.patch('requests.Session.get', yarn_requests_auth_mock):
         c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
         dd_run_check(c)
 
@@ -737,7 +764,7 @@ def test_auth_yarn(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_mesos(aggregator, dd_run_check):
-    with mock.patch('requests.get', mesos_requests_get_mock):
+    with mock.patch('requests.Session.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_CONFIG])
         dd_run_check(c)
         _assert(
@@ -796,7 +823,7 @@ def test_mesos(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_mesos_filter(aggregator, dd_run_check):
-    with mock.patch('requests.get', mesos_requests_get_mock):
+    with mock.patch('requests.Session.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_FILTERED_CONFIG])
         dd_run_check(c)
 
@@ -809,7 +836,7 @@ def test_mesos_filter(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_driver_unit(aggregator, dd_run_check):
-    with mock.patch('requests.get', driver_requests_get_mock):
+    with mock.patch('requests.Session.get', driver_requests_get_mock):
         c = SparkCheck('spark', {}, [DRIVER_CONFIG])
         dd_run_check(c)
 
@@ -869,7 +896,7 @@ def test_driver_unit(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_standalone_unit(aggregator, dd_run_check):
-    with mock.patch('requests.get', standalone_requests_get_mock):
+    with mock.patch('requests.Session.get', standalone_requests_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
         dd_run_check(c)
 
@@ -920,9 +947,57 @@ def test_standalone_unit(aggregator, dd_run_check):
 
 
 @pytest.mark.unit
+def test_standalone_stage_disabled_unit(aggregator, dd_run_check):
+    with mock.patch('requests.Session.get', standalone_requests_get_mock):
+        c = SparkCheck('spark', {}, [STANDALONE_CONFIG_STAGE_DISABLED])
+        dd_run_check(c)
+
+        _assert(
+            aggregator,
+            [
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS),
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS),
+                # Check the succeeded job metrics
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_NO_STAGE_METRIC_TAGS),
+                # Check the driver metrics
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional driver metrics
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the executor level metrics
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the optional executor level metrics
+                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the executor metrics
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional summary executor metrics
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the RDD metrics
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                # Check the streaming statistics metrics
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                # Check the structured streaming metrics
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+            ],
+        )
+        # Check the service tests
+        for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
+            assert sc.status == SparkCheck.OK
+            assert sc.tags == ['url:http://localhost:8080'] + CLUSTER_TAGS
+        for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
+            assert sc.status == SparkCheck.OK
+            assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
+
+        # Assert coverage for this check on this instance
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.unit
 def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
-    with mock.patch('requests.get', proxy_with_warning_page_mock):
+    with mock.patch('requests.Session.get', proxy_with_warning_page_mock):
         dd_run_check(c)
 
         _assert(
@@ -974,7 +1049,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_standalone_pre20(aggregator, dd_run_check):
-    with mock.patch('requests.get', standalone_requests_pre20_get_mock):
+    with mock.patch('requests.Session.get', standalone_requests_pre20_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG_PRE_20])
         dd_run_check(c)
 
@@ -1027,7 +1102,7 @@ def test_standalone_pre20(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_metadata(aggregator, datadog_agent, dd_run_check):
-    with mock.patch('requests.get', standalone_requests_pre20_get_mock):
+    with mock.patch('requests.Session.get', standalone_requests_pre20_get_mock):
         c = SparkCheck(CHECK_NAME, {}, [STANDALONE_CONFIG_PRE_20])
         c.check_id = "test:123"
         dd_run_check(c)
@@ -1053,7 +1128,7 @@ def test_disable_legacy_cluster_tags(aggregator, dd_run_check):
     instance = MESOS_FILTERED_CONFIG
     instance['disable_legacy_cluster_tag'] = True
 
-    with mock.patch('requests.get', mesos_requests_get_mock):
+    with mock.patch('requests.Session.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [instance])
         dd_run_check(c)
 
@@ -1082,7 +1157,7 @@ def test_enable_query_name_tag_for_structured_streaming(
 ):
     instance['enable_query_name_tag'] = True
 
-    with mock.patch('requests.get', requests_get_mock):
+    with mock.patch('requests.Session.get', requests_get_mock):
         c = SparkCheck('spark', {}, [instance])
         dd_run_check(c)
 
@@ -1166,7 +1241,7 @@ def test_do_not_crash_on_single_app_failure():
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
 def test_no_running_apps(aggregator, dd_run_check, instance, service_check, caplog):
-    with mock.patch('requests.get', return_value=MockResponse("{}")):
+    with mock.patch('requests.Session.get', return_value=MockResponse("{}")):
         with caplog.at_level(logging.WARNING):
             dd_run_check(SparkCheck('spark', {}, [instance]))
 
@@ -1179,6 +1254,82 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check, capl
         )
 
     assert 'No running apps found. No metrics will be collected.' in caplog.text
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "mock_response",
+    [
+        pytest.param(MockResponse(content=""), id="Invalid JSON"),  # this triggers json parsing error,
+        pytest.param(MockResponse(status_code=404), id="property not found"),
+        pytest.param(MockResponse(status_code=500), id="Spark internal server error"),  # reported by users in the wild
+    ],
+)
+@pytest.mark.parametrize(
+    'property_url, missing_metrics',
+    [
+        pytest.param(YARN_SPARK_JOB_URL, SPARK_JOB_RUNNING_METRIC_VALUES, id='jobs'),
+        pytest.param(YARN_SPARK_STAGE_URL, SPARK_STAGE_RUNNING_METRIC_VALUES, id='stages'),
+        pytest.param(
+            YARN_SPARK_EXECUTOR_URL,
+            SPARK_EXECUTOR_METRIC_VALUES.keys() | SPARK_EXECUTOR_LEVEL_METRIC_VALUES.keys(),
+            id='executors',
+        ),
+        pytest.param(YARN_SPARK_RDD_URL, SPARK_RDD_METRIC_VALUES, id='storage/rdd'),
+        pytest.param(
+            YARN_SPARK_STREAMING_STATISTICS_URL, SPARK_STREAMING_STATISTICS_METRIC_VALUES, id='streaming/statistics'
+        ),
+    ],
+)
+def test_yarn_no_json_for_app_properties(
+    aggregator, dd_run_check, mocker, mock_response, property_url, missing_metrics
+):
+    """
+    In some yarn deployments apps stop exposing properties (such as jobs and stages) by the time we query them.
+    In these cases we skip only the specific missing apps and metrics while collecting all others.
+    """
+
+    def get_without_json(session, url, *args, **kwargs):
+        arg_url = Url(url)
+        if arg_url == property_url:
+            return mock_response
+        elif arg_url == YARN_SPARK_APP_URL:
+            return MockResponse(
+                json_data=[
+                    {
+                        "id": SPARK_APP_ID,
+                        "name": "PySparkShell",
+                        "attempts": [
+                            {
+                                "startTime": "2016-04-12T12:48:17.576GMT",
+                                "endTime": "1969-12-31T23:59:59.999GMT",
+                                "sparkUser": "",
+                                "completed": False,
+                            }
+                        ],
+                    },
+                    {
+                        "id": SPARK_APP2_ID,
+                        "name": "PySparkShell2",
+                        "attempts": [
+                            {
+                                "startTime": "2016-04-12T12:48:17.576GMT",
+                                "endTime": "1969-12-31T23:59:59.999GMT",
+                                "sparkUser": "",
+                                "completed": False,
+                            }
+                        ],
+                    },
+                ]
+            )
+        else:
+            return yarn_requests_get_mock(session, url, *args, **kwargs)
+
+    mocker.patch('requests.Session.get', get_without_json)
+    dd_run_check(SparkCheck('spark', {}, [YARN_CONFIG]))
+    for m in missing_metrics:
+        aggregator.assert_metric_has_tag(m, 'app_name:PySparkShell', count=0)
+        aggregator.assert_metric_has_tag(m, 'app_name:PySparkShell2')
 
 
 class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):

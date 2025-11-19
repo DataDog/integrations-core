@@ -6,7 +6,7 @@ Command: show server
   Runtime Module Path:      /opt/tibco/ems/10.1/bin/lib:/opt/tibco/ems/10.1/lib
   Topics:                   3 (0 dynamic, 0 temporary)
   Queues:                   9 (0 dynamic, 2 temporary)
-  Client Connections:       0
+  Client Connections:       0 of 1000 maximum
   Admin Connections:        2
   Sessions:                 2
   Producers:                2

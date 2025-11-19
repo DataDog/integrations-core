@@ -19,15 +19,19 @@ jobs:
       repo: core
 
       # Options
-      standard: true
-      # Because -m starts with a dash, 
-      # click (the library used to build the CLI) will 
+      # Because -m starts with a dash,
+      # click (the library used to build the CLI) will
       # interpret it as an option, not as an argument.
-      # To avoid this, using -- syntax, 
-      # which tells the command that everything following it 
+      # To avoid this, using -- syntax,
+      # which tells the command that everything following it
       # should be treated as positional arguments, not options
       pytest-args: '-m flaky'
+      context: "flaky-tests"
     secrets: inherit
+
+    permissions:
+       # needed for compute-matrix in test-target.yml
+       contents: read
 
   publish-test-results:
     needs:
@@ -35,6 +39,11 @@ jobs:
     if: success() || failure()
     concurrency:
       group: test-results
+
+    permissions:
+      checks: write # Needed for test-results-master
+      contents: write # Needed for test-results-master
+      pull-requests: write # Needed for test-results-master
 
     uses: ./.github/workflows/test-results-master.yml
     secrets: inherit

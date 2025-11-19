@@ -1,0 +1,10 @@
+name: Delinea Privilege Manager
+files:
+- name: delinea_privilege_manager.yaml
+  options:
+  - template: logs
+    example:
+    - type: <tcp/udp>
+      port: <PORT>
+      service: delinea-privilege-manager
+      source: delinea-privilege-manager

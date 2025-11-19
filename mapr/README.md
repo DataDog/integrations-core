@@ -4,6 +4,8 @@
 
 This check monitors [MapR][1] 6.1+ through the Datadog Agent.
 
+**Minimum Agent version:** 6.15.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.
@@ -113,7 +115,7 @@ Need more help? Contact [Datadog support][13].
 
 
 [1]: https://mapr.com
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://mapr.com/docs/61/AdministratorGuide/Monitoring.html
 [4]: https://mapr.com/docs/61/AdministratorGuide/c-managing-users-and-groups.html
 [5]: https://docs.datafabric.hpe.com/52/SecurityGuide/t_config_impersonation_notsecure.html?hl=secure%2Ccluster

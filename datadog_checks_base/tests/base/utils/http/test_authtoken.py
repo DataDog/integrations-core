@@ -9,7 +9,7 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import DEFAULT_EXPIRATION, RequestsWrapper
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import read_file, write_file
@@ -399,7 +399,7 @@ class TestAuthTokenReadFile:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            with mock.patch('requests.get'):
+            with mock.patch('requests.Session.get'):
                 write_file(token_file, '\nsecret\nsecret\n')
 
                 with pytest.raises(
@@ -424,7 +424,7 @@ class TestAuthTokenReadFile:
 
             expected_headers = {'Authorization': 'Bearer bar'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.get') as get:
+            with mock.patch('requests.Session.get') as get:
                 write_file(token_file, '\nfoobar\nfoobaz\n')
                 http.get('https://www.google.com')
 
@@ -463,13 +463,29 @@ class TestAuthTokenOAuth:
             def fetch_token(self, *args, **kwargs):
                 return {'error': 'unauthorized_client'}
 
-        with mock.patch('requests.get'), mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
-            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+        with (
+            mock.patch('requests.Session.get'),
+            mock.patch('oauthlib.oauth2.BackendApplicationClient'),
+            mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
         ):
             with pytest.raises(Exception, match='OAuth2 client credentials grant error: unauthorized_client'):
                 http.get('https://www.google.com')
 
-    def test_success(self):
+    @pytest.mark.parametrize(
+        'token_response, expected_expiration',
+        [
+            pytest.param({'access_token': 'foo', 'expires_in': 9000}, 9000, id='With expires_in'),
+            pytest.param({'access_token': 'foo'}, DEFAULT_EXPIRATION, id='Without expires_in'),
+            pytest.param(
+                {'access_token': 'foo', 'expires_in': 'two minutes'}, DEFAULT_EXPIRATION, id='With string expires_in'
+            ),
+            pytest.param({'access_token': 'foo', 'expires_in': '3600'}, 3600, id='With numeric string expires_in'),
+            pytest.param(
+                {'access_token': 'foo', 'expires_in': [1, 2, 3]}, DEFAULT_EXPIRATION, id='With list expires_in'
+            ),
+        ],
+    )
+    def test_success(self, token_response, expected_expiration):
         instance = {
             'auth_token': {
                 'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz'},
@@ -487,10 +503,13 @@ class TestAuthTokenOAuth:
                 pass
 
             def fetch_token(self, *args, **kwargs):
-                return {'access_token': 'foo', 'expires_in': 9000}
+                return token_response
 
-        with mock.patch('requests.get') as get, mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
-            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+        with (
+            mock.patch('requests.Session.get') as get,
+            mock.patch('oauthlib.oauth2.BackendApplicationClient'),
+            mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
+            mock.patch('datadog_checks.base.utils.http.get_timestamp', return_value=0),
         ):
             http.get('https://www.google.com')
 
@@ -506,6 +525,7 @@ class TestAuthTokenOAuth:
             )
 
             assert http.options['headers'] == expected_headers
+            assert http.auth_token_handler.reader._expiration == expected_expiration
 
     def test_success_with_auth_params(self):
         instance = {
@@ -535,8 +555,10 @@ class TestAuthTokenOAuth:
                 assert kwargs['audience'] == 'http://example.com'
                 return {'access_token': 'foo', 'expires_in': 9000}
 
-        with mock.patch('requests.get') as get, mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
-            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+        with (
+            mock.patch('requests.Session.get') as get,
+            mock.patch('oauthlib.oauth2.BackendApplicationClient'),
+            mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
         ):
             http.get('https://www.google.com')
 
@@ -594,8 +616,8 @@ class TestAuthTokenDCOS:
                 return MockResponse(json_data={})
             return MockResponse(status_code=404)
 
-        http = RequestsWrapper(instance, init_config)
-        with mock.patch('requests.post', side_effect=login), mock.patch('requests.get', side_effect=auth):
+        with mock.patch('requests.post', side_effect=login), mock.patch('requests.Session.get', side_effect=auth):
+            http = RequestsWrapper(instance, init_config)
             http.get('https://leader.mesos/service/some-service')
 
 
@@ -614,7 +636,7 @@ class TestAuthTokenWriteHeader:
 
             expected_headers = {'X-Vault-Token': 'foobar'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.get') as get:
+            with mock.patch('requests.Session.get') as get:
                 write_file(token_file, '\nfoobar\n')
                 http.get('https://www.google.com')
 
@@ -647,7 +669,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
 
             expected_headers = {'Authorization': 'Bearer secret1'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.get') as get:
+            with mock.patch('requests.Session.get') as get:
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com')
 
@@ -693,11 +715,10 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            with mock.patch('requests.get'):
+            with mock.patch('requests.Session.get'):
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com')
 
-            # TODO: use nonlocal when we drop Python 2 support
             counter = {'errors': 0}
 
             def raise_error_once(*args, **kwargs):
@@ -709,7 +730,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
 
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.get', side_effect=raise_error_once) as get:
+            with mock.patch('requests.Session.get', side_effect=raise_error_once) as get:
                 write_file(token_file, '\nsecret2\n')
 
                 http.get('https://www.google.com')
@@ -739,7 +760,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            with mock.patch('requests.get'):
+            with mock.patch('requests.Session.get'):
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com')
 
@@ -748,7 +769,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
 
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.get', return_value=mock.MagicMock(raise_for_status=error)) as get:
+            with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=error)) as get:
                 write_file(token_file, '\nsecret2\n')
                 http.get('https://www.google.com')
 

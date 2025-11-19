@@ -6,6 +6,8 @@
 
 The network check collects TCP/IP stats from the host operating system.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.
@@ -18,8 +20,6 @@ To collect metrics with this integration, make sure the conntrack module is acti
 
 ```shell
 sudo modprobe nf_conntrack
-sudo modprobe nf_conntrack_ipv4
-sudo modprobe nf_conntrack_ipv6
 ```
 
 *Note*: You may need to install the conntrack binary in the Agent image.
@@ -124,7 +124,7 @@ The Network check does not include any service checks.
 - [Build a network monitor on an HTTP check][10]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/network/datadog_checks/network/data/conf.yaml.default
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

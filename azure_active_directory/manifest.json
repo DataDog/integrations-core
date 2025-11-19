@@ -2,14 +2,15 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8c4717a8-93f0-4de6-b79b-1e7f52c94895",
   "app_id": "azure-active-directory",
+  "owner": "azureintegrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Analyze your Azure Active Directory activity logs",
-    "title": "Azure Active Directory",
+    "description": "Analyze your Microsoft Entra ID activity logs",
+    "title": "Microsoft Entra ID",
     "media": [],
     "classifier_tags": [
       "Category::Azure",

@@ -2,21 +2,285 @@
 
 <!-- towncrier release notes start -->
 
-## 37.0.0 / 2024-09-19
+## 37.24.0 / 2025-11-18
+
+***Added***:
+
+* Create shared schemas collector for the Postgres, MySQL, and SQL Server integrations ([#21720](https://github.com/DataDog/integrations-core/pull/21720))
+* [wmi_check] Allow tag aliases for wmi `tag_by` and `tag_queries` parameters ([#21792](https://github.com/DataDog/integrations-core/pull/21792))
+
+***Fixed***:
+
+* Fix YAML configuration parsing to properly handle Unicode characters on Windows systems where the UTF-8 locale is not enabled by default. ([#21852](https://github.com/DataDog/integrations-core/pull/21852))
+
+## 37.23.0 / 2025-10-31
+
+***Added***:
+
+* Bump ddtrace to version 3.16.4 ([#21773](https://github.com/DataDog/integrations-core/pull/21773))
+
+## 37.22.1 / 2025-10-29
+
+***Fixed***:
+
+* Fix missed collection event to use correct collection interval. ([#21766](https://github.com/DataDog/integrations-core/pull/21766))
+
+## 37.22.0 / 2025-10-27
+
+***Added***:
+
+* Added error health event for DBM async jobs ([#21703](https://github.com/DataDog/integrations-core/pull/21703))
+* Add health event for missed DBM async job executions ([#21719](https://github.com/DataDog/integrations-core/pull/21719))
+
+***Fixed***:
+
+* Update CA certificate loading logic to not load certificates when `tls_verify` is false ([#21607](https://github.com/DataDog/integrations-core/pull/21607))
+* Add `certifi` fallback for missing default CA certificates ([#21609](https://github.com/DataDog/integrations-core/pull/21609))
+
+## 37.21.1 / 2025-10-09 / Agent 7.72.0
+
+***Fixed***:
+
+* Fix helper method `config_set_persistent_cache_id` to ensure that the persistent cache id generated is stable between agent restarts. ([#21577](https://github.com/DataDog/integrations-core/pull/21577))
+
+## 37.21.0 / 2025-09-30
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add DatabaseCheck base class for database integrations ([#21202](https://github.com/DataDog/integrations-core/pull/21202))
+* Add tag normalization support to TagManager with optional tag_normalizer parameter and normalize flags for set_tag/set_tags_from_list/delete_tag methods. ([#21474](https://github.com/DataDog/integrations-core/pull/21474))
+
+## 37.20.0 / 2025-09-17 / Agent 7.71.0
+
+***Added***:
+
+* Add support for customizable cache keys to be used by the agent persistent cache. This allows integrations developers to define when the cache will be invalidated for each integration. ([#21316](https://github.com/DataDog/integrations-core/pull/21316))
+* Upgrade ddtrace to 3.12.5 ([#21360](https://github.com/DataDog/integrations-core/pull/21360))
+
+## 37.19.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 37.18.1 / 2025-09-03 / Agent 7.70.1
+
+***Fixed***:
+
+* Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
+
+*Note: This release is bundled with Agent version `7.70.1` and does not include changes from the `37.18.0` release.*
+
+## 37.18.0 / 2025-08-29
+
+***Added***:
+
+* Add database Health class for sending DBM health events ([#20739](https://github.com/DataDog/integrations-core/pull/20739))
+
+## 37.17.1 / 2025-08-26
+
+***Fixed***:
+
+* Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
+
+## 37.17.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Update orjson to 3.11.1 ([#20958](https://github.com/DataDog/integrations-core/pull/20958))
+
+***Fixed***:
+
+* Fixes deprecation warnings on isSet() usage in DBMAsyncJob ([#20947](https://github.com/DataDog/integrations-core/pull/20947))
+
+## 37.16.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Add OpenMetrics decorator to add code_class to metrics that have an HTTP status code tag ([#20528](https://github.com/DataDog/integrations-core/pull/20528))
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* Add flag to allow symmetric inclusion validation on assert_metrics_using_metadata in AggregatorStub ([#20563](https://github.com/DataDog/integrations-core/pull/20563))
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Add support for ingesting target_info when using the WithHttpCodeClass decorator ([#20555](https://github.com/DataDog/integrations-core/pull/20555))
+* Fix WithHttpCodeClass decorator not keeping track of internal state of the scraper ([#20640](https://github.com/DataDog/integrations-core/pull/20640))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* Replace patch_all with modern config ddtrace.auto ([#20651](https://github.com/DataDog/integrations-core/pull/20651))
+
+## 37.15.0 / 2025-06-13 / Agent 7.68.0
+
+***Security***:
+
+* Updates `requests` to 2.32.4 ([#20494](https://github.com/DataDog/integrations-core/pull/20494))
+
+## 37.14.0 / 2025-06-12
+
+***Added***:
+
+* Update dependencies ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+
+***Fixed***:
+
+* Fix handling of special float values like inf in configs. ([#20406](https://github.com/DataDog/integrations-core/pull/20406))
+
+## 37.13.0 / 2025-05-29
+
+***Added***:
+
+* Add TagManager class to dbm base utils ([#20397](https://github.com/DataDog/integrations-core/pull/20397))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+## 37.12.0 / 2025-05-28
+
+***Added***:
+
+* Bump ddtrace to 3.7.2 ([#20358](https://github.com/DataDog/integrations-core/pull/20358))
+
+***Fixed***:
+
+* Fix tracemalloc usage error ([#20355](https://github.com/DataDog/integrations-core/pull/20355))
+
+## 37.11.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+## 37.10.1 / 2025-04-30
+
+***Fixed***:
+
+* Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
+
+## 37.10.0 / 2025-04-17 / Agent 7.66.0
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Added execution indicators to StatementMetrics to filter out false positives from normalized queries being evicted and re-inserted with same call count and slight duration change. ([#20037](https://github.com/DataDog/integrations-core/pull/20037))
+
+***Fixed***:
+
+* Fix a spike in monotonic counter values after a failed openmetrics scrape ([#20063](https://github.com/DataDog/integrations-core/pull/20063))
+
+## 37.9.0 / 2025-03-27
+
+***Security***:
+
+* The `pyyaml` library is no longer globally patched to force the use of safe_* methods ([#19863](https://github.com/DataDog/integrations-core/pull/19863))
+
+***Added***:
+
+* Remove unnecessary `pyyaml` usage ([#19863](https://github.com/DataDog/integrations-core/pull/19863))
+
+## 37.8.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Add lazy import mechanism using the [lazy-loader](https://github.com/scientific-python/lazy-loader) library. This allows us to continue exposing a nice API (simple, short imports) for customers without the baseline memory overhead of importing everything all the time. ([#19838](https://github.com/DataDog/integrations-core/pull/19838))
+* Add `datadog_checks.base.utils.format.json` module for JSON serialization ([#19845](https://github.com/DataDog/integrations-core/pull/19845))
+* Add more lazy imports to reduce memory overhead. ([#19845](https://github.com/DataDog/integrations-core/pull/19845))
+
+***Fixed***:
+
+* Import dependencies in base check classes lazily. With only the disk and network checks running, the Agent uses almost 50MB less memory after this change. ([#19781](https://github.com/DataDog/integrations-core/pull/19781))
+* Reduce log verbosity level for unverified HTTP requests. WARNING level spams a lot with no evidence that users pay attention. DEBUG will be useful for support cases. ([#19791](https://github.com/DataDog/integrations-core/pull/19791))
+* Stop using the `uptime` library. It has alternatives that are more actively maintained. By removing the dependency we also reduce our disk usage footprint. ([#19842](https://github.com/DataDog/integrations-core/pull/19842))
+
+## 37.7.0 / 2025-03-05
+
+***Added***:
+
+* Add is_enabled() to FIPS utils ([#19735](https://github.com/DataDog/integrations-core/pull/19735))
+
+***Fixed***:
+
+* Use regex in service check message assertion ([#19736](https://github.com/DataDog/integrations-core/pull/19736))
+
+## 37.6.1 / 2025-02-20 / Agent 7.64.0
+
+***Fixed***:
+
+* Remove HA_SUPPORTED as a class attribute to the AgentCheck to let integrations self declare that they support HA. ([#19671](https://github.com/DataDog/integrations-core/pull/19671))
+
+## 37.6.0 / 2025-02-20
+
+***Added***:
+
+* Add support for target_info metric w/ shared label cache ([#19397](https://github.com/DataDog/integrations-core/pull/19397))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+* Adds HA_SUPPORTED as a class attribute to the AgentCheck to let integrations self declare that they support HA. ([#19580](https://github.com/DataDog/integrations-core/pull/19580))
+
+## 37.5.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+* Add tls_ciphers option for http ([#19469](https://github.com/DataDog/integrations-core/pull/19469))
+
+***Fixed***:
+
+* Handle unexpected values for `expires_in` in OAuth Access response ([#19371](https://github.com/DataDog/integrations-core/pull/19371))
+* Drop unused importlib-metadata dependency. ([#19382](https://github.com/DataDog/integrations-core/pull/19382))
+
+## 37.4.0 / 2025-01-16
+
+***Added***:
+
+* Allow for Ciphers to be customizable in the SSLContext creation ([#19312](https://github.com/DataDog/integrations-core/pull/19312))
+
+## 37.3.0 / 2024-12-26 / Agent 7.62.0
+
+***Security***:
+
+* Add FIPS switch ([#19179](https://github.com/DataDog/integrations-core/pull/19179))
+
+***Added***:
+
+* Show diff to closest metric match when metric test fails ([#18975](https://github.com/DataDog/integrations-core/pull/18975))
+* Use `time_elapsed` metric type for process start time and last GC time metrics ([#19309](https://github.com/DataDog/integrations-core/pull/19309))
+
+***Fixed***:
+
+* Fix "no snapshot data found" error when `agent check <check> --profile-memory` ([#19197](https://github.com/DataDog/integrations-core/pull/19197))
+
+## 37.2.0 / 2024-12-05 / Agent 7.60.0
+
+***Added***:
+
+* Bump binary package version for py3.12 ([#19190](https://github.com/DataDog/integrations-core/pull/19190))
+
+## 37.1.1 / 2024-11-28
+
+***Fixed***:
+
+* When resolving database hosts, always resolve a .local database host to itself ([#19039](https://github.com/DataDog/integrations-core/pull/19039))
+
+## 37.1.0 / 2024-10-04 / Agent 7.59.0
+
+***Added***:
+
+* Added Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
+## 37.0.0 / 2024-09-19 / Agent 7.58.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
 
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
-
-## 36.16.0 / 2024-09-30 / Agent 7.58.0
+## 36.16.0 / 2024-09-30
 
 ***Security***:
 
 * Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
 ## 36.15.0 / 2024-09-05
 
@@ -61,7 +325,7 @@
 * Log invalid line when failing to parse OpenMetrics response ([#17514](https://github.com/DataDog/integrations-core/pull/17514))
 * Support log submission from checks ([#18019](https://github.com/DataDog/integrations-core/pull/18019))
 * Allow untyped metrics that we coerce to `counter` to be collected regardless if they have `_total` or not. ([#18054](https://github.com/DataDog/integrations-core/pull/18054))
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 36.10.0 / 2024-07-11
 

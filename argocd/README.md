@@ -4,6 +4,8 @@
 
 This check monitors [Argo CD][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.41.0
+
 ## Setup
 
 ### Installation
@@ -189,7 +191,7 @@ Additional helpful documentation, links, and articles:
 
 
 [1]: https://argo-cd.readthedocs.io/en/stable/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=kubernetesadv2
 [5]: https://docs.datadoghq.com/agent/kubernetes/log/

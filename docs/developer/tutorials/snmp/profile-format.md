@@ -153,7 +153,7 @@ exampleColumn2 OBJECT-TYPE
 -- ...
 ```
 
-In profiles, tables can be specified as entries containing the `MIB`, `table` and `symbols` fields. The syntax for the value contained in each row is typically `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>`:
+In profiles, tables can be specified as entries containing the `MIB`, `table` and `symbols` fields. Columns of a table are specified as `<TABLE_OID>.1.<COLUMN_ID>`, and will cause the agent to collect all values matching `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>`:
 
 ```yaml
 metrics:
@@ -166,11 +166,13 @@ metrics:
     symbols:
       # List of symbols ('columns') to retrieve.
       # Same format as for a single OID.
-      # The value from each row (index) in the table will be collected `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>`
+      # Every value with an OID matching <OID>.<INDEX> will be collected
       - OID: 1.3.6.1.4.1.10.1.1
         name: exampleColumn1
       - OID: 1.3.6.1.4.1.10.1.2
         name: exampleColumn2
+      # ...
+    metric_tags:
       # ...
 
   # More realistic example:
@@ -182,6 +184,8 @@ metrics:
     symbols:
       - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
         name: cpmCPUMemoryUsed
+      # ...
+    metric_tags:
       # ...
 ```
 

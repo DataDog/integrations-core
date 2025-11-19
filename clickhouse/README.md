@@ -4,6 +4,8 @@
 
 This check monitors [ClickHouse][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.16.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -24,6 +26,8 @@ To configure this check for an Agent running on a host:
 #### Metric collection
 
 1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
+
+*Note*: This integration uses the official `clickhouse-connect` client to connect over HTTP.
 
 2. [Restart the Agent][5].
 
@@ -100,7 +104,7 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://clickhouse.yandex
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/datadog_checks/clickhouse/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/

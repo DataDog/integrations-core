@@ -11,6 +11,11 @@ on:
       target:
         required: true
         type: string
+      target-env:
+        description: "Specific target env to run"
+        required: false
+        default: ""
+        type: string
       platform:
         required: true
         type: string
@@ -25,10 +30,6 @@ on:
         required: false
         default: ""
         type: string
-      standard:
-        required: false
-        default: false
-        type: boolean
       benchmark:
         required: false
         default: false
@@ -41,6 +42,9 @@ on:
         required: false
         default: false
         type: boolean
+      # integrations-core repo no longer tests Python 2, only Python 3.
+      # We keep the options in the workflow for community and marketplace partners.
+      # They may still continue to test Python 2 and Agent 6.
       test-py2:
         required: false
         default: false
@@ -51,19 +55,19 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py2"
         type: string
       agent-image-windows:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py3-win-servercore"
         type: string
       agent-image-windows-py2:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
       traces-artifact-name:
         required: false
@@ -82,6 +86,16 @@ on:
         required: false
         type: string
         default: ""
+      context:
+        description: "Context where the test is run"
+        required: false
+        default: "standard"
+        type: string
+      step-timeout-minutes:
+        description: "Timeout in minutes for ddev test steps"
+        required: false
+        default: 60
+        type: number
 
 defaults:
   run:
@@ -89,38 +103,49 @@ defaults:
 
 jobs:
   run:
-    name: "${{ inputs.job-name }}"
+    name: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
     runs-on: ${{ fromJson(inputs.runner) }}
 
     env:
       FORCE_COLOR: "1"
-      PYTHON_VERSION: "${{ inputs.python-version || '3.12' }}"
-      PYTHON_FILTER: "${{ (inputs.test-py2 && !inputs.test-py3) && '2.7' || (!inputs.test-py2 && inputs.test-py3) && (inputs.python-version || '3.12') || '' }}"
+      PYTHON_VERSION: "${{ inputs.python-version || '3.13' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers
-      DDEV_E2E_AGENT: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows || 'datadog/agent-dev:master-py3-win-servercore') || inputs.agent-image }}"
-      DDEV_E2E_AGENT_PY2: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows-py2 || 'datadog/agent-dev:master-py2-win-servercore') || inputs.agent-image-py2 }}"
+      DDEV_E2E_AGENT: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows) || inputs.agent-image }}"
+      DDEV_E2E_AGENT_PY2: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows-py2) || inputs.agent-image-py2 }}"
       # Test results for later processing
-      TEST_RESULTS_BASE_DIR: ".test-results"
-      TEST_RESULTS_DIR: ".test-results/${{ inputs.job-name }}"
+      TEST_RESULTS_BASE_DIR: "test-results"
       # Tracing to monitor our test suite
       DD_ENV: "ci"
-      DD_SERVICE: "ddev-integrations-${{ inputs.repo }}"
-      DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
+      DD_SERVICE: "${{ inputs.target }}-integrations-${{ inputs.repo }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       # Capture traces for a separate job to do the submission
-      TRACE_CAPTURE_BASE_DIR: ".trace-captures"
-      TRACE_CAPTURE_FILE: ".trace-captures/${{ inputs.job-name }}"
-      TRACE_CAPTURE_LOG: ".trace-captures/output.log"
+      TRACE_CAPTURE_BASE_DIR: "trace-captures"
+      TRACE_CAPTURE_LOG: "trace-captures/output.log"
+      # Prefix for artifact names when using minimum base package
+      MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"
 
+    permissions:
+       # needed for compute-matrix in test-target.yml
+       contents: read
     steps:
+
+    - name: Set environment variables
+      run: |
+        # We want to replace leading dots as they will make directories hidden, which will cause them to be ignored by upload-artifact and EnricoMi/publish-unit-test-result-action
+        JOB_NAME=$(echo "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}" | sed 's/^\./Dot/')
+
+        echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+        echo "DD_TAGS=team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }},agent_image:$DDEV_E2E_AGENT,context:${{ inputs.context }}" >> $GITHUB_ENV
+
     - name: Set up Windows
       if: runner.os == 'Windows'
       run: |-
         # Enable disk performance counters
         diskperf -y
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
     - name: Set up Python 2.7
       if: inputs.test-py2
@@ -138,14 +163,14 @@ jobs:
       shell: bash
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
         cache: 'pip'
 
     - name: Restore cache
       if: inputs.repo == 'core'
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
@@ -175,10 +200,16 @@ jobs:
         ddev config set repo ${{ inputs.repo }}
 
     - name: Lint
-      # TODO: use the more descriptive `--lint` variant when ddev is released
-      run: ddev test -s ${{ inputs.target }}
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      run: |-
+        ddev test --lint ${{ inputs.target }} || {
+          echo "::error::Lint failed!"
+          echo "::error::Please update to the latest version of ddev to ensure you are using the latest linting rules and then run 'ddev test --fmt ${{ inputs.target }}' to fix formatting issues."
+          exit 1
+        }
 
     - name: Prepare for testing
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env: >-
         ${{ fromJson(inputs.setup-env-vars || format(
           '{{
@@ -187,19 +218,17 @@ jobs:
             "DOCKER_ACCESS_TOKEN": "{1}",
             "ORACLE_DOCKER_USERNAME": "{2}",
             "ORACLE_DOCKER_PASSWORD": "{3}",
-            "SINGLESTORE_LICENSE": "{4}",
-            "DD_GITHUB_USER": "{5}",
-            "DD_GITHUB_TOKEN": "{6}"
+            "DD_GITHUB_USER": "{4}",
+            "DD_GITHUB_TOKEN": "{5}"
           }}',
           secrets.DOCKER_USERNAME,
           secrets.DOCKER_ACCESS_TOKEN,
           secrets.ORACLE_DOCKER_USERNAME,
           secrets.ORACLE_DOCKER_PASSWORD,
-          secrets.SINGLESTORE_LICENSE,
           github.actor,
           secrets.GITHUB_TOKEN
         ))}}
-      run: ddev ci setup ${{ inputs.target }}
+      run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Set up trace capturing
       if: inputs.repo == 'core'
@@ -210,13 +239,15 @@ jobs:
         python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
     - name: Run Unit & Integration tests
-      if: inputs.standard && !inputs.minimum-base-package
+      if: inputs.latest != true && inputs.minimum-base-package != true
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+        # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
-          ddev test --cov --junit ${{ inputs.target }} -- ${{ inputs.pytest-args }}
+          ddev -v test --cov --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} -- ${{ inputs.pytest-args }} -k "not fips"
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
             # Flaky test count can be zero, this is done to avoid pipeline failure
@@ -226,15 +257,16 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev test --cov --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0}', inputs.pytest-args) || '' }}
+          ddev -v test --cov --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
         fi
 
     - name: Run Unit & Integration tests with minimum version of base package
-      if: inputs.standard && inputs.minimum-base-package
+      if: inputs.minimum-base-package
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
-          ddev test --compat --recreate --junit ${{ inputs.target }} -- ${{ inputs.pytest-args }}
+          ddev test --compat --recreate --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} -- ${{ inputs.pytest-args }} -k "not fips"
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
             # Flaky test count can be zero, this is done to avoid pipeline failure
@@ -244,11 +276,12 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev test --compat --recreate --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0}', inputs.pytest-args) || '' }}
+          ddev test --compat --recreate --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
         fi
 
     - name: Run E2E tests with latest base package
-      if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
+      if: inputs.repo == 'core' && !inputs.minimum-base-package
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -259,34 +292,25 @@ jobs:
         #   ddev will interpret '-m' as an environment to run the e2e test on and fails
         # This is not required when no pytest args are provided and it will run all environments
         #   by default
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
+        set +e # Disable immediate exit
+        if [ '${{ inputs.pytest-args }}' = '-m flaky' ] || [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
+          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} -- ${{ inputs.pytest-args }} -k "not fips"
           exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
-          set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
         else
-          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
+          exit_code=$?
+        fi
+
+        if [ "$exit_code" -eq 5 ]; then
+          echo "No tests were collected."
+          exit 0
+        else
+          exit "$exit_code"
         fi
 
     - name: Run E2E tests
-      if: inputs.standard && inputs.repo != 'core'
+      if: inputs.repo != 'core'
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -297,45 +321,39 @@ jobs:
         #   ddev will interpret '-m' as an environment to run the e2e test on and fails
         # This is not required when no pytest args are provided and it will run all environments
         #   by default
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev env test --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
+        set +e # Disable immediate exit
+        if [ '${{ inputs.pytest-args }}' = '-m flaky' ] || [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
+          ddev env test --dev --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} -- ${{ inputs.pytest-args }} -k "not fips"
           exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
-          set +e # Disable immediate exit
-          ddev env test --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
         else
-          ddev env test --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+          ddev env test --dev --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
+          exit_code=$?
+        fi
+
+        if [ "$exit_code" -eq 5 ]; then
+          echo "No tests were collected."
+          exit 0
+        else
+          exit "$exit_code"
         fi
 
     - name: Run benchmarks
       if: inputs.benchmark
-      run: ddev test --bench --junit ${{ inputs.target }}
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      run: ddev test --bench --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Run tests and verify support for the latest version
       if: inputs.latest
-      run: ddev test --latest --junit ${{ inputs.target }}
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      run: ddev test --latest --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Run E2E tests for the latest version
       if: inputs.latest
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+        # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
@@ -346,7 +364,7 @@ jobs:
         #   by default
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- all ${{ inputs.pytest-args }}
+          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- ${{ inputs.pytest-args }} -k "not fips"
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
             # Flaky test count can be zero, this is done to avoid pipeline failure
@@ -357,7 +375,7 @@ jobs:
           fi
         elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
           set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- all ${{ inputs.pytest-args }}
+          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- ${{ inputs.pytest-args }}
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
             # Flaky test count can be zero, this is done to avoid pipeline failure
@@ -367,7 +385,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+          ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- all -k "not fips"' }}
         fi
 
     - name: View trace log
@@ -376,35 +394,34 @@ jobs:
 
     - name: Upload captured traces
       if: inputs.repo == 'core' && always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: "${{ inputs.traces-artifact-name }}-${{ inputs.target }}-${{ inputs.platform }}"
+        name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}${{ inputs.traces-artifact-name }}-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ env.TRACE_CAPTURE_FILE }}"
 
     - name: Finalize test results
       if: always()
       run: |-
         mkdir -p "${{ env.TEST_RESULTS_DIR }}"
-        if [[ -d ${{ inputs.target }}/.junit ]]; then
-          mv ${{ inputs.target }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+        if [[ -d ${{ inputs.target }}/junit ]]; then
+          mv ${{ inputs.target }}/junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
         fi
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: "test-results-${{ inputs.target }}-${{ inputs.platform }}"
+        name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}test-results-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
-    - name: Upload coverage data
+    - name: Upload coverage data as artifact
       if: >
-        inputs.standard &&
         !github.event.repository.private &&
         always() &&
         inputs.pytest-args != '-m flaky'
-      # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
-      uses: codecov/codecov-action@v4
+      # Flaky tests will have low coverage, don't include in artifacts to avoid pipeline issues
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: "${{ inputs.target }}/coverage.xml"
-        flags: "${{ inputs.target }}"
+        name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}coverage-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
+        path: "${{ inputs.target }}/coverage.xml"
+        if-no-files-found: ignore

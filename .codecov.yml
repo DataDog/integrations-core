@@ -82,6 +82,10 @@ coverage:
         target: 75
         flags:
         - azure_iot_edge
+      BentoML:
+        target: 75
+        flags:
+        - bentoml
       Boundary:
         target: 75
         flags:
@@ -106,6 +110,10 @@ coverage:
         target: 75
         flags:
         - cassandra_nodetool
+      Celery:
+        target: 75
+        flags:
+        - celery
       Ceph:
         target: 75
         flags:
@@ -186,6 +194,10 @@ coverage:
         target: 75
         flags:
         - druid
+      DuckDB:
+        target: 75
+        flags:
+        - duckdb
       EKS_Fargate:
         target: 75
         flags:
@@ -210,6 +222,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      Falco:
+        target: 75
+        flags:
+        - falco
       Fluentd:
         target: 75
         flags:
@@ -270,6 +286,10 @@ coverage:
         target: 75
         flags:
         - hazelcast
+      Hugging_Face_TGI:
+        target: 75
+        flags:
+        - hugging_face_tgi
       IBM_ACE:
         target: 75
         flags:
@@ -298,6 +318,10 @@ coverage:
         target: 75
         flags:
         - impala
+      Infiniband:
+        target: 75
+        flags:
+        - infiniband
       Istio:
         target: 75
         flags:
@@ -310,22 +334,30 @@ coverage:
         target: 75
         flags:
         - karpenter
+      Keda:
+        target: 75
+        flags:
+        - keda
       Kong:
         target: 75
         flags:
         - kong
-      KubeVirt_Handler:
+      KrakenD:
         target: 75
         flags:
-        - kubevirt_handler
-      KubeVirt_Controller:
-        target: 75
-        flags:
-        - kubevirt_controller
+        - krakend
       KubeVirt_API:
         target: 75
         flags:
         - kubevirt_api
+      KubeVirt_Controller:
+        target: 75
+        flags:
+        - kubevirt_controller
+      KubeVirt_Handler:
+        target: 75
+        flags:
+        - kubevirt_handler
       Kube_DNS:
         target: 75
         flags:
@@ -366,6 +398,10 @@ coverage:
         target: 75
         flags:
         - kubernetes_state
+      Kuma:
+        target: 75
+        flags:
+        - kuma
       Kyoto_Tycoon:
         target: 75
         flags:
@@ -382,6 +418,18 @@ coverage:
         target: 75
         flags:
         - linux_proc_extras
+      LiteLLM:
+        target: 75
+        flags:
+        - litellm
+      Lustre:
+        target: 75
+        flags:
+        - lustre
+      Mac_Audit_Logs:
+        target: 75
+        flags:
+        - mac_audit_logs
       MapR:
         target: 75
         flags:
@@ -410,6 +458,10 @@ coverage:
         target: 75
         flags:
         - mesos_master
+      Milvus:
+        target: 75
+        flags:
+        - milvus
       MongoDB:
         target: 75
         flags:
@@ -442,6 +494,10 @@ coverage:
         target: 75
         flags:
         - nvidia_triton
+      Octopus_Deploy:
+        target: 75
+        flags:
+        - octopus_deploy
       OpenLDAP:
         target: 75
         flags:
@@ -490,6 +546,10 @@ coverage:
         target: 75
         flags:
         - prometheus
+      Proxmox:
+        target: 75
+        flags:
+        - proxmox
       ProxySQL:
         target: 75
         flags:
@@ -498,6 +558,10 @@ coverage:
         target: 75
         flags:
         - pulsar
+      Quarkus:
+        target: 75
+        flags:
+        - quarkus
       RabbitMQ:
         target: 75
         flags:
@@ -546,10 +610,18 @@ coverage:
         target: 75
         flags:
         - silk
+      Silverstripe_CMS:
+        target: 75
+        flags:
+        - silverstripe_cms
       SingleStore:
         target: 75
         flags:
         - singlestore
+      Slurm:
+        target: 75
+        flags:
+        - slurm
       Snowflake:
         target: 75
         flags:
@@ -574,6 +646,10 @@ coverage:
         target: 75
         flags:
         - strimzi
+      Supabase:
+        target: 75
+        flags:
+        - supabase
       Supervisord:
         target: 75
         flags:
@@ -646,6 +722,10 @@ coverage:
         target: 75
         flags:
         - vault
+      Velero:
+        target: 75
+        flags:
+        - velero
       Vertica:
         target: 75
         flags:
@@ -686,6 +766,14 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      checkpoint_harmony_endpoint:
+        target: 75
+        flags:
+        - checkpoint_harmony_endpoint
+      datadog_csi_driver:
+        target: 75
+        flags:
+        - datadog_csi_driver
       dcgm:
         target: 75
         flags:
@@ -706,6 +794,14 @@ coverage:
         target: 75
         flags:
         - kyverno
+      nvidia_nim:
+        target: 75
+        flags:
+        - nvidia_nim
+      sonatype_nexus:
+        target: 75
+        flags:
+        - sonatype_nexus
       tibco_ems:
         target: 75
         flags:
@@ -800,6 +896,11 @@ flags:
     paths:
     - azure_iot_edge/datadog_checks/azure_iot_edge
     - azure_iot_edge/tests
+  bentoml:
+    carryforward: true
+    paths:
+    - bentoml/datadog_checks/bentoml
+    - bentoml/tests
   boundary:
     carryforward: true
     paths:
@@ -825,6 +926,11 @@ flags:
     paths:
     - cassandra_nodetool/datadog_checks/cassandra_nodetool
     - cassandra_nodetool/tests
+  celery:
+    carryforward: true
+    paths:
+    - celery/datadog_checks/celery
+    - celery/tests
   ceph:
     carryforward: true
     paths:
@@ -835,6 +941,11 @@ flags:
     paths:
     - cert_manager/datadog_checks/cert_manager
     - cert_manager/tests
+  checkpoint_harmony_endpoint:
+    carryforward: true
+    paths:
+    - checkpoint_harmony_endpoint/datadog_checks/checkpoint_harmony_endpoint
+    - checkpoint_harmony_endpoint/tests
   cilium:
     carryforward: true
     paths:
@@ -915,6 +1026,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  datadog_csi_driver:
+    carryforward: true
+    paths:
+    - datadog_csi_driver/datadog_checks/datadog_csi_driver
+    - datadog_csi_driver/tests
   dcgm:
     carryforward: true
     paths:
@@ -950,6 +1066,11 @@ flags:
     paths:
     - druid/datadog_checks/druid
     - druid/tests
+  duckdb:
+    carryforward: true
+    paths:
+    - duckdb/datadog_checks/duckdb
+    - duckdb/tests
   ecs_fargate:
     carryforward: true
     paths:
@@ -990,6 +1111,11 @@ flags:
     paths:
     - external_dns/datadog_checks/external_dns
     - external_dns/tests
+  falco:
+    carryforward: true
+    paths:
+    - falco/datadog_checks/falco
+    - falco/tests
   fluentd:
     carryforward: true
     paths:
@@ -1070,6 +1196,11 @@ flags:
     paths:
     - http_check/datadog_checks/http_check
     - http_check/tests
+  hugging_face_tgi:
+    carryforward: true
+    paths:
+    - hugging_face_tgi/datadog_checks/hugging_face_tgi
+    - hugging_face_tgi/tests
   ibm_ace:
     carryforward: true
     paths:
@@ -1105,6 +1236,11 @@ flags:
     paths:
     - impala/datadog_checks/impala
     - impala/tests
+  infiniband:
+    carryforward: true
+    paths:
+    - infiniband/datadog_checks/infiniband
+    - infiniband/tests
   istio:
     carryforward: true
     paths:
@@ -1120,11 +1256,21 @@ flags:
     paths:
     - karpenter/datadog_checks/karpenter
     - karpenter/tests
+  keda:
+    carryforward: true
+    paths:
+    - keda/datadog_checks/keda
+    - keda/tests
   kong:
     carryforward: true
     paths:
     - kong/datadog_checks/kong
     - kong/tests
+  krakend:
+    carryforward: true
+    paths:
+    - krakend/datadog_checks/krakend
+    - krakend/tests
   kube_apiserver_metrics:
     carryforward: true
     paths:
@@ -1175,21 +1321,26 @@ flags:
     paths:
     - kubernetes_state/datadog_checks/kubernetes_state
     - kubernetes_state/tests
-  kubevirt_handler:
-    carryforward: true
-    paths:
-    - kubevirt_handler/datadog_checks/kubevirt_handler
-    - kubevirt_handler/tests
-  kubevirt_controller:
-    carryforward: true
-    paths:
-    - kubevirt_controller/datadog_checks/kubevirt_controller
-    - kubevirt_controller/tests
   kubevirt_api:
     carryforward: true
     paths:
     - kubevirt_api/datadog_checks/kubevirt_api
     - kubevirt_api/tests
+  kubevirt_controller:
+    carryforward: true
+    paths:
+    - kubevirt_controller/datadog_checks/kubevirt_controller
+    - kubevirt_controller/tests
+  kubevirt_handler:
+    carryforward: true
+    paths:
+    - kubevirt_handler/datadog_checks/kubevirt_handler
+    - kubevirt_handler/tests
+  kuma:
+    carryforward: true
+    paths:
+    - kuma/datadog_checks/kuma
+    - kuma/tests
   kyototycoon:
     carryforward: true
     paths:
@@ -1215,6 +1366,21 @@ flags:
     paths:
     - linux_proc_extras/datadog_checks/linux_proc_extras
     - linux_proc_extras/tests
+  litellm:
+    carryforward: true
+    paths:
+    - litellm/datadog_checks/litellm
+    - litellm/tests
+  lustre:
+    carryforward: true
+    paths:
+    - lustre/datadog_checks/lustre
+    - lustre/tests
+  mac_audit_logs:
+    carryforward: true
+    paths:
+    - mac_audit_logs/datadog_checks/mac_audit_logs
+    - mac_audit_logs/tests
   mapr:
     carryforward: true
     paths:
@@ -1250,6 +1416,11 @@ flags:
     paths:
     - mesos_slave/datadog_checks/mesos_slave
     - mesos_slave/tests
+  milvus:
+    carryforward: true
+    paths:
+    - milvus/datadog_checks/milvus
+    - milvus/tests
   mongo:
     carryforward: true
     paths:
@@ -1285,11 +1456,21 @@ flags:
     paths:
     - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
+  nvidia_nim:
+    carryforward: true
+    paths:
+    - nvidia_nim/datadog_checks/nvidia_nim
+    - nvidia_nim/tests
   nvidia_triton:
     carryforward: true
     paths:
     - nvidia_triton/datadog_checks/nvidia_triton
     - nvidia_triton/tests
+  octopus_deploy:
+    carryforward: true
+    paths:
+    - octopus_deploy/datadog_checks/octopus_deploy
+    - octopus_deploy/tests
   openldap:
     carryforward: true
     paths:
@@ -1350,6 +1531,11 @@ flags:
     paths:
     - prometheus/datadog_checks/prometheus
     - prometheus/tests
+  proxmox:
+    carryforward: true
+    paths:
+    - proxmox/datadog_checks/proxmox
+    - proxmox/tests
   proxysql:
     carryforward: true
     paths:
@@ -1360,6 +1546,11 @@ flags:
     paths:
     - pulsar/datadog_checks/pulsar
     - pulsar/tests
+  quarkus:
+    carryforward: true
+    paths:
+    - quarkus/datadog_checks/quarkus
+    - quarkus/tests
   rabbitmq:
     carryforward: true
     paths:
@@ -1405,11 +1596,21 @@ flags:
     paths:
     - silk/datadog_checks/silk
     - silk/tests
+  silverstripe_cms:
+    carryforward: true
+    paths:
+    - silverstripe_cms/datadog_checks/silverstripe_cms
+    - silverstripe_cms/tests
   singlestore:
     carryforward: true
     paths:
     - singlestore/datadog_checks/singlestore
     - singlestore/tests
+  slurm:
+    carryforward: true
+    paths:
+    - slurm/datadog_checks/slurm
+    - slurm/tests
   snmp:
     carryforward: true
     paths:
@@ -1425,6 +1626,11 @@ flags:
     paths:
     - sonarqube/datadog_checks/sonarqube
     - sonarqube/tests
+  sonatype_nexus:
+    carryforward: true
+    paths:
+    - sonatype_nexus/datadog_checks/sonatype_nexus
+    - sonatype_nexus/tests
   spark:
     carryforward: true
     paths:
@@ -1455,6 +1661,11 @@ flags:
     paths:
     - strimzi/datadog_checks/strimzi
     - strimzi/tests
+  supabase:
+    carryforward: true
+    paths:
+    - supabase/datadog_checks/supabase
+    - supabase/tests
   supervisord:
     carryforward: true
     paths:
@@ -1550,6 +1761,11 @@ flags:
     paths:
     - vault/datadog_checks/vault
     - vault/tests
+  velero:
+    carryforward: true
+    paths:
+    - velero/datadog_checks/velero
+    - velero/tests
   vertica:
     carryforward: true
     paths:

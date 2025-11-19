@@ -51,6 +51,7 @@ class SparkCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
         'ssl_key': {'name': 'tls_private_key'},
     }
 
@@ -73,6 +74,8 @@ class SparkCheck(AgentCheck):
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
         self._enable_query_name_tag = is_affirmative(self.instance.get('enable_query_name_tag', False))
+        self._disable_spark_job_stage_tags = is_affirmative(self.instance.get('disable_spark_job_stage_tags', False))
+        self._disable_spark_stage_metrics = is_affirmative(self.instance.get('disable_spark_stage_metrics', False))
 
         # Get the cluster name from the instance configuration
         self.cluster_name = self.instance.get('cluster_name')
@@ -97,8 +100,9 @@ class SparkCheck(AgentCheck):
         # Get the job metrics
         self._spark_job_metrics(spark_apps, tags)
 
-        # Get the stage metrics
-        self._spark_stage_metrics(spark_apps, tags)
+        if not self._disable_spark_stage_metrics:
+            # Get the stage metrics
+            self._spark_stage_metrics(spark_apps, tags)
 
         # Get the executor metrics
         self._spark_executor_metrics(spark_apps, tags)
@@ -352,7 +356,6 @@ class SparkCheck(AgentCheck):
 
         if metrics_json.get('apps'):
             if metrics_json['apps'].get('app') is not None:
-
                 for app_json in metrics_json['apps']['app']:
                     app_id = app_json.get('id')
                     tracking_url = app_json.get('trackingUrl')
@@ -389,32 +392,50 @@ class SparkCheck(AgentCheck):
 
         return spark_apps
 
+    def _describe_app(self, property, running_apps, addl_tags):
+        """
+        Get payloads that describe certain property of the running apps.
+        Examples of properties:
+        - the app's jobs
+        - the app's spark stages
+        """
+        for app_id, (app_name, tracking_url) in running_apps.items():
+            base_url = self._get_request_url(tracking_url)
+            try:
+                response = self._rest_request(
+                    base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, property
+                )
+            except HTTPError:
+                self.log.debug("Got an error collecting %s", property, exc_info=True)
+                continue
+            try:
+                yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
+            except JSONDecodeError:
+                self.log.debug(
+                    'Skipping metrics for %s from app %s due to unparsable JSON payload.', property, app_name
+                )
+                continue
+
     def _spark_job_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each Spark job.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
-
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'jobs'
-            )
-
-            for job in response:
+        for jobs, app_tags in self._describe_app('jobs', running_apps, addl_tags):
+            for job in jobs:
+                job_tags = []
 
                 status = job.get('status')
-
-                tags = ['app_name:%s' % str(app_name)]
-                tags.extend(addl_tags)
-                tags.append('status:%s' % str(status).lower())
+                job_tags.append('status:%s' % str(status).lower())
 
                 job_id = job.get('jobId')
                 if job_id is not None:
-                    tags.append('job_id:{}'.format(job_id))
+                    job_tags.append('job_id:{}'.format(job_id))
 
-                for stage_id in job.get('stageIds', []):
-                    tags.append('stage_id:{}'.format(stage_id))
+                if not self._disable_spark_job_stage_tags:
+                    for stage_id in job.get('stageIds', []):
+                        job_tags.append('stage_id:{}'.format(stage_id))
 
+                tags = app_tags + job_tags
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', COUNT, 1, tags)
 
@@ -422,25 +443,18 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each Spark stage.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
-
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'stages'
-            )
-
-            for stage in response:
+        for stages, app_tags in self._describe_app('stages', running_apps, addl_tags):
+            for stage in stages:
+                stage_tags = []
 
                 status = stage.get('status')
-
-                tags = ['app_name:%s' % str(app_name)]
-                tags.extend(addl_tags)
-                tags.append('status:%s' % str(status).lower())
+                stage_tags.append('status:%s' % str(status).lower())
 
                 stage_id = stage.get('stageId')
                 if stage_id is not None:
-                    tags.append('stage_id:{}'.format(stage_id))
+                    stage_tags.append('stage_id:{}'.format(stage_id))
 
+                tags = app_tags + stage_tags
                 self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
                 self._set_metric('spark.stage.count', COUNT, 1, tags)
 
@@ -448,73 +462,41 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each Spark executor.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
-
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'executors'
-            )
-
-            tags = ['app_name:%s' % str(app_name)]
-            tags.extend(addl_tags)
-
-            for executor in response:
+        for executors, app_tags in self._describe_app('executors', running_apps, addl_tags):
+            for executor in executors:
                 if executor.get('id') == 'driver':
-                    self._set_metrics_from_json(tags, executor, SPARK_DRIVER_METRICS)
+                    self._set_metrics_from_json(app_tags, executor, SPARK_DRIVER_METRICS)
                 else:
-                    self._set_metrics_from_json(tags, executor, SPARK_EXECUTOR_METRICS)
+                    self._set_metrics_from_json(app_tags, executor, SPARK_EXECUTOR_METRICS)
 
                     if is_affirmative(self.instance.get('executor_level_metrics', False)):
                         self._set_metrics_from_json(
-                            tags + ['executor_id:{}'.format(executor.get('id', 'unknown'))],
+                            app_tags + ['executor_id:{}'.format(executor.get('id', 'unknown'))],
                             executor,
                             SPARK_EXECUTOR_LEVEL_METRICS,
                         )
 
-            if len(response):
-                self._set_metric('spark.executor.count', COUNT, len(response), tags)
+            if executors:
+                self._set_metric('spark.executor.count', COUNT, len(executors), app_tags)
 
     def _spark_rdd_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each Spark RDD.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
+        for rdds, app_tags in self._describe_app('storage/rdd', running_apps, addl_tags):
+            for rdd in rdds:
+                self._set_metrics_from_json(app_tags, rdd, SPARK_RDD_METRICS)
 
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'storage/rdd'
-            )
-
-            tags = ['app_name:%s' % str(app_name)]
-            tags.extend(addl_tags)
-
-            for rdd in response:
-                self._set_metrics_from_json(tags, rdd, SPARK_RDD_METRICS)
-
-            if len(response):
-                self._set_metric('spark.rdd.count', COUNT, len(response), tags)
+            if rdds:
+                self._set_metric('spark.rdd.count', COUNT, len(rdds), app_tags)
 
     def _spark_streaming_statistics_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each application streaming statistics.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
-            try:
-                base_url = self._get_request_url(tracking_url)
-                response = self._rest_request_to_json(
-                    base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'streaming/statistics'
-                )
-                self.log.debug('streaming/statistics: %s', response)
-                tags = ['app_name:%s' % str(app_name)]
-                tags.extend(addl_tags)
-
-                # NOTE: response is a dict
-                self._set_metrics_from_json(tags, response, SPARK_STREAMING_STATISTICS_METRICS)
-            except HTTPError as e:
-                # NOTE: If api call returns response 404
-                # then it means that the application is not a streaming application, we should skip metric submission
-                if e.response.status_code != 404:
-                    raise
+        for stats, app_tags in self._describe_app('streaming/statistics', running_apps, addl_tags):
+            self.log.debug('streaming/statistics: %s', stats)
+            self._set_metrics_from_json(app_tags, stats, SPARK_STREAMING_STATISTICS_METRICS)
 
     def _spark_structured_streams_metrics(self, running_apps, addl_tags):
         """
@@ -563,9 +545,7 @@ class SparkCheck(AgentCheck):
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
-                self.log.debug(
-                    "No structured streaming metrics to collect from" " app %s. %s", app_name, e, exc_info=True
-                )
+                self.log.debug("No structured streaming metrics to collect from app %s. %s", app_name, e, exc_info=True)
                 pass
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
@@ -716,7 +696,7 @@ class SparkCheck(AgentCheck):
 
         soup = BeautifulSoup(html_content, 'html.parser')
         redirect_link = None
-        for link in soup.findAll('a'):
+        for link in soup.find_all('a'):
             href = link.get('href')
             if 'proxyapproved' in href:
                 redirect_link = href

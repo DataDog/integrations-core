@@ -5,11 +5,12 @@ import re
 import time
 from contextlib import contextmanager
 
-from ...errors import SubprocessError
-from ...subprocess import run_command
-from ...utils import ON_WINDOWS, file_exists, find_free_port, get_hostname, get_ip, path_join
-from ..commands.console import echo_debug, echo_warning
-from ..constants import get_root
+from datadog_checks.dev.errors import SubprocessError
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.commands.console import echo_debug, echo_warning
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.utils import ON_WINDOWS, file_exists, find_free_port, get_hostname, get_ip, path_join
+
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_DOGSTATSD_PORT,
@@ -307,12 +308,6 @@ class DockerInterface(object):
             'DD_CMD_PORT': find_free_port(get_ip()),
             # Disable trace agent
             'DD_APM_ENABLED': 'false',
-            # Don't write .pyc, needed to fix this issue (only Python 2):
-            # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
-            # in the first place.
-            # More info: https://github.com/DataDog/integrations-core/pull/5454
-            # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
-            'PYTHONDONTWRITEBYTECODE': "1",
             "DD_TELEMETRY_ENABLED": "1",
         }
         if self.dd_site:

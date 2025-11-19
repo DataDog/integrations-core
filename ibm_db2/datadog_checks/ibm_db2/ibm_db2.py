@@ -6,11 +6,21 @@ from __future__ import division
 from itertools import chain
 from time import time as timestamp
 
-import ibm_db
 from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.platform import Platform
+
+if Platform.is_windows():
+    # After installing ibm_db, dll path of dependent library of clidriver must be set before importing the module
+    # Ref: https://github.com/ibmdb/python-ibmdb/#installation
+    import os
+
+    embedded_lib = os.path.dirname(os.path.abspath(os.__file__))
+    os.add_dll_directory(os.path.join(embedded_lib, 'site-packages', 'clidriver', 'bin'))
+
+import ibm_db
 
 from . import queries
 from .utils import get_version, scrub_connection_string, status_to_service_check
@@ -117,14 +127,12 @@ class IbmDb2Check(AgentCheck):
     def query_instance(self):
         # Only 1 instance
         for inst in self.iter_rows(queries.INSTANCE_TABLE, ibm_db.fetch_assoc):
-
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0060773.html
             self.gauge(self.m('connection.active'), inst['total_connections'], tags=self._tags)
 
     def query_database(self):
         # Only 1 database
         for db in self.iter_rows(queries.DATABASE_TABLE, ibm_db.fetch_assoc):
-
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001156.html
             self.service_check(self.SERVICE_CHECK_STATUS, status_to_service_check(db['db_status']), tags=self._tags)
 
@@ -185,7 +193,6 @@ class IbmDb2Check(AgentCheck):
         # Hit ratio formulas:
         # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0056871.html
         for bp in self.iter_rows(queries.BUFFER_POOL_TABLE, ibm_db.fetch_assoc):
-
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002256.html
             bp_tags = ['bufferpool:{}'.format(bp['bp_name'])]
             bp_tags.extend(self._tags)
@@ -373,7 +380,6 @@ class IbmDb2Check(AgentCheck):
         # Utilization formulas:
         # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0056516.html
         for ts in self.iter_rows(queries.TABLE_SPACE_TABLE, ibm_db.fetch_assoc):
-
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001295.html
             table_space_name = ts['tbsp_name']
             ts_tags = ['tablespace:{}'.format(table_space_name)]
@@ -408,7 +414,6 @@ class IbmDb2Check(AgentCheck):
     def query_transaction_log(self):
         # Only 1 transaction log
         for tlog in self.iter_rows(queries.TRANSACTION_LOG_TABLE, ibm_db.fetch_assoc):
-
             # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.1.0/com.ibm.db2.luw.admin.config.doc/doc/r0000239.html
             block_size = 4096
 

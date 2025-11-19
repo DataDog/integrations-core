@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
 from copy import deepcopy
+from urllib.parse import urlencode
 
 from datadog_checks.avi_vantage import metrics
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
@@ -29,6 +30,9 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         # Required for storing the auth cookie
         self.instance['persist_connections'] = True
         self._base_url = None
+        self.tenant = None
+        if self.instance.get("tenants"):
+            self.tenant = ",".join(self.instance.get("tenants"))
 
     @property
     def base_url(self):
@@ -46,7 +50,14 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
             resource_metrics = RESOURCE_METRICS[entity]
             instance_copy = deepcopy(self.instance)
+
+            # GET /api/analytics/prometheus-metrics/{entity_type}/?{query_params}"
             endpoint = self.base_url + "/api/analytics/prometheus-metrics/" + entity
+            if self.tenant:
+                query_params = {"tenant": self.tenant}
+                encoded_params = urlencode(query_params)
+                endpoint += f"/?{encoded_params}"
+
             instance_copy['openmetrics_endpoint'] = endpoint
             instance_copy['metrics'] = [resource_metrics]
             instance_copy['rename_labels'] = LABELS_REMAPPER.copy()

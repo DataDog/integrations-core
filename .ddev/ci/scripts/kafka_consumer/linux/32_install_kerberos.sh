@@ -8,7 +8,7 @@ sudo apt install -y --no-install-recommends build-essential libkrb5-dev wget sof
 # Install librdkafka from source since no binaries are available for the distribution we use on the CI:
 git clone https://github.com/confluentinc/librdkafka
 cd librdkafka
-git checkout v2.5.0
+git checkout v2.11.1
 sudo ./configure --install-deps --prefix=/usr
 make
 sudo make install

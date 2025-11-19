@@ -1,41 +1,43 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
-from typing import Dict, List
+from typing import TYPE_CHECKING, List
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.postgres.config_models.instance import DatabaseAutodiscovery
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+
 from datadog_checks.base.utils.discovery import Discovery
-from datadog_checks.postgres.cursor import CommenterCursor
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
-DEFAULT_EXCLUDES = ["cloudsqladmin", "rdsadmin"]
-DEFAULT_MAX_DATABASES = 100
-DEFAULT_REFRESH = 600
+DEFAULT_EXCLUDES = ["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"]
 
 
 class PostgresAutodiscovery(Discovery):
     def __init__(
         self,
-        check: AgentCheck,
+        check: PostgreSql,
         global_view_db: str,
-        autodiscovery_config: Dict,
+        autodiscovery_config: DatabaseAutodiscovery,
         default_ttl: int,
     ) -> None:
         super(PostgresAutodiscovery, self).__init__(
             self._get_databases,
             # parent class asks for includelist to be a dictionary
-            include={db: 0 for db in autodiscovery_config.get("include", [".*"])},
-            exclude=autodiscovery_config.get("exclude", DEFAULT_EXCLUDES),
-            interval=autodiscovery_config.get("refresh", DEFAULT_REFRESH),
+            include=dict.fromkeys(autodiscovery_config.include, 0),
+            exclude=autodiscovery_config.exclude,
+            interval=autodiscovery_config.refresh,
         )
         self._default_ttl = default_ttl
         self._db = global_view_db
         self._check = check
         self._log = self._check.log
         self.db_pool = self._check.db_pool
-        self._max_databases = autodiscovery_config.get("max_databases", DEFAULT_MAX_DATABASES)
+        self._max_databases = autodiscovery_config.max_databases
         self._cache_filtered = []
 
     def get_items(self) -> List[str]:
@@ -71,8 +73,8 @@ class PostgresAutodiscovery(Discovery):
         return items_parsed
 
     def _get_databases(self) -> List[str]:
-        with self.db_pool.get_connection(self._db, self._default_ttl) as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+        with self.db_pool.get_connection(self._db) as conn:
+            with conn.cursor() as cursor:
                 cursor.execute(AUTODISCOVERY_QUERY)
                 databases = list(cursor.fetchall())
                 databases = [

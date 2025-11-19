@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from typing import Generator
 
 from ddev.e2e.constants import E2EEnvVars
-from ddev.testing.hatch import get_hatch_env_vars
+from ddev.utils.hatch import get_hatch_env_vars
 from ddev.utils.structures import EnvVars
 
 
@@ -28,7 +28,7 @@ class E2EEnvironmentRunner:
             yield self._base_command()
 
     def _base_command(self) -> list[str]:
-        command = [
+        return [
             sys.executable,
             '-m',
             'hatch',
@@ -43,9 +43,5 @@ class E2EEnvironmentRunner:
             '--exitfirst',
             # We need -2 verbosity and by default the test command sets the verbosity to +2
             '-qqqq',
+            '--no-header',
         ]
-        # TODO: always use this flag when we drop support for Python 2
-        if not self.__env.startswith('py2'):
-            command.append('--no-header')
-
-        return command

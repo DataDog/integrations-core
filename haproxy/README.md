@@ -10,6 +10,8 @@ Capture HAProxy activity in Datadog to:
 - Know when a server goes down.
 - Correlate the performance of HAProxy with the rest of your applications.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 This integration can collect metrics from a Prometheus endpoint (recommended) or from a socket-based integration through the stats endpoint (deprecated). Using the Prometheus endpoint requires HAProxy version 2 (enterprise version 1.9rc1) or later.
@@ -404,7 +406,7 @@ Need help? Contact [Datadog support][20].
 - [HA Proxy Multi Process Configuration][24]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/prometheus/haproxy_exporter
 [4]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
 [5]: https://www.haproxy.org/download/1.7/doc/management.txt

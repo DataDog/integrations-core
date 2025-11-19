@@ -4,6 +4,8 @@
 
 This check monitors [Argo Workflows][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.53.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running in your Kubernetes environment. For more information about configuration in containerized environments, see the [Autodiscovery Integration Templates][3] for guidance.
@@ -87,7 +89,7 @@ Additional helpful documentation, links, and articles:
 - [Monitoring the health and performance of your container-native CI/CD pipelines][12]
 
 [1]: https://argo-workflows.readthedocs.io/en/stable/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/argo_workflows/datadog_checks/argo_workflows/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/openmetrics/

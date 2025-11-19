@@ -1,0 +1,57 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a86f7f3f-148b-4a66-838b-fb4c8678be59",
+  "app_id": "supply-chain-firewall",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into your Supply Chain Firewall logs.",
+    "title": "Supply Chain Firewall",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Supply Chain Firewall - Events",
+        "image_url": "images/supply_chain_firewall_events_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Supply Chain Firewall - Events",
+        "image_url": "images/supply_chain_firewall_events_2.png"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 54882269,
+      "source_type_name": "Supply Chain Firewall",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Supply Chain Firewall - Events": "assets/dashboards/supply_chain_firewall_events.json"
+    },
+    "logs": {
+      "source": "scfw"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

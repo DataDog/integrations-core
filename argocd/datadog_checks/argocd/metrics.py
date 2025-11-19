@@ -44,6 +44,7 @@ APPLICATION_CONTROLLER = {
     'argocd_app_info': 'app.info',
     'argocd_app_reconcile': 'app.reconcile',
     'argocd_app_sync': 'app.sync',
+    'argocd_app_sync_duration_seconds': 'app.sync.duration.seconds',
     'argocd_app_labels': 'app.labels',
     'argocd_cluster_api_resource_objects': 'cluster.api.resource_objects',
     'argocd_cluster_api_resources': 'cluster.api.resources',
@@ -67,6 +68,10 @@ APPSET_CONTROLLER = {
     'controller_runtime_reconcile_errors': 'reconcile.errors',
     'controller_runtime_reconcile_time_seconds': 'reconcile.time_seconds',
     'controller_runtime_reconcile': 'runtime.reconcile',
+    'argocd_appset_info': 'appset.info',
+    'argocd_appset_reconcile': 'appset.reconcile',
+    'argocd_appset_owned_applications': 'appset.owned.applications',
+    'argocd_appset_labels': 'appset.labels',
 }
 
 API_SERVER = {
@@ -90,8 +95,18 @@ NOTIFICATIONS_CONTROLLER = {
     'argocd_notifications_trigger_eval': 'notifications.trigger_eval',
 }
 
+COMMIT_SERVER = {
+    'argocd_commitserver_commit_pending_request_total': 'commit.pending.request.total',
+    'argocd_commitserver_git_request_duration_seconds': 'git.request.duration.seconds',
+    'argocd_commitserver_git_request': 'git.request',
+    'argocd_commitserver_commit_request_duration_seconds': 'commit.request.duration.seconds',
+    'argocd_commitserver_userinfo_request_duration_seconds': 'userinfo.request.duration.seconds',
+    'argocd_commitserver_commit_request': 'commit.request',
+}
+
 APPLICATION_CONTROLLER_METRICS = [{**APPLICATION_CONTROLLER, **GENERAL_METRICS}]
 APPSET_CONTROLLER_METRICS = [{**APPSET_CONTROLLER, **GENERAL_METRICS}]
 API_SERVER_METRICS = [{**API_SERVER, **GENERAL_METRICS}]
 REPO_SERVER_METRICS = [{**REPO_SERVER, **GENERAL_METRICS}]
 NOTIFICATIONS_CONTROLLER_METRICS = [{**NOTIFICATIONS_CONTROLLER, **GENERAL_METRICS}]
+COMMIT_SERVER_METRICS = [{**COMMIT_SERVER, **GENERAL_METRICS}]

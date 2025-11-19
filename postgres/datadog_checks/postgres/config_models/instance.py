@@ -59,6 +59,14 @@ class Azure(BaseModel):
     managed_authentication: Optional[ManagedAuthentication1] = None
 
 
+class CollectRawQueryStatement(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+
+
 class CollectSchemas(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -84,6 +92,7 @@ class CollectSettings(BaseModel):
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     ignored_settings_patterns: Optional[tuple[str, ...]] = None
+    run_sync: Optional[bool] = None
 
 
 class CustomQuery(BaseModel):
@@ -111,6 +120,14 @@ class DatabaseAutodiscovery(BaseModel):
     refresh: Optional[int] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class Gcp(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -120,13 +137,14 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
-class ManagedIdentity(BaseModel):
+class LocksIdleInTransaction(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    client_id: Optional[str] = None
-    identity_scope: Optional[str] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_rows: Optional[int] = None
 
 
 class MetricPatterns(BaseModel):
@@ -176,10 +194,14 @@ class QueryMetrics(BaseModel):
         frozen=True,
     )
     baseline_metrics_expiry: Optional[float] = None
+    batch_max_content_size: Optional[int] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[float] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
     incremental_query_metrics: Optional[bool] = None
     pg_stat_statements_max_warning_threshold: Optional[float] = None
+    run_sync: Optional[bool] = None
 
 
 class QuerySamples(BaseModel):
@@ -189,10 +211,13 @@ class QuerySamples(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explain_errors_cache_maxsize: Optional[int] = None
+    explain_errors_cache_ttl: Optional[int] = None
     explain_function: Optional[str] = None
     explain_parameterized_queries: Optional[bool] = None
     explained_queries_cache_maxsize: Optional[int] = None
     explained_queries_per_hour_per_query: Optional[int] = None
+    run_sync: Optional[bool] = None
     samples_per_hour_per_query: Optional[int] = None
     seen_samples_cache_maxsize: Optional[int] = None
 
@@ -227,25 +252,30 @@ class InstanceConfig(BaseModel):
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None
     collect_function_metrics: Optional[bool] = None
+    collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
+    custom_metrics: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     dbname: Optional[str] = None
     dbstrict: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
-    host: str
+    host: Optional[str] = None
     idle_connection_timeout: Optional[int] = None
     ignore_databases: Optional[tuple[str, ...]] = None
+    ignore_schemas_owned_by: Optional[tuple[str, ...]] = None
+    locks_idle_in_transaction: Optional[LocksIdleInTransaction] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
-    managed_identity: Optional[ManagedIdentity] = None
     max_connections: Optional[int] = None
     max_relations: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
@@ -253,10 +283,12 @@ class InstanceConfig(BaseModel):
     obfuscator_options: Optional[ObfuscatorOptions] = None
     only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
+    pg_stat_activity_view: Optional[str] = None
     pg_stat_statements_view: Optional[str] = None
     port: Optional[int] = None
     propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
+    query_encodings: Optional[tuple[str, ...]] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     query_timeout: Optional[int] = None
@@ -272,7 +304,7 @@ class InstanceConfig(BaseModel):
     tag_replication_role: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
-    username: str
+    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

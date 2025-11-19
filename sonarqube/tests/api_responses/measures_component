@@ -146,6 +146,26 @@
 			"metric": "vulnerabilities",
 			"value": "0",
 			"bestValue": true
-		}]
+		}, {
+			"metric": "new_blocker_violations",
+			"periods": [
+			  {
+				"index": 1,
+				"value": "4",
+				"bestValue": true
+			  },
+			  {
+				"index": 2,
+				"value": "7",
+				"bestValue": false
+			  }
+			]
+		}, {
+			  "metric": "new_vulnerabilities",
+			  "period": {
+				    "value": "0",
+				    "bestValue": true
+			  }
+    }]
 	}
 }

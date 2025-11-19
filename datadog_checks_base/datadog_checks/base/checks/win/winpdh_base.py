@@ -5,10 +5,9 @@ from collections import defaultdict
 from typing import Callable, Dict, List, Optional, Tuple  # noqa: F401
 
 import win32wnet
-from six import iteritems
 
-from ... import AgentCheck, is_affirmative
-from ...utils.containers import hash_mutable
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.containers import hash_mutable
 
 try:
     from .winpdh import DATA_TYPE_DOUBLE, DATA_TYPE_INT, WinPDHCounter
@@ -171,7 +170,7 @@ class PDHBaseCheck(AgentCheck):
     def do_refresh_counters(self):
         if self.refresh_counters:
             self.log.debug('Refreshing counters')
-            for counter, values in list(iteritems(self._missing_counters)):
+            for counter, values in self._missing_counters.items():
                 self._make_counters(counter_data=([counter], values))
 
     def get_counter_values(self, counterobj):
@@ -187,7 +186,7 @@ class PDHBaseCheck(AgentCheck):
         for inst_name, dd_name, metric_func, counterobj in self._metrics[self.instance_hash]:
             try:
                 vals = self.get_counter_values(counterobj)
-                for instance_name, val in iteritems(vals):
+                for instance_name, val in vals.items():
                     tags = list(self._tags.get(self.instance_hash, []))  # type: List[str]
 
                     if not counterobj.is_single_instance():

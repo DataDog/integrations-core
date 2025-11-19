@@ -2,14 +2,15 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fff4d15b-0953-41c9-8139-ef0a8d718d93",
   "app_id": "aws-neuron",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor the performance and usage of AWS Neuron and the Inferentia/Trainium hardware.",
-    "title": "AWS Neuron",
+    "description": "Monitor the performance and usage of AWS Inferentia/Trainium instances and the Neuron SDK.",
+    "title": "AWS Inferentia and AWS Trainium Monitoring",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",

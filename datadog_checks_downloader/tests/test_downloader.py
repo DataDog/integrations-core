@@ -53,6 +53,15 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-dd-cluster-agent",  # excluding this since actual integration is called `datadog-cluster-agent`
     "datadog-kubernetes",  # excluding this since `kubernetes` check is Agent v5 only
     "datadog-go-metro",  # excluding this since `go-metro` check is Agent v5 only
+    "datadog-agent-metrics",  # excluding this since `agent-metrics` check is Agent v5 only
+    "datadog-amazon-kafka",  # excluding this since `amazon-kafka` wasn't an official release
+    "datadog-tokumx",  # excluding this since `tokumx` was dropped in py3
+    "datadog-ntp",  # excluding this since `ntp` was Agent 5 only
+]
+
+EXCLUDED_LOG_INTEGRATIONS = [
+    # Temporary exclusion until we re-release the integration or come up with a better solution.
+    "datadog-zeek",  # log only integration released by Florent. Will fail until we re-release it.
 ]
 
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.
@@ -153,8 +162,8 @@ def test_non_datadog_distribution():
     [
         (
             "datadog-active-directory",
-            "1.10.0",
-            "simple/datadog-active-directory/datadog_active_directory-1.10.0-py2.py3-none-any.whl",
+            "4.0.0",
+            "simple/datadog-active-directory/datadog_active_directory-4.0.0-py2.py3-none-any.whl",
         ),
     ],
 )
@@ -212,7 +221,7 @@ def test_local_dir_download(capfd, local_dir, distribution_name, distribution_ve
 @pytest.mark.parametrize(
     "distribution_name,distribution_version",
     [
-        ("datadog-active-directory", "1.10.0"),
+        ("datadog-active-directory", "4.0.0"),
     ],
 )
 def test_local_expired_metadata_error(distribution_name, distribution_version):
@@ -250,7 +259,7 @@ def test_local_unreachable_repository():
 @pytest.mark.parametrize(
     "distribution_name,distribution_version",
     [
-        ("datadog-active-directory", "1.10.0"),
+        ("datadog-active-directory", "4.0.0"),
     ],
 )
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
@@ -287,12 +296,12 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
 def test_local_tampered_target_triggers_failure():
     distribution_name = "datadog-active-directory"
-    distribution_version = "1.10.0"
+    distribution_version = "4.0.0"
 
     def tamper(repo_dir):
         """Modify the target that we want to download."""
         files_to_change = (repo_dir / 'targets' / 'simple' / 'datadog-active-directory').glob(
-            '*.datadog_active_directory-1.10.0-*.whl'
+            '*.datadog_active_directory-4.0.0-*.whl'
         )
 
         for path in files_to_change:
@@ -319,7 +328,7 @@ def test_local_tampered_target_triggers_failure():
 def test_local_download_non_existing_package():
     """Test local verification of a wheel file."""
 
-    with local_http_server("datadog-active-directory-1.10.0".format()) as http_url:
+    with local_http_server("datadog-active-directory-4.0.0".format()) as http_url:
         argv = [
             "datadog-a-nonexisting",
             "--version",
@@ -450,7 +459,7 @@ def test_downloader():
         if not match:
             continue
         integration_name = match.group(1)
-        if integration_name in EXCLUDED_INTEGRATIONS:
+        if integration_name in EXCLUDED_INTEGRATIONS + EXCLUDED_LOG_INTEGRATIONS:
             continue
         if integration_name not in integrations_metadata:
             raise Exception(

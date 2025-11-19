@@ -9,6 +9,8 @@ This integration monitors the health and performance of [Teleport][1] through th
 - Cluster logs into patterns for faster investigation of abnormal infrastructure access, such as a high number of failed logins or attempts to access as many resources as possible in a short period of time.
 
 
+**Minimum Agent version:** 7.54.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -24,7 +26,7 @@ The Teleport check gathers Teleport's metrics and performance data using two dis
 - The [Health endpoint](https://goteleport.com/docs/management/diagnostics/monitoring/#healthz) provides the overall health status of your Teleport instance.
 - The [OpenMetrics endpoint](https://goteleport.com/docs/reference/metrics/#auth-service-and-backends) extracts metrics on the Teleport instance and the various services operating within that instance.
 
-These endpoints aren't activated by default. To enable the diagnostic HTTP endpoints in your Teleport instance, please refer to the public Teleport [documentation](https://goteleport.com/docs/management/diagnostics/monitoring/#enable-health-monitoring).
+These endpoints aren't activated by default. To enable the diagnostic HTTP endpoints in your Teleport instance, please refer to the public Teleport [documentation](https://goteleport.com/docs/admin-guides/management/diagnostics/monitoring/).
 
 ### Configuration
 
@@ -49,8 +51,8 @@ These endpoints aren't activated by default. To enable the diagnostic HTTP endpo
      - type: file
        path: /var/log/teleport/teleport.log
        source: teleport
-       service: telepor-service
-      log_processing_rules:
+       service: teleport-service
+       log_processing_rules:
          - type: multi_line
          name: logs_start_with_date
          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
@@ -87,7 +89,7 @@ Additional helpful documentation, links, and articles:
 Need help? Contact [Datadog support][9].
 
 [1]: https://goteleport.com/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/teleport/datadog_checks/teleport/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

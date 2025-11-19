@@ -1,0 +1,6 @@
+services:
+
+  quarkus-app:
+    build: micrometer-quickstart
+    ports:
+      - "8080:8080"

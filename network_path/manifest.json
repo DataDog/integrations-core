@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "3913cf32-d869-4852-beda-9e3e9d9e2feb",
   "app_id": "network-path",
+  "owner": "cloud-network-monitoring",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -13,6 +14,7 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
+      "Supported OS::Windows",
       "Category::Network",
       "Offering::Integration"
     ]

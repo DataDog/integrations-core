@@ -8,7 +8,9 @@ The SQL Server integration tracks the performance of your SQL Server instances. 
 
 Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (DBM) for enhanced insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
-All editions of SQL Server 2012 and above are supported.
+SQL Server 2012, 2014, 2016, 2017, 2019, and 2022 are supported.
+
+**Minimum Agent version:** 6.0.0
 
 ## Setup
 
@@ -34,6 +36,7 @@ Proceed with the following steps in this guide only if you are installing the st
 
     ```SQL
         CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
+        USE master;
         CREATE USER datadog FOR LOGIN datadog;
         GRANT SELECT on sys.dm_os_performance_counters to datadog;
         GRANT VIEW SERVER STATE to datadog;
@@ -69,13 +72,15 @@ To configure this check for an Agent running on a host:
      - host: "<SQL_HOST>,<SQL_PORT>"
        username: datadog
        password: "<YOUR_PASSWORD>"
-       connector: odbc # alternative is 'adodbapi'
-       driver: SQL Server
+       connector: adodbapi 
+       adoprovider: MSOLEDBSQL19  # Replace with MSOLEDBSQL for versions 18 and previous
    ```
 
     If you use port autodiscovery, use `0` for `SQL_PORT`. See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
+    
+    Use [supported drivers][25] based on your SQL Server setup.
 
-    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL19` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. If you're using `MSOLEDBSQL` version 18 or lower, set the `adoprovider` variable to `MSOLEDBSQL` instead. It is also possible to use the Windows Authentication and not specify the username/password with:
+    **Note**: It is also possible to use the Windows Authentication and not specify the username/password with:
 
       ```yaml
       connection_string: "Trusted_Connection=yes"
@@ -199,7 +204,7 @@ This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and ab
 - [Optimize SQL Server performance with Datadog Database Monitoring][24]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard_02_2024.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-server-permissions-transact-sql?view=sql-server-ver15
 [4]: https://docs.microsoft.com/en-us/sql/tools/configuration-manager/tcp-ip-properties-ip-addresses-tab
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -222,3 +227,4 @@ This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and ab
 [22]: https://www.datadoghq.com/blog/sql-server-metrics
 [23]: https://www.datadoghq.com/blog/migrate-sql-workloads-to-azure-with-datadog/
 [24]: https://www.datadoghq.com/blog/optimize-sql-server-performance-with-datadog/
+[25]: https://docs.datadoghq.com/database_monitoring/setup_sql_server/selfhosted/#supported-drivers

@@ -10,16 +10,12 @@ from math import isinf, isnan
 
 import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
-from six import PY3, iteritems, itervalues
 
-from ...config import is_affirmative
-from ...utils.http import RequestsWrapper
-from ...utils.prometheus import metrics_pb2
-from .. import AgentCheck
-from ..libs.prometheus import text_fd_to_metric_families
-
-if PY3:
-    long = int
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.prometheus import metrics_pb2
 
 
 class PrometheusFormat:
@@ -276,11 +272,11 @@ class PrometheusScraperMixin(object):
         """
         metric_name = '{}_{}'.format(_m, metric_suffix)
         expected_labels = {
-            (k, v) for k, v in iteritems(_metric["labels"]) if k not in PrometheusScraperMixin.UNWANTED_LABELS
+            (k, v) for k, v in _metric["labels"].items() if k not in PrometheusScraperMixin.UNWANTED_LABELS
         }
         for elt in messages[metric_name]:
             current_labels = {
-                (k, v) for k, v in iteritems(elt["labels"]) if k not in PrometheusScraperMixin.UNWANTED_LABELS
+                (k, v) for k, v in elt["labels"].items() if k not in PrometheusScraperMixin.UNWANTED_LABELS
             }
             # As we have two hashable objects we can compare them without any side effects
             if current_labels == expected_labels:
@@ -307,7 +303,7 @@ class PrometheusScraperMixin(object):
             # in the case of quantiles and buckets, they need to be grouped by labels
             if obj_map[_m] in ['summary', 'histogram'] and len(_obj.metric) > 0:
                 _label_exists = False
-                _metric_minus = {k: v for k, v in list(iteritems(_metric['labels'])) if k not in ['quantile', 'le']}
+                _metric_minus = {k: v for k, v in _metric['labels'].items() if k not in ['quantile', 'le']}
                 _metric_idx = 0
                 for mls in _obj.metric:
                     _tmp_lbl = {idx.name: idx.value for idx in mls.label}
@@ -327,13 +323,13 @@ class PrometheusScraperMixin(object):
                 _g.gauge.value = float(_metric['value'])
             elif obj_map[_m] == 'summary':
                 if '{}_count'.format(_m) in messages:
-                    _g.summary.sample_count = long(self.get_metric_value_by_labels(messages, _metric, _m, 'count'))
+                    _g.summary.sample_count = int(self.get_metric_value_by_labels(messages, _metric, _m, 'count'))
                 if '{}_sum'.format(_m) in messages:
                     _g.summary.sample_sum = self.get_metric_value_by_labels(messages, _metric, _m, 'sum')
             # TODO: see what can be done with the untyped metrics
             elif obj_map[_m] == 'histogram':
                 if '{}_count'.format(_m) in messages:
-                    _g.histogram.sample_count = long(self.get_metric_value_by_labels(messages, _metric, _m, 'count'))
+                    _g.histogram.sample_count = int(self.get_metric_value_by_labels(messages, _metric, _m, 'count'))
                 if '{}_sum'.format(_m) in messages:
                     _g.histogram.sample_sum = self.get_metric_value_by_labels(messages, _metric, _m, 'sum')
             # last_metric = len(_obj.metric) - 1
@@ -350,7 +346,7 @@ class PrometheusScraperMixin(object):
                     # _q = _obj.metric[last_metric].histogram.bucket.add()
                     _q = _g.histogram.bucket.add()
                     _q.upper_bound = float(_metric['labels'][lbl])
-                    _q.cumulative_count = long(float(_metric['value']))
+                    _q.cumulative_count = int(float(_metric['value']))
                 else:
                     # labels deduplication
                     is_in_labels = False
@@ -374,7 +370,7 @@ class PrometheusScraperMixin(object):
                 self._dry_run = False
             elif not self._watched_labels:
                 # build the _watched_labels set
-                for val in itervalues(self.label_joins):
+                for val in self.label_joins.values():
                     self._watched_labels.add(val['label_to_match'])
 
             for metric in self.parse_metric_family(response):
@@ -383,7 +379,7 @@ class PrometheusScraperMixin(object):
             # Set dry run off
             self._dry_run = False
             # Garbage collect unused mapping and reset active labels
-            for metric, mapping in list(iteritems(self._label_mapping)):
+            for metric, mapping in self._label_mapping.items():
                 for key in list(mapping):
                     if key not in self._active_label_mapping[metric]:
                         del self._label_mapping[metric][key]
@@ -565,7 +561,7 @@ class PrometheusScraperMixin(object):
             headers['Accept-Encoding'] = 'gzip'
         if pFormat == PrometheusFormat.PROTOBUF:
             headers['accept'] = (
-                'application/vnd.google.protobuf; ' 'proto=io.prometheus.client.MetricFamily; ' 'encoding=delimited'
+                'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
             )
         handler = self.get_http_handler(endpoint, instance)
         if (
@@ -573,7 +569,7 @@ class PrometheusScraperMixin(object):
             and not handler.ignore_tls_warning
             and not is_affirmative(handler.options.get('ssl_verify', True))
         ):
-            self.log.warning(u'An unverified HTTPS request is being made to %s', endpoint)
+            self.log.debug('An unverified HTTPS request is being made to %s', endpoint)
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)

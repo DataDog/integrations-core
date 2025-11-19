@@ -12,13 +12,18 @@ defaults:
     shell: bash
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
   CHECK_SCRIPT: "ddev/src/ddev/utils/scripts/check_pr.py"
+  WARN_MAJOR_UPDATE_MESSAGE: "⚠️ **Major version bump**\nThe changelog type `changed` or `removed` was used in this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `fixed` or `added` type instead."
 
 jobs:
   check:
     name: Check PR
     runs-on: ubuntu-22.04
+
+    permissions:
+      pull-requests: write # For the "Comment" step, read for the "Fetch script" and "Check changelog" steps
+      contents: read # For the "Fetch diff" and "Check changelog" steps
 
     steps:
     # Uncomment for testing purposes
@@ -28,7 +33,7 @@ jobs:
     #     ref: "${{ github.event.pull_request.head.sha }}"
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
@@ -59,7 +64,8 @@ jobs:
         ${{ github.event.pull_request.base.repo.private && '--private' || '' }}
         --repo "${{ inputs.repo }}"
 
-    - uses: dorny/paths-filter@v2
+    - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      # Make sure to update the list of allowed actions in the repo's settings when you bump the hash.
       id: changes
       with:
         filters: |
@@ -68,11 +74,17 @@ jobs:
             - '*/changelog.d/*.removed'
             - '*/changelog.d/*.major'
 
-    - name: Comment
+    - name: Check for major version bump comment
       if: ${{ steps.changes.outputs.major_bump_fragments == 'true' }}
-      uses: actions/github-script@v7
+      id: find_comment
+      uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
-          github.rest.issues.createComment({ issue_number, owner, repo, body: "The changelog type `changed` or `removed` was used in this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `fixed` or `added` type instead." });
+        issue-number: ${{ github.event.pull_request.number }}
+        body-includes: ${{ env.WARN_MAJOR_UPDATE_MESSAGE }}
+
+    - name: Comment
+      if: ${{ steps.changes.outputs.major_bump_fragments == 'true' && steps.find_comment.outputs.comment-id == '' }}
+      uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: ${{ env.WARN_MAJOR_UPDATE_MESSAGE }}

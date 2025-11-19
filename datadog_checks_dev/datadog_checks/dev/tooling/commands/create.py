@@ -8,15 +8,16 @@ from datetime import date
 
 import click
 
-from ...fs import resolve_path
-from ..constants import get_root
-from ..create import (
+from datadog_checks.dev.fs import resolve_path
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.create import (
     construct_template_fields,
     create_template_files,
     get_valid_templates,
     prefill_template_fields_for_check_only,
 )
-from ..utils import kebab_case_name, normalize_package_name
+from datadog_checks.dev.tooling.utils import kebab_case_name, normalize_display_name, normalize_package_name
+
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
@@ -190,6 +191,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             author = manifest.get("author", {}).get("name")
             if author is None:
                 abort("Unable to determine author from manifest")
+            author = normalize_display_name(author)
             integration_dir_name = integration_dir_name.removeprefix(f"{author}_")
     else:
         if os.path.exists(integration_dir):
@@ -233,9 +235,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             # Fill in all common non Marketplace fields
             template_fields['pricing_plan'] = ''
             if repo_choice in ['core', 'integrations-internal-core']:
-                template_fields[
-                    'author_info'
-                ] = """
+                template_fields['author_info'] = """
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
@@ -245,9 +245,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             else:
                 prompt_and_update_if_missing(template_fields, 'email', 'Email used for support requests')
                 prompt_and_update_if_missing(template_fields, 'author', 'Your name')
-                template_fields[
-                    'author_info'
-                ] = f"""
+                template_fields['author_info'] = f"""
   "author": {{
     "support_email": "{template_fields['email']}",
     "name": "{template_fields['author']}",

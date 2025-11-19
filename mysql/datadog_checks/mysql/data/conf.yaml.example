@@ -64,6 +64,33 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
+    ## @param exclude_hostname - boolean - optional - default: false
+    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+    #
+    # exclude_hostname: false
+
+    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## - mysql_sock: The socket path of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
+
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
     ## If you specify a socket you dont need to specify a host.
@@ -128,51 +155,48 @@ instances:
     ## Each query must have 2 fields, and can have a third optional field:
     ##
     ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-    ##            Use the pipe `|` if you require a multi-line script.
+    ##     Use the pipe `|` if you require a multi-line script.
     ## 2. columns - The list representing each column, ordered sequentially from left to right.
-    ##              The number of columns must equal the number of columns returned in the query.
-    ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is a `tag` type, this column is
-    ##                          considered a tag and applied to every
-    ##                          metric collected by this particular query.
-    ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to the following `tag` types to
-    ##                          tag each metric in the row with the name and value
-    ##                          of the item in this column:
-    ##                           i. tag           - This is the default tag type
-    ##                           ii. tag_list     - This allows multiple values to be attached
-    ##                                             to the tag name. For example: 
-    ##
-    ##                                             query = {
-    ##                                               "name": "example",
-    ##                                               "query": "...",
-    ##                                               "columns": [
-    ##                                                 {"name": "server_tag", "type": "tag_list"},
-    ##                                                 {"name": "foo", "type": "gauge"},
-    ##                                               ]
-    ##                                             }
-    ##
-    ##                                             May result in:
-    ##                                             gauge("foo", tags=[
-    ##                                                                 "server_tag:us",
-    ##                                                                 "server_tag:primary",
-    ##                                                                 "server_tag:default"
-    ##                                                               ])
-    ##                                             gauge("foo", tags=["server_tag:eu"])
-    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
-    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
-    ##                          You can use the `count` type to perform aggregation
-    ##                          for queries that return multiple rows with the same or no tags.
-    ##              Columns without a name are ignored. To skip a column, enter:
-    ##                - {}
+    ##     The number of columns must equal the number of columns returned in the query.
+    ##     There are 2 required pieces of data:
+    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
+    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
+    ##           to every metric collected by this particular query.
+    ##       2. type - The submission method (gauge, monotonic_count, etc.).
+    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
+    ##           and value of the item in this column:
+    ##             1. tag - This is the default tag type
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##                 ```
+    ##                 query = {
+    ##                   "name": "example",
+    ##                   "query": "...",
+    ##                   "columns": [
+    ##                     {"name": "server_tag", "type": "tag_list"},
+    ##                     {"name": "foo", "type": "gauge"},
+    ##                   ]
+    ##                 }
+    ##                 ```
+    ##                 May result in:
+    ##                 ```
+    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
+    ##                 gauge("foo", tags=["server_tag:eu"])
+    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                 ```
+    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
+    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
+    ##           the same or no tags.
+    ##     Columns without a name are ignored. To skip a column, enter:
+    ##     ```
+    ##       - {}
+    ##     ```
     ## 3. tags (optional) - A list of tags to apply to each metric.
     ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
     ##     If collection_interval is not set, the query will be run every check run.
-    ##     If the collection interval is less than check collection interval, 
-    ##     the query will be run every check run.
-    ##     If the collection interval is greater than check collection interval, 
-    ##     the query will NOT BE RUN exactly at the collection interval.
+    ##     If the collection interval is less than check collection interval, the query will be run every check
+    ##     run.
+    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
+    ##     exactly at the collection interval.
     ##     The query will be run at the next check run after the collection interval has passed.
     ## 5. metric_prefix (optional) - The prefix to apply to each metric.
     #
@@ -259,11 +283,6 @@ instances:
         ## If using multiple sources, set the channel name to monitor.
         #
         # replication_channel: <REPLICATION_CHANNEL>
-
-        ## @param replication_non_blocking_status - boolean - optional - default: false
-        ## Set to `true` to grab slave count in a non-blocking manner (requires `performance_schema`);
-        #
-        # replication_non_blocking_status: false
 
         ## @param galera_cluster - boolean - optional - default: false
         ## Set to `true` to collect Galera cluster metrics.
@@ -368,16 +387,65 @@ instances:
     #
     # collect_settings:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of performance_schema.global_variables. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the database settings collection interval (in seconds). Each collection involves a single query to
         ## `performance_schema.global_variables`.
         #
         # collection_interval: 600
+
+    ## Configure collection of schemas (databases).
+    ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 60
+        ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
+        ## Capped by `collect_schemas.collection_interval`
+        #
+        # max_execution_time: 60
+
+    ## DEPRECATED: Use `collect_schemas` instead.
+    ## Configure collection of schemas (databases).
+    ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.69.0
+    ## Migration: Use `collect_schemas` instead.
+    #
+    # schemas_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 60
+        ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
+        ## Capped by `schemas_collection.collection_interval`
+        #
+        # max_execution_time: 60
 
     ## Configure collection of query metrics
     #
@@ -394,6 +462,13 @@ instances:
         ## check instance. Running different instances with different collection intervals is not supported.
         #
         # collection_interval: 10
+
+        ## @param only_query_recent_statements - boolean - optional - default: false
+        ## Enable querying only for statements that have been run since last collection. This may improve agent
+        ## performance and reduce database load. Enabling this option should not alter the total number of query
+        ## metrics available.
+        #
+        # only_query_recent_statements: false
 
     ## Configure collection of query samples
     #
@@ -487,10 +562,33 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the activity collection interval (in seconds).
+        ## @param collect_blocking_queries - boolean - optional - default: false
+        ## Enable collection of blocking queries.
         #
-        # collection_interval: 10
+        # collect_blocking_queries: false
+
+    ## Configure collection of index metrics.
+    ## Metrics provided by the options:
+    ##   - mysql.index.size (per index)
+    ##   - mysql.index.reads (per index)
+    ##   - mysql.index.updates (per index)
+    ##   - mysql.index.deletes (per index)
+    ## Note that the index size metric requires the user defined for this instance to have
+    ## SELECT privileges. Take a look at
+    ## https://docs.datadoghq.com/integrations/mysql/?tab=host#prepare-mysql for further instructions.
+    #
+    # index_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of index metrics.
+        #
+        # enabled: true
+
+        ## @param limit - integer - optional - default: 1000
+        ## Set the maximum number of unique (by combination of database, table, and index name)
+        ## indexes to collect. Defaults to 1000.
+        #
+        # limit: 1000
 
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
@@ -510,6 +608,32 @@ instances:
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
         #
         # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+        ## @param region - string - optional - default: us-east-1
+        ## Equal to the region of the instance the agent is connecting to.
+        ## This value is used to configure IAM authentication.
+        #
+        # region: us-east-1
+
+        ## @param managed_authentication - mapping - optional
+        ## Configure section used for AWS IAM Authentication with RDS.
+        ##
+        ## This supports using IAM database authentication to connect to your database instance.
+        ##
+        ## For more information on configuration, see
+        ## https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+        ##
+        ## For more information on RDS IAM Authentication, see the AWS docs
+        ## https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
+        ##
+        ## To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
+        ## If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+        ## `aws.region` is required to enable IAM Authentication.
+        ##
+        ## Optionally, you can set `aws.managed_authentication.role_arn` to specify the IAM role ARN.
+        ## This can be used to perform cross-account authentication.
+        #
+        # managed_authentication: {}
 
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
@@ -609,6 +733,8 @@ instances:
         ## @param collect_comments - boolean - optional - default: true
         ## Set to `false` to disable the collection of comments in your SQL statements.
         ## Requires `collect_metadata: true`.
+        ## Note: This option must be `true` in order to correlate Database Monitoring samples and APM traces.
+        ## See https://docs.datadoghq.com/database_monitoring/connect_dbm_and_apm
         #
         # collect_comments: true
 

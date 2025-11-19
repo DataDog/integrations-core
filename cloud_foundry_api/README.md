@@ -4,6 +4,8 @@
 
 This check queries the [Cloud Foundry API][1] to collect audit events and send them to Datadog through the Agent.
 
+**Minimum Agent version:** 7.23.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -44,7 +46,7 @@ Need help? Contact [Datadog support][9].
 
 [1]: http://v3-apidocs.cloudfoundry.org
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/cloud_foundry_api/datadog_checks/cloud_foundry_api/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

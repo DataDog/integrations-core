@@ -5,6 +5,12 @@ on:
     paths-ignore:
     - datadog_checks_base/datadog_checks/**
     - datadog_checks_dev/datadog_checks/dev/*.py
+  merge_group:
+    # We require this workflow to pass in order to merge a PR to master.
+    # This means Github's Merge Queue also requires it to pass.
+    # We must add the Merge Queue trigger in this configuration, otherwise Merge Queue
+    # times out waiting for this check that never triggers.
+    types: [checks_requested]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
@@ -16,3 +22,9 @@ jobs:
     with:
       repo: core
     secrets: inherit
+
+    permissions:
+       # needed for codecov in pr-test.yml, allows the action to get a JWT signed by Github
+       id-token: write
+       # needed for compute-matrix in test-target.yml
+       contents: read

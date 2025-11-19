@@ -59,6 +59,7 @@ class InstanceConfig(BaseModel):
     file_system_exclude: Optional[tuple[str, ...]] = None
     file_system_include: Optional[tuple[str, ...]] = None
     include_all_devices: Optional[bool] = None
+    lowercase_device_tag: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     min_disk_size: Optional[float] = None

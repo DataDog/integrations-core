@@ -1,0 +1,19 @@
+# Krakend Traffic Generator Configuration
+#
+# This file contains the request probabilities for different endpoints.
+# You can modify these values while the traffic generator is running,
+# and the changes will be picked up automatically every 5 seconds.
+#
+# Probabilities should be between 0.0 and 1.0
+# Higher values mean the endpoint will be called more frequently
+
+request_probabilities:
+  /api/valid: 0.75              # Successful requests
+  /api/invalid: 0.05            # Invalid requests
+  /api/timeout: 0.05            # Timeout scenarios
+  /api/no-content-length: 0.05  # Edge case scenarios
+  /api/not-found: 0.05          # 404 errors
+  /api/cancelled: 0.05          # Cancelled requests
+
+# Configuration reload interval in seconds
+reload_interval: 5

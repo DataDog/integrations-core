@@ -25,7 +25,6 @@ def test_generate_new_files_check_licenses(repo, expect_licenses):
     runner = CliRunner()
 
     with runner.isolated_filesystem():
-
         # Generate the check structure
         working_repo = 'integrations-{}'.format(repo)
         shutil.copytree(
@@ -68,7 +67,6 @@ def test_validate_config_models_not_in_sync(repo, expect_failure):
     runner = CliRunner()
 
     with runner.isolated_filesystem():
-
         # Generate the check structure
         working_repo = 'integrations-{}'.format(repo)
         shutil.copytree(
@@ -111,7 +109,6 @@ def test_validate_no_config_models(repo, expect_failure):
     runner = CliRunner()
 
     with runner.isolated_filesystem():
-
         # Generate the check structure
         working_repo = 'integrations-{}'.format(repo)
         shutil.copytree(

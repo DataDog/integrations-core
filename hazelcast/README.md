@@ -4,6 +4,8 @@
 
 This check monitors [Hazelcast][1] v4.0+.
 
+**Minimum Agent version:** 7.19.0
+
 ## Setup
 
 ### Installation
@@ -168,7 +170,7 @@ Need help? Contact [Datadog support][5].
 
 
 [1]: https://hazelcast.org
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/datadog_checks/hazelcast/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java/
 [5]: https://docs.datadoghq.com/help/

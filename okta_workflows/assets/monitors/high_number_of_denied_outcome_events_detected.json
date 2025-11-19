@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-12-23",
+	"last_updated_at": "2024-12-23",
+	"title": "High Number of Denied Outcome Events Detected",
+	"description": "Denied outcome events in Okta Workflows show blocked or rejected requests, disrupting workflow execution and operations. This monitor tracks such events to identify issues and ensure smooth processes. Immediate action is advised to address the root cause.",
+	"definition": {
+		"id": 159650626,
+		"name": "High Number of Denied Outcome Events Detected",
+		"type": "log alert",
+		"query": "logs(\"source:okta-workflows service:workflows @evt.outcome:DENY @evt.name:workflows.*\").index(\"*\").rollup(\"cardinality\", \"@log.uuid\").last(\"1h\") > 50",
+		"message": "{{#is_alert}}\nDenied outcome events for Okta Workflows indicates that a large number of requests are being blocked or rejected. It impacts workflow execution, potentially leading to operational disruptions and access issues. \n\nHigh number of denied outcome events detected in Okta Workflows. Immediate investigation is recommended to identify the root cause and restore optimal workflow performance.\n{{/is_alert}}",
+		"tags": [
+			"integration:okta-workflows"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 50
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:okta-workflows"
+	]
+}

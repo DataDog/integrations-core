@@ -17,7 +17,7 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
@@ -73,7 +73,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         self.log = check.log
         self._config = config
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         collection_interval = float(
             self._config.procedure_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -148,17 +147,18 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         rows = rows[:max_queries]
         return {
-            'host': self._check.resolved_hostname,
+            'host': self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
-            'tags': self.tags,
-            'cloud_metadata': self._config.cloud_metadata,
+            'cloud_metadata': self._check.cloud_metadata,
             'kind': 'procedure_metrics',
             'sqlserver_rows': rows,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
-            'ddagenthostname': self._check.agent_hostname,
+            'service': self._config.service,
+            'tags': self._check.tag_manager.get_tags(),
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)

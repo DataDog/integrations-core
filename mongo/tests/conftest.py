@@ -130,6 +130,7 @@ def instance_integration(instance_custom_queries):
     instance["collections"] = ["foo", "bar"]
     instance["collections_indexes_stats"] = True
     instance["add_node_tag_to_events"] = False
+    instance["service"] = "my_service"
     return instance
 
 
@@ -139,6 +140,7 @@ def instance_integration_autodiscovery(instance_integration):
     instance["database_autodiscovery"] = {
         "enabled": True,
     }
+    instance.pop("collections", None)
     return instance
 
 
@@ -173,9 +175,11 @@ def mock_pymongo(deployment):
         new_callable=mock.PropertyMock,
     ) as mock_is_localhost:
         mock_is_localhost.return_value = False
-        with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
-            'pymongo.collection.Collection'
-        ), mock.patch('pymongo.command_cursor') as cur:
+        with (
+            mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)),
+            mock.patch('pymongo.collection.Collection'),
+            mock.patch('pymongo.command_cursor') as cur,
+        ):
             cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
             yield mocked_client
 

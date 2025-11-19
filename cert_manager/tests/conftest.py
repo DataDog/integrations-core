@@ -20,14 +20,13 @@ PORT = 9402
 
 
 def setup_cert_manager():
-
     # Deploy Cert Manager
     run_command(
         [
             "kubectl",
             "apply",
             "-f",
-            "https://github.com/jetstack/cert-manager/releases/download/v1.5.0/cert-manager.yaml",
+            "https://github.com/jetstack/cert-manager/releases/download/v1.6.0/cert-manager.yaml",
         ]
     )
     run_command(

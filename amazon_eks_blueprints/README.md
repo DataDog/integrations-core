@@ -90,7 +90,7 @@ Monitoring EKS requires that you set up one of the following Datadog integration
 
 - [Kubernetes][4]
 - [AWS][5]
-- [AWS EC2][6]
+- [Amazon EC2][6]
 
 Also set up the integrations for any other AWS services that you are running with EKS, such as [ELB][3].
 

@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "Failed capture detected due to a rejection by the card scheme",
+	"description": "This monitor tracks and alerts for failed captures caused by a rejection from the card scheme. These failures occur when payments cannot be secured, typically due to issues with the card issuer or network, and require prompt investigation to prevent payment processing disruptions.",
+	"definition": {
+		"id": 154282075,
+		"name": "Failed capture detected due to a rejection by the card scheme",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:transaction @evt.name:CAPTURE_FAILED\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
+		"message": "{{#is_alert}}\nFailed capture due to card scheme refers to a failure in the transaction capture process, where the payment from the customer's card could not be secured, typically due to problems with the card issuer or network.\n\nThis requires prompt investigation (pspReference:{{log.attributes.pspReference}}) to avoid disruption in payment processing.\n{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:transaction"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}

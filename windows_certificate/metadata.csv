@@ -1,0 +1,6 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+windows_certificate.crl_days_remaining,gauge,,day,,Days until certificate revocation list (CRL) expiration,1,windows_certificate_store,Days until expiration,,
+
+windows_certificate.days_remaining,gauge,,day,,Days until certificate expiration,1,windows_certificate_store,Days until expiration,,
+
+

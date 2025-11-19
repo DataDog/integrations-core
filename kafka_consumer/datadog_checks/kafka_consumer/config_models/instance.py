@@ -46,6 +46,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     close_admin_client: Optional[bool] = None
+    collect_consumer_group_state: Optional[bool] = None
     consumer_groups: Optional[MappingProxyType[str, Any]] = None
     consumer_groups_regex: Optional[MappingProxyType[str, Any]] = None
     consumer_queued_max_messages_kbytes: Optional[int] = None
@@ -71,6 +72,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_crlfile: Optional[str] = None
     tls_private_key: Optional[str] = None
     tls_private_key_password: Optional[str] = None

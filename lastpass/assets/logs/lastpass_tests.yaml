@@ -11,8 +11,11 @@ tests:
       }
     result:
       custom:
+        Action: "Remove from group"
         Data: "'Group3' 'cdd@test.com'"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         evt:
           name: "Remove from group"
         group:
@@ -20,8 +23,33 @@ tests:
           name: "Group3"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 4
+          activity_name: "Remove User"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Group Management"
+          class_uid: 3006
+          group:
+            name: "Group3"
+          message: "Remove from group"
+          metadata:
+            event_code: "Remove from group"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 300604
+          user:
+            email_addr: "cdd@test.com"
+            name: "cdd@test.com"
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -47,8 +75,11 @@ tests:
       }
     result:
       custom:
+        Action: "Adding user to group"
         Data: "cdd@test.com - Group3"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         evt:
           name: "Adding user to group"
         group:
@@ -56,8 +87,33 @@ tests:
           name: "Group3"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 3
+          activity_name: "Add User"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Group Management"
+          class_uid: 3006
+          group:
+            name: "Group3"
+          message: "Adding user to group"
+          metadata:
+            event_code: "Adding user to group"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 300603
+          user:
+            email_addr: "cdd@test.com"
+            name: "cdd@test.com"
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -83,14 +139,43 @@ tests:
       }
     result:
       custom:
+        Action: "Add to shared folder"
         Data: "'shared by name1' 'cdd@test.com'"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         evt:
           name: "Add to shared folder"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 1
+          activity_name: "Create"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Add to shared folder"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Add to shared folder"
+          metadata:
+            event_code: "Add to shared folder"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600301
         shared_folder:
           modified_user: "cdd@test.com"
           name: "shared by name1"
@@ -119,14 +204,43 @@ tests:
       }
     result:
       custom:
+        Action: "Move to shared folder"
         Data: "VID: 4901555952779484761 to Common_DataDog_Creds"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         evt:
           name: "Move to shared folder"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 99
+          activity_name: "Move to shared folder"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Move to shared folder"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Move to shared folder"
+          metadata:
+            event_code: "Move to shared folder"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600399
         shared_folder:
           VID: "4901555952779484761"
           name: "Common_DataDog_Creds"
@@ -155,14 +269,43 @@ tests:
       }
     result:
       custom:
+        Action: "Removed from shared folder"
         Data: "'Testing_data' 'cdd@test.com'"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         evt:
           name: "Removed from shared folder"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 4
+          activity_name: "Delete"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Removed from shared folder"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Removed from shared folder"
+          metadata:
+            event_code: "Removed from shared folder"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600304
         shared_folder:
           modified_user: "cdd@test.com"
           name: "Testing_data"
@@ -191,14 +334,43 @@ tests:
       }
     result:
       custom:
+        Action: "Renamed shared folder"
         Data: "'shared by name1' 'shared by name2'"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         evt:
           name: "Renamed shared folder"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 99
+          activity_name: "Renamed shared folder"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Renamed shared folder"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Renamed shared folder"
+          metadata:
+            event_code: "Renamed shared folder"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600399
         shared_folder:
           name: "shared by name2"
           old_name: "shared by name1"
@@ -227,14 +399,43 @@ tests:
       }
     result:
       custom:
+        Action: "Add policy"
         Data: "Length of site passwords"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         evt:
           name: "Add policy"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 1
+          activity_name: "Create"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Add policy"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Add policy"
+          metadata:
+            event_code: "Add policy"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600301
         policy:
           name: "Length of site passwords"
         timestamp: 1.722921377E12
@@ -256,32 +457,60 @@ tests:
           "Time": "2024-08-06 05:16:17",
           "Username": "abc@test.com",
           "IP_Address": "10.10.10.10",
-          "Action": "Edit policy",
-          "Data": "Length of site passwords New value: test.com=8",
+          "Action": "Remove admin",
+          "Data": "abc1@test.com",
           "timestamp": 1722921377000.0  
       }
     result:
       custom:
-        Data: "Length of site passwords New value: test.com=8"
+        Action: "Remove admin"
+        Data: "abc1@test.com"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         evt:
-          name: "Edit policy"
+          name: "Remove admin"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
-        policy:
-          name: "Length of site passwords"
-          new_values: "test.com=8"
+        ocsf:
+          activity_id: 2
+          activity_name: "Revoke Privileges"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "User Access Management"
+          class_uid: 3005
+          message: "Remove admin"
+          metadata:
+            event_code: "Remove admin"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          privileges:
+            - "ADMIN"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 300502
+          user:
+            name: "abc1@test.com"
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
       message: |-
         {
-          "Action" : "Edit policy",
+          "Action" : "Remove admin",
           "Username" : "abc@test.com",
           "Time" : "2024-08-06 05:16:17",
-          "Data" : "Length of site passwords New value: test.com=8",
+          "Data" : "abc1@test.com",
           "IP_Address" : "10.10.10.10",
           "timestamp" : 1.722921377E12
         }
@@ -298,8 +527,11 @@ tests:
       }
     result:
       custom:
+        Action: "Site added"
         Data: "VID: 5516541713708306640 from SFolder33"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         VID: "5516541713708306640"
         evt:
           name: "Site added"
@@ -307,6 +539,32 @@ tests:
           client:
             geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 1
+          activity_name: "Create"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Site added"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Site added"
+          metadata:
+            event_code: "Site added"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600301
         shared_folder:
           name: "SFolder33"
         timestamp: 1.722921377E12
@@ -334,8 +592,11 @@ tests:
       }
     result:
       custom:
+        Action: "Username changed"
         Data: "VID: 4963227935627314198"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         VID: "4963227935627314198"
         evt:
           name: "Username changed"
@@ -343,6 +604,32 @@ tests:
           client:
             geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 99
+          activity_name: "Username changed"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Account Change"
+          class_uid: 3001
+          message: "Username changed"
+          metadata:
+            event_code: "Username changed"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 300199
+          user:
+            name: "abc@test.com"
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -368,8 +655,11 @@ tests:
       }
     result:
       custom:
+        Action: "Password changed"
         Data: "VID: 4963227935627314198"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         VID: "4963227935627314198"
         evt:
           name: "Password changed"
@@ -377,6 +667,32 @@ tests:
           client:
             geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 3
+          activity_name: "Update"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Password changed"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Password changed"
+          metadata:
+            event_code: "Password changed"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600303
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -396,30 +712,57 @@ tests:
           "Time": "2024-08-06 05:16:17",
           "Username": "abc@test.com",
           "IP_Address": "10.10.10.10",
-          "Action": "Site changed",
-          "Data": "VID: 8129207370202608594",
+          "Action": "Data export",
+          "Data": "",
           "timestamp": 1722921377000.0
       }
     result:
       custom:
-        Data: "VID: 8129207370202608594"
+        Action: "Data export"
+        Data: ""
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
-        VID: "8129207370202608594"
+        Username: "abc@test.com"
         evt:
-          name: "Site changed"
+          name: "Data export"
         network:
           client:
             geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 7
+          activity_name: "Export"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "Web Resources Activity"
+          class_uid: 6001
+          message: "Data export"
+          metadata:
+            event_code: "Data export"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            profiles:
+              - "host"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600107
+          web_resources:
+            - name: "LastPass vault"
+              type: "PASSWORD_MANAGER_VAULT"
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
       message: |-
         {
-          "Action" : "Site changed",
+          "Action" : "Data export",
           "Username" : "abc@test.com",
           "Time" : "2024-08-06 05:16:17",
-          "Data" : "VID: 8129207370202608594",
+          "Data" : "",
           "IP_Address" : "10.10.10.10",
           "timestamp" : 1.722921377E12
         }
@@ -436,8 +779,11 @@ tests:
       }
     result:
       custom:
+        Action: "Deleted sites"
         Data: "VID: 8802943594384138037"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         VID: "8802943594384138037"
         evt:
           name: "Deleted sites"
@@ -445,6 +791,32 @@ tests:
           client:
             geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 4
+          activity_name: "Delete"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Deleted sites"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Deleted sites"
+          metadata:
+            event_code: "Deleted sites"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600304
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -470,8 +842,11 @@ tests:
       }
     result:
       custom:
+        Action: "Log in"
         Data: "VID: 4963227935627314198"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         VID: "4963227935627314198"
         evt:
           name: "Log in"
@@ -479,6 +854,36 @@ tests:
           client:
             geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 1
+          activity_name: "Logon"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Authentication"
+          class_uid: 3002
+          message: "Log in"
+          metadata:
+            event_code: "Log in"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          service:
+            name: "LastPass"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          status: "Success"
+          status_id: 1
+          time: 1.722921377E12
+          type_uid: 300201
+          user:
+            name: "abc@test.com"
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -504,8 +909,11 @@ tests:
       }
     result:
       custom:
+        Action: "Open secure note"
         Data: "Secure Note (VID: 7608813617878138489)"
+        IP_Address: "10.10.10.10"
         Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
         VID: "7608813617878138489"
         evt:
           name: "Open secure note"
@@ -513,6 +921,32 @@ tests:
           client:
             geoip: {}
             ip: "10.10.10.10"
+        ocsf:
+          activity_id: 99
+          activity_name: "Open secure note"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Open secure note"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Open secure note"
+          metadata:
+            event_code: "Open secure note"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600399
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -522,6 +956,75 @@ tests:
           "Username" : "abc@test.com",
           "Time" : "2024-08-06 05:16:17",
           "Data" : "Secure Note (VID: 7608813617878138489)",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
+  - sample: |-
+      {
+          "Action" : "Update folder permissions",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+      }
+    result:
+      custom:
+        Action: "Update folder permissions"
+        Data: "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'"
+        IP_Address: "10.10.10.10"
+        Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
+        evt:
+          name: "Update folder permissions"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        ocsf:
+          activity_id: 3
+          activity_name: "Update"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Update folder permissions"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Update folder permissions"
+          metadata:
+            event_code: "Update folder permissions"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600303
+        shared_folder:
+          modified_user: "cdd@test.com"
+          name: "SF5"
+          permissions:
+            hide_password: "yes"
+            is_admin: "yes"
+            read_only: "yes"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Update folder permissions",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'",
           "IP_Address" : "10.10.10.10",
           "timestamp" : 1.722921377E12
         }

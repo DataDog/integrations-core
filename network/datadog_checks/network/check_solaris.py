@@ -26,7 +26,7 @@ class SolarisNetwork(Network):
             self.log.exception("Error collecting kstat stats.")
 
         try:
-            netstat, _, _ = get_subprocess_output(["netstat", "-s", "-P" "tcp"], self.log)
+            netstat, _, _ = get_subprocess_output(["netstat", "-s", "-P", "tcp"], self.log)
             # TCP: tcpRtoAlgorithm=     4 tcpRtoMin           =   200
             # tcpRtoMax           = 60000 tcpMaxConn          =    -1
             # tcpActiveOpens      =    57 tcpPassiveOpens     =    50

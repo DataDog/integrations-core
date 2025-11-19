@@ -21,7 +21,6 @@ jobs:
       ci: true
       codeowners: true
       config: true
-      dashboards: true
       dep: true
       http: true
       imports: true
@@ -37,6 +36,5 @@ jobs:
       package: true
       readmes: true
       saved-views: true
-      service-checks: true
       version: true
     secrets: inherit

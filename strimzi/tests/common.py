@@ -6,6 +6,7 @@ import os
 from datadog_checks.dev import get_here
 
 STRIMZI_VERSION = os.environ["STRIMZI_VERSION"]
+KUBERNETES_VERSION = os.environ["KUBERNETES_VERSION"]
 HERE = get_here()
 
 MOCKED_CLUSTER_OPERATOR_INSTANCE = {'cluster_operator_endpoint': 'http://cluster-operator:8080/metrics'}
@@ -207,6 +208,7 @@ USER_OPERATOR_METRICS = (
 FLAKY_E2E_METRICS = (
     "strimzi.cluster_operator.reconciliations.failed.count",
     "strimzi.cluster_operator.reconciliations.periodical.count",
+    "strimzi.cluster_operator.reconciliations.locked.count",
     "strimzi.cluster_operator.resources.paused",
     "strimzi.cluster_operator.vertx.http_client.active_connections",
     "strimzi.cluster_operator.vertx.http_client.active_requests",

@@ -35,6 +35,8 @@ DEFAULT_TIMEOUT = 30
 ALLOWED_CUSTOM_METRICS_TYPES = ['gauge', 'rate', 'count', 'monotonic_count']
 ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
 
+MONGODB_SYSTEM_DATABASES = frozenset(["admin", "config", "local"])
+
 
 class HostingType:
     ATLAS = "mongodb-atlas"

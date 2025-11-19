@@ -8,9 +8,8 @@ import os
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
-from copy import copy
+from copy import copy, deepcopy
 from datetime import datetime
-from os import environ
 from threading import Event
 
 import mock
@@ -23,7 +22,7 @@ from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
 
-from .common import CHECK_NAME, HOST, MYSQL_VERSION_PARSED, PORT
+from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -53,16 +52,17 @@ def dbm_instance(instance_complex):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "query,query_signature,expected_query_truncated",
+    "query,query_signature,expected_query_truncated,collect_blocking_queries",
     [
         (
             'SELECT id, name FROM testdb.users FOR UPDATE',
             (
                 '4d09873d44c33af7'
-                if MYSQL_VERSION_PARSED > parse_version('5.7') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+                if MYSQL_VERSION_PARSED > parse_version('5.7') and MYSQL_FLAVOR != 'mariadb'
                 else 'aca1be410fbadb61'
             ),
             StatementTruncationState.not_truncated.value,
+            True,
         ),
         (
             'SELECT id, {} FROM testdb.users FOR UPDATE'.format(
@@ -70,15 +70,20 @@ def dbm_instance(instance_complex):
             ),
             (
                 '4a12d7afe06cf40'
-                if environ.get('MYSQL_FLAVOR') == 'mariadb'
+                if MYSQL_FLAVOR == 'mariadb'
                 else ('da7d6b1e9deb88e' if MYSQL_VERSION_PARSED > parse_version('5.7') else '63bd1fd025c7f7fb')
             ),
             StatementTruncationState.truncated.value,
+            False,
         ),
     ],
 )
-def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
-    check = MySql(CHECK_NAME, {}, [dbm_instance])
+def test_activity_collection(
+    aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated, collect_blocking_queries
+):
+    config = deepcopy(dbm_instance)
+    config['query_activity']['collect_blocking_queries'] = collect_blocking_queries
+    check = MySql(CHECK_NAME, {}, instances=[config])
 
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
 
@@ -113,7 +118,19 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     assert activity['dbm_type'] == 'activity'
     assert activity['ddsource'] == 'mysql'
     assert activity['ddagentversion'], "missing agent version"
-    assert set(activity['ddtags']) == {'tag1:value1', 'tag2:value2', 'port:13306'}
+    expected_tags = (
+        'database_hostname:stubbed.hostname',
+        'database_instance:stubbed.hostname',
+        'tag1:value1',
+        'tag2:value2',
+        'port:13306',
+        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
+    )
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
+        expected_tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            expected_tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')
+    assert sorted(activity['ddtags']) == sorted(expected_tags)
     assert type(activity['collection_interval']) in (float, int), "invalid collection_interval"
 
     assert activity['mysql_activity'], "should have at least one activity row"
@@ -132,9 +149,10 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     # sql text length limits
     expected_sql_text = (
         query[:1021] + '...'
-        if len(query) > 1024
-        and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
-        else query[:4093] + '...' if len(query) > 4096 else query
+        if len(query) > 1024 and (MYSQL_VERSION_PARSED == parse_version('5.6') or MYSQL_FLAVOR == 'mariadb')
+        else query[:4093] + '...'
+        if len(query) > 4096
+        else query
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
@@ -144,8 +162,16 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     assert blocked_row['wait_timer_end'], "missing wait timer end"
     assert blocked_row['event_timer_start'], "missing event timer start"
     assert blocked_row['event_timer_end'], "missing event timer end"
-    assert blocked_row['lock_time'], "missing lock time"
     assert blocked_row['query_truncated'] == expected_query_truncated
+
+    if check._query_activity._should_collect_blocking_queries():
+        assert len(activity['mysql_activity']) >= 2, "should have collected at least two activity payloads"
+        captured_idle_blocker = False
+        for activity in dbm_activity:
+            for row in activity['mysql_activity']:
+                if row['processlist_user'] == 'bob':
+                    captured_idle_blocker = True
+        assert captured_idle_blocker, "should have captured the idle blocker"
 
 
 @pytest.mark.integration
@@ -193,7 +219,7 @@ def test_activity_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent
     """
     query_signature = (
         '4d09873d44c33af7'
-        if MYSQL_VERSION_PARSED > parse_version('5.7') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+        if MYSQL_VERSION_PARSED > parse_version('5.7') and MYSQL_FLAVOR != 'mariadb'
         else 'e7f7cb251194df29'
     )
 
@@ -409,7 +435,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check._query_activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.mysql.async_job.inactive_stop",
-        tags=_expected_dbm_job_err_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance, check),
         hostname='',
     )
 
@@ -428,7 +454,7 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.mysql.async_job.cancel",
-        tags=_expected_dbm_job_err_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance, check),
     )
 
 
@@ -520,12 +546,20 @@ def test_events_wait_current_disabled_no_warning_azure_flexible_server(
 
 # the inactive job metrics are emitted from the main integrations
 # directly to metrics-intake, so they should also be properly tagged with a resource
-def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + [
+def _expected_dbm_job_err_tags(dbm_instance, check):
+    _tags = dbm_instance['tags'] + (
+        'database_hostname:stubbed.hostname',
+        'database_instance:stubbed.hostname',
         'job:query-activity',
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',
-    ]
+        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
+    )
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
+        _tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            _tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')
+    return _tags
 
 
 @pytest.mark.integration
@@ -539,7 +573,7 @@ def test_if_deadlock_metric_is_collected(aggregator, dd_run_check, dbm_instance)
 
 
 @pytest.mark.skipif(
-    environ.get('MYSQL_FLAVOR') == 'mariadb' or MYSQL_VERSION_PARSED < parse_version('8.0'),
+    MYSQL_FLAVOR == 'mariadb' or MYSQL_VERSION_PARSED < parse_version('8.0'),
     reason='Deadock count is not updated in MariaDB or older MySQL versions',
 )
 @pytest.mark.integration
@@ -607,9 +641,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
 
     deadlock_metric_end = aggregator.metrics("mysql.innodb.deadlocks")
 
-    assert (
-        len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1
-    ), "there should be one new deadlock"
+    assert len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1, (
+        "there should be one new deadlock"
+    )
 
 
 def _get_conn_for_user(user, _autocommit=False):

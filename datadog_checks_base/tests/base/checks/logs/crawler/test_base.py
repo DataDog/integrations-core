@@ -1,13 +1,11 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.base.checks.logs.crawler.base import LogCrawlerCheck
+from datadog_checks.base.checks.logs.crawler.stream import LogRecord, LogStream
 
 
-# TODO: Remove lazy imports and `.format` calls when we drop support for Python 2
 def test_submission(dd_run_check, datadog_agent):
-    from datadog_checks.base.checks.logs.crawler.base import LogCrawlerCheck
-    from datadog_checks.base.checks.logs.crawler.stream import LogRecord, LogStream
-
     class TestLogStream(LogStream):
         def __init__(self, start, **kwargs):
             super().__init__(**kwargs)
@@ -17,11 +15,11 @@ def test_submission(dd_run_check, datadog_agent):
         def records(self, cursor=None):
             start = cursor['counter'] + 1 if cursor is not None else self.start
             for i in range(start, start + 2):
-                message = '{} {}'.format(self.name, i)
+                message = f'{self.name} {i}'
                 data = (
                     {'message': message}
                     if i % 2 == 0
-                    else {'message': message, 'ddtags': self.construct_tags(['{}:tag{}'.format(self.name, i)])}
+                    else {'message': message, 'ddtags': self.construct_tags([f'{self.name}:tag{i}'])}
                 )
                 yield LogRecord(data, cursor={'counter': i})
 

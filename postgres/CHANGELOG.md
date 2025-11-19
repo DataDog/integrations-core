@@ -2,11 +2,337 @@
 
 <!-- towncrier release notes start -->
 
-## 21.0.0 / 2024-10-01
+## 23.2.0 / 2025-10-31
+
+***Added***:
+
+* Add additional context to the database_identifier configuration description. ([#21575](https://github.com/DataDog/integrations-core/pull/21575))
+* Resend Postgres initialization event every six hours to avoid event expiration ([#21702](https://github.com/DataDog/integrations-core/pull/21702))
+* Bump base version for Postgres integration with fix for missed collection event ([#21776](https://github.com/DataDog/integrations-core/pull/21776))
+
+***Fixed***:
+
+* Improved Postgres spec documentation for query samples, explain plans, and AWS instance_endpoint ([#21682](https://github.com/DataDog/integrations-core/pull/21682))
+* Fixes an issue querying table and index relation metrics on the public schema ([#21686](https://github.com/DataDog/integrations-core/pull/21686))
+* Fix logic for only_custom_queries configuration option. ([#21708](https://github.com/DataDog/integrations-core/pull/21708))
+* Fix handling health event tags in Postgres to allow for additional tags as an argument. ([#21764](https://github.com/DataDog/integrations-core/pull/21764))
+
+## 23.1.2 / 2025-10-07 / Agent 7.72.0
+
+***Fixed***:
+
+* Backfill old keys in options passed from Postgres integration to SQL obfuscator ([#21557](https://github.com/DataDog/integrations-core/pull/21557))
+* Fixes a collision issue when token based authentication is configured for multiple Postgres instances ([#21560](https://github.com/DataDog/integrations-core/pull/21560))
+
+## 23.1.1 / 2025-10-03
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 23.1.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add gauge postgresql.locks.idle_in_transaction_age to measure age (s) of idle-in-transaction sessions holding exclusive relation locks; tags: pid, db, session_user, app, client_hostname, lock_mode, relation, relation_owner; limit 100 rows. ([#21182](https://github.com/DataDog/integrations-core/pull/21182))
+* Add agent health event for Postgres config validation ([#21347](https://github.com/DataDog/integrations-core/pull/21347))
+* Refactor Postgres configuration with fixes and clarifications on default values ([#21347](https://github.com/DataDog/integrations-core/pull/21347))
+* PG: Handle locks without relations like transactionid or virtualxid locks ([#21393](https://github.com/DataDog/integrations-core/pull/21393))
+* Add tombstone fields for Postgres schema collection ([#21431](https://github.com/DataDog/integrations-core/pull/21431))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Compile and reuse regex patterns ([#21317](https://github.com/DataDog/integrations-core/pull/21317))
+* Fixed support for refreshing IAM authentication and Azure Managed Identity tokens ([#21503](https://github.com/DataDog/integrations-core/pull/21503))
+
+## 23.0.2 / 2025-10-03 / Agent 7.71.1
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 23.0.1 / 2025-09-24 / Agent 7.71.0
+
+***Fixed***:
+
+* Updated to build psycopg from source to fix a problem with FIPS compatibility ([#21074](https://github.com/DataDog/integrations-core/pull/21074))
+
+## 23.0.0 / 2025-09-05
+
+***Changed***:
+
+* Bump minimum datadog_checks_base to 37.18.0 ([#21238](https://github.com/DataDog/integrations-core/pull/21238))
+
+***Added***:
+
+* Update core tags with agent host name for DB integrations(postgres, mysql, sqlserver) ([#20991](https://github.com/DataDog/integrations-core/pull/20991))
+* Enable collect_settings by default for DBM enabled integrations ([#21172](https://github.com/DataDog/integrations-core/pull/21172))
+* Add Postgres Health class for submitting Postgres health events ([#21193](https://github.com/DataDog/integrations-core/pull/21193))
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 22.18.0 / 2025-09-04 / Agent 7.70.1
+
+***Added***:
+
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+
+## 22.17.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* PG: Add valid tag to index metrics ([#20731](https://github.com/DataDog/integrations-core/pull/20731))
+* PG: Add per index blocks hit and blocks read ([#20767](https://github.com/DataDog/integrations-core/pull/20767))
+
+***Fixed***:
+
+* Fixed a bug where the AWS configuration was overwritten for the Postgres integration ([#20774](https://github.com/DataDog/integrations-core/pull/20774))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Avoid sending empty Postgres extensions and settings payloads ([#20939](https://github.com/DataDog/integrations-core/pull/20939))
+
+## 22.16.0 / 2025-07-29 / Agent 7.69.0
+
+***Added***:
+
+* Reverts upgrade to psycopg3 ([#20885](https://github.com/DataDog/integrations-core/pull/20885))
+* Reverts the fix to the `e.pgerror` ([#20883](https://github.com/DataDog/integrations-core/pull/20883))
+
+## 22.15.1 / 2025-07-25
+
+***Fixed***:
+
+* Fixes the reference to the now non-existent `e.pgerror` ([#20848](https://github.com/DataDog/integrations-core/pull/20848))
+
+## 22.15.0 / 2025-07-10
+
+***Added***:
+
+* PG: Add recovery prefetch metrics ([#20464](https://github.com/DataDog/integrations-core/pull/20464))
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* PG: Add wait events counts from pg_stat_activity ([#20588](https://github.com/DataDog/integrations-core/pull/20588))
+* Upgrade psycopg to version 3 for Postgres integration ([#20617](https://github.com/DataDog/integrations-core/pull/20617))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 22.14.2 / 2025-07-02 / Agent 7.68.0
+
+***Fixed***:
+
+* Ensure extension IDs are sent as text, not integer ([#20605](https://github.com/DataDog/integrations-core/pull/20605))
+
+## 22.14.1 / 2025-06-26
+
+***Fixed***:
+
+* checking wal_level and if is aurora before querying for control checkpoint metrics ([#20500](https://github.com/DataDog/integrations-core/pull/20500))
+
+## 22.14.0 / 2025-06-12
+
+***Added***:
+
+* Collect and forward list of PostgreSQL extensions ([#20266](https://github.com/DataDog/integrations-core/pull/20266))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399)), ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+* Added a configuration option to support SQL_ASCII encoded Postgres databases with clients making requests in other encodings ([#20441](https://github.com/DataDog/integrations-core/pull/20441))
+
+***Fixed***:
+
+* Check for aws extensions before querying aurora_version() ([#20310](https://github.com/DataDog/integrations-core/pull/20310))
+* Allow EXPLAIN on multi-statement SQL where one or more SET commands appear before another supported statement type ([#20319](https://github.com/DataDog/integrations-core/pull/20319))
+* Checks wal_level before collecting control checkpoint metrics ([#20490](https://github.com/DataDog/integrations-core/pull/20490))
+
+## 22.13.1 / 2025-05-19 / Agent 7.67.0
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
+
+## 22.13.0 / 2025-05-15
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Include foreign tables in DBM agent schema collection ([#20137](https://github.com/DataDog/integrations-core/pull/20137))
+* Make owner of schemas to be ignored during collection configurable ([#20153](https://github.com/DataDog/integrations-core/pull/20153))
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+***Fixed***:
+
+* Fixed bug where we fail to explain parameterized queries that have no parameters. *Note: Does not include fix from 22.12.1* ([#20243](https://github.com/DataDog/integrations-core/pull/20243))
+
+## 22.12.1 / 2025-05-19 / Agent 7.66.0
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix. *Note: This fix is not included in 22.13.0* ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
+
+## 22.12.0 / 2025-05-14
+
+***Added***:
+
+* Add exclude_hostname option to specs ([#20259](https://github.com/DataDog/integrations-core/pull/20259))
+
+## 22.11.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+* Added query call count `calls` to StatementMetrics execution indicators to filter out false positives from normalized queries being evicted and re-inserted with same call count and slight duration change. ([#20096](https://github.com/DataDog/integrations-core/pull/20096))
+
+## 22.10.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 22.9.0 / 2025-04-17
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Postgres: Add checkpoint byte delay metric ([#20017](https://github.com/DataDog/integrations-core/pull/20017))
+* add replication slot information and replication slot type to postgres replication stat metric ([#20035](https://github.com/DataDog/integrations-core/pull/20035))
+
+***Fixed***:
+
+* Add handling for IndeterminateDatatype error in explain plan collection ([#19969](https://github.com/DataDog/integrations-core/pull/19969))
+* Add handling for UndefinedFunction error in explain plan collection ([#19998](https://github.com/DataDog/integrations-core/pull/19998))
+
+## 22.8.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* When Amazon adds Extended Support to older Postgres versions, they update the version string to a format we are currently unable to parse. This adds the ability to parse those versions. Here is an example announcement where they communicate such a version string: https://aws.amazon.com/about-aws/whats-new/2024/12/amazon-rds-postgresql-minor-11-22-rds-20241121/ ([#19773](https://github.com/DataDog/integrations-core/pull/19773))
+
+***Fixed***:
+
+* Omit .* regex filter to avoid unnecessary work in query ([#19470](https://github.com/DataDog/integrations-core/pull/19470))
+
+## 22.7.0 / 2025-02-26 / Agent 7.64.0
+
+***Added***:
+
+* Add support for Postgres 17 ([#19625](https://github.com/DataDog/integrations-core/pull/19625))
+
+## 22.6.1 / 2025-02-25
+
+***Fixed***:
+
+* When collecting Postgres setttings, only trigger the activations extensions that are installed in default namespaces. ([#19694](https://github.com/DataDog/integrations-core/pull/19694))
+
+## 22.6.0 / 2025-02-20
+
+***Added***:
+
+* Add support for collecting raw query statements and explain plans when `collect_raw_query_statement.enabled` is true. ([#19493](https://github.com/DataDog/integrations-core/pull/19493))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+***Fixed***:
+
+* Split Postgres query metrics payload to conform to max payload size and enable larger query metrics collection ([#19582](https://github.com/DataDog/integrations-core/pull/19582))
+* Fix exception handling for auto discovered databases ([#19586](https://github.com/DataDog/integrations-core/pull/19586))
+
+## 22.5.1 / 2025-01-29 / Agent 7.63.0
+
+***Fixed***:
+
+* Revert "Upgrade postgres to psycopg3" due to instability in testing ([#19499](https://github.com/DataDog/integrations-core/pull/19499))
+
+## 22.5.0 / 2025-01-25
+
+***Added***:
+
+* Upgrade psycopg to version 3 for Postgres integration ([#19322](https://github.com/DataDog/integrations-core/pull/19322))
+* Add index state attributes (is_unique, is_exclusion, is_immediate, is_clustered, is_valid, is_checkxmin, is_ready, is_live, is_replident, is_partial) from pg_index to PostgreSQL schema collection for enhanced index property visibility. ([#19406](https://github.com/DataDog/integrations-core/pull/19406))
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+***Fixed***:
+
+* Resolved an issue in `QUERY_PG_CLASS` where multiple locks on the same table in `PG_LOCKS` caused duplicate rows, leading to inaccurate rate metric like `postgresql.rows_inserted`, `postgresql.rows_updated`, or `postgresql.rows_deleted`. ([#19351](https://github.com/DataDog/integrations-core/pull/19351))
+* Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
+
+## 22.4.0 / 2024-12-26 / Agent 7.62.0
+
+***Added***:
+
+* Add postgresql.relation.xmin metric ([#19218](https://github.com/DataDog/integrations-core/pull/19218))
+
+***Fixed***:
+
+* Fix check for Postgres collect query activity to avoid bugs with in-flight duration and missing blocking pids ([#19271](https://github.com/DataDog/integrations-core/pull/19271))
+
+## 22.3.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Submit database_hostname with database instance and metrics for MySQL, Postgres, and SQLServer ([#18969](https://github.com/DataDog/integrations-core/pull/18969))
+* Track logical replication slot catalog_xmin age ([#19083](https://github.com/DataDog/integrations-core/pull/19083))
+
+***Fixed***:
+
+* Add alloydbadmin & alloydbmetadata to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on GCP AlloyDB for PostgreSQL. ([#19061](https://github.com/DataDog/integrations-core/pull/19061))
+
+## 22.2.0 / 2024-11-06 / Agent 7.60.0
+
+***Added***:
+
+* Include port as part of database instance metadata for MySQL and Postgres ([#18966](https://github.com/DataDog/integrations-core/pull/18966))
+
+## 22.1.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied to query metrics, query samples and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+
+***Fixed***:
+
+* Use specific databases for template on postgres ignore ([#18807](https://github.com/DataDog/integrations-core/pull/18807))
+* Fix unicode decode error from Azure PostgreSQL Flexible Server ([#18938](https://github.com/DataDog/integrations-core/pull/18938))
+
+## 22.0.3 / 2024-10-23 / Agent 7.59.0
+
+***Fixed***:
+
+* Fix `UnboundLocalError` in postgres schema collection, ensuring proper reset of `_is_schemas_collection_in_progress` to allow consecutive collections. ([#18870](https://github.com/DataDog/integrations-core/pull/18870))
+
+## 22.0.2 / 2024-10-18
+
+***Fixed***:
+
+* Revert "Parse each row of pg_stat_activity separately inside a try/catch (#18762)" ([#18866](https://github.com/DataDog/integrations-core/pull/18866))
+
+## 22.0.1 / 2024-10-14
+
+***Fixed***:
+
+* Wrap schema collection attempt in try/except block to catch collection exceptions ([#18788](https://github.com/DataDog/integrations-core/pull/18788))
+
+## 22.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+* Add `keep_json_path` to `obfuscator_options` to allow users to control whether JSON paths following JSON operators in SQL statements should be obfuscated. By default, these paths are treated as literals and are obfuscated to `?`. ([#18726](https://github.com/DataDog/integrations-core/pull/18726))
+* Add additional debug logging to help with schema collection investigations ([#18754](https://github.com/DataDog/integrations-core/pull/18754))
+* Add Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
+***Fixed***:
+
+* Parse each row of `pg_stat_activity` separately inside a `try`/`catch` to avoid crashing on bad UTF8 data. ([#18762](https://github.com/DataDog/integrations-core/pull/18762))
+
+## 21.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 20.0.0 / 2024-09-05
 
@@ -36,7 +362,7 @@
 * Allow filtering of schema collection in Postgres using regexes to include or exclude objects ([#18145](https://github.com/DataDog/integrations-core/pull/18145))
 * Collect blk read/write time from pg_stat_database ([#18169](https://github.com/DataDog/integrations-core/pull/18169))
 * Use QueryManager to collect `custom_queries` and `global_custom_queries`. `custom_queries` now supports configurable `collection_interval`. ([#18183](https://github.com/DataDog/integrations-core/pull/18183))
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 * Add new config option `role_arn` to AWS managed authentication to support cross account IAM auth. ([#18228](https://github.com/DataDog/integrations-core/pull/18228))
 
 ***Fixed***:

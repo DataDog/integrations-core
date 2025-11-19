@@ -41,7 +41,7 @@ spec:
 ```
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Operator (< v1.5.0)" xxx -->
+<!-- xxx tab "Operator (below v1.5.0)" xxx -->
 
 This is a cluster check. You can enable this check by providing a configuration file `helm.yaml` to the cluster Agent in your `DatadogAgent` deployment configuration.
 

@@ -4,6 +4,8 @@
 
 This check monitors [TIBCO Enterprise Message Service][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -22,17 +24,18 @@ The TIBCO EMS check is included in the [Datadog Agent][2] package. No additional
 
 ##### Create your Tibco EMS command script
 
-The Tibco EMS integration utilizes the `tibemsadmin` CLI tool provided by Tibco EMS. To reduce the number of calls to the `$sys.admin` queue, Datadog uses a script to batch the queries made to Tibco. To collect your Tibco EMS metrics, pass the the script path and the absolute path of the `tibemsadmin` binary to the integration configuration.
+The Tibco EMS integration utilizes the `tibemsadmin` CLI tool provided by Tibco EMS. To reduce the number of calls to the `$sys.admin` queue, Datadog uses a script to batch the queries made to Tibco. To collect your Tibco EMS metrics, pass the script path and the absolute path of the `tibemsadmin` binary to the integration configuration.
 
 *Note*: The `dd-agent` user needs execute permissions on the `tibemsadmin` binary.
 1. Create a file named `show_commands` with the following contents:
 ```text
-    show server
+    show connections full
+    show durables
     show queues
-    show topics
+    show server
     show stat consumers
     show stat producers
-    show connections full
+    show topics
 ```
 
 
@@ -98,19 +101,18 @@ The TIBCO EMS integration does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+The TIBCO EMS integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 
 [1]: https://docs.tibco.com/products/tibco-enterprise-message-service
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/tibco_ems/datadog_checks/tibco_ems/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/tibco_ems/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/tibco_ems/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/help/

@@ -6,6 +6,8 @@ The Agent's Kong check tracks total requests, response codes, client connections
 
 You can also use Kong's [Datadog plugin][15] to send API, connection, and database metrics to Datadog through the Datadog Agent using [DogStatsD][16]. Read the [Monitor Kong with the Datadog integration][11] blog post for more information.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -127,7 +129,7 @@ Need help? Contact [Datadog support][10].
 
 - [Monitor Kong with the Datadog integration][11]
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/kong/datadog_checks/kong/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

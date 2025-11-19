@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  redis-standalone:
+    image: "redis:7.2"
+    volumes:
+      - ./config/auth.conf:/etc/redis.conf
+    ports:
+      - "6379:6379"
+    networks:
+      - network1
+    command: ["redis-server", "/etc/redis.conf", "--save", "", "--stop-writes-on-bgsave-error", "no"]
+    
+  producer:
+    build:
+      context: ./proj
+    depends_on:
+      - redis-standalone
+    networks:
+      - network1
+    restart: always
+    command: python producer.py
+
+  worker:
+    build:
+      context: ./proj
+    depends_on:
+      - redis-standalone
+    networks:
+      - network1
+    restart: always
+    command: celery -A tasks worker --loglevel=DEBUG; celery -A tasks events --dump
+
+  flower:
+    build:
+      context: ./proj
+    depends_on:
+      - redis-standalone
+    ports:
+      - "5555:5555"
+    networks:
+      - network1
+    restart: always
+    command: celery -A tasks flower --port=5555
+
+networks:
+  network1:
+    name: standalone_default

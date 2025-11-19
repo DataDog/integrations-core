@@ -9,6 +9,8 @@ Traefik Mesh is a lightweight and easy-to-deploy service mesh that offers advanc
 
 This check monitors [Traefik Mesh][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.54.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -129,7 +131,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://traefik.io/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/datadog_checks/traefik_mesh/data/conf.yaml.example
 [5]: https://doc.traefik.io/traefik-mesh/api/

@@ -2,11 +2,94 @@
 
 <!-- towncrier release notes start -->
 
-## 4.0.0 / 2024-10-01
+## 6.2.1 / 2025-10-31
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+* Fix schema issue on `ignore_metrics_by_labels` field ([#21583](https://github.com/DataDog/integrations-core/pull/21583))
+
+## 6.2.0 / 2025-10-10 / Agent 7.72.0
+
+***Added***:
+
+* Add new metric for SSI gradual rollout ([#21599](https://github.com/DataDog/integrations-core/pull/21599))
+
+## 6.1.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 6.0.2 / 2025-10-10 / Agent 7.71.2
+
+***Added***:
+
+* Add new metric for SSI gradual rollout ([#21599](https://github.com/DataDog/integrations-core/pull/21599))
+
+## 6.0.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 6.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Update CWS mutating webhook metrics to better track its performance ([#20557](https://github.com/DataDog/integrations-core/pull/20557))
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+## 5.5.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Collect telemetry for autoscaling local fallback ([#19522](https://github.com/DataDog/integrations-core/pull/19522))
+
+## 5.4.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Add telemetry for checks that are not scheduled. ([#19306](https://github.com/DataDog/integrations-core/pull/19306))
+
+## 5.3.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 5.2.0 / 2024-12-26 / Agent 7.62.0
+
+***Added***:
+
+* add telemetry for local load store in dca ([#19229](https://github.com/DataDog/integrations-core/pull/19229))
+
+## 5.1.0 / 2024-10-31 / Agent 7.60.0
+
+***Added***:
+
+* Add telemetry scraping for Validation AdmissionController ([#18867](https://github.com/DataDog/integrations-core/pull/18867))
+
+## 5.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 4.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 3.2.0 / 2024-08-09 / Agent 7.57.0
 

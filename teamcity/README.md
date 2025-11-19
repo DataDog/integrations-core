@@ -4,6 +4,10 @@
 
 This integration connects to your TeamCity server to submit metrics, service checks, and events, allowing you to monitor the health of your TeamCity projects' build configurations, build runs, server resources, and more.
 
+For more in-depth monitoring of your TeamCity pipelines, check out [CI Pipeline Visibility][28]. CI Pipeline Visibility provides granular insights into your user workflow, lets you access detailed Git metadata, and tracks pipeline performance over time.
+
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -59,23 +63,14 @@ The TeamCity check offers two methods of data collection. To optimally monitor y
    init_config: 
 
    instances:
-     - server: http://teamcity.<ACCOUNT_NAME>.com
-
-       ## @param projects - mapping - optional
-       ## Mapping of TeamCity projects and build configurations to
-       ## collect events and metrics from the TeamCity REST API.
-       #
-       projects:
-         <PROJECT_A>:
-           include:    
-           - <BUILD_CONFIG_A>
-           - <BUILD_CONFIG_B>
-           exclude:
-           - <BUILD_CONFIG_C>
-         <PROJECT_B>:
-           include:
-           - <BUILD_CONFIG_D>
-         <PROJECT_C>: {}
+    - use_openmetrics: true
+    
+      ## @param server - string - required
+      ## Specify the server name of your TeamCity instance.
+      ## Enable Guest Authentication on your instance or specify `username` and `password` to
+      ## enable basic HTTP authentication.
+      #
+      server: http://teamcity.<ACCOUNT_NAME>.com
    ```
   
   To collect [OpenMetrics-compliant][16] histogram and summary metrics (available starting in TeamCity Server 2022.10+), add the internal property, `teamcity.metrics.followOpenMetricsSpec=true`. See, [TeamCity Internal Properties][25].
@@ -191,6 +186,11 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "teamcity"}` |
 
+
+### CI Pipeline Visibility
+
+To configure CI Pipeline Visibility, see the [product setup page][27]. For more details, see [Set up Tracing on a TeamCity Pipeline][26].
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -220,7 +220,7 @@ Need help? Contact [Datadog support][12].
 
 - [Track performance impact of code changes with TeamCity and Datadog][13]
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://www.jetbrains.com/help/teamcity/enabling-guest-login.html
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example
@@ -245,3 +245,6 @@ Need help? Contact [Datadog support][12].
 [23]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html
 [24]: https://www.jetbrains.com/help/teamcity/creating-and-managing-users.html#Assigning+Roles+to+Users
 [25]: https://www.jetbrains.com/help/teamcity/server-startup-properties.html#TeamCity+Internal+Properties
+[26]: https://docs.datadoghq.com/continuous_integration/pipelines/teamcity/
+[27]: /ci/setup/pipeline?provider=teamcity
+[28]: /ci/getting-started

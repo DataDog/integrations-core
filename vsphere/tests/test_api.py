@@ -8,16 +8,26 @@ import pytest
 from mock import ANY, MagicMock, patch
 from pyVmomi import vim, vmodl
 
+from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
+from datadog_checks.vsphere.cache import InfrastructureCache
 from datadog_checks.vsphere.config import VSphereConfig
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 def test_ssl_verify_false(realtime_instance):
     realtime_instance['ssl_verify'] = False
 
-    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+    ):
         smart_connect = connect.SmartConnect
 
         config = VSphereConfig(realtime_instance, {}, MagicMock())
@@ -34,9 +44,10 @@ def test_ssl_cert(realtime_instance):
     realtime_instance['ssl_cafile'] = '/dummy/path/cafile.pem'
     realtime_instance['ssl_capath'] = '/dummy/path'
 
-    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+    ):
         smart_connect = connect.SmartConnect
 
         config = VSphereConfig(realtime_instance, {}, MagicMock())
@@ -53,9 +64,10 @@ def test_ssl_cafile(realtime_instance):
     realtime_instance['ssl_verify'] = True
     realtime_instance['ssl_capath'] = '/dummy/path'
 
-    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+    ):
         smart_connect = connect.SmartConnect
 
         config = VSphereConfig(realtime_instance, {}, MagicMock())
@@ -72,9 +84,10 @@ def test_ssl_capath(realtime_instance):
     realtime_instance['ssl_verify'] = True
     realtime_instance['ssl_cafile'] = '/dummy/path/cafile.pem'
 
-    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+    ):
         smart_connect = connect.SmartConnect
 
         config = VSphereConfig(realtime_instance, {}, MagicMock())
@@ -255,3 +268,101 @@ def test_get_new_events_with_fallback(realtime_instance):
 
         events = api.get_new_events(start_time=dt.datetime.now())
         assert events == [event1, event3]
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
+    realtime_instance['collect_vsan_data'] = True
+
+    with patch('datadog_checks.vsphere.api.connect'):
+        with patch('pyVmomi.vim.cluster.VsanPerformanceManager') as MockVsanPerformanceManager:
+            config = VSphereConfig(realtime_instance, {}, MagicMock())
+            api = VSphereAPI(config, MagicMock())
+            cluster = MagicMock(name='a', spec=vim.ClusterComputeResource)
+            host = MagicMock(name='b')
+            cluster.host = [host]
+            cluster_nested_elts = {cluster: ['nested-id-1', 'nested-id-2']}
+            entity_ref_ids = {
+                'cluster': ['cluster-domclient:', 'vsan-cluster-capacity:'],
+                'host': ['host-domclient:', 'host-cpu:'],
+            }
+            id_to_tags = {'nested-id-1': ['cluster'], 'nested-id-2': ['host']}
+            starting_time = dt.datetime(2024, 1, 1)
+            mock_vsan_events = api.get_vsan_events(starting_time)
+            assert len(mock_vsan_events) == 0
+
+            mock_vsan_perf_manager = MockVsanPerformanceManager.return_value
+            mock_vsan_perf_manager.QueryClusterHealth.return_value = [
+                MagicMock(
+                    groupId='group-1',
+                    groupHealth='green',
+                    groupTests=[
+                        MagicMock(testId='test.1', testHealth='green'),
+                        MagicMock(testId='test.2', testHealth='yellow'),
+                    ],
+                )
+            ]
+            mock_vsan_perf_manager.QueryVsanPerf.return_value = [
+                MagicMock(
+                    entityRefId="cluster-domclient:nested-id-1",
+                    value=[MagicMock(metricId=MagicMock(dynamicProperty=[]))],
+                )
+            ]
+
+            health_metrics, performance_metrics = api.get_vsan_metrics(
+                cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
+            )
+
+            assert len(health_metrics) == 1
+            assert 'vsphere.vsan.cluster.health.count' in health_metrics[0]
+            assert 'vsphere.vsan.cluster.health.1.count' in health_metrics[0]
+            assert 'vsphere.vsan.cluster.health.2.count' in health_metrics[0]
+            assert len(performance_metrics) == 1
+            assert len(performance_metrics[0]) == 1
+
+            vsan_config = MagicMock()
+            vsan_config.enabled = True
+            cluster.configurationEx.vsanConfigInfo = vsan_config
+            cache = InfrastructureCache(float('inf'))
+            cache.set_mor_props(cluster, {})
+            cache.set_mor_props(host, {})
+            check = VSphereCheck('vsphere', {}, [realtime_instance])
+            check.infrastructure_cache = cache
+            dd_run_check(check)
+
+            aggregator.assert_metric('vsphere.vsan.cluster.health.count', value=1)
+            aggregator.assert_metric('vsphere.vsan.cluster.health.1.count', count=0)
+            aggregator.assert_metric('vsphere.vsan.cluster.health.2.count', count=0)
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_vsan_empty_health_metrics(aggregator, realtime_instance, dd_run_check, caplog):
+    realtime_instance['collect_vsan_data'] = True
+
+    with patch('datadog_checks.vsphere.api.connect'):
+        with patch('pyVmomi.vim.cluster.VsanPerformanceManager') as MockVsanPerformanceManager:
+            config = VSphereConfig(realtime_instance, {}, MagicMock())
+            api = VSphereAPI(config, MagicMock())
+            cluster = MagicMock(name='a', spec=vim.ClusterComputeResource)
+            host = MagicMock(name='b')
+            cluster.host = [host]
+            cluster_nested_elts = {cluster: ['nested-id-1', 'nested-id-2']}
+            entity_ref_ids = {'type1': ['entity-1'], 'type2': ['entity-2']}
+            id_to_tags = {'nested-id-1': ['type1'], 'nested-id-2': ['type2']}
+            starting_time = dt.datetime(2024, 1, 1)
+            mock_vsan_events = api.get_vsan_events(starting_time)
+            assert len(mock_vsan_events) == 0
+
+            mock_vsan_perf_manager = MockVsanPerformanceManager.return_value
+            mock_vsan_perf_manager.QueryClusterHealth.return_value = []
+            mock_vsan_perf_manager.QueryVsanPerf.return_value = [
+                MagicMock(
+                    entityRefId="cluster-domclient:nested-id-1",
+                    value=[MagicMock(metricId=MagicMock(dynamicProperty=[]))],
+                )
+            ]
+
+            health_metrics, performance_metrics = api.get_vsan_metrics(
+                cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
+            )
+            assert len(health_metrics) == 0

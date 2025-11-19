@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import raise_from
-
-from .....constants import ServiceCheck
+from datadog_checks.base.constants import ServiceCheck
 
 
 def get_service_check(check, metric_name, modifiers, global_options):
@@ -56,7 +54,7 @@ def compile_service_check_statuses(modifiers):
         try:
             value = int(value)
         except Exception:
-            raise_from(TypeError(f'value `{value}` of parameter `status_map` does not represent an integer'), None)
+            raise TypeError(f'value `{value}` of parameter `status_map` does not represent an integer') from None
 
         if not isinstance(status_string, str):
             raise ValueError(f'status `{status_string}` for value `{value}` of parameter `status_map` is not a string')

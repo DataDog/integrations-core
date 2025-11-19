@@ -1,5 +1,8 @@
 import os
+import re
 from functools import cached_property
+from pathlib import Path
+from typing import Any
 
 from hatch.env.collectors.plugin.interface import EnvironmentCollectorInterface
 
@@ -45,12 +48,26 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return self.config.get('check-types', False)
 
     @cached_property
+    def disable_linter(self):
+        return self.config.get('disable-linter', False)
+
+    @cached_property
+    def disable_formatter(self):
+        return self.config.get('disable-formatter', False)
+
+    def on_config(self, name: str, on_true: Any, on_false: Any) -> Any:
+        """Return `on_true` if the config option `name` is set to true, otherwise return `on_false`"""
+        if self.config.get(name, False):
+            return on_true
+        return on_false
+
+    @cached_property
     def mypy_args(self):
-        return self.config.get('mypy-args', [])
+        return self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
 
     @cached_property
     def mypy_deps(self):
-        return self.config.get('mypy-deps', [])
+        return self.config.get('mypy-deps', []) + ['mypy']
 
     @cached_property
     def test_package_install_command(self):
@@ -86,7 +103,6 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
 
     def finalize_config(self, config):
-
         for env_name, env_config in config.items():
             is_template_env = env_name == 'default'
             is_test_env = env_config.setdefault('test-env', is_template_env)
@@ -124,30 +140,58 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             scripts.setdefault('test-cov', '_dd-test-cov')
             scripts.setdefault('benchmark', '_dd-benchmark')
 
+    def lint_command(self, options: str, settings_dir: str) -> str:
+        return self.on_config(
+            'disable-linter',
+            "echo 'Linter is disabled for this environment'",
+            f'ruff check {options} --config {settings_dir}/pyproject.toml .',
+        )
+
+    def formatter_command(self, options: str, settings_dir: str) -> str:
+        return self.on_config(
+            'disable-formatter',
+            "echo 'Formatter is disabled for this environment'",
+            f'ruff format {options} --config {settings_dir}/pyproject.toml .',
+        )
+
+    def ruff_settings_dir(self):
+        # If the local pyproject.toml exists and has ruff configuration, use it
+        local_pyproject = Path("./pyproject.toml")
+        if local_pyproject.exists():
+            pyproject_text = local_pyproject.read_text()
+            if re.search(r'\[tool\.ruff\]', pyproject_text):
+                return "."
+        return ".."
+
     def get_initial_config(self):
-        settings_dir = '.' if self.is_dev_package else '..'
+        settings_dir = self.ruff_settings_dir()
+
         lint_env = {
             'detached': True,
             'scripts': {
                 'style': [
-                    f'black --config {settings_dir}/pyproject.toml --check --diff .',
-                    f'ruff check --config {settings_dir}/pyproject.toml .',
+                    self.formatter_command('--diff --check', settings_dir),
+                    self.lint_command('', settings_dir),
+                ],
+                'style-unsafe': [
+                    self.formatter_command('--diff --check', settings_dir),
+                    self.lint_command('--diff --unsafe-fixes', settings_dir),
                 ],
                 'fmt': [
-                    f'black . --config {settings_dir}/pyproject.toml',
-                    f'ruff check --config {settings_dir}/pyproject.toml --fix .',
-                    'python -c "print(\'\\n[NOTE] ruff may still report style errors for things '
-                    'black cannot fix, these will need to be fixed manually.\')"',
-                    'style',
+                    self.formatter_command('', settings_dir),
+                    self.lint_command('--fix', settings_dir),
+                ],
+                'fmt-unsafe': [
+                    self.formatter_command('', settings_dir),
+                    self.lint_command('--fix --unsafe-fixes', settings_dir),
                 ],
                 'all': ['style'],
             },
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
-                'black==24.2.0',
-                'ruff==0.3.3',
+                'ruff==0.11.10',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
-                'pydantic==2.7.3',
+                'pydantic==2.11.5',
             ],
         }
         config = {'lint': lint_env}
@@ -157,19 +201,6 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)}'.rstrip()
             ]
             lint_env['scripts']['all'].append('typing')
-            lint_env['dependencies'].extend(
-                [
-                    # TODO: remove extra when we drop Python 2
-                    'mypy[python2]==0.910; python_version<"3"',
-                    'mypy[python2]==1.3.0; python_version>"3"',
-                    # TODO: remove these when drop Python 2 and replace with --install-types --non-interactive
-                    'types-python-dateutil==2.8.2',
-                    'types-pyyaml==5.4.10',
-                    'types-requests==2.25.11',
-                    'types-simplejson==3.17.5',
-                    'types-six==1.16.2',
-                ]
-            )
             lint_env['dependencies'].extend(self.mypy_deps)
 
         return config

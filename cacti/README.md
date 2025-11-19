@@ -7,6 +7,8 @@ Get metrics from Cacti in real time to:
 - Visualize and monitor Cacti states.
 - Be notified about Cacti failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -162,7 +164,7 @@ A [Github issue][7] has been opened to track this memory leak.
 
 Need help? Contact [Datadog support][8].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

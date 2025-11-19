@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....fs import (
+from datadog_checks.dev.fs import (
     chdir,
     dir_exists,
     ensure_parent_dir_exists,
@@ -13,20 +13,7 @@ from ....fs import (
     read_file_lines,
     write_file_lines,
 )
-from ...configuration import ConfigSpec
-from ...configuration.consumers import ModelConsumer
-from ...constants import get_root
-from ...manifest_utils import Manifest
-from ...testing import process_checks_option
-from ...utils import (
-    CUSTOM_FILES,
-    complete_valid_checks,
-    get_config_models_documentation,
-    get_license_header,
-    get_models_location,
-    get_version_string,
-)
-from ..console import (
+from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
     annotate_display_queue,
@@ -35,6 +22,18 @@ from ..console import (
     echo_failure,
     echo_info,
     echo_success,
+)
+from datadog_checks.dev.tooling.configuration import ConfigSpec
+from datadog_checks.dev.tooling.configuration.consumers import ModelConsumer
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import (
+    CUSTOM_FILES,
+    complete_valid_checks,
+    get_config_models_documentation,
+    get_license_header,
+    get_models_location,
+    get_version_string,
 )
 
 LICENSE_HEADER = "(C) Datadog, Inc."
@@ -108,12 +107,9 @@ def models(ctx, check, sync, verbose):
             source = 'test'
             version = '0.0.1'
         else:
-            manifest = Manifest.load_manifest(check)
-            if not manifest:
-                echo_debug(f"Skipping validation for check: {check}; can't process manifest")
-                continue
-            spec_path = manifest.get_config_spec()
+            spec_path = path_join(root, check, 'assets', 'configuration', 'spec.yaml')
             if not file_exists(spec_path):
+                echo_debug(f"Skipping validation for check: {check}; 'spec.yaml' file doesn't exist")
                 continue
 
             source = check
@@ -158,6 +154,7 @@ def models(ctx, check, sync, verbose):
                 files_failed[model_file_path] = True
                 for error in errors:
                     check_display_queue.append((echo_failure, error))
+                display_queue[model_file_path] = check_display_queue
                 continue
 
             generated_model_file_lines = contents.splitlines(True)

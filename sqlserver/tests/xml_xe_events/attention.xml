@@ -1,0 +1,105 @@
+<event name="attention" package="sqlserver" timestamp="2025-04-24T20:37:47.978Z">
+	<data name="duration">
+		<type name="uint64" package="package0" />
+		<value>
+			328677
+		</value>
+	</data>
+	<data name="request_id">
+		<type name="int32" package="package0" />
+		<value>
+			0
+		</value>
+	</data>
+	<action name="request_id" package="sqlserver">
+		<type name="uint32" package="package0" />
+		<value>
+			0
+		</value>
+	</action>
+	<action name="session_id" package="sqlserver">
+		<type name="uint16" package="package0" />
+		<value>
+			123
+		</value>
+	</action>
+	<action name="client_hostname" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			COMP-MX2YQD7P2P
+		</value>
+	</action>
+	<action name="username" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			datadog
+		</value>
+	</action>
+	<action name="database_name" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			master
+		</value>
+	</action>
+	<action name="client_app_name" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			azdata
+		</value>
+	</action>
+	<action name="sql_text" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			-- Set the session name here
+			DECLARE @session_name NVARCHAR(100) = 'datadog_sql_statement';
+			
+			-- See size of ring buffer
+			SELECT
+			DATALENGTH(target_data) / 1024.0 AS ring_buffer_kb
+			FROM sys.dm_xe_session_targets AS t
+			JOIN sys.dm_xe_sessions AS s
+			ON t.event_session_address = s.address
+			WHERE s.name = @session_name
+			AND t.target_name = 'ring_buffer';
+			
+			-- -- Minimal polling of session events
+			-- SELECT
+			--     event_data.query('.') AS full_event_xml
+			-- FROM (
+			--     SELECT CAST(t.target_data AS XML) AS target_xml
+			--     FROM sys.dm_xe_session_targets AS t
+			--     JOIN sys.dm_xe_sessions AS s
+			--       ON t.event_session_address = s.address
+			--     WHERE s.name = @session_name
+			--       AND t.target_name = 'ring_buffer'
+			-- ) AS src
+			-- CROSS APPLY target_xml.nodes('//RingBufferTarget/event[position() &lt;= 100]') AS XTbl(event_data);
+			
+			SELECT
+			event_data.value('(event/@timestamp)[1]', 'datetime2') AS event_timestamp,
+			event_data.query('.') AS full_event_xml
+			FROM (
+			SELECT CAST(t.target_data AS XML) AS target_xml
+			FROM sys.dm_xe_session_targets AS t
+			JOIN sys.dm_xe_sessions AS s
+			ON t.event_session_address = s.address
+			WHERE s.name = @session_name
+			AND t.target_name = 'ring_buffer'
+			) AS src
+			CROSS APPLY target_xml.nodes('//RingBufferTarget/event[@name="attention"]') AS XTbl(event_data)
+			ORDER BY event_timestamp;
+		</value>
+	</action>
+	<action name="attach_activity_id_xfer" package="package0">
+		<type name="activity_id_xfer" package="package0" />
+		<value>
+			AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0
+		</value>
+	</action>
+	<action name="attach_activity_id" package="package0">
+		<type name="activity_id" package="package0" />
+		<value>
+			F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1
+		</value>
+	</action>
+</event>

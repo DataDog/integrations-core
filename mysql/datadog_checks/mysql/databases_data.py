@@ -5,9 +5,10 @@
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 import json
 import time
+from collections import defaultdict
 from contextlib import closing
 
 import pymysql
@@ -19,9 +20,9 @@ from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
     SQL_DATABASES,
     SQL_FOREIGN_KEYS,
-    SQL_INDEXES,
     SQL_PARTITION,
     SQL_TABLES,
+    get_indexes_query,
 )
 
 from .util import get_list_chunks
@@ -30,7 +31,6 @@ DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
 
 
 class SubmitData:
-
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
         self._base_event = base_event
@@ -40,9 +40,11 @@ class SubmitData:
         self._total_columns_sent = 0
         self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
+        self.any_tables_found = False  # Flag to track for permission issues
 
-    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version, flavor):
+    def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version, flavor):
         self._base_event["host"] = hostname
+        self._base_event["database_instance"] = database_instance
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
@@ -52,6 +54,8 @@ class SubmitData:
         self._total_columns_sent = 0
         self._columns_count = 0
         self.db_info.clear()
+        self.db_to_tables.clear()
+        self.any_tables_found = False
 
     def store_db_infos(self, db_infos):
         for db_info in db_infos:
@@ -61,6 +65,8 @@ class SubmitData:
         self._columns_count += columns_count
         known_tables = self.db_to_tables.setdefault(db_name, [])
         known_tables.extend(tables)
+        if tables:
+            self.any_tables_found = True
 
     def columns_since_last_submit(self):
         return self._columns_count
@@ -110,7 +116,6 @@ def agent_check_getter(self):
 
 
 class DatabasesData:
-
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -161,8 +166,7 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
         tables = self._get_tables(db_name, cursor)
-        tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
-        for tables_chunk in tables_chunks:
+        for tables_chunk in get_list_chunks(tables, self.TABLES_CHUNK_SIZE):
             schema_collection_elapsed_time = time.time() - start_time
             if schema_collection_elapsed_time > self._max_execution_time:
                 self._data_submitter.submit()
@@ -180,7 +184,7 @@ class DatabasesData:
         self._data_submitter.submit()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_databases_data(self, tags):
+    def collect_databases_data(self, tags):
         """
         Collects database information and schemas and submits them to the agent's queue as dictionaries.
 
@@ -203,15 +207,17 @@ class DatabasesData:
                     - indexes (list): A list of index dictionaries.
                         - index (dict): A dictionary representing an index.
                             - name (str): The name of the index.
-                            - collation (str): The collation of the index.
-                            - cardinality (str): The cardinality of the index.
-                            - index_type (str): The type of the index.
-                            - seq_in_index (str): The sequence in index.
-                            - columns (str): The columns in the index.
-                            - sub_parts (str): The sub-parts of the index.
-                            - packed (str): Whether the index is packed.
-                            - nullables (str): The nullable columns in the index.
-                            - non_uniques (str): Whether the index is non-unique.
+                            - cardinality (int): The cardinality of the index.
+                            - index_type (str): The index method used.
+                            - columns (list): A list of column dictionaries
+                                - column (dict): A dictionary representing a column.
+                                    - name (str): The name of the column.
+                                    - sub_part (int): The number of indexed characters if column is partially indexed.
+                                    - collation (str): The collation of the column.
+                                    - packed (str): How the index is packed.
+                                    - nullable (bool): Whether the column is nullable.
+                            - non_unique (bool): Whether the index can contain duplicates.
+                            - expression (str): If index was built with a functional key part, the expression used.
                     - foreign_keys (list): A list of foreign key dictionaries.
                         - foreign_key (dict): A dictionary representing a foreign key.
                             - constraint_schema (str): The schema of the constraint.
@@ -220,40 +226,47 @@ class DatabasesData:
                             - referenced_table_schema (str): The schema of the referenced table.
                             - referenced_table_name (str): The name of the referenced table.
                             - referenced_column_names (str): The column names in the referenced table.
+                            - update_action (str): The update rule for the foreign key.
+                            - delete_action (str): The delete rule for the foreign key.
                     - partitions (list): A list of partition dictionaries.
                         - partition (dict): A dictionary representing a partition.
                             - name (str): The name of the partition.
-                            - subpartition_names (str): The names of the subpartitions.
-                            - partition_ordinal_position (str): The ordinal position of the partition.
-                            - subpartition_ordinal_positions (str): The ordinal positions of the subpartitions.
+                            - subpartitions (list): A list of subpartition dictionaries.
+                                - subpartition (dict): A dictionary representing a subpartition.
+                                    - name (str): The name of the subpartition.
+                                    - subpartition_ordinal_position (int): The ordinal position of the subpartition.
+                                    - subpartition_method (str): The subpartition method.
+                                    - subpartition_expression (str): The subpartition expression.
+                                    - table_rows (int): The number of rows in the subpartition.
+                                    - data_length (int): The data length of the subpartition in bytes.
+                            - partition_ordinal_position (int): The ordinal position of the partition.
                             - partition_method (str): The partition method.
-                            - subpartition_methods (str): The subpartition methods.
                             - partition_expression (str): The partition expression.
-                            - subpartition_expressions (str): The subpartition expressions.
                             - partition_description (str): The description of the partition.
-                            - table_rows (str): The number of rows in the partition.
-                            - data_lengths (str): The data lengths in the partition.
-                            - max_data_lengths (str): The maximum data lengths in the partition.
-                            - index_lengths (str): The index lengths in the partition.
-                            - data_free (str): The free data space in the partition.
-                            - partition_comment (str): The comment on the partition.
-                            - tablespace_name (str): The tablespace name.
+                            - table_rows (int): The number of rows in the partition. If partition has subpartitions,
+                                                this is the sum of all subpartitions table_rows.
+                            - data_length (int): The data length of the partition in bytes. If partition has
+                                                 subpartitions, this is the sum of all subpartitions data_length.
         """
-        self._data_submitter.reset()
+        self._data_submitter.reset()  # Ensure we start fresh
         self._tags = tags
-        with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            self._data_submitter.set_base_event_data(
-                self._check.resolved_hostname,
-                self._tags,
-                self._check._config.cloud_metadata,
-                self._check.version.version,
-                self._check.version.flavor,
-            )
-            db_infos = self._query_db_information(cursor)
-            self._data_submitter.store_db_infos(db_infos)
-            self._fetch_for_databases(db_infos, cursor)
-            self._data_submitter.submit()
-            self._log.debug("Finished collect_schemas_data")
+        self._data_submitter.set_base_event_data(
+            self._check.reported_hostname,
+            self._check.database_identifier,
+            self._tags,
+            self._check._config.cloud_metadata,
+            self._check.version.version,
+            self._check.version.flavor,
+        )
+        try:
+            with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+                db_infos = self._query_db_information(cursor)
+                self._data_submitter.store_db_infos(db_infos)
+                self._fetch_for_databases(db_infos, cursor)
+                self._data_submitter.submit()
+        finally:
+            self._data_submitter.reset()  # Ensure we reset in case of errors
+        self._log.debug("Finished collect_databases_data")
 
     def _fetch_for_databases(self, db_infos, cursor):
         start_time = time.time()
@@ -262,17 +275,27 @@ class DatabasesData:
                 self._fetch_database_data(cursor, start_time, db_info['name'])
             except StopIteration as e:
                 self._log.error(
-                    "While executing fetch database data for databse {}, the following exception occured {}".format(
+                    "While executing fetch database data for database {}, the following exception occured {}".format(
                         db_info['name'], e
                     )
                 )
                 return
             except Exception as e:
                 self._log.error(
-                    "While executing fetch database data for databse {}, the following exception occured {}".format(
+                    "While executing fetch database data for database {}, the following exception occured {}".format(
                         db_info['name'], e
                     )
                 )
+
+        # Check if we found databases but no tables across all of them.
+        # This happens when the datadog user has permissions to see databases
+        # but lacks SELECT privileges on the tables themselves, which prevents
+        # the agent from collecting table metadata.
+        if db_infos and not self._data_submitter.any_tables_found:
+            self._log.warning(
+                "No tables were found across any of the {} databases. This may indicate insufficient privileges "
+                "to view table metadata. The datadog user needs SELECT privileges on the tables.".format(len(db_infos))
+            )
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
@@ -292,15 +315,13 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, db_name, cursor):
-
         if len(table_list) == 0:
-            return
+            return 0, []
+
         table_name_to_table_index = {}
-        table_names = ""
         for i, table in enumerate(table_list):
             table_name_to_table_index[table["name"]] = i
-            table_names += '"' + str(table["name"]) + '",'
-        table_names = table_names[:-1]
+        table_names = ','.join(f'"{str(table["name"])}"' for table in table_list)
         total_columns_number = self._populate_with_columns_data(
             table_name_to_table_index, table_list, table_names, db_name, cursor
         )
@@ -334,21 +355,43 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_INDEXES.format(table_names), params=db_name)
+        query = get_indexes_query(self._check.version, self._check.is_mariadb, table_names)
+        self._cursor_run(cursor, query=query, params=db_name)
         rows = cursor.fetchall()
+        if not rows:
+            return
+        table_index_dict = defaultdict(lambda: defaultdict(lambda: {}))
         for row in rows:
-            table_name = str(row.pop("table_name"))
+            table_name = str(row["table_name"])
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
-            if "nullables" in row:
-                nullables_arr = row["nullables"].split(',')
-                nullables_converted = ""
-                for s in nullables_arr:
-                    if s.lower() == "yes":
-                        nullables_converted += "true,"
-                    else:
-                        nullables_converted += "false,"
-                row["nullables"] = nullables_converted[:-1]
-            table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
+            index_name = str(row["name"])
+            index_data = table_index_dict[table_name][index_name]
+
+            # Update index-level info
+            index_data["name"] = index_name
+
+            # in-memory table BTREE indexes have no cardinality apparently, so we default to 0
+            # https://bugs.mysql.com/bug.php?id=58520
+            index_data["cardinality"] = int(row["cardinality"]) if row["cardinality"] is not None else 0
+            index_data["index_type"] = str(row["index_type"])
+            index_data["non_unique"] = bool(row["non_unique"])
+            if row["expression"]:
+                index_data["expression"] = str(row["expression"])
+
+            # Add column info, if exists
+            if row["column_name"]:
+                index_data.setdefault("columns", [])
+                column = {"name": row["column_name"], "nullable": bool(row["nullable"].lower() == "yes")}
+                if row["sub_part"]:
+                    column["sub_part"] = int(row["sub_part"])
+                if row["collation"]:
+                    column["collation"] = str(row["collation"])
+                if row["packed"]:
+                    column["packed"] = str(row["packed"])
+                index_data["columns"].append(column)
+
+        for table_name, index_dict in table_index_dict.items():
+            table_list[table_name_to_table_index[table_name]]["indexes"] = list(index_dict.values())
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
@@ -363,7 +406,43 @@ class DatabasesData:
     def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(cursor, query=SQL_PARTITION.format(table_names), params=db_name)
         rows = cursor.fetchall()
+        if not rows:
+            return
+        table_partitions_dict = defaultdict(
+            lambda: defaultdict(
+                lambda: {
+                    "table_rows": 0,
+                    "data_length": 0,
+                }
+            )
+        )
+
         for row in rows:
-            table_name = str(row.pop("table_name"))
+            table_name = str(row["table_name"])
             table_list[table_name_to_table_index[table_name]].setdefault("partitions", [])
-            table_list[table_name_to_table_index[table_name]]["partitions"].append(row)
+            partition_name = str(row["name"])
+            partition_data = table_partitions_dict[table_name][partition_name]
+
+            # Update partition-level info
+            partition_data["name"] = partition_name
+            partition_data["partition_ordinal_position"] = int(row["partition_ordinal_position"])
+            partition_data["partition_method"] = str(row["partition_method"])
+            partition_data["partition_expression"] = str(row["partition_expression"]).strip().lower()
+            partition_data["partition_description"] = str(row["partition_description"])
+            partition_data["table_rows"] += int(row["table_rows"])
+            partition_data["data_length"] += int(row["data_length"])
+
+            # Add subpartition info, if exists
+            if row["subpartition_name"]:
+                partition_data.setdefault("subpartitions", [])
+                subpartition = {
+                    "name": row["subpartition_name"],
+                    "subpartition_ordinal_position": int(row["subpartition_ordinal_position"]),
+                    "subpartition_method": str(row["subpartition_method"]),
+                    "subpartition_expression": str(row["subpartition_expression"]).strip().lower(),
+                    "table_rows": int(row["table_rows"]),
+                    "data_length": int(row["data_length"]),
+                }
+                partition_data["subpartitions"].append(subpartition)
+        for table_name, partitions_dict in table_partitions_dict.items():
+            table_list[table_name_to_table_index[table_name]]["partitions"] = list(partitions_dict.values())

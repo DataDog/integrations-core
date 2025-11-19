@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6b760149-4a9f-4ec7-a5bf-081fcd1d75b0",
   "app_id": "kubevirt-api",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -44,9 +45,6 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": ["virt-api"]
-    },
-    "dashboards": {
-      "KubeVirt Overview": "assets/dashboards/kubevirt_overview.json"
     }
   },
   "author": {

@@ -48,18 +48,19 @@ instances:
     ## @param use_openmetrics - boolean - optional - default: false
     ## Use the OpenMetrics V2 implementation for more features and better performance.
     ## This implementation is only available for Istio >= 1.5, and should be used with 
-    ## `istiod_endpoint` and/or `istio_mesh_endpoint`.
+    ## `istiod_endpoint` or `istio_mesh_endpoint`.
     #
   - use_openmetrics: true
 
     ## @param istiod_endpoint - string - optional
     ## Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
-    ## Only available for Istio >= v1.5.
+    ## Only available for Istio >= v1.5. Cannot be used in combination with `istio_mesh_endpoint` in the same instance.
     #
     # istiod_endpoint: http://istiod.istio-system:15014/metrics
 
     ## @param istio_mesh_endpoint - string - optional
     ## To enable Istio metrics you must specify the url exposing the API.
+    ## Cannot be used in combination with `istiod_endpoint` in the same instance.
     ## Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
     ## the CPP extension to process Protocol buffer messages coming from the api. Depending
     ## on the metrics volume, the check may run very slowly.
@@ -82,22 +83,24 @@ instances:
     ##
     ## 1. If the item is a string, then it represents the exposed metric name, and
     ##    the sent metric name will be identical. For example:
-    ##
+    ##      ```
     ##      extra_metrics:
     ##      - <METRIC_1>
     ##      - <METRIC_2>
+    ##      ```
     ## 2. If the item is a mapping, then the keys represent the exposed metric names.
     ##
-    ##      a. If a value is a string, then it represents the sent metric name. For example:
-    ##
+    ##      1. If a value is a string, then it represents the sent metric name. For example:
+    ##           ```
     ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
     ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##           ```
+    ##      2. If a value is a mapping, then it must have a `name` and/or `type` key.
     ##         The `name` represents the sent metric name, and the `type` represents how
     ##         the metric should be handled, overriding any type information the endpoint
     ##         may provide. For example:
-    ##
+    ##           ```
     ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>:
     ##               name: <SENT_METRIC_1>
@@ -105,7 +108,7 @@ instances:
     ##           - <EXPOSED_METRIC_2>:
     ##               name: <SENT_METRIC_2>
     ##               type: <METRIC_TYPE_2>
-    ##
+    ##           ```
     ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
     ##
     ## Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
@@ -115,13 +118,19 @@ instances:
     ## https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
     ##
     ## Regular expressions may be used to match the exposed metric names, for example:
-    ##
+    ##   ```
     ##   extra_metrics:
     ##   - ^network_(ingress|egress)_.+
     ##   - .+:
     ##       type: gauge
+    ##   ```
     #
-    # extra_metrics: []
+    # extra_metrics:
+    #   - <METRIC_1>
+    #   - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+    #   - <EXPOSED_METRIC_3>:
+    #       name: <SENT_METRIC_3>
+    #       type: <METRIC_TYPE_3>
 
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
@@ -255,9 +264,9 @@ instances:
     ## exposed metrics from which to share labels, and the values are mappings that configure the
     ## sharing behavior. Each mapping must have at least one of the following keys:
     ##
-    ##   labels - This is a list of labels to share. All labels are shared if this is not set.
-    ##   match - This is a list of labels to match on other metrics as a condition for sharing.
-    ##   values - This is a list of allowed values as a condition for sharing.
+    ##   - labels - This is a list of labels to share. All labels are shared if this is not set.
+    ##   - match - This is a list of labels to match on other metrics as a condition for sharing.
+    ##   - values - This is a list of allowed values as a condition for sharing.
     ##
     ## To unconditionally share all labels of a metric, set it to `true`.
     ##
@@ -265,20 +274,18 @@ instances:
     ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
     ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
     ## to all other metrics if their value is equal to `23` or `42`.
-    ##
-    ##   share_labels:
-    ##     metric_a: true
-    ##     metric_b:
-    ##       labels:
-    ##       - node
-    ##       match:
-    ##       - pod
-    ##     metric_c:
-    ##       values:
-    ##       - 23
-    ##       - 42
     #
-    # share_labels: {}
+    # share_labels:
+    #   metric_a: true
+    #   metric_b:
+    #     labels:
+    #     - node
+    #     match:
+    #     - pod
+    #   metric_c:
+    #     values:
+    #     - 23
+    #     - 42
 
     ## @param cache_shared_labels - boolean - optional - default: true
     ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
@@ -346,7 +353,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -369,7 +376,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
@@ -568,6 +575,16 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

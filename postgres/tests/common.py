@@ -9,15 +9,18 @@ import pytest
 from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.postgres.util import (
     CHECKSUM_METRICS,
     NEWER_14_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
+    QUERY_PG_REPLICATION_STATS_METRICS,
+    QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
-    REPLICATION_STATS_METRICS,
+    QUERY_PG_WAIT_EVENT_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     STAT_IO_METRICS,
@@ -41,8 +44,11 @@ PASSWORD_ADMIN = 'dd_admin'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
+POSTGRES_LOCALE = os.environ.get('POSTGRES_LOCALE', "UTF8")
 
-REPLICA_CONTAINER_NAME = 'compose-postgres_replica-1'
+REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
+REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
+REPLICA_LOGICAL_1_NAME = 'compose-postgres_logical_replica-1'
 USING_LATEST = False
 
 if POSTGRES_VERSION is not None:
@@ -93,14 +99,13 @@ COMMON_BGW_METRICS = [
     'postgresql.bgwriter.buffers_checkpoint',
     'postgresql.bgwriter.buffers_clean',
     'postgresql.bgwriter.maxwritten_clean',
-    'postgresql.bgwriter.buffers_backend',
     'postgresql.bgwriter.buffers_alloc',
-    'postgresql.bgwriter.buffers_backend_fsync',
     'postgresql.bgwriter.write_time',
     'postgresql.bgwriter.sync_time',
 ]
 
 COMMON_BGW_METRICS_PG_ABOVE_94 = ['postgresql.archiver.archived_count', 'postgresql.archiver.failed_count']
+COMMON_BGW_METRICS_PG_BELOW_17 = ['postgresql.bgwriter.buffers_backend', 'postgresql.bgwriter.buffers_backend_fsync']
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 CONNECTION_METRICS_DB = ['postgresql.connections']
 COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
@@ -151,13 +156,17 @@ def _get_expected_tags(
     role='master',
     **kwargs,
 ):
-    base_tags = pg_instance['tags'] + [f'port:{pg_instance["port"]}']
+    base_tags = (
+        pg_instance['tags']
+        + [f'port:{pg_instance["port"]}']
+        + [f'database_hostname:{check.database_hostname}', f'database_instance:{check.database_identifier}']
+    )
     if role:
         base_tags.append(f'replication_role:{role}')
     if with_db:
         base_tags.append(f'db:{pg_instance["dbname"]}')
     if with_host:
-        base_tags.append(f'dd.internal.resource:database_instance:{check.resolved_hostname}')
+        base_tags.append(f'dd.internal.resource:database_instance:{check.database_identifier}')
     if with_cluster_name and check.cluster_name:
         base_tags.append(f'postgresql_cluster_name:{check.cluster_name}')
     if with_sys_id and check.system_identifier:
@@ -197,9 +206,9 @@ def assert_metric_at_least(
             found_values += 1
 
     if count:
-        assert (
-            found_values == count
-        ), f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
+        assert found_values == count, (
+            f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
+        )
     if min_count:
         assert found_values >= min_count, (
             f'Expected to have at least {min_count} with tags {expected_tags} values for metric {metric_name},'
@@ -234,7 +243,7 @@ def check_db_count(aggregator, expected_tags, count=1):
         count=count,
         tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public'],
     )
-    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=15, count=1)
 
 
 def check_connection_metrics(aggregator, expected_tags, count=1):
@@ -262,16 +271,34 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
         aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
 
 
-def check_stat_replication(aggregator, expected_tags, count=1):
+def check_stat_replication_physical_slot(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10:
         return
     replication_tags = expected_tags + [
         'wal_app_name:walreceiver',
-        'wal_client_addr:{}'.format(get_container_ip(REPLICA_CONTAINER_NAME)),
+        f'wal_client_addr:{get_container_ip(REPLICA_CONTAINER_1_NAME)}',
+        'wal_state:streaming',
+        'wal_sync_state:async',
+        'slot_name:replication_slot',
+        'slot_type:physical',
+    ]
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_STATS_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
+
+
+def check_stat_replication_no_slot(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10:
+        return
+    wal_app_name = 'replica2'
+    if float(POSTGRES_VERSION) < 12:
+        wal_app_name = 'walreceiver'
+    replication_tags = expected_tags + [
+        f'wal_app_name:{wal_app_name}',
+        f'wal_client_addr:{get_container_ip(REPLICA_CONTAINER_2_NAME)}',
         'wal_state:streaming',
         'wal_sync_state:async',
     ]
-    for metric_name in _iterate_metric_name(REPLICATION_STATS_METRICS):
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_STATS_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
 
 
@@ -314,6 +341,7 @@ def check_replication_slots(aggregator, expected_tags, count=1):
     for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS):
         if 'slot_type:physical' in expected_tags and metric_name in [
             'postgresql.replication_slot.confirmed_flush_delay_bytes',
+            'postgresql.replication_slot.catalog_xmin_age',
         ]:
             continue
         if 'slot_type:logical' in expected_tags and metric_name in [
@@ -328,6 +356,13 @@ def check_replication_slots_stats(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14.0:
         return
     for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS_STATS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_wait_event_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10.0:
+        return
+    for metric_name in _iterate_metric_name(QUERY_PG_WAIT_EVENT_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
@@ -360,6 +395,10 @@ def check_bgw_metrics(aggregator, expected_tags, count=1):
     for name in COMMON_BGW_METRICS:
         aggregator.assert_metric(name, count=count, tags=expected_tags)
 
+    if float(POSTGRES_VERSION) < 17:
+        for name in COMMON_BGW_METRICS_PG_BELOW_17:
+            aggregator.assert_metric(name, count=count, tags=expected_tags)
+
     if float(POSTGRES_VERSION) >= 9.4:
         for name in COMMON_BGW_METRICS_PG_ABOVE_94:
             aggregator.assert_metric(name, count=count, tags=expected_tags)
@@ -369,7 +408,27 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 13.0:
         return
 
-    slru_caches = ['Subtrans', 'Serial', 'MultiXactMember', 'Xact', 'other', 'Notify', 'CommitTs', 'MultiXactOffset']
+    slru_caches = [
+        'subtransaction',
+        'serializable',
+        'multixact_member',
+        'transaction',
+        'other',
+        'notify',
+        'commit_timestamp',
+        'multixact_offset',
+    ]
+    if float(POSTGRES_VERSION) < 17.0:
+        slru_caches = [
+            'Subtrans',
+            'Serial',
+            'MultiXactMember',
+            'Xact',
+            'other',
+            'Notify',
+            'CommitTs',
+            'MultiXactOffset',
+        ]
     for metric_name in _iterate_metric_name(SLRU_METRICS):
         for slru_cache in slru_caches:
             aggregator.assert_metric(
@@ -428,6 +487,14 @@ def check_subscription_state_metrics(aggregator, expected_tags, count=1):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
+def check_recovery_prefetch_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 15.0:
+        return
+
+    for metric_name in _iterate_metric_name(QUERY_PG_STAT_RECOVERY_PREFETCH):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
 def check_subscription_stats_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 15:
         return
@@ -452,3 +519,8 @@ def check_stat_io_metrics(aggregator, expected_tags, count=1):
     ]
     for metric_name in _iterate_metric_name(STAT_IO_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)
+
+
+def check_metrics_metadata(aggregator):
+    exclude = ['dd.postgres.operation.time']
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude)

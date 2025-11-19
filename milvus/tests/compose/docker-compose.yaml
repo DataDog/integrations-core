@@ -1,0 +1,41 @@
+services:
+  milvus:
+    image: milvusdb/milvus:v2.5.0
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      - ETCD_USE_EMBED=true
+      - ETCD_DATA_DIR=/var/lib/milvus/etcd
+      - ETCD_CONFIG_PATH=/milvus/configs/embedEtcd.yaml
+      - COMMON_STORAGETYPE=local
+    volumes:
+      - /tmp/volumes/milvus:/var/lib/milvus
+      - ./embedEtcd.yaml:/milvus/configs/embedEtcd.yaml
+      - ./user.yaml:/milvus/configs/user.yaml
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+      - "2379:2379"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      timeout: 20s
+      start_period: 90s
+      retries: 3
+    command: milvus run standalone
+
+  script-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: script-runner
+    depends_on:
+      milvus:
+        condition: service_healthy
+    volumes:
+      - ./script.py:/app/script.py
+    working_dir: /app
+    command: ["python", "script.py"]
+    environment:
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530

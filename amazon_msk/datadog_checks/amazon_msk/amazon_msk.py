@@ -103,7 +103,11 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._scraper_config['custom_tags'])
 
         for node_info in response['NodeInfoList']:
-            broker_info = node_info['BrokerNodeInfo']
+            broker_info = node_info.get('BrokerNodeInfo')
+            if not broker_info:
+                self.log.debug('NodeInfo does not contain BrokerNodeInfo, skipping')
+                continue
+
             self._scraper_config['_metric_tags'] = ['broker_id:{}'.format(broker_info['BrokerId'])]
 
             for endpoint in broker_info['Endpoints']:

@@ -127,12 +127,23 @@ class LinuxNetwork(Network):
         #     lo:45890956   112797   0    0    0     0          0         0    45890956   112797    0    0    0     0       0          0 # noqa: E501
         #   eth0:631947052 1042233   0   19    0   184          0      1206  1208625538  1320529    0    0    0     0       0          0 # noqa: E501
         #   eth1:       0        0   0    0    0     0          0         0           0        0    0    0    0     0       0          0 # noqa: E501
+        sys_net_location = '/sys/class/net'
         for line in lines[2:]:
             cols = line.split(':', 1)
             x = cols[1].split()
             # Filter inactive interfaces
             if self.parse_int(x[0]) or self.parse_int(x[8]):
                 iface = cols[0].strip()
+
+                # Try to get the NIC speed and MTU for additional tagging
+                meta_tags = []
+                speed_path = os.path.join(sys_net_location, iface, 'speed')
+                mtu_path = os.path.join(sys_net_location, iface, 'mtu')
+                if speed_value := self._read_int_file(speed_path):
+                    meta_tags.extend(['speed:' + str(speed_value)])
+                if mtu_value := self._read_int_file(mtu_path):
+                    meta_tags.extend(['mtu:' + str(mtu_value)])
+
                 metrics = {
                     'bytes_rcvd': self.parse_int(x[0]),
                     'bytes_sent': self.parse_int(x[8]),
@@ -143,7 +154,7 @@ class LinuxNetwork(Network):
                     'packets_out.drop': self.parse_int(x[11]),
                     'packets_out.error': self.parse_int(x[10]) + self.parse_int(x[11]),
                 }
-                self.submit_devicemetrics(iface, metrics, custom_tags)
+                self.submit_devicemetrics(iface, metrics, meta_tags + custom_tags)
                 self._handle_ethtool_stats(iface, custom_tags)
 
         netstat_data = {}
@@ -318,7 +329,7 @@ class LinuxNetwork(Network):
 
     def _get_iface_sys_metrics(self, custom_tags):
         sys_net_location = '/sys/class/net'
-        sys_net_metrics = ['mtu', 'tx_queue_len']
+        sys_net_metrics = ['mtu', 'tx_queue_len', 'up']
         try:
             ifaces = os.listdir(sys_net_location)
         except OSError as e:
@@ -326,7 +337,10 @@ class LinuxNetwork(Network):
             return None
         for iface in ifaces:
             for metric_name in sys_net_metrics:
-                metric_file_location = os.path.join(sys_net_location, iface, metric_name)
+                metric_file_name = metric_name
+                if metric_name == 'up':
+                    metric_file_name = 'carrier'
+                metric_file_location = os.path.join(sys_net_location, iface, metric_file_name)
                 value = self._read_int_file(metric_file_location)
                 if value is not None:
                     self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])

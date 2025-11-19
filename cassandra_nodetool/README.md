@@ -6,6 +6,8 @@
 
 This check collects metrics for your Cassandra cluster that are not available through [jmx integration][2]. It uses the `nodetool` utility to collect them.
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 ### Installation
@@ -82,7 +84,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard_2.png
 [2]: https://github.com/DataDog/integrations-core/tree/master/cassandra
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/datadog_checks/cassandra_nodetool/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

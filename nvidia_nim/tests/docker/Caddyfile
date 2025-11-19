@@ -1,0 +1,15 @@
+:8000 {
+  route /metrics {
+    rewrite * /metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+
+  route /v1/version {
+    rewrite * /version
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}

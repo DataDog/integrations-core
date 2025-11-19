@@ -23,13 +23,13 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]~=33.1",
+    "datadog-checks-dev[cli]~=35.3",
     "hatch>=1.8.1",
     "httpx",
     "jsonpointer",
@@ -40,6 +40,10 @@ dependencies = [
     "tomli-w",
     "tomlkit",
     "tqdm",
+    "requests",
+    "matplotlib",
+    "squarify",
+    "datadog",
 ]
 dynamic = ["version"]
 
@@ -72,16 +76,19 @@ include = ["src"]
 [tool.hatch.build.targets.app]
 scripts = ["ddev"]
 
+# Keep Black configuration to generate models through validate
+# Switch to Ruff after it provides a Python API
 [tool.black]
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py312"]
+target-version = ["py313"]
 extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
+extend = "../pyproject.toml"
 exclude = []
-target-version = "py312"
+target-version = "py313"
 line-length = 120
 
 [tool.ruff.lint]
@@ -95,6 +102,7 @@ select = [
   "G",
   "W",
   "I",
+  "TID252",
 ]
 ignore = [
   # From legacy flake8 settings
@@ -112,11 +120,17 @@ unfixable = [
   "F401",
 ]
 
+[tool.ruff.format]
+quote-style = "preserve"
+exclude = [
+  "src/ddev/_version.py"
+]
+
 [tool.ruff.lint.isort]
 known-first-party = ["ddev"]
 
 [tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
+ban-relative-imports = "parents"
 
 [tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports

@@ -7,10 +7,10 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, EXT_METRICS, INSTANCES, RBAC_METRICS
+from .common import ENVOY_VERSION, EXT_AUTHZ_METRICS, INSTANCES, RBAC_METRICS
 
 CHECK_NAME = 'envoy'
-UNIQUE_METRICS = EXT_METRICS + RBAC_METRICS
+UNIQUE_METRICS = EXT_AUTHZ_METRICS + RBAC_METRICS
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment'), pytest.mark.flaky]
 
@@ -37,7 +37,7 @@ def test_success(aggregator, check, dd_run_check):
                     all(any(tag in mt for mt in m.tags) for tag in tag_set)
                     for m in collected_metrics
                     if len(m.tags) > 1
-                ), ('tags ' + str(expected_tags) + ' not found in ' + metric)
+                ), 'tags ' + str(expected_tags) + ' not found in ' + metric
 
         metrics_collected += len(collected_metrics)
     assert metrics_collected >= 445

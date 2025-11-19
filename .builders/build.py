@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -118,10 +119,14 @@ def build_macos():
             'DD_PY2_BUILDENV_PATH': builder_root / 'py2' / 'bin' / 'python',
             # Path where we'll install libraries that we build
             'DD_PREFIX_PATH': prefix_path,
+            'PATH': f'{prefix_path}/bin:{os.environ["PATH"]}',
             # Common compilation flags
             'LDFLAGS': f'-L{prefix_path}/lib',
             'CFLAGS': f'-I{prefix_path}/include -O2',
             'CXXFLAGS': f'-I{prefix_path}/include -O2',
+            # Use single-arch builds to avoid bundling extraneous binary payload and enable `require_archs` verification
+            'ARCHFLAGS': f'-arch {os.uname().machine}',
+            '_PYTHON_HOST_PLATFORM': f'macosx-{os.environ["MACOSX_DEPLOYMENT_TARGET"]}-{os.uname().machine}',
             # Build command for extra platform-specific build steps
             'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
         }
@@ -151,6 +156,10 @@ def build_macos():
         # Move the final requirements file to the output directory
         final_requirements = mount_dir / 'frozen.txt'
         shutil.move(final_requirements, output_dir)
+
+        # Move the dependency sizes to the output directory
+        dependency_sizes_dir = mount_dir / 'sizes.json'
+        shutil.move(dependency_sizes_dir, output_dir)
 
 
 def build_image():
@@ -223,7 +232,7 @@ def build_image():
 
             # Assumption: if a digest was provided we're not changing the build image and therefore
             # we're fine with reusing wheels we've built previously
-            if args.digest or True:
+            if args.digest:
                 script_args.append('--use-built-index')
 
             check_process([
@@ -244,6 +253,9 @@ def build_image():
 
             # Move the final requirements file to the output directory
             shutil.move(final_requirements, output_dir)
+
+            # Move the dependency sizes to the output directory
+            shutil.move(mount_dir / 'sizes.json', output_dir)
 
 
 def main():

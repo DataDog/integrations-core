@@ -1,0 +1,70 @@
+  {
+  "manifest_version": "2.0.0",
+  "app_uuid": "69a8e7df-7ed3-451c-948b-43303a5219e3",
+  "app_id": "delinea-secret-server",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Delinea Secret Server logs.",
+    "title": "Delinea Secret Server",
+    "media": [
+      {
+        "caption": "Delinea Secret Server - Overview 1",
+        "image_url": "images/delinea_secret_server_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Delinea Secret Server - Overview 2",
+        "image_url": "images/delinea_secret_server_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Delinea Secret Server - Overview 3",
+        "image_url": "images/delinea_secret_server_overview_3.png",
+        "media_type": "image"
+      },{
+        "caption": "Delinea Secret Server - Overview 4",
+        "image_url": "images/delinea_secret_server_overview_4.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 41132309,
+      "source_type_name": "Delinea Secret Server",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Delinea Secret Server - Overview": "assets/dashboards/delinea_secret_server_overview.json"
+    },
+    "logs": {
+      "source": "delinea-secret-server"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

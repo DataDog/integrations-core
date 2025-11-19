@@ -2,13 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Callable, Dict  # noqa: F401
 from unittest.mock import MagicMock
 
 import pytest
 
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.tibco_ems import TibcoEMSCheck
 
@@ -152,3 +149,17 @@ def test_parse_factory(data, regex, expected_result):
     result = check._parse_factory(data.decode('utf-8'), regex)
 
     assert result == expected_result
+
+
+def test_base_tags(dd_run_check, instance):
+    check = TibcoEMSCheck('tibco_ems', {}, [instance])
+    check.run_tibco_command = MagicMock(return_value=mock_output('show_all'))
+    dd_run_check(check)
+    assert len(check.tags) == 3
+
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    # assert the lenght of tags does not grow indefinitely
+    assert len(check.tags) == 3

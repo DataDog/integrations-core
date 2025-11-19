@@ -131,9 +131,20 @@ instances:
     # namespace: default
 
     ## @param send_ndm_metadata - boolean - optional - default: false
-    ## Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
+    ## Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent
+    ## and to allow Cisco ACI fault collection to be enabled.
     #
     # send_ndm_metadata: false
+
+    ## @param send_faultinst_faults - boolean - optional - default: false
+    ## Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
+    #
+    # send_faultinst_faults: false
+
+    ## @param send_faultdelegate_faults - boolean - optional - default: false
+    ## Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
+    #
+    # send_faultdelegate_faults: false
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -260,6 +271,16 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

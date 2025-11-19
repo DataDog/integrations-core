@@ -11,6 +11,8 @@ Get metrics from the Kubernetes service in real time to:
 
 Note: This check only works with Agent v5. For Agent v6+, see the [kubelet check][2].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -110,7 +112,7 @@ The docker_daemon check ignores them through a default exclusion list, but they 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kubernetes/images/kubernetes_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/kubelet
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/kubernetes/
 [5]: https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

@@ -4,6 +4,8 @@
 
 This check monitors [Cilium][1] through the Datadog Agent. The integration can either collect metrics from the `cilium-agent` or `cilium-operator`.
 
+**Minimum Agent version:** 6.15.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -174,7 +176,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://cilium.io
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset#installation
@@ -184,4 +186,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/cilium/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
 [12]: https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
-[13]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[13]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

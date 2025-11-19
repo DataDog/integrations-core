@@ -1,0 +1,83 @@
+{
+    "raw": {
+        "shard01/shard01a:27018,shard01b:27018": {
+            "db": "test",
+            "collections": 0,
+            "views": 0,
+            "objects": 0,
+            "avgObjSize": 0,
+            "dataSize": 0,
+            "storageSize": 0,
+            "numExtents": 0,
+            "indexes": 0,
+            "indexSize": 0,
+            "indexFreeStorageSize": 0,
+            "scaleFactor": 1,
+            "fileSize": 0,
+            "ok": 1.0
+        },
+        "shard03/shard03a:27020,shard03b:27020": {
+            "db": "test",
+            "collections": 0,
+            "views": 0,
+            "objects": 0,
+            "avgObjSize": 0,
+            "dataSize": 0,
+            "storageSize": 0,
+            "numExtents": 0,
+            "indexes": 0,
+            "indexSize": 0,
+            "indexFreeStorageSize": 0,
+            "scaleFactor": 1,
+            "fileSize": 0,
+            "ok": 1.0
+        },
+        "shard02/shard02a:27019,shard02b:27019": {
+            "db": "test",
+            "collections": 3,
+            "views": 0,
+            "objects": 316,
+            "avgObjSize": 27.556962025316455,
+            "dataSize": 8708.0,
+            "storageSize": 49152.0,
+            "numExtents": 0,
+            "indexes": 3,
+            "indexSize": 49152.0,
+            "indexFreeStorageSize": 1.0,
+            "scaleFactor": 1.0,
+            "ok": 1.0
+        }
+    },
+    "objects": 316,
+    "avgObjSize": 27.0,
+    "dataSize": 8708,
+    "storageSize": 49152,
+    "numExtents": 0,
+    "indexes": 3,
+    "indexSize": 49152,
+    "indexFreeStorageSize": 8556544.0,
+    "scaleFactor": 1,
+    "fileSize": 0,
+    "ok": 1.0,
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600245931,
+            "i": 1
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600245931,
+                "i": 1
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    }
+}

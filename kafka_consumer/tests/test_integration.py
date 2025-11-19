@@ -8,11 +8,12 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka.admin import AdminClient
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
-from .common import assert_check_kafka, assert_check_kafka_has_consumer_group_state_tag, metrics
+from .common import assert_check_kafka, metrics
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -34,13 +35,33 @@ def mocked_time():
     return 400
 
 
+def get_all_consumer_groups(kafka_instance):
+    """Get all consumer groups from Kafka cluster."""
+    config = {
+        "bootstrap.servers": kafka_instance['kafka_connect_str'],
+        "socket.timeout.ms": 1000,
+        "topic.metadata.refresh.interval.ms": 2000,
+    }
+    config.update(common.get_authentication_configuration(kafka_instance))
+    admin_client = AdminClient(config)
+
+    final_groups = set()
+    try:
+        groups_result = admin_client.list_consumer_groups().result()
+        for valid_group in groups_result.valid:
+            final_groups.add(valid_group.group_id)
+    except Exception as e:
+        print(f"Error getting final consumer groups: {e}")
+
+    return final_groups
+
+
 def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
     dd_run_check(check(kafka_instance))
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
-    assert_check_kafka_has_consumer_group_state_tag(aggregator, kafka_instance['consumer_groups'])
 
 
 def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):
@@ -467,3 +488,58 @@ def test_regex_consumer_groups(
     aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
 
     assert expected_warning in caplog.text
+
+
+@mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
+def test_data_streams_live_messages(dd_run_check, check, kafka_instance, datadog_agent):
+    cluster_id = common.get_cluster_id()
+    kafka_instance['live_messages_configs'] = [
+        {
+            'kafka': {
+                'cluster': cluster_id,
+                'topic': 'marvel',
+                'partition': 0,
+                'start_offset': 0,
+                'n_messages': 2,
+                'value_format': 'json',
+            },
+            'id': 'config_1_id',
+        }
+    ]
+    kafka_check = check(kafka_instance)
+    dd_run_check(kafka_check)
+
+    # Verify that live messages is not leaving behind any new consumer groups
+    final_groups = get_all_consumer_groups(kafka_instance)
+    assert final_groups == {'my_consumer'}
+
+    expected_logs = [
+        {
+            'timestamp': 400 * 1000,
+            'technology': 'kafka',
+            'cluster': str(cluster_id),
+            'config_id': 'config_1_id',
+            'topic': 'marvel',
+            'partition': '0',
+            'offset': '0',
+            'feature': 'data_streams_messages',
+            'message_value': '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+            'ddtags': 'optional:tag1',
+        },
+        {
+            'timestamp': 400 * 1000,
+            'technology': 'kafka',
+            'cluster': str(cluster_id),
+            'config_id': 'config_1_id',
+            'topic': 'marvel',
+            'partition': '0',
+            'offset': '1',
+            'feature': 'data_streams_messages',
+            'message_value': '{"name": "Bruce Banner", "age": 45,\
+ "transaction_amount": 456, "currency": "dollar"}',
+            'value_schema_id': '350',
+            'message_key': '{"name": "Bruce Banner"}',
+            'ddtags': 'optional:tag1',
+        },
+    ]
+    datadog_agent.assert_logs(kafka_check.check_id, expected_logs)

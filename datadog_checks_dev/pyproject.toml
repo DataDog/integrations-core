@@ -26,13 +26,12 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "coverage>=5.0.3",
     "flaky>=3.8.0",
     "mock",
-    "psutil",
     "pytest==8.1.1",
     "pytest-asyncio>=0.23.4",
     "pytest-benchmark[histogram]>=4.0.0",
@@ -52,7 +51,7 @@ cli = [
     "aiohttp",
     "aiomultiprocess",
     "atomicwrites",
-    "beautifulsoup4>=4.9.3",
+    "beautifulsoup4==4.12.3",
     "black==23.12.1",  # TODO Remove once https://github.com/koxudaxi/datamodel-code-generator/issues/1821 is fixed
     "build>=0.7.0",
     "click~=8.1.6",

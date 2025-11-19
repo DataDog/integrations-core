@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2025-04-02",
+	"last_updated_at": "2025-04-02",
+	"title": "Appliance Function Suspension state",
+	"description": "The appliance has suspended new connections due to load",
+	"definition": {
+		"id": 168100621,
+		"name": "Appliance Function Suspension state",
+		"type": "query alert",
+		"query": "min(last_5m):max:appgate.apn_function_suspended{*} by {collective_name,site_name,appliance_name,func,name} > 2",
+		"message": "Appliance: {{appliance_name.name}} \nThe appliance has suspended new connections due to load",
+		"tags": [
+			"performance",
+			"integration:appgate_sdp"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 2,
+				"warning": 0
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60,
+			"on_missing_data": "default",
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:appgate-sdp"
+	]
+}

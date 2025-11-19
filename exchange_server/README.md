@@ -6,6 +6,8 @@ Get metrics from Microsoft Exchange Server
 
 - Visualize and monitor Exchange server performance
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -72,7 +74,7 @@ The Exchange server check does not include any service checks.
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/datadog_checks/exchange_server/data/conf.yaml.example

@@ -46,7 +46,7 @@
     type: string
   description: |
     The type of authentication to use. The available types (and related options) are:
-
+    ```
       - basic
         |__ username
         |__ password
@@ -69,7 +69,7 @@
         |__ aws_region
         |__ aws_host
         |__ aws_service
-
+    ```
     The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. /noqa
     Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials /noqa
 
@@ -100,6 +100,10 @@
   value:
     example: disabled
     type: string
+    enum: 
+      - required
+      - optional
+      - disabled
   description: |
     If your services use Kerberos authentication, you can specify the Kerberos
     strategy to use between:
@@ -287,6 +291,19 @@
       TLSv1.1
       TLSv1.2
       TLSv1.3
+- name: tls_ciphers
+  description: |
+    The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    `ALL` ciphers are used. For list of ciphers see: 
+    https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - 'TLS_AES_256_GCM_SHA384'
+      - 'TLS_CHACHA20_POLY1305_SHA256'
+      - 'TLS_AES_128_GCM_SHA256'
 - name: headers
   value:
     example:

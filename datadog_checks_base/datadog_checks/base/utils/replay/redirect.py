@@ -5,12 +5,12 @@ import logging
 import os
 import sys
 
-from ...checks import base
-from ...log import LOG_LEVEL_MAP, TRACE_LEVEL, _get_py_loglevel
-from ...utils.common import to_native_string
-from ...utils.metadata import core
-from ...utils.replay.constants import KNOWN_DATADOG_AGENT_SETTER_METHODS, EnvVars
-from ...utils.serialization import json
+from datadog_checks.base.checks import base
+from datadog_checks.base.log import LOG_LEVEL_MAP, TRACE_LEVEL, _get_py_loglevel
+from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.metadata import core
+from datadog_checks.base.utils.replay.constants import KNOWN_DATADOG_AGENT_SETTER_METHODS, EnvVars
 
 MESSAGE_INDICATOR = os.environ[EnvVars.MESSAGE_INDICATOR]
 LOG_METHODS = {log_level: log_method.lower() for log_method, log_level in LOG_LEVEL_MAP.items()}
@@ -30,7 +30,7 @@ class ReplayAggregator(object):
             print(
                 '{}:aggregator:{}'.format(
                     MESSAGE_INDICATOR,
-                    to_native_string(json.dumps({'method': method_name, 'args': list(args)[1:], 'kwargs': kwargs})),
+                    to_native_string(json.encode({'method': method_name, 'args': list(args)[1:], 'kwargs': kwargs})),
                 )
             )
 
@@ -49,11 +49,11 @@ class ReplayDatadogAgent(object):
             print(
                 '{}:datadog_agent:{}'.format(
                     MESSAGE_INDICATOR,
-                    to_native_string(json.dumps({'method': method_name, 'args': list(args), 'kwargs': kwargs})),
+                    to_native_string(json.encode({'method': method_name, 'args': list(args), 'kwargs': kwargs})),
                 )
             )
             if read:
-                return json.loads(sys.stdin.readline())['value']
+                return json.decode(sys.stdin.readline())['value']
 
         return method
 
@@ -63,7 +63,7 @@ class ReplayLogger(logging.Logger):
         print(
             '{}:log:{}'.format(
                 MESSAGE_INDICATOR,
-                to_native_string(json.dumps({'method': LOG_METHODS[level], 'args': [str(a) for a in args]})),
+                to_native_string(json.encode({'method': LOG_METHODS[level], 'args': [str(a) for a in args]})),
             )
         )
 
@@ -80,8 +80,8 @@ logging.getLogger().setLevel(_get_py_loglevel(base.datadog_agent.get_config('log
 def run_check(check_class):
     check = check_class(
         os.environ[EnvVars.CHECK_NAME],
-        json.loads(os.environ[EnvVars.INIT_CONFIG]),
-        [json.loads(os.environ[EnvVars.INSTANCE])],
+        json.decode(os.environ[EnvVars.INIT_CONFIG]),
+        [json.decode(os.environ[EnvVars.INSTANCE])],
     )
     check.check_id = os.environ[EnvVars.CHECK_ID]
 

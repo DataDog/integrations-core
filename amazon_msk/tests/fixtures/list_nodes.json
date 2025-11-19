@@ -1,6 +1,14 @@
 {
   "NodeInfoList": [
     {
+      "nodeType": "CONTROLLER",
+      "controllerNodeInfo": {
+        "endpoints": [
+          "b-2.msk-integrate.ch6uni.c6.kafka.us-east-1.amazonaws.com"
+        ]
+      }
+    },
+    {
       "AddedToClusterTime": "2019-11-22T23:44:28.725Z",
       "BrokerNodeInfo": {
         "AttachedENIId": "eni-12a34b56c78d90e",

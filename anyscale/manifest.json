@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e3d14556-99b3-4c17-a51a-4d66ef622601",
   "app_id": "anyscale",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

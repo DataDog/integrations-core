@@ -10,6 +10,10 @@ This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 - Track node-based stats: waiting processes, used sockets, used file descriptors, and more.
 - Monitor vhosts for aliveness and number of connections.
 
+Consider [Data Streams Monitoring][24] to enhance your RabbitMQ integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
+
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -36,15 +40,14 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
        url: http://<HOST>:15692
  ```
 
- This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. Datadog can also collect data from the [`/metrics/detailed` endpoint][22].
-
- ```yaml
+ This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. Datadog can also collect data from the [`/metrics/detailed` endpoint][22]. The metrics collected will depend on which families are included.
+```yaml
  instances:
    - prometheus_plugin:
        url: http://<HOST>:15692
-       unaggregated_endpoint: detailed?family=queue_coarse_metrics
+       unaggregated_endpoint: detailed?family=queue_coarse_metrics&family=queue_consumer_count&family=channel_exchange_metrics&family=channel_queue_exchange_metrics&family=node_coarse_metrics
  ```
- This enables scraping of the [`/metrics/detailed` endpoint][22] to collect queue coarse metrics.
+This configuration collects metrics for each queue, exchange, and node. See the [`/metrics/detailed` API documentation][22] for more information on the metrics provided by each family.
 
 ##### [RabbitMQ Management Plugin][4].
 
@@ -167,7 +170,7 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 The Prometheus Plugin exposes a different set of metrics from the Management Plugin.
 Here is what to be aware of as you migrate from the Management to the Prometheus Plugin.
 
-- Look up your metrics in [this table][23]. If a metric's description contains an `[OpenMetricsV2]` tag, then it is available in the Prometheus Plugin. Metrics available only in the Management Plugin do not have any tags in their descriptions.
+- Look up your metrics in [this table][23]. If a metric's description contains an `[OpenMetrics]` tag, then it is available in the Prometheus Plugin. Metrics available only in the Management Plugin do not have any tags in their descriptions.
 - Any dashboards and monitors using Management Plugin metrics do not function. Switch to the dashboards and monitors marked as *OpenMetrics Version*.
 - The default configuration collects aggregated metrics. This means, for example, that there are no metrics tagged by queue. Configure the option `prometheus_plugin.unaggregated_endpoint` to get metrics without aggregation.
 - The `rabbitmq.status` service check is replaced by `rabbitmq.openmetrics.health`. The service check `rabbitmq.aliveness` has no equivalent in the Prometheus Plugin.
@@ -194,7 +197,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://www.rabbitmq.com/management.html
 [5]: https://www.rabbitmq.com/rabbitmqctl.8.html#set_permissions
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -215,3 +218,4 @@ Additional helpful documentation, links, and articles:
 [21]: https://docs.datadoghq.com/containers/docker/integrations/?tab=dockeradv2
 [22]: https://www.rabbitmq.com/prometheus.html#detailed-endpoint
 [23]: https://docs.datadoghq.com/integrations/rabbitmq/?tab=host#metrics
+[24]: https://docs.datadoghq.com/data_streams/

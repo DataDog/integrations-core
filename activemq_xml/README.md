@@ -7,6 +7,8 @@ Get metrics from ActiveMQ XML in real time to:
 - Visualize and monitor ActiveMQ XML states.
 - Be notified about ActiveMQ XML failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -90,7 +92,7 @@ Need help? Contact [Datadog support][6].
 
 - [Monitor ActiveMQ metrics and performance][11]
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/datadog_checks/activemq_xml/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/developers/metrics/custom_metrics/

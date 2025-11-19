@@ -6,6 +6,8 @@ This check monitors the availability and uptime of non-Datadog StatsD servers. I
 
 This check does **NOT** forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -101,7 +103,7 @@ Additional helpful documentation, links, and articles:
 - [Visualize StatsD metrics with Counts Graphing][11]
 
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/statsd/datadog_checks/statsd/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

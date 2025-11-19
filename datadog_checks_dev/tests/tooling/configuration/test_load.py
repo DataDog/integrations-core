@@ -37,32 +37,29 @@ def test_not_map():
 
 
 def test_no_name():
+    """
+    We used to have a top-level "name" field that we enforced.
+
+    We no longer need this field, we keep this test as proof.
+    """
+
     spec = get_spec(
         """
-        foo:
-        - bar
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          options: []
         """
     )
     spec.load()
 
-    assert 'test: Configuration specifications must contain a top-level `name` attribute' in spec.errors
-
-
-def test_name_not_string():
-    spec = get_spec(
-        """
-        name: 123
-        """
-    )
-    spec.load()
-
-    assert 'test: The top-level `name` attribute must be a string' in spec.errors
+    assert not spec.errors
 
 
 def test_no_version():
     spec = get_spec(
         """
-        name: foo
+        files: []
         """
     )
     spec.load()
@@ -73,7 +70,6 @@ def test_no_version():
 def test_version_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 123
         """
     )
@@ -85,7 +81,7 @@ def test_version_not_string():
 def test_version_loaded():
     spec = get_spec(
         """
-        name: foo
+        {}
         """,
         version='0.0.0',
     )
@@ -97,7 +93,6 @@ def test_version_loaded():
 def test_no_files():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         """
     )
@@ -109,7 +104,6 @@ def test_no_files():
 def test_files_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
           foo: bar
@@ -123,7 +117,6 @@ def test_files_not_array():
 def test_file_not_map():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - 5
@@ -139,7 +132,6 @@ def test_file_not_map():
 def test_file_no_name():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - foo: bar
@@ -155,7 +147,6 @@ def test_file_no_name():
 def test_file_name_duplicate():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -170,7 +161,6 @@ def test_file_name_duplicate():
 def test_example_file_name_duplicate():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -187,7 +177,6 @@ def test_example_file_name_duplicate():
 def test_file_name_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: 123
@@ -202,7 +191,6 @@ def test_file_name_not_string():
 def test_example_file_name_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -217,7 +205,6 @@ def test_example_file_name_not_string():
 def test_file_name_standard_incorrect():
     spec = get_spec(
         """
-        name: IBM Db2
         version: 0.0.0
         files:
         - name: foo.yaml
@@ -232,7 +219,6 @@ def test_file_name_standard_incorrect():
 def test_example_file_name_autodiscovery_incorrect():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: auto_conf.yaml
@@ -247,7 +233,6 @@ def test_example_file_name_autodiscovery_incorrect():
 def test_example_file_name_core_check_incorrect():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: conf.yaml.default
@@ -262,7 +247,6 @@ def test_example_file_name_core_check_incorrect():
 def test_example_file_name_standard_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -276,7 +260,6 @@ def test_example_file_name_standard_default():
 def test_example_file_name_autodiscovery_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: auto_conf.yaml
@@ -290,7 +273,6 @@ def test_example_file_name_autodiscovery_default():
 def test_example_file_name_core_check_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: conf.yaml.default
@@ -304,7 +286,6 @@ def test_example_file_name_core_check_default():
 def test_no_options():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -319,7 +300,6 @@ def test_no_options():
 def test_sections_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -336,7 +316,6 @@ def test_sections_not_array():
 def test_section_not_map():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -355,7 +334,6 @@ def test_section_not_map():
 def test_section_no_name():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -372,7 +350,6 @@ def test_section_no_name():
 def test_section_name_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -389,7 +366,6 @@ def test_section_name_not_string():
 def test_section_name_duplicate():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -407,7 +383,6 @@ def test_section_name_duplicate():
 def test_options_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -427,7 +402,6 @@ def test_options_not_array():
 def test_option_not_map():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -449,7 +423,6 @@ def test_option_not_map():
 def test_option_no_name():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -469,7 +442,6 @@ def test_option_no_name():
 def test_option_name_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -489,7 +461,6 @@ def test_option_name_not_string():
 def test_option_name_duplicate():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -510,7 +481,6 @@ def test_option_name_duplicate():
 def test_option_no_description():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -530,7 +500,6 @@ def test_option_no_description():
 def test_option_description_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -551,7 +520,6 @@ def test_option_description_not_string():
 def test_option_required_not_boolean():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -573,7 +541,6 @@ def test_option_required_not_boolean():
 def test_option_required_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -594,7 +561,6 @@ def test_option_required_default():
 def test_option_hidden_not_boolean():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -616,7 +582,6 @@ def test_option_hidden_not_boolean():
 def test_option_hidden_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -637,7 +602,6 @@ def test_option_hidden_default():
 def test_option_display_priority_not_integer():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -659,7 +623,6 @@ def test_option_display_priority_not_integer():
 def test_option_display_priority_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -680,7 +643,6 @@ def test_option_display_priority_default():
 def test_option_deprecation_not_mapping():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -702,7 +664,6 @@ def test_option_deprecation_not_mapping():
 def test_option_deprecation_value_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -725,7 +686,6 @@ def test_option_deprecation_value_not_string():
 def test_option_deprecation_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -746,7 +706,6 @@ def test_option_deprecation_default():
 def test_option_deprecation_ok():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -769,7 +728,6 @@ def test_option_deprecation_ok():
 def test_option_metadata_tags_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -791,7 +749,6 @@ def test_option_metadata_tags_not_array():
 def test_option_metadata_tags_value_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -814,7 +771,6 @@ def test_option_metadata_tags_value_not_string():
 def test_option_metadata_tags_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -835,7 +791,6 @@ def test_option_metadata_tags_default():
 def test_option_metadata_tags_ok():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -858,7 +813,6 @@ def test_option_metadata_tags_ok():
 def test_option_no_value_nor_options():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -876,7 +830,6 @@ def test_option_no_value_nor_options():
 def test_option_value_and_options():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -901,7 +854,6 @@ def test_option_value_and_options():
 def test_option_value_not_map():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -924,7 +876,6 @@ def test_option_value_not_map():
 def test_option_secret_not_boolean():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -948,7 +899,6 @@ def test_option_secret_not_boolean():
 def test_option_secret_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -971,7 +921,6 @@ def test_option_secret_default():
 def test_value_no_type():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -994,7 +943,6 @@ def test_value_no_type():
 def test_value_type_string_valid_basic():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1017,7 +965,6 @@ def test_value_type_string_valid_basic():
 def test_value_type_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1040,7 +987,6 @@ def test_value_type_not_string():
 def test_value_type_string_example_default_no_depth():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1063,7 +1009,6 @@ def test_value_type_string_example_default_no_depth():
 def test_value_type_string_example_default_nested():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1089,7 +1034,6 @@ def test_value_type_string_example_default_nested():
 def test_value_type_string_example_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1113,7 +1057,6 @@ def test_value_type_string_example_not_string():
 def test_value_type_string_example_valid():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1137,7 +1080,6 @@ def test_value_type_string_example_valid():
 def test_value_type_string_pattern_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1161,7 +1103,6 @@ def test_value_type_string_pattern_not_string():
 def test_value_type_integer_valid_basic():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1184,7 +1125,6 @@ def test_value_type_integer_valid_basic():
 def test_value_type_integer_example_default_no_depth():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1207,7 +1147,6 @@ def test_value_type_integer_example_default_no_depth():
 def test_value_type_integer_example_default_nested():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1233,7 +1172,6 @@ def test_value_type_integer_example_default_nested():
 def test_value_type_integer_example_not_number():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1257,7 +1195,6 @@ def test_value_type_integer_example_not_number():
 def test_value_type_integer_example_valid():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1281,7 +1218,6 @@ def test_value_type_integer_example_valid():
 def test_value_type_integer_correct_minimum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1305,7 +1241,6 @@ def test_value_type_integer_correct_minimum():
 def test_value_type_integer_incorrect_minimum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1329,7 +1264,6 @@ def test_value_type_integer_incorrect_minimum():
 def test_value_type_integer_correct_maximum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1353,7 +1287,6 @@ def test_value_type_integer_correct_maximum():
 def test_value_type_integer_incorrect_maximum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1377,7 +1310,6 @@ def test_value_type_integer_incorrect_maximum():
 def test_value_type_integer_correct_minimum_maximum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1402,7 +1334,6 @@ def test_value_type_integer_correct_minimum_maximum():
 def test_value_type_integer_incorrect_minimum_maximum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1430,7 +1361,6 @@ def test_value_type_integer_incorrect_minimum_maximum():
 def test_value_type_number_valid_basic():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1453,7 +1383,6 @@ def test_value_type_number_valid_basic():
 def test_value_type_number_example_default_no_depth():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1476,7 +1405,6 @@ def test_value_type_number_example_default_no_depth():
 def test_value_type_number_example_default_nested():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1502,7 +1430,6 @@ def test_value_type_number_example_default_nested():
 def test_value_type_number_example_not_number():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1526,7 +1453,6 @@ def test_value_type_number_example_not_number():
 def test_value_type_number_example_valid():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1550,7 +1476,6 @@ def test_value_type_number_example_valid():
 def test_value_type_number_correct_minimum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1574,7 +1499,6 @@ def test_value_type_number_correct_minimum():
 def test_value_type_number_incorrect_minimum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1598,7 +1522,6 @@ def test_value_type_number_incorrect_minimum():
 def test_value_type_number_correct_maximum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1622,7 +1545,6 @@ def test_value_type_number_correct_maximum():
 def test_value_type_number_incorrect_maximum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1646,7 +1568,6 @@ def test_value_type_number_incorrect_maximum():
 def test_value_type_number_correct_minimum_maximum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1671,7 +1592,6 @@ def test_value_type_number_correct_minimum_maximum():
 def test_value_type_number_incorrect_minimum_maximum():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1699,7 +1619,6 @@ def test_value_type_number_incorrect_minimum_maximum():
 def test_value_type_boolean_example_default_no_depth():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1722,7 +1641,6 @@ def test_value_type_boolean_example_default_no_depth():
 def test_value_type_boolean_example_default_nested():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1748,7 +1666,6 @@ def test_value_type_boolean_example_default_nested():
 def test_value_type_boolean_example_not_boolean():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1774,7 +1691,6 @@ def test_value_type_boolean_example_not_boolean():
 def test_value_type_boolean_example_valid():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1798,7 +1714,6 @@ def test_value_type_boolean_example_valid():
 def test_value_type_array_example_default_no_depth():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1823,7 +1738,6 @@ def test_value_type_array_example_default_no_depth():
 def test_value_type_array_example_default_nested():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1851,7 +1765,6 @@ def test_value_type_array_example_default_nested():
 def test_value_type_array_example_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1877,7 +1790,6 @@ def test_value_type_array_example_not_array():
 def test_value_type_array_example_valid():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1905,7 +1817,6 @@ def test_value_type_array_example_valid():
 def test_value_type_array_no_items():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1928,7 +1839,6 @@ def test_value_type_array_no_items():
 def test_value_type_array_items_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1952,7 +1862,6 @@ def test_value_type_array_items_not_array():
 def test_value_type_array_unique_items_not_boolean():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -1980,7 +1889,6 @@ def test_value_type_array_unique_items_not_boolean():
 def test_value_type_array_correct_min_items():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2006,7 +1914,6 @@ def test_value_type_array_correct_min_items():
 def test_value_type_array_incorrect_min_items():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2032,7 +1939,6 @@ def test_value_type_array_incorrect_min_items():
 def test_value_type_array_correct_max_items():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2058,7 +1964,6 @@ def test_value_type_array_correct_max_items():
 def test_value_type_array_incorrect_max_items():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2084,7 +1989,6 @@ def test_value_type_array_incorrect_max_items():
 def test_value_type_array_correct_min_items_max_items():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2111,7 +2015,6 @@ def test_value_type_array_correct_min_items_max_items():
 def test_value_type_array_incorrect_min_items_max_items():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2143,7 +2046,6 @@ def test_value_type_array_incorrect_min_items_max_items():
 def test_value_type_object_example_default_no_depth():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2167,7 +2069,6 @@ def test_value_type_object_example_default_no_depth():
 def test_value_type_object_example_default_nested():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2193,7 +2094,6 @@ def test_value_type_object_example_default_nested():
 def test_value_type_object_example_not_map():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2219,7 +2119,6 @@ def test_value_type_object_example_not_map():
 def test_value_type_object_example_valid():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2246,7 +2145,6 @@ def test_value_type_object_example_valid():
 def test_value_type_object_required_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2270,7 +2168,6 @@ def test_value_type_object_required_not_array():
 def test_value_type_object_required_empty():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2296,7 +2193,6 @@ def test_value_type_object_required_empty():
 def test_value_type_object_required_not_unique():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2324,7 +2220,6 @@ def test_value_type_object_required_not_unique():
 def test_value_type_object_properties_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2348,7 +2243,6 @@ def test_value_type_object_properties_default():
 def test_value_type_object_properties_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2372,7 +2266,6 @@ def test_value_type_object_properties_not_array():
 def test_value_type_object_properties_entry_not_map():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2399,7 +2292,6 @@ def test_value_type_object_properties_entry_not_map():
 def test_value_type_object_properties_entry_no_name():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2426,7 +2318,6 @@ def test_value_type_object_properties_entry_no_name():
 def test_value_type_object_properties_entry_name_not_string():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2452,7 +2343,6 @@ def test_value_type_object_properties_entry_name_not_string():
 def test_value_type_object_properties_valid():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2478,7 +2368,6 @@ def test_value_type_object_properties_valid():
 def test_value_type_object_properties_entry_name_not_unique():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2509,7 +2398,6 @@ def test_value_type_object_properties_entry_name_not_unique():
 def test_value_type_object_properties_required_not_met():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2541,7 +2429,6 @@ def test_value_type_object_properties_required_not_met():
 def test_value_type_object_additional_properties_invalid_type():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2568,7 +2455,6 @@ def test_value_type_object_additional_properties_invalid_type():
 def test_value_type_object_additional_properties_nested_error():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2602,7 +2488,6 @@ def test_value_type_object_additional_properties_nested_error():
 def test_value_type_object_additional_properties_nested_ok():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2635,7 +2520,6 @@ def test_value_type_object_additional_properties_nested_ok():
 def test_value_type_object_additional_properties_true_ok():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2659,7 +2543,6 @@ def test_value_type_object_additional_properties_true_ok():
 def test_value_type_unknown():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2685,7 +2568,6 @@ def test_value_type_unknown():
 def test_option_no_section():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2707,7 +2589,6 @@ def test_option_no_section():
 def test_multiple_default():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2730,7 +2611,6 @@ def test_multiple_default():
 def test_multiple_not_boolean():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2754,7 +2634,6 @@ def test_multiple_not_boolean():
 def test_template_unknown():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2782,7 +2661,6 @@ def test_template_unknown():
 def test_template_mapping():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2830,7 +2708,6 @@ def test_template_mapping():
 def test_template_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2883,6 +2760,7 @@ def test_template_array():
         'tls_private_key',
         'tls_ca_cert',
         'tls_protocols_allowed',
+        'tls_ciphers',
         'headers',
         'extra_headers',
         'timeout',
@@ -2904,8 +2782,7 @@ def test_template_array_empty():
 
         spec = get_spec(
             """
-            name: foo
-            version: 0.0.0
+                version: 0.0.0
             files:
             - name: test.yaml
               example_name: test.yaml.example
@@ -2938,8 +2815,7 @@ def test_template_array_primitive():
 
         spec = get_spec(
             """
-            name: foo
-            version: 0.0.0
+                version: 0.0.0
             files:
             - name: test.yaml
               example_name: test.yaml.example
@@ -2967,7 +2843,6 @@ def test_template_array_primitive():
 def test_template_primitive():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -2995,7 +2870,6 @@ def test_template_primitive():
 def test_template_hide_duplicate():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -3015,7 +2889,6 @@ def test_template_hide_duplicate():
 def test_value_one_of_with_type():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -3042,7 +2915,6 @@ def test_value_one_of_with_type():
 def test_value_one_of_not_array():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -3065,7 +2937,6 @@ def test_value_one_of_not_array():
 def test_value_one_of_single_type():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -3092,7 +2963,6 @@ def test_value_one_of_single_type():
 def test_value_one_of_type_not_mapping():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -3117,7 +2987,6 @@ def test_value_one_of_type_not_mapping():
 def test_value_one_of_type_recursive_validation_error():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -3147,7 +3016,6 @@ def test_value_one_of_type_recursive_validation_error():
 def test_value_one_of_type_super_recursive_validation_error():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml
@@ -3181,7 +3049,6 @@ def test_value_one_of_type_super_recursive_validation_error():
 def test_value_one_of_type_recursive_validation_success():
     spec = get_spec(
         """
-        name: foo
         version: 0.0.0
         files:
         - name: test.yaml

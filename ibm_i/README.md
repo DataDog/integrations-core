@@ -4,6 +4,8 @@
 
 This check monitors [IBM i][1] remotely through the Datadog Agent.
 
+**Minimum Agent version:** 7.31.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -77,7 +79,7 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://www.ibm.com/it-infrastructure/power/os/ibm-i
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://www.ibm.com/support/pages/ibm-i-access-client-solutions
 [5]: https://github.com/DataDog/integrations-core/blob/master/ibm_i/datadog_checks/ibm_i/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

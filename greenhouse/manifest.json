@@ -2,20 +2,32 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7cf95e39-874e-4179-91da-bd142ff391ee",
   "app_id": "greenhouse",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Greenhouse audit logs",
+    "description": "Gain insights into your organization's hiring activities by monitoring Greenhouse audit logs",
     "title": "Greenhouse",
-    "media": [],
+    "media": [
+      {
+        "caption": "Greenhouse - Audit Logs",
+        "image_url": "images/greenhouse_audit_image1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Greenhouse - Audit Logs",
+        "image_url": "images/greenhouse_audit_image2.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
-      "Offering::Integration",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -29,6 +41,12 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Greenhouse - Audit Logs": "assets/dashboards/greenhouse_audit_logs.json"
+    },
+    "logs": {
+      "source": "greenhouse"
     }
   },
   "author": {
@@ -36,6 +54,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

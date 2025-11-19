@@ -2,20 +2,28 @@
   "manifest_version": "2.0.0",
   "app_uuid": "9776e6c8-2031-4dda-98b5-3628b181625b",
   "app_id": "cisco-secure-email-threat-defense",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Cisco Secure Email Threat Defense logs",
+    "description": "Gain insights into Cisco Secure Email Threat Defense message logs.",
     "title": "Cisco Secure Email Threat Defense",
-    "media": [],
+    "media": [
+      {
+        "caption": "Cisco Secure Email Threat Defense",
+        "image_url": "images/cisco_secure_email_threat_defense.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
-      "Submitted Data Type::Logs",
-      "Offering::Integration"
+      "Category::Cloud",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
@@ -29,6 +37,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Cisco Secure Email Threat Defense": "assets/dashboards/cisco_secure_email_threat_defense.json"
     }
   },
   "author": {

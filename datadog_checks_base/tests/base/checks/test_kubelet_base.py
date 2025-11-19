@@ -3,12 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 import mock
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, urljoin
-from datadog_checks.base.utils.date import UTC
 from datadog_checks.dev import get_here
 
 HERE = get_here()
@@ -64,7 +63,7 @@ def test_compute_pod_expiration_datetime(monkeypatch):
     with mock.patch("datadog_checks.base.checks.kubelet_base.base.get_config", return_value="900"):
         expire = KubeletBase.compute_pod_expiration_datetime()
         assert expire is not None
-        now = datetime.utcnow().replace(tzinfo=UTC)
+        now = datetime.now(timezone.utc)
         assert abs((now - expire).seconds - 60 * 15) < 2
 
 

@@ -36,6 +36,10 @@ def instance_collect_tags():
     return False
 
 
+def instance_collect_vsan_data():
+    return False
+
+
 def instance_collection_level():
     return 1
 
@@ -66,6 +70,10 @@ def instance_hostname_transform():
 
 def instance_include_datastore_cluster_folder_tag():
     return True
+
+
+def instance_infrastructure_mode():
+    return 'full'
 
 
 def instance_max_historical_metrics():

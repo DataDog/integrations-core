@@ -101,7 +101,7 @@ def create_dependency_data():
     # dependency name ->
     #   Python major version ->
     #     dependency definition -> set of checks with definition
-    return defaultdict(lambda: {'py2': defaultdict(set), 'py3': defaultdict(set)})
+    return defaultdict(lambda: {'py3': defaultdict(set)})
 
 
 def load_dependency_data_from_requirements(req_file, dependencies, errors, check_name=None):
@@ -144,26 +144,12 @@ def load_dependency_data_from_metadata(integration, dependencies, errors):
 
 
 def set_project_dependency(project, dependency, check_name):
-    if 'python_version <' in dependency:
-        project['py2'][dependency].add(check_name)
-    elif 'python_version >' in dependency:
-        project['py3'][dependency].add(check_name)
-    else:
-        project['py2'][dependency].add(check_name)
-        project['py3'][dependency].add(check_name)
+    project['py3'][dependency].add(check_name)
 
 
 def update_project_dependency(project, dependency):
-    if 'python_version <' in dependency:
-        project['py2'][dependency] = project['py2'].popitem()[1]
-        return project['py2'][dependency]
-    elif 'python_version >' in dependency:
-        project['py3'][dependency] = project['py3'].popitem()[1]
-        return project['py3'][dependency]
-    else:
-        project['py2'][dependency] = project['py2'].popitem()[1]
-        project['py3'][dependency] = project['py3'].popitem()[1]
-        return project['py2'][dependency] | project['py3'][dependency]
+    project['py3'][dependency] = project['py3'].popitem()[1]
+    return project['py3'][dependency]
 
 
 def get_normalized_dependency(requirement):

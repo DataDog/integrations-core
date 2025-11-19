@@ -4,12 +4,12 @@
 import copy
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from pytest import fail
 from semver import VersionInfo
 
-from datadog_checks.postgres import PostgreSql, util
+from datadog_checks.postgres import util
 
 pytestmark = pytest.mark.unit
 
@@ -69,12 +69,14 @@ def test_get_instance_metrics_database_size_metrics(integration_check, pg_instan
 
 
 @pytest.mark.parametrize("collect_default_database", [True, False])
-def test_get_instance_with_default(pg_instance, collect_default_database):
+def test_get_instance_with_default(pg_instance, collect_default_database, integration_check):
     """
     Test the contents of the query string with different `collect_default_database` values
     """
     pg_instance['collect_default_database'] = collect_default_database
-    check = PostgreSql('postgres', {}, [pg_instance])
+    if not collect_default_database:
+        pg_instance['ignore_databases'] = ['postgres']
+    check = integration_check(pg_instance)
     check.version = VersionInfo(9, 2, 0)
     res = check.metrics_cache.get_instance_metrics(check.version)
     dbfilter = " AND psd.datname not ilike 'postgres'"
@@ -124,10 +126,10 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
 
     check = integration_check(pg_instance)
     try:
-        check.db_pool.get_connection(pg_instance['dbname'], 100)
-    except psycopg2.ProgrammingError as e:
+        check.db_pool.get_connection(pg_instance['dbname'])
+    except psycopg.ProgrammingError as e:
         fail(str(e))
-    except psycopg2.OperationalError:
+    except psycopg.OperationalError:
         # could not connect to server because there is no server running
         pass
 
@@ -142,6 +144,8 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'port:5432',
                 'foo:bar',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
             },
         ),
         (
@@ -152,27 +156,84 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'port:5432',
                 'server:localhost',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
             },
         ),
     ],
 )
-def test_server_tag_(disable_generic_tags, expected_tags, pg_instance):
+def test_server_tag_(disable_generic_tags, expected_tags, pg_instance, integration_check):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = disable_generic_tags
-    check = PostgreSql('test_instance', {}, [instance])
+    check = integration_check(instance)
     assert set(check.tags) == expected_tags
 
 
 @pytest.mark.parametrize(
     'disable_generic_tags, expected_hostname', [(True, 'resolved.hostname'), (False, 'resolved.hostname')]
 )
-def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance):
+def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance, integration_check):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = disable_generic_tags
 
     with mock.patch(
         'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
     ) as resolve_db_host_mock:
-        check = PostgreSql('test_instance', {}, [instance])
+        check = integration_check(instance)
         assert check.resolved_hostname == expected_hostname
         assert resolve_db_host_mock.called is True
+
+
+@pytest.mark.parametrize(
+    'template, expected, tags',
+    [
+        ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:5432', ['env:prod', 'port:1']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+        ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
+    ],
+)
+def test_database_identifier(pg_instance, template, expected, tags, integration_check):
+    """
+    Test functionality of calculating database_identifier
+    """
+
+    pg_instance['database_identifier'] = {'template': template}
+    pg_instance['tags'] = tags
+    check = integration_check(pg_instance)
+    assert check.database_identifier == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query,expected_trimmed_query",
+    [
+        ("SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1"),
+        ("SELECT * FROM pg_settings; DELETE FROM pg_settings;", "SELECT * FROM pg_settings; DELETE FROM pg_settings;"),
+        ("SET search_path TO 'my_schema', public; SELECT * FROM pg_settings", "SELECT * FROM pg_settings"),
+        ("SET TIME ZONE 'Europe/Rome'; SELECT * FROM pg_settings", "SELECT * FROM pg_settings"),
+        (
+            "SET LOCAL request_id = 1234; SET LOCAL hostname TO 'Bob''s Laptop'; SELECT * FROM pg_settings",
+            "SELECT * FROM pg_settings",
+        ),
+        ("SET LONG;" * 1024 + "SELECT *;", "SELECT *;"),
+        ("SET " + "'quotable'" * 1024 + "; SELECT *;", "SELECT *;"),
+        ("SET 'l" + "o" * 1024 + "ng'; SELECT *;", "SELECT *;"),
+        (" /** pl/pgsql **/ SET 'comment'; SELECT *;", "SELECT *;"),
+        ("this isn't SQL", "this isn't SQL"),
+        (
+            "SET SESSION min_wal_size = 14400; "
+            + "SET LOCAL wal_buffers TO 2048; "
+            + "/* testing id 1234 */ set send_abort_for_kill TO 'stderr'; "
+            + "set id = case when (false) and ((((cast(null as box) ~= cast(null as box)) "
+            + "or (cast(null as point) <@ cast(null as line))) or (public.my table",
+            "set id = case when (false) and ((((cast(null as box) ~= cast(null as box)) "
+            + "or (cast(null as point) <@ cast(null as line))) or (public.my table",
+        ),
+        ("", ""),
+    ],
+)
+def test_trim_set_stmts(query, expected_trimmed_query):
+    trimmed_query = util.trim_leading_set_stmts(query)
+    assert trimmed_query == expected_trimmed_query

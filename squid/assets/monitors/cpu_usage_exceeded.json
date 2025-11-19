@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2024-09-12",
+    "last_updated_at": "2024-09-12",
+    "title": "CPU usage exceeded",
+    "description": "CPU usage monitored.",
+    "definition": {
+        "id": 153453104,
+        "name": "CPU usage exceeded",
+        "type": "query alert",
+        "query": "avg(last_5m):sum:squid.cachemgr.cpu_time{*} >= 90",
+        "message": "{{#is_warning}}  \nCPU Usage exceeded the threshold.  \nThreshold: {{warn_threshold}} %\n{{/is_warning}}\n\n{{#is_alert}}  \nCPU Usage exceeded the threshold.  \nCurrent Usage : {{value}} %\nThreshold: {{threshold}} % \n{{/is_alert}}",
+        "tags": [ "squid" ],
+        "options": {
+            "thresholds": {
+                "critical": 90,
+                "warning": 50
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": false,
+            "new_host_delay": 300,
+            "silenced": { }
+        },
+        "priority": 4,
+        "restriction_policy": {
+            "bindings": [ ]
+        }
+    },
+    "tags": [
+        "integration:squid"
+    ]
+}

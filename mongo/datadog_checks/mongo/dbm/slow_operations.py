@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import binascii
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from bson import json_util
 from cachetools import TTLCache
@@ -15,6 +16,7 @@ from datadog_checks.mongo.dbm.utils import (
     format_key_name,
     get_command_collection,
     get_command_truncation_state,
+    get_db_from_namespace,
     get_explain_plan,
     obfuscate_command,
     should_explain_operation,
@@ -40,6 +42,8 @@ class MongoSlowOperations(DBMAsyncJob):
         self._slow_operations_config = check._config.slow_operations
         self._collection_interval = self._slow_operations_config["collection_interval"]
         self._max_operations = self._slow_operations_config["max_operations"]
+        self._explain_verbosity = self._slow_operations_config["explain_verbosity"]
+        self._cursor_timeout = check._config.timeout
 
         # _explained_operations_ratelimiter: limit how often we try to re-explain the same query
         self._explained_operations_ratelimiter = RateLimitingTTLCache(
@@ -63,6 +67,8 @@ class MongoSlowOperations(DBMAsyncJob):
         )
 
         self._last_collection_timestamp = None
+
+        self._log_json_opts = json_util.JSONOptions(tz_aware=True)
 
     def run_job(self):
         self.collect_slow_operations()
@@ -152,22 +158,28 @@ class MongoSlowOperations(DBMAsyncJob):
         for profile in profiling_data:
             if 'command' not in profile:
                 continue
-            profile["ts"] = profile["ts"].timestamp()  # convert datetime to timestamp
+            profile["ts"] = profile["ts"].replace(tzinfo=timezone.utc).timestamp()  # convert datetime to timestamp
             yield self._obfuscate_slow_operation(profile, db_name)
 
     def _collect_slow_operations_from_logs(self, db_names, last_ts):
+        self._check.log.debug(
+            "Collecting slow operations from logs for databases %s with lookback ts %s", db_names, last_ts
+        )
         logs = self._check.api_client.get_log_data()
         log_entries = logs.get("log", [])
+        self._check.log.debug("Found %d log entries", len(log_entries))
         start_index = self._binary_search(log_entries, last_ts)
+        self._check.log.debug("Starting log search from index: %d", start_index)
         for i in range(start_index, len(log_entries)):
             parsed_log = log_entries[i]
             if isinstance(parsed_log, str):
                 try:
-                    parsed_log = json_util.loads(parsed_log)
+                    parsed_log = json_util.loads(parsed_log, json_options=self._log_json_opts)
                 except Exception as e:
                     self._check.log.error("Failed to parse log line: %s", e)
                     continue
-            if parsed_log.get("msg", "").lower() == 'slow query':
+            log_msg = parsed_log.get("msg", "")
+            if log_msg.lower() == 'slow query':
                 ts = parsed_log["t"].timestamp()
                 if ts <= last_ts:
                     # This check is still needed when binary search fails to parse a log line
@@ -181,6 +193,8 @@ class MongoSlowOperations(DBMAsyncJob):
                     continue
                 log_attr["ts"] = ts
                 yield self._obfuscate_slow_operation(log_attr, db_name)
+            else:
+                self._check.log.debug("Skipping non-slow query log entry: %s", log_msg)
 
     def _collect_slow_operation_explain_plan(self, slow_operation, dbname):
         try:
@@ -190,6 +204,7 @@ class MongoSlowOperations(DBMAsyncJob):
                 command=slow_operation["command"],
                 explain_plan_rate_limiter=self._explained_operations_ratelimiter,
                 explain_plan_cache_key=(dbname, slow_operation["query_signature"]),
+                verbosity=self._explain_verbosity,
             ):
                 if slow_operation.get("execStats"):
                     # execStats is available with profiling, so we just need to format it
@@ -197,7 +212,12 @@ class MongoSlowOperations(DBMAsyncJob):
                 else:
                     # explain the slow operation from the logs
                     explain_plan = get_explain_plan(
-                        self._check.api_client, slow_operation.get("op"), slow_operation["command"], dbname
+                        api_client=self._check.api_client,
+                        command=slow_operation["command"],
+                        dbname=dbname,
+                        op_duration=self._get_operation_duration_microsecs(slow_operation),
+                        cursor_timeout=self._cursor_timeout,
+                        verbosity=self._explain_verbosity,
                     )
 
                 explain_plan_payload = self._create_slow_operation_explain_plan_payload(slow_operation, explain_plan)
@@ -222,7 +242,7 @@ class MongoSlowOperations(DBMAsyncJob):
         return slow_operation
 
     def _get_db_name(self, command, ns):
-        return command.get('$db') or ns.split('.', 1)[0]
+        return command.get('$db') or get_db_from_namespace(ns)
 
     def _binary_search(self, logs, ts):
         # Binary search to find the index of the first log line with timestamp >= ts
@@ -231,7 +251,7 @@ class MongoSlowOperations(DBMAsyncJob):
         while left <= right:
             mid = (left + right) // 2
             try:
-                parsed_log = json_util.loads(logs[mid])
+                parsed_log = json_util.loads(logs[mid], json_options=self._log_json_opts)
             except Exception as e:
                 self._check.log.debug("Failed to parse log line: %s", e)
                 # If we can't parse the log, skip binary search and linearly search the rest of the logs
@@ -309,7 +329,9 @@ class MongoSlowOperations(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags()),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": slow_operation["ts"] * 1000,
+            "service": self._check._config.service,
             "network": {
                 "client": self._get_slow_operation_client(slow_operation),
             },
@@ -334,16 +356,21 @@ class MongoSlowOperations(DBMAsyncJob):
                     "op": self._get_slow_operation_op_type(slow_operation),
                     "ns": slow_operation.get("ns"),
                     "plan_summary": slow_operation.get("planSummary"),
-                    "microsecs_running": slow_operation.get("millis", slow_operation.get("durationMillis", 0)) * 1000,
+                    "microsecs_running": self._get_operation_duration_microsecs(slow_operation),
                     "num_yields": slow_operation.get("numYield", slow_operation.get("numYields", 0)),
                     "write_conflicts": slow_operation.get("writeConflicts"),
                     "lock_stats": self._get_slow_operation_lock_stats(slow_operation),
                     "flow_control_stats": self._get_slow_operation_flow_control_stats(slow_operation),
                     "cursor": self._get_slow_operation_cursor(slow_operation),
+                    "lsid": self._get_slow_operation_lsid(slow_operation["command"]),
                 }
             ),
         }
         return self._sanitize_event(event)
+
+    def _get_operation_duration_microsecs(self, slow_operation: dict) -> int:
+        # The total duration of the slow operation in microseconds
+        return slow_operation.get("millis", slow_operation.get("durationMillis", 0)) * 1000
 
     def _get_slow_operation_op_type(self, slow_operation):
         return slow_operation.get("op") or slow_operation.get("type")
@@ -364,6 +391,15 @@ class MongoSlowOperations(DBMAsyncJob):
                 "comment": slow_operation.get("originatingCommandComment"),
             }
         return None
+
+    def _get_slow_operation_lsid(self, command):
+        lsid = command.get("lsid")
+        if not lsid or not lsid.get("id"):
+            return None
+
+        return {
+            "id": binascii.hexlify(lsid['id']).decode(),
+        }
 
     def _get_slow_operation_lock_stats(self, slow_operation):
         lock_stats = slow_operation.get("locks")
@@ -404,7 +440,9 @@ class MongoSlowOperations(DBMAsyncJob):
             "dbm_type": "slow_query",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": time.time() * 1000,
+            "service": self._check._config.service,
             "mongodb_slow_queries": slow_operation_events,
         }
         self._check.database_monitoring_query_activity(json_util.dumps(payload))

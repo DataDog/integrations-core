@@ -1,0 +1,80 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6cec5ac3-a686-4408-936d-26f19fa6763a",
+  "app_id": "sonatype-nexus",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Sonatype Nexus analytics and instance health data.",
+    "title": "Sonatype Nexus",
+    "media": [
+      {
+        "caption": "Sonatype Nexus Instance Health",
+        "image_url": "images/sonatype_nexus_instance_health.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Sonatype Nexus Metrics",
+        "image_url": "images/sonatype_nexus_metrics_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Sonatype Nexus Metrics",
+        "image_url": "images/sonatype_nexus_metrics_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 34928997,
+      "source_type_name": "sonatype_nexus",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "sonatype_nexus.",
+        "check": [
+          "sonatype_nexus.analytics.available_cpus",
+          "sonatype_nexus.status.available_cpus_health"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Sonatype Nexus Instance Health": "assets/dashboards/sonatype_nexus_instance_health.json",
+      "Sonatype Nexus Metrics": "assets/dashboards/sonatype_nexus_metrics.json"
+    },
+    "monitors": {
+      "High Number of Failed Unique User Authentication Detected": "assets/monitors/high_number_of_failed_unique_user_authentication_detected.json",
+      "High Percentage of JVM Heap Memory Usage Detected": "assets/monitors/high_percentage_of_jvm_heap_memory_usage_detected.json",
+      "Unhealthy Available CPUs Detected": "assets/monitors/unhealthy_available_cpus_detected.json",
+      "Unhealthy Blob Stores Detected": "assets/monitors/unhealthy_blob_stores_detected.json",
+      "Unhealthy Thread Deadlock Detected": "assets/monitors/unhealthy_thread_deadlock_detected.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

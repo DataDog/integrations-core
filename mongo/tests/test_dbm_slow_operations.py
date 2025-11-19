@@ -36,15 +36,95 @@ def test_mongo_slow_operations_standalone(aggregator, instance_integration_clust
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
-    print(json.dumps(slow_operation_payload))
+    with open(os.path.join(HERE, "results", "slow-operations-standalone.json"), 'r') as f:
+        expected_slow_operation_payload = json.load(f)
+        assert slow_operation_payload == expected_slow_operation_payload
+
+    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-standalone-queryplanner.json"), 'r') as f:
+        expected_slow_operation_explain_plans_payload = json.load(f)
+        assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
+
+    assert_metrics(
+        mongo_check,
+        aggregator,
+        ["profiling"],
+    )
+
+
+@mock_now(1715911398.1112723)
+@common.standalone
+def test_mongo_slow_operations_standalone_queryplanner(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
+):
+    instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['slow_operations'] = {
+        'enabled': True,
+        'run_sync': True,
+        'explain_verbosity': 'executionStats',
+    }
+    instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    aggregator.reset()
+    with mock_pymongo("standalone"):
+        run_check_once(mongo_check, dd_run_check)
+
+    events = aggregator.get_event_platform_events("dbm-activity")
+    slow_operation_payload = [event for event in events if event['dbm_type'] == 'slow_query']
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
     with open(os.path.join(HERE, "results", "slow-operations-standalone.json"), 'r') as f:
         expected_slow_operation_payload = json.load(f)
         assert slow_operation_payload == expected_slow_operation_payload
 
-    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-standalone.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-standalone-executionstats.json"), 'r') as f:
         expected_slow_operation_explain_plans_payload = json.load(f)
         assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
+
+    assert_metrics(
+        mongo_check,
+        aggregator,
+        ["profiling"],
+    )
+
+
+@mock_now(1715911398.1112723)
+@common.standalone
+def test_mongo_slow_operations_standalone_disabled(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
+):
+    instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['slow_operations'] = {
+        'enabled': True,
+        'run_sync': True,
+        'explain_verbosity': 'disabled',
+    }
+    instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    aggregator.reset()
+    with mock_pymongo("standalone"):
+        run_check_once(mongo_check, dd_run_check)
+
+    events = aggregator.get_event_platform_events("dbm-activity")
+    slow_operation_payload = [event for event in events if event['dbm_type'] == 'slow_query']
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
+
+    with open(os.path.join(HERE, "results", "slow-operations-standalone.json"), 'r') as f:
+        expected_slow_operation_payload = json.load(f)
+        assert slow_operation_payload == expected_slow_operation_payload
+
+    assert len(slow_operation_explain_plans_payload) == 0
 
     assert_metrics(
         mongo_check,
@@ -74,7 +154,43 @@ def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster_a
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
-    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-mongos.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-mongos-queryplanner.json"), 'r') as f:
+        expected_slow_operation_explain_plans_payload = json.load(f)
+        assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
+
+    with open(os.path.join(HERE, "results", "slow-operations-mongos.json"), 'r') as f:
+        expected_slow_operation_payload = json.load(f)
+        assert slow_operation_payload == expected_slow_operation_payload
+
+
+@mock_now(1715911398.1112723)
+@common.shard
+def test_mongo_slow_operations_mongos_queryplanner(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
+):
+    instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['slow_operations'] = {
+        'enabled': True,
+        'run_sync': True,
+        'explain_verbosity': 'executionStats',
+    }
+    instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    aggregator.reset()
+    with mock_pymongo("mongos"):
+        run_check_once(mongo_check, dd_run_check)
+
+    events = aggregator.get_event_platform_events("dbm-activity")
+    slow_operation_payload = [event for event in events if event['dbm_type'] == 'slow_query']
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
+
+    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-mongos-executionstats.json"), 'r') as f:
         expected_slow_operation_explain_plans_payload = json.load(f)
         assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
 

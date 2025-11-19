@@ -4,6 +4,8 @@
 
 This check monitors [Kyverno][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.55.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running in your Kubernetes environment. For more information about configuration in containerized environments, see the [Autodiscovery Integration Templates][3] for guidance.
@@ -114,7 +116,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://kyverno.io/docs/introduction/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/kyverno/datadog_checks/kyverno/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/openmetrics/

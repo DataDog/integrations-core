@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "751006a9-b87a-4f54-acc5-2886ec49073e",
   "app_id": "kubevirt-handler",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

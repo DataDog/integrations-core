@@ -13,6 +13,8 @@ Gunicorn itself can provide further metrics using DogStatsD, including:
 - Request duration (average, median, max, 95th percentile, etc.)
 - Log message rate by log level (critical, error, warning, exception)
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -156,7 +158,7 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 - [Monitor Gunicorn performance with Datadog][14]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/gunicorn/images/gunicorn-dash.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://pypi.python.org/pypi/setproctitle
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/datadog_checks/gunicorn/data/conf.yaml.example

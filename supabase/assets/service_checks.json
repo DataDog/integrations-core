@@ -1,0 +1,32 @@
+[
+    {
+        "agent_version": "7.62.0",
+        "integration": "Supabase",
+        "check": "supabase.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Supabase OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Supabase OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.62.0",
+        "integration": "Supabase",
+        "check": "supabase.storage_api.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Supabase Storage API OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Supabase Storage API OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]

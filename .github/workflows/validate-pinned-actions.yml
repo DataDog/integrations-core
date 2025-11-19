@@ -1,0 +1,51 @@
+name: Validate Pinned Actions
+on:
+  pull_request: {}
+  push:
+    branches:
+      - master
+  merge_group:
+    # Test requested to pass before merging
+    # needs to trigger in merge queues
+    types: [checks_requested]
+
+jobs:
+  pinact:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Pin actions
+        id: pin-actions
+        # Relies on the following actions that need to be allowed in the repo:
+        # aquaproj/aqua-installer@e2d0136abcf70b7a2f6f505720640750557c4b33
+        # suzuki-shunsuke/commit-action@9faad521ea6a1e768439ffbe6b25b6cb3fc1b181
+        # suzuki-shunsuke/github-token-action@350d7506222e3a0016491abe85b5c4dd475b67d1
+        # tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
+        uses: suzuki-shunsuke/pinact-action@49cbd6acd0dbab6a6be2585d1dbdaa43b4410133 # v1.0.0
+        with:
+          skip_push: true
+
+      - name: Output pin actions failure message
+        if: failure() && steps.pin-actions.outcome == 'failure'
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## ⚠️ Action Pinning Validation Failed
+
+          This check ensures actions are pinned to a specific commit SHA for security and reliability. This validation did not pass for your workflow.
+
+          Here's how to resolve this:
+
+          **1. If you added or modified an action:**
+          * Ensure it's pinned to a full commit SHA (e.g., `actions/checkout@a12b34cdef567890...`), not a tag or branch.
+          * For new actions or versions, please ping `@agent-integrations` in your pull request to validate and allow-list its usage.
+
+          **2. If you have *not* changed any actions in this branch:**
+          * An allowed action version may have been updated centrally, and your branch is now using an older, unpermitted version.
+          * Update your branch with the latest changes from `master` (or your repository's main branch) to get the current allowed actions.
+
+          If the issue persists after these steps, please contact `@agent-integrations` for assistance.
+          EOF

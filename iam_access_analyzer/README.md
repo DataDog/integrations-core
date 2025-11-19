@@ -10,7 +10,7 @@ Use AWS Identity and Access Management (IAM) Access Analyzer across your Amazon 
 
 1. If you haven't already, set up the [Datadog Forwarder][1] Lambda function.
 
-2. Create a new rule with type `Rule with an event pattern` in AWS EventBridge.
+2. Create a new rule with type `Rule with an event pattern` in Amazon EventBridge.
 
 3. For the event source configuration, select `Other`. For `Creation method`, select `Custom pattern (JSON editor)`. For `Event pattern`, copy and paste the following JSON:
 
@@ -48,6 +48,6 @@ This integration does not include any events.
 
 Need help? Contact [Datadog support][3].
 
-[1]: /logs/guide/forwarder/
-[2]: https://app.datadoghq.com/logs?query=source%3Aaccess-analyzer
+[1]: https://docs.datadoghq.com/logs/guide/forwarder/
+[2]: /logs?query=source%3Aaccess-analyzer
 [3]: https://docs.datadoghq.com/help

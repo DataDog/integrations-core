@@ -92,6 +92,16 @@ files:
             my_cons.+:
               <TOPIC_NAME_2>: []
             test_consumer.+: {}
+      - name: collect_consumer_group_state
+        description: |
+          Setting the collect_consumer_group_state to true collects the 
+          consumer group state as a tag. 
+
+          WARNING: Enabling this feature might cause some increase in Agent resource consumption.
+        value:
+          type: boolean
+          example: false
+          display_default: false
       - name: monitor_unlisted_consumer_groups
         description: |
           Setting `monitor_unlisted_consumer_groups` to `true` tells the check to discover all consumer groups

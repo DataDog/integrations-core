@@ -8,7 +8,6 @@ from .metrics import METRIC_MAP
 
 
 class CockroachdbCheck(OpenMetricsBaseCheck):
-
     DEFAULT_METRIC_LIMIT = 0
 
     def __new__(cls, name, init_config, instances):

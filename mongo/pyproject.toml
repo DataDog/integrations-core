@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 name = "datadog-mongo"
 description = "The MongoDB check"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 keywords = [
     "datadog",
     "datadog agent",
@@ -23,12 +23,12 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=36.11.0",
+    "datadog-checks-base>=37.21.0",
 ]
 dynamic = [
     "version",
@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "cachetools==5.5.0",
+    "cachetools==6.2.0",
     "psutil==6.0.0",
     "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]

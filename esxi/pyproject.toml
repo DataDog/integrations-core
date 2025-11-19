@@ -9,7 +9,7 @@ name = "datadog-esxi"
 description = "The ESXi check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 keywords = [
     "datadog",
     "datadog agent",
@@ -25,11 +25,11 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=34.1.2",
+    "datadog-checks-base>=37.21.0",
 ]
 dynamic = [
     "version",

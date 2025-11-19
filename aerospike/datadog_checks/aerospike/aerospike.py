@@ -152,7 +152,7 @@ class AerospikeCheck(AgentCheck):
 
             # https://www.aerospike.com/docs/reference/info/#sindex
             sindex = self.get_info('sindex/{}'.format(ns))
-            for idx in parse_namespace(sindex[:-1], ns, 'indexname'):
+            for idx in parse_namespace(sindex, ns, 'indexname'):
                 sindex_tags = ['sindex:{}'.format(idx)]
                 sindex_tags.extend(namespace_tags)
                 self.collect_info('sindex/{}/{}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)

@@ -1,0 +1,63 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "716a8b3d-6ca3-43fb-ba0d-c71665b4243e",
+  "app_id": "checkpoint-harmony-email-and-collaboration",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Check Point Harmony Email & Collaboration security events",
+    "title": "Check Point Harmony Email & Collaboration",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Check Point Harmony Email & Collaboration - Overview",
+        "image_url": "images/checkpoint_harmony_email_and_collaboration_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Check Point Harmony Email & Collaboration - Check Point Harmony Email & Collaboration - Email Application Insights",
+        "image_url": "images/checkpoint_harmony_email_and_collaboration_email_application_insights.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Check Point Harmony Email & Collaboration - Messaging and File Sharing Application Insights",
+        "image_url": "images/checkpoint_harmony_email_and_collaboration_messaging_and_file_sharing_application_insights.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Collaboration",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 42989389,
+      "source_type_name": "Check Point Harmony Email & Collaboration",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Check Point Harmony Email & Collaboration - Overview": "assets/dashboards/checkpoint_harmony_email_and_collaboration_overview.json",
+      "Check Point Harmony Email & Collaboration - Email Application Insights": "assets/dashboards/checkpoint_harmony_email_and_collaboration_email_application_insights.json",
+      "Check Point Harmony Email & Collaboration - Messaging and File Sharing Application Insights": "assets/dashboards/checkpoint_harmony_email_and_collaboration_messaging_and_file_sharing_application_insights.json"
+    },
+    "logs": {
+      "source": "checkpoint-harmony-email-and-collaboration"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

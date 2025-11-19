@@ -6,6 +6,8 @@ Get metrics from the external DNS service in real time to visualize and monitor 
 
 For more information about external DNS, see the [Github repo][1].
 
+**Minimum Agent version:** 7.17.0
+
 ## Setup
 
 ### Installation
@@ -56,7 +58,7 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][8].
 
 [1]: https://github.com/kubernetes-incubator/external-dns
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/external_dns/datadog_checks/external_dns/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

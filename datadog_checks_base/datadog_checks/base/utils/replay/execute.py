@@ -5,9 +5,10 @@ import os
 import subprocess
 import sys
 
-from ..common import ensure_bytes, to_native_string
-from ..platform import Platform
-from ..serialization import json
+from datadog_checks.base.utils.common import ensure_bytes, to_native_string
+from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.platform import Platform
+
 from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS, EnvVars
 
 
@@ -24,8 +25,8 @@ def run_with_isolation(check, aggregator, datadog_agent):
     env_vars[EnvVars.MESSAGE_INDICATOR] = message_indicator
     env_vars[EnvVars.CHECK_NAME] = check.name
     env_vars[EnvVars.CHECK_ID] = check.check_id
-    env_vars[EnvVars.INIT_CONFIG] = to_native_string(json.dumps(init_config))
-    env_vars[EnvVars.INSTANCE] = to_native_string(json.dumps(instance))
+    env_vars[EnvVars.INIT_CONFIG] = to_native_string(json.encode(init_config))
+    env_vars[EnvVars.INSTANCE] = to_native_string(json.encode(instance))
 
     if Platform.is_windows():
         env_vars[EnvVars.DDTRACE] = "false"
@@ -60,7 +61,7 @@ def run_with_isolation(check, aggregator, datadog_agent):
             check.log.trace(line)
 
             message_type, _, message = procedure.partition(':')
-            message = json.loads(message)
+            message = json.decode(message)
             if message_type == 'aggregator':
                 getattr(aggregator, message['method'])(check, *message['args'], **message['kwargs'])
             elif message_type == 'log':
@@ -69,7 +70,7 @@ def run_with_isolation(check, aggregator, datadog_agent):
                 method = message['method']
                 value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
                 if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
-                    process.stdin.write(b'%s\n' % ensure_bytes(json.dumps({'value': value})))
+                    process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
                     process.stdin.flush()
             elif message_type == 'error':
                 check.log.error(message[0]['traceback'])

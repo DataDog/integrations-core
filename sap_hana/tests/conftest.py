@@ -116,6 +116,8 @@ def dd_environment(schema="SYS_DATABASES"):
         env_vars={'PASSWORD': ADMIN_CONFIG['password']},
         mount_logs=True,
         sleep=10,
+        attempts=5,
+        attempts_wait=10,
     ):
         yield CONFIG, E2E_METADATA
 

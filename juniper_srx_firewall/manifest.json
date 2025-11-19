@@ -1,0 +1,90 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "0451c670-94dc-490e-86b7-b23b5a7cdceb",
+  "app_id": "juniper-srx-firewall",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Juniper SRX Firewall logs",
+    "title": "Juniper SRX Firewall",
+    "media": [
+      {
+        "caption": "Juniper SRX Firewall - Overview",
+        "image_url": "images/juniper_srx_firewall_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Session Logs",
+        "image_url": "images/juniper_srx_firewall_session_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Security Logs",
+        "image_url": "images/juniper_srx_firewall_security_logs_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Security Logs",
+        "image_url": "images/juniper_srx_firewall_security_logs_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Security Logs",
+        "image_url": "images/juniper_srx_firewall_security_logs_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Security Logs",
+        "image_url": "images/juniper_srx_firewall_security_logs_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Authentication Logs",
+        "image_url": "images/juniper_srx_firewall_authentication_logs.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 40625309,
+      "source_type_name": "Juniper SRX Firewall",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Juniper SRX Firewall - Overview": "assets/dashboards/juniper_srx_firewall_overview.json",
+      "Juniper SRX Firewall - Session Logs": "assets/dashboards/juniper_srx_firewall_session_logs.json",
+      "Juniper SRX Firewall - Security Logs": "assets/dashboards/juniper_srx_firewall_security_logs.json",
+      "Juniper SRX Firewall - Authentication Logs": "assets/dashboards/juniper_srx_firewall_authentication_logs.json"
+    },
+    "logs": {
+      "source": "juniper-srx-firewall"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

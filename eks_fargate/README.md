@@ -5,143 +5,202 @@
 <div class="alert alert-warning"> This page describes the EKS Fargate integration. For ECS Fargate, see the documentation for Datadog's <a href="http://docs.datadoghq.com/integrations/ecs_fargate">ECS Fargate integration</a>.
 </div>
 
-Amazon EKS on AWS Fargate is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. Kubernetes nodes are managed by AWS Fargate and abstracted away from the user.
+Amazon EKS Fargate is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. The EKS Fargate nodes are managed by AWS Fargate and abstracted away from the user.
 
-**Note**: Network Performance Monitoring (NPM) is not supported for EKS Fargate.
+### How Datadog monitors EKS Fargate pods
+
+EKS Fargate pods do not run on traditional EKS nodes backed by EC2 instances. While the Agent does report [system checks][1], like `system.cpu.*` and `system.memory.*`, these are just for the Agent container. To collect data from your EKS Fargate pods, run the Agent as a sidecar within *each* of your desired application pods. Each pod needs a custom RBAC that grants permissions to the kubelet for the Agent to get the required information.
+
+The Agent sidecar is responsible for monitoring the other containers in the same pod as itself, in addition to communicating with the Cluster Agent for portions of its reporting. The Agent can:
+
+- Report Kubernetes metrics collection from the pod running your application containers and the Agent
+- Run [Autodiscovery][2]-based Agent integrations against the containers in the same pod
+- Collect APM and DogStatsD metrics for containers in the same pod
+
+If you have a mixed cluster of traditional EKS nodes and Fargate pods, you can manage the EKS nodes with the [standard Datadog Kubernetes installation][5] (Helm chart or Datadog Operator) - and manage the Fargate pods separately.
+
+**Note**: Cloud Network Monitoring (CNM) is not supported for EKS Fargate.
+
+**Minimum Agent version:** 7.18.0
 
 ## Setup
 
-These steps cover the setup of the Datadog Agent v7.17+ in a container within Amazon EKS on AWS Fargate. See the [Datadog-Amazon EKS integration documentation][2] if you are not using AWS Fargate.
+### Prerequisites
 
-AWS Fargate pods are not physical pods, which means they exclude [host-based system-checks][3], like CPU, memory, etc. In order to collect data from your AWS Fargate pods, you must run the Agent as a sidecar of your application pod with custom RBAC, which enables these features:
+- An [AWS Fargate profile](#aws-fargate-profile)
+- A [Kubernetes Secret named `datadog-secret`](#secret-for-keys-and-tokens), containing your Datadog API key and Cluster Agent token
+- An [AWS Fargate RBAC](#aws-fargate-rbac)
 
-- Kubernetes metrics collection from the pod running your application containers and the Agent
-- [Autodiscovery][4]
-- Configuration of custom Agent Checks to target containers in the same pod
-- APM and DogStatsD for containers in the same pod
+#### AWS Fargate profile
 
-### EC2 Node
+Create and specify an [AWS Fargate profile][3] for your EKS Fargate pods.
 
-If you don't specify through [AWS Fargate Profile][5] that your pods should run on fargate, your pods can use classical EC2 machines. If it's the case see the [Datadog-Amazon EKS integration setup][6] in order to collect data from them. This works by running the Agent as an EC2-type workload. The Agent setup is the same as that of the [Kubernetes Agent setup][7], and all options are available. To deploy the Agent on EC2 nodes, use the [DaemonSet setup for the Datadog Agent][8].
+If you do not specify an AWS Fargate profile, your pods use classical EC2 machines. To monitor these pods, use the [standard Datadog Kubernetes installation][5] with the [Datadog-Amazon EKS integration][4].
+
+#### Secret for keys and tokens
+
+Create a [Kubernetes Secret][26] named `datadog-secret` that contains:
+- Your [Datadog API key][7]
+- A 32-character alphanumeric token for the Cluster Agent. The Agent and Cluster Agent use this token to communicate. Creating it in advance ensures both the traditional setups and Fargate pod get the same token value (as opposed to letting the Datadog Operator or Helm create a random token for you). For more information on how this token is used, see the [Cluster Agent Setup][17].
+
+```shell
+kubectl create secret generic datadog-secret -n <NAMESPACE> \
+  --from-literal api-key=<DATADOG_API_KEY> \
+  --from-literal token=<CLUSTER_AGENT_TOKEN>
+```
+
+If you are deploying your traditional Datadog installation in one namespace and the Fargate pods in a different namespace, create a secret in *both* namespaces:
+
+```shell
+# Create the secret in the namespace:datadog-agent
+kubectl create secret generic datadog-secret -n datadog-agent \
+  --from-literal api-key=<DATADOG_API_KEY> \
+  --from-literal token=<CLUSTER_AGENT_TOKEN>
+
+# Create the secret in the namespace:fargate
+kubectl create secret generic datadog-secret -n fargate \
+  --from-literal api-key=<DATADOG_API_KEY> \
+  --from-literal token=<CLUSTER_AGENT_TOKEN>
+```
+
+**Note**: To use the Admission Controller to run the Datadog Agent in Fargate, the name of this Kubernetes Secret _must_ be `datadog-secret`.
+
+#### AWS Fargate RBAC
+
+Create a `ClusterRole` for the necessary permissions and bind it to the `ServiceAccount` your pods are using:
+
+1. Create a `ClusterRole` using the following manifest:
+
+   ```yaml
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: ClusterRole
+   metadata:
+     name: datadog-agent-fargate
+   rules:
+     - apiGroups:
+       - ""
+       resources:
+       - nodes
+       - namespaces
+       - endpoints
+       verbs:
+       - get
+       - list
+     - apiGroups:
+         - ""
+       resources:
+         - nodes/metrics
+         - nodes/spec
+         - nodes/stats
+         - nodes/proxy
+         - nodes/pods
+         - nodes/healthz
+       verbs:
+         - get
+   ```
+
+2. Create a `ClusterRoleBinding` to attach this to the namespaced `ServiceAccount` that your pods are currently using. The `ClusterRoleBindings` below reference this previously created `ClusterRole`.
+
+   ```yaml
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: ClusterRoleBinding
+   metadata:
+     name: datadog-agent-fargate
+   roleRef:
+     apiGroup: rbac.authorization.k8s.io
+     kind: ClusterRole
+     name: datadog-agent-fargate
+   subjects:
+     - kind: ServiceAccount
+       name: <SERVICE_ACCOUNT>
+       namespace: <NAMESPACE>
+   ```
+   
+   #### If your pods do not use a ServiceAccount
+
+   If your pods do not use a `ServiceAccount`, use the following:
+
+   ```yaml
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: ClusterRoleBinding
+   metadata:
+     name: datadog-agent-fargate
+   roleRef:
+     apiGroup: rbac.authorization.k8s.io
+     kind: ClusterRole
+     name: datadog-agent-fargate
+   subjects:
+     - kind: ServiceAccount
+       name: datadog-agent
+       namespace: fargate
+   ---
+   apiVersion: v1
+   kind: ServiceAccount
+   metadata:
+     name: datadog-agent
+     namespace: fargate
+   ```
+
+   This creates a `ServiceAccount` named `datadog-agent` in the `fargate` namespace that is referenced in the `ClusterRoleBinding`. Adjust this for your Fargate pods' namespace and set this as the `serviceAccountName` in your pod spec.
+
+   #### If you are using multiple ServiceAccounts across namespaces
+   If you are using multiple `ServiceAccounts` across namespaces for your Fargate pods, use the following:
+
+   ```yaml
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: ClusterRoleBinding
+   metadata:
+     name: datadog-agent-fargate
+   roleRef:
+     apiGroup: rbac.authorization.k8s.io
+     kind: ClusterRole
+     name: datadog-agent-fargate
+   subjects:
+     - kind: ServiceAccount
+       name: <SERVICE_ACCOUNT_1>
+       namespace: <NAMESPACE_1>
+     - kind: ServiceAccount
+       name: <SERVICE_ACCOUNT_2>
+       namespace: <NAMESPACE_2>
+     - kind: ServiceAccount
+       name: <SERVICE_ACCOUNT_3>
+       namespace: <NAMESPACE_3>
+   ```
+
+To validate your RBAC, see [Troubleshooting: ServiceAccount Permissions](#serviceaccount-kubelet-permissions).
 
 ### Installation
 
-To get the best observability coverage monitoring workloads in AWS EKS Fargate, install the Datadog integrations for:
+After you complete all prerequisites, run the Datadog Agent as a sidecar container within each of your pods. You can do this with the [Datadog Admission Controller][25]'s automatic injection feature, or manually.
 
-- [Kubernetes][9]
-- [AWS][10]
-- [EKS][11]
-- [EC2][12] (if you are running an EC2-type node)
+The Admission Controller is a Datadog component that can automatically add the Agent sidecar to every pod that has the label `agent.datadoghq.com/sidecar: fargate`.
 
-Also, set up integrations for any other AWS services you are running with EKS (for example, [ELB][13]).
+Manual configuration requires that you modify every workload manifest when adding or changing the Agent sidecar. Datadog recommends that you use the Admission Controller instead.
 
-#### Manual installation
-
-To install, download the custom Agent image: `datadog/agent` with version v7.17 or above.
-
-If the Agent is running as a sidecar, it can communicate only with containers on the same pod. Run an Agent for every pod you wish to monitor.
-
-### Configuration
-
-To collect data from your applications running in AWS EKS Fargate over a Fargate node, follow these setup steps:
-
-- [Set up AWS EKS Fargate RBAC rules](#aws-eks-fargate-rbac).
-- [Deploy the Agent as a sidecar](#running-the-agent-as-a-sidecar).
-- Set up Datadog [metrics](#metrics-collection), [logs](#log-collection), [events](#events-collection), and [traces](#traces-collection) collection.
-
-To have EKS Fargate containers in the Datadog Live Container View, enable `shareProcessNamespace` on your pod spec. See [Process Collection](#process-collection).
-
-#### AWS EKS Fargate RBAC
-
-Use the following Agent RBAC when deploying the Agent as a sidecar in AWS EKS Fargate:
-
-```yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: datadog-agent
-rules:
-  - apiGroups:
-    - ""
-    resources:
-    - nodes
-    - namespaces
-    - endpoints
-    verbs:
-    - get
-    - list
-  - apiGroups:
-      - ""
-    resources:
-      - nodes/metrics
-      - nodes/spec
-      - nodes/stats
-      - nodes/proxy
-      - nodes/pods
-      - nodes/healthz
-    verbs:
-      - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: datadog-agent
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: datadog-agent
-subjects:
-  - kind: ServiceAccount
-    name: datadog-agent
-    namespace: default
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: datadog-agent
-  namespace: default
-```
-
-#### Running the Agent as a sidecar
-
-You can run the Agent as a sidecar by using the [Datadog Admission Controller][36] (requires Cluster Agent v7.52+) or with manual sidecar configuration. With the Admission Controller, you can inject an Agent sidecar into every pod that has the label `agent.datadoghq.com/sidecar:fargate`. 
-
-With manual configuration, you must modify every workload manifest when adding or changing the Agent sidecar. Datadog recommends you use the Admission Controller.
+**Note**: If you have a mixed cluster of traditional EKS nodes and Fargate pods, set up up monitoring for your traditional nodes with the [standard Datadog Kubernetes installation][5] (with the Kubernetes Secret from the prerequisites) and install the [Datadog-AWS integration][6] and [Datadog-EKS integration][4]. Then, to monitor your Fargate pods, continue with this section.
 
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Datadog Operator" xxx -->
-##### Admission Controller using Datadog Operator
+<!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
+#### Admission Controller - Datadog Operator
 
-<div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+, Datadog Operator v1.7.0+, and the <a href="https://docs.datadoghq.com/integrations/eks_fargate">EKS Fargate integration</a>.
-</div>
+1. If you haven't already, [install Helm][27] on your machine.
 
-The setup below configures the Cluster Agent to communicate with the Agent sidecars, allowing access to features such as [events collection][29], [Kubernetes resources view][30], and [cluster checks][31].
-
-**Prerequisites**
-
-* Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
-* Bind above RBAC to application pod by setting Service Account name.
-* Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
-
+2. Install the Datadog Operator:
    ```shell
-   kubectl create secret generic datadog-secret -n datadog-agent \
-           --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
-   kubectl create secret generic datadog-secret -n fargate \
-           --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
+   helm repo add datadog https://helm.datadoghq.com
+   helm install datadog-operator datadog/datadog-operator
    ```
-   For more information how these secrets are used, see the [Cluster Agent Setup][35].
 
-###### Setup
+3. Create a `datadog-agent.yaml` file to define a `DatadogAgent` custom resource, with Admission Controller and Fargate injection enabled:
 
-1. Create a `DatadogAgent` custom resource in the `datadog-agent.yaml` with Admission Controller enabled:
-
-   ```yaml
+    ```yaml
     apiVersion: datadoghq.com/v2alpha1
     kind: DatadogAgent
     metadata:
       name: datadog
     spec:
       global:
+        clusterName: <CLUSTER_NAME>
         clusterAgentTokenSecret:
           secretName: datadog-secret
           keyName: token
@@ -154,200 +213,54 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
           agentSidecarInjection:
             enabled: true
             provider: fargate
-   ```
-   Then apply the new configuration:
+    ```
+4. Apply this configuration:
   
-   ```shell
-   kubectl apply -n datadog-agent -f datadog-agent.yaml
-   ```
+    ```shell
+    kubectl apply -n <NAMESPACE> -f datadog-agent.yaml
+    ```
 
-2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
-   **The Admission Controller does not mutate pods that are already created**.
+5.  After the Cluster Agent reaches a running state and registers Admission Controller's mutating webhooks, add the label `agent.datadoghq.com/sidecar: fargate` to your desired pods (not the parent workload) to trigger the injection of the Datadog Agent sidecar container.
 
-**Example result**
+**Note**: The Admission Controller only mutates new pods, not pods that are already created. It does not adjust your `serviceAccountName`. If you have not set the RBAC for this pod, the Agent cannot connect to Kubernetes.
+
+**Example**
+
+The following is output from a sample Redis deployment's pod where the Admission Controller injected an Agent sidecar. The environment variables and resource settings are automatically applied based on the Datadog Fargate profile's internal default values.
+
+The sidecar uses the image repository and tags set in `datadog-agent.yaml`.
   
-   The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The sidecar is automatically configured using internal defaults, with additional settings to run in an EKS Fargate environment. The sidecar uses the image repository and tags set in `datadog-agent.yaml`. Communication between Cluster Agent and sidecars is enabled by default. 
-  
-   {{< highlight yaml "hl_lines=7-29" >}}
-     containers:
-     - args:
-       - redis-server
-       image: redis:latest
-     # ...
-     - env:
-       - name: DD_API_KEY
-         valueFrom:
-           secretKeyRef:
-             key: api-key
-             name: datadog-secret
-       - name: DD_CLUSTER_AGENT_AUTH_TOKEN
-         valueFrom:
-           secretKeyRef:
-             key: token
-             name: datadog-secret
-       - name: DD_EKS_FARGATE
-         value: "true"
-       # ...
-       image: gcr.io/datadoghq/agent:7.51.0
-       imagePullPolicy: IfNotPresent
-       name: datadog-agent-injected
-       resources:
-         limits:
-           cpu: 200m
-           memory: 256Mi
-         requests:
-           cpu: 200m
-           memory: 256Mi
-   {{< /highlight >}}
-
-###### Sidecar profiles and custom selectors
-
-To further configure the Agent or its container resources, use the properties in your `DatadogAgent` resource. Use the `spec.features.admissionController.agentSidecarInjection.profiles` to add environment variable definitions and resource settings. Use the `spec.features.admissionController.agentSidecarInjection.selectors` property to configure a custom selector to target workload pods instead of updating the workload to add `agent.datadoghq.com/sidecar:fargate` labels.
-
-  1. Create a `DatadogAgent` custom resource in `datadog-values.yaml` file that configures a sidecar profile and a custom pod selector.
-
-     **Example**
-
-     In the following example, a selector targets all pods with the label `"app": redis`. The sidecar profile configures a `DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED` environment variable and resource settings. 
-
-     ```yaml
-        spec:
-          features:
-            admissionController:
-              agentSidecarInjection:
-                enabled: true
-                provider: fargate
-                selectors:
-                - objectSelector:
-                    matchLabels:
-                      "app": redis
-                profiles:
-                - env:
-                  - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-                    value: "true"
-                  resources:
-                    requests:
-                      cpu: "400m"
-                      memory: "256Mi"
-                    limits:
-                      cpu: "800m"
-                      memory: "512Mi"
-     ```
-
-     Then apply the new configuration:
-     
-     ```shell
-     kubectl apply -n datadog-agent -f datadog-agent.yaml
-     ```
-
-  2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `app:redis`.
-   **The Admission Controller does not mutate pods that are already created**.
-
- **Example result**
-
- The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The environment variables and resource settings from `datadog-agent.yaml` are automatically applied.
-     
-   {{< highlight yaml "hl_lines=12-30" >}}
-   labels:
-     app: redis
-     eks.amazonaws.com/fargate-profile: fp-fargate
-     pod-template-hash: 7b86c456c4
-   # ...
-   containers:
-   - args:
-     - redis-server
-     image: redis:latest
-   # ...
-   - env:
-     - name: DD_API_KEY
-       valueFrom:
-         secretKeyRef:
-           key: api-key
-           name: datadog-secret
-     # ...
-     - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-       value: "true"
-     # ...
-     image: gcr.io/datadoghq/agent:7.51.0
-     imagePullPolicy: IfNotPresent
-     name: datadog-agent-injected
-     resources:
-       limits:
-         cpu: 800m
-         memory: 512Mi
-       requests:
-         cpu: 400m
-         memory: 256Mi
-   {{< /highlight >}}
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "Helm" xxx -->
-##### Admission Controller using Helm
-
-<div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+.
-</div>
-
-The setup below configures the Cluster Agent to communicate with the Agent sidecars, allowing access to features such as [events collection][29], [Kubernetes resources view][30], and [cluster checks][31].
-
-**Prerequisites**
-
-* Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
-* Bind above RBAC to application pod by setting Service Account name.
-* Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
-
-   ```shell
-   kubectl create secret generic datadog-secret -n datadog-agent \
-           --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
-   kubectl create secret generic datadog-secret -n fargate \
-           --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
-   ```
-   For more information how these secrets are used, see the [Cluster Agent Setup][35].
-
-###### Setup
-
-1. Install the Datadog Agent with the Cluster Agent and Admission Controller enabled:
-
-   ```sh
-   helm install datadog datadog/datadog -n datadog-agent \
-       --set datadog.clusterName=cluster-name \
-       --set agents.enabled=false \
-       --set datadog.apiKeyExistingSecret=datadog-secret \
-       --set clusterAgent.tokenExistingSecret=datadog-secret \
-       --set clusterAgent.admissionController.agentSidecarInjection.enabled=true \
-       --set clusterAgent.admissionController.agentSidecarInjection.provider=fargate
-   ```
-   **Note**: Use `agents.enabled=false` for a Fargate-only cluster. On a mixed cluster, set `agents.enabled=true` to create a DaemonSet for monitoring workloads on EC2 instances.
-
-2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
-   **The Admission Controller does not mutate pods that are already created**.
-
-**Example result**
-
-The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The sidecar is automatically configured using internal defaults, with additional settings to run in an EKS Fargate environment. The sidecar uses the image repository and tags set in the Helm values. Communication between Cluster Agent and sidecars is enabled by default. 
-
-{{< highlight yaml "hl_lines=7-29" >}}
+```yaml
+metadata:
+  labels:
+    app: redis
+    eks.amazonaws.com/fargate-profile: fp-fargate
+    agent.datadoghq.com/sidecar: fargate
+spec:
+  serviceAccountName: datadog-agent
   containers:
-  - args:
-    - redis-server
+  - name: my-redis
     image: redis:latest
-  # ...
-  - env:
-    - name: DD_API_KEY
-      valueFrom:
-        secretKeyRef:
-          key: api-key
-          name: datadog-secret
-    - name: DD_CLUSTER_AGENT_AUTH_TOKEN
-      valueFrom:
-        secretKeyRef:
-          key: token
-          name: datadog-secret
-    - name: DD_EKS_FARGATE
-      value: "true"
-    # ...
-    image: gcr.io/datadoghq/agent:7.51.0
-    imagePullPolicy: IfNotPresent
-    name: datadog-agent-injected
+    args:
+      - redis-server
+    # (...)
+
+  - name: datadog-agent-injected
+    image: gcr.io/datadoghq/agent:7.64.0
+    env:
+      - name: DD_API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: api-key
+            name: datadog-secret
+      - name: DD_EKS_FARGATE
+        value: "true"
+      - name: DD_CLUSTER_AGENT_AUTH_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: token
+            name: datadog-secret
+      # (...)
     resources:
       limits:
         cpu: 200m
@@ -355,515 +268,1011 @@ The following is a `spec.containers` snippet from a Redis deployment where the A
       requests:
         cpu: 200m
         memory: 256Mi
-{{< /highlight >}}
+```
 
-###### Sidecar profiles and custom selectors
+##### Custom configuration with sidecar profiles and custom selectors - Datadog Operator
 
-To further configure the Agent or its container resources, use the Helm property `clusterAgent.admissionController.agentSidecarInjection.profiles` to add environment variable definitions and resource settings. Use the `clusterAgent.admissionController.agentSidecarInjection.selectors` property to configure a custom selector to target workload pods instead of updating the workload to add `agent.datadoghq.com/sidecar:fargate` labels.
+To further configure the Agent or its container resources, use the following properties in your `DatadogAgent` resource:
 
-1. Create a Helm `datadog-values.yaml` file that configures a sidecar profile and a custom pod selector. 
+- `spec.features.admissionController.agentSidecarInjection.profiles`, to add environment variable definitions and resource settings
+- `spec.features.admissionController.agentSidecarInjection.selectors`, to configure a custom selector to target your desired workload pods (instead of pods with the `agent.datadoghq.com/sidecar: fargate` label)
 
-   **Example**
+You can adjust the profile of the injected Agent container without updating the label selector if desired.
 
-   In the following example, a selector targets all pods with the label `"app": redis`. The sidecar profile configures a `DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED` environment variable and resource settings. 
+For example, the following `datadog-agent.yaml` uses a selector to target all pods with the label `app: redis`. The sidecar profile configures a `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED` environment variable and new resource settings.
 
-   ```yaml
-   clusterAgent:
-     admissionController:
-       agentSidecarInjection:
-         selectors:
-           - objectSelector:
-               matchLabels:
-                   "app": redis
-         profiles:
-           - env:
-             - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-               value: "true"
-             resources:
-               requests:
-                 cpu: "400m"
-                 memory: "256Mi"
-               limits:
-                 cpu: "800m"
-                 memory: "512Mi"
-   ```
+```yaml
+#(...)
+spec:
+  #(...)
+  features:
+    admissionController:
+      agentSidecarInjection:
+        enabled: true
+        provider: fargate
+        selectors:
+          - objectSelector:
+              matchLabels:
+                app: redis
+        profiles:
+          - env:
+            - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+              value: "true"
+            resources:
+              requests:
+                cpu: "400m"
+                memory: "256Mi"
+              limits:
+                cpu: "800m"
+                memory: "512Mi"
+```
 
-2. Install the chart:
+Apply this configuration and wait for the Cluster Agent to reach a running state and register Admission Controller mutating webhooks. Then, an Agent sidecar is automatically injected into any new pod created with the label `app: redis`. 
+
+**Note**: The Admission Controller does not mutate pods that are already created.
+
+The following is output from a Redis deployment's pod where the Admission Controller injected an Agent sidecar based on the pod label `app: redis` instead of the label `agent.datadoghq.com/sidecar: fargate`:
+
+```yaml
+metadata: 
+  labels:
+    app: redis
+    eks.amazonaws.com/fargate-profile: fp-fargate
+spec:
+  serviceAccountName: datadog-agent
+  containers:
+  - name: my-redis
+    image: redis:latest
+    args:
+    - redis-server
+    # (...)
+
+  - name: datadog-agent-injected
+    image: gcr.io/datadoghq/agent:7.64.0
+    env:
+      - name: DD_API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: api-key
+            name: datadog-secret
+      - name: DD_EKS_FARGATE
+        value: "true"
+      - name: DD_CLUSTER_AGENT_AUTH_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: token
+            name: datadog-secret
+      - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+        value: "true"
+      #(...)
+    resources:
+      requests:
+        cpu: "400m"
+        memory: "256Mi"
+      limits:
+        cpu: "800m"
+        memory: "512Mi"
+```
+
+The environment variables and resource settings are automatically applied based on the new Fargate profile configured in the `DatadogAgent`.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Admission Controller - Helm" xxx -->
+
+#### Admission Controller - Helm
+
+1. If you haven't already, [install Helm][27] on your machine.
+
+2. Add the Datadog Helm repository:
 
    ```shell
-   helm install datadog datadog/datadog -n datadog-agent \
-       --set datadog.clusterName=cluster-name \
-       --set agents.enabled=false \
-       --set datadog.apiKeyExistingSecret=datadog-secret \
-       --set clusterAgent.tokenExistingSecret=datadog-secret \
-       --set clusterAgent.admissionController.agentSidecarInjection.enabled=true \
-       --set clusterAgent.admissionController.agentSidecarInjection.provider=fargate \
-       -f datadog-values.yaml
+   helm repo add datadog https://helm.datadoghq.com
+   helm repo update
    ```
-   **Note**: Use `agents.enabled=false` for a Fargate-only cluster. On a mixed cluster, set `agents.enabled=true` to create a DaemonSet for monitoring workloads on EC2 instances.
 
-3. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `app:redis`. 
-   **The Admission Controller does not mutate pods that are already created**.
+3.  Create a `datadog-values.yaml` with Admission Controller and Fargate injection enabled:
 
-**Example result**
+    ```yaml
+    datadog:
+      apiKeyExistingSecret: datadog-secret
+      clusterName: <CLUSTER_NAME>
+    clusterAgent:
+      tokenExistingSecret: datadog-secret
+      admissionController:
+        agentSidecarInjection:
+          enabled: true
+          provider: fargate
+    ```
 
-The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The environment variables and resource settings from `datadog-values.yaml` are automatically applied.
+4.  Deploy the chart in your desired namespace:
+    
+    ```shell
+    helm install datadog-agent -f datadog-values.yaml datadog/datadog
+    ```
 
-{{< highlight yaml "hl_lines=12-30" >}}
-labels:
-  app: redis
-  eks.amazonaws.com/fargate-profile: fp-fargate
-  pod-template-hash: 7b86c456c4
-# ...
-containers:
-- args:
-  - redis-server
-  image: redis:latest
-# ...
-- env:
-  - name: DD_API_KEY
-    valueFrom:
-      secretKeyRef:
-        key: api-key
-        name: datadog-secret
-  # ...
-  - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-    value: "true"
-  # ...
-  image: gcr.io/datadoghq/agent:7.51.0
-  imagePullPolicy: IfNotPresent
-  name: datadog-agent-injected
-  resources:
-    limits:
-      cpu: 800m
-      memory: 512Mi
-    requests:
-      cpu: 400m
-      memory: 256Mi
-{{< /highlight >}}
+5.  After the Cluster Agent reaches a running state and registers Admission Controller's mutating webhooks, add the label `agent.datadoghq.com/sidecar: fargate` to your desired pods (not the parent workload) to trigger the injection of the Datadog Agent sidecar container.
 
+**Note**: The Admission Controller only mutates new pods, not pods that are already created. It does not adjust your `serviceAccountName`. If you have not set the RBAC for this pod, the Agent cannot connect to Kubernetes.
+
+On a Fargate-only cluster, you can set `agents.enabled=false` to skip creating the traditional DaemonSet for monitoring workloads on EC2 instances.
+
+**Example**
+
+The following is output from a sample Redis Deployment's pod where the Admission Controller injected an Agent sidecar. The environment variables and resource settings are automatically applied based on the Datadog Fargate profile's internal default values.
+
+The sidecar uses the image repository and tags set in `datadog-values.yaml`.
+
+```yaml
+metadata:
+  labels:
+    app: redis
+    eks.amazonaws.com/fargate-profile: fp-fargate
+    agent.datadoghq.com/sidecar: fargate
+spec:
+  serviceAccountName: datadog-agent
+  containers:
+  - name: my-redis
+    image: redis:latest
+    args:
+      - redis-server
+    # (...)
+
+  - name: datadog-agent-injected
+    image: gcr.io/datadoghq/agent:7.64.0
+    env:
+      - name: DD_API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: api-key
+            name: datadog-secret
+      - name: DD_EKS_FARGATE
+        value: "true"
+      - name: DD_CLUSTER_AGENT_AUTH_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: token
+            name: datadog-secret
+      # (...)
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+```
+
+##### Custom configuration with sidecar profiles and custom selectors - Helm
+
+To further configure the Agent or its container resources, use the following properties in your Helm configuration:
+
+- `clusterAgent.admissionController.agentSidecarInjection.profiles`, to add environment variable definitions and resource settings
+- `clusterAgent.admissionController.agentSidecarInjection.selectors`, to configure a custom selector to target your desired workload pods (instead of pods with the `agent.datadoghq.com/sidecar: fargate` label)
+
+You can adjust the profile of the injected Agent container without updating the label selector if desired.
+
+For example, the following `datadog-values.yaml` uses a selector to target all pods with the label `app: redis`. The sidecar profile configures a `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED` environment variable and new resource settings.
+
+```yaml
+#(...)
+clusterAgent:
+  admissionController:
+    agentSidecarInjection:
+      enabled: true
+      provider: fargate
+      selectors:
+        - objectSelector:
+            matchLabels:
+              app: redis
+      profiles:
+        - env:
+          - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+            value: "true"
+          resources:
+            requests:
+              cpu: "400m"
+              memory: "256Mi"
+            limits:
+              cpu: "800m"
+              memory: "512Mi"
+```
+
+Apply this configuration and wait for the Cluster Agent to reach a running state and register Admission Controller mutating webhooks. Then, an Agent sidecar is automatically injected into any new pod created with the label `app: redis`. 
+
+**Note**: The Admission Controller does not mutate pods that are already created.
+
+The following is output from a Redis deployment's pod where the Admission Controller injected an Agent sidecar based on the pod label `app: redis` instead of the label `agent.datadoghq.com/sidecar: fargate`:
+
+```yaml
+metadata:
+  labels:
+    app: redis
+    eks.amazonaws.com/fargate-profile: fp-fargate
+spec:
+  serviceAccountName: datadog-agent
+  containers:
+  - name: my-redis
+    image: redis:latest
+    args:
+    - redis-server
+    # (...)
+
+  - name: datadog-agent-injected
+    image: gcr.io/datadoghq/agent:7.64.0
+    env:
+      - name: DD_API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: api-key
+            name: datadog-secret
+      - name: DD_EKS_FARGATE
+        value: "true"
+      - name: DD_CLUSTER_AGENT_AUTH_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: token
+            name: datadog-secret
+      - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+        value: "true"
+      #(...)
+    resources:
+      requests:
+        cpu: "400m"
+        memory: "256Mi"
+      limits:
+        cpu: "800m"
+        memory: "512Mi"
+```
+
+The environment variables and resource settings are automatically applied based on the new Fargate profile configured in the Helm configuration.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Manual" xxx -->
-##### Manual
+#### Manual
 
-To start collecting data from your Fargate type pod, deploy the Datadog Agent v7.17+ as a sidecar of your application. This is the minimum configuration required to collect metrics from your application running in the pod, notice the addition of `DD_EKS_FARGATE=true` in the manifest to deploy your Datadog Agent sidecar.
+To start collecting data from your Fargate type pod, deploy the Datadog Agent v7.17+ as a sidecar container within your application's pod using the following manifest:
 
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
- name: "<APPLICATION_NAME>"
- namespace: default
+  name: "<APPLICATION_NAME>"
+  namespace: default
 spec:
- selector:
-   matchLabels:
-     app: "<APPLICATION_NAME>"
- replicas: 1
- template:
-   metadata:
-     labels:
-       app: "<APPLICATION_NAME>"
-     name: "<POD_NAME>"
-   spec:
-     serviceAccountName: datadog-agent
-     containers:
-     - name: "<APPLICATION_NAME>"
-       image: "<APPLICATION_IMAGE>"
-     ## Running the Agent as a side-car
-     - image: datadog/agent
-       name: datadog-agent
-       env:
-       - name: DD_API_KEY
-         value: "<YOUR_DATADOG_API_KEY>"
-         ## Set DD_SITE to "datadoghq.eu" to send your
-         ## Agent data to the Datadog EU site
-       - name: DD_SITE
-         value: "datadoghq.com"
-       - name: DD_EKS_FARGATE
-         value: "true"
-       - name: DD_CLUSTER_NAME
-         value: "<CLUSTER_NAME>"
-       - name: DD_KUBERNETES_KUBELET_NODENAME
-         valueFrom:
-           fieldRef:
-             apiVersion: v1
-             fieldPath: spec.nodeName
-      resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "<APPLICATION_NAME>"
+  template:
+    metadata:
+      labels:
+        app: "<APPLICATION_NAME>"
+    spec:
+      serviceAccountName: datadog-agent
+      containers:
+        # Your original container
+        - name: "<CONTAINER_NAME>"
+          image: "<CONTAINER_IMAGE>"
+
+        # Running the Agent as a sidecar
+        - name: datadog-agent
+          image: gcr.io/datadoghq/agent:7
+          env:
+            - name: DD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: api-key
+                  name: datadog-secret
+            - name: DD_SITE
+              value: "<DATADOG_SITE>"
+            - name: DD_EKS_FARGATE
+              value: "true"
+            - name: DD_CLUSTER_NAME
+              value: "<CLUSTER_NAME>"
+            - name: DD_KUBERNETES_KUBELET_NODENAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "200m"
+              limits:
+                memory: "256Mi"
+                cpu: "200m"
 ```
 
-**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
+- Replace `<DATADOG_SITE>` to your site: {{< region-param key="dd_site" code="true" >}}. Defaults to `datadoghq.com`.
+- Ensure you are using a `serviceAccountName` with the prerequisite permissions.
+- Add `DD_TAGS` to append additional space separated `<KEY>:<VALUE>` tags. The `DD_CLUSTER_NAME` environment variable sets your `kube_cluster_name` tag.
 
-**Note**: Add your desired `kube_cluster_name:<CLUSTER_NAME>` to the list of `DD_TAGS` to ensure your metrics are tagged by your desired cluster. You can append additional tags here as space separated `<KEY>:<VALUE>` tags. For Agents `7.34+` and `6.34+`, this is not required. Instead, set the `DD_CLUSTER_NAME` environment variable.
+This manifest uses the Secret `datadog-secret` created in the prerequisite steps.
 
-###### Running the Cluster Agent or the Cluster Checks Runner
+#### Running the Cluster Agent or the Cluster Checks Runner
 
-Datadog recommends you run the Cluster Agent to access features such as [events collection][29], [Kubernetes resources view][30], and [cluster checks][31].
+Datadog recommends you run the Cluster Agent to access features such as [events collection][21], [Kubernetes resources view][22], and [cluster checks][23].
 
 When using EKS Fargate, there are two possible scenarios depending on whether or not the EKS cluster is running mixed workloads (Fargate/non-Fargate).
 
-If the EKS cluster runs Fargate and non-Fargate workloads, and you want to monitor the non-Fargate workload through Node Agent DaemonSet, add the Cluster Agent/Cluster Checks Runner to this deployment. For more information, see the [Cluster Agent Setup][25].
+If the EKS cluster runs Fargate and non-Fargate workloads, and you want to monitor the non-Fargate workload through Node Agent DaemonSet, add the Cluster Agent/Cluster Checks Runner to this deployment. For more information, see the [Cluster Agent Setup][17].
 
-The Cluster Agent token must be reachable from the Fargate tasks you want to monitor. If you are using the Helm Chart or Datadog Operator, this is not reachable by default because a secret in the target namespace is created.
+When deploying your Cluster Agent use the Secret and token created in the prerequisite steps.
 
-You have two options for this to work properly:
-
-* Use an hardcoded token value (`clusterAgent.token` in Helm, `credentials.token` in the Datadog Operator); convenient, but less secure.
-* Use a manually-created secret (`clusterAgent.tokenExistingSecret` in Helm, not available in the Datadog Operator) and replicate it in all namespaces where Fargate tasks need to be monitored; secure, but requires extra operations.
-**Note**:  The `token` value requires a minimum of 32 characters.
-
-If the EKS cluster runs only Fargate workloads, you need a standalone Cluster Agent deployment. And, as described above, choose one of the two options for making the token reachable.
-
-Use the following Helm `values.yaml`:
-
+##### Helm
 ```yaml
 datadog:
-  apiKey: <YOUR_DATADOG_API_KEY>
+  apiKeyExistingSecret: datadog-secret
   clusterName: <CLUSTER_NAME>
-agents:
-  enabled: false
 clusterAgent:
-  enabled: true
-  replicas: 2
-  env:
-    - name: DD_EKS_FARGATE
-      value: "true"
+  tokenExistingSecret: datadog-secret
 ```
 
+Set `agents.enabled=false` to disable the standard node Agent if you are using *only* Fargate workloads.
 
+##### Operator
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  global:
+    clusterAgentTokenSecret:
+      secretName: datadog-secret
+      keyName: token
+    credentials:
+      apiSecret:
+        secretName: datadog-secret
+        keyName: api-key
+```
+
+##### Configuring sidecar for Cluster Agent
 In both cases, you need to change the Datadog Agent sidecar manifest in order to allow communication with the Cluster Agent:
 
 ```yaml
-       env:
+    containers:
+    #(...)
+    - name: datadog-agent
+      image: gcr.io/datadoghq/agent:7
+      env:
+        #(...)
+        - name: DD_CLUSTER_NAME
+          value: <CLUSTER_NAME>
         - name: DD_CLUSTER_AGENT_ENABLED
           value: "true"
         - name: DD_CLUSTER_AGENT_AUTH_TOKEN
-          value: <hardcoded token value> # Use valueFrom: if you're using a secret
+          valueFrom:
+            secretKeyRef:
+              name: datadog-secret
+              key: token
         - name: DD_CLUSTER_AGENT_URL
           value: https://<CLUSTER_AGENT_SERVICE_NAME>.<CLUSTER_AGENT_SERVICE_NAMESPACE>.svc.cluster.local:5005
-        - name: DD_ORCHESTRATOR_EXPLORER_ENABLED # Required to get Kubernetes resources view
-          value: "true"
-        - name: DD_CLUSTER_NAME
-          value: <CLUSTER_NAME>
+```
+
+See the `DD_CLUSTER_AGENT_URL` relative to the Service name and Namespace created for your Datadog Cluster Agent.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+## Metrics collection
+
+### Integration metrics
+
+Use [Autodiscovery annotations with your application container][8] to start collecting its metrics for the [supported Agent integrations][9].
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "<APPLICATION_NAME>"
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "<APPLICATION_NAME>"
+  template:
+    metadata:
+      labels:
+        app: "<APPLICATION_NAME>"
+      annotations:
+        ad.datadoghq.com/<CONTAINER_NAME>.checks: |
+          {
+            "<INTEGRATION_NAME>": {
+              "init_config": <INIT_CONFIG>,
+              "instances": [<INSTANCES_CONFIG>]
+            }
+          }
+    spec:
+      serviceAccountName: datadog-agent
+      containers:
+      # Your original container
+      - name: "<CONTAINER_NAME>"
+        image: "<CONTAINER_IMAGE>"
+
+      # Running the Agent as a sidecar
+      - name: datadog-agent
+        image: gcr.io/datadoghq/agent:7
+        env:
+          - name: DD_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: api-key
+                name: datadog-secret
+          - name: DD_SITE
+            value: "<DATADOG_SITE>"
+          - name: DD_EKS_FARGATE
+            value: "true"
+          - name: DD_KUBERNETES_KUBELET_NODENAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
+          # (...)
+```
+
+### DogStatsD
+
+In EKS Fargate your application container will send the [DogStatsD metrics][10] to the Datadog Agent sidecar container. The Agent accepts these metrics by default over the port `8125`.
+
+You do not have to set the `DD_AGENT_HOST` address in your application container when sending these metrics. Let this default to `localhost`.
+
+
+### Live containers
+
+Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Live containers appear on the [Containers][11] page.
+
+### Kubernetes resources view
+
+To collect Kubernetes resource views, you need a [Cluster Agent setup][17] and a valid connection between the sidecar Agent and Cluster Agent. When using the Admission Controller's sidecar injection setup this is connected for you automatically. When configuring the sidecar manually ensure you are [connecting the sidecar Agent](#configuring-sidecar-for-cluster-agent).
+
+## Process collection
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
+
+To collect all processes running on your Fargate pod:
+
+1. [Set `shareProcessNamespace: true` on your pod spec][13]. For example:
+
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: "<APPLICATION_NAME>"
+     namespace: default
+   spec:
+     replicas: 1
+     selector:
+       matchLabels:
+         app: "<APPLICATION_NAME>"
+     template:
+       metadata:
+         labels:
+           app: "<APPLICATION_NAME>"
+           agent.datadoghq.com/sidecar: fargate
+       spec:
+         serviceAccountName: datadog-agent
+         shareProcessNamespace: true
+         containers:
+         # Your original container
+         - name: "<CONTAINER_NAME>"
+           image: "<CONTAINER_IMAGE>"
+   ```
+
+2. Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` by adding a [custom sidecar profile in your Operator's `DatadogAgent` configuration](#custom-configuration-with-sidecar-profiles-and-custom-selectors---datadog-operator):
+
+   ```yaml
+   #(...)
+   spec:
+     #(...)
+     features:
+       admissionController:
+         agentSidecarInjection:
+           enabled: true
+           provider: fargate
+           profiles:
+             - env:
+               - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+                 value: "true"
+   ```
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Admission Controller - Helm" xxx -->
+
+To collect all processes running on your Fargate pod:
+
+1. [Set `shareProcessNamespace: true` on your pod spec][13]. For example:
+
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: "<APPLICATION_NAME>"
+     namespace: default
+   spec:
+     replicas: 1
+     selector:
+       matchLabels:
+         app: "<APPLICATION_NAME>"
+     template:
+       metadata:
+         labels:
+           app: "<APPLICATION_NAME>"
+           agent.datadoghq.com/sidecar: fargate
+       spec:
+         serviceAccountName: datadog-agent
+         shareProcessNamespace: true
+         containers:
+         # Your original container
+         - name: "<CONTAINER_NAME>"
+           image: "<CONTAINER_IMAGE>"
+   ```
+   
+2. Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` by adding a [custom sidecar profile in your Helm configuration](#custom-configuration-with-sidecar-profiles-and-custom-selectors---helm):
+
+   ```yaml
+   clusterAgent:
+     admissionController:
+       agentSidecarInjection:
+         enabled: true
+         provider: fargate
+         profiles:
+           - env:
+             - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+               value: "true"
+   ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "Manual" xxx -->
+
+To collect all processes running on your Fargate pod, set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` and [set `shareProcessNamespace: true` on your pod spec][13].
+
+For example:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "<APPLICATION_NAME>"
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "<APPLICATION_NAME>"
+  template:
+    metadata:
+      labels:
+        app: "<APPLICATION_NAME>"
+    spec:
+      serviceAccountName: datadog-agent
+      shareProcessNamespace: true
+      containers:
+      # Your original container
+      - name: "<CONTAINER_NAME>"
+        image: "<CONTAINER_IMAGE>"
+
+      # Running the Agent as a sidecar
+      - name: datadog-agent
+        image: gcr.io/datadoghq/agent:7
+        env:
+          - name: DD_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: api-key
+                name: datadog-secret
+          - name: DD_SITE
+            value: "<DATADOG_SITE>"
+          - name: DD_EKS_FARGATE
+            value: "true"
+          - name: DD_KUBERNETES_KUBELET_NODENAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
+          - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+            value: "true"
+          # (...)
 ```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 
-## Cluster performance
-
-For insights into your EKS cluster performance, enable a [Cluster Check Runner][34] to collect metrics from the [`kube-state-metrics`][33] service.
-
-## Metrics collection
-
-### Integration metrics
-
-Use [Autodiscovery labels with your application container][15] to start collecting its metrics for the [supported Agent integrations][16].
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
- name: "<APPLICATION_NAME>"
- namespace: default
-spec:
- replicas: 1
- selector:
-   matchLabels:
-     app: "<APPLICATION_NAME>"
- template:
-   metadata:
-     labels:
-       app: "<APPLICATION_NAME>"
-     name: "<POD_NAME>"
-     annotations:
-      ad.datadoghq.com/<CONTAINER_NAME>.check_names: '[<CHECK_NAME>]'
-      ad.datadoghq.com/<CONTAINER_IDENTIFIER>.init_configs: '[<INIT_CONFIG>]'
-      ad.datadoghq.com/<CONTAINER_IDENTIFIER>.instances: '[<INSTANCE_CONFIG>]'
-   spec:
-     serviceAccountName: datadog-agent
-     containers:
-     - name: "<APPLICATION_NAME>"
-       image: "<APPLICATION_IMAGE>"
-     ## Running the Agent as a side-car
-     - image: datadog/agent
-       name: datadog-agent
-       env:
-       - name: DD_API_KEY
-         value: "<YOUR_DATADOG_API_KEY>"
-         ## Set DD_SITE to "datadoghq.eu" to send your
-         ## Agent data to the Datadog EU site
-       - name: DD_SITE
-         value: "datadoghq.com"
-       - name: DD_EKS_FARGATE
-         value: "true"
-       - name: DD_KUBERNETES_KUBELET_NODENAME
-         valueFrom:
-           fieldRef:
-             apiVersion: v1
-             fieldPath: spec.nodeName
-      resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-```
-
-**Notes**:
-
-- Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
-- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent. The [Live Containers][17] view reports 0 for CPU and Memory.
-
-### DogStatsD
-
-Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][18] from your application container to Datadog.
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
- name: "<APPLICATION_NAME>"
- namespace: default
-spec:
- replicas: 1
- selector:
-   matchLabels:
-     app: "<APPLICATION_NAME>"
- template:
-   metadata:
-     labels:
-       app: "<APPLICATION_NAME>"
-     name: "<POD_NAME>"
-   spec:
-     serviceAccountName: datadog-agent
-     containers:
-     - name: "<APPLICATION_NAME>"
-       image: "<APPLICATION_IMAGE>"
-     ## Running the Agent as a side-car
-     - image: datadog/agent
-       name: datadog-agent
-       ## Enabling port 8125 for DogStatsD metric collection
-       ports:
-        - containerPort: 8125
-          name: dogstatsdport
-          protocol: UDP
-       env:
-       - name: DD_API_KEY
-         value: "<YOUR_DATADOG_API_KEY>"
-         ## Set DD_SITE to "datadoghq.eu" to send your
-         ## Agent data to the Datadog EU site
-       - name: DD_SITE
-         value: "datadoghq.com"
-       - name: DD_EKS_FARGATE
-         value: "true"
-       - name: DD_KUBERNETES_KUBELET_NODENAME
-         valueFrom:
-           fieldRef:
-             apiVersion: v1
-             fieldPath: spec.nodeName
-      resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-```
-
-**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
-
-### Live containers
-
-Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Live containers appear on the [Containers][19] page.
-
-### Live processes
-
-Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][20] page. To enable live processes, [enable shareProcessNamespace in the pod spec][21].
-
-### Kubernetes resources view
-
-To collect Kubernetes resource views, you need a [Cluster Agent setup](#running-the-cluster-agent-or-the-cluster-checks-runner).
-
 ## Log collection
 
-### Collecting logs from EKS on Fargate with Fluent Bit.
+### Collecting logs from EKS on Fargate natively with the Agent
 
-Monitor EKS Fargate logs by using [Fluent Bit][22] to route EKS logs to CloudWatch Logs and the [Datadog Forwarder][23] to route logs to Datadog.
+**Minimum Agent version:** 7.71.0
+
+Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubelet and ship them to Datadog.
+
+1. The most convenient way to enable native kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers automatically have kubelet logging enabled. This feature can also be configured manually in your Application's manifest.
+
+  <!-- xxx tabs xxx -->
+  <!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
+
+  Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`, so newly injected Agent containers will have kubelet logging enabled.
+
+  ```yaml
+  apiVersion: datadoghq.com/v2alpha1
+  kind: DatadogAgent
+  metadata:
+    name: datadog
+    namespace: datadog
+  spec:
+    features:
+      admissionController:
+        agentSidecarInjection:
+          enabled: true
+          provider: fargate
+    override:
+      clusterAgent:
+        env:
+          - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
+            value: "true"
+  ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxx tab "Admission Controller - Helm" xxx -->
+
+  Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`, so newly injected Agent containers will have kubelet logging enabled.
+
+  ```yaml
+  clusterAgent:
+    admissionController:
+      agentSidecarInjection:
+        enabled: true
+        provider: fargate
+    env:
+      - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
+        value: true
+  ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxx tab "Manual" xxx -->
+
+  To enable Agent logging manually, you must:
+  1. Attach an [emptyDir][29] volume to your pod and mount it inside the Agent container. This prevents duplicate logs should the Agent container restart.
+  2. Set `DD_LOGS_ENABLED` to `"true"` - this instructs the Agent to collect logs.
+  3. Set `DD_LOGS_CONFIG_RUN_PATH` to the emptyDir mount path.
+  4. Set `DD_LOGS_CONFIG_K8S_CONTAINER_USE_KUBELET_API` to `"true"` - this instructs the Agent on which logging method to use. 
+
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  spec:
+    #(...)
+    template:
+      #(...)
+      spec:
+        # Empty dir to keep track of logging timestamps in case of agent restart
+        volumes:
+          - name: agent-option
+            emptyDir: {}
+        containers:
+          # Your original container
+          - name: "<CONTAINER_NAME>"
+            image: "<CONTAINER_IMAGE>"
+
+          # Running the Agent as a sidecar
+          - name: datadog-agent
+            image: gcr.io/datadoghq/agent:7
+            # Mount the empty dir to the Agent
+            volumeMounts:
+              - name: agent-option
+                mountPath: /opt/datadog-agent/run
+                readOnly: false
+            env:
+              #(...)
+              - name: DD_LOGS_ENABLED
+                value: "true"
+              - name: DD_LOGS_CONFIG_K8S_CONTAINER_USE_KUBELET_API
+                value: "true"
+              - name: DD_LOGS_CONFIG_RUN_PATH
+                value: "/opt/datadog-agent/run"
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "200m"
+              limits:
+                memory: "256Mi"
+                cpu: "200m"
+  ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxz tabs xxx -->
+
+2. You can configure the Agent sidecar to automatically collect logs for all of the containers in its pod by enabling `DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL`. Alternatively, the log integration can be setup per container with the standard Kubernetes [Autodiscovery annotations][30].
+
+  <!-- xxx tabs xxx -->
+  <!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
+
+  ```yaml
+  #(...)
+  spec:
+    #(...)
+    features:
+      admissionController:
+        agentSidecarInjection:
+          #(...)
+          profiles:
+            - env:
+              # Collect all container logs
+              - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+                value: "true"
+  ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxx tab "Admission Controller - Helm" xxx -->
+
+  ```yaml
+  clusterAgent:
+    admissionController:
+      agentSidecarInjection:
+        # (...)
+        profiles:
+          - env:
+            # Collect all container logs
+            - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+              value: "true"
+  ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxx tab "Manual" xxx -->
+
+  ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: "<APPLICATION_NAME>"
+      namespace: default
+    spec:
+      #(...)
+      template:
+      #(...)
+        spec:
+          #(...)
+          containers:
+            # Running the Agent as a sidecar
+            - name: datadog-agent
+              image: gcr.io/datadoghq/agent:7
+              env:
+                # Collect all container logs
+                - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+                  value: "true"
+              #(...)
+  ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxz tabs xxx -->
+
+### Collecting logs from EKS on Fargate with Fluent Bit
+
+Monitor EKS Fargate logs by using [Fluent Bit][14] to route EKS logs to CloudWatch Logs and the [Datadog Forwarder][15] to route logs to Datadog.
 
 1. To configure Fluent Bit to send logs to CloudWatch, create a Kubernetes ConfigMap that specifies CloudWatch Logs as its output. The ConfigMap specifies the log group, region, prefix string, and whether to automatically create the log group.
 
-   ```yaml
-    kind: ConfigMap
-    apiVersion: v1
-    metadata:
-      name: aws-logging
-      namespace: aws-observability
-    data:
-      output.conf: |
-        [OUTPUT]
-            Name cloudwatch_logs
-            Match   *
-            region us-east-1
-            log_group_name awslogs-https
-            log_stream_prefix awslogs-firelens-example
-            auto_create_group true
-   ```
-2. Use the [Datadog Forwarder][23] to collect logs from Cloudwatch and send them to Datadog.
+  ```yaml
+  kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: aws-logging
+    namespace: aws-observability
+  data:
+    output.conf: |
+      [OUTPUT]
+          Name cloudwatch_logs
+          Match   *
+          region us-east-1
+          log_group_name awslogs-https
+          log_stream_prefix awslogs-firelens-example
+          auto_create_group true
+  ```
+2. Use the [Datadog Forwarder][15] to collect logs from CloudWatch and send them to Datadog.
 
-## Traces collection
+## Trace collection
 
-Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][24].
+In EKS Fargate, your application container sends its traces to the Datadog Agent sidecar container. The Agent accepts these traces over port `8126` by default.
+
+You do not have to set the `DD_AGENT_HOST` address in your application container when sending these metrics. Let this default to `localhost`.
+
+Set [`shareProcessNamespace: true` in the pod spec][13] to assist the Agent for origin detection.
 
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
- name: "<APPLICATION_NAME>"
- namespace: default
+  name: "<APPLICATION_NAME>"
+  namespace: default
 spec:
- replicas: 1
- selector:
-   matchLabels:
-     app: "<APPLICATION_NAME>"
- template:
-   metadata:
-     labels:
-       app: "<APPLICATION_NAME>"
-     name: "<POD_NAME>"
-   spec:
-     serviceAccountName: datadog-agent
-     ## Putting the agent in the same namespace as the application for origin detection with cgroup v2
-     shareProcessNamespace: true
-     containers:
-     - name: "<APPLICATION_NAME>"
-       image: "<APPLICATION_IMAGE>"
-     ## Running the Agent as a side-car
-     - image: datadog/agent
-       name: datadog-agent
-       ## Enabling port 8126 for Trace collection
-       ports:
-        - containerPort: 8126
-          name: traceport
-          protocol: TCP
-       env:
-       - name: DD_API_KEY
-         value: "<YOUR_DATADOG_API_KEY>"
-         ## Set DD_SITE to "datadoghq.eu" to send your
-         ## Agent data to the Datadog EU site
-       - name: DD_SITE
-         value: "datadoghq.com"
-       - name: DD_EKS_FARGATE
-         value: "true"
-       - name: DD_APM_ENABLED
-         value: "true"
-       - name: DD_KUBERNETES_KUBELET_NODENAME
-         valueFrom:
-           fieldRef:
-             apiVersion: v1
-             fieldPath: spec.nodeName
-      resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "<APPLICATION_NAME>"
+  template:
+    metadata:
+      labels:
+        app: "<APPLICATION_NAME>"
+    spec:
+      serviceAccountName: datadog-agent
+      shareProcessNamespace: true
+      containers:
+      # Your original container
+      - name: "<CONTAINER_NAME>"
+        image: "<CONTAINER_IMAGE>"
+
+      # Running the Agent as a sidecar
+      - name: datadog-agent
+        image: gcr.io/datadoghq/agent:7
+        # (...)
 ```
 
-**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
+[Read more about how to set up tracing][16].
 
 ## Events collection
 
-To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster](#running-the-cluster-agent-or-the-cluster-checks-runner) and [Enable Event collection for your Cluster Agent][19].
-
-Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
+To collect events from your Amazon EKS Fargate API server, run the [Datadog Cluster Agent][17] within your EKS cluster. The Cluster Agent collects Kubernetes events, including those for the EKS Fargate pods, by default.
 
 **Note**: You can also collect events if you run the Datadog Cluster Agent in a pod in Fargate.
-
-## Process collection
-
-For Agent 6.19+/7.19+, [Process Collection][26] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
-
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  name: <NAME>
-spec:
-  shareProcessNamespace: true
-...
-```
-
-**Note**: CPU and memory metrics are not available.
 
 ## Data Collected
 
 ### Metrics
 
-The eks_fargate check submits a heartbeat metric `eks.fargate.pods.running` that is tagged by `pod_name` and `virtual_node` so you can keep track of how many pods are running.
+The `eks_fargate` check submits a heartbeat metric `eks.fargate.pods.running` that is tagged by `pod_name` and `virtual_node` so you can keep track of how many pods are running.
 
 ### Service Checks
 
-eks_fargate does not include any service checks.
+The `eks_fargate` check does not include any service checks.
 
 ### Events
 
-eks_fargate does not include any events.
+The `eks_fargate` check does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][20].
+### ServiceAccount Kubelet permissions
+
+Ensure you have the right permissions on the `ServiceAccount` associated with your pod. If your pod does not have a `ServiceAccount` associated with it or isn't bound to the correct ClusterRole, it does not have access to the Kubelet.
+
+To validate your access, run:
+
+```shell
+kubectl auth can-i get nodes/pods --as system:serviceaccount:<NAMESPACE>:<SERVICEACCOUNT>
+```
+
+For example, if your Fargate pod is in the `fargate` namespace with the ServiceAccount `datadog-agent`:
+```shell
+kubectl auth can-i get nodes/pods --as system:serviceaccount:fargate:datadog-agent
+```
+
+This returns `yes` or `no` based on the access.
+
+
+### Datadog Agent container security context
+
+The Datadog Agent container is designed to run as the dd-agent user (UID: 100). If you override the default security context by setting, for example, `runAsUser: 1000` in your pod spec, the container fails to start due to insufficient permissions. You may see errors such as:
+
+```log
+[s6-init] making user provided files available at /var/run/s6/etc...exited 0.
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-ecs.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-eks.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/60-network-check.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/59-defaults.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/60-sysprobe-check.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-ci.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/89-copy-customfiles.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/01-check-apikey.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/51-docker.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-kubernetes.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-mesos.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/trace/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/security/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/sysprobe/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/agent/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/process/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/security/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/trace/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/sysprobe/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/agent/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/process/finish: Operation not permitted
+[s6-init] ensuring user provided files have correct perms...exited 0.
+[fix-attrs.d] applying ownership & permissions fixes...
+[fix-attrs.d] done.
+[cont-init.d] executing container initialization scripts...
+[cont-init.d] 01-check-apikey.sh: executing... 
+[cont-init.d] 01-check-apikey.sh: exited 0.
+[cont-init.d] 50-ci.sh: executing... 
+[cont-init.d] 50-ci.sh: exited 0.
+[cont-init.d] 50-ecs.sh: executing... 
+[cont-init.d] 50-ecs.sh: exited 0.
+[cont-init.d] 50-eks.sh: executing... 
+ln: failed to create symbolic link '/etc/datadog-agent/datadog.yaml': Permission denied
+[cont-init.d] 50-eks.sh: exited 0.
+[cont-init.d] 50-kubernetes.sh: executing... 
+[cont-init.d] 50-kubernetes.sh: exited 0.
+[cont-init.d] 50-mesos.sh: executing... 
+[cont-init.d] 50-mesos.sh: exited 0.
+[cont-init.d] 51-docker.sh: executing... 
+[cont-init.d] 51-docker.sh: exited 0.
+[cont-init.d] 59-defaults.sh: executing... 
+touch: cannot touch '/etc/datadog-agent/datadog.yaml': Permission denied
+[cont-init.d] 59-defaults.sh: exited 1.
+```
+
+Since Datadog Cluster Agent v7.62+, overriding the security context for the Datadog Agent sidecar allows you to maintain consistent security standards across your Kubernetes deployments. Whether using the DatadogAgent custom resource or Helm values, you can ensure that the Agent container runs with the appropriate user, dd-agent (UID 100), as needed by your environment.
+
+By following the examples, you can deploy the Agent sidecar in environments where the default Pod security context must be overridden.
+
+Datadog Operator
+
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    admissionController:
+      agentSidecarInjection:
+        enabled: true
+        provider: fargate
+        - securityContext:
+            runAsUser: 100
+```
+
+Helm
+
+```yaml
+clusterAgent:
+  admissionController:
+    agentSidecarInjection:
+      profiles:
+        - securityContext:
+            runAsUser: 100
+```
+
+Need help? Contact [Datadog support][12].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [Key metrics for monitoring AWS Fargate][32]
-- [How to collect metrics and logs from AWS Fargate workloads][27]
-- [AWS Fargate monitoring with Datadog][28]
+- [Key metrics for monitoring AWS Fargate][24]
+- [How to collect metrics and logs from AWS Fargate workloads][19]
+- [AWS Fargate monitoring with Datadog][20]
+- [Trace API Gateway when proxying requests to ECS Fargate][28]
 
-[1]: http://docs.datadoghq.com/integrations/ecs_fargate/
-[2]: http://docs.datadoghq.com/integrations/amazon_eks/
-[3]: http://docs.datadoghq.com/integrations/system
-[4]: https://docs.datadoghq.com/getting_started/agent/autodiscovery/
-[5]: https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html
-[6]: http://docs.datadoghq.com/integrations/amazon_eks/#setup
-[7]: http://docs.datadoghq.com/agent/kubernetes
-[8]: http://docs.datadoghq.com/agent/kubernetes/daemonset_setup
-[9]: https://app.datadoghq.com/account/settings#integrations/kubernetes
-[10]: https://app.datadoghq.com/account/settings#integrations/amazon-web-services
-[11]: https://app.datadoghq.com/account/settings#integrations/amazon-eks
-[12]: https://app.datadoghq.com/account/settings#integrations/amazon-ec2
-[13]: http://docs.datadoghq.com/integrations/kubernetes
-[14]: https://app.datadoghq.com/organization-settings/api-keys
-[15]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[16]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
-[17]: https://app.datadoghq.com/containers
-[18]: http://docs.datadoghq.com/tracing/setup
-[19]: https://app.datadoghq.com/containers
-[20]: https://app.datadoghq.com/process
-[21]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
-[22]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
-[23]: https://docs.datadoghq.com/serverless/libraries_integrations/forwarder/
-[24]: http://docs.datadoghq.com/tracing/#send-traces-to-datadog
-[25]: http://docs.datadoghq.com/agent/cluster_agent/setup/
-[26]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
-[27]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
-[28]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
-[29]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm#event-collection
-[30]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
-[31]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview
-[32]: https://www.datadoghq.com/blog/aws-fargate-metrics/
-[33]: https://github.com/kubernetes/kube-state-metrics
-[34]: https://docs.datadoghq.com/containers/guide/clustercheckrunners
-[35]: http://docs.datadoghq.com/agent/cluster_agent
-[36]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
+[1]: http://docs.datadoghq.com/integrations/system
+[2]: https://docs.datadoghq.com/getting_started/agent/autodiscovery/
+[3]: https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html
+[4]: http://docs.datadoghq.com/integrations/amazon_eks/#setup
+[5]: http://docs.datadoghq.com/containers/kubernetes/installation
+[6]: /account/settings#integrations/amazon-web-services
+[7]: /organization-settings/api-keys
+[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[9]: https://github.com/DataDog/integrations-core
+[10]: https://docs.datadoghq.com/developers/dogstatsd/
+[11]: /containers
+[12]: https://docs.datadoghq.com/help/
+[13]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
+[14]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
+[15]: https://docs.datadoghq.com/serverless/libraries_integrations/forwarder/
+[16]: http://docs.datadoghq.com/tracing/#send-traces-to-datadog
+[17]: http://docs.datadoghq.com/agent/cluster_agent/setup/
+[18]: https://docs.datadoghq.com/infrastructure/process/?tab=kubernetesmanual#installation
+[19]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
+[20]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+[21]: https://docs.datadoghq.com/containers/kubernetes/configuration/#enable-kubernetes-event-collection
+[22]: https://docs.datadoghq.com/infrastructure/containers/orchestrator_explorer
+[23]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview
+[24]: https://www.datadoghq.com/blog/aws-fargate-metrics/
+[25]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
+[26]: https://kubernetes.io/docs/concepts/configuration/secret/
+[27]: https://helm.sh/docs/intro/install/
+[28]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
+[29]: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
+[30]: https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations

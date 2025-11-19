@@ -4,6 +4,8 @@
 
 This check monitors [Strimzi][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 ### Installation
@@ -231,7 +233,7 @@ Additional helpful documentation, links, and articles:
 
 
 [1]: https://strimzi.io/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/strimzi/datadog_checks/strimzi/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "44210c4a-0fe6-4702-88bf-d720e492a806",
   "app_id": "wincrashdetect",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -14,7 +15,18 @@
     "classifier_tags": [
       "Supported OS::Windows",
       "Category::OS & System",
+      "Category::Windows",
       "Offering::Integration"
+    ], 
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/wincrashdetect/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/troubleshoot-windows-blue-screen-errors/"
+      }
     ]
   },
   "author": {

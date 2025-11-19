@@ -4,11 +4,11 @@
 from copy import deepcopy
 
 import requests
-from six import PY2
 
-from ...errors import CheckException
-from ...utils.tracing import traced_class
-from .. import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.tracing import traced_class
+
 from .mixins import OpenMetricsScraperMixin
 
 STANDARD_FIELDS = [
@@ -183,5 +183,4 @@ class StandardFields(object):
     pass
 
 
-if not PY2:
-    StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)
+StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)

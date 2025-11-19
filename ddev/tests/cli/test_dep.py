@@ -127,7 +127,7 @@ class TestUpdates:
         assert (
             result.output
             == '''1 dependencies are out of sync:
-dep-a can be updated to version 1.2.3 on py2 and py3
+dep-a can be updated to version 1.2.3 on py3
 '''
         )
         assert result.exit_code != 0
@@ -291,13 +291,16 @@ def mock_async_http_get_json():
 
 
 @pytest.fixture
-def fake_repo(tmp_path, config_file):
+def fake_repo(tmp_path, config_file, mocker):
     data_folder = tmp_path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data'
     data_folder.mkdir(parents=True)
 
     # Set this as core repo in the config
     config_file.model.repos['core'] = str(tmp_path)
     config_file.save()
+
+    # Mock the access to worktrees because this is a fake repo
+    mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
 
     yield tmp_path
 

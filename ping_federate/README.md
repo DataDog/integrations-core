@@ -5,13 +5,15 @@
 
 This integration provides enrichment and visulization for admin and audit logs. It helps to visualize detailed insights into admin and audit log analysis using out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 ### Installation
 
 To install the PingFederate integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][4] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.54.0.
+**Note**: This step is not necessary for Agent version >= 7.57.0.
 
 Linux command
   ```shell

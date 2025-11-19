@@ -26,8 +26,8 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 2,
-                            "height": 2
+                            "width": 6,
+                            "height": 4
                         }
                     },
                     {
@@ -45,10 +45,10 @@
                             "has_padding": true
                         },
                         "layout": {
-                            "x": 2,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
                         }
                     }
                 ]
@@ -57,7 +57,124 @@
                 "x": 0,
                 "y": 0,
                 "width": 6,
-                "height": 3
+                "height": 9
+            }
+        },
+        {
+            "id": 8073559146636168,
+            "definition": {
+                "title": "Health Overview",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5679074543367742,
+                        "definition": {
+                            "title": "Leafs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:leaf} by {device_id}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6149327972947806,
+                        "definition": {
+                            "title": "Spines",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:spine} by {device_id}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2542134220658730,
+                        "definition": {
+                            "title": "Monitors overview",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "cisco-aci",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 6
             }
         },
         {
@@ -217,7 +334,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 0,
+                "y": 6,
                 "width": 6,
                 "height": 3
             }
@@ -433,7 +550,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 9,
                 "width": 12,
                 "height": 6
             }
@@ -480,7 +597,7 @@
                             "x": 0,
                             "y": 0,
                             "width": 2,
-                            "height": 1
+                            "height": 2
                         }
                     },
                     {
@@ -533,55 +650,7 @@
                         "layout": {
                             "x": 2,
                             "y": 0,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 20,
-                        "definition": {
-                            "title": "Top 10 EPGs by IP",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "style": {
-                                        "palette": "dog_classic"
-                                    },
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant} by {ip,application,endpoint_group}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "custom_links": [],
-                            "style": {}
-                        },
-                        "layout": {
-                            "x": 5,
-                            "y": 0,
-                            "width": 4,
+                            "width": 5,
                             "height": 2
                         }
                     },
@@ -633,10 +702,10 @@
                             "style": {}
                         },
                         "layout": {
-                            "x": 9,
+                            "x": 7,
                             "y": 0,
-                            "width": 3,
-                            "height": 2
+                            "width": 5,
+                            "height": 4
                         }
                     },
                     {
@@ -670,18 +739,66 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 1,
+                            "y": 2,
                             "width": 2,
-                            "height": 1
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 20,
+                        "definition": {
+                            "title": "Top 10 EPGs by IP",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant} by {ip,application,endpoint_group}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 15,
                 "width": 12,
-                "height": 3
+                "height": 5
             }
         },
         {
@@ -895,6 +1012,104 @@
                 "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 1547034477646386,
+                        "definition": {
+                            "title": "Avg CPU %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:leaf} by {device_id,fabric_pod_id,node_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1671869305900852,
+                        "definition": {
+                            "title": "Avg Memory %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cisco_aci.fabric.node.mem.avg{apic_role:leaf} by {device_id,fabric_pod_id,node_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
                         "id": 2991165436190176,
                         "definition": {
                             "title": "Interfaces",
@@ -979,8 +1194,8 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
-                            "width": 6,
+                            "y": 4,
+                            "width": 12,
                             "height": 3
                         }
                     }
@@ -988,9 +1203,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 0,
-                "width": 6,
-                "height": 4
+                "y": 6,
+                "width": 12,
+                "height": 8
             }
         },
         {
@@ -1002,6 +1217,104 @@
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
+                    {
+                        "id": 3145200399718776,
+                        "definition": {
+                            "title": "Avg CPU %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:spine} by {device_id,fabric_pod_id,node_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3332653863183974,
+                        "definition": {
+                            "title": "Avg Memory %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cisco_aci.fabric.node.mem.avg{apic_role:spine} by {device_id,fabric_pod_id,node_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
                     {
                         "id": 1813163214351510,
                         "definition": {
@@ -1087,19 +1400,104 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
-                            "width": 6,
+                            "y": 4,
+                            "width": 12,
                             "height": 3
                         }
                     }
                 ]
             },
             "layout": {
-                "x": 6,
-                "y": 0,
-                "width": 6,
-                "height": 4
+                "x": 0,
+                "y": 14,
+                "width": 12,
+                "height": 8
             }
+        },
+        {
+          "id": 2956975389292306,
+          "definition": {
+            "title": "Faults",
+            "background_color": "vivid_purple",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": []
+          },
+          "layout": {
+            "x": 0,
+            "y": 34,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "id": 987022990164424,
+          "definition": {
+            "title": "",
+            "title_size": "16",
+            "title_align": "left",
+            "requests": [
+              {
+                "response_format": "event_list",
+                "query": {
+                  "data_source": "logs_stream",
+                  "query_string": "service:cisco-aci source:cisco-aci",
+                  "indexes": [],
+                  "storage": "hot"
+                },
+                "columns": [
+                  {
+                    "field": "status_line",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "timestamp",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "host",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "status",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "content",
+                    "width": "compact"
+                  },
+                  {
+                    "field": "@cisco_aci.ack",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "@cisco_aci.cause",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "@cisco_aci.code",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "@cisco_aci.occur",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "@cisco_aci.severity",
+                    "width": "auto"
+                  }
+                ]
+              }
+            ],
+            "type": "list_stream"
+          },
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 7
+          }
         }
     ],
     "template_variables": [

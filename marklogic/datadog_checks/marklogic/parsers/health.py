@@ -4,8 +4,7 @@
 from typing import Any, Dict  # noqa: F401
 
 from datadog_checks.base import AgentCheck
-
-from ..constants import STATE_HEALTH_MAPPER
+from datadog_checks.marklogic.constants import STATE_HEALTH_MAPPER
 
 
 def parse_summary_health(data):

@@ -22,7 +22,7 @@ Monitoring EKS requires that you set up one of the following Datadog integration
 
 - [Kubernetes][4]
 - [AWS][5]
-- [AWS EC2][6]
+- [Amazon EC2][6]
 
 ### Log collection
 

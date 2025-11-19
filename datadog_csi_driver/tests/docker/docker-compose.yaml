@@ -1,0 +1,10 @@
+services:
+
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/metrics.txt:/metrics/metrics

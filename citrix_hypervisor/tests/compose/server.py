@@ -1,3 +1,5 @@
+from os import environ
+
 from flask import Flask, request
 
 app = Flask('Xenserver Test')
@@ -6,7 +8,7 @@ base_path = '/usr/share/responses'
 
 @app.route("/rrd_updates", methods=["GET"])
 def rrd_updates():
-    f = open(base_path + '/rrd_updates.json', 'r')
+    f = open('/'.join([base_path, environ['RRD_UPDATES_FILE']]), 'r')
     return f.read()
 
 

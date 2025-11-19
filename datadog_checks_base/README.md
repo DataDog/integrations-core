@@ -29,6 +29,15 @@ install the toolkit locally and play with it:
 pip install datadog-checks-base
 ```
 
+## Performance Optimizations
+
+We strive to balance lean resource usage with a "batteries included" user experience.
+We employ a few tricks to achieve this.
+
+One of them is the [lazy-loader][9] library that allows us to expose a nice API (simple, short imports) without the baseline memory overhead of importing everything all the time.
+
+Another trick is to import some of our dependencies inside functions that use them instead of the more conventional import section at the top of the file. We rely on this the most in the `AgentCheck` base class.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
@@ -40,3 +49,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://github.com/DataDog/integrations-core
 [7]: https://pypi.org/project/datadog-checks-base/
 [8]: https://docs.datadoghq.com/help/
+[9]: https://github.com/scientific-python/lazy-loader

@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: "postgres:${POSTGRES_IMAGE_TAG}"
+    environment:
+      POSTGRES_PASSWORD: d@tadog
+    volumes:
+      - ${TEST_RESOURCES_PATH}/pg:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  pgbouncer:
+    # TODO: use a different source than bitnamilegacy as it will no longer be updated
+    image: "bitnamilegacy/pgbouncer:${PGBOUNCER_IMAGE_TAG}"
+    environment:
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: d@tadog
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      PGBOUNCER_PORT: 6432
+      PGBOUNCER_DATABASE: datadog_test
+      PGBOUNCER_STATS_USERS: datadog
+      PGBOUNCER_LOG_CONNECTIONS: 1
+      PGBOUNCER_LOG_DISCONNECTIONS: 1
+
+    ports:
+      - "6432:6432"
+    depends_on:
+      - postgres

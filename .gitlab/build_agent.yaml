@@ -1,0 +1,55 @@
+---
+.build-agent-tpl:
+  variables:
+    # Pass these to triggered agent build job.
+    RELEASE_VERSION_6: "nightly"
+    RELEASE_VERSION_7: "nightly-a7"
+    BUCKET_BRANCH: "dev"
+    DEPLOY_AGENT: "false"
+    INTEGRATIONS_CORE_VERSION: ${CI_COMMIT_REF_NAME}
+    RUN_E2E_TESTS: "on"
+    # disable kitchen tests
+    RUN_KITCHEN_TESTS: "false"
+  stage: build
+  trigger:
+    project: DataDog/datadog-agent
+    branch: main
+    # It's more convenient to directly show if downstream pipeline succeeded.
+    strategy: depend
+
+build-agent-auto:
+  extends: .build-agent-tpl
+  rules:
+    # Do not run on tags
+    - if: $CI_COMMIT_TAG
+      when: never
+    # Do not run on release branches
+    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+      when: never
+    # Only run if the branch is not a Github Merge Queue one.
+    - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
+      changes:
+        # We don't yet support variable expansion in `compare_to`. It was added in gitlab 17.2:
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/369916#note_1972773223
+        compare_to: "master"
+        paths:
+          - .deps/*
+          - .gitlab/build_agent.yaml
+
+build-agent-manual-release:
+  extends: .build-agent-tpl
+  allow_failure: true
+  trigger:
+    branch: $CI_COMMIT_BRANCH
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+      when: manual
+
+# Always have the option to run manually the agent build manually against the agent's main
+build-agent-manual:
+  extends: .build-agent-tpl
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+      when: never
+    - when: manual

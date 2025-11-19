@@ -1,0 +1,57 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "fe7df7db-b889-46f1-a191-e115fabec22a",
+  "app_id": "kubevirt",
+  "owner": "agent-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect key metrics to monitor the health of your KubeVirt components.",
+    "title": "KubeVirt",
+    "media": [],
+    "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 46027487,
+      "source_type_name": "kubevirt",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kubevirt",
+        "check": [
+          "kubevirt_api.process.cpu_seconds.count",
+          "kubevirt_handler.vmi.cpu_system_usage_seconds.count",
+          "kubevirt_controller.virt_controller.ready_status"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "KubeVirt - Overview": "assets/dashboards/kubevirt_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import logging
 import re
-from copy import copy
+from copy import copy, deepcopy
 
 import pytest
 
@@ -96,7 +96,7 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
 
 
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
-    databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
+    databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second', 'datadog_test_collation']
     exp_datadog_test = {
         'id': 'normalized_value',
         'name': 'datadog_test_schemas_second',
@@ -239,6 +239,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'referencing_column': 'city_id',
                                 'referenced_table': 'cities',
                                 'referenced_column': 'id',
+                                "delete_action": "SET_NULL",
+                                "update_action": "NO_ACTION",
                             }
                         ],
                     },
@@ -276,6 +278,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'referencing_column': 'RestaurantName,District',
                                 'referenced_table': 'Restaurants',
                                 'referenced_column': 'RestaurantName,District',
+                                "delete_action": "CASCADE",
+                                "update_action": "SET_NULL",
                             }
                         ],
                     },
@@ -322,18 +326,27 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             }
         ],
     }
+    exp_datadog_test_collation = deepcopy(exp_datadog_test_schemas)
+    exp_datadog_test_collation['name'] = 'datadog_test_collation'
+    exp_datadog_test_collation['collation'] = 'Latin1_General_100_BIN2'
 
     if running_on_windows_ci():
         exp_datadog_test['owner'] = 'None'
         exp_datadog_test_schemas['owner'] = 'None'
+        exp_datadog_test_collation['owner'] = 'None'
 
     expected_data_for_db = {
         'datadog_test_schemas_second': exp_datadog_test,
         'datadog_test_schemas': exp_datadog_test_schemas,
+        'datadog_test_collation': exp_datadog_test_collation,
     }
 
     dbm_instance['database_autodiscovery'] = True
-    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas', 'datadog_test_schemas_second']
+    dbm_instance['autodiscovery_include'] = [
+        'datadog_test_schemas',
+        'datadog_test_schemas_second',
+        'datadog_test_collation',
+    ]
     dbm_instance['dbm'] = True
     dbm_instance['schemas_collection'] = {"enabled": True}
 
@@ -364,7 +377,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
-
         assert db_name in databases_to_find
         # id's are env dependant
         normalize_ids(actual_payload)
@@ -391,3 +403,15 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
             ):
                 found = True
     assert found
+
+
+@pytest.mark.unit
+def test_collect_schemas_config(dbm_instance):
+    dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}
+
+    dbm_instance.pop('collect_schemas')
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}

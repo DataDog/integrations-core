@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b613759e-89ca-4d98-a2c1-4d465c42e413",
   "app_id": "coredns",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -52,7 +53,11 @@
       },
       "metrics": {
         "prefix": "coredns.",
-        "check": "coredns.request_count",
+        "check": [
+          "coredns.request_count",
+          "coredns.request_count.count",
+          "coredns.build_info"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -65,7 +70,8 @@
       "auto_install": true
     },
     "dashboards": {
-      "CoreDNS": "assets/dashboards/coredns.json"
+      "CoreDNS": "assets/dashboards/coredns.json",
+      "CoreDNS [V2]": "assets/dashboards/coredns_v2.json"
     },
     "monitors": {
       "Cache hits count is low": "assets/monitors/coredns_cache_hits_low.json",

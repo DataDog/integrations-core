@@ -2,17 +2,89 @@
 
 <!-- towncrier release notes start -->
 
-## 6.0.0 / 2024-10-01
+## 8.3.0 / 2025-10-31
+
+***Added***:
+
+* Add new metrics collected from the INFO command ([#21555](https://github.com/DataDog/integrations-core/pull/21555))
+
+## 8.2.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.1.1 / 2025-09-17 / Agent 7.71.0
+
+***Fixed***:
+
+* Downgrade redis module ([#21366](https://github.com/DataDog/integrations-core/pull/21366))
+
+## 8.1.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 8.0.0 / 2025-06-12 / Agent 7.68.0
+
+***Changed***:
+
+* Bump `redis` dependency to `6.0.0` and stop supporting `charset`, `connection_pool`, and `errors` configuration options. ([#20265](https://github.com/DataDog/integrations-core/pull/20265))
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+## 7.3.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Adds redisdb replication byte metrics ([#20029](https://github.com/DataDog/integrations-core/pull/20029))
+* Add support of Redis 8 ([#20227](https://github.com/DataDog/integrations-core/pull/20227))
+
+***Fixed***:
+
+* Allow slowlog collection to fail without error to support some managed Redis that do not allow SLOWLOG GET. ([#20261](https://github.com/DataDog/integrations-core/pull/20261))
+
+## 7.2.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Add additional memory metrics. ([#19696](https://github.com/DataDog/integrations-core/pull/19696))
+
+## 7.1.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 7.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 6.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
 
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
 ## 5.7.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 5.6.0 / 2024-07-05 / Agent 7.56.0
 

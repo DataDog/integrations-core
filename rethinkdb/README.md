@@ -10,6 +10,8 @@ data availability, cluster configuration, and more.
 
 **Note**: this integration is compatible with RethinkDB **version 2.3.6 and above**.
 
+**Minimum Agent version:** 7.19.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For
@@ -103,7 +105,7 @@ Need help? Contact [Datadog support][13].
 
 [1]: https://rethinkdb.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://rethinkdb.com/docs/permissions-and-accounts/
 [5]: https://rethinkdb.com/docs/security/#the-admin-account
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

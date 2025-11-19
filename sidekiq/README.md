@@ -6,6 +6,8 @@ This integration monitors [Sidekiq][1] through [Dogstatsd][2]. It collects metri
 
 **Note** Only Sidekiq Pro (>= 3.6) or Enterprise (>= 1.1.0) users can collect metrics.
 
+**Minimum Agent version:** 7.19.0
+
 ## Setup
 
 ### Installation
@@ -119,7 +121,7 @@ Need help? Contact [Datadog support][12].
 [1]: https://sidekiq.org/
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
 [3]: https://github.com/DataDog/dogstatsd-ruby
-[4]: https://app.datadoghq.com/account/settings/agent/latest
+[4]: /account/settings/agent/latest
 [5]: https://github.com/mperham/sidekiq/wiki/Pro-Metrics
 [6]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/

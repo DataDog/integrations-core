@@ -1,0 +1,69 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b53ac38a-5ec9-4ad7-bc86-58be53f3c5ee",
+  "app_id": "box",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Box enterprise events",
+    "title": "Box",
+    "media": [
+      {
+        "caption": "Box - Events Overview",
+        "image_url": "images/box_events_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Box - Shield Insights",
+        "image_url": "images/box_shield_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Box - Files and Folders Insights",
+        "image_url": "images/box_files_and_folders_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Box - Users and Access Management Insights",
+        "image_url": "images/box_users_and_access_management_insights.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Collaboration",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 45990845,
+      "source_type_name": "Box",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Box - Events Overview": "assets/dashboards/box_events_overview.json",
+      "Box - Shield Insights": "assets/dashboards/box_shield_insights.json",
+      "Box - Files and Folders Insights": "assets/dashboards/box_files_and_folders_insights.json",
+      "Box - Users and Access Management Insights": "assets/dashboards/box_users_and_access_management_insights.json"
+    },
+    "logs": {
+      "source": "box"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

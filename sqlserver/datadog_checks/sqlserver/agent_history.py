@@ -12,7 +12,7 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 15
 DEFAULT_ROW_LIMIT = 10000
@@ -103,8 +103,6 @@ def agent_check_getter(self):
 
 class SqlserverAgentHistory(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
-        # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
         collection_interval = float(self._config.agent_jobs_config.get('collection_interval', 15))
@@ -158,16 +156,18 @@ class SqlserverAgentHistory(DBMAsyncJob):
 
     def _create_agent_jobs_history_event(self, history_rows):
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "agent_jobs",
             "collection_interval": self.collection_interval,
-            "ddtags": self.tags,
+            "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time.time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            "cloud_metadata": self._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
+            'service': self._config.service,
             "sqlserver_job_history": history_rows,
         }
         return event

@@ -8,6 +8,8 @@ Get metrics from Windows performance counters in real time to:
 
 - Visualize and monitor Windows performance counters through the PDH API.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -42,7 +44,7 @@ The PDH check does not include any service checks.
 
 Need help? Contact [Datadog support][9].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/pdh_check/datadog_checks/pdh_check/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent

@@ -3,7 +3,6 @@ extends:
   - _hp-base.yaml
   - _hp-compaq-health.yaml
   - _hp-driver-stats.yaml
-  - _generic-if.yaml
   - _generic-tcp.yaml
   - _generic-udp.yaml
   - _generic-ip.yaml

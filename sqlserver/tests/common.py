@@ -22,10 +22,10 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE_AO,
     INSTANCE_METRICS_DATABASE_SINGLE,
+    TABLE_SIZE_METRICS,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
-from datadog_checks.sqlserver.queries import get_query_file_stats
 
 from .utils import is_always_on
 
@@ -37,11 +37,14 @@ def get_local_driver():
     we need to define the 'FreeTDS' driver in odbcinst.ini
     """
     if ON_MACOS:
-        return '/usr/local/lib/libtdsodbc.so'
+        return '/opt/homebrew/Cellar/freetds/1.4.26/lib/libtdsodbc.so'
     elif ON_WINDOWS:
         return '{ODBC Driver 18 for SQL Server}'
     else:
-        return '{ODBC Driver 18 for SQL Server}'
+        driver = os.environ.get('LINUX_SQLSERVER_DRIVER')
+        if not driver or driver == 'odbc':
+            return '{ODBC Driver 18 for SQL Server}'
+        return f'{driver}'
 
 
 HOST = get_docker_hostname()
@@ -64,12 +67,18 @@ SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
 SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
 
 
-def get_expected_file_stats_metrics():
-    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION, SQLSERVER_ENGINE_EDITION)
-    return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
-
-
-EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
+EXPECTED_FILE_STATS_METRICS = [
+    'sqlserver.files.io_stall',
+    'sqlserver.files.read_io_stall_queued',
+    'sqlserver.files.write_io_stall_queued',
+    'sqlserver.files.read_io_stall',
+    'sqlserver.files.write_io_stall',
+    'sqlserver.files.read_bytes',
+    'sqlserver.files.written_bytes',
+    'sqlserver.files.reads',
+    'sqlserver.files.writes',
+    'sqlserver.files.size_on_disk',
+]
 
 # SQL Server incremental sql fraction metrics require diffs in order to calculate
 # & report the metric, which means this requires a special unit/integration test coverage
@@ -89,6 +98,7 @@ EXPECTED_DEFAULT_METRICS = (
             DATABASE_METRICS,
             DATABASE_BACKUP_METRICS,
             TEMPDB_FILE_SPACE_USAGE_METRICS,
+            TABLE_SIZE_METRICS,
         )
     ]
     + DATABASE_INDEX_METRICS
@@ -245,10 +255,7 @@ INIT_CONFIG_ALT_TABLES = {
 
 OPERATION_TIME_METRICS = [
     'simple_metrics',
-    'database_stats_metrics',
     'fraction_metrics',
-    'db_file_space_usage_metrics',
-    'database_file_stats_metrics',
     'incr_fraction_metrics',
 ]
 
@@ -318,11 +325,4 @@ def get_operation_time_metrics(instance):
     Return a list of all operation time metrics
     """
     operation_time_metrics = deepcopy(OPERATION_TIME_METRICS)
-    if instance.get('include_task_scheduler_metrics', False):
-        operation_time_metrics.append('os_schedulers_metrics')
-        operation_time_metrics.append('os_tasks_metrics')
-    if instance.get('include_ao_metrics', False):
-        operation_time_metrics.append('availability_groups_metrics')
-    if instance.get('include_master_files_metrics', False):
-        operation_time_metrics.append('master_database_file_stats_metrics')
     return operation_time_metrics

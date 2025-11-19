@@ -107,6 +107,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
 @contextmanager
 def docker_run(
     compose_file=None,
+    waith_for_health=False,
     build=False,
     service_name=None,
     up=None,
@@ -121,6 +122,7 @@ def docker_run(
     wrappers=None,
     attempts=None,
     attempts_wait=1,
+    capture=None,
 ):
     """
     A convenient context manager for safely setting up and tearing down Docker environments.
@@ -130,6 +132,8 @@ def docker_run(
         compose_file (str):
             A path to a Docker compose file. A custom tear
             down is not required when using this.
+        waith_for_health (bool):
+            Whether or not to wait for the health of the service to be healthy before yielding.
         build (bool):
             Whether or not to build images for when `compose_file` is provided
         service_name (str):
@@ -169,7 +173,12 @@ def docker_run(
         if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
 
-        set_up = ComposeFileUp(compose_file, build=build, service_name=service_name)
+        composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
+        if capture is not None:
+            composeFileArgs['capture'] = capture
+        if waith_for_health:
+            composeFileArgs['waith_for_health'] = waith_for_health
+        set_up = ComposeFileUp(**composeFileArgs)
         if down is not None:
             tear_down = down
         else:
@@ -229,11 +238,23 @@ def docker_run(
 
 
 class ComposeFileUp(LazyFunction):
-    def __init__(self, compose_file, build=False, service_name=None):
+    def __init__(
+        self,
+        compose_file: str,
+        build: bool = False,
+        service_name: str | None = None,
+        capture: str | None = None,
+        waith_for_health: bool = False,
+    ):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
+        self.capture = capture
+        self.waith_for_health = waith_for_health
         self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d', '--force-recreate']
+
+        if waith_for_health:
+            self.command.append('--wait')
 
         if self.build:
             self.command.append('--build')
@@ -242,7 +263,10 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
-        return run_command(self.command, check=True)
+        args = {'check': True}
+        if self.capture is not None:
+            args['capture'] = self.capture
+        return run_command(self.command, **args)
 
 
 class ComposeFileLogs(LazyFunction):

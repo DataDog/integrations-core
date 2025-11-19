@@ -13,6 +13,8 @@ This check watches your Nagios server's logs and sends events to Datadog for the
 
 This check can also send Nagios performance data as metrics to Datadog.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -111,7 +113,7 @@ Need help? Contact [Datadog support][9].
 
 - [Understand your Nagios alerts with Datadog][10]
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/nagios/datadog_checks/nagios/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

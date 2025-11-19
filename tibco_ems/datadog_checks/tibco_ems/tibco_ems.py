@@ -11,12 +11,11 @@ from .constants import SHOW_METRIC_DATA, UNIT_PATTERN
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 7222
-TO_BYTES = {'B': 1, 'Kb': 1e3, 'Mb': 1e6, 'Gb': 1e9, 'Tb': 1e12}
+TO_BYTES = {'b': 1, 'kb': 1e3, 'mb': 1e6, 'gb': 1e9, 'tb': 1e12}
 CONNECTION_STRING = 'tcp://{}:{}'
 
 
 class TibcoEMSCheck(AgentCheck):
-
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'tibco_ems'
 
@@ -32,7 +31,6 @@ class TibcoEMSCheck(AgentCheck):
         script_path = self.instance.get('script_path')
         server_string = CONNECTION_STRING.format(host, port)
         self.tags = self.instance.get('tags', [])
-        self.parsed_data = {}
 
         self.cmd = tibemsadmin_cmd + [
             '-server',
@@ -46,7 +44,6 @@ class TibcoEMSCheck(AgentCheck):
         ]
 
     def check(self, _):
-
         output = self.run_tibco_command()
         decoded_output = output.decode('utf-8')
 
@@ -57,18 +54,20 @@ class TibcoEMSCheck(AgentCheck):
         sections = self._section_output(cleaned_data)
 
         # Parse the output
+        parsed_data = {}
         for command, section in sections.items():
             pattern = SHOW_METRIC_DATA[command]['regex']
             if command == 'show server':
-                self.parsed_data[command] = self._parse_show_server(section, pattern)
+                parsed_data[command] = self._parse_show_server(section, pattern)
             else:
                 try:
-                    self.parsed_data[command] = self._parse_factory(section, pattern)
+                    parsed_data[command] = self._parse_factory(section, pattern)
                 except Exception as e:
                     self.log.error('Error parsing command %s: %s', command, e)
                     continue
 
-        for command, metric_info in self.parsed_data.items():
+        for command, metric_info in parsed_data.items():
+            self.log.debug("Processing output from %s command", command)
             metric_keys = SHOW_METRIC_DATA[command]['metric_keys']
             tag_keys = SHOW_METRIC_DATA[command]['tags']
             metric_prefix = SHOW_METRIC_DATA[command]['metric_prefix']
@@ -112,7 +111,7 @@ class TibcoEMSCheck(AgentCheck):
                 if version_match:
                     server_data['version'] = version_match.group()
                 server_data[key] = value
-            elif key in ['topics', 'queues']:
+            elif key in ['topics', 'queues', 'client_connections']:
                 server_data[key] = int(value.split(' ')[0])
             elif "rate" in key:
                 parse_rate(server_data, key, value)
@@ -207,12 +206,14 @@ class TibcoEMSCheck(AgentCheck):
         return data
 
     def _submit_metrics_factory(self, prefix, metric_data, metric_names, tag_keys):
-
+        self.log.debug("Submitting %s metrics (%s tags) for %s", len(metric_names), len(tag_keys), prefix)
         tags = []
         for key in tag_keys:
             if prefix == 'server':
                 # Add server tags to all metrics
-                self.tags.append(f"server_{key}:{metric_data[key]}")
+                server_tag = f"server_{key}:{metric_data[key]}"
+                if server_tag not in self.tags:
+                    self.tags.append(server_tag)
             else:
                 if metric_data.get(key):
                     tags.append(f"{key}:{metric_data[key]}")
@@ -223,7 +224,9 @@ class TibcoEMSCheck(AgentCheck):
             if metric_name in metric_data:
                 if isinstance(metric_info, dict):
                     self.gauge(
-                        f"{prefix}.{metric_name}", (metric_info['value'] * TO_BYTES[metric_info['unit']]), tags=tags
+                        f"{prefix}.{metric_name}",
+                        (metric_info['value'] * TO_BYTES[metric_info['unit'].lower()]),
+                        tags=tags,
                     )
                 else:
                     self.gauge(f"{prefix}.{metric_name}", metric_info, tags=tags)

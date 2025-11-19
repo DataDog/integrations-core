@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "77acdb8a-4ea8-4294-baa7-d5ccfe698d9f",
   "app_id": "appgate-sdp",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -39,6 +40,30 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Appgate SDP Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "Active Connection Exceeds Limit": "assets/monitors/monitor_Active_connection_exceeds_limit.json",
+      "Appliance Function Suspension State": "assets/monitors/monitor_Appliance_Function_Suspension_state.json",
+      "Appliance Function Unhealthy": "assets/monitors/monitor_Appliance_Function_Unhealthy.json",
+      "Appliance Status Warning": "assets/monitors/monitor_Appliance_status_warning_for_appliance.json",
+      "Certificate Expiration Soon": "assets/monitors/monitor_Certificate_expiration_soon.json",
+      "Controller Database Replication": "assets/monitors/monitor_Controller_Database_Replication.json",
+      "Database Replication Replay Lag": "assets/monitors/monitor_Database_replication_replay_lag_on_controller.json",
+      "Excessive Database Size": "assets/monitors/monitor_Excessive_database_size_on_controller.json",
+      "High CPU on Appliance": "assets/monitors/monitor_High_CPU_on_appliance.json",
+      "High Disk Utilization": "assets/monitors/monitor_High_Disk_Utilization_on_appliance.json",
+      "High Disk Utilization for Controller Database": "assets/monitors/monitor_High_disk_utilization_for_controller_database_partition.json",
+      "High Event Queue on Gateway": "assets/monitors/monitor_High_event_queue_on_gateway.json",
+      "High Gateway Session Count": "assets/monitors/monitor_Hight_Gateway_session_count.json",
+      "High IP Pool Utilization": "assets/monitors/monitor_High_IP_pool_utilization_on_appliance.json",
+      "High Memory on Appliance": "assets/monitors/monitor_High_memory_on_appliance.json",
+      "High Sessiond Heap Utilization": "assets/monitors/monitor_High_sessiond_heap_utilization_on_appliance.json",
+      "High Token Size Utilization": "assets/monitors/monitor_High_token_size_utilization_on_gateway.json",
+      "High User License Utilization": "assets/monitors/monitor_High_user_license_utilization_on_controller.json",
+      "SSH Access Attempted": "assets/monitors/monitor_SSH_Access_attempted.json"
     }
   },
   "author": {

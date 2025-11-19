@@ -1,0 +1,110 @@
+<event name="error_reported" package="sqlserver" timestamp="2025-04-24T20:57:17.287Z">
+	<data name="error_number">
+		<type name="int32" package="package0" />
+		<value>
+			195
+		</value>
+	</data>
+	<data name="severity">
+		<type name="int32" package="package0" />
+		<value>
+			15
+		</value>
+	</data>
+	<data name="state">
+		<type name="int32" package="package0" />
+		<value>
+			10
+		</value>
+	</data>
+	<data name="user_defined">
+		<type name="boolean" package="package0" />
+		<value>
+			false
+		</value>
+	</data>
+	<data name="category">
+		<type name="error_category" package="sqlserver" />
+		<value>
+			2
+		</value>
+		<text>
+			SERVER
+		</text>
+	</data>
+	<data name="destination">
+		<type name="error_destination" package="sqlserver" />
+		<value>
+			0x00000002
+		</value>
+		<text>
+			USER
+		</text>
+	</data>
+	<data name="is_intercepted">
+		<type name="boolean" package="package0" />
+		<value>
+			false
+		</value>
+	</data>
+	<data name="message">
+		<type name="unicode_string" package="package0" />
+		<value>
+			'REPEAT' is not a recognized built-in function name.
+		</value>
+	</data>
+	<action name="request_id" package="sqlserver">
+		<type name="uint32" package="package0" />
+		<value>
+			0
+		</value>
+	</action>
+	<action name="session_id" package="sqlserver">
+		<type name="uint16" package="package0" />
+		<value>
+			81
+		</value>
+	</action>
+	<action name="client_hostname" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			a05c90468fb8
+		</value>
+	</action>
+	<action name="client_app_name" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			go-mssqldb
+		</value>
+	</action>
+	<action name="username" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			shopper_4
+		</value>
+	</action>
+	<action name="database_name" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			dbmorders
+		</value>
+	</action>
+	<action name="sql_text" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			/*dddbs='orders-app',ddps='orders-app',ddh='awbergs-sqlserver2019-test.c7ug0vvtkhqv.us-east-1.rds.amazonaws.com',dddb='dbmorders',ddprs='orders-sqlserver'*/ SELECT discount_percent, store_name, description, discount_in_currency, dbm_item_id, REPEAT('a', 1000) from discount where id BETWEEN 6117 AND 6127 GROUP by dbm_item_id, store_name, description, discount_in_currency, discount_percent /* date='12%2F31',key='val' */
+		</value>
+	</action>
+	<action name="attach_activity_id_xfer" package="package0">
+		<type name="activity_id_xfer" package="package0" />
+		<value>
+			AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0
+		</value>
+	</action>
+	<action name="attach_activity_id" package="package0">
+		<type name="activity_id" package="package0" />
+		<value>
+			F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1
+		</value>
+	</action>
+</event>

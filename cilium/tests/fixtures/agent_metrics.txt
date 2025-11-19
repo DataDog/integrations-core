@@ -581,6 +581,9 @@ cilium_forward_count_total{direction="INGRESS"} 1.455756e+06
 # HELP cilium_fqdn_gc_deletions_total Number of FQDNs that have been cleaned on FQDN Garbage collector job
 # TYPE cilium_fqdn_gc_deletions_total counter
 cilium_fqdn_gc_deletions_total 0
+# HELP cilium_fqdn_selectors Number of registered ToFQDN selectors
+# TYPE cilium_fqdn_selectors gauge
+cilium_fqdn_selectors 0
 # HELP cilium_fqdn_active_names Number of domains inside the DNS cache that have not expired (by TTL), per endpoint
 # TYPE cilium_fqdn_active_names gauge
 cilium_fqdn_active_names{endpoint="123"} 1
@@ -593,6 +596,11 @@ cilium_fqdn_alive_zombie_connections{endpoint="123"} 0
 # HELP cilium_identity_count Number of identities currently allocated
 # TYPE cilium_identity_count gauge
 cilium_identity_count 13
+# HELP cilium_identity_label_sources Number of identities which contain at least one label of the given label source
+# TYPE cilium_identity_label_sources gauge
+cilium_identity_label_sources{source="cidr"} 13
+cilium_identity_label_sources{source="k8s"} 17
+cilium_identity_label_sources{source="reserved"} 44
 # HELP cilium_ip_addresses Number of allocated IP addresses
 # TYPE cilium_ip_addresses gauge
 cilium_ip_addresses{family="ipv4"} 3

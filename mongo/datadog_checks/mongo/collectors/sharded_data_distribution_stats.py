@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.collectors.base import MongoCollector, collection_interval_checker
 from datadog_checks.mongo.common import MongosDeployment
 from datadog_checks.mongo.metrics import SHARDED_DATA_DISTRIBUTION_METRICS
 
@@ -14,11 +14,13 @@ class ShardedDataDistributionStatsCollector(MongoCollector):
 
     def __init__(self, check, tags):
         super(ShardedDataDistributionStatsCollector, self).__init__(check, tags)
+        self._collection_interval = check._config.metrics_collection_interval['sharded_data_distribution']
 
     def compatible_with(self, deployment):
         # Can only be run on mongos nodes.
         return isinstance(deployment, MongosDeployment)
 
+    @collection_interval_checker
     def collect(self, api):
         for distribution in api.sharded_data_distribution_stats():
             ns = distribution['ns']

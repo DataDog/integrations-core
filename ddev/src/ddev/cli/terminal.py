@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Callable
 import click
 from rich.console import Console
 from rich.errors import StyleSyntaxError
+from rich.markup import escape
 from rich.style import Style
 from rich.text import Text
 
@@ -336,6 +337,13 @@ class Terminal:
                 self.console.print(*args, **kwargs)
             finally:
                 self.console.stderr = False
+
+    def escaped_output(self, *args, stderr=False, **kwargs):
+        """
+        Same as output but ensure we scape any tag-like element from the inputs. This is useful
+        when we want to print raw content (like a command output).
+        """
+        self.output(*(escape(arg) for arg in args), stderr=stderr, **kwargs)
 
     @staticmethod
     def prompt(text, **kwargs):
