@@ -78,9 +78,19 @@ class SQLServerSchemaCollector(SchemaCollector):
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         config.max_tables = check._config.schema_config.get('max_tables', 300)
-        major_version = int(check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) or 0)
-        self._is_2016_or_earlier = major_version <= 13
+        self._is_2016_or_earlier = None
         super().__init__(check, config)
+
+    def collect_schemas(self):
+        # We wait until collect is called to check for static information
+        major_version = int(self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) or 0)
+        if major_version == 0:
+            self._check.log.debug("major_version is not available yet, defaulting to 2016 or earlier")
+        self._is_2016_or_earlier = major_version <= 13
+        print(f"major_version: {major_version}")
+        print(f"is_2016_or_earlier: {self._is_2016_or_earlier}")
+
+        super().collect_schemas()
 
     @property
     def kind(self):
@@ -103,7 +113,7 @@ class SQLServerSchemaCollector(SchemaCollector):
                 cursor.execute(query)
                 yield cursor
 
-    def _get_tables_query(self):
+    def _get_tables_query(self):        
         limit = int(self._config.max_tables or 1_000_000)
 
         # Note that we INNER JOIN tables to omit schemas with no tables

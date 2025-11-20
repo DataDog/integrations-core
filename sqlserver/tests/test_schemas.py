@@ -131,7 +131,7 @@ def test_collect_schemas(dbm_instance, integration_check):
     collector.collect_schemas()
 
 
-# Force pre-2017 behavior for testing
+# Force pre-2017 behavior for testing that collections don't crash
 # Note that this test assumes the pre-2017 tables are still present
 def test_collect_schemas_pre_2017(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
