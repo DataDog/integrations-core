@@ -13,21 +13,21 @@ PYPI_URL = "https://pypi.org/pypi/ddev/json"
 CHECK_INTERVAL = timedelta(days=7)
 
 
-def read_last_run():
+def read_last_run(cache_file=CACHE_FILE):
     # Read the last run from the cache file and return a version and a date.
     # Format: {"version": "1.6.0", "date": "2023-04-11T10:56:39.786412"}
     try:
-        with open(CACHE_FILE, "r") as f:
+        with open(cache_file, "r") as f:
             data = json.load(f)
             return Version(data["version"]), datetime.fromisoformat(data["date"])
     except (FileNotFoundError, json.JSONDecodeError, KeyError, InvalidVersion, ValueError):
         return None, None
 
 
-def write_last_run(version, date):
+def write_last_run(version, date, cache_file=CACHE_FILE):
     # Records/overwrites the run in the cache file. If the file isn't there, it will be created
-    CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(CACHE_FILE, "w") as f:
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(cache_file, "w") as f:
         json.dump({"version": str(version), "date": date.isoformat()}, f)
 
 
@@ -37,7 +37,7 @@ def exit_handler(app, msg):
 
 def upgrade_check(app, version, cache_file=CACHE_FILE, pypi_url=PYPI_URL, check_interval=CHECK_INTERVAL):
     current_version = Version(version)
-    last_version, last_date = read_last_run()
+    last_version, last_date = read_last_run(cache_file)
     date_now = datetime.now()
 
     # If cache does not exist or is older than check_interval, fetch from PyPI
@@ -46,7 +46,7 @@ def upgrade_check(app, version, cache_file=CACHE_FILE, pypi_url=PYPI_URL, check_
             resp = requests.get(pypi_url, timeout=5)
             resp.raise_for_status()
             latest_version = Version(resp.json()["info"]["version"])
-            write_last_run(latest_version, date_now)
+            write_last_run(latest_version, date_now, cache_file)
             if latest_version > current_version:
                 msg = (
                     f'\n!!An upgrade to version {latest_version} is available for {PACKAGE_NAME}. '
