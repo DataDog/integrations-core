@@ -26,8 +26,10 @@ mmh3==5.2.0
 oauthlib==3.3.1
 openstacksdk==4.7.0
 orjson==3.11.3
+os-service-types==1.8.0
 packaging==25.0
 paramiko==3.5.1
+pbr==7.0.1
 prometheus-client==0.22.1
 protobuf==6.32.0
 psutil==6.0.0
