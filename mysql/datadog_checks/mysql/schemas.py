@@ -188,7 +188,7 @@ class MySqlSchemaCollector(SchemaCollector):
                     "columns": list(
                         {
                             v['name']: {
-                                **{k: v_ for k, v_ in v.items() if v_ is not None},
+                                **{k: v_ for k, v_ in v.items() if k == 'default' or v_ is not None},
                                 'nullable': v['nullable'] == 'YES',
                             }
                             for v in json.loads(cursor_row.get("columns")) or []
@@ -205,11 +205,11 @@ class MySqlSchemaCollector(SchemaCollector):
                                         'non_unique': v['non_unique'] == 1,
                                         'columns': list(
                                             {
-                                                c and c['name']: {
+                                                c['name']: {
                                                     **{k: v_ for k, v_ in c.items() if v_ is not None},
                                                     'nullable': c['nullable'] == 'YES',
                                                 }
-                                                for c in v['columns'] or []
+                                                for c in v['columns'] or [] if c and c.get('name') is not None
                                             }.values()
                                         ),
                                     }.items()

@@ -38,7 +38,7 @@ def normalize_values(actual_payload):
         if 'indexes' in table:
             table['indexes'].sort(key=lambda x: x['name'])
             for index in table['indexes']:
-                index['columns'].sort(key=lambda x: x['name'])
+                index['columns'].sort(key=lambda x: x['name'])                
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
                 f_key["referenced_column_names"] = (
@@ -46,6 +46,11 @@ def normalize_values(actual_payload):
                     if "referenced_column_names" in f_key and f_key["referenced_column_names"] is not None
                     else None
                 )
+        if 'partitions' in table:
+            table['partitions'].sort(key=lambda x: x['name'])
+            for partition in table['partitions']:
+                if 'subpartitions' in partition:
+                    partition['subpartitions'].sort(key=lambda x: x['name'])
         if 'columns' in table:
             for column in table['columns']:
                 if column['column_type'] == 'int':
@@ -334,6 +339,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "cardinality": 0,
                             "non_unique": True,
                             "expression": "(`population` + 1)",
+                            "columns": []
                         }
                     ]
                     if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db and not is_percona
