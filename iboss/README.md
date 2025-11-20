@@ -205,9 +205,9 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 
 ### Metrics
 
-The iboss integration collects and forwards Gateway Performance, Bandwidth, Digital Experience, Web, CASB, Threat, and Zero Trust metrics to Datadog.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
-{{< get-metrics-from-git "iboss" >}}
+<!-- {{< get-metrics-from-git "iboss" >}} -->
 
 ### Events
 
@@ -265,3 +265,4 @@ For further assistance, contact [Datadog support][3].
 [4]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
 [5]: https://github.com/DataDog/integrations-core/blob/master/iboss/datadog_checks/iboss/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/iboss/metadata.csv
