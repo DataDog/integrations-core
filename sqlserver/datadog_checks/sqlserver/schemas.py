@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
-    STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     SWITCH_DB_STATEMENT,
 )
@@ -251,14 +250,14 @@ class SQLServerSchemaCollector(SchemaCollector):
             )
         """
         if self._is_2016_or_earlier:
-            query += f"""
+            query += """
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
-                schema_tables.table_name, schema_tables.table_id                
+                schema_tables.table_name, schema_tables.table_id
             FROM schema_tables
             ;
         """
             return query
-        
+
         # For 2017 and later we can get all the data in one query
         query += f"""
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
@@ -271,7 +270,6 @@ class SQLServerSchemaCollector(SchemaCollector):
             ;
         """
         return query
-
 
     def _get_next(self, cursor):
         return cursor.fetchone_dict()
@@ -305,18 +303,18 @@ class SQLServerSchemaCollector(SchemaCollector):
             indexes = json.loads(cursor_row.get("indexes") or "[]")
             foreign_keys = json.loads(cursor_row.get("foreign_keys") or "[]")
             partition_count = cursor_row.get("partition_count")
-        
+
         # Map the cursor row to the expected schema, and strip out None values
         object["schemas"] = [
             {
                 "name": cursor_row.get("schema_name"),
-                "id": str(cursor_row.get("schema_id")), # Backend expects a string
+                "id": str(cursor_row.get("schema_id")),  # Backend expects a string
                 "owner_name": cursor_row.get("owner_name"),
                 "tables": [
                     {
                         k: v
                         for k, v in {
-                            "id": str(cursor_row.get("table_id")), # Backend expects a string
+                            "id": str(cursor_row.get("table_id")),  # Backend expects a string
                             "name": cursor_row.get("table_name"),
                             "columns": columns,
                             "indexes": indexes,

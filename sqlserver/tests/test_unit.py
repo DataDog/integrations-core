@@ -2,10 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import json
 import os
 import re
-import time
 from collections import namedtuple
 
 import mock
@@ -24,7 +22,6 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
-from datadog_checks.sqlserver.schemas_old import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
@@ -36,10 +33,10 @@ from datadog_checks.sqlserver.utils import (
 )
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
-from .utils import deep_compare, not_windows_ci, windows_ci
+from .utils import not_windows_ci, windows_ci
 
 try:
-    import pyodbc
+    import pyodbc  # type: ignore
 except ImportError:
     pyodbc = None
 
@@ -746,142 +743,6 @@ def test_extract_sql_comments_and_procedure_name(query, expected_comments, is_pr
     assert comments == expected_comments
     assert p == is_proc
     assert re.match(name, expected_name, re.IGNORECASE) if expected_name else expected_name == name
-
-
-class DummyLogger:
-    def debug(*args):
-        pass
-
-    def error(*args):
-        pass
-
-
-def set_up_submitter_unit_test():
-    submitted_data = []
-    base_event = {
-        "host": "some",
-        "agent_version": 0,
-        "dbms": "sqlserver",
-        "kind": "sqlserver_databases",
-        "collection_interval": 1200,
-        "dbms_version": "some",
-        "tags": "some",
-        "cloud_metadata": "some",
-    }
-
-    def submitData(data):
-        submitted_data.append(data)
-
-    dataSubmitter = SubmitData(submitData, base_event, DummyLogger())
-    return dataSubmitter, submitted_data
-
-
-def test_submit_data():
-    dataSubmitter, submitted_data = set_up_submitter_unit_test()
-
-    dataSubmitter.store_db_infos(
-        [{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}], ["test_db1", "test_db2"]
-    )
-    schema1 = {"id": "1"}
-    schema2 = {"id": "2"}
-    schema3 = {"id": "3"}
-
-    dataSubmitter.store("test_db1", schema1, [1, 2], 5)
-    dataSubmitter.store("test_db2", schema3, [1, 2], 5)
-    assert dataSubmitter.columns_since_last_submit() == 10
-    dataSubmitter.store("test_db1", schema2, [1, 2], 10)
-
-    dataSubmitter.submit()
-
-    assert dataSubmitter.columns_since_last_submit() == 0
-
-    expected_data = {
-        "host": "some",
-        "agent_version": 0,
-        "dbms": "sqlserver",
-        "kind": "sqlserver_databases",
-        "collection_interval": 1200,
-        "dbms_version": "some",
-        "tags": "some",
-        "cloud_metadata": "some",
-        "metadata": [
-            {"id": 3, "name": "test_db1", "schemas": [{"id": "1", "tables": [1, 2]}, {"id": "2", "tables": [1, 2]}]},
-            {"id": 4, "name": "test_db2", "schemas": [{"id": "3", "tables": [1, 2]}]},
-        ],
-    }
-    data = json.loads(submitted_data[0])
-    data.pop("timestamp")
-    assert deep_compare(data, expected_data)
-
-
-@pytest.mark.parametrize(
-    "db_infos, databases, expected_dbs",
-    [
-        pytest.param(
-            [
-                {"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CI_AS"},
-                {"id": 4, "name": "TEST_DB2", "collation": "SQL_Latin1_General_CP1_CI_AS"},
-            ],
-            ["test_db1", "test_db2"],
-            ["test_db1", "test_db2"],
-            id="case_insensitive",
-        ),
-        pytest.param(
-            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
-            ["TEST_DB1"],
-            [],
-            id="case_sensitive",
-        ),
-        pytest.param(
-            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
-            ["test_db1"],
-            ["test_db1"],
-            id="case_sensitive_lowercase",
-        ),
-        pytest.param(
-            [{"id": 3, "name": "TEST_DB1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
-            ["TEST_DB1"],
-            ["TEST_DB1"],
-            id="case_sensitive_uppercase",
-        ),
-    ],
-)
-def test_store_db_infos_case_sensitive(db_infos, databases, expected_dbs):
-    dataSubmitter, _ = set_up_submitter_unit_test()
-    dataSubmitter.db_info.clear()
-
-    dataSubmitter.store_db_infos(db_infos, databases)
-    assert list(dataSubmitter.db_info.keys()) == expected_dbs
-
-
-def test_fetch_throws(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    schemas = Schemas(check, check._config)
-    with (
-        mock.patch('time.time', side_effect=[0, 9999999]),
-        mock.patch('datadog_checks.sqlserver.schemas_old.Schemas._query_schema_information', return_value={"id": 1}),
-        mock.patch('datadog_checks.sqlserver.schemas_old.Schemas._get_tables', return_value=[1, 2]),
-    ):
-        with pytest.raises(StopIteration):
-            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
-
-
-def test_exception_handling_by_do_for_dbs(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    check.initialize_connection()
-    schemas = Schemas(check, check._config)
-    mock_cursor = mock.MagicMock()
-    with (
-        mock.patch(
-            'datadog_checks.sqlserver.schemas_old.Schemas._fetch_schema_data', side_effect=Exception("Can't connect to DB")
-        ),
-        mock.patch('datadog_checks.sqlserver.sqlserver.SQLServer.get_databases', return_value=["db1"]),
-        mock.patch('cachetools.TTLCache.get', return_value="dummy"),
-        mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_connection'),
-        mock.patch('datadog_checks.sqlserver.connection.Connection.get_managed_cursor', return_value=mock_cursor),
-        mock.patch('datadog_checks.sqlserver.utils.is_azure_sql_database', return_value={}),
-    ):
-        schemas._fetch_for_databases()
 
 
 def test_get_unixodbc_sysconfig():

@@ -7,8 +7,8 @@ from typing import Callable, Optional
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
 from datadog_checks.sqlserver.const import STATIC_INFO_MAJOR_VERSION
+from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
 
 from . import common
 

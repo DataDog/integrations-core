@@ -91,10 +91,10 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_FULL_SERVERNAME,
     STATIC_INFO_INSTANCENAME,
     STATIC_INFO_MAJOR_VERSION,
-    STATIC_INFO_YEAR,
     STATIC_INFO_RDS,
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
+    STATIC_INFO_YEAR,
     SWITCH_DB_STATEMENT,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
@@ -349,10 +349,6 @@ class SQLServer(DatabaseCheck):
         return self._resolved_hostname
 
     @property
-    def tags(self):
-        return self.tag_manager.get_tags()
-
-    @property
     def database_identifier(self):
         # type: () -> str
         if self._database_identifier is None:
@@ -394,10 +390,6 @@ class SQLServer(DatabaseCheck):
         return self._database_hostname
 
     @property
-    def cloud_metadata(self):
-        return self._cloud_metadata
-
-    @property
     def dbms_version(self):
         return "{},{}".format(
             self.static_info_cache.get(STATIC_INFO_VERSION, ""),
@@ -429,10 +421,8 @@ class SQLServer(DatabaseCheck):
                                 self.log.warning("failed to parse SQL Server year from version: %s", version)
                         else:
                             self.log.warning("failed to load version static information due to empty results")
-                    if not STATIC_INFO_MAJOR_VERSION in self.static_info_cache:
-                        cursor.execute(
-                            "SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion"
-                        )
+                    if STATIC_INFO_MAJOR_VERSION not in self.static_info_cache:
+                        cursor.execute("SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion")
                         result = cursor.fetchone()
                         if result:
                             self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
