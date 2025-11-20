@@ -1,0 +1,97 @@
+id: microsoft-copilot
+tests:
+  - sample: >-
+      {
+        "service": "user-detail-report",
+        "report": {
+          "wordCopilotLastActivityDate": "",
+          "powerPointCopilotLastActivityDate": "",
+          "oneNoteCopilotLastActivityDate": "",
+          "displayName": "5528113CBA611463496E1F7931013B2D",
+          "excelCopilotLastActivityDate": "",
+          "loopCopilotLastActivityDate": "",
+          "microsoftTeamsCopilotLastActivityDate": "",
+          "lastActivityDate": "",
+          "reportRefreshDate": "2025-09-22",
+          "copilotActivityUserDetailsByPeriod": [
+            {
+              "reportPeriod": 7
+            }
+          ],
+          "copilotChatLastActivityDate": "",
+          "outlookCopilotLastActivityDate": "",
+          "userPrincipalName": "E95B5A5273F1E3B48023296BB4B444BE"
+        },
+        "active": {
+          "excel": 0,
+          "microsoftTeams": 0,
+          "oneNote": 0,
+          "copilotChat": 0,
+          "loop": 0,
+          "powerPoint": 0,
+          "word": 0,
+          "outlook": 0
+        }
+      }
+    result:
+      custom:
+        active:
+          copilotChat: 0
+          excel: 0
+          loop: 0
+          microsoftTeams: 0
+          oneNote: 0
+          outlook: 0
+          powerPoint: 0
+          word: 0
+        report:
+          copilotActivityUserDetailsByPeriod:
+            - reportPeriod: 7
+          copilotChatLastActivityDate: ""
+          displayName: "5528113CBA611463496E1F7931013B2D"
+          excelCopilotLastActivityDate: ""
+          lastActivityDate: ""
+          loopCopilotLastActivityDate: ""
+          microsoftTeamsCopilotLastActivityDate: ""
+          oneNoteCopilotLastActivityDate: ""
+          outlookCopilotLastActivityDate: ""
+          powerPointCopilotLastActivityDate: ""
+          reportRefreshDate: "2025-09-22"
+          userPrincipalName: "E95B5A5273F1E3B48023296BB4B444BE"
+          wordCopilotLastActivityDate: ""
+        service: "user-detail-report"
+      message: |-
+        {
+          "service" : "user-detail-report",
+          "report" : {
+            "wordCopilotLastActivityDate" : "",
+            "powerPointCopilotLastActivityDate" : "",
+            "oneNoteCopilotLastActivityDate" : "",
+            "displayName" : "5528113CBA611463496E1F7931013B2D",
+            "excelCopilotLastActivityDate" : "",
+            "loopCopilotLastActivityDate" : "",
+            "microsoftTeamsCopilotLastActivityDate" : "",
+            "lastActivityDate" : "",
+            "reportRefreshDate" : "2025-09-22",
+            "copilotActivityUserDetailsByPeriod" : [ {
+              "reportPeriod" : 7
+            } ],
+            "copilotChatLastActivityDate" : "",
+            "outlookCopilotLastActivityDate" : "",
+            "userPrincipalName" : "E95B5A5273F1E3B48023296BB4B444BE"
+          },
+          "active" : {
+            "excel" : 0,
+            "microsoftTeams" : 0,
+            "oneNote" : 0,
+            "copilotChat" : 0,
+            "loop" : 0,
+            "powerPoint" : 0,
+            "word" : 0,
+            "outlook" : 0
+          }
+        }
+      service: "user-detail-report"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1
