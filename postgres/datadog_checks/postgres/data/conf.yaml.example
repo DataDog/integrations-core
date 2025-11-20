@@ -399,7 +399,7 @@ instances:
         #   - master$
         #   - AdventureWorks.*
 
-        ## @param exclude - list of strings - optional - default: ['cloudsqladmin']
+        ## @param exclude - list of strings - optional - default: ['cloudsqladmin', 'rdsadmin', 'alloydbadmin', 'alloydbmetadata']
         ## Regular expression for database names to exclude as part of `database_autodiscovery`.
         ## Character casing is ignored. The regular expressions start matching from the beginning,
         ## so to match anywhere, prepend `.*`. For exact matches append `$`.
@@ -407,10 +407,10 @@ instances:
         ## those found via `include`
         #
         # exclude:
-        #   - model
-        #   - msdb
         #   - cloudsqladmin
         #   - rdsadmin
+        #   - alloydbadmin
+        #   - alloydbmetadata
 
         ## @param refresh - integer - optional - default: 600
         ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.
