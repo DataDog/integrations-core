@@ -15,6 +15,7 @@ from datadog_checks.postgres.util import DatabaseConfigurationError, warning_wit
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
 
+
 class PostgresAutodiscovery(Discovery):
     def __init__(
         self,

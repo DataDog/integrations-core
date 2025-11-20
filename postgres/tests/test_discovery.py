@@ -292,7 +292,7 @@ def test_database_autodiscovery_exclude_defaults(aggregator, integration_check, 
     run_one_check(check, pg_instance)
 
     databases_excluded_by_default = instance_database_autodiscovery().exclude
-    check_excludes = check._config.database_autodiscovery.exclude 
+    check_excludes = check._config.database_autodiscovery.exclude
 
     assert databases_excluded_by_default == check_excludes
     assert check.autodiscovery is not None
@@ -305,16 +305,13 @@ def test_database_autodiscovery_exclude_defaults_overriden(aggregator, integrati
 
     exclude_reg = "dogs_2$"
 
-    pg_instance["database_autodiscovery"] = {
-        "enabled": True,
-        "exclude": [exclude_reg]
-    }
+    pg_instance["database_autodiscovery"] = {"enabled": True, "exclude": [exclude_reg]}
     del pg_instance['dbname']
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
 
     databases_excluded_by_default = instance_database_autodiscovery().exclude
-    check_excludes = check._config.database_autodiscovery.exclude 
+    check_excludes = check._config.database_autodiscovery.exclude
 
     assert check.autodiscovery is not None
     assert check_excludes != databases_excluded_by_default
