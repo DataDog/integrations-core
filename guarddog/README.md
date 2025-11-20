@@ -13,14 +13,14 @@ This integration monitors configured dependency files using GuardDog scans and s
 
 ### Installation
 
-The GuardDog check is already included with the [Datadog Agent][7] package, so no extra installation is required.
+The GuardDog check is already included with the [Datadog Agent][7] package, so no extra installation is required. You must also install the GuardDog package (see [Install GuardDog](#install-guarddog) under Configuration).
 
 ### Configuration
 
 #### Install GuardDog
 
   Note: 
-      - GuardDog requires python version 3.10 or higher.
+      - GuardDog requires Python version 3.10 or higher.
       - The Datadog Agent must have access to the GuardDog executable path.
 
 1. Install GuardDog using pip:
@@ -31,7 +31,8 @@ The GuardDog check is already included with the [Datadog Agent][7] package, so n
     ```shell
     which guarddog
     ```
-    This path is required for the **guarddog_path** parameter in **guarddog.d/conf.yaml** file.
+
+    This path is required for the `guarddog_path` parameter in the `guarddog.d/conf.yaml` file.
 
 
 #### Log collection
@@ -73,8 +74,8 @@ The GuardDog check is already included with the [Datadog Agent][7] package, so n
       ```
 
       **Note:**
-      - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
-      - To track more than one dependency file, add additional entries under the instances as below:
+      - We recommend you do not change the `service` and `source` values, as these parameters are integral to the pipeline's operation.
+      - To track more than one dependency file, add additional entries under `instances`:
         ```yaml
         instances:
           - package_ecosystem: pypi
@@ -114,15 +115,17 @@ The GuardDog integration does not include any events.
 
 ## Troubleshooting
 
-In case of a **Permission denied** error, run the following command to give the Datadog Agent permission for the GuardDog executable:
-  ```shell
-  chmod o+rx /path/to/guarddog
-  ```
+If you see a **Permission denied** error, run the following command to give the Datadog Agent permission for the GuardDog executable:
+
+```shell
+chmod o+rx /path/to/guarddog
+```
 
 If the issue persists, ensure that the parent directories in the path are accessible to the Datadog Agent. Run the following command to grant permissions to the parent directory:
-  ```shell
-  chmod o+x /path/to/parent_directory
-  ```
+
+```shell
+chmod o+x /path/to/parent_directory
+```
 
 
 For any further assistance, contact [Datadog support][3].
