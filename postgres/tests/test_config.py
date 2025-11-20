@@ -7,8 +7,8 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-from datadog_checks.base.errors import ConfigurationError
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres.config import (
     FeatureKey,
     ValidationResult,

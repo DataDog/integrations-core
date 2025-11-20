@@ -6,6 +6,7 @@ import time
 
 import psycopg
 import pytest
+
 from datadog_checks.base import AgentCheck
 
 from .common import PASSWORD_ADMIN, POSTGRES_VERSION, USER_ADMIN

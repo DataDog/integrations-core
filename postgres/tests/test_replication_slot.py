@@ -5,8 +5,8 @@ import time
 
 import psycopg
 import pytest
-from datadog_checks.dev.docker import get_container_ip
 
+from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS, QUERY_PG_REPLICATION_STATS_METRICS
 
 from .common import (

@@ -8,9 +8,9 @@ from typing import Optional
 
 import psycopg
 import pytest
-from datadog_checks.dev import WaitFor, docker_run
 from semver import VersionInfo
 
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache

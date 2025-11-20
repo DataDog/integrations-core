@@ -6,8 +6,8 @@ from unittest import mock
 
 import psycopg
 import pytest
-from datadog_checks.base.utils.db.sql import compute_sql_signature
 
+from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.postgres.util import DBExplainError
 from datadog_checks.postgres.version_utils import V12
 
