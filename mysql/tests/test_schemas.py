@@ -1,20 +1,19 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
+
 from typing import Callable, Optional
 
 import pytest
+from packaging.version import parse as parse_version
 
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.schemas import MySqlSchemaCollector
 
 from . import common
+from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
-
-
-MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 
 
 @pytest.fixture
@@ -57,7 +56,10 @@ def test_get_cursor(dbm_instance, integration_check):
         for row in cursor:
             schemas.append(row['schema_name'])
 
-        assert set(schemas) == {'datadog_test_schemas', 'datadog', 'datadog_test_schemas_second', 'testdb'}
+        expected_schemas = {'datadog_test_schemas', 'datadog', 'datadog_test_schemas_second', 'testdb'}
+        if MYSQL_FLAVOR.lower() == 'mariadb' and MYSQL_VERSION_PARSED <= parse_version('10.6.0'):
+            expected_schemas.add('test')
+        assert set(schemas) == expected_schemas
 
 
 def test_tables(dbm_instance, integration_check):
