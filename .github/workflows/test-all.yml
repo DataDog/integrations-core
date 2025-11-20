@@ -3490,14 +3490,10 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.13-linux-FreeTDS-2017-single
-        - py3.13-linux-FreeTDS-2017-ha
         - py3.13-linux-FreeTDS-2019-single
         - py3.13-linux-FreeTDS-2019-ha
         - py3.13-linux-FreeTDS-2022-single
         - py3.13-linux-FreeTDS-2022-ha
-        - py3.13-linux-odbc-2017-single
-        - py3.13-linux-odbc-2017-ha
         - py3.13-linux-odbc-2019-single
         - py3.13-linux-odbc-2019-ha
         - py3.13-linux-odbc-2022-single
