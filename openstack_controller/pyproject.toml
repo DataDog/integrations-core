@@ -38,6 +38,8 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "openstacksdk==4.7.0",
+    "os_service_types==1.8.0",
+    "pbr==7.0.1"
 ]
 
 [project.urls]
