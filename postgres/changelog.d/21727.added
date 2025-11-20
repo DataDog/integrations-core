@@ -1,1 +1,1 @@
-Migrate SQL Server to new schema collector. This collector provides improved performance in the agent and allows the backend to handle larger schema collections.
+Migrate PostgreSQL to new schema collector. This collector provides improved performance in the agent and allows the backend to handle larger schema collections.
