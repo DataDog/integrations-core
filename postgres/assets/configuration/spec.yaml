@@ -461,10 +461,10 @@ files:
             items:
               type: string
             example:
+              - "model"
+              - "msdb"
               - "cloudsqladmin"
-              - "rdsadmin" 
-              - "alloydbadmin"
-              - "alloydbmetadata"
+              - "rdsadmin"
             display_default:
               - "cloudsqladmin"
               - "rdsadmin" 
