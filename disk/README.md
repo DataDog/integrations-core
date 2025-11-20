@@ -4,6 +4,8 @@
 
 Collect metrics related to disk usage and IO.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

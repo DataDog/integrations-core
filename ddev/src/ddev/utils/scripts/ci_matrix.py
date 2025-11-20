@@ -74,8 +74,8 @@ PLATFORMS = {
     'linux': __plat('Linux', 'ubuntu-22.04'),
     # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
     'windows': __plat('Windows', 'windows-2022'),
-    # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
-    'macos': __plat('macOS', 'macos-13'),
+    # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
+    'macos': __plat('macOS', 'macos-14-large'),
 }
 
 # The following integrations are no longer tested in CI
@@ -112,13 +112,14 @@ def git(*args) -> str:
     return process.stdout
 
 
-def get_changed_files(*, ref: str, local: bool) -> list[str]:
+def get_changed_files(*, ref: str, exact: bool, local: bool) -> list[str]:
     changed_files = set()
 
     # Committed e.g.:
     # A   relative/path/to/file.added
     # M   relative/path/to/file.modified
-    for line in git('diff', '--name-status', f'{ref}...').splitlines():
+    strategy = '..' if exact else '...'
+    for line in git('diff', '--name-status', f'{ref}{strategy}').splitlines():
         if not is_git_warning_line(line):
             _, relative_path = line.split(maxsplit=1)
             changed_files.add(relative_path)
@@ -136,8 +137,8 @@ def get_changed_files(*, ref: str, local: bool) -> list[str]:
     return sorted(changed_files, key=lambda path: (path, -path.count('/')))
 
 
-def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> list[str]:
-    changed_files = get_changed_files(ref=ref, local=local)
+def get_changed_targets(root: Path, *, ref: str, exact: bool, local: bool, verbose: bool) -> list[str]:
+    changed_files = get_changed_files(ref=ref, exact=exact, local=local)
     if verbose:
         print('\n'.join(changed_files), file=sys.stderr)
 
@@ -302,6 +303,7 @@ def main():
 
     parser = argparse.ArgumentParser(prog=__name__, allow_abbrev=False)
     parser.add_argument('--ref', default='origin/master')
+    parser.add_argument('--exact', action='store_true', help='Whether ref refers to the merge base')
     parser.add_argument('-a', '--all', action='store_true')
     parser.add_argument('-p', '--pretty', action='store_true')
     parser.add_argument('-v', '--verbose', action='store_true')
@@ -311,7 +313,7 @@ def main():
     targets = (
         get_all_targets(root)
         if args.all
-        else get_changed_targets(root, ref=args.ref, local=args.pretty, verbose=args.verbose)
+        else get_changed_targets(root, ref=args.ref, exact=args.exact, local=args.pretty, verbose=args.verbose)
     )
     job_matrix = construct_job_matrix(root, targets)
 

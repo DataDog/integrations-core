@@ -1,12 +1,12 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 
 [envs.default]
 e2e-env = false
 dependencies = [
-  "freezegun==1.2.2",
+  "freezegun==1.5.5",
 ]
 
 [envs.test-data]

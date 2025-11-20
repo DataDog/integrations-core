@@ -2,7 +2,47 @@
 
 <!-- towncrier release notes start -->
 
-## 22.8.0 / 2025-08-07
+## 22.11.0 / 2025-10-31
+
+***Added***:
+
+* Add additional context to the database_identifier configuration description. ([#21575](https://github.com/DataDog/integrations-core/pull/21575))
+
+## 22.10.1 / 2025-10-03 / Agent 7.72.0
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 22.10.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add SQL Server database metric `user_access`. ([#21406](https://github.com/DataDog/integrations-core/pull/21406))
+* Normalize `sqlserver_servername` and `sqlserver_instancename` tag values to avoid duplicate tags. ([#21475](https://github.com/DataDog/integrations-core/pull/21475))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+* Add `replace_bind_parameter` to sqlserver obfuscator option to support obfuscate bind parameters like `@P1`. ([#21481](https://github.com/DataDog/integrations-core/pull/21481))
+
+***Fixed***:
+
+* Compile and reuse connection error regex patterns ([#21319](https://github.com/DataDog/integrations-core/pull/21319))
+
+## 22.9.1 / 2025-10-03 / Agent 7.71.1
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 22.9.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update core tags with agent host name for DB integrations(postgres, mysql, sqlserver) ([#20991](https://github.com/DataDog/integrations-core/pull/20991))
+* Enable collect_settings by default for DBM enabled integrations ([#21172](https://github.com/DataDog/integrations-core/pull/21172))
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 22.8.0 / 2025-08-07 / Agent 7.70.0
 
 ***Added***:
 

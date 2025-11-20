@@ -82,6 +82,10 @@ coverage:
         target: 75
         flags:
         - azure_iot_edge
+      BentoML:
+        target: 75
+        flags:
+        - bentoml
       Boundary:
         target: 75
         flags:
@@ -254,6 +258,10 @@ coverage:
         target: 75
         flags:
         - go_expvar
+      GuardDog:
+        target: 75
+        flags:
+        - guarddog
       Gunicorn:
         target: 75
         flags:
@@ -282,6 +290,10 @@ coverage:
         target: 75
         flags:
         - hazelcast
+      Hugging_Face_TGI:
+        target: 75
+        flags:
+        - hugging_face_tgi
       IBM_ACE:
         target: 75
         flags:
@@ -758,6 +770,14 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      checkpoint_harmony_endpoint:
+        target: 75
+        flags:
+        - checkpoint_harmony_endpoint
+      datadog_csi_driver:
+        target: 75
+        flags:
+        - datadog_csi_driver
       dcgm:
         target: 75
         flags:
@@ -880,6 +900,11 @@ flags:
     paths:
     - azure_iot_edge/datadog_checks/azure_iot_edge
     - azure_iot_edge/tests
+  bentoml:
+    carryforward: true
+    paths:
+    - bentoml/datadog_checks/bentoml
+    - bentoml/tests
   boundary:
     carryforward: true
     paths:
@@ -920,6 +945,11 @@ flags:
     paths:
     - cert_manager/datadog_checks/cert_manager
     - cert_manager/tests
+  checkpoint_harmony_endpoint:
+    carryforward: true
+    paths:
+    - checkpoint_harmony_endpoint/datadog_checks/checkpoint_harmony_endpoint
+    - checkpoint_harmony_endpoint/tests
   cilium:
     carryforward: true
     paths:
@@ -1000,6 +1030,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  datadog_csi_driver:
+    carryforward: true
+    paths:
+    - datadog_csi_driver/datadog_checks/datadog_csi_driver
+    - datadog_csi_driver/tests
   dcgm:
     carryforward: true
     paths:
@@ -1130,6 +1165,11 @@ flags:
     paths:
     - go_expvar/datadog_checks/go_expvar
     - go_expvar/tests
+  guarddog:
+    carryforward: true
+    paths:
+    - guarddog/datadog_checks/guarddog
+    - guarddog/tests
   gunicorn:
     carryforward: true
     paths:
@@ -1165,6 +1205,11 @@ flags:
     paths:
     - http_check/datadog_checks/http_check
     - http_check/tests
+  hugging_face_tgi:
+    carryforward: true
+    paths:
+    - hugging_face_tgi/datadog_checks/hugging_face_tgi
+    - hugging_face_tgi/tests
   ibm_ace:
     carryforward: true
     paths:

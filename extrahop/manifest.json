@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "76e1c087-314f-4d90-860e-c6eaee7a6eeb",
   "app_id": "extrahop",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1af07d08-4c45-43f1-9fef-4c2653d1a0b8",
   "app_id": "postmark",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -30,7 +31,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 28886018,
       "source_type_name": "Postmark",
       "events": {

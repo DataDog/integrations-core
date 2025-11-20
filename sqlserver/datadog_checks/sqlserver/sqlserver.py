@@ -11,8 +11,10 @@ from string import Template
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -49,6 +51,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SQLServerXESessionMetrics,
 )
 from datadog_checks.sqlserver.deadlocks import Deadlocks
+from datadog_checks.sqlserver.health import SqlServerHealth
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
@@ -56,8 +59,10 @@ from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
+from .config import sanitize
+
 try:
-    import datadog_agent
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
@@ -116,13 +121,15 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 
-class SQLServer(AgentCheck):
+class SQLServer(DatabaseCheck):
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True
 
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
+
+        self.health = SqlServerHealth(self)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -141,8 +148,10 @@ class SQLServer(AgentCheck):
         self.do_check = True
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
-        self.cloud_metadata = self._config.cloud_metadata
-        self.tag_manager = TagManager()
+        self._initialized_at = int(time.time() * 1000)
+
+        self._cloud_metadata = self._config.cloud_metadata
+        self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
         self.databases = set()
@@ -183,6 +192,8 @@ class SQLServer(AgentCheck):
 
         self._schemas = Schemas(self, self._config)
 
+        self._submit_initialization_health_event()
+
     def initialize_xe_session_handlers(self):
         """Initialize the XE session handlers without starting them"""
         # Initialize XE session handlers if not already initialized
@@ -218,6 +229,22 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
+    def _submit_initialization_health_event(self):
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            # TODO: Validate the config once it has been refactored
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.OK,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={
+                    "initialized_at": self._initialized_at,
+                    "instance": sanitize(self.instance),
+                },
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
+
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
         tags = self.tag_manager.get_tags() + (extra_tags or [])
         return QueryExecutor(
@@ -235,8 +262,6 @@ class SQLServer(AgentCheck):
         """
         self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
-        if self.agent_hostname:
-            self.tag_manager.set_tag("ddagenthostname", self.agent_hostname, replace=True)
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -300,6 +325,14 @@ class SQLServer(AgentCheck):
 
     def resolve_db_host(self):
         return agent_host_resolver(self.host)
+
+    @property
+    def tags(self):
+        return self.tag_manager.get_tags()
+
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
 
     @property
     def reported_hostname(self):
@@ -405,9 +438,11 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_INSTANCENAME] = instancename
                             self.static_info_cache[STATIC_INFO_FULL_SERVERNAME] = full_servername
 
-                            self.tag_manager.set_tag("sqlserver_servername", servername, replace=True)
+                            self.tag_manager.set_tag("sqlserver_servername", servername, replace=True, normalize=True)
                             if instancename:
-                                self.tag_manager.set_tag("sqlserver_instancename", instancename, replace=True)
+                                self.tag_manager.set_tag(
+                                    "sqlserver_instancename", instancename, replace=True, normalize=True
+                                )
                         else:
                             self.log.warning("failed to load servername static information due to empty results")
 
@@ -821,6 +856,8 @@ class SQLServer(AgentCheck):
             self._check_connections_by_use_db()
 
     def check(self, _):
+        self._submit_initialization_health_event()
+
         if self.do_check:
             self.load_static_information()
             # configure custom queries for the check
@@ -1074,6 +1111,7 @@ class SQLServer(AgentCheck):
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
+                "ddagenthostname": self.agent_hostname,
                 "dbms": "sqlserver",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,

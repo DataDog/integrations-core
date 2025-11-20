@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "9c1e5a09-836f-49c8-bbb2-2dd7f86ad0de",
   "app_id": "mux",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7368f005-2333-4dc5-a2b5-14419e4995d1",
   "app_id": "cockroachdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

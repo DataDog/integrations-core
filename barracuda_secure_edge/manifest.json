@@ -1,0 +1,59 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "c0acbaef-4769-4ea9-aa77-b208440f9303",
+  "app_id": "barracuda-secure-edge",
+  "owner": "agent-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "SecureEdge is a unified SASE platform that includes NGFW, zero trust and secure SD-WAN",
+    "title": "Barracuda SecureEdge",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Barracuda SecureEdge Overview Light Mode",
+        "image_url": "images/secure_edge_overview_light.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Barracuda SecureEdge Overview Bottom Light Mode",
+        "image_url": "images/secure_edge_overview_bottom_section_light.png"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 48860633,
+      "source_type_name": "barracuda_secure_edge",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Barracuda Secure Edge overview": "assets/dashboards/barracuda_secure_edge_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

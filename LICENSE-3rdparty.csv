@@ -13,8 +13,7 @@ boto3,PyPI,Apache-2.0,"Copyright 2013-2017 Amazon.com, Inc. or its affiliates. A
 botocore,PyPI,Apache-2.0,"Copyright 2012-2022 Amazon.com, Inc. or its affiliates. All Rights Reserved."
 cachetools,PyPI,MIT,Copyright (c) 2014-2025 Thomas Kemmer
 check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Copyright 2007 - 2023 Greg Sabino Mullane
-clickhouse-cityhash,PyPI,MIT,"Copyright (c) 2011, Alexander Marshalov <alone.amper@gmail.com>"
-clickhouse-driver,PyPI,MIT,Copyright (c) 2017 by Konstantin Lebedev.
+clickhouse-connect,PyPI,Apache-2.0,"Copyright 2022-2024 ClickHouse, Inc."
 cm-client,PyPI,Apache-2.0,
 confluent-kafka,PyPI,Apache-2.0,Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
@@ -37,27 +36,22 @@ lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
 lz4,PyPI,BSD-3-Clause,"Copyright (c) 2012-2013, Steeve Morin"
 mmh3,PyPI,CC0-1.0,Copyright (c) 2011-2025 Hajime Senuma
 oauthlib,PyPI,BSD-3-Clause,Copyright (c) The OAuthlib Community
-openstacksdk,PyPI,Apache-2.0,Copyright OpenStack
-orjson,PyPI,Apache-2.0,Copyright ijl <ijl@mailbox.org>
-orjson,PyPI,MIT,Copyright (c) ijl <ijl@mailbox.org>
+openstacksdk,PyPI,Apache-2.0,Copyright OpenStack <openstack-discuss@lists.openstack.org>
+orjson,PyPI,Apache-2.0,
+orjson,PyPI,MIT,
 packaging,PyPI,Apache-2.0,Copyright (c) Donald Stufft and individual contributors.
 packaging,PyPI,BSD-3-Clause,Copyright (c) Donald Stufft and individual contributors.
 paramiko,PyPI,LGPL-2.1-only,Copyright (C) 2009 Jeff Forcier
-ply,PyPI,BSD-3-Clause,Copyright (C) 2001-2018
 prometheus-client,PyPI,Apache-2.0,Copyright 2015 The Prometheus Authors
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
 psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola"
 psycopg,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
 pyOpenSSL,PyPI,Apache-2.0,Copyright The pyOpenSSL developers
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
-pycryptodomex,PyPI,BSD-2-Clause,Copyright 2014 Helder Eijs
-pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the public domain under Unlicense.
 pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
 pymongo,PyPI,Apache-2.0,Copyright The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
 pyodbc,PyPI,MIT-0,Copyright 2008 Michael Kleehammer
-pysmi,PyPI,BSD-2-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
-pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysnmp,PyPI,BSD-2-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pysnmp-mibs,PyPI,BSD-3-Clause,"Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>"
