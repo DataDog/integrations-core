@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 35.3.1 / 2025-11-19
+
+***Fixed***:
+
+* Add a fallback mechanism when mount_logs is True and no manifest is present in the integration ([#21784](https://github.com/DataDog/integrations-core/pull/21784))
+* Update event integration template. ([#21897](https://github.com/DataDog/integrations-core/pull/21897))
+
 ## 35.3.0 / 2025-11-03
 
 ***Added***:
