@@ -10,13 +10,13 @@ from collections import Counter, namedtuple
 import mock
 import psycopg
 import pytest
+from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.time import UTC
 from dateutil import parser
 from psycopg import ClientCursor
 from semver import VersionInfo
 
-from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,

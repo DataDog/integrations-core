@@ -5,11 +5,11 @@ import os
 from sys import maxsize
 
 import pytest
-
 from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from datadog_checks.postgres.util import (
     CHECKSUM_METRICS,
     NEWER_14_METRICS,

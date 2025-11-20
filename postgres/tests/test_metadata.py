@@ -6,7 +6,6 @@ from typing import List
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 from .common import POSTGRES_LOCALE, POSTGRES_VERSION

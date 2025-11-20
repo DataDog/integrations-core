@@ -12,9 +12,10 @@ import psycopg
 import psycopg.sql
 import pytest
 
+from datadog_checks.postgres.config_models.dict_defaults import instance_database_autodiscovery
+
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics
 from .utils import requires_over_13, run_one_check
-from datadog_checks.postgres.config_models.dict_defaults import instance_database_autodiscovery
 
 DISCOVERY_CONFIG = {
     "enabled": True,
