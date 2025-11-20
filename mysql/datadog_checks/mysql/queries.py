@@ -143,17 +143,18 @@ SELECT
     table_name as `table_name`,
     table_schema as `schema_name`,
     index_name as `name`,
-    collation as `collation`,
     cardinality as `cardinality`,
     index_type as `index_type`,
-    seq_in_index as `seq_in_index`,
-    column_name as `column_name`,
-    sub_part as `sub_part`,
-    packed as `packed`,
-    nullable as `nullable`,
     non_unique as `non_unique`,
-    expression as `expression`
+    expression as `expression`,
+    json_arrayagg(json_object(
+        'name', column_name,
+        'collation', collation,
+        'nullable', nullable,
+        'sub_part', sub_part
+    )) as `columns`
 FROM INFORMATION_SCHEMA.STATISTICS
+GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
 """
 
 SQL_FOREIGN_KEYS = """\
