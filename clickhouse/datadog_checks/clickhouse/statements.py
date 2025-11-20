@@ -26,6 +26,9 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 # Query to fetch aggregated metrics from system.query_log
 # This is the ClickHouse equivalent of Postgres pg_stat_statements
+# Note: We collect count() and sum() metrics which are treated as cumulative counters
+# and then compute derivatives. We no longer collect avg/min/max/percentile as they
+# don't make sense after derivative calculation (mean_time is computed from total_time/count).
 STATEMENTS_QUERY = """
 SELECT
     normalized_query_hash,
@@ -36,10 +39,6 @@ SELECT
     any(tables) as tables,
     count() as execution_count,
     sum(query_duration_ms) as total_duration_ms,
-    avg(query_duration_ms) as avg_duration_ms,
-    min(query_duration_ms) as min_duration_ms,
-    max(query_duration_ms) as max_duration_ms,
-    quantile(0.95)(query_duration_ms) as p95_duration_ms,
     sum(read_rows) as total_read_rows,
     sum(read_bytes) as total_read_bytes,
     sum(written_rows) as total_written_rows,
@@ -248,10 +247,6 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                     tables,
                     execution_count,
                     total_duration_ms,
-                    avg_duration_ms,
-                    min_duration_ms,
-                    max_duration_ms,
-                    p95_duration_ms,
                     total_read_rows,
                     total_read_bytes,
                     total_written_rows,
@@ -270,12 +265,11 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                         'query_type': str(query_type) if query_type else '',
                         'databases': str(databases[0]) if databases and len(databases) > 0 else '',
                         'tables': tables if tables else [],
-                        'calls': int(execution_count) if execution_count else 0,
+                        'count': int(execution_count) if execution_count else 0,
                         'total_time': float(total_duration_ms) if total_duration_ms else 0.0,
-                        'mean_time': float(avg_duration_ms) if avg_duration_ms else 0.0,
-                        'min_time': float(min_duration_ms) if min_duration_ms else 0.0,
-                        'max_time': float(max_duration_ms) if max_duration_ms else 0.0,
-                        'p95_time': float(p95_duration_ms) if p95_duration_ms else 0.0,
+                        # Note: mean_time will be calculated after derivative calculation as total_time / count
+                        # min_time, max_time, p95_time are not included because they are aggregates that
+                        # don't make sense after taking derivatives
                         'rows': int(total_result_rows) if total_result_rows else 0,
                         'read_rows': int(total_read_rows) if total_read_rows else 0,
                         'read_bytes': int(total_read_bytes) if total_read_bytes else 0,
@@ -315,14 +309,13 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             return []
 
         # Get available metric columns
+        # Note: We only include counter metrics (count, totals) in derivative calculation.
+        # Aggregated metrics like mean_time, min_time, max_time, p95_time are excluded
+        # because taking derivatives of averages/percentiles is mathematically incorrect.
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & {
-            'calls',
+            'count',
             'total_time',
-            'mean_time',
-            'min_time',
-            'max_time',
-            'p95_time',
             'rows',
             'read_rows',
             'read_bytes',
@@ -335,8 +328,16 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
 
         # Compute derivative rows (calculate deltas since last collection)
         rows_before = len(rows)
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key, execution_indicators=['calls'])
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key, execution_indicators=['count'])
         rows_after = len(rows)
+
+        # Calculate mean_time from derivative values (total_time / count)
+        # This follows the same pattern as Postgres, MySQL, and SQL Server
+        for row in rows:
+            if row.get('count', 0) > 0:
+                row['mean_time'] = row.get('total_time', 0.0) / row['count']
+            else:
+                row['mean_time'] = 0.0
 
         self._log.info(
             "Query metrics: loaded=%d rows, after_derivative=%d rows (filtered=%d)",
