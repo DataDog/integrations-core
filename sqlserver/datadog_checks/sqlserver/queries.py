@@ -37,6 +37,16 @@ FROM
 WHERE c.object_id = schema_tables.table_id
 """
 
+PARTITIONS_QUERY = """
+SELECT
+    COUNT(*) AS partition_count
+FROM
+    sys.partitions
+WHERE
+    object_id = schema_tables.table_id
+GROUP BY object_id
+"""
+
 INDEX_QUERY = """
 SELECT
     i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
@@ -128,17 +138,6 @@ GROUP BY
     FK.delete_referential_action_desc,
     FK.update_referential_action_desc
 """
-
-PARTITIONS_QUERY = """
-SELECT
-    COUNT(*) AS partition_count
-FROM
-    sys.partitions
-WHERE
-    object_id = schema_tables.table_id
-GROUP BY object_id
-"""
-
 
 DEFAULT_DM_XE_TARGETS = "sys.dm_xe_session_targets"
 DEFAULT_DM_XE_SESSIONS = "sys.dm_xe_sessions"

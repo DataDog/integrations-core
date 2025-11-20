@@ -491,10 +491,10 @@ Microsoft SQL Server 2019 (RTM-CU12) (KB5004524) - 15.0.4153.1 (X64)
 
 
 @pytest.mark.parametrize(
-    "version,expected_major_version", [(SQL_SERVER_2012_VERSION_EXAMPLE, 2012), (SQL_SERVER_2019_VERSION_EXAMPLE, 2019)]
+    "version,expected_year", [(SQL_SERVER_2012_VERSION_EXAMPLE, 2012), (SQL_SERVER_2019_VERSION_EXAMPLE, 2019)]
 )
-def test_parse_sqlserver_year(version, expected_major_version):
-    assert parse_sqlserver_year(version) == expected_major_version
+def test_parse_sqlserver_year(version, expected_year):
+    assert parse_sqlserver_year(version) == expected_year
 
 
 @pytest.mark.parametrize(

@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import logging
-import pprint
 from copy import copy, deepcopy
 
 import pytest
@@ -377,7 +376,4 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
         matches = deep_compare(actual_payload, expected_data_for_db[db_name])
-        if not matches:
-            pprint.pprint(actual_payload)
-            pprint.pprint(expected_data_for_db[db_name])
         assert matches
