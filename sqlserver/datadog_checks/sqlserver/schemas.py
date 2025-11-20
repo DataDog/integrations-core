@@ -113,7 +113,7 @@ class SQLServerSchemaCollector(SchemaCollector):
                 cursor.execute(query)
                 yield cursor
 
-    def _get_tables_query(self):        
+    def _get_tables_query(self):
         limit = int(self._config.max_tables or 1_000_000)
 
         # Note that we INNER JOIN tables to omit schemas with no tables
