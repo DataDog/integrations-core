@@ -21,7 +21,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
 ]
 dynamic = [
@@ -37,7 +37,7 @@ deps = [
     "binary==1.0.2",
     "cachetools==6.2.0",
     "cryptography==45.0.6",
-    "ddtrace==3.12.5",
+    "ddtrace==3.16.4",
     "jellyfish==1.2.0",
     "lazy-loader==0.4",
     "prometheus-client==0.22.1",

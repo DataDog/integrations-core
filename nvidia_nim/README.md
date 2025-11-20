@@ -4,11 +4,9 @@
 
 This check monitors [NVIDIA NIM][1] through the Datadog Agent. 
 
-## Setup
+**Minimum Agent version:** 7.61.0
 
-<div class="alert alert-warning">
-This integration is currently in Preview. Its availability is subject to change in the future. 
-</div>
+## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 

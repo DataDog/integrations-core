@@ -8,6 +8,8 @@ The ActiveMQ check collects metrics for brokers, queues, producers, consumers, a
 
 **Note**: If you are running an ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][2].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

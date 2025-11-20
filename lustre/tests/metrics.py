@@ -449,11 +449,11 @@ JOBSTATS_MDS_BASE = [
 # Expand jobstats metrics with appropriate suffixes
 JOBSTATS_OSS_METRICS = _expand_metric_base(
     [f'lustre.{metric}' for metric in JOBSTATS_OSS_BASE], EXTENDED_HISTOGRAM_SUFFIXES
-)
+) + ['lustre.job_stats.read_bytes.bucket', 'lustre.job_stats.write_bytes.bucket']
 
 JOBSTATS_MDS_METRICS = _expand_metric_base(
     [f'lustre.{metric}' for metric in JOBSTATS_MDS_BASE], EXTENDED_HISTOGRAM_SUFFIXES
-)
+) + ['lustre.job_stats.read_bytes.bucket', 'lustre.job_stats.write_bytes.bucket']
 
 # Job statistics metrics - combination of OSS and MDS jobstats
 JOBSTATS_METRICS = JOBSTATS_OSS_METRICS + JOBSTATS_MDS_METRICS

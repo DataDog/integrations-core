@@ -6,6 +6,8 @@ import contextlib
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
+from dateutil.tz import UTC
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.time import get_timestamp
@@ -77,9 +79,9 @@ class ApiV7(Api):
 
     def _collect_events(self):
         now_utc = get_timestamp()
-        start_time_iso = datetime.utcfromtimestamp(self._check.latest_event_query_utc).isoformat()
-        end_time_iso = datetime.utcfromtimestamp(now_utc).isoformat()
-        query = f"timeOccurred=ge={start_time_iso};timeOccurred=le={end_time_iso}"
+        start_time_iso = datetime.fromtimestamp(self._check.latest_event_query_utc, UTC).isoformat()
+        end_time_iso = datetime.fromtimestamp(now_utc, UTC).isoformat()
+        query = f"timeReceived=ge={start_time_iso};timeReceived=le={end_time_iso}"
         self._log.debug("Cloudera event query: %s", query)
         try:
             events = self._api_client.read_events(query)

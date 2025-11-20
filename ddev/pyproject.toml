@@ -23,13 +23,13 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]~=35.2",
+    "datadog-checks-dev[cli]~=35.3",
     "hatch>=1.8.1",
     "httpx",
     "jsonpointer",
@@ -82,13 +82,13 @@ scripts = ["ddev"]
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py312"]
+target-version = ["py313"]
 extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
 extend = "../pyproject.toml"
 exclude = []
-target-version = "py312"
+target-version = "py313"
 line-length = 120
 
 [tool.ruff.lint]

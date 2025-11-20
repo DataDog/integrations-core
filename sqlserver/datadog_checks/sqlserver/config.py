@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import json
 import re
 
@@ -103,6 +104,9 @@ class SQLServerConfig:
                     'keep_boolean': is_affirmative(obfuscator_options_config.get('keep_boolean', False)),
                     'keep_positional_parameter': is_affirmative(
                         obfuscator_options_config.get('keep_positional_parameter', False)
+                    ),
+                    'replace_bind_parameter': is_affirmative(
+                        obfuscator_options_config.get('replace_bind_parameter', False)
                     ),
                     'keep_trailing_semicolon': is_affirmative(
                         obfuscator_options_config.get('keep_trailing_semicolon', False)
@@ -271,3 +275,12 @@ class SQLServerConfig:
                 if value is not None:
                     config[key] = value
         return configurable_metrics
+
+
+def sanitize(config: dict) -> dict:
+    """
+    Sanitize the config to remove sensitive information.
+    """
+    sanitized = copy.deepcopy(config)
+    sanitized['password'] = '***' if sanitized.get('password') else None
+    return sanitized

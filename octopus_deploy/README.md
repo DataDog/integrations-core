@@ -4,6 +4,8 @@
 
 This check monitors your [Octopus Deploy][1] deployments through the Datadog Agent. Track information such as average deployment time per environment and deployment failure rate for a project.
 
+**Minimum Agent version:** 7.63.0
+
 ## Setup
 
 Complete the following steps to install and configure this check on a host-based Agent. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

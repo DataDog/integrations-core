@@ -2,7 +2,58 @@
 
 <!-- towncrier release notes start -->
 
-## 23.0.1 / 2025-09-24
+## 23.2.0 / 2025-10-31
+
+***Added***:
+
+* Add additional context to the database_identifier configuration description. ([#21575](https://github.com/DataDog/integrations-core/pull/21575))
+* Resend Postgres initialization event every six hours to avoid event expiration ([#21702](https://github.com/DataDog/integrations-core/pull/21702))
+* Bump base version for Postgres integration with fix for missed collection event ([#21776](https://github.com/DataDog/integrations-core/pull/21776))
+
+***Fixed***:
+
+* Improved Postgres spec documentation for query samples, explain plans, and AWS instance_endpoint ([#21682](https://github.com/DataDog/integrations-core/pull/21682))
+* Fixes an issue querying table and index relation metrics on the public schema ([#21686](https://github.com/DataDog/integrations-core/pull/21686))
+* Fix logic for only_custom_queries configuration option. ([#21708](https://github.com/DataDog/integrations-core/pull/21708))
+* Fix handling health event tags in Postgres to allow for additional tags as an argument. ([#21764](https://github.com/DataDog/integrations-core/pull/21764))
+
+## 23.1.2 / 2025-10-07 / Agent 7.72.0
+
+***Fixed***:
+
+* Backfill old keys in options passed from Postgres integration to SQL obfuscator ([#21557](https://github.com/DataDog/integrations-core/pull/21557))
+* Fixes a collision issue when token based authentication is configured for multiple Postgres instances ([#21560](https://github.com/DataDog/integrations-core/pull/21560))
+
+## 23.1.1 / 2025-10-03
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 23.1.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add gauge postgresql.locks.idle_in_transaction_age to measure age (s) of idle-in-transaction sessions holding exclusive relation locks; tags: pid, db, session_user, app, client_hostname, lock_mode, relation, relation_owner; limit 100 rows. ([#21182](https://github.com/DataDog/integrations-core/pull/21182))
+* Add agent health event for Postgres config validation ([#21347](https://github.com/DataDog/integrations-core/pull/21347))
+* Refactor Postgres configuration with fixes and clarifications on default values ([#21347](https://github.com/DataDog/integrations-core/pull/21347))
+* PG: Handle locks without relations like transactionid or virtualxid locks ([#21393](https://github.com/DataDog/integrations-core/pull/21393))
+* Add tombstone fields for Postgres schema collection ([#21431](https://github.com/DataDog/integrations-core/pull/21431))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Compile and reuse regex patterns ([#21317](https://github.com/DataDog/integrations-core/pull/21317))
+* Fixed support for refreshing IAM authentication and Azure Managed Identity tokens ([#21503](https://github.com/DataDog/integrations-core/pull/21503))
+
+## 23.0.2 / 2025-10-03 / Agent 7.71.1
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 23.0.1 / 2025-09-24 / Agent 7.71.0
 
 ***Fixed***:
 

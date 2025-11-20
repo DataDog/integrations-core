@@ -11,13 +11,13 @@ import psycopg
 from cachetools import TTLCache
 from psycopg.rows import dict_row
 
-from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.config_models import InstanceConfig
 
 from .query_calls_cache import QueryCallsCache
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
@@ -150,22 +150,15 @@ def _row_key(row):
     return row['query_signature'], row['datname'], row['rolname']
 
 
-DEFAULT_COLLECTION_INTERVAL = 10
-
-
 class PostgresStatementMetrics(DBMAsyncJob):
     """Collects telemetry for SQL statements"""
 
-    def __init__(self, check, config):
-        collection_interval = float(
-            config.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
-        )
-        if collection_interval <= 0:
-            collection_interval = DEFAULT_COLLECTION_INTERVAL
+    def __init__(self, check, config: InstanceConfig):
+        collection_interval = float(config.query_metrics.collection_interval)
         super(PostgresStatementMetrics, self).__init__(
             check,
-            run_sync=is_affirmative(config.statement_metrics_config.get('run_sync', False)),
-            enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
+            run_sync=config.query_metrics.run_sync,
+            enabled=config.query_metrics.enabled,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
             dbms="postgres",
@@ -174,9 +167,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         self._check = check
         self._metrics_collection_interval = collection_interval
-        self._pg_stat_statements_max_warning_threshold = config.statement_metrics_config.get(
-            'pg_stat_statements_max_warning_threshold', 10000
-        )
+        self._pg_stat_statements_max_warning_threshold = config.query_metrics.pg_stat_statements_max_warning_threshold
         self._config = config
         # This config option isn't publicized because the related option in datadog.yaml
         # (database_monitoring.metrics.batch_max_content_size) cannot be decreased, and increasing it
@@ -185,7 +176,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         # NB: This value should always match the datadog.yaml value, whose default is set
         # https://github.com/DataDog/datadog-agent/blob/96d253e8b91326c2418302b13a73b420ad5a6d92/comp/forwarder/eventplatform/eventplatformimpl/epforwarder.go#L79
         # If that default changes, this should be updated
-        self.batch_max_content_size = config.init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000)
+        self.batch_max_content_size = config.query_metrics.batch_max_content_size
         self._tags_no_db = None
         self.tags = None
         self._state = StatementMetrics()
@@ -194,11 +185,16 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._baseline_metrics = {}
         self._last_baseline_metrics_expiry = None
         self._track_io_timing_cache = None
-        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        obfuscate_options = self._config.obfuscator_options.model_dump()
+        # Backfill old keys used in the agent obfuscator
+        obfuscate_options['table_names'] = self._config.obfuscator_options.collect_tables
+        obfuscate_options['dollar_quoted_func'] = self._config.obfuscator_options.keep_dollar_quoted_func
+        obfuscate_options['return_json_metadata'] = self._config.obfuscator_options.collect_metadata
+        self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
-            maxsize=config.full_statement_text_cache_max_size,
-            ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
+            maxsize=config.query_metrics.full_statement_text_cache_max_size,
+            ttl=60 * 60 / config.query_metrics.full_statement_text_samples_per_hour_per_query,
         )
 
     def _execute_query(self, query, params=(), binary=False, row_factory=None) -> Tuple[list, list]:
@@ -288,7 +284,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'cloud_metadata': self._check.cloud_metadata,
                 'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
-                'ddagenthostname': self._check.agent_hostname,
                 'service': self._config.service,
             }
 
@@ -560,7 +555,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _check_baseline_metrics_expiry(self):
         if (
             self._last_baseline_metrics_expiry is None
-            or self._last_baseline_metrics_expiry + self._config.baseline_metrics_expiry < time.time()
+            or self._last_baseline_metrics_expiry + self._config.query_metrics.baseline_metrics_expiry < time.time()
             or len(self._baseline_metrics) > 3 * int(self._check.pg_settings.get("pg_stat_statements.max", 10000))
         ):
             self._baseline_metrics = {}
@@ -582,7 +577,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         self._check_baseline_metrics_expiry()
         rows = []
-        if (not self._config.incremental_query_metrics) or self._check.version < V10:
+        if (not self._config.query_metrics.incremental_query_metrics) or self._check.version < V10:
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
         elif len(self._baseline_metrics) == 0:

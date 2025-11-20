@@ -50,9 +50,9 @@ METRICS_CONFIG = {
                 'LDAP Bind Time': {'metric_name': 'ldap.bind_time'},
                 'LDAP Successful Binds/sec': {'metric_name': 'ldap.successful_binds_persec'},
                 'LDAP Searches/sec': {'metric_name': 'ldap.searches_persec'},
-                'LDAP Writes/sec': {'metric_name': 'ldap.writes_persec', 'type': 'rate'},
+                'LDAP Writes/sec': {'metric_name': 'ldap.writes_persec'},
                 'LDAP Active Threads': {'metric_name': 'ldap.active_threads'},
-                'DS Client Binds/sec': {'metric_name': 'ds.client_binds_persec', 'type': 'rate'},
+                'DS Client Binds/sec': {'metric_name': 'ds.client_binds_persec'},
             }
         ],
     },
@@ -72,8 +72,8 @@ METRICS_CONFIG = {
         'name': 'security',
         'counters': [
             {
-                'NTLM Authentications': {'name': 'ntlm_authentications', 'type': 'rate'},
-                'Kerberos Authentications': {'name': 'kerberos_authentications', 'type': 'rate'},
+                'NTLM Authentications': {'name': 'ntlm_authentications'},
+                'Kerberos Authentications': {'name': 'kerberos_authentications'},
             }
         ],
     },
@@ -81,10 +81,10 @@ METRICS_CONFIG = {
         'name': 'dhcp',
         'counters': [
             {
-                'Failover: BndUpd Dropped.': {'name': 'failover.binding_updates_dropped', 'type': 'count'},
+                'Failover: BndUpd Dropped.': {'name': 'failover.binding_updates_dropped'},
                 'Failover: BndUpd pending in outbound queue.': 'failover.binding_updates_pending',
-                'Failover: BndUpd received/sec.': {'name': 'failover.binding_updates_received', 'type': 'rate'},
-                'Failover: BndUpd sent/sec.': {'name': 'failover.binding_updates_sent', 'type': 'rate'},
+                'Failover: BndUpd received/sec.': {'name': 'failover.binding_updates_received'},
+                'Failover: BndUpd sent/sec.': {'name': 'failover.binding_updates_sent'},
             }
         ],
     },
@@ -92,10 +92,10 @@ METRICS_CONFIG = {
         'name': 'dfsr',
         'counters': [
             {
-                'Conflict Space In Use': {'name': 'conflict_space_in_use', 'unit': 'byte'},
-                'Deleted Space In Use': {'name': 'deleted_space_in_use', 'unit': 'byte'},
-                'File Installs Retried': {'name': 'file_installs_retried', 'type': 'count'},
-                'Staging Space In Use': {'name': 'staging_space_in_use', 'unit': 'byte'},
+                'Conflict Space In Use': {'name': 'conflict_space_in_use'},
+                'Deleted Space In Use': {'name': 'deleted_space_in_use'},
+                'File Installs Retried': {'name': 'file_installs_retried'},
+                'Staging Space In Use': {'name': 'staging_space_in_use'},
             }
         ],
     },
