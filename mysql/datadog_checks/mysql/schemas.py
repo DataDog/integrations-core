@@ -167,9 +167,12 @@ class TableObject(TypedDict):
 class MySqlDatabaseObject(DatabaseObject):
     schemas: list[TableObject]
 
+
 class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
     max_execution_time: int
     max_tables: int
+
+
 class MySqlSchemaCollector(SchemaCollector):
     _check: MySql
     _config: MySqlSchemaCollectorConfig
@@ -259,6 +262,7 @@ class MySqlSchemaCollector(SchemaCollector):
             ;
         """
         return query
+
     def _get_next(self, cursor):
         return cursor.fetchone()
 
