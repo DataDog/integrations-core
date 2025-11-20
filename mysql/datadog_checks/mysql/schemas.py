@@ -109,6 +109,7 @@ GROUP BY
     kcu.constraint_schema,
     kcu.constraint_name,
     kcu.table_name,
+    kcu.table_schema,
     kcu.referenced_table_schema,
     kcu.referenced_table_name,
     rc.update_rule,
@@ -166,21 +167,17 @@ class TableObject(TypedDict):
 class MySqlDatabaseObject(DatabaseObject):
     schemas: list[TableObject]
 
-
+class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
+    max_execution_time: int
+    max_tables: int
 class MySqlSchemaCollector(SchemaCollector):
     _check: MySql
+    _config: MySqlSchemaCollectorConfig
 
     def __init__(self, check: MySql):
-        config = SchemaCollectorConfig()
-        # config.collection_interval = check._config.collect_schemas.collection_interval
-        # config.max_tables = check._config.collect_schemas.max_tables
-        # config.exclude_databases =  check._config.collect_schemas.exclude_databases
-        # config.include_databases =  check._config.collect_schemas.include_databases
-        # config.exclude_schemas =  check._config.collect_schemas.exclude_schemas
-        # config.include_schemas =  check._config.collect_schemas.include_schemas
-        # config.exclude_tables =  check._config.collect_schemas.exclude_tables
-        # config.include_tables =  check._config.collect_schemas.include_tables
-        # config.max_columns =  check._config.collect_schemas.max_columns
+        config = MySqlSchemaCollectorConfig()
+        config.max_execution_time = check._config.schemas_config.get('max_execution_time', 60)
+        config.max_tables = check._config.schemas_config.get('max_tables', 300)
         super().__init__(check, config)
 
     @property
@@ -195,120 +192,73 @@ class MySqlSchemaCollector(SchemaCollector):
     @contextlib.contextmanager
     def _get_cursor(self, database_name):
         with closing(self._check._mysql_metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            schemas_query = SQL_DATABASES
-            tables_query = SQL_TABLES
-            columns_query = SQL_COLUMNS
-            indexes_query = SQL_INDEXES
-            constraints_query = SQL_FOREIGN_KEYS
-            column_columns = """'name', columns.name,
-            'column_type', columns.column_type,
-            'default', columns.default,
-            'nullable', columns.nullable,
-            'ordinal_position', columns.ordinal_position,
-            'column_key', columns.column_key"""
-            index_columns = """'name', indexes.name,
-            'collation', indexes.collation,
-             'cardinality', indexes.cardinality,
-            'index_type', indexes.index_type,
-            'seq_in_index', indexes.seq_in_index,
-            'column_name', indexes.column_name,
-            'sub_part', indexes.sub_part,
-            'packed', indexes.packed,
-            'nullable', indexes.nullable,
-            'non_unique', indexes.non_unique
-             """
-            constraint_columns = """'name', constraints.name,
-            'constraint_schema', constraints.constraint_schema,
-            'table_name', constraints.table_name,
-            'referenced_table_schema', constraints.referenced_table_schema,
-            'referenced_table_name', constraints.referenced_table_name,
-            'referenced_column_names', constraints.referenced_column_names
-            """
-            # partition_ctes = (
-            #     f"""
-            #     ,
-            #     partition_keys AS (
-            #         {PARTITION_KEY_QUERY}
-            #     ),
-            #     num_partitions AS (
-            #         {NUM_PARTITIONS_QUERY}
-            #     )
-            # """
-            #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-            #     else ""
-            # )
-            # partition_joins = (
-            #     """
-            #     LEFT JOIN partition_keys ON tables.table_id = partition_keys.table_id
-            #     LEFT JOIN num_partitions ON tables.table_id = num_partitions.table_id
-            # """
-            #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-            #     else ""
-            # )
-            # parition_selects = (
-            #     """
-            # ,
-            #     partition_keys.partition_key,
-            #     num_partitions.num_partitions
-            # """
-            #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-            #     else ""
-            # )
-            partition_ctes = ""
-            partition_joins = ""
-            partition_selects = ""
-            # limit = int(self._config.max_tables or 1_000_000)
-            limit = 1_000_000
-
-            query = f"""
-                WITH
-                `schemas` AS (
-                    {schemas_query}
-                ),
-                tables AS (
-                    {tables_query}
-                ),
-                schema_tables AS (
-                    SELECT `schemas`.schema_name, `schemas`.default_character_set_name,
-                    `schemas`.default_collation_name,
-                    tables.table_name, tables.engine, tables.row_format, tables.create_time
-                    FROM `schemas`
-                    LEFT JOIN tables ON `schemas`.schema_name = tables.schema_name
-                    ORDER BY tables.table_name
-                    LIMIT {limit}
-                ),
-                columns AS (
-                    {columns_query}
-                ),
-                indexes AS (
-                    {indexes_query}
-                ),
-                constraints AS (
-                    {constraints_query}
-                )
-                {partition_ctes}
-                SELECT * FROM (
-                SELECT schema_tables.schema_name, schema_tables.table_name,
-                    json_arrayagg(json_object({column_columns})) columns,
-                    json_arrayagg(json_object({index_columns})) indexes,
-                    json_arrayagg(json_object({constraint_columns})) foreign_keys
-                    {partition_selects}
-                FROM schema_tables
-                    LEFT JOIN columns ON schema_tables.table_name = columns.table_name and
-                      schema_tables.schema_name = columns.schema_name
-                    LEFT JOIN indexes ON schema_tables.table_name = indexes.table_name and
-                      schema_tables.schema_name = indexes.schema_name
-                    LEFT JOIN constraints ON schema_tables.table_name = constraints.table_name and
-                      schema_tables.schema_name = constraints.schema_name
-                    {partition_joins}
-                GROUP BY schema_tables.schema_name, schema_tables.table_name
-                ) t
-                ;
-            """
-            cursor.execute("SET SESSION MAX_EXECUTION_TIME=60000;")
+            query = self._get_tables_query()
+            max_execution_time = self._config.max_execution_time
+            if self._check.is_mariadb:
+                # MariaDB is in seconds
+                cursor.execute(f"SET SESSION MAX_STATEMENT_TIME={max_execution_time};")
+            else:
+                # MySQL is in milliseconds
+                cursor.execute(f"SET SESSION MAX_EXECUTION_TIME={max_execution_time * 1000};")
             cursor.execute(query)
             yield cursor
 
+    def _get_tables_query(self):
+        schemas_query = SQL_DATABASES
+        tables_query = SQL_TABLES
+        columns_query = SQL_COLUMNS
+        indexes_query = SQL_INDEXES
+        constraints_query = SQL_FOREIGN_KEYS
+        column_columns = """'name', columns.name,
+        'column_type', columns.column_type,
+        'default', columns.default,
+        'nullable', columns.nullable,
+        'ordinal_position', columns.ordinal_position,
+        'column_key', columns.column_key"""
+        index_columns = """'name', indexes.name,
+        'collation', indexes.collation,
+            'cardinality', indexes.cardinality,
+        'index_type', indexes.index_type,
+        'seq_in_index', indexes.seq_in_index,
+        'column_name', indexes.column_name,
+        'sub_part', indexes.sub_part,
+        'packed', indexes.packed,
+        'nullable', indexes.nullable,
+        'non_unique', indexes.non_unique
+            """
+        constraint_columns = """'name', constraints.name,
+        'constraint_schema', constraints.constraint_schema,
+        'table_name', constraints.table_name,
+        'referenced_table_schema', constraints.referenced_table_schema,
+        'referenced_table_name', constraints.referenced_table_name,
+        'referenced_column_names', constraints.referenced_column_names
+        """
+
+        limit = int(self._config.max_tables or 1_000_000)
+
+        query = f"""
+            SELECT schema_tables.schema_name, schema_tables.table_name,
+                json_arrayagg(json_object({column_columns})) columns,
+                json_arrayagg(json_object({index_columns})) indexes,
+                json_arrayagg(json_object({constraint_columns})) foreign_keys
+            FROM (
+                SELECT `schemas`.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
+                tables.table_name, tables.engine, tables.row_format, tables.create_time
+                FROM ({schemas_query}) `schemas`
+                LEFT JOIN ({tables_query}) tables ON `schemas`.schema_name = tables.schema_name
+                ORDER BY tables.table_name
+                LIMIT {limit}
+            ) schema_tables
+                LEFT JOIN ({columns_query}) columns ON schema_tables.table_name = columns.table_name and
+                    schema_tables.schema_name = columns.schema_name
+                LEFT JOIN ({indexes_query}) indexes ON schema_tables.table_name = indexes.table_name and
+                    schema_tables.schema_name = indexes.schema_name
+                LEFT JOIN ({constraints_query}) constraints ON schema_tables.table_name = constraints.table_name and
+                    schema_tables.schema_name = constraints.schema_name
+            GROUP BY schema_tables.schema_name, schema_tables.table_name
+            ;
+        """
+        return query
     def _get_next(self, cursor):
         return cursor.fetchone()
 
