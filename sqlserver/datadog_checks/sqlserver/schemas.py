@@ -144,6 +144,7 @@ SELECT
     FK.update_referential_action_desc AS update_action
 FROM
     sys.foreign_keys AS FK
+WHERE FK.parent_object_id = schema_tables.table_id
 GROUP BY
     FK.name,
     FK.object_id,
@@ -203,9 +204,8 @@ class SQLServerSchemaCollector(SchemaCollector):
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         config.max_tables = check._config.schema_config.get('max_tables', 300)
-        major_version = check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
-        is_2019_or_later = major_version >= 15
-        is_2016_or_earlier = major_version <= 13
+        major_version = int(check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) or 0)
+        self._is_2016_or_earlier = major_version <= 13
         super().__init__(check, config)
 
     @property
@@ -224,46 +224,54 @@ class SQLServerSchemaCollector(SchemaCollector):
         with self._check.connection.open_managed_default_connection():
             with self._check.connection.get_managed_cursor() as cursor:
                 cursor.execute(SWITCH_DB_STATEMENT.format(database_name))
-
-                schemas_query = SCHEMA_QUERY
-                tables_query = TABLES_IN_SCHEMA_QUERY
-                columns_query = COLUMN_QUERY
-                indexes_query = INDEX_QUERY
-                constraints_query = FOREIGN_KEY_QUERY
-                partitions_query = PARTITIONS_QUERY
-
-                limit = int(self._config.max_tables or 1_000_000)
-
-                # Note that we INNER JOIN tables to omit schemas with no tables
-                # This is a simple way to omit the system tables like db_blah
-                query = f"""
-                    WITH
-                    schemas AS (
-                        {schemas_query}
-                    ),
-                    tables AS (
-                        {tables_query}
-                    ),
-                    schema_tables AS (
-                        SELECT TOP {limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
-                        tables.table_id, tables.table_name
-                        FROM schemas
-                        INNER JOIN tables ON schemas.schema_id = tables.schema_id
-                        ORDER BY schemas.schema_name, tables.table_name
-                    )
-
-                    SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
-                        schema_tables.table_name
-                        , json_query(({columns_query} FOR JSON PATH), '$') as columns
-                        , json_query(({indexes_query} FOR JSON PATH), '$') as indexes
-                        , json_query(({constraints_query} FOR JSON PATH), '$') as foreign_keys
-                        , ({partitions_query}) as partition_count
-                    FROM schema_tables
-                    ;
-                """
+                query = self._get_tables_query()
                 # print(query)
                 cursor.execute(query)
                 yield cursor
+
+    def _get_tables_query(self):
+        limit = int(self._config.max_tables or 1_000_000)
+
+        # Note that we INNER JOIN tables to omit schemas with no tables
+        # This is a simple way to omit the system tables like db_blah
+        query = f"""
+            WITH
+            schemas AS (
+                {SCHEMA_QUERY}
+            ),
+            tables AS (
+                {TABLES_IN_SCHEMA_QUERY}
+            ),
+            schema_tables AS (
+                SELECT TOP {limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
+                tables.table_id, tables.table_name
+                FROM schemas
+                INNER JOIN tables ON schemas.schema_id = tables.schema_id
+                ORDER BY schemas.schema_name, tables.table_name
+            )
+        """
+        if self._is_2016_or_earlier:
+            query += f"""
+            SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
+                schema_tables.table_name, schema_tables.table_id                
+            FROM schema_tables
+            ;
+        """
+            return query
+        
+        # For 2017 and later we can get all the data in one query
+        query += f"""
+            SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
+                schema_tables.table_name
+                , json_query(({COLUMN_QUERY} FOR JSON PATH), '$') as columns
+                , json_query(({INDEX_QUERY} FOR JSON PATH), '$') as indexes
+                , json_query(({FOREIGN_KEY_QUERY} FOR JSON PATH), '$') as foreign_keys
+                , ({PARTITIONS_QUERY}) as partition_count
+            FROM schema_tables
+            ;
+        """
+        return query
+
 
     def _get_next(self, cursor):
         return cursor.fetchone_dict()
@@ -273,6 +281,31 @@ class SQLServerSchemaCollector(SchemaCollector):
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
+        if self._is_2016_or_earlier:
+            # We need to fetch the related data for each table
+            # Use a key_prefix to get a separate connection to avoid conflicts with the main connection
+            with self._check.connection.open_managed_default_connection(key_prefix="schemas-pre-2017"):
+                with self._check.connection.get_managed_cursor(key_prefix="schemas-pre-2017") as cursor:
+                    table_id = str(cursor_row.get("table_id"))
+                    columns_query = COLUMN_QUERY.replace("schema_tables.table_id", table_id)
+                    cursor.execute(columns_query)
+                    columns = cursor.fetchall_dict()
+                    indexes_query = INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
+                    cursor.execute(indexes_query)
+                    indexes = cursor.fetchall_dict()
+                    foreign_keys_query = FOREIGN_KEY_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
+                    cursor.execute(foreign_keys_query)
+                    foreign_keys = cursor.fetchall_dict()
+                    partitions_query = PARTITIONS_QUERY.replace("schema_tables.table_id", table_id)
+                    cursor.execute(partitions_query)
+                    partition_row = cursor.fetchone_dict()
+                    partition_count = partition_row.get("partition_count") if partition_row else None
+        else:
+            columns = json.loads(cursor_row.get("columns") or "[]")
+            indexes = json.loads(cursor_row.get("indexes") or "[]")
+            foreign_keys = json.loads(cursor_row.get("foreign_keys") or "[]")
+            partition_count = cursor_row.get("partition_count")
+        
         # Map the cursor row to the expected schema, and strip out None values
         object["schemas"] = [
             {
@@ -285,10 +318,10 @@ class SQLServerSchemaCollector(SchemaCollector):
                         for k, v in {
                             "id": cursor_row.get("table_id"),
                             "name": cursor_row.get("table_name"),
-                            "columns": json.loads(cursor_row.get("columns") or "[]"),
-                            "indexes": json.loads(cursor_row.get("indexes") or "[]"),
-                            "foreign_keys": json.loads(cursor_row.get("foreign_keys") or "[]"),
-                            "partitions": {"partition_count": cursor_row.get("partition_count")},
+                            "columns": columns,
+                            "indexes": indexes,
+                            "foreign_keys": foreign_keys,
+                            "partitions": {"partition_count": partition_count},
                         }.items()
                         if v is not None
                     }

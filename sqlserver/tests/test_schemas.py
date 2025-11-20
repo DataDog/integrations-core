@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
+from datadog_checks.sqlserver.const import STATIC_INFO_MAJOR_VERSION
 
 from . import common
 
@@ -132,6 +133,16 @@ def test_indexes(dbm_instance, integration_check):
 
 def test_collect_schemas(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
+    collector = SQLServerSchemaCollector(check)
+
+    collector.collect_schemas()
+
+
+# Force pre-2017 behavior for testing
+# Note that this test assumes the pre-2017 tables are still present
+def test_collect_schemas_pre_2017(dbm_instance, integration_check):
+    check = integration_check(dbm_instance)
+    check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 13
     collector = SQLServerSchemaCollector(check)
 
     collector.collect_schemas()
