@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 14.0.1 / 2025-11-19
+
+***Fixed***:
+
+* Add a way for integrations to override their integration name used in the metadata file validation ([#21836](https://github.com/DataDog/integrations-core/pull/21836))
+* Upgrade runners to macos-14 due to deprecation of macos-13 ([#21905](https://github.com/DataDog/integrations-core/pull/21905))
+
 ## 14.0.0 / 2025-11-10
 
 ***Changed***:
