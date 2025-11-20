@@ -1,0 +1,49 @@
+# Test configuration for kafka_actions - evolve_schema action
+# This updates a schema in Schema Registry with compatibility check
+
+init_config:
+
+instances:
+  - action: evolve_schema
+    
+    kafka_connect_str: localhost:9092
+    security_protocol: PLAINTEXT
+    
+    evolve_schema:
+      schema_registry_url: http://localhost:8081
+      
+      # Subject to update
+      subject: products-value
+      
+      # Schema type
+      schema_type: AVRO
+      
+      # Enable compatibility checking
+      compatibility_check: true
+      
+      # New schema with additional field (backward compatible)
+      schema: |
+        {
+          "type": "record",
+          "name": "Product",
+          "doc": "Product catalog schema for e-commerce - UPDATED",
+          "metadata": {
+            "owner": "data-platform-team",
+            "team": "backend",
+            "critical": true,
+            "updated_by": "kafka-actions"
+          },
+          "fields": [
+            {"name": "product_id", "type": "string"},
+            {"name": "name", "type": "string"},
+            {"name": "price", "type": "double"},
+            {"name": "category", "type": "string"},
+            {"name": "updated_at", "type": "long", "default": 0}
+          ]
+        }
+    
+    tags:
+      - env:test
+      - integration:kafka_actions
+      - action:schema_evolution
+

@@ -1,0 +1,165 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+instances:
+
+    ## @param action - string - required
+    ## The action to perform. This check runs once per execution.
+    ## Available actions:
+    ##   - retrieve_messages: Retrieve and filter messages from topics, emit as events
+    ##   - produce_message: Produce a message to a topic
+    ##   - manage_topic: Create, update, or delete topics
+    ##   - rebalance_partitions: Trigger partition rebalancing
+    #
+  - action: retrieve_messages
+
+    ## @param kafka_connect_str - string - required
+    ## Kafka bootstrap servers connection string
+    #
+    kafka_connect_str: localhost:9092
+
+    ## @param security_protocol - string - optional - default: PLAINTEXT
+    ## Protocol used to communicate with brokers
+    ## Valid values: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+    #
+    # security_protocol: PLAINTEXT
+
+    ## @param sasl_mechanism - string - optional
+    ## SASL mechanism for authentication
+    ## Valid values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+    #
+    # sasl_mechanism: PLAIN
+
+    ## @param sasl_plain_username - string - optional
+    ## Username for SASL PLAIN authentication
+    #
+    # sasl_plain_username: <USERNAME>
+
+    ## @param sasl_plain_password - string - optional
+    ## Password for SASL PLAIN authentication
+    #
+    # sasl_plain_password: <PASSWORD>
+
+    ## ========================================================================
+    ## retrieve_messages action configuration
+    ## ========================================================================
+    ## This action retrieves messages from Kafka topics with jq-style filtering
+    ## and emits them as Datadog events.
+    #
+    retrieve_messages:
+      topic: orders
+      partition: -1  # -1 for all partitions
+      start_offset: -2  # -2 for earliest, -1 for latest
+      max_messages_scan: 1000  # Maximum messages to scan
+      max_messages_send: 100   # Maximum matching messages to emit as events
+      timeout_ms: 30000
+      
+      ## @param filters - list of objects - optional
+      ## jq-style filters to apply to messages
+      ## Each filter can match on key, value fields, timestamp, or offset
+      #
+      filters:
+        - field: value.status
+          operator: eq
+          value: "failed"
+        - field: value.amount
+          operator: gt
+          value: "1000"
+        - field: timestamp
+          operator: gte
+          value: "1699999999000"
+
+    ## ========================================================================
+    ## produce_message action configuration
+    ## ========================================================================
+    ## Example configuration (comment out retrieve_messages and uncomment this)
+    #
+    # produce_message:
+    #   topic: test-topic
+    #   value: '{"order_id": "12345", "status": "pending"}'
+    #   key: "12345"
+    #   partition: -1  # -1 for automatic partitioning
+    #   headers:
+    #     source: datadog-agent
+    #     timestamp: "2024-01-01T00:00:00Z"
+
+    ## ========================================================================
+    ## manage_topic action configuration
+    ## ========================================================================
+    ## Example configuration for creating a topic
+    #
+    # manage_topic:
+    #   operation: create  # create, update, or delete
+    #   topic: new-topic
+    #   num_partitions: 3
+    #   replication_factor: 1
+    #   configs:
+    #     retention.ms: "86400000"  # 1 day
+    #     compression.type: "snappy"
+    #     cleanup.policy: "delete"
+
+    ## Example for updating topic configuration
+    #
+    # manage_topic:
+    #   operation: update
+    #   topic: existing-topic
+    #   configs:
+    #     retention.ms: "604800000"  # 7 days
+    #     max.message.bytes: "2000000"
+
+    ## Example for deleting a topic
+    #
+    # manage_topic:
+    #   operation: delete
+    #   topic: old-topic
+
+    ## ========================================================================
+    ## rebalance_partitions action configuration
+    ## ========================================================================
+    ## Example configuration for partition rebalancing
+    ## Note: Full rebalancing requires external tools (kafka-reassign-partitions)
+    #
+    # rebalance_partitions:
+    #   topics:
+    #     - orders
+    #     - payments
+    #   brokers:
+    #     - 1
+    #     - 2
+    #     - 3
+    #   strategy: uniform  # uniform, rack-aware, or custom
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    #
+    # tags:
+    #   - env:production
+    #   - service:kafka
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    #
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

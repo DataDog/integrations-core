@@ -1,0 +1,346 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""Kafka client wrapper for kafka_actions check."""
+
+from typing import Any
+
+from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
+from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, ResourceType
+
+
+class KafkaActionsClient:
+    """Kafka client for performing actions on Kafka clusters."""
+
+    def __init__(self, config: dict[str, Any], log):
+        """Initialize Kafka client with configuration.
+
+        Args:
+            config: Kafka configuration dictionary
+            log: Logger instance
+        """
+        self.config = config
+        self.log = log
+        self.consumer = None
+        self.producer = None
+        self.admin_client = None
+
+    def _get_kafka_config(self) -> dict[str, str]:
+        """Build Kafka configuration from check config."""
+        kafka_config = {
+            'bootstrap.servers': self.config.get('kafka_connect_str', 'localhost:9092'),
+            'security.protocol': self.config.get('security_protocol', 'PLAINTEXT'),
+        }
+
+        # Add SASL configuration if present
+        if self.config.get('sasl_mechanism'):
+            kafka_config['sasl.mechanism'] = self.config['sasl_mechanism']
+        if self.config.get('sasl_plain_username'):
+            kafka_config['sasl.username'] = self.config['sasl_plain_username']
+        if self.config.get('sasl_plain_password'):
+            kafka_config['sasl.password'] = self.config['sasl_plain_password']
+
+        return kafka_config
+
+    def get_consumer(self, group_id: str = 'kafka_actions') -> Consumer:
+        """Get or create Kafka consumer.
+
+        Args:
+            group_id: Consumer group ID
+
+        Returns:
+            Kafka Consumer instance
+        """
+        if self.consumer is None:
+            config = self._get_kafka_config()
+            config.update(
+                {
+                    'group.id': group_id,
+                    'auto.offset.reset': 'earliest',
+                    'enable.auto.commit': False,
+                }
+            )
+            self.consumer = Consumer(config)
+            self.log.debug("Created Kafka consumer with group_id: %s", group_id)
+        return self.consumer
+
+    def get_producer(self) -> Producer:
+        """Get or create Kafka producer.
+
+        Returns:
+            Kafka Producer instance
+        """
+        if self.producer is None:
+            config = self._get_kafka_config()
+            self.producer = Producer(config)
+            self.log.debug("Created Kafka producer")
+        return self.producer
+
+    def get_admin_client(self) -> AdminClient:
+        """Get or create Kafka admin client.
+
+        Returns:
+            Kafka AdminClient instance
+        """
+        if self.admin_client is None:
+            config = self._get_kafka_config()
+            self.admin_client = AdminClient(config)
+            self.log.debug("Created Kafka admin client")
+        return self.admin_client
+
+    def consume_messages(
+        self,
+        topic: str,
+        partition: int = -1,
+        start_offset: int = -2,
+        max_messages: int = 1000,
+        timeout_ms: int = 30000,
+    ) -> list[Any]:
+        """Consume messages from a Kafka topic.
+
+        Args:
+            topic: Topic name
+            partition: Partition number (-1 for all partitions)
+            start_offset: Starting offset (-1 for latest, -2 for earliest)
+            max_messages: Maximum messages to consume
+            timeout_ms: Consumption timeout in milliseconds
+
+        Returns:
+            List of consumed messages
+        """
+        consumer = self.get_consumer()
+        messages = []
+
+        try:
+            # Assign topic partitions
+            if partition == -1:
+                # Get all partitions
+                metadata = consumer.list_topics(topic, timeout=10)
+                if topic not in metadata.topics:
+                    raise ValueError(f"Topic '{topic}' not found")
+
+                partitions = [TopicPartition(topic, p, start_offset) for p in metadata.topics[topic].partitions.keys()]
+            else:
+                partitions = [TopicPartition(topic, partition, start_offset)]
+
+            self.log.debug("Assigning partitions: %s", partitions)
+            consumer.assign(partitions)
+
+            # Consume messages
+            timeout_s = timeout_ms / 1000.0
+            consumed = 0
+
+            while consumed < max_messages:
+                msg = consumer.poll(timeout=timeout_s)
+
+                if msg is None:
+                    self.log.debug("No more messages available (timeout)")
+                    break
+
+                if msg.error():
+                    if msg.error().code() == KafkaException._PARTITION_EOF:
+                        self.log.debug("Reached end of partition")
+                        break
+                    else:
+                        raise KafkaException(msg.error())
+
+                messages.append(msg)
+                consumed += 1
+
+            self.log.info("Consumed %d messages from topic %s", len(messages), topic)
+            return messages
+
+        finally:
+            if consumer:
+                consumer.close()
+                self.consumer = None
+
+    def produce_message(
+        self,
+        topic: str,
+        value: str | bytes,
+        key: str | bytes | None = None,
+        partition: int = -1,
+        headers: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
+        """Produce a message to a Kafka topic.
+
+        Args:
+            topic: Topic name
+            value: Message value
+            key: Message key (optional)
+            partition: Target partition (-1 for automatic)
+            headers: Message headers (optional)
+
+        Returns:
+            Dict with production metadata
+        """
+        producer = self.get_producer()
+
+        # Convert string to bytes if needed
+        if isinstance(value, str):
+            value = value.encode('utf-8')
+        if isinstance(key, str):
+            # Empty string should be treated as None (null key)
+            key = key.encode('utf-8') if key else None
+
+        # Convert headers to list of tuples
+        kafka_headers = None
+        if headers:
+            kafka_headers = [(k, v.encode('utf-8') if isinstance(v, str) else v) for k, v in headers.items()]
+
+        # Delivery callback
+        result = {'delivered': False, 'error': None, 'partition': None, 'offset': None}
+
+        def delivery_callback(err, msg):
+            if err:
+                result['error'] = str(err)
+                self.log.error("Message delivery failed: %s", err)
+            else:
+                result['delivered'] = True
+                result['partition'] = msg.partition()
+                result['offset'] = msg.offset()
+                self.log.debug(
+                    "Message delivered to %s [%d] at offset %d",
+                    msg.topic(),
+                    msg.partition(),
+                    msg.offset(),
+                )
+
+        # Produce message
+        try:
+            # Ensure partition is None for automatic assignment
+            partition_arg = None if partition is None or partition == -1 else int(partition)
+            
+            self.log.info(
+                "Calling producer.produce with: topic=%s, key=%s, value_len=%d, partition=%s, headers=%s",
+                topic,
+                key,
+                len(value) if value else 0,
+                partition_arg,
+                kafka_headers,
+            )
+            
+            # Build produce kwargs, omitting None values
+            produce_kwargs = {
+                'topic': topic,
+                'value': value,
+                'callback': delivery_callback,
+            }
+            if key is not None:
+                produce_kwargs['key'] = key
+            if partition_arg is not None:
+                produce_kwargs['partition'] = partition_arg
+            if kafka_headers is not None:
+                produce_kwargs['headers'] = kafka_headers
+            
+            producer.produce(**produce_kwargs)
+            producer.flush()
+
+            return result
+
+        except Exception as e:
+            self.log.error("Failed to produce message: %s", e)
+            result['error'] = str(e)
+            return result
+
+    def create_topic(
+        self,
+        topic: str,
+        num_partitions: int = 1,
+        replication_factor: int = 1,
+        configs: dict[str, str] | None = None,
+    ) -> bool:
+        """Create a new Kafka topic.
+
+        Args:
+            topic: Topic name
+            num_partitions: Number of partitions
+            replication_factor: Replication factor
+            configs: Topic configurations
+
+        Returns:
+            True if successful
+        """
+        admin = self.get_admin_client()
+
+        new_topic = NewTopic(
+            topic,
+            num_partitions=num_partitions,
+            replication_factor=replication_factor,
+            config=configs or {},
+        )
+
+        futures = admin.create_topics([new_topic])
+
+        # Wait for creation
+        for topic_name, future in futures.items():
+            try:
+                future.result()
+                self.log.info("Topic '%s' created successfully", topic_name)
+                return True
+            except Exception as e:
+                self.log.error("Failed to create topic '%s': %s", topic_name, e)
+                raise
+
+    def delete_topic(self, topic: str) -> bool:
+        """Delete a Kafka topic.
+
+        Args:
+            topic: Topic name
+
+        Returns:
+            True if successful
+        """
+        admin = self.get_admin_client()
+
+        futures = admin.delete_topics([topic])
+
+        for topic_name, future in futures.items():
+            try:
+                future.result()
+                self.log.info("Topic '%s' deleted successfully", topic_name)
+                return True
+            except Exception as e:
+                self.log.error("Failed to delete topic '%s': %s", topic_name, e)
+                raise
+
+    def update_topic_config(self, topic: str, configs: dict[str, str]) -> bool:
+        """Update topic configuration.
+
+        Args:
+            topic: Topic name
+            configs: Configuration key-value pairs to update
+
+        Returns:
+            True if successful
+        """
+        admin = self.get_admin_client()
+
+        # Create config resource
+        resource = ConfigResource(ResourceType.TOPIC, topic)
+        for key, value in configs.items():
+            resource.set_config(key, value)
+
+        futures = admin.alter_configs([resource])
+
+        for _res, future in futures.items():
+            try:
+                future.result()
+                self.log.info("Topic '%s' configuration updated", topic)
+                return True
+            except Exception as e:
+                self.log.error("Failed to update topic '%s' config: %s", topic, e)
+                raise
+
+    def close(self):
+        """Close all Kafka clients."""
+        if self.consumer:
+            self.consumer.close()
+            self.consumer = None
+        if self.producer:
+            self.producer.flush()
+            self.producer = None
+        # Admin client doesn't need explicit closing
+        self.admin_client = None
+        self.log.debug("Kafka clients closed")
