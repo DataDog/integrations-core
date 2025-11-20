@@ -20,7 +20,7 @@ def read_last_run():
         with open(CACHE_FILE, "r") as f:
             data = json.load(f)
             return Version(data["version"]), datetime.fromisoformat(data["date"])
-    except (FileNotFoundError, json.JSONDecodeError, KeyError, InvalidVersion):
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, InvalidVersion, ValueError):
         return None, None
 
 
