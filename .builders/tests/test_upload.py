@@ -274,7 +274,7 @@ def test_upload_built_existing_different_sha_does_upload_multiple_existing_build
         'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': new_hash,
     })
 
-    targets = upload.upload(targets_dir)
+    upload.upload(targets_dir)
 
     uploads = {str(Path(f).name) for f in uploads}
 

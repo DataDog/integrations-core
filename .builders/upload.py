@@ -156,9 +156,6 @@ def upload(targets_dir):
 
                     sha256_digest = hash_file(wheel)
                     index_url = f'{STORAGE_URL}/{artifact_type}/{project_name}'
-                    already_uploaded = False
-                    dep_entry = ""
-
                     if artifact_type == 'external':
                         artifact_name = wheel.name
                         # https://agent-int-packages.datadoghq.com/external/cffi/cffi-1.17.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
@@ -168,10 +165,10 @@ def upload(targets_dir):
                         # PyPI artifacts never change, so we don't need to upload them again.
                         if artifact.exists():
                             print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists')
-                            already_uploaded = True
-                            dep_entry = f'{project_name} @ {artifact.name}'
+                            lockfile_lines.append(f'{project_name} @ {artifact.name}')
+                            continue
                         else:
-                            dep_entry = f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}'
+                            lockfile_lines.append(f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}')
 
                     else:
                         # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
@@ -187,26 +184,23 @@ def upload(targets_dir):
                             if most_recent_wheel.metadata['sha256'] == sha256_digest:
                                 print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists '
                                     'with the same hash')
-                                already_uploaded = True
+                                lockfile_lines.append(f'{project_name} @ {most_recent_wheel.name}')
+                                continue
 
-                        if already_uploaded:
-                            dep_entry = f'{project_name} @ {most_recent_wheel.name}'
-                        else:
-                            build_number = timestamp_build_number()
-                            artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
-                            artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
+                        # If we get here, that means that this is a new dependency
+                        # and we need to upload the wheel for built artifacts
+                        build_number = timestamp_build_number()
+                        artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
+                        artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
+                        lockfile_lines.append(f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}')
 
-                            dep_entry = f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}'
-
-                    if not already_uploaded:
-                        print(f'{padding}Artifact: {artifact_name}')
-                        artifact.upload_from_filename(str(wheel))
-
-                        requires_python = project_metadata.get('Requires-Python', '').replace('<', '&lt;').replace('>', '&gt;') # noqa: 501
-
-                        artifact.metadata = {'requires-python': requires_python, 'sha256': sha256_digest}
-                        artifact.patch()
-                    lockfile_lines.append(dep_entry)
+                    # For built OR external artifacts
+                    # only get here if we need to upload the wheel
+                    print(f'{padding}Artifact: {artifact_name}')
+                    artifact.upload_from_filename(str(wheel))
+                    requires_python = project_metadata.get('Requires-Python', '').replace('<', '&lt;').replace('>', '&gt;') # noqa: 501
+                    artifact.metadata = {'requires-python': requires_python, 'sha256': sha256_digest}
+                    artifact.patch()
 
             lockfile_lines.append('')
             lockfiles[target.name] = lockfile_lines
