@@ -26,7 +26,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(IbmSpectrumLsfCheck, self).__init__(name, init_config, instances)
         self.client: LSFClient = LSFClient(self.log)
-        self.processors: list[LSFMetricsProcessor] = None
+        self.processors: list[LSFMetricsProcessor] = []
         cluster_name = self.instance.get("cluster_name")
         self.tags: list[str] = self.instance.get("tags", []) + [f"lsf_cluster_name:{cluster_name}"]
         self.check_initializations.append(self.initialize_processors)
