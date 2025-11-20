@@ -32,7 +32,7 @@ def test_check(mock_client, dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
 
 
 def test_check_tags(mock_client, dd_run_check, aggregator, instance):
@@ -105,7 +105,7 @@ def test_bjobs_no_output(mock_client, dd_run_check, aggregator, instance, caplog
         if metric not in BJOBS_METRICS:
             aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
 
-    assert "Skipping bjobs metrics; unexpected return value: 1, expected 12" in caplog.text
+    assert "Skipping bjobs metrics; unexpected cli command output. Number of columns: 1, expected: 12" in caplog.text
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

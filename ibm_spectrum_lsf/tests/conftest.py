@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -10,9 +10,9 @@ from datadog_checks.ibm_spectrum_lsf.client import LSFClient
 
 
 def get_mock_output(method):
-    fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', f"{method}.txt")
+    fixture_path = Path(__file__).parent / 'fixtures' / f'{method}.txt'
     with open(fixture_path, 'r') as f:
-        return f.read().strip(), None, 0
+        return f.read().strip(), "", 0
 
 
 @pytest.fixture

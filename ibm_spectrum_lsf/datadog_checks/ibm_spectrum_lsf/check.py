@@ -14,6 +14,7 @@ from .processors import (
     GPUHostsProcessor,
     GPULoadProcessor,
     LsClustersProcessor,
+    LSFMetricsProcessor,
     LSHostsProcessor,
     LsLoadProcessor,
 )
@@ -24,17 +25,11 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(IbmSpectrumLsfCheck, self).__init__(name, init_config, instances)
-        self.client = LSFClient(self.log)
-        self.processors = None
-        self.check_initializations.append(self.parse_config)
+        self.client: LSFClient = LSFClient(self.log)
+        self.processors: list[LSFMetricsProcessor] = None
+        cluster_name = self.instance.get("cluster_name")
+        self.tags: list[str] = self.instance.get("tags", []) + [f"lsf_cluster_name:{cluster_name}"]
         self.check_initializations.append(self.initialize_processors)
-
-    def parse_config(self):
-        self.tags = []
-        self.log.warning(self.config.tags)
-        if self.config.tags:
-            self.tags.extend(self.config.tags)
-        self.tags.append(f"lsf_cluster_name:{self.config.cluster_name}")
 
     def initialize_processors(self):
         self.processors = [

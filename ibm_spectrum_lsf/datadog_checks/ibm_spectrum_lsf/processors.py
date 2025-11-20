@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
-from datadog_checks.base.log import AgentLogger
+from datadog_checks.base.log import CheckLoggingAdapter
 
 from .client import LSFClient
 from .common import (
@@ -34,28 +34,23 @@ class LSFMetric:
 @dataclass
 class LSFTagMapping:
     name: str
-    id: int
-    transform: Callable[[str], Optional[str]]
+    position: int
+    transform: Callable[[str], str | None]
 
 
 @dataclass
 class LSFMetricMapping:
     name: str
-    id: int
+    position: int
     transform: Callable[[str], float]
 
 
 def process_table_tags(tag_mapping: list[LSFTagMapping], line_data: list[str]) -> list[str]:
     tags = []
     for tag in tag_mapping:
-        val = line_data[tag.id]
-        transformer = tag.transform
-        transformed_val = transformer(val)
-        if transformed_val is None:
-            continue
-        key = tag.name
-        tags.append(f"{key}:{transformed_val}")
-
+        transformed_val = tag.transform(line_data[tag.position])
+        if transformed_val is not None:
+            tags.append(f"{tag.name}:{transformed_val}")
     return tags
 
 
@@ -64,7 +59,7 @@ def process_table_metrics(
 ) -> list[LSFMetric]:
     metrics = []
     for metric in metric_mapping:
-        val = line_data[metric.id]
+        val = line_data[metric.position]
         transformer = metric.transform
         transformed_val = transformer(val)
 
@@ -77,37 +72,35 @@ class LSFMetricsProcessor(ABC):
     name: str
     prefix: str
     expected_columns: int
-    delimiter: Optional[str]
+    delimiter: str | None
 
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         self.client = client
         self.delimiter = '|'
         self.log = logger
         self.base_tags = base_tags
 
     @abstractmethod
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         pass
 
     def parse_table_command(
         self, metric_mapping: list[LSFMetricMapping], tag_mapping: list[LSFTagMapping]
     ) -> list[LSFMetric]:
         output, err, exit_code = self.run_lsf_command()
-        if exit_code != 0 or output is None:
+        if exit_code != 0:
             self.log.error("Failed to get %s output: %s", self.name, err)
             return []
 
-        output_lines = output.strip().split('\n')
+        output_lines = output.strip().splitlines()
         headers = output_lines.pop(0)
         if len(headers.split(self.delimiter)) != self.expected_columns:
-            (
-                self.log.warning(
-                    "Skipping %s metrics; unexpected return value: %s, expected %s. Headers %s",
-                    self.name,
-                    len(headers.split(self.delimiter)),
-                    self.expected_columns,
-                    headers,
-                ),
+            self.log.warning(
+                "Skipping %s metrics; unexpected cli command output. Number of columns: %s, expected: %s, headers: %s",
+                self.name,
+                len(headers.split(self.delimiter)),
+                self.expected_columns,
+                headers,
             )
             return []
 
@@ -135,14 +128,14 @@ class LSFMetricsProcessor(ABC):
 
 
 class LsClustersProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.delimiter = None
         self.name = 'lsclusters'
         self.expected_columns = 6
         self.prefix = 'cluster'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.lsclusters()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -160,14 +153,14 @@ class LsClustersProcessor(LSFMetricsProcessor):
 
 
 class BHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.delimiter = '|'
         self.name = 'bhosts'
         self.expected_columns = 9
         self.prefix = 'server'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.bhosts()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -187,14 +180,14 @@ class BHostsProcessor(LSFMetricsProcessor):
 
 
 class LSHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.delimiter = '|'
         self.name = 'lshosts'
         self.expected_columns = 12
         self.prefix = 'host'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.lshosts()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -219,14 +212,14 @@ class LSHostsProcessor(LSFMetricsProcessor):
 
 
 class LsLoadProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.delimiter = '|'
         self.name = 'lsload'
         self.expected_columns = 13
         self.prefix = 'load'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.lsload()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -250,14 +243,14 @@ class LsLoadProcessor(LSFMetricsProcessor):
 
 
 class BSlotsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.delimiter = None
         self.name = 'bslots'
         self.expected_columns = 2
         self.prefix = 'slots'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.bslots()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -271,14 +264,14 @@ class BSlotsProcessor(LSFMetricsProcessor):
 
 
 class BQueuesProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.delimiter = '|'
         self.name = 'bqueues'
         self.expected_columns = 11
         self.prefix = 'queue'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.bqueues()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -301,14 +294,14 @@ class BQueuesProcessor(LSFMetricsProcessor):
 
 
 class BJobsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.delimiter = '|'
         self.name = 'bjobs'
         self.expected_columns = 12
         self.prefix = 'job'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.bjobs()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -335,14 +328,14 @@ class BJobsProcessor(LSFMetricsProcessor):
 
 
 class GPULoadProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.name = 'lsload gpu'
         self.expected_columns = 14
         self.delimiter = None
         self.prefix = 'gpu'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.gpuload()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -368,14 +361,14 @@ class GPULoadProcessor(LSFMetricsProcessor):
 
 
 class GPUHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
         self.name = 'bhosts gpu'
         self.expected_columns = 8
         self.delimiter = '|'
         self.prefix = 'server.gpu'
 
-    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+    def run_lsf_command(self) -> tuple[str, str, int]:
         return self.client.bhosts_gpu()
 
     def process_metrics(self) -> list[LSFMetric]:

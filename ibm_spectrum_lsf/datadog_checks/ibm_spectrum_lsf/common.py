@@ -2,7 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from typing import Optional
+
+FLOAT_PATTERN = re.compile(r"\D+$")
 
 
 def is_affirmative(val: str) -> bool:
@@ -10,45 +11,34 @@ def is_affirmative(val: str) -> bool:
 
 
 def transform_status(status: str) -> int:
-    return int(status == "ok")
+    return 1 if status.lower() == "ok" else 0
 
 
 def transform_float(val: str) -> float:
-    val = val.strip()
-    if val == "-":
-        return -1
-    else:
-        # Remove units from end of strings
-        # sometimes there are trailing Ls to represent a limit reached
-        # ie: 22.00% L
-        float_val = re.sub(r'\D+$', '', val)
-        return float(float_val)
+    # Remove units from end of strings
+    # sometimes there are trailing Ls to represent a limit reached
+    # ie: 22.00% L
+    # If the value passed is "-", return -1
+    return -1 if val.strip() == "-" else float(FLOAT_PATTERN.sub('', val))
 
 
 def transform_runtime(val: str) -> float:
-    if val == "UNLIMITED":
-        return -1
-    else:
-        return transform_float(val)
+    return -1 if val.strip() == "UNLIMITED" else transform_float(val)
 
 
 def transform_active(val: str) -> bool:
-    _, active = val.split(":")
-    return active.lower() == "active"
+    return val.split(":")[-1].lower() == "active"
 
 
 def transform_open(val: str) -> bool:
-    is_open, _ = val.split(":")
-    return is_open.lower() == "open"
+    return val.split(":")[0].lower() == "open"
 
 
 def transform_job_id(val: str) -> str:
-    parts = val.split("[")
-    job_id = parts[0]
-    return job_id
+    return val.split("[")[0]
 
 
-def transform_task_id(val: str) -> Optional[str]:
+def transform_task_id(val: str) -> str | None:
     parts = val.split("[")
     if len(parts) > 1:
         second_part = parts[1].split("]")
@@ -57,7 +47,7 @@ def transform_task_id(val: str) -> Optional[str]:
     return None
 
 
-def transform_tag(val: str) -> Optional[str]:
+def transform_tag(val: str) -> str | None:
     parsed = val.strip()
     if parsed == '-':
         return None
