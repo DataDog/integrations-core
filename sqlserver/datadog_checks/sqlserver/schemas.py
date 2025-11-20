@@ -169,7 +169,7 @@ class SQLServerSchemaCollector(SchemaCollector):
             # Use a key_prefix to get a separate connection to avoid conflicts with the main connection
             with self._check.connection.open_managed_default_connection(key_prefix="schemas-pre-2017"):
                 with self._check.connection.get_managed_cursor(key_prefix="schemas-pre-2017") as cursor:
-                    cursor.execute(SWITCH_DB_STATEMENT.format(database.name))
+                    cursor.execute(SWITCH_DB_STATEMENT.format(database.get("name")))
                     table_id = str(cursor_row.get("table_id"))
                     columns_query = COLUMN_QUERY.replace("schema_tables.table_id", table_id)
                     cursor.execute(columns_query)
