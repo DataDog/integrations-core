@@ -153,18 +153,6 @@ class DatabaseObject(TypedDict):
     owner: str
 
 
-class TableObject(TypedDict):
-    id: str
-    name: str
-    columns: list
-    indexes: list
-    foreign_keys: list
-
-
-class MySqlDatabaseObject(DatabaseObject):
-    schemas: list[TableObject]
-
-
 class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
     max_execution_time: int
     max_tables: int

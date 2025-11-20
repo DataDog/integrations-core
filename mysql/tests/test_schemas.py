@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from typing import Callable, Optional
 
 import pytest
@@ -11,6 +12,9 @@ from datadog_checks.mysql.schemas import MySqlSchemaCollector
 from . import common
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+
+
+MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 
 
 @pytest.fixture
@@ -33,6 +37,7 @@ def integration_check() -> Callable[[dict, Optional[dict]], MySql]:
     def _check(instance: dict, init_config: dict = None):
         nonlocal checks
         c = MySql(common.CHECK_NAME, init_config or {}, [instance])
+        c.is_mariadb = MYSQL_FLAVOR.lower() == 'mariadb'
         checks.append(c)
         return c
 
