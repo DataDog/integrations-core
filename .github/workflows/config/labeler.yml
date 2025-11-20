@@ -257,6 +257,8 @@ integration/forcepoint_secure_web_gateway:
 - forcepoint_secure_web_gateway/**/*
 integration/forcepoint_security_service_edge:
 - forcepoint_security_service_edge/**/*
+integration/forescout:
+- forescout/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/freshservice:
@@ -283,6 +285,8 @@ integration/gpu:
 - gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
+integration/guarddog:
+- guarddog/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:

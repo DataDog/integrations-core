@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.2.1 / 2025-11-19
+
+***Fixed***:
+
+* Fix device discovery for older versions of Lustre (<2.15.5) ([#21901](https://github.com/DataDog/integrations-core/pull/21901))
+
 ## 1.2.0 / 2025-10-31
 
 ***Security***:
