@@ -20,7 +20,7 @@ def instance_database_autodiscovery():
         global_view_db="postgres",
         max_databases=100,
         include=[".*"],
-        exclude=["cloudsqladmin"],
+        exclude=["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"],
         refresh=600,
     )
 
