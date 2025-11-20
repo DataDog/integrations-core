@@ -310,13 +310,13 @@ class SQLServerSchemaCollector(SchemaCollector):
         object["schemas"] = [
             {
                 "name": cursor_row.get("schema_name"),
-                "id": cursor_row.get("schema_id"),
+                "id": str(cursor_row.get("schema_id")), # Backend expects a string
                 "owner_name": cursor_row.get("owner_name"),
                 "tables": [
                     {
                         k: v
                         for k, v in {
-                            "id": cursor_row.get("table_id"),
+                            "id": str(cursor_row.get("table_id")), # Backend expects a string
                             "name": cursor_row.get("table_name"),
                             "columns": columns,
                             "indexes": indexes,
