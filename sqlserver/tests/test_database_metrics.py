@@ -13,8 +13,8 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
-    STATIC_INFO_YEAR,
     STATIC_INFO_SERVERNAME,
+    STATIC_INFO_YEAR,
 )
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,

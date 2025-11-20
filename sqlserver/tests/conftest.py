@@ -288,7 +288,6 @@ def pytest_addoption(parser):
     )
 
 
-
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "run_high_cardinality_forever: mark a test to run high cardinality queries forever"
@@ -348,5 +347,3 @@ def dd_environment(full_e2e_config):
         compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3, capture=False
     ):
         yield full_e2e_config, E2E_METADATA
-
-

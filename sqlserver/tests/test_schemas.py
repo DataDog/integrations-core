@@ -59,7 +59,7 @@ def test_get_cursor(dbm_instance, integration_check):
             schemas.append(row['schema_name'])
 
         assert set(schemas) == {
-            'test_schema',            
+            'test_schema',
         }
 
 
