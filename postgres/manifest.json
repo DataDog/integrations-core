@@ -74,7 +74,8 @@
       "process_signatures": [
         "postgres -D",
         "pg_ctl start -l logfile",
-        "postgres -c 'pg_ctl start -D -l"
+        "postgres -c 'pg_ctl start -D -l",
+        "postgres.exe"
       ],
       "source_type_id": 28,
       "auto_install": true

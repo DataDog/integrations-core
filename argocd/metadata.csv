@@ -49,6 +49,7 @@ argocd.app_controller.app.reconcile.bucket,count,,,,Application reconciliation p
 argocd.app_controller.app.reconcile.count,count,,,,The count aggregation of the application reconciliation performance histogram,0,argocd,app_controller app reconcile count,,
 argocd.app_controller.app.reconcile.sum,count,,,,The sum aggregation of the application reconciliation performance histogram,0,argocd,app_controller app reconcile sum,,
 argocd.app_controller.app.sync.count,count,,,,The total number of application syncs,0,argocd,app_controller app sync,,
+argocd.app_controller.app.sync.duration.seconds.count,count,,second,,Application sync performance in seconds,0,argocd,app_controller app sync duration seconds,,
 argocd.app_controller.cluster.api.resource_objects,gauge,,object,,The number of Kubernetes resource objects in the cache,0,argocd,app_controller cluster api resource_objects,,
 argocd.app_controller.cluster.api.resources,gauge,,resource,,The number of monitored kubernetes API resources.,0,argocd,app_controller cluster api resources,,
 argocd.app_controller.cluster.cache.age.seconds,gauge,,second,,The age of the cluster cache in seconds,0,argocd,app_controller cluster cache age seconds,,

@@ -15,8 +15,9 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 import pymysql
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -28,11 +29,12 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
+from datadog_checks.mysql.health import MySqlHealth
 
 from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
-from .config import MySQLConfig
+from .config import MySQLConfig, sanitize
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -95,12 +97,12 @@ except ImportError:
     PSUTIL_AVAILABLE = False
 
 try:
-    import datadog_agent
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
-class MySql(AgentCheck):
+class MySql(DatabaseCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
@@ -110,6 +112,7 @@ class MySql(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
+        self.health = MySqlHealth(self)
         self.qcache_stats = {}
         self.version = None
         self.is_mariadb = None
@@ -122,11 +125,12 @@ class MySql(AgentCheck):
         self._events_wait_current_enabled = None
         self._group_replication_active = None
         self._replication_role = None
+        self._initialized_at = int(time.time() * 1000)
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
         self.add_core_tags()
-        self.cloud_metadata = self._config.cloud_metadata
+        self._cloud_metadata = self._config.cloud_metadata
 
         # Create a new connection on every check run
         self._conn = None
@@ -167,6 +171,21 @@ class MySql(AgentCheck):
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
 
+        self._submit_initialization_health_event()
+
+    def _submit_initialization_health_event(self):
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            # TODO: validate the config once it is refactored similar to Postgres, and then send the computed config
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.OK,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={"initialized_at": self._initialized_at, "instance": sanitize(self.instance)},
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
+
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
             cursor.execute(query)
@@ -178,6 +197,10 @@ class MySql(AgentCheck):
         self.set_metadata('version', self.version.version + '+' + self.version.build)
         self.set_metadata('flavor', self.version.flavor)
         self.set_metadata('resolved_hostname', self.resolved_hostname)
+
+    @property
+    def tags(self):
+        return self.tag_manager.get_tags()
 
     @property
     def reported_hostname(self):
@@ -195,6 +218,10 @@ class MySql(AgentCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
 
     @property
     def database_identifier(self):
@@ -352,6 +379,8 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        self._submit_initialization_health_event()
+
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
 

@@ -1,5 +1,8 @@
 # Use the official JDK 19 image as the base image for the build stage
-FROM openjdk:19-jdk AS build
+FROM amazoncorretto:19-al2-jdk AS build
+
+# Install curl for Maven wrapper downloads (fallback if maven-wrapper.jar is missing)
+RUN yum install -y curl && yum clean all
 
 # Enable preview features
 ENV JAVA_OPTS="--enable-preview"
@@ -33,7 +36,7 @@ RUN ./mvnw package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -B -V
 
 
 # Use the official JDK 19 image as the base image for the runtime stage
-FROM openjdk:19-jdk AS runtime
+FROM amazoncorretto:19-al2-jdk AS runtime
 
 # Enable preview features
 ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager --enable-preview"

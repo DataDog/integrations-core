@@ -46,6 +46,11 @@
         "check": "hyperv.hypervisor_logical_processor.total_run_time",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "vmms.exe",
+        "vmwp.exe",
+        "vmcompute.exe"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
