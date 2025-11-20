@@ -179,7 +179,6 @@ class SQLServer(DatabaseCheck):
         )  # type: TTLCache
         # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
-        self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.load_static_information)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)

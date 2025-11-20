@@ -287,12 +287,6 @@ def pytest_addoption(parser):
         help="run a test that executes high cardinality queries forever unless it's terminated",
     )
 
-    parser.addoption(
-        "--skip-env",
-        action="store_true",
-        default=False,
-        help="skip environment setup",
-    )
 
 
 def pytest_configure(config):
@@ -320,11 +314,7 @@ def full_e2e_config(instance_session_default):
 
 
 @pytest.fixture(scope='session')
-def dd_environment(full_e2e_config, skip_env):
-    if skip_env:
-        yield full_e2e_config, E2E_METADATA
-        return
-
+def dd_environment(full_e2e_config):
     if pyodbc is None:
         raise Exception("pyodbc is not installed!")
 
@@ -360,9 +350,3 @@ def dd_environment(full_e2e_config, skip_env):
         yield full_e2e_config, E2E_METADATA
 
 
-# Skip environment setup
-# This is helpful for running tests locally without having to spin up the environment repeatedly
-# To use this, launch the necessary docker compose files manually and then run the tests with --skip-env
-@pytest.fixture(scope='session')
-def skip_env(request):
-    return request.config.getoption("--skip-env")

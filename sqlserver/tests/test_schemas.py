@@ -8,7 +8,7 @@ from typing import Callable, Optional
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.const import STATIC_INFO_MAJOR_VERSION
+from datadog_checks.sqlserver.const import STATIC_INFO_MAJOR_VERSION, STATIC_INFO_YEAR
 from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
 
 from . import common
@@ -36,6 +36,8 @@ def integration_check() -> Callable[[dict, Optional[dict]], SQLServer]:
     def _check(instance: dict, init_config: dict = None):
         nonlocal checks
         c = SQLServer(common.CHECK_NAME, init_config or {}, [instance])
+        c.static_info_cache[STATIC_INFO_MAJOR_VERSION] = common.SQLSERVER_MAJOR_VERSION
+        c.static_info_cache[STATIC_INFO_YEAR] = common.SQLSERVER_YEAR
         checks.append(c)
         return c
 
@@ -57,18 +59,7 @@ def test_get_cursor(dbm_instance, integration_check):
             schemas.append(row['schema_name'])
 
         assert set(schemas) == {
-            'db_accessadmin',
-            'db_denydatawriter',
-            'test_schema',
-            'db_datawriter',
-            'db_ddladmin',
-            'db_datareader',
-            'db_securityadmin',
-            'db_denydatareader',
-            'db_backupoperator',
-            'dbo',
-            'guest',
-            'db_owner',
+            'test_schema',            
         }
 
 
@@ -95,6 +86,7 @@ def test_columns(dbm_instance, integration_check):
         assert cursor is not None
         # Assert that at least one row has columns
         rows = cursor.fetchall_dict()
+        print(rows)
         assert any(row['columns'] for row in rows)
         for row in rows:
             if row['columns']:

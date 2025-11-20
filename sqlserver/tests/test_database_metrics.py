@@ -12,7 +12,7 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
-    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_YEAR,
     STATIC_INFO_SERVERNAME,
 )
 from datadog_checks.sqlserver.database_metrics import (
@@ -41,14 +41,14 @@ from datadog_checks.sqlserver.utils import Database
 from .common import (
     CHECK_NAME,
     SQLSERVER_ENGINE_EDITION,
-    SQLSERVER_MAJOR_VERSION,
+    SQLSERVER_YEAR,
 )
 
 INCR_FRACTION_METRICS = {'sqlserver.latches.latch_wait_time'}
 AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test-1']
 
 STATIC_SERVER_INFO = {
-    STATIC_INFO_MAJOR_VERSION: SQLSERVER_MAJOR_VERSION,
+    STATIC_INFO_YEAR: SQLSERVER_YEAR,
     STATIC_INFO_ENGINE_EDITION: SQLSERVER_ENGINE_EDITION,
 }
 
