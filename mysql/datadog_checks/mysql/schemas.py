@@ -15,123 +15,15 @@ if TYPE_CHECKING:
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.mysql.cursor import CommenterDictCursor
-
-SQL_DATABASES = """
-SELECT schema_name as `schema_name`,
-       default_character_set_name as `default_character_set_name`,
-       default_collation_name as `default_collation_name`
-       FROM information_schema.SCHEMATA
-       WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
-
-SQL_TABLES = """\
-SELECT table_name as `table_name`,
-       engine as `engine`,
-       row_format as `row_format`,
-       create_time as `create_time`,
-       table_schema as `schema_name`
-       FROM information_schema.TABLES
-       WHERE TABLE_TYPE="BASE TABLE"
-"""
-
-SQL_COLUMNS = """\
-SELECT table_name as `table_name`,
-       table_schema as `schema_name`,
-       column_name as `name`,
-       column_type as `column_type`,
-       column_default as `default`,
-       is_nullable as `nullable`,
-       ordinal_position as `ordinal_position`,
-       column_key as `column_key`,
-       extra as `extra`
-FROM INFORMATION_SCHEMA.COLUMNS
-"""
-
-SQL_INDEXES = """\
-SELECT
-    table_name as `table_name`,
-    table_schema as `schema_name`,
-    index_name as `name`,
-    collation as `collation`,
-    cardinality as `cardinality`,
-    index_type as `index_type`,
-    seq_in_index as `seq_in_index`,
-    column_name as `column_name`,
-    sub_part as `sub_part`,
-    packed as `packed`,
-    nullable as `nullable`,
-    non_unique as `non_unique`,
-    NULL as `expression`
-FROM INFORMATION_SCHEMA.STATISTICS
-"""
-
-SQL_INDEXES_8_0_13 = """\
-SELECT
-    table_name as `table_name`,
-    table_schema as `schema_name`,
-    index_name as `name`,
-    collation as `collation`,
-    cardinality as `cardinality`,
-    index_type as `index_type`,
-    seq_in_index as `seq_in_index`,
-    column_name as `column_name`,
-    sub_part as `sub_part`,
-    packed as `packed`,
-    nullable as `nullable`,
-    non_unique as `non_unique`,
-    expression as `expression`
-FROM INFORMATION_SCHEMA.STATISTICS
-"""
-
-SQL_FOREIGN_KEYS = """\
-SELECT
-    kcu.constraint_schema as constraint_schema,
-    kcu.constraint_name as name,
-    kcu.table_name as table_name,
-    kcu.table_schema as schema_name,
-    group_concat(kcu.column_name order by kcu.ordinal_position asc) as column_names,
-    kcu.referenced_table_schema as referenced_table_schema,
-    kcu.referenced_table_name as referenced_table_name,
-    group_concat(kcu.referenced_column_name) as referenced_column_names,
-    rc.update_rule as update_action,
-    rc.delete_rule as delete_action
-FROM
-    INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
-LEFT JOIN
-    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
-    ON kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
-    AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
-WHERE
-    kcu.referenced_table_name is not null
-GROUP BY
-    kcu.constraint_schema,
-    kcu.constraint_name,
-    kcu.table_name,
-    kcu.table_schema,
-    kcu.referenced_table_schema,
-    kcu.referenced_table_name,
-    rc.update_rule,
-    rc.delete_rule
-"""
-
-SQL_PARTITION = """\
-SELECT
-    table_name as `table_name`,
-    table_schema as `schema_name`,
-    partition_name as `name`,
-    subpartition_name as `subpartition_name`,
-    partition_ordinal_position as `partition_ordinal_position`,
-    subpartition_ordinal_position as `subpartition_ordinal_position`,
-    partition_method as `partition_method`,
-    subpartition_method as `subpartition_method`,
-    partition_expression as `partition_expression`,
-    subpartition_expression as `subpartition_expression`,
-    partition_description as `partition_description`,
-    table_rows as `table_rows`,
-    data_length as `data_length`
-FROM INFORMATION_SCHEMA.PARTITIONS
-WHERE
-    partition_name IS NOT NULL
-"""
+from datadog_checks.mysql.queries import (
+    SQL_COLUMNS,
+    SQL_DATABASES,
+    SQL_FOREIGN_KEYS,
+    SQL_INDEXES,
+    SQL_INDEXES_8_0_13,
+    SQL_PARTITION,
+    SQL_TABLES,
+)
 
 
 class DatabaseInfo(TypedDict):
@@ -172,6 +64,12 @@ class MySqlSchemaCollector(SchemaCollector):
     def kind(self):
         return "mysql_databases"
 
+    @property
+    def base_event(self):
+        event = super().base_event
+        event["flavor"] = self._check.version.flavor
+        return event
+
     def _get_databases(self):
         # MySQL can query all schemas at once so we return a stub
         # and then fetch all databases with their tables in the _get_cursor method
@@ -195,8 +93,13 @@ class MySqlSchemaCollector(SchemaCollector):
         schemas_query = SQL_DATABASES
         tables_query = SQL_TABLES
         columns_query = SQL_COLUMNS
-        indexes_query = SQL_INDEXES
+        indexes_query = (
+            SQL_INDEXES_8_0_13
+            if self._check.version.flavor == 'MySQL' and self._check.version.version_compatible((8, 0, 13))
+            else SQL_INDEXES
+        )
         constraints_query = SQL_FOREIGN_KEYS
+        partition_query = SQL_PARTITION
         column_columns = """'name', columns.name,
         'column_type', columns.column_type,
         'default', columns.default,
@@ -204,31 +107,40 @@ class MySqlSchemaCollector(SchemaCollector):
         'ordinal_position', columns.ordinal_position,
         'column_key', columns.column_key"""
         index_columns = """'name', indexes.name,
-        'collation', indexes.collation,
-            'cardinality', indexes.cardinality,
+        'cardinality', indexes.cardinality,
         'index_type', indexes.index_type,
-        'seq_in_index', indexes.seq_in_index,
-        'column_name', indexes.column_name,
-        'sub_part', indexes.sub_part,
-        'packed', indexes.packed,
-        'nullable', indexes.nullable,
-        'non_unique', indexes.non_unique
+        'non_unique', indexes.non_unique,
+        'expression', indexes.expression,
+        'columns', indexes.columns
             """
         constraint_columns = """'name', constraints.name,
         'constraint_schema', constraints.constraint_schema,
         'table_name', constraints.table_name,
+        'column_names', constraints.column_names,
         'referenced_table_schema', constraints.referenced_table_schema,
         'referenced_table_name', constraints.referenced_table_name,
-        'referenced_column_names', constraints.referenced_column_names
+        'referenced_column_names', constraints.referenced_column_names,
+        'update_action', constraints.update_action,
+        'delete_action', constraints.delete_action
+        """
+
+        partition_columns = """'name', partitions.name,
+        'partition_ordinal_position', partitions.partition_ordinal_position,
+        'partition_method', partitions.partition_method,
+        'partition_expression', partitions.partition_expression,
+        'partition_description', partitions.partition_description,
+        'subpartitions', partitions.subpartitions
         """
 
         limit = int(self._config.max_tables or 1_000_000)
 
         query = f"""
             SELECT schema_tables.schema_name, schema_tables.table_name,
+                schema_tables.engine, schema_tables.row_format, schema_tables.create_time,
                 json_arrayagg(json_object({column_columns})) columns,
                 json_arrayagg(json_object({index_columns})) indexes,
-                json_arrayagg(json_object({constraint_columns})) foreign_keys
+                json_arrayagg(json_object({constraint_columns})) foreign_keys,
+                json_arrayagg(json_object({partition_columns})) partitions
             FROM (
                 SELECT `schemas`.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
                 tables.table_name, tables.engine, tables.row_format, tables.create_time
@@ -243,7 +155,9 @@ class MySqlSchemaCollector(SchemaCollector):
                     schema_tables.schema_name = indexes.schema_name
                 LEFT JOIN ({constraints_query}) constraints ON schema_tables.table_name = constraints.table_name and
                     schema_tables.schema_name = constraints.schema_name
-            GROUP BY schema_tables.schema_name, schema_tables.table_name
+                LEFT JOIN ({partition_query}) partitions ON schema_tables.table_name = partitions.table_name
+            GROUP BY schema_tables.schema_name, schema_tables.table_name,
+            schema_tables.engine, schema_tables.row_format, schema_tables.create_time
             ;
         """
         return query
@@ -255,28 +169,82 @@ class MySqlSchemaCollector(SchemaCollector):
         return cursor.fetchall()
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
-        print(cursor_row)
         # We intentionally dont call super because MySQL has no logical databases
         object = {
-            'name': cursor_row.get("schema_name"),
-            'default_character_set_name': cursor_row.get("default_character_set_name"),
-            'default_collation_name': cursor_row.get("default_collation_name"),
+            "name": cursor_row.get("schema_name"),
+            "default_character_set_name": cursor_row.get("default_character_set_name"),
+            "default_collation_name": cursor_row.get("default_collation_name"),
         }
         # Map the cursor row to the expected schema, and strip out None values
         object["tables"] = [
             {
                 k: v
                 for k, v in {
+                    "engine": cursor_row.get("engine"),
+                    "row_format": cursor_row.get("row_format"),
+                    "create_time": cursor_row.get("create_time"),
                     "name": cursor_row.get("table_name"),
                     # The query can create duplicates of the joined tables
-                    "columns": list({v and v['name']: v for v in json.loads(cursor_row.get("columns")) or []}.values()),
-                    "indexes": list({v and v['name']: v for v in json.loads(cursor_row.get("indexes")) or []}.values()),
-                    "foreign_keys": list(
-                        {v and v['name']: v for v in json.loads(cursor_row.get("foreign_keys")) or []}.values()
+                    "columns": list(
+                        {
+                            v['name']: {
+                                **{k: v_ for k, v_ in v.items() if v_ is not None},
+                                'nullable': v['nullable'] == 'YES',
+                            }
+                            for v in json.loads(cursor_row.get("columns")) or []
+                            if v and v.get('name') is not None
+                        }.values()
                     ),
-                    # "toast_table": cursor_row.get("toast_table"),
-                    # "num_partitions": cursor_row.get("num_partitions"),
-                    # "partition_key": cursor_row.get("partition_key"),
+                    "indexes": list(
+                        {
+                            v['name']: {
+                                **{
+                                    k: v2
+                                    for k, v2 in {
+                                        **v,
+                                        'non_unique': v['non_unique'] == 1,
+                                        'columns': list(
+                                            {
+                                                c and c['name']: {
+                                                    **{k: v_ for k, v_ in c.items() if v_ is not None},
+                                                    'nullable': c['nullable'] == 'YES',
+                                                }
+                                                for c in v['columns'] or []
+                                            }.values()
+                                        ),
+                                    }.items()
+                                    if v2 is not None
+                                }
+                            }
+                            for v in json.loads(cursor_row.get("indexes")) or []
+                            if v and v.get('name') is not None
+                        }.values()
+                    ),
+                    "foreign_keys": list(
+                        {
+                            v['name']: v
+                            for v in (json.loads(cursor_row.get("foreign_keys")) or [])
+                            if v and v.get('name') is not None
+                        }.values()
+                    ),
+                    "partitions": list(
+                        {
+                            v['name']: {
+                                **v,
+                                'subpartitions': list(
+                                    {
+                                        v2['name']: v2
+                                        for v2 in v['subpartitions'] or []
+                                        if v2 and v2.get('name') is not None
+                                    }.values()
+                                ),
+                                "data_length": sum(v2.get('data_length', 0) for v2 in (v['subpartitions'] or [])),
+                                "table_rows": sum(v2.get('table_rows', 0) for v2 in (v['subpartitions'] or [])),
+                            }
+                            for v in (json.loads(cursor_row.get("partitions")) or [])
+                            if v and v.get('name') is not None
+                        }.values()
+                    ),
                 }.items()
                 if v is not None
             }
