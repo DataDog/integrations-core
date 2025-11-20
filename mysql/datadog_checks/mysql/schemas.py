@@ -209,7 +209,8 @@ class MySqlSchemaCollector(SchemaCollector):
                                                     **{k: v_ for k, v_ in c.items() if v_ is not None},
                                                     'nullable': c['nullable'] == 'YES',
                                                 }
-                                                for c in v['columns'] or [] if c and c.get('name') is not None
+                                                for c in v['columns'] or []
+                                                if c and c.get('name') is not None
                                             }.values()
                                         ),
                                     }.items()
