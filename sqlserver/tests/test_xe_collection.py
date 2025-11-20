@@ -92,9 +92,9 @@ def mock_check():
     cursor_context.__enter__ = Mock(return_value=cursor_mock)
     cursor_context.__exit__ = Mock(return_value=None)
 
-    check._connection = Mock()
-    check._connection.open_managed_default_connection = Mock(return_value=conn_context)
-    check._connection.get_managed_cursor = Mock(return_value=cursor_context)
+    check.connection = Mock()
+    check.connection.open_managed_default_connection = Mock(return_value=conn_context)
+    check.connection.get_managed_cursor = Mock(return_value=cursor_context)
 
     # Make debug_stats_kwargs return an empty dictionary for @tracked_method decorator
     check.debug_stats_kwargs.return_value = {}
