@@ -10,10 +10,6 @@ from datadog_checks.mysql.schemas import MySqlSchemaCollector
 
 from . import common
 
-# from datadog_checks.postgres.version_utils import VersionUtils
-
-# from .common import POSTGRES_VERSION
-
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 

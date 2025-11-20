@@ -16,9 +16,6 @@ if TYPE_CHECKING:
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
-# from datadog_checks.postgres.version_utils import VersionUtils
-
-
 SQL_DATABASES = """
 SELECT schema_name as `schema_name`,
        default_character_set_name as `default_character_set_name`,
