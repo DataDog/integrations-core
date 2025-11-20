@@ -166,5 +166,5 @@ class SqlserverMetadata(DBMAsyncJob):
             return
         if time.time() - self._last_schemas_collection_time < self._schema_collection_interval:
             return
-        self._schema_collector.collect_schemas()
         self._last_schemas_collection_time = time.time()
+        self._schema_collector.collect_schemas()
