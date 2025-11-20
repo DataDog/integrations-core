@@ -5,11 +5,11 @@
 from typing import Callable, Optional
 
 import pytest
-from datadog_checks.mysql.version_utils import MySQLVersion
 from packaging.version import parse as parse_version
 
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.schemas import MySqlSchemaCollector
+from datadog_checks.mysql.version_utils import MySQLVersion
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED
