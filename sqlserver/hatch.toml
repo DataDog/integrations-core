@@ -58,7 +58,7 @@ matrix.setup.env-vars = [
 ]
 matrix.version.env-vars = [
   { key = "SQLSERVER_YEAR" },
-  { key = "SQLSERVER_ENGINE_EDITION" },
+  { key = "SQLSERVER_ENGINE_EDITION", value = "express" },
   # Map years to major versions
   { key = "SQLSERVER_MAJOR_VERSION", value="16", if = ["2022"] },
   { key = "SQLSERVER_MAJOR_VERSION", value="15", if = ["2019"] },

@@ -21,6 +21,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
+    STATIC_INFO_YEAR,
     TABLE_SIZE_METRICS,
 )
 
@@ -851,7 +852,8 @@ def test_resolved_hostname_set(
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     if engine_edition:
         sqlserver_check.static_info_cache[STATIC_INFO_VERSION] = "Microsoft SQL Server 2019"
-        sqlserver_check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 2019
+        sqlserver_check.static_info_cache[STATIC_INFO_YEAR] = 2019
+        sqlserver_check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 15
         sqlserver_check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
     dd_run_check(sqlserver_check)
     assert sqlserver_check.resolved_hostname == expected_hostname
@@ -1049,21 +1051,21 @@ def test_check_static_information_expire(aggregator, dd_run_check, init_config, 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually clear static information cache
     sqlserver_check.static_info_cache.clear()
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually pop STATIC_INFO_ENGINE_EDITION to make sure it is reloaded
     sqlserver_check.static_info_cache.pop(STATIC_INFO_ENGINE_EDITION)
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
 

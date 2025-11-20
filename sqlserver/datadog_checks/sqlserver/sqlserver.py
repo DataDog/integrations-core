@@ -608,7 +608,7 @@ class SQLServer(DatabaseCheck):
         Will also create and cache cursors to query the db.
         """
 
-        major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
+        year = self.static_info_cache.get(STATIC_INFO_YEAR)
         metrics_to_collect = []
 
         # Load instance-level (previously Performance metrics)
@@ -616,7 +616,7 @@ class SQLServer(DatabaseCheck):
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get("include_instance_metrics", True)):
             common_metrics = list(INSTANCE_METRICS)
-            if major_version and major_version >= 2016:
+            if year and year >= 2016:
                 common_metrics.extend(INSTANCE_METRICS_NEWER_2016)
             if not self._config.dbm_enabled:
                 common_metrics.extend(DBM_MIGRATED_METRICS)
@@ -964,8 +964,8 @@ class SQLServer(DatabaseCheck):
         self.log.debug("initialized dynamic queries")
         return self._database_metrics
 
-    def log_missing_metric(self, metric_name, major_version, engine_version):
-        if major_version <= 2012:
+    def log_missing_metric(self, metric_name, year, engine_version):
+        if year <= 2012:
             self.log.warning("%s metrics are not supported on version 2012", metric_name)
         else:
             self.log.warning("%s metrics are not supported on Azure engine version: %s", metric_name, engine_version)
