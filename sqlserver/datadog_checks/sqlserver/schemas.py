@@ -201,9 +201,13 @@ class SQLServerSchemaCollector(SchemaCollector):
                         for k, v in {
                             "id": str(cursor_row.get("table_id")),  # Backend expects a string
                             "name": cursor_row.get("table_name"),
-                            "columns": columns,
-                            "indexes": indexes,
-                            "foreign_keys": foreign_keys,
+                            "columns": [column for column in columns if column.get("name") is not None],
+                            "indexes": [index for index in indexes if index.get("name") is not None],
+                            "foreign_keys": [
+                                foreign_key
+                                for foreign_key in foreign_keys
+                                if foreign_key.get("foreign_key_name") is not None
+                            ],
                             "partitions": {"partition_count": partition_count},
                         }.items()
                         if v is not None
