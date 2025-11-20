@@ -1041,10 +1041,6 @@ class PostgreSql(AgentCheck):
         for warning in messages:
             self.warning(warning)
 
-    @property
-    def dbms_version(self):
-        return payload_pg_version(self.version)
-
     def _send_database_instance_metadata(self):
         if self.database_identifier not in self._database_instance_emitted:
             event = {
@@ -1057,7 +1053,7 @@ class PostgreSql(AgentCheck):
                 "dbms": "postgres",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
-                'dbms_version': self.dbms_version,
+                'dbms_version': payload_pg_version(self.version),
                 'integration_version': __version__,
                 "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,

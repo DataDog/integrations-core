@@ -20,6 +20,12 @@ GRANT USAGE on SCHEMA public to blocking_bob;
 CREATE DATABASE dogs_nofunc;
 CREATE DATABASE dogs_noschema;
 
+-- These databases should get excluded from database autodiscovery by default
+CREATE DATABASE rdsadmin;
+CREATE DATABASE cloudsqladmin;
+CREATE DATABASE alloydbadmin;
+CREATE DATABASE alloydbmetadata;
+
 -- These databases must be enumerated like so because postgres does
 -- not support the creation of databases in a transaction so functions
 -- cannot be used to accomplish this same task. Anyone aware of a better

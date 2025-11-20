@@ -4,14 +4,13 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import time
 from typing import Dict, List, Union
 
 import psycopg
 from psycopg.rows import dict_row
-
-from .schemas import PostgresSchemaCollector
 
 try:
     import datadog_agent
@@ -26,6 +25,7 @@ if TYPE_CHECKING:
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
+from datadog_checks.postgres.util import get_list_chunks
 
 from .util import payload_pg_version
 from .version_utils import VersionUtils
@@ -258,7 +258,6 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_pg_settings_enabled = config.collect_settings.enabled
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
-        self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
         self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
         self._compiled_patterns_cache = {}
@@ -369,10 +368,107 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
-        success = self._schema_collector.collect_schemas()
-        if not success:
-            # TODO: Emit health event for over-long collection
-            self._log.warning("Previous schema collection still in progress, skipping this collection")
+        self._is_schemas_collection_in_progress = True
+        status = "success"
+        start_time = time.time()
+        total_tables = 0
+        try:
+            schema_metadata = self._collect_schema_info()
+            # We emit an event for each batch of tables to reduce total data in memory
+            # and keep event size reasonable
+            base_event = {
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_databases",
+                "collection_interval": self.schemas_collection_interval,
+                "dbms_version": self._payload_pg_version(),
+                "tags": self._tags_no_db,
+                "cloud_metadata": self._check.cloud_metadata,
+                # We don't rely on this time being strictly monotonic, it's just a unique identifier
+                # but having it be the time is helpful for debugging
+                "collection_started_at": math.floor(time.time() * 1000),
+            }
+
+            # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
+            chunk_size = 50
+            payloads_count = 0
+
+            for di, database in enumerate(schema_metadata):
+                dbname = database["name"]
+                if not self._should_collect_metadata(dbname, "database"):
+                    continue
+
+                with self.db_pool.get_connection(dbname) as conn:
+                    with conn.cursor(row_factory=dict_row) as cursor:
+                        for si, schema in enumerate(database["schemas"]):
+                            if not self._should_collect_metadata(schema["name"], "schema"):
+                                continue
+
+                            tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
+                            self._log.debug(
+                                "Tables found for schema '{schema}' in database '{database}': {tables}".format(
+                                    schema=database["schemas"],
+                                    database=dbname,
+                                    tables=[table["name"] for table in tables],
+                                )
+                            )
+                            table_chunks = list(get_list_chunks(tables, chunk_size))
+
+                            buffer_column_count = 0
+                            tables_buffer = []
+
+                            for tables in table_chunks:
+                                table_info = self._query_table_information(cursor, dbname, tables)
+
+                                tables_buffer = [*tables_buffer, *table_info]
+                                for t in table_info:
+                                    buffer_column_count += len(t.get("columns", []))
+
+                                if buffer_column_count >= self.column_buffer_size:
+                                    payloads_count += 1
+                                    self._flush_schema(base_event, database, schema, tables_buffer)
+                                    total_tables += len(tables_buffer)
+                                    tables_buffer = []
+                                    buffer_column_count = 0
+
+                            # Send the payload in the last iteration to 1) capture empty schemas and 2) ensure we get
+                            # a final payload for tombstoning
+                            is_final_payload = di == len(schema_metadata) - 1 and si == len(database["schemas"]) - 1
+                            payloads_count += 1
+                            self._flush_schema(
+                                # For very last payload send the payloads count to mark the collection as complete
+                                {**base_event, "collection_payloads_count": payloads_count}
+                                if is_final_payload
+                                else base_event,
+                                database,
+                                schema,
+                                tables_buffer,
+                            )
+                            total_tables += len(tables_buffer)
+        except Exception as e:
+            self._log.error("Error collecting schema metadata: %s", e)
+            status = "error"
+        finally:
+            self._is_schemas_collection_in_progress = False
+            elapsed_ms = (time.time() - start_time) * 1000
+            self._check.histogram(
+                "dd.postgres.schema.time",
+                elapsed_ms,
+                tags=self._check.tags + ["status:" + status],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+            self._check.gauge(
+                "dd.postgres.schema.tables_count",
+                total_tables,
+                tags=self._check.tags + ["status:" + status],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+            datadog_agent.emit_agent_telemetry("postgres", "schema_tables_elapsed_ms", elapsed_ms, "gauge")
+            datadog_agent.emit_agent_telemetry("postgres", "schema_tables_count", total_tables, "gauge")
 
     def _should_collect_metadata(self, name, metadata_type):
         # We get the config as a dict so we can use string interpolation

@@ -19,6 +19,17 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     SWITCH_DB_STATEMENT,
 )
+from datadog_checks.sqlserver.queries import (
+    COLUMN_QUERY,
+    DB_QUERY,
+    FOREIGN_KEY_QUERY,
+    FOREIGN_KEY_QUERY_PRE_2017,
+    INDEX_QUERY,
+    INDEX_QUERY_PRE_2017,
+    PARTITIONS_QUERY,
+    SCHEMA_QUERY,
+    TABLES_QUERY,
+)
 
 
 class DatabaseInfo(TypedDict):
@@ -26,142 +37,6 @@ class DatabaseInfo(TypedDict):
     id: str
     collation: str
     owner: str
-
-
-DB_QUERY = """
-SELECT
-    db.database_id AS id, db.name AS name, db.collation_name AS collation, dp.name AS owner
-FROM
-    sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid
-WHERE db.name IN ({});
-"""
-
-SCHEMA_QUERY = """
-SELECT
-    s.name AS schema_name, s.schema_id AS schema_id, dp.name AS owner_name
-FROM
-    sys.schemas AS s JOIN sys.database_principals dp ON s.principal_id = dp.principal_id
-WHERE s.name NOT IN ('sys', 'information_schema')
-"""
-
-TABLES_IN_SCHEMA_QUERY = """
-SELECT
-    object_id AS table_id, name AS table_name, schema_id
-FROM
-    sys.tables
-"""
-
-COLUMN_QUERY = """
-SELECT
-    c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable
-FROM
-    sys.columns c
-    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
-    LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
-WHERE c.object_id = schema_tables.table_id
-"""
-
-INDEX_QUERY = """
-SELECT
-    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
-    i.is_disabled, STRING_AGG(c.name, ',') AS column_names
-FROM
-    sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
-    AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-WHERE i.object_id = schema_tables.table_id
-GROUP BY i.object_id, i.name, i.type,
-    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
-"""
-
-INDEX_QUERY_PRE_2017 = """
-SELECT
-    i.object_id AS id,
-    i.name,
-    i.type,
-    i.is_unique,
-    i.is_primary_key,
-    i.is_unique_constraint,
-    i.is_disabled,
-    STUFF((
-        SELECT ',' + c.name
-        FROM sys.index_columns ic
-        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
-        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS column_names
-FROM
-    sys.indexes i
-WHERE i.object_id = schema_tables.table_id
-GROUP BY
-    i.object_id,
-    i.name,
-    i.index_id,
-    i.type,
-    i.is_unique,
-    i.is_primary_key,
-    i.is_unique_constraint,
-    i.is_disabled
-"""
-
-FOREIGN_KEY_QUERY = """
-SELECT
-    FK.name AS foreign_key_name,
-    OBJECT_NAME(FK.parent_object_id) AS referencing_table,
-    STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
-    OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
-    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column,
-    FK.delete_referential_action_desc AS delete_action,
-    FK.update_referential_action_desc AS update_action
-FROM
-    sys.foreign_keys AS FK
-    JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
-WHERE FK.parent_object_id = schema_tables.table_id
-GROUP BY
-    FK.name,
-    FK.parent_object_id,
-    FK.referenced_object_id,
-    FK.delete_referential_action_desc,
-    FK.update_referential_action_desc
-"""
-
-FOREIGN_KEY_QUERY_PRE_2017 = """
-SELECT
-    FK.parent_object_id AS table_id,
-    FK.name AS foreign_key_name,
-    OBJECT_NAME(FK.parent_object_id) AS referencing_table,
-    STUFF((
-        SELECT ',' + COL_NAME(FKC.parent_object_id, FKC.parent_column_id)
-        FROM sys.foreign_key_columns AS FKC
-        WHERE FKC.constraint_object_id = FK.object_id
-        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referencing_column,
-    OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
-    STUFF((
-        SELECT ',' + COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id)
-        FROM sys.foreign_key_columns AS FKC
-        WHERE FKC.constraint_object_id = FK.object_id
-        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referenced_column,
-    FK.delete_referential_action_desc AS delete_action,
-    FK.update_referential_action_desc AS update_action
-FROM
-    sys.foreign_keys AS FK
-WHERE FK.parent_object_id = schema_tables.table_id
-GROUP BY
-    FK.name,
-    FK.object_id,
-    FK.parent_object_id,
-    FK.referenced_object_id,
-    FK.delete_referential_action_desc,
-    FK.update_referential_action_desc
-"""
-
-PARTITIONS_QUERY = """
-SELECT
-    COUNT(*) AS partition_count
-FROM
-    sys.partitions
-WHERE
-    object_id = schema_tables.table_id
-GROUP BY object_id
-"""
 
 
 # The schema collector sends lists of DatabaseObjects to the agent
@@ -239,7 +114,7 @@ class SQLServerSchemaCollector(SchemaCollector):
                 {SCHEMA_QUERY}
             ),
             tables AS (
-                {TABLES_IN_SCHEMA_QUERY}
+                {TABLES_QUERY}
             ),
             schema_tables AS (
                 SELECT TOP {limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
