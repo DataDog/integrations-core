@@ -13,7 +13,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
-**Note**: Providing an admin key only collects `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics. Providing a project key is deprecated, and only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
+**Note**: Providing an admin key collects `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
 
 ### Installation
 
@@ -67,7 +67,7 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 <!-- xxz tab xxx -->
 <!-- xxx tab "Python" xxx -->
 
-**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+**Note**: This setup method does not collect `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics. To collect these metrics, also follow the API key setup instructions.
 
 ### Installation
 

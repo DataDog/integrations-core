@@ -23,6 +23,8 @@ This integration enrich and ingests the following logs from Cisco Secure FTD usi
 
 Visualize detailed insights into SNMP requests, identity-based firewall logs, real time threat analysis, security detection and observation, and compliance monitoring with the out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.53.0
+
 ## Setup
 
 ### Installation

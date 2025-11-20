@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4e8f129e-1c9b-4078-a966-f0099dbf9465",
   "app_id": "tekton",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

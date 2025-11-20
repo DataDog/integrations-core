@@ -32,6 +32,7 @@ METRICS = [
     'admission_webhooks.response_duration.count',
     'admission_webhooks.response_duration.sum',
     'admission_webhooks.webhooks_received',
+    'admission_webhooks.image_resolution_attempts',
     'aggregator.flush',
     'aggregator.processed',
     'api_requests',

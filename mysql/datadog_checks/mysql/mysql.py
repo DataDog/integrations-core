@@ -15,8 +15,9 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 import pymysql
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -28,11 +29,12 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
+from datadog_checks.mysql.health import MySqlHealth
 
 from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
-from .config import MySQLConfig
+from .config import MySQLConfig, sanitize
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -63,6 +65,7 @@ from .innodb_metrics import InnoDBMetrics
 from .metadata import MySQLMetadata
 from .queries import (
     QUERY_DEADLOCKS,
+    QUERY_ERRORS_RAISED,
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
@@ -94,12 +97,12 @@ except ImportError:
     PSUTIL_AVAILABLE = False
 
 try:
-    import datadog_agent
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
-class MySql(AgentCheck):
+class MySql(DatabaseCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
@@ -109,6 +112,7 @@ class MySql(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
+        self.health = MySqlHealth(self)
         self.qcache_stats = {}
         self.version = None
         self.is_mariadb = None
@@ -121,11 +125,12 @@ class MySql(AgentCheck):
         self._events_wait_current_enabled = None
         self._group_replication_active = None
         self._replication_role = None
+        self._initialized_at = int(time.time() * 1000)
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
         self.add_core_tags()
-        self.cloud_metadata = self._config.cloud_metadata
+        self._cloud_metadata = self._config.cloud_metadata
 
         # Create a new connection on every check run
         self._conn = None
@@ -138,10 +143,23 @@ class MySql(AgentCheck):
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
         self._warnings_by_code = {}
-        self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
-        self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
-        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
-        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+
+        # Determine if using AWS managed authentication
+        self._uses_aws_managed_auth = (
+            'aws' in self.cloud_metadata
+            and 'managed_authentication' in self.cloud_metadata.get('aws', {})
+            and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
+        )
+
+        # Pass function reference and managed auth flag to async jobs
+        self._statement_metrics = MySQLStatementMetrics(
+            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
+        )
+        self._statement_samples = MySQLStatementSamples(
+            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
+        )
+        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -152,6 +170,21 @@ class MySql(AgentCheck):
         self._runtime_queries_cached = None
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
+
+        self._submit_initialization_health_event()
+
+    def _submit_initialization_health_event(self):
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            # TODO: validate the config once it is refactored similar to Postgres, and then send the computed config
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.OK,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={"initialized_at": self._initialized_at, "instance": sanitize(self.instance)},
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
@@ -164,6 +197,10 @@ class MySql(AgentCheck):
         self.set_metadata('version', self.version.version + '+' + self.version.build)
         self.set_metadata('flavor', self.version.flavor)
         self.set_metadata('resolved_hostname', self.resolved_hostname)
+
+    @property
+    def tags(self):
+        return self.tag_manager.get_tags()
 
     @property
     def reported_hostname(self):
@@ -181,6 +218,10 @@ class MySql(AgentCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
 
     @property
     def database_identifier(self):
@@ -232,8 +273,6 @@ class MySql(AgentCheck):
         """
         self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
-        if self.agent_hostname:
-            self.tag_manager.set_tag("ddagenthostname", self.agent_hostname, replace=True)
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -340,6 +379,8 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        self._submit_initialization_health_event()
+
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
 
@@ -427,6 +468,10 @@ class MySql(AgentCheck):
 
         if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
+            if not self.is_mariadb and self.version.version_compatible((8, 0, 0)) and self._config.dbm_enabled:
+                error_query = QUERY_ERRORS_RAISED.copy()
+                error_query['query'] = error_query['query'].format(user=self._config.user)
+                queries.extend([error_query])
         if self._index_metrics.include_index_metrics:
             queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
@@ -474,20 +519,18 @@ class MySql(AgentCheck):
             return connection_args
 
         connection_args.update({'user': self._config.user, 'passwd': self._config.password})
-        if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
-            # if we are running on AWS, check if IAM auth is enabled
+        if self._uses_aws_managed_auth:
+            # Generate AWS IAM auth token
             aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
-            if aws_managed_authentication['enabled']:
-                # if IAM auth is enabled, region must be set. Validation is done in the config
-                region = self.cloud_metadata['aws']['region']
-                password = aws.generate_rds_iam_token(
-                    host=self._config.host,
-                    username=self._config.user,
-                    port=self._config.port,
-                    region=region,
-                    role_arn=aws_managed_authentication.get('role_arn'),
-                )
-                connection_args.update({'user': self._config.user, 'passwd': password})
+            region = self.cloud_metadata['aws']['region']
+            password = aws.generate_rds_iam_token(
+                host=self._config.host,
+                username=self._config.user,
+                port=self._config.port,
+                region=region,
+                role_arn=aws_managed_authentication.get('role_arn'),
+            )
+            connection_args.update({'user': self._config.user, 'passwd': password})
         if self._config.mysql_sock != '':
             self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
             connection_args.update({'unix_socket': self._config.mysql_sock})
@@ -542,9 +585,7 @@ class MySql(AgentCheck):
             # Use cached global variables instead of making a separate query
             results.update(self.global_variables.all_variables)
 
-        if not is_affirmative(
-            self._config.options.get('disable_innodb_metrics', False)
-        ) and self._check_innodb_engine_enabled(db):
+        if self._check_innodb_engine_enabled(db):
             # Innodb metrics are not available for Aurora reader instances
             if self.global_variables.is_aurora and self._replication_role == "reader":
                 self.log.debug("Skipping innodb metrics collection for reader instance")
@@ -1083,6 +1124,12 @@ class MySql(AgentCheck):
         # table. Later is chosen because that involves no string parsing.
         if self._is_innodb_engine_enabled_cached is not None:
             return self._is_innodb_engine_enabled_cached
+
+        if self._config.disable_innodb_metrics:
+            self.log.debug("disable_innodb_metrics config is set, disabling innodb metric collection")
+            self._is_innodb_engine_enabled_cached = False
+            return self._is_innodb_engine_enabled_cached
+
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_INNODB_ENGINES)
@@ -1097,18 +1144,19 @@ class MySql(AgentCheck):
         replica_results = defaultdict(dict)
         replica_status = self._get_replica_replication_status(db)
         if replica_status:
-            # MySQL <5.7 does not have Channel_Name.
-            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-            channel = self._config.replication_channel or replica_status.get('Channel_Name') or 'default'
-            for key, value in replica_status.items():
-                if value is not None:
-                    replica_results[key]['channel:{0}'.format(channel)] = value
+            for replica in replica_status:
+                # MySQL <5.7 does not have Channel_Name.
+                # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+                channel = self._config.replication_channel or replica.get('Channel_Name') or 'default'
+                for key, value in replica.items():
+                    if value is not None:
+                        replica_results[key]['channel:{0}'.format(channel)] = value
         return replica_results
 
     def _get_replica_replication_status(self, db):
-        result = {}
+        results = []
         if not self._config.replication_enabled:
-            return result
+            return results
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
@@ -1118,8 +1166,8 @@ class MySql(AgentCheck):
                     show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
                 )
 
-                result = cursor.fetchone()
-                self.log.debug("Getting replication status: %s", result)
+                results = cursor.fetchall()
+                self.log.debug("Getting replication status: %s", results)
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
             if errno == 1617 and msg == "There is no master connection '{0}'".format(self._config.replication_channel):
@@ -1131,7 +1179,7 @@ class MySql(AgentCheck):
             else:
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
-        return result
+        return results
 
     def _get_replicas_connected_count(self, db, above_560):
         """
@@ -1346,6 +1394,7 @@ class MySql(AgentCheck):
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
+                "ddagenthostname": self.agent_hostname,
                 "dbms": "mysql",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
@@ -1374,8 +1423,9 @@ class MySql(AgentCheck):
             return
 
         replica_status = self._get_replica_replication_status(db)
-        if replica_status:
-            self.cluster_uuid = replica_status.get('Source_UUID', replica_status.get('Master_UUID'))
+        # Currently we only support single primary source clustering
+        if replica_status and len(replica_status) > 0:
+            self.cluster_uuid = replica_status[0].get('Source_UUID', replica_status[0].get('Master_UUID'))
             if self.cluster_uuid:
                 self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
                 self.tag_manager.set_tag('replication_role', "replica", replace=True)

@@ -115,6 +115,7 @@ def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, exp
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tags(metric, tags=['jobid_var:disable', 'jobid_name:%e.%u'])
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.parametrize(
@@ -622,3 +623,109 @@ def test_changelog_logging(caplog, mock_lustre_commands):
         assert 'Could not retrieve log cursor, assuming initialization' in log_text
         assert 'Fetching changelog from index 0 to 100' in log_text
         assert 'Collecting changelogs for:' in log_text
+
+
+@pytest.mark.parametrize(
+    'bin_path, should_pass',
+    [
+        pytest.param('/usr/sbin/lctl', True, id='valid_lctl'),
+        pytest.param('/usr/sbin/lnetctl', True, id='valid_lnetctl'),
+        pytest.param('/usr/bin/lfs', True, id='valid_lfs'),
+        pytest.param('/custom/path/lctl', True, id='custom_path_lctl'),
+        pytest.param('lctl', False, id='relative_path'),
+        pytest.param('./lctl', False, id='relative_with_dot'),
+        pytest.param('/bin/bash', False, id='shell_bash'),
+        pytest.param('/bin/sh', False, id='shell_sh'),
+        pytest.param('/usr/bin/zsh', False, id='shell_zsh'),
+        pytest.param('/usr/bin/python', False, id='unexpected_binary'),
+        pytest.param('/sbin/sudo', False, id='sudo_binary'),
+        pytest.param('/usr/bin/cat', False, id='cat_binary'),
+    ],
+)
+def test_sanitize_command(bin_path, should_pass):
+    """Test _sanitize_command with various binary paths."""
+    from datadog_checks.lustre.check import _sanitize_command
+
+    if should_pass:
+        # Should not raise an exception
+        _sanitize_command(bin_path)
+    else:
+        # Should raise ValueError
+        with pytest.raises(ValueError):
+            _sanitize_command(bin_path)
+
+
+@pytest.mark.parametrize(
+    ['yaml_fixture', 'non_yaml_fixture'],
+    [
+        pytest.param('', '', id='no devices'),
+        pytest.param('client_dl_yaml.txt', '', id='devices from yaml'),
+        pytest.param('', 'client_dl.txt', id='devices without yaml'),
+    ],
+)
+def test_device_discovery(mock_lustre_commands, yaml_fixture, non_yaml_fixture):
+    """Devices should be discovered regardless of Lustre version"""
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl -y': yaml_fixture,
+        'lctl dl': non_yaml_fixture,
+        'lfs changelog': 'test_changelog',
+    }
+
+    with mock_lustre_commands(mapping):
+        check = LustreCheck('lustre', {}, [{}])
+
+    # Assert device contents
+    if not yaml_fixture and not non_yaml_fixture:
+        assert check.devices == []
+    else:
+        # Expected device structure - same for both YAML and non-YAML fixtures
+        expected_devices = [
+            {
+                'index': '0',
+                'status': 'UP',
+                'type': 'mgc',
+                'name': 'MGC172.31.16.218@tcp',
+                'uuid': '7d3988a7-145f-444e-9953-58e3e6d97385',
+                'refcount': '5',
+            },
+            {
+                'index': '1',
+                'status': 'UP',
+                'type': 'lov',
+                'name': 'lustre-clilov-ffff8b904341d000',
+                'uuid': 'ac8e54e3-1334-4865-a3f5-4f61ce87bdd1',
+                'refcount': '4',
+            },
+            {
+                'index': '2',
+                'status': 'UP',
+                'type': 'lmv',
+                'name': 'lustre-clilmv-ffff8b904341d000',
+                'uuid': 'ac8e54e3-1334-4865-a3f5-4f61ce87bdd1',
+                'refcount': '5',
+            },
+            {
+                'index': '3',
+                'status': 'UP',
+                'type': 'mdc',
+                'name': 'lustre-MDT0000-mdc-ffff8b904341d000',
+                'uuid': 'ac8e54e3-1334-4865-a3f5-4f61ce87bdd1',
+                'refcount': '5',
+            },
+            {
+                'index': '4',
+                'status': 'UP',
+                'type': 'osc',
+                'name': 'lustre-OST0001-osc-ffff8b904341d000',
+                'uuid': 'ac8e54e3-1334-4865-a3f5-4f61ce87bdd1',
+                'refcount': '5',
+            },
+        ]
+
+        # Convert YAML integer types to strings for consistency
+        actual_devices = [
+            {k: str(v) if isinstance(v, int) else v for k, v in device.items()} for device in check.devices
+        ]
+
+        assert actual_devices == expected_devices

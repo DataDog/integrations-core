@@ -7,7 +7,6 @@ import threading
 import psycopg
 import pytest
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import (
     QUERY_PG_CLASS,
     QUERY_PG_CLASS_SIZE,
@@ -411,29 +410,85 @@ def test_vacuum_age(aggregator, integration_check, pg_instance):
             [{"relation_regex": "perso.*", "relkind": ["r"]}],
             1,
             "persons",
-            None,
+            [
+                "db:datadog_test",
+                "lock_mode:AccessExclusiveLock",
+                "lock_type:relation",
+                "granted:True",
+                "fastpath:False",
+                "table:persons",
+                "schema:public",
+            ],
             id="test with matching relkind should return 1",
         ),
         pytest.param(
             [{"relation_regex": "perso.*", "relkind": ["i"]}],
             0,
             "persons",
-            None,
+            [
+                "db:datadog_test",
+                "lock_mode:AccessExclusiveLock",
+                "lock_type:relation",
+                "granted:True",
+                "fastpath:False",
+                "table:persons",
+                "schema:public",
+            ],
             id="test without matching relkind should return 0",
         ),
         pytest.param(
             ["pgtable"],
             1,
             "pgtable",
-            None,
+            [
+                "db:datadog_test",
+                "lock_mode:AccessExclusiveLock",
+                "lock_type:relation",
+                "granted:True",
+                "fastpath:False",
+                "table:pgtable",
+                "schema:public",
+            ],
             id="pgtable should be included in lock metrics",
         ),
         pytest.param(
             ["pg_newtable"],
             0,
             "pg_newtable",
-            None,
+            [
+                "db:datadog_test",
+                "lock_mode:AccessExclusiveLock",
+                "lock_type:relation",
+                "granted:True",
+                "fastpath:False",
+                "table:pg_newtable",
+                "schema:public",
+            ],
             id="pg_newtable should be excluded from query since it starts with `pg_`",
+        ),
+        pytest.param(
+            ['persons'],
+            1,
+            'persons',
+            [
+                "lock_mode:ExclusiveLock",
+                "lock_type:transactionid",
+                "granted:True",
+                "fastpath:False",
+            ],
+            id="transactionid lock should be visible",
+        ),
+        pytest.param(
+            ['persons'],
+            1,
+            'persons',
+            [
+                "lock_mode:ExclusiveLock",
+                "lock_type:virtualxid",
+                "granted:True",
+                "fastpath:True",
+            ],
+            id="virtualxid lock should be visible",
         ),
     ],
 )
@@ -474,21 +529,3 @@ def test_relations_validation_accepts_list_of_str_and_dict():
             {"relation_name": "person", "schemas": ["foo"]},
         ]
     )
-
-
-@pytest.mark.unit
-def test_relations_validation_fails_if_no_relname_or_regex():
-    with pytest.raises(ConfigurationError):
-        RelationsManager.validate_relations_config([{"relkind": ["i"]}])
-
-
-@pytest.mark.unit
-def test_relations_validation_fails_if_schemas_is_wrong_type():
-    with pytest.raises(ConfigurationError):
-        RelationsManager.validate_relations_config([{"relation_name": "person", "schemas": "foo"}])
-
-
-@pytest.mark.unit
-def test_relations_validation_fails_if_relkind_is_wrong_type():
-    with pytest.raises(ConfigurationError):
-        RelationsManager.validate_relations_config([{"relation_name": "person", "relkind": "foo"}])

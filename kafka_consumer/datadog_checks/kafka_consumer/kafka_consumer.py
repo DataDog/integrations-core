@@ -415,8 +415,10 @@ class KafkaCheck(AgentCheck):
             config_id = cfg["id"]
             value_format = kafka["value_format"]
             value_schema_str = kafka.get("value_schema", "")
+            value_uses_schema_registry = kafka.get("value_uses_schema_registry", False)
             key_format = kafka["key_format"]
             key_schema_str = kafka.get("key_schema", "")
+            key_uses_schema_registry = kafka.get("key_uses_schema_registry", False)
             if self._messages_have_been_retrieved(config_id):
                 continue
             if not cluster or not cluster_id or cluster.lower() != cluster_id.lower():
@@ -497,7 +499,13 @@ class KafkaCheck(AgentCheck):
                         'feature': 'data_streams_messages',
                     }
                     decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(
-                        message, value_format, value_schema, key_format, key_schema
+                        message,
+                        value_format,
+                        value_schema,
+                        value_uses_schema_registry,
+                        key_format,
+                        key_schema,
+                        key_uses_schema_registry,
                     )
                     if decoded_value:
                         data['message_value'] = decoded_value
@@ -570,31 +578,56 @@ def resolve_start_offsets(highwater_offsets, target_topic, target_partition, sta
     return [TopicPartition(target_topic, target_partition, start_offset)]
 
 
-def deserialize_message(message, value_format, value_schema, key_format, key_schema):
+def deserialize_message(
+    message,
+    value_format,
+    value_schema,
+    value_uses_schema_registry,
+    key_format,
+    key_schema,
+    key_uses_schema_registry,
+):
     try:
         decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(
-            message.value(), value_format, value_schema
+            message.value(), value_format, value_schema, value_uses_schema_registry
         )
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return None, None, None, None
     try:
-        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(message.key(), key_format, key_schema)
+        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(
+            message.key(), key_format, key_schema, key_uses_schema_registry
+        )
         return decoded_value, value_schema_id, decoded_key, key_schema_id
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return decoded_value, value_schema_id, None, None
 
 
-def _deserialize_bytes_maybe_schema_registry(message, message_format, schema):
-    try:
-        return _deserialize_bytes(message, message_format, schema), None
-    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as e:
-        # If the message is not a valid JSON, it might be a schema registry message, that is prefixed
-        # with a magic byte and a schema ID.
+def _deserialize_bytes_maybe_schema_registry(message, message_format, schema, uses_schema_registry):
+    if not message:
+        return "", None
+    if uses_schema_registry:
+        # When explicitly configured, go straight to schema registry format
         if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
-            raise e
+            msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
+            raise ValueError(
+                f"Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
+                f"but message is too short or has wrong magic byte: {msg_hex}"
+            )
         schema_id = int.from_bytes(message[1:5], 'big')
-        message = message[5:]  # Skip the schema ID bytes
+        message = message[5:]  # Skip the magic byte and schema ID bytes
         return _deserialize_bytes(message, message_format, schema), schema_id
+    else:
+        # Fallback behavior: try without schema registry format first, then with it
+        try:
+            return _deserialize_bytes(message, message_format, schema), None
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as e:
+            # If the message is not valid, it might be a schema registry message, that is prefixed
+            # with a magic byte and a schema ID.
+            if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
+                raise e
+            schema_id = int.from_bytes(message[1:5], 'big')
+            message = message[5:]  # Skip the magic byte and schema ID bytes
+            return _deserialize_bytes(message, message_format, schema), schema_id
 
 
 def _deserialize_bytes(message, message_format, schema):
@@ -621,18 +654,40 @@ def _deserialize_json(message):
 
 
 def _deserialize_protobuf(message, schema):
-    """Deserialize a Protobuf message using google.protobuf."""
+    """Deserialize a Protobuf message using google.protobuf with strict validation."""
     try:
-        schema.ParseFromString(message)
+        bytes_consumed = schema.ParseFromString(message)
+
+        # Check if all bytes were consumed (strict validation)
+        if bytes_consumed != len(message):
+            raise ValueError(
+                f"Not all bytes were consumed during Protobuf decoding! "
+                f"Read {bytes_consumed} bytes, but message has {len(message)} bytes. "
+            )
+
         return MessageToJson(schema)
     except Exception as e:
         raise ValueError(f"Failed to deserialize Protobuf message: {e}")
 
 
 def _deserialize_avro(message, schema):
-    """Deserialize an Avro message using fastavro."""
+    """Deserialize an Avro message using fastavro with strict validation."""
     try:
-        data = schemaless_reader(BytesIO(message), schema)
+        bio = BytesIO(message)
+        initial_position = bio.tell()
+        data = schemaless_reader(bio, schema)
+        final_position = bio.tell()
+
+        # Check if all bytes were consumed (strict validation)
+        bytes_read = final_position - initial_position
+        total_bytes = len(message)
+
+        if bytes_read != total_bytes:
+            raise ValueError(
+                f"Not all bytes were consumed during Avro decoding! "
+                f"Read {bytes_read} bytes, but message has {total_bytes} bytes. "
+            )
+
         return json.dumps(data)
     except Exception as e:
         raise ValueError(f"Failed to deserialize Avro message: {e}")
