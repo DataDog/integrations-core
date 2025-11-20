@@ -5,6 +5,7 @@
 from typing import Callable, Optional
 
 import pytest
+from datadog_checks.mysql.version_utils import MySQLVersion
 from packaging.version import parse as parse_version
 
 from datadog_checks.mysql import MySql
@@ -37,6 +38,7 @@ def integration_check() -> Callable[[dict, Optional[dict]], MySql]:
         nonlocal checks
         c = MySql(common.CHECK_NAME, init_config or {}, [instance])
         c.is_mariadb = MYSQL_FLAVOR.lower() == 'mariadb'
+        c.version = MySQLVersion(version=str(MYSQL_VERSION_PARSED), flavor=MYSQL_FLAVOR, build='')
         checks.append(c)
         return c
 
