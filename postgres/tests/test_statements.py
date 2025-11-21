@@ -50,6 +50,18 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
+
+@pytest.fixture(autouse=True)
+def auto_reset_pg_stat_statements(reset_pg_stat_statements):
+    """
+    Automatically reset pg_stat_statements before each test in this file.
+    This ensures test isolation for statement metrics tests.
+    """
+    # The reset happens before this fixture runs (in reset_pg_stat_statements)
+    # We just need to depend on it to trigger it
+    pass
+
+
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
     ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello"),
@@ -81,14 +93,17 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     connections = {}
 
     def normalize_query(q):
-        # Remove the quotes from below:
-        normalized = ""
-        for s in ["'one'", "'two'"]:
-            if s in q:
-                normalized = q.replace(s, "?")
-                break
-
-        return normalized
+        if float(POSTGRES_VERSION) >= 18:
+            # Postgres 18+ uses $1 placeholders in pg_stat_statements for SET queries
+            return q.replace('$1', '?')
+        else:
+            # Older versions store literal values
+            normalized = ""
+            for s in ["'one'", "'two'"]:
+                if s in q:
+                    normalized = q.replace(s, "?")
+                    break
+            return normalized
 
     def obfuscate_sql(query, options=None):
         if query.startswith('SET application_name'):
@@ -105,7 +120,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         dbname = "datadog_test"
         if dbname not in connections:
             connections[dbname] = psycopg.connect(
-                host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor
+                host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor
             )
 
         args = ('two',)

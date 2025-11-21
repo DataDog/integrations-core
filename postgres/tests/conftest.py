@@ -166,3 +166,25 @@ def e2e_instance():
     instance = copy.deepcopy(INSTANCE)
     instance['dbm'] = True
     return instance
+
+
+@pytest.fixture(scope='function', autouse=False)
+def reset_pg_stat_statements(pg_instance):
+    """
+    Resets pg_stat_statements before each test to ensure clean state.
+    This prevents test isolation issues when incremental_query_metrics is enabled.
+
+    Usage: Add this fixture as a parameter to any test that needs a clean pg_stat_statements state.
+    """
+    from .utils import _get_superconn
+
+    try:
+        with _get_superconn(pg_instance) as superconn:
+            with superconn.cursor() as cur:
+                cur.execute("SELECT pg_stat_statements_reset();")
+    except Exception:
+        # If pg_stat_statements is not available or we can't reset, that's okay
+        # Some tests might run on versions without pg_stat_statements
+        pass
+
+    yield
