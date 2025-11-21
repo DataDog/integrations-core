@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import contextlib
-import pprint
 from typing import TYPE_CHECKING, TypedDict
 
 from psycopg.rows import dict_row
@@ -373,7 +372,6 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
-        pprint.pprint(cursor_row)
         # Map the cursor row to the expected schema, and strip out None values
         object["schemas"] = [
             {
