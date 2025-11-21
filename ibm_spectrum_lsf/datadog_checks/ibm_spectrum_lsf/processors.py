@@ -19,7 +19,6 @@ from .common import (
     transform_runtime,
     transform_status,
     transform_tag,
-    transform_task_id,
     transform_time_left,
 )
 
@@ -342,7 +341,6 @@ class BJobsProcessor(LSFMetricsProcessor):
     def process_metrics(self) -> list[LSFMetric]:
         tags = [
             LSFTagMapping('job_id', 0, transform_job_id),
-            LSFTagMapping('task_id', 0, transform_task_id),
             LSFTagMapping('full_job_id', 0, transform_tag),
             LSFTagMapping('status', 1, transform_tag),
             LSFTagMapping('queue', 2, transform_tag),

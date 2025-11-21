@@ -38,15 +38,6 @@ def transform_job_id(val: str) -> str:
     return val.split("[")[0]
 
 
-def transform_task_id(val: str) -> str | None:
-    parts = val.split("[")
-    if len(parts) > 1:
-        second_part = parts[1].split("]")
-        task_id = second_part[0]
-        return task_id
-    return None
-
-
 def transform_tag(val: str) -> str | None:
     parsed = val.strip()
     if parsed == '-':

@@ -820,7 +820,7 @@ BJOBS_METRICS = [
             'queue:normal',
             'status:PEND',
         ],
-        "val": -1,
+        "val": 120,
     },
     # 175
     {
