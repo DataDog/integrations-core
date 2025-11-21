@@ -114,45 +114,46 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
         connections[dbname].cursor().execute(query, args)
 
+    try:
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+            mock_agent.side_effect = obfuscate_sql
 
-        check = integration_check(dbm_instance)
-        check._connect()
+            check = integration_check(dbm_instance)
+            check._connect()
 
-        # Seed a bunch of calls into pg_stat_statements
-        for _ in range(10):
+            # Seed a bunch of calls into pg_stat_statements
+            for _ in range(10):
+                _run_query(1)
+
+            _run_query(0)
+
+            run_one_check(check, cancel=False)
+
+            # Call one query
+            _run_query(0)
+            run_one_check(check, cancel=False)
+            aggregator.reset()
+
+            # Call other query that maps to same query signature
             _run_query(1)
+            run_one_check(check, cancel=False)
 
-        _run_query(0)
+            obfuscated_param = '?'
+            query0 = queries[0] % (obfuscated_param,)
+            query_signature = compute_sql_signature(query0)
+            events = aggregator.get_event_platform_events("dbm-metrics")
 
-        run_one_check(check, cancel=False)
+            assert len(events) > 0
 
-        # Call one query
-        _run_query(0)
-        run_one_check(check, cancel=False)
-        aggregator.reset()
+            matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
 
-        # Call other query that maps to same query signature
-        _run_query(1)
-        run_one_check(check, cancel=False)
+            assert len(matching_rows) == 1
 
-        obfuscated_param = '?'
-        query0 = queries[0] % (obfuscated_param,)
-        query_signature = compute_sql_signature(query0)
-        events = aggregator.get_event_platform_events("dbm-metrics")
-
-        assert len(events) > 0
-
-        matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
-
-        assert len(matching_rows) == 1
-
-        assert matching_rows[0]['calls'] == 1
-
-    for conn in connections.values():
-        conn.close()
+            assert matching_rows[0]['calls'] == 1
+    finally:
+        for conn in connections.values():
+            conn.close()
 
 
 statement_samples_keys = ["query_samples", "statement_samples"]
