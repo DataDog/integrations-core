@@ -1,4 +1,4 @@
-id: "REPLACE_WITH_APP_ID"
+id: resend
 tests:
  -
   sample: |-
@@ -31,44 +31,71 @@ tests:
       },
       "service": "events",
       "created_at": "2025-11-11T14:38:44.303203+00:00",
-      "type": "email.clicked",
+      "type": "email.clicked"
     }
   result:
-    custom: {}
+    custom:
+      created_at: "2025-11-11T14:38:44.303203+00:00"
+      data:
+        click:
+          ipAddress: "2620:1ec:bdf::40"
+          link: "https://example.com/products"
+          timestamp: "2025-11-11T14:38:43.814112+00:00"
+          userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0"
+        created_at: "2025-11-11T14:38:43.814135+00:00"
+        email_id: "50cd6bf1-577e-4001-9cef-5f55484111f0"
+        from: "do-not-reply@future.example.com"
+        headers:
+         -
+          name: "X-Example-ID"
+          value: "12312312-1234-1234-1234-123412341234"
+        subject: "Subscription Renewal Notice"
+        tags:
+          priority: "high"
+          type: "renewal"
+        template_id: "f6g7h8i9-j0k1-52l3-m4n5-o6p7q8r9s0t1"
+        to:
+         - "gyvonne.hough@example.com"
+      network:
+        client:
+          geoip: {}
+      resend:
+        domain: "future.example.com"
+        recipient_count: 1
+        recipients: "gyvonne.hough@example.com"
+      service: "events"
+      type: "email.clicked"
     message: |-
       {
-        "data": {
-          "email_id": "50cd6bf1-577e-4001-9cef-5f55484111f0",
-          "headers": [
-            {
-              "name": "X-Example-ID",
-              "value": "12312312-1234-1234-1234-123412341234"
-            }
-          ],
-          "subject": "Subscription Renewal Notice",
-          "created_at": "2025-11-11T14:38:43.814135+00:00",
-          "from": "do-not-reply@future.example.com",
-          "template_id": "f6g7h8i9-j0k1-52l3-m4n5-o6p7q8r9s0t1",
-          "to": [
-            "gyvonne.hough@example.com"
-          ],
-          "click": {
-            "ipAddress": "2620:1ec:bdf::40",
-            "link": "https://example.com/products",
-            "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0",
-            "timestamp": "2025-11-11T14:38:43.814112+00:00"
+        "data" : {
+          "email_id" : "50cd6bf1-577e-4001-9cef-5f55484111f0",
+          "headers" : [ {
+            "name" : "X-Example-ID",
+            "value" : "12312312-1234-1234-1234-123412341234"
+          } ],
+          "subject" : "Subscription Renewal Notice",
+          "created_at" : "2025-11-11T14:38:43.814135+00:00",
+          "from" : "do-not-reply@future.example.com",
+          "template_id" : "f6g7h8i9-j0k1-52l3-m4n5-o6p7q8r9s0t1",
+          "to" : [ "gyvonne.hough@example.com" ],
+          "click" : {
+            "ipAddress" : "2620:1ec:bdf::40",
+            "link" : "https://example.com/products",
+            "userAgent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0",
+            "timestamp" : "2025-11-11T14:38:43.814112+00:00"
           },
-          "tags": {
-            "priority": "high",
-            "type": "renewal"
+          "tags" : {
+            "priority" : "high",
+            "type" : "renewal"
           }
         },
-        "service": "events",
-        "created_at": "2025-11-11T14:38:44.303203+00:00",
-        "type": "email.clicked",
+        "service" : "events",
+        "created_at" : "2025-11-11T14:38:44.303203+00:00",
+        "type" : "email.clicked"
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1762871924303
  -
   sample: |-
     {
@@ -109,6 +136,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1758218197693
  -
   sample: |-
     {
@@ -175,6 +203,8 @@ tests:
           status: "verified"
         region: "us-east-1"
         status: "verified"
+      resend:
+        domain: "updates.helodali.com"
       type: "domain.deleted"
     message: |-
       {
@@ -212,6 +242,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1758217710788
  -
   sample: |-
     {
@@ -263,6 +294,10 @@ tests:
         subject: "Time to join the fun"
         to:
          - "brian+clarkson@mayalane.com"
+      resend:
+        domain: "resend.helodali.com"
+        recipient_count: 1
+        recipients: "brian+clarkson@mayalane.com"
       type: "email.delivered"
     message: |-
       {
@@ -292,3 +327,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1757627939303

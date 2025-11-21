@@ -9,7 +9,7 @@
 	"name": "[Resend] Spike in transactional email complaints for domain",
 	"type": "log alert",
 	"query": "logs(\"source:resend service:events @type:email.complained -@data.broadcast_id:*\").index(\"*\").rollup(\"count\").by(\"@resend.domain\").last(\"1d\") > 10",
-	"message": "The number of complaints from transactional email for {{[resend.domain].name}} is {{#is_alert}}high{{/is_alert}}{{#is_alert_recovery}}back below threshold{{/is_alert_recovery}}. @brian.williams@barefootcoders.com",
+	"message": "The number of complaints from transactional email for {{[resend.domain].name}} is {{#is_alert}}high{{/is_alert}}{{#is_alert_recovery}}back below threshold{{/is_alert_recovery}}. @example@example.com",
 	"tags": [
 		"source:resend"
 	],

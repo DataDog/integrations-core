@@ -9,7 +9,7 @@
 	"name": "[Resend] High transactional email delivery delayed rate for domain",
 	"type": "log alert",
 	"query": "logs(\"source:resend service:events @type:email.delivery_delayed -@data.broadcast_id:*\").index(\"*\").rollup(\"count\").by(\"@resend.domain\").last(\"1h\") > 10",
-	"message": "The number of recent delayed delivery from transactional email for {{[resend.domain].name}} is {{#is_alert}}high{{/is_alert}}{{#is_alert_recovery}}back below threshold{{/is_alert_recovery}}. @brian.williams@barefootcoders.com",
+	"message": "The number of recent delayed delivery from transactional email for {{[resend.domain].name}} is {{#is_alert}}high{{/is_alert}}{{#is_alert_recovery}}back below threshold{{/is_alert_recovery}}. @example@example.com",
 	"tags": [
 		"source:resend"
 	],

@@ -66,7 +66,7 @@ pipeline:
   name: Resend
   enabled: true
   filter:
-    query: source:resend service:events
+    query: source:resend
   processors:
     - type: date-remapper
       name: Define `created_at` as the official date of the log
