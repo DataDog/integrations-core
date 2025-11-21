@@ -69,11 +69,6 @@ def process_table_metrics(
 
 
 class LSFMetricsProcessor(ABC):
-    name: str
-    prefix: str
-    expected_columns: int
-    delimiter: str | None
-
     def __init__(
         self,
         name: str,
