@@ -15,7 +15,8 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 import pymysql
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
@@ -86,7 +87,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
+from .util import connect_with_session_variables
 from .version_utils import parse_version
 
 try:
@@ -222,6 +223,12 @@ class MySql(DatabaseCheck):
     @property
     def cloud_metadata(self):
         return self._cloud_metadata
+
+    @property
+    def dbms_version(self):
+        if self.version is None:
+            return None
+        return self.version.version + '+' + self.version.build
 
     @property
     def database_identifier(self):
