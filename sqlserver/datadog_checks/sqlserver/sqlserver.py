@@ -876,10 +876,12 @@ class SQLServer(DatabaseCheck):
                 )
                 self._query_manager.compile_queries()
             self._send_database_instance_metadata()
+
             if self._config.proc:
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
+
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             if self._config.dbm_enabled:
@@ -896,6 +898,7 @@ class SQLServer(DatabaseCheck):
                         handler.run_job_loop(self.tag_manager.get_tags())
                     except Exception as e:
                         self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
+
         else:
             self.log.debug("Skipping check")
 
@@ -970,52 +973,56 @@ class SQLServer(DatabaseCheck):
         else:
             self.log.warning("%s metrics are not supported on Azure engine version: %s", metric_name, engine_version)
 
+    # queries for default integration metrics from the database
+    def load_basic_metrics(self, cursor):
+        # initiate autodiscovery or if the server was down at check __init__ key could be missing.
+        if self.autodiscover_databases(cursor) or not self.instance_metrics:
+            self._make_metric_list_to_collect(self._config.custom_metrics)
+
+        instance_results = {}
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
+        # Execute the `fetch_all` operations first to minimize the database calls
+        for cls, metric_names in self.instance_per_type_metrics.items():
+            if not metric_names:
+                instance_results[cls] = None, None
+            else:
+                try:
+                    db_names = [d.name for d in self.databases] or [
+                        self.instance.get("database", self.connection.DEFAULT_DATABASE)
+                    ]
+                    metric_cls = getattr(metrics, cls)
+                    with tracked_query(self, operation=metric_cls.OPERATION_NAME):
+                        rows, cols = metric_cls.fetch_all_values(
+                            cursor,
+                            list(metric_names),
+                            self.log,
+                            databases=db_names,
+                            engine_edition=engine_edition,
+                        )
+                except Exception as e:
+                    self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
+                    rows, cols = None, None
+
+                instance_results[cls] = rows, cols
+
+        for metric in self.instance_metrics:
+            key = metric.__class__.__name__
+            if key not in instance_results:
+                self.log.warning("No %s metrics found, skipping", str(key))
+            else:
+                rows, cols = instance_results[key]
+                if rows is not None:
+                    if key == "SqlIncrFractionMetric":
+                        metric.fetch_metric(rows, cols, self.sqlserver_incr_fraction_metric_previous_values)
+                    else:
+                        metric.fetch_metric(rows, cols)
+
     def collect_metrics(self):
         """Fetch the metrics from all the associated database tables."""
-
         with self.connection.open_managed_default_connection():
-            with self.connection.get_managed_cursor() as cursor:
-                # initiate autodiscovery or if the server was down at check __init__ key could be missing.
-                if self.autodiscover_databases(cursor) or not self.instance_metrics:
-                    self._make_metric_list_to_collect(self._config.custom_metrics)
-
-                instance_results = {}
-                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
-                # Execute the `fetch_all` operations first to minimize the database calls
-                for cls, metric_names in self.instance_per_type_metrics.items():
-                    if not metric_names:
-                        instance_results[cls] = None, None
-                    else:
-                        try:
-                            db_names = [d.name for d in self.databases] or [
-                                self.instance.get("database", self.connection.DEFAULT_DATABASE)
-                            ]
-                            metric_cls = getattr(metrics, cls)
-                            with tracked_query(self, operation=metric_cls.OPERATION_NAME):
-                                rows, cols = metric_cls.fetch_all_values(
-                                    cursor,
-                                    list(metric_names),
-                                    self.log,
-                                    databases=db_names,
-                                    engine_edition=engine_edition,
-                                )
-                        except Exception as e:
-                            self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
-                            rows, cols = None, None
-
-                        instance_results[cls] = rows, cols
-
-                for metric in self.instance_metrics:
-                    key = metric.__class__.__name__
-                    if key not in instance_results:
-                        self.log.warning("No %s metrics found, skipping", str(key))
-                    else:
-                        rows, cols = instance_results[key]
-                        if rows is not None:
-                            if key == "SqlIncrFractionMetric":
-                                metric.fetch_metric(rows, cols, self.sqlserver_incr_fraction_metric_previous_values)
-                            else:
-                                metric.fetch_metric(rows, cols)
+            if not self._config.only_custom_queries:
+                with self.connection.get_managed_cursor() as cursor:
+                    self.load_basic_metrics(cursor)
 
             # Neither pyodbc nor adodbapi are able to read results of a query if the number of rows affected
             # statement are returned as part of the result set, so we disable for the entire connection
@@ -1024,14 +1031,15 @@ class SQLServer(DatabaseCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
-                # restore the current database after executing dynamic queries
-                # this is to ensure the current database context is not changed
-                with self.connection.restore_current_database_context():
-                    if self.database_metrics:
-                        for database_metric in self.database_metrics:
-                            database_metric.execute()
+                if not self._config.only_custom_queries:
+                    # restore the current database after executing dynamic queries
+                    # this is to ensure the current database context is not changed
+                    with self.connection.restore_current_database_context():
+                        if self.database_metrics:
+                            for database_metric in self.database_metrics:
+                                database_metric.execute()
 
-                # reuse connection for any custom queries
+                # reuse the connection for custom queries
                 self._query_manager.execute()
             finally:
                 with self.connection.get_managed_cursor() as cursor:
