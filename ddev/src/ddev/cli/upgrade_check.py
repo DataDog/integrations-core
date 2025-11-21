@@ -49,16 +49,21 @@ def upgrade_check(app, version, cache_file=CACHE_FILE, pypi_url=PYPI_URL, check_
             write_last_run(latest_version, date_now, cache_file)
             if latest_version > current_version:
                 msg = (
-                    f'\n!!An upgrade to version {latest_version} is available for {PACKAGE_NAME}. '
-                    f'Your current version is {current_version}!!'
+                    f'\n\u001b[31mAn upgrade to version {latest_version} is available for {PACKAGE_NAME}. '
+                    f'Your current version is {current_version}\u001b[0m'
                 )
                 atexit.register(exit_handler, app, msg)
         except (requests.RequestException, OSError, json.JSONDecodeError, KeyError, InvalidVersion) as e:
             logging.debug("Upgrade check failed: %s", e)
+            # Record the attempt to prevent even if failed
+            try:
+                write_last_run(current_version, date_now, cache_file)
+            except OSError:
+                pass
     else:
         if last_version > current_version:
             msg = (
-                f'\n!!An upgrade to version {last_version} is available for {PACKAGE_NAME}. '
-                f'Your current version is {current_version}!!'
+                f'\n\u001b[31mAn upgrade to version {last_version} is available for {PACKAGE_NAME}. '
+                f'Your current version is {current_version}\u001b[0m'
             )
             atexit.register(exit_handler, app, msg)
