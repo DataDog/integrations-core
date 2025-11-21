@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2025-09-24",
+  "last_updated_at": "2025-09-24",
+  "title": "Spike in transactional email bounces for domain",
+  "description": "Alert when a spike of transactional email bounces occurs.",
+  "definition": {
+	"id": 236301253,
+	"name": "[Resend] Spike in transactional email bounces for domain",
+	"type": "log alert",
+	"query": "logs(\"source:resend service:events @type:email.bounced -@data.broadcast_id:*\").index(\"*\").rollup(\"count\").by(\"@resend.domain\").last(\"4h\") > 10",
+	"message": "The number of recent transactional email bounces for {{[resend.domain].name}} is {{#is_alert}}high{{/is_alert}}{{#is_alert_recovery}}back below threshold{{/is_alert_recovery}}. @brian.williams@barefootcoders.com",
+	"tags": [
+		"source:resend"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 10
+		},
+		"enable_logs_sample": true,
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": true,
+		"new_group_delay": 60,
+		"groupby_simple_monitor": false
+	},
+	"priority": null
+  },
+  "tags": [
+    "integration:resend"
+  ]
+}

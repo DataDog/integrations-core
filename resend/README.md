@@ -28,7 +28,7 @@ Follow these steps to enable email click and optionally open email tracking for 
 3. For each sending domain in use:
    1. Click on the domain name to edit.
    2. In the Configuration section, enable **Click Tracking**.
-   3. Optionally, enable **Open Tracking**.
+   3. Optionally, enable **Open Tracking**. Though Resend [cautions against depending on open tracking](https://resend.com/docs/knowledge-base/why-are-my-open-rates-not-accurate).
 
 #### Optional: Surface the use of tags in transactional email in the Datadog Dashboard
 The Resend API supports per-message tags for transactional email, such as a 
@@ -44,8 +44,7 @@ contain email header and tag information which included sender and recipient ema
 Actual email content is not included in the events.
 
 ### Metrics
-The Resend integration defines log-based metrics to track the delivery status of your transactional and broadcast messages
-on a per-domain (for transactional email, the Resend domain) and per-broadcast (for broadcast email) basis.
+The Resend integration does not define any metrics.
 
 ### Service Checks
 Resend does not include any service checks.

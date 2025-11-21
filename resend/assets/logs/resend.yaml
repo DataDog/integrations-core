@@ -1,0 +1,136 @@
+id: resend
+metric_id: resend
+backend_only: false
+facets:
+  - description: ""
+    facetType: list
+    groups:
+      - Resend
+    name: Resend Broadcast Id
+    path: data.broadcast_id
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Resend
+    name: Resend Domain
+    path: resend.domain
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Resend
+    name: Resend Template Id
+    path: data.template_id
+    source: log
+    type: string
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Resend
+  enabled: true
+  filter:
+    query: source:resend service:events
+  processors:
+    - type: date-remapper
+      name: Define `created_at` as the official date of the log
+      enabled: true
+      sources:
+        - created_at
+    - type: pipeline
+      name: Email Events
+      enabled: true
+      filter:
+        query: "@type:email*"
+      processors:
+        - type: grok-parser
+          name: Parse `resend.domain` from `data.from`
+          enabled: true
+          source: data.from
+          samples:
+            - '{"data":{"email_id":"1054f755-fd92-4be2-a073-ece6b19be6bd","headers":[{"name":"Precedence","value":"bulk"},{"name":"X-Entity-Ref-ID","value":"a654fa0b-b6b7-4d9a-a95c-ff58d9086ec1"},{"name":"List-Unsubscribe","value":"<https://unsubscribe.resend.com/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb250YWN0SWQiOiJkNjg3YjQyOS1iNmUyLTQ2OTYtODRhZS05NzhkN2Q2MDViOTgiLCJhdWRpZW5jZUlkIjoiMmY1NGUwNzctYTdjNC00N2IxLTk1NzctYjliY2ViMTAzYzhiIiwiYnJvYWRjYXN0SWQiOiIyYzMwYWM4ZC0yNjJiLTQ3ODUtODRhYy00YzQ5OGY3NDdhYWEiLCJ0ZWFtSWQiOiIwM2Y2MjU3ZS05YWNhLTQzNzgtOTc2Zi02MjExMjkyMzc2YzUiLCJpYXQiOjE3NTc2Mjc5MzMsImV4cCI6MTc4OTE2MzkzM30.Mi7RIGdLxrUqkp4ixOPEJ1ZP6uyA1eAtpMNUymD96-g>"},{"name":"List-Unsubscribe-Post","value":"List-Unsubscribe=One-Click"}],"subject":"Your
+              Productivity Boost Awaits: New Features
+              Inside","broadcast_id":"db7bce7c-012a-4c66-9a30-c3257ce96e5c","created_at":"2025-09-16T16:48:20.612877+00:00","from":"HeloWorld
+              <heloworld@resend.example.com>","to":["stephanie.sanderson@example.com"]},"service":"events","created_at":"2025-09-11T21:58:59.303Z","type":"email.delivered"}'
+          grok:
+            supportRules: ""
+            matchRules: domain_from
+              %{regex(".+@")}%{regex("([^\">]+)"):resend.domain}%{regex(">?")}
+        - type: array-processor
+          name: Store recipient count in `resend.recipient_count`
+          enabled: true
+          operation:
+            source: data.to
+            target: resend.recipient_count
+            type: length
+        - type: string-builder-processor
+          name: Combine recipients into comma-separated `resend.recipients`
+          enabled: true
+          template: "%{data.to}"
+          target: resend.recipients
+          replaceMissing: false
+    - type: pipeline
+      name: Email Clicked
+      enabled: true
+      filter:
+        query: "@type:email.clicked"
+      processors:
+        - type: geo-ip-parser
+          name: GeoIP Parser
+          enabled: true
+          sources:
+            - data.click.ipAddress
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Domain Events
+      enabled: true
+      filter:
+        query: "@type:domain*"
+      processors:
+        - type: attribute-remapper
+          name: Map `data.name` to `resend.domain`
+          enabled: true
+          sources:
+            - data.name
+          sourceType: attribute
+          target: resend.domain
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false

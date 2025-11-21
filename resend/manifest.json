@@ -10,7 +10,28 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into your Resend transactional and broadcast email delivery.",
     "title": "Resend",
-    "media": [],
+    "media": [
+      {
+        "caption": "Resend Overview",
+        "image_url": "images/resend_overview_light_page1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Resend Overview (Page 2)",
+        "image_url": "images/resend_overview_light_page1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Resend Overview (Page 3)",
+        "image_url": "images/resend_overview_light_page3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Resend Overview (Page 4)",
+        "image_url": "images/resend_overview_light_page4.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Submitted Data Type::Logs",
       "Offering::Integration",
@@ -35,7 +56,22 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {}
+    "logs": {
+        "source": "resend"
+    },
+    "dashboards": {
+      "Resend Overview": "assets/dashboards/resend_overview.json"
+    },
+    "monitors": {
+      "High broadcast email delivery delayed rate for domain": "assets/monitors/high_broadcast_email_delivery_delayed.json",
+      "High broadcast email delivery failure rate for domain": "assets/monitors/high_broadcast_email_delivery_failure.json",
+      "High transactional email delivery delayed rate for domain": "assets/monitors/high_transactional_email_delivery_delayed.json",
+      "High transactional email delivery failure rate for domain": "assets/monitors/high_transactional_email_delivery_failure.json",
+      "Spike in broadcast email bounces for domain": "assets/monitors/spike_in_broadcast_email_bounces.json",
+      "Spike in broadcast email complaints for domain": "assets/monitors/spike_in_broadcast_email_complaints.json",
+      "Spike in transactional email bounces for domain": "assets/monitors/spike_in_transactional_email_bounces.json",
+      "Spike in transactional email complaints for domain": "assets/monitors/spike_in_transactional_email_complaints.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
