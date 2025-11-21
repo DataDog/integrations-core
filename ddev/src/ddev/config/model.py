@@ -85,10 +85,10 @@ class RootConfig(LazilyParsedConfig):
                 elif raw_update.lower() == 'false':
                     upgrade_check = False
                 else:
-                    raise ValueError(f'Invalid value for upgrade_check, it must be True or False: {raw_update}')
+                    self.raise_error(f'must be a boolean or the string "true"/"false", got: {raw_update!r}')
 
             else:
-                raise TypeError(f'Invalid value for upgrade_check, it must be True or False: {type(raw_update)}')
+                self.raise_error(f'must be a boolean or string, got type: {type(raw_update).__name__}')
             self._field_upgrade_check = upgrade_check
         return self._field_upgrade_check
 
