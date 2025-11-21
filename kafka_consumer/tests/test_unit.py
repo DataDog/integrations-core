@@ -27,7 +27,7 @@ from datadog_checks.kafka_consumer.kafka_consumer import (
 pytestmark = [pytest.mark.unit]
 
 
-def fake_consumer_offsets_for_times(partitions):
+def fake_consumer_offsets_for_times(partitions, offset=-1):
     """In our testing environment the offset is 80 for all partitions and topics."""
 
     return [(t, p, 80) for t, p in partitions]
