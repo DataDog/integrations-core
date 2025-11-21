@@ -881,7 +881,7 @@ pipeline:
                 query: "@ocsf.metadata.log_name:(SignInLogs OR NonInteractiveUserSignInLogs)"
               name: User
             - filter:
-                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
+                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR MicrosoftServicePrincipalSignInLogs OR ServicePrincipalSignInLogs)"
               name: System
           target: ocsf.actor.user.type
         - type: category-processor
@@ -892,7 +892,7 @@ pipeline:
                 query: "@ocsf.metadata.log_name:(SignInLogs OR NonInteractiveUserSignInLogs)"
               name: "1"
             - filter:
-                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
+                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR MicrosoftServicePrincipalSignInLogs OR ServicePrincipalSignInLogs)"
               name: "3"
             - filter:
                 query: "@ocsf.metadata.log_name:*"
@@ -948,7 +948,7 @@ pipeline:
                 query: "@ocsf.metadata.log_name:(SignInLogs OR NonInteractiveUserSignInLogs)"
               name: User
             - filter:
-                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
+                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR MicrosoftServicePrincipalSignInLogs OR ServicePrincipalSignInLogs)"
               name: System
           target: ocsf.user.type
         - type: category-processor
@@ -959,7 +959,7 @@ pipeline:
                 query: "@ocsf.metadata.log_name:(SignInLogs OR NonInteractiveUserSignInLogs)"
               name: "1"
             - filter:
-                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
+                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR MicrosoftServicePrincipalSignInLogs OR ServicePrincipalSignInLogs)"
               name: "3"
             - filter:
                 query: "@ocsf.metadata.log_name:*"
@@ -1242,7 +1242,7 @@ pipeline:
           operation:
             source: properties.targetResources
             target: ocsf.privilege
-            filter: 'type:(ServicePrincipal OR User OR Group)'
+            filter: "type:(ServicePrincipal OR User OR Group)"
             valueToExtract: modifiedProperties
             type: select
         - type: array-processor
@@ -1251,7 +1251,7 @@ pipeline:
           operation:
             source: ocsf.privilege
             target: ocsf.privilege
-            filter: 'displayName:*DisplayName*'
+            filter: "displayName:*DisplayName*"
             valueToExtract: newValue
             type: select
         - type: category-processor

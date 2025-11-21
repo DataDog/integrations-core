@@ -46,6 +46,7 @@ class ClickhouseCheck(AgentCheck):
             self.execute_query_raw,
             queries=[
                 queries.SystemMetrics,
+                queries.SystemEventsToDeprecate,
                 queries.SystemEvents,
                 queries.SystemAsynchronousMetrics,
                 queries.SystemErrors,

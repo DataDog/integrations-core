@@ -12,20 +12,22 @@ import psycopg
 import psycopg.sql
 import pytest
 
+from datadog_checks.postgres.config_models.dict_defaults import instance_database_autodiscovery
+
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics
 from .utils import requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
     "enabled": True,
-    "include": ["dogs_([0-9]|[1-9][0-9]|10[0-9])"],
-    "exclude": ["dogs_5$", "dogs_50$"],
+    "include": ["dogs_[0-9]"],
+    "exclude": ["dogs_5$"],
 }
 
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 
 
-# the number of test databases that exist from [dogs_0, dogs_100]
-NUM_DOGS_DATABASES = 101
+# the number of test databases that exist from [dogs_0, dogs_9]
+NUM_DOGS_DATABASES = 10
 
 RELATION_METRICS = {
     'postgresql.seq_scans',
@@ -78,8 +80,9 @@ def get_postgres_connection(dbname="postgres"):
     yield conn
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+
+
 def test_autodiscovery_simple(integration_check, pg_instance):
     """
     Test simple autodiscovery.
@@ -95,8 +98,6 @@ def test_autodiscovery_simple(integration_check, pg_instance):
     assert len(databases) == expected_len
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_global_view_db_specified(integration_check, pg_instance):
     """
     Test autodiscovery with global view db specified.
@@ -113,14 +114,12 @@ def test_autodiscovery_global_view_db_specified(integration_check, pg_instance):
     assert len(databases) == expected_len
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_max_databases(integration_check, pg_instance):
     """
     Test database list truncation.
     """
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
-    pg_instance['database_autodiscovery']['max_databases'] = 20
+    pg_instance['database_autodiscovery']['max_databases'] = 7
     del pg_instance['dbname']
 
     check = integration_check(pg_instance)
@@ -142,8 +141,6 @@ def test_autodiscovery_max_databases(integration_check, pg_instance):
     assert check.warnings == expected_warning
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 @requires_over_13
 def test_autodiscovery_refresh(integration_check, pg_instance):
     """
@@ -178,8 +175,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
             )
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.flaky(max_runs=5)
 def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_instance):
     """
     Check that metrics get collected for each database discovered.
@@ -198,6 +194,10 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     # it does not make sense to create and execute the dummy_function for every single database
     with get_postgres_connection(dbname='dogs_nofunc') as conn:
         with conn.cursor() as cursor:
+            # Run a few times to reduce flakiness
+            cursor.execute("SELECT dummy_function()")
+            cursor.execute("SELECT dummy_function()")
+            cursor.execute("SELECT dummy_function()")
             cursor.execute("SELECT dummy_function()")
     conn.close()
 
@@ -236,8 +236,6 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
         aggregator.assert_metric('postgresql.checksums.enabled', value=1, tags=checksum_metrics_expected_tags)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_exceeds_min_interval(aggregator, integration_check, pg_instance):
     """
     Check that relation metrics get collected for each database discovered.
@@ -269,10 +267,10 @@ def _set_allow_connection(dbname: str, allow: bool):
         conn.commit()
 
 
-@pytest.mark.integration
 def test_handle_cannot_connect(aggregator, integration_check, pg_instance):
     db_to_disable = "dogs_0"
     _set_allow_connection(db_to_disable, False)
+    pg_instance["collect_settings"] = {"enabled": False}
     pg_instance["database_autodiscovery"] = {"enabled": True, "include": ["dogs_[0-3]"]}
     del pg_instance['dbname']
     check = integration_check(pg_instance)
@@ -280,3 +278,43 @@ def test_handle_cannot_connect(aggregator, integration_check, pg_instance):
     expected_tags = _get_expected_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
     _set_allow_connection(db_to_disable, True)
+
+
+def test_database_autodiscovery_exclude_defaults(aggregator, integration_check, pg_instance):
+    """
+    Test that the exclude defaults for database autodiscovery filters the excluded databases
+    """
+
+    pg_instance["database_autodiscovery"] = {
+        "enabled": True,
+    }
+    del pg_instance['dbname']
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+
+    databases_excluded_by_default = instance_database_autodiscovery().exclude
+    check_excludes = check._config.database_autodiscovery.exclude
+
+    assert databases_excluded_by_default == check_excludes
+    assert check.autodiscovery is not None
+
+
+def test_database_autodiscovery_exclude_defaults_overriden(aggregator, integration_check, pg_instance):
+    """
+    Test that the exclude defaults for database autodiscovery can be overriden
+    """
+
+    exclude_reg = "dogs_2$"
+
+    pg_instance["database_autodiscovery"] = {"enabled": True, "exclude": [exclude_reg]}
+    del pg_instance['dbname']
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+
+    databases_excluded_by_default = instance_database_autodiscovery().exclude
+    check_excludes = check._config.database_autodiscovery.exclude
+
+    assert check.autodiscovery is not None
+    assert check_excludes != databases_excluded_by_default
+    assert exclude_reg in check_excludes
+    assert len(check_excludes) == 1

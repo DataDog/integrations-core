@@ -175,7 +175,7 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
         └── Apache
             └── {outfile}
 
-                apache:2 metric_prefix does not exist in manifest.
+                apache: metric_prefix does not exist in manifest or overrides.
 
         Errors: 1
         """
@@ -318,6 +318,41 @@ def test_integration_header(ddev, repository, helpers):
                 apache:7 integration: `apache___` should be: apache.
 
         Errors: 1
+        """
+    )
+
+
+def test_integration_header_with_override(ddev, repository, helpers):
+    helpers.write_file(
+        repository.path / 'apache',
+        'metadata.csv',
+        helpers.dedent(
+            """
+        metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+        apache.conns_total,gauge,,connection,,The number of connections.,0,apache___,,
+        """
+        ),
+    )
+
+    helpers.write_file(
+        repository.path / ".ddev",
+        "config.toml",
+        helpers.dedent(
+            """
+        [overrides.validate.metadata.integration]
+        apache = "apache___"
+        """
+        ),
+    )
+
+    result = ddev("validate", "metadata", 'apache')
+
+    assert result.exit_code == 0, result.output
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        Metrics validation
+
+        Passed: 1
         """
     )
 
@@ -577,7 +612,7 @@ def test_prefix_match(ddev, repository, helpers):
             └── {outfile}
 
                 apache: `invalid_metric_prefix` appears 1 time(s) and does not match
-                metric_prefix defined in the manifest.
+                metric_prefix defined for this integration: metric_prefix='apache.'.
 
         Errors: 1
         """

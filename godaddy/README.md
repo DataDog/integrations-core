@@ -5,8 +5,6 @@
 
 The GoDaddy integration collects metrics from SSL certificates and their domains, directing them into Datadog for analysis. This integration provides data points such as the total number of certificates, issued certificates, expired certificates, revoked certificates, and domains associated with each certificate. It also includes specific metrics for certificates nearing expiration. All these metrics are accessible through out-of-the-box dashboards and monitors.
 
-**Minimum Agent version:** 7.56.0
-
 ## Setup
 
 ### Generate API credentials in GoDaddy

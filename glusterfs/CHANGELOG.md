@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.0 / 2025-10-31
+
+***Added***:
+
+* Add volume heal entries count metric ([#21634](https://github.com/DataDog/integrations-core/pull/21634))
+
+## 3.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
 ## 3.0.2 / 2025-07-10 / Agent 7.69.0
 
 ***Fixed***:

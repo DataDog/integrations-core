@@ -89,7 +89,7 @@ class AzureTokenProvider(TokenProvider):
         from .azure import generate_managed_identity_token
 
         token = generate_managed_identity_token(client_id=self.client_id, identity_scope=self.identity_scope)
-        return token.token, float(token.expires_at)
+        return token.token, float(token.expires_on)
 
 
 class TokenAwareConnection(Connection):
@@ -97,15 +97,17 @@ class TokenAwareConnection(Connection):
     Connection that can be used for managed authentication.
     """
 
-    token_provider: Optional[TokenProvider] = None
-
     @classmethod
     def connect(cls, *args, **kwargs):
         """
         Override the connection method to pass a refreshable token as the connection password.
+
+        The token_provider can be passed via the 'token_provider' kwarg and will be used
+        to dynamically fetch authentication tokens.
         """
-        if cls.token_provider:
-            kwargs["password"] = cls.token_provider.get_token()
+        token_provider = kwargs.pop("token_provider", None)
+        if token_provider:
+            kwargs["password"] = token_provider.get_token()
         return super().connect(*args, **kwargs)
 
 
@@ -193,6 +195,7 @@ class LRUConnectionPoolManager:
             pool_config (dict, optional): Additional ConnectionPool settings (min_size, max_size, etc).
             statement_timeout (int, optional): Statement timeout in milliseconds.
             sqlascii_encodings (list[str], optional): List of encodings to handle for SQLASCII text.
+            token_provider (TokenProvider, optional): Token provider for managed authentication.
         """
         self.max_db = max_db
         self.base_conn_args = base_conn_args
@@ -206,8 +209,6 @@ class LRUConnectionPoolManager:
             "max_size": 2,
             "open": True,
         }
-
-        TokenAwareConnection.token_provider = self.token_provider
 
         self.lock = threading.Lock()
         self.pools: OrderedDict[str, Tuple[ConnectionPool, float, bool]] = OrderedDict()
@@ -239,6 +240,10 @@ class LRUConnectionPoolManager:
             ConnectionPool: A new pool instance configured for the dbname.
         """
         kwargs = self.base_conn_args.as_kwargs(dbname=dbname)
+
+        # Pass the token_provider as a kwarg so it's available to TokenAwareConnection.connect()
+        if self.token_provider:
+            kwargs["token_provider"] = self.token_provider
 
         return ConnectionPool(
             kwargs=kwargs,

@@ -78,7 +78,12 @@ def status(
             if commit:
                 from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
 
-                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat)
+                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, ver, compressed)
+                if not dependency_sizes:
+                    app.display_error(
+                        "Could not find dependency sizes in the artifacts: falling back to local lockfiles"
+                    )
+
             parameters: CLIParameters = {
                 "app": app,
                 "platform": plat,
@@ -159,11 +164,17 @@ def status_mode(
         if dependency_sizes:
             from ddev.cli.size.utils.common_funcs import get_dependencies_from_json
 
+            params["app"].display_debug(
+                f"Getting dependencies from artifacts for {params['platform']} {params['version']}"
+            )
             modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies_from_json(
                 dependency_sizes, params["platform"], params["version"], params["compressed"]
             )
 
         else:
+            params["app"].display_debug(
+                f"Getting dependencies from lockfiles for {params['platform']} {params['version']}"
+            )
             modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
                 repo_path, params["platform"], params["version"], params["compressed"]
             )

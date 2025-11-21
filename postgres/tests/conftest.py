@@ -59,10 +59,14 @@ def connect_to_pg():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(e2e_instance):
+def dd_environment(e2e_instance, skip_env):
     """
     Start a standalone postgres server requiring authentication.
     """
+    if skip_env:
+        yield e2e_instance, E2E_METADATA
+        return
+
     compose_file = 'docker-compose.yaml'
     if float(POSTGRES_VERSION) >= 10.0:
         compose_file = 'docker-compose-replication.yaml'
@@ -75,6 +79,23 @@ def dd_environment(e2e_instance):
         yield e2e_instance, E2E_METADATA
 
 
+# Skip environment setup
+# This is helpful for running tests locally without having to spin up the environment repeatedly
+# To use this, launch the necessary docker compose files manually and then run the tests with --skip-env
+def pytest_addoption(parser: pytest.Parser):
+    parser.addoption(
+        "--skip-env",
+        action="store_true",
+        default=False,
+        help="skip environment setup",
+    )
+
+
+@pytest.fixture(scope='session')
+def skip_env(request):
+    return request.config.getoption("--skip-env")
+
+
 @pytest.fixture
 def check():
     c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432', 'username': USER}])
@@ -84,16 +105,17 @@ def check():
 
 @pytest.fixture(scope="function")
 def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
-    c = None
+    checks = []
 
     def _check(instance: dict, init_config: dict = None):
-        nonlocal c
+        nonlocal checks
         c = PostgreSql('postgres', init_config or {}, [instance])
+        checks.append(c)
         return c
 
     yield _check
 
-    if c:
+    for c in checks:
         c.cancel()
 
 
@@ -124,16 +146,16 @@ def pg_replica_logical():
 
 
 @pytest.fixture
-def metrics_cache(pg_instance):
-    check = PostgreSql('postgres', {}, [pg_instance])
+def metrics_cache(pg_instance, integration_check):
+    check = integration_check(pg_instance)
     check.warning = print
     config, _ = build_config(check)
     return PostgresMetricsCache(config)
 
 
 @pytest.fixture
-def metrics_cache_replica(pg_replica_instance):
-    check = PostgreSql('postgres', {}, [pg_replica_instance])
+def metrics_cache_replica(pg_replica_instance, integration_check):
+    check = integration_check(pg_replica_instance)
     check.warning = print
     config, _ = build_config(check)
     return PostgresMetricsCache(config)

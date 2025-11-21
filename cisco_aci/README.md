@@ -7,11 +7,13 @@ The Cisco ACI Integration lets you:
 - Track the state and health of your network
 - Track the capacity of your ACI
 - Monitor the switches and controllers themselves
-- The ability to monitor devices via [Network Devices Monitoring][11]
+- The ability to monitor devices with [Network Device Monitoring][11]
 
 **Minimum Agent version:** 6.3.2
 
 ## Setup
+
+<div class="alert alert-info">Enabling send_ndm_metadata to send metadata from this integration has potential billing implications. See the <a href="https://www.datadoghq.com/pricing/?product=network-monitoring&tab=ndm#products"> pricing page </a> for more information.</div>
 
 ### Installation
 
@@ -62,20 +64,38 @@ To configure this check for an Agent running on a host:
         #
         # send_ndm_metadata: false
 
+        #Enable collection of Cisco ACI fault logs (Requires send_ndm_metadata to be enabled).
+
         ## @param send_faultinst_faults - boolean - optional - default: false
         ## Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
-        #
+        
         # send_faultinst_faults: false
 
         ## @param send_faultdelegate_faults - boolean - optional - default: false
         ## Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
-        #
-        # send_faultdelegate_faults: false
-   ```
-   
-   *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
 
-2. [Restart the Agent][4] to begin sending Cisco ACI metrics to Datadog.
+        # send_faultdelegate_faults: false
+          
+   ```
+
+2. If you have enabled `send_faultinst_faults` or `send_faultdelegate_faults`, ensure [logging is enabled][17] in your Datadog `.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+3. Additionally, to receive [ACI faults](#cisco-aci-faults) as logs, add the following configuration to the logs section of your `cisco_aci.d/conf.yaml` file:
+
+   ```yaml
+   logs:
+     - type: integration
+       source: cisco-aci
+       service: cisco-aci
+   ```
+
+4. [Restart the Agent][4] to begin sending Cisco ACI metrics and optionally, ACI fault logs to Datadog.
+
+   **Note**: Be sure to specify any tenants for the integration to collect metrics on applications (for example, EPG).
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -107,6 +127,21 @@ Specific supported vendor profiles for this integration can be found on the [net
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+### Cisco ACI faults
+
+**Note**: Requires `send_ndm_metadata` to be enabled.
+
+Cisco ACI faults are collected by the Agent and stored in Datadog as logs. They can be viewed from the [Cisco ACI dashboard][15], or by filtering for `source:cisco-aci` in the [Log Explorer][16].
+
+There are two types of Cisco ACI faults: `fault:Inst` and `fault:Delegate`. See [fault objects and records][12] for more information.
+ 
+The Cisco ACI config `.yaml` file can be set up to collect one or both of the following fault types:
+
+| Fault Type          | Description                                                                 |
+|---------------------|-----------------------------------------------------------------------------|
+| [send_faultinst_faults][13]     | Set to `true` to enable collection of Cisco ACI `faultInst` faults as logs. |
+| [send_faultdelegate_faults][14] | Set to `true` to enable collection of Cisco ACI `faultDelegate` faults as logs. |
+
 ### Events
 
 The Cisco ACI check sends tenant faults as events.
@@ -118,7 +153,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 ## Troubleshooting
 
 ### Missing `cisco_aci.tenant.*` metrics
-If you are missing `cisco_aci.tenant.*` metrics, you can run the `test/cisco_aci_query.py` script to manually query the tenant endpoint.
+If you are missing `cisco_aci.tenant.*` metrics, you can run the `tests/cisco_aci_query.py` [script][18] to manually query the tenant endpoint. 
 
 Modify the `apic_url`, `apic_username`, and `apic_password` to your configuration information, and input the tenant URL for the `apic_url`.
 
@@ -142,7 +177,8 @@ Because this check queries all the tenants, apps, and endpoints listed before re
     Last Successful Execution Date : 2023-01-04 15:58:04 CST / 2023-01-04 21:58:04 UTC (1672869484000)
   ```
 
-Need help? Contact [Datadog support][9].
+### Help
+Contact [Datadog support][9].
 
 [1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -154,4 +190,11 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
-[11]: https://www.datadoghq.com/product/network-monitoring/network-device-monitoring/
+[11]: https://www.datadoghq.com/product/network-monitoring/#ndm
+[12]: https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/all/faults/guide/b_APIC_Faults_Errors/b_IFC_Faults_Errors_chapter_01.html
+[13]: https://github.com/DataDog/integrations-core/blob/c5890c7b6946a5e7e9d4c6eda993821eb6b75055/cisco_aci/assets/configuration/spec.yaml#L109-L115
+[14]: https://github.com/DataDog/integrations-core/blob/c5890c7b6946a5e7e9d4c6eda993821eb6b75055/cisco_aci/assets/configuration/spec.yaml#L116-L122  
+[15]: /dash/integration/242/cisco-aci---overview
+[16]: /logs
+[17]: https://docs.datadoghq.com/logs/log_collection/?tab=host#setup
+[18]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/tests/cisco_aci_query.py

@@ -23,6 +23,8 @@ from datadog_checks.postgres.relationsmanager import RelationsManager
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
+import time
+
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
@@ -46,6 +48,7 @@ class ValidationResult:
         self.features: list[Feature] = []
         self.errors: list[ConfigurationError] = []
         self.warnings: list[str] = []
+        self.created_at: int = int(time.time() * 1000)
 
     def add_feature(self, feature: FeatureKey, enabled=True, description: Optional[str] = None):
         """
@@ -99,6 +102,15 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
         if f in instance:
             args[f] = instance[f]
 
+    # Build database_autodiscovery config first, as we may need it for dbname defaulting
+    database_autodiscovery_config = {
+        **dict_defaults.instance_database_autodiscovery().model_dump(),
+        **(instance.get('database_autodiscovery', {})),
+    }
+
+    if 'dbname' not in instance and database_autodiscovery_config.get('enabled'):
+        args['dbname'] = database_autodiscovery_config.get('global_view_db')
+
     # Set values for args that have deprecated fallbacks, are not supported by the spec model
     # or have other complexities
     # If you change a literal value here, make sure to update spec.yaml
@@ -116,10 +128,7 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
                 **dict_defaults.instance_database_identifier().model_dump(),
                 **(instance.get('database_identifier', {})),
             },
-            "database_autodiscovery": {
-                **dict_defaults.instance_database_autodiscovery().model_dump(),
-                **(instance.get('database_autodiscovery', {})),
-            },
+            "database_autodiscovery": database_autodiscovery_config,
             "query_metrics": {
                 **dict_defaults.instance_query_metrics().model_dump(),
                 **{
@@ -177,6 +186,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             "metric_patterns": instance.get('metric_patterns', None),
         }
     )
+
+    # Backfill old key to new key
+    if instance.get('obfuscator_options', {}).get('quantize_sql_tables'):
+        args['obfuscator_options']['replace_digits'] = True
 
     validation_result = ValidationResult()
 
@@ -378,6 +391,28 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
             'The `empty_default_hostname` option has no effect in the Postgres check. '
             'Use the `exclude_hostname` option instead.'
         )
+
+    # Validate dbname is not excluded when using autodiscovery
+    # Only validate when dbname was NOT explicitly set by the user (auto-defaulted)
+    # If user explicitly set dbname, they may intentionally want to connect to an excluded database
+    # for global operations while excluding it from per-database metric collection
+    if config.database_autodiscovery.enabled and config.dbname and 'dbname' not in instance:
+        import re
+
+        # Guard against None - exclude could be explicitly set to null to remove default exclusions
+        for exclude_pattern in config.database_autodiscovery.exclude or ():
+            try:
+                # Note: Match is case-sensitive to match the behavior of the base Discovery Filter class
+                if re.search(exclude_pattern, config.dbname):
+                    # Auto-defaulted dbname conflicts - suggest setting global_view_db
+                    validation_result.add_error(
+                        f'The default dbname "{config.dbname}" is excluded by autodiscovery pattern '
+                        f'"{exclude_pattern}". Set database_autodiscovery.global_view_db to a '
+                        f'non-excluded database.'
+                    )
+                    break
+            except re.error:
+                validation_result.add_warning(f'Invalid regex pattern in autodiscovery exclude: {exclude_pattern}')
 
     # If the user provided config explicitly enables these features, we add a warning if dbm is not enabled
     dbm_required = ['query_activity', 'query_samples', 'query_metrics', 'collect_settings', 'collect_schemas']

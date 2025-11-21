@@ -9,7 +9,7 @@ import pytest
 from pytest import fail
 from semver import VersionInfo
 
-from datadog_checks.postgres import PostgreSql, util
+from datadog_checks.postgres import util
 
 pytestmark = pytest.mark.unit
 
@@ -69,14 +69,14 @@ def test_get_instance_metrics_database_size_metrics(integration_check, pg_instan
 
 
 @pytest.mark.parametrize("collect_default_database", [True, False])
-def test_get_instance_with_default(pg_instance, collect_default_database):
+def test_get_instance_with_default(pg_instance, collect_default_database, integration_check):
     """
     Test the contents of the query string with different `collect_default_database` values
     """
     pg_instance['collect_default_database'] = collect_default_database
     if not collect_default_database:
         pg_instance['ignore_databases'] = ['postgres']
-    check = PostgreSql('postgres', {}, [pg_instance])
+    check = integration_check(pg_instance)
     check.version = VersionInfo(9, 2, 0)
     res = check.metrics_cache.get_instance_metrics(check.version)
     dbfilter = " AND psd.datname not ilike 'postgres'"
@@ -146,7 +146,6 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
-                'ddagenthostname:stubbed.hostname',
             },
         ),
         (
@@ -159,29 +158,28 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
-                'ddagenthostname:stubbed.hostname',
             },
         ),
     ],
 )
-def test_server_tag_(disable_generic_tags, expected_tags, pg_instance):
+def test_server_tag_(disable_generic_tags, expected_tags, pg_instance, integration_check):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = disable_generic_tags
-    check = PostgreSql('test_instance', {}, [instance])
+    check = integration_check(instance)
     assert set(check.tags) == expected_tags
 
 
 @pytest.mark.parametrize(
     'disable_generic_tags, expected_hostname', [(True, 'resolved.hostname'), (False, 'resolved.hostname')]
 )
-def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance):
+def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance, integration_check):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = disable_generic_tags
 
     with mock.patch(
         'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
     ) as resolve_db_host_mock:
-        check = PostgreSql('test_instance', {}, [instance])
+        check = integration_check(instance)
         assert check.resolved_hostname == expected_hostname
         assert resolve_db_host_mock.called is True
 
@@ -196,14 +194,14 @@ def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance)
         ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
     ],
 )
-def test_database_identifier(pg_instance, template, expected, tags):
+def test_database_identifier(pg_instance, template, expected, tags, integration_check):
     """
     Test functionality of calculating database_identifier
     """
 
     pg_instance['database_identifier'] = {'template': template}
     pg_instance['tags'] = tags
-    check = PostgreSql('postgres', {}, [pg_instance])
+    check = integration_check(pg_instance)
     assert check.database_identifier == expected
 
 

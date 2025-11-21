@@ -257,6 +257,8 @@ integration/forcepoint_secure_web_gateway:
 - forcepoint_secure_web_gateway/**/*
 integration/forcepoint_security_service_edge:
 - forcepoint_security_service_edge/**/*
+integration/forescout:
+- forescout/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/freshservice:
@@ -283,6 +285,8 @@ integration/gpu:
 - gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
+integration/guarddog:
+- guarddog/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:
@@ -361,6 +365,8 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
+integration/kandji:
+- kandji/**/*
 integration/keda:
 - keda/**/*
 integration/keeper:
@@ -485,6 +491,8 @@ integration/nvidia_nim:
 - nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/obsidian_security:
+- obsidian_security/**/*
 integration/octopus_deploy:
 - octopus_deploy/**/*
 integration/oke:
@@ -563,6 +571,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/push_security:
+- push_security/**/*
 integration/quarkus:
 - quarkus/**/*
 integration/rabbitmq:
@@ -709,8 +719,6 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trellix_endpoint_security:
 - trellix_endpoint_security/**/*
-integration/trend_micro_cloud_one:
-- trend_micro_cloud_one/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
 integration/trend_micro_vision_one_endpoint_security:
@@ -777,8 +785,12 @@ integration/zerofox_cloud_platform:
 - zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
+integration/barracuda_secure_edge:
+- barracuda_secure_edge/**/*
 integration/cloudgen_firewall:
 - cloudgen_firewall/**/*
+integration/zscaler_private_access:
+- zscaler_private_access/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt

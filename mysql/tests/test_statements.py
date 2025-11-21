@@ -155,7 +155,6 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
@@ -380,7 +379,6 @@ def test_statement_metrics_cloud_metadata(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
@@ -401,7 +399,13 @@ def test_statement_metrics_cloud_metadata(
         (
             'information_schema',
             'select * from testdb.users',
-            [{'strategy': 'PROCEDURE', 'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"}],
+            [
+                {
+                    'strategy': 'PROCEDURE',
+                    'code': 'database_error',
+                    'message': "1044: Access denied for user 'dog'@'%' to database 'information_schema'",
+                }
+            ],
             StatementTruncationState.not_truncated.value,
         ),
         (
@@ -411,7 +415,7 @@ def test_statement_metrics_cloud_metadata(
                 {
                     'strategy': 'FQ_PROCEDURE',
                     'code': 'database_error',
-                    'message': "<class 'pymysql.err.ProgrammingError'>",
+                    'message': "1146: Table 'datadog.users' doesn't exist",
                 }
             ],
             StatementTruncationState.not_truncated.value,
@@ -911,7 +915,6 @@ def _expected_dbm_instance_tags(dbm_instance, check):
     _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
-        'ddagenthostname:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
@@ -929,7 +932,6 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
     _tags = dbm_instance['tags'] + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
-        'ddagenthostname:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',

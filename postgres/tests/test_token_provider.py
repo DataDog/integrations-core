@@ -3,9 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import time
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
-from datadog_checks.postgres.connection_pool import AWSTokenProvider, AzureTokenProvider, TokenProvider
+from datadog_checks.postgres.connection_pool import (
+    AWSTokenProvider,
+    AzureTokenProvider,
+    LRUConnectionPoolManager,
+    PostgresConnectionArgs,
+    TokenProvider,
+)
 
 
 def test_get_token_first_call():
@@ -195,7 +201,7 @@ def test_azure_fetch_token_with_scope(mock_credential_class):
     """Test Azure token fetching with custom scope."""
     mock_token = Mock()
     mock_token.token = "azure_token_123"
-    mock_token.expires_at = 1900.0
+    mock_token.expires_on = 1900.0
 
     mock_credential = Mock()
     mock_credential.get_token.return_value = mock_token
@@ -216,7 +222,7 @@ def test_azure_fetch_token_without_scope(mock_credential_class):
     """Test Azure token fetching without custom scope (uses default)."""
     mock_token = Mock()
     mock_token.token = "azure_token_456"
-    mock_token.expires_at = 2000.0
+    mock_token.expires_on = 2000.0
 
     mock_credential = Mock()
     mock_credential.get_token.return_value = mock_token
@@ -237,7 +243,7 @@ def test_azure_token_provider_integration():
     with patch('datadog_checks.postgres.azure.ManagedIdentityCredential') as mock_credential_class:
         mock_token = Mock()
         mock_token.token = "integration_azure_token"
-        mock_token.expires_at = time.time() + 3600
+        mock_token.expires_on = time.time() + 3600
 
         mock_credential = Mock()
         mock_credential.get_token.return_value = mock_token
@@ -254,6 +260,109 @@ def test_azure_token_provider_integration():
         token2 = provider.get_token()
         assert token2 == "integration_azure_token"
         assert mock_credential.get_token.call_count == 1
+
+
+def test_multiple_connection_pools_no_token_collision():
+    """
+    Test that multiple LRUConnectionPoolManager instances with different token providers
+    don't have token collision issues.
+    """
+    # Create two different mock token providers that return different tokens
+    token_provider_1 = MockTokenProvider()
+    token_provider_1._fetch_token = Mock(return_value=("token_for_rds_1", time.time() + 3600))
+
+    token_provider_2 = MockTokenProvider()
+    token_provider_2._fetch_token = Mock(return_value=("token_for_rds_2", time.time() + 3600))
+
+    # Create connection args for two different RDS instances
+    conn_args_1 = PostgresConnectionArgs(
+        application_name="test_rds_1",
+        username="user1",
+        host="rds-instance-1.amazonaws.com",
+        port=5432,
+    )
+
+    conn_args_2 = PostgresConnectionArgs(
+        application_name="test_rds_2",
+        username="user2",
+        host="rds-instance-2.amazonaws.com",
+        port=5432,
+    )
+
+    # Create two connection pool managers with different token providers
+    pool_manager_1 = LRUConnectionPoolManager(
+        max_db=2,
+        base_conn_args=conn_args_1,
+        token_provider=token_provider_1,
+    )
+
+    pool_manager_2 = LRUConnectionPoolManager(
+        max_db=2,
+        base_conn_args=conn_args_2,
+        token_provider=token_provider_2,
+    )
+
+    # Mock the ConnectionPool to capture what connection_class is passed
+    # and simulate connections to verify the token provider behavior
+    captured_pools = []
+
+    def mock_ConnectionPool(*args, **pool_kwargs):
+        # Capture the kwargs and connection_class
+        connection_class = pool_kwargs.get('connection_class')
+        conn_kwargs = pool_kwargs.get('kwargs', {})
+
+        captured_pools.append(
+            {
+                'connection_class': connection_class,
+                'kwargs': conn_kwargs.copy() if conn_kwargs else {},
+            }
+        )
+
+        # Create a mock pool
+        mock_pool = MagicMock()
+        return mock_pool
+
+    with patch('datadog_checks.postgres.connection_pool.ConnectionPool', side_effect=mock_ConnectionPool):
+        # Create pools
+        pool_manager_1._create_pool("db1")
+        pool_manager_2._create_pool("db2")
+
+    # Verify that pools were created
+    assert len(captured_pools) == 2, "Should have created 2 connection pools"
+
+    # Get the pools for each RDS instance
+    pool_1 = captured_pools[0]
+    pool_2 = captured_pools[1]
+
+    # Simulate what happens when a connection is established by calling the connect method
+    # This will trigger the token provider logic
+    conn_class_1 = pool_1['connection_class']
+    conn_class_2 = pool_2['connection_class']
+
+    # Call connect to see what token each would use
+    # We need to mock the parent connect to capture the password
+    with patch('psycopg.Connection.connect') as mock_parent_connect:
+        mock_parent_connect.return_value = MagicMock()
+
+        # Call connect for pool 1 with its kwargs
+        conn_class_1.connect(**pool_1['kwargs'])
+        password_1 = mock_parent_connect.call_args[1].get('password')
+
+        # Call connect for pool 2 with its kwargs
+        conn_class_2.connect(**pool_2['kwargs'])
+        password_2 = mock_parent_connect.call_args[1].get('password')
+
+    # Verify no collision - each pool manager uses its own token provider
+    assert password_1 == "token_for_rds_1"
+    assert password_2 == "token_for_rds_2"
+
+    # Verify each token provider was called independently
+    assert token_provider_1._fetch_token.call_count >= 1, "Token provider 1 should be called at least once"
+    assert token_provider_2._fetch_token.call_count >= 1, "Token provider 2 should be called at least once"
+
+    # Clean up
+    pool_manager_1.close_all()
+    pool_manager_2.close_all()
 
 
 class MockTokenProvider(TokenProvider):

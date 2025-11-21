@@ -89,25 +89,26 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
-# Alisases add to homogenize fields across different database types like SQLServer, PostgreSQL
 SQL_DATABASES = """
-SELECT schema_name as `name`,
+SELECT schema_name as `schema_name`,
        default_character_set_name as `default_character_set_name`,
        default_collation_name as `default_collation_name`
        FROM information_schema.SCHEMATA
        WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
 
 SQL_TABLES = """\
-SELECT table_name as `name`,
+SELECT table_name as `table_name`,
        engine as `engine`,
        row_format as `row_format`,
-       create_time as `create_time`
+       create_time as `create_time`,
+       table_schema as `schema_name`
        FROM information_schema.TABLES
-       WHERE TABLE_SCHEMA = %s AND TABLE_TYPE="BASE TABLE"
+       WHERE TABLE_TYPE="BASE TABLE"
 """
 
 SQL_COLUMNS = """\
 SELECT table_name as `table_name`,
+       table_schema as `schema_name`,
        column_name as `name`,
        column_type as `column_type`,
        column_default as `default`,
@@ -116,43 +117,44 @@ SELECT table_name as `table_name`,
        column_key as `column_key`,
        extra as `extra`
 FROM INFORMATION_SCHEMA.COLUMNS
-WHERE table_schema = %s AND table_name IN ({});
 """
 
 SQL_INDEXES = """\
 SELECT
     table_name as `table_name`,
+    table_schema as `schema_name`,
     index_name as `name`,
-    collation as `collation`,
     cardinality as `cardinality`,
     index_type as `index_type`,
-    seq_in_index as `seq_in_index`,
-    column_name as `column_name`,
-    sub_part as `sub_part`,
-    packed as `packed`,
-    nullable as `nullable`,
     non_unique as `non_unique`,
-    NULL as `expression`
+    NULL as `expression`,
+    json_arrayagg(json_object(
+        'name', column_name,
+        'collation', collation,
+        'nullable', nullable,
+        'sub_part', sub_part
+    )) as `columns`
 FROM INFORMATION_SCHEMA.STATISTICS
-WHERE table_schema = %s AND table_name IN ({});
+GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
 """
 
 SQL_INDEXES_8_0_13 = """\
 SELECT
     table_name as `table_name`,
+    table_schema as `schema_name`,
     index_name as `name`,
-    collation as `collation`,
     cardinality as `cardinality`,
     index_type as `index_type`,
-    seq_in_index as `seq_in_index`,
-    column_name as `column_name`,
-    sub_part as `sub_part`,
-    packed as `packed`,
-    nullable as `nullable`,
     non_unique as `non_unique`,
-    expression as `expression`
+    expression as `expression`,
+    json_arrayagg(json_object(
+        'name', column_name,
+        'collation', collation,
+        'nullable', nullable,
+        'sub_part', sub_part
+    )) as `columns`
 FROM INFORMATION_SCHEMA.STATISTICS
-WHERE table_schema = %s AND table_name IN ({});
+GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
 """
 
 SQL_FOREIGN_KEYS = """\
@@ -160,6 +162,7 @@ SELECT
     kcu.constraint_schema as constraint_schema,
     kcu.constraint_name as name,
     kcu.table_name as table_name,
+    kcu.table_schema as schema_name,
     group_concat(kcu.column_name order by kcu.ordinal_position asc) as column_names,
     kcu.referenced_table_schema as referenced_table_schema,
     kcu.referenced_table_name as referenced_table_name,
@@ -173,12 +176,12 @@ LEFT JOIN
     ON kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
     AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
 WHERE
-    kcu.table_schema = %s AND kcu.table_name in ({})
-    AND kcu.referenced_table_name is not null
+    kcu.referenced_table_name is not null
 GROUP BY
     kcu.constraint_schema,
     kcu.constraint_name,
     kcu.table_name,
+    kcu.table_schema,
     kcu.referenced_table_schema,
     kcu.referenced_table_name,
     rc.update_rule,
@@ -188,21 +191,27 @@ GROUP BY
 SQL_PARTITION = """\
 SELECT
     table_name as `table_name`,
+    table_schema as `schema_name`,
     partition_name as `name`,
-    subpartition_name as `subpartition_name`,
     partition_ordinal_position as `partition_ordinal_position`,
-    subpartition_ordinal_position as `subpartition_ordinal_position`,
     partition_method as `partition_method`,
-    subpartition_method as `subpartition_method`,
     partition_expression as `partition_expression`,
-    subpartition_expression as `subpartition_expression`,
     partition_description as `partition_description`,
-    table_rows as `table_rows`,
-    data_length as `data_length`
+    json_arrayagg(json_object(
+        'name', subpartition_name,
+        'subpartition_ordinal_position', subpartition_ordinal_position,
+        'subpartition_method', subpartition_method,
+        'subpartition_expression', subpartition_expression,
+        'table_rows', table_rows,
+        'data_length', data_length
+    )) as `subpartitions`
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
-    table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL
+    partition_name IS NOT NULL
+GROUP BY table_name, table_schema, partition_name, partition_ordinal_position,
+   partition_method, partition_expression, partition_description
 """
+
 
 QUERY_DEADLOCKS = {
     'name': 'information_schema.INNODB_METRICS.lock_deadlocks',
@@ -239,6 +248,28 @@ QUERY_USER_CONNECTIONS = {
         {'name': 'processlist_host', 'type': 'tag'},
         {'name': 'processlist_db', 'type': 'tag'},
         {'name': 'processlist_state', 'type': 'tag'},
+    ],
+}
+
+QUERY_ERRORS_RAISED = {
+    'name': 'performance_schema.events_errors_summary_global_by_error',
+    'query': """
+        SELECT
+            SUM(SUM_ERROR_RAISED) as errors_raised,
+            ERROR_NUMBER as error_number,
+            ERROR_NAME as error_name
+        FROM performance_schema.events_errors_summary_by_user_by_error
+        WHERE
+            SUM_ERROR_RAISED > 0
+            AND ERROR_NUMBER IS NOT NULL
+            AND ERROR_NAME IS NOT NULL
+            AND NOT (ERROR_NAME = 'ER_NO_SYSTEM_TABLE_ACCESS' AND USER = '{user}')
+        GROUP BY ERROR_NUMBER, ERROR_NAME
+    """.strip(),
+    'columns': [
+        {'name': 'mysql.performance.errors_raised', 'type': 'monotonic_count'},
+        {'name': 'error_number', 'type': 'tag'},
+        {'name': 'error_name', 'type': 'tag'},
     ],
 }
 

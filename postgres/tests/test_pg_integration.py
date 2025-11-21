@@ -119,6 +119,7 @@ def _increase_txid(cur):
     else:
         query = 'select txid_current();'
     cur.execute(query)
+    assert cur.fetchone() is not None
 
 
 def test_initialization_tags(integration_check, pg_instance):
@@ -478,13 +479,14 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     thread.join()
 
 
+@pytest.mark.flaky(max_runs=5)
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
 
     check.run()
 
-    app = 'test_backend_transaction_age'
+    app = f'test_backend_transaction_age_{time.time()}'
     conn1 = _get_conn(pg_instance, application_name=app)
     cur = conn1.cursor()
 
@@ -497,8 +499,6 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     # Force assignement of a txid and keep the transaction opened
     _increase_txid(cur)
-    # Make sure to fetch the result to make sure we start the timer after the transaction started
-    cur.fetchall()
     start_transaction_time = time.time()
 
     aggregator.reset()
@@ -685,7 +685,6 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         for tag in expected_tags
         if not tag.startswith('database_instance:')
         and not tag.startswith('database_hostname:')
-        and not tag.startswith('ddagenthostname:')
         and not tag.startswith('dd.internal')
     ]
 
@@ -704,7 +703,9 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         (True, 'forced_hostname', 'forced_hostname'),
     ],
 )
-def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, aggregator, pg_instance):
+def test_correct_hostname(
+    dbm_enabled, reported_hostname, expected_hostname, aggregator, pg_instance, integration_check
+):
     pg_instance['dbm'] = dbm_enabled
     pg_instance['collect_activity_metrics'] = True
     pg_instance['query_samples'] = {'enabled': False}
@@ -720,7 +721,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         ) as resolve_db_host,
         mock.patch('datadog_checks.base.stubs.datadog_agent.get_hostname', return_value=expected_hostname),
     ):
-        check = PostgreSql('test_instance', {}, [pg_instance])
+        check = integration_check(pg_instance)
         check.run()
         assert resolve_db_host.called is True
 
@@ -755,7 +756,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         (False, 'forced_hostname'),
     ],
 )
-def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
+def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname, integration_check):
     pg_instance['dbm'] = dbm_enabled
     pg_instance['collect_settings'] = {'collection_interval': 1, 'run_sync': True}
 
@@ -771,9 +772,8 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         'replication_role:master',
         'database_hostname:{}'.format(expected_database_hostname),
         'database_instance:{}'.format(expected_database_instance),
-        'ddagenthostname:{}'.format(expected_database_hostname),
     ]
-    check = PostgreSql('test_instance', {}, [pg_instance])
+    check = integration_check(pg_instance)
     run_one_check(check)
 
     # These tags are a bit dynamic in value, so we get them from the check and ensure they are present
@@ -787,6 +787,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     assert event['database_instance'] == expected_database_instance
     assert event['database_hostname'] == expected_database_hostname
     assert event['dbms'] == "postgres"
+    assert event['ddagenthostname'] == "stubbed.hostname"
 
     assert sorted(event['tags']) == sorted(expected_tags)
     assert event['integration_version'] == __version__

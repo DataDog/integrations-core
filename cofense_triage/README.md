@@ -1,25 +1,69 @@
-# Agent Check: Cofense Triage
-
 ## Overview
 
-This check monitors [Cofense Triage][1].
+[Cofense Triage][1] is a powerful email-focused security platform designed to help organizations rapidly detect, analyze, and respond to phishing threats, especially those that bypass traditional email gateways.
+
+This integration ingests the following logs:
+- **Reports**: Provide information about the reported emails that Cofense Triage ingests, break down into components, and add additional information.
+- **Threat Indicators**: Identify the threat level of an email's subject, sender, domains, URLs, and MD5 and SHA256 attachment hash signatures.
+
+Integrate Cofense Triage with Datadog to gain insights into reports and threat indicators using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. The integration can also be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
-### Installation
+### Prerequisites
 
-The Cofense Triage check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+- API Host
+- Client ID
+- Client Secret
 
-### Configuration
+Note: Users must have superuser access to generate the Client ID and Client Secret.
 
-!!! Add list of steps to set up this integration !!!
+### Generate API Credentials in Cofense Triage
 
-### Validation
+1. Log in to the Cofense Triage portal with superuser credentials.
+2. Navigate to **Administration** > **API Management**.
+3. In the **Rate Limit Settings**, set the **Triage API rate limit** to the maximum value.
+4. Select the **Version2** tab, then click **Applications**.
+5. Click **New Application**.
+6. Enter a name for the application.
+7. Choose the **Read Only** option under **Triage Role**.
+8. Click **Submit**.
 
-!!! Add steps to validate integration is functioning as expected !!!
+   After submission, you'll see the Client ID and Client Secret displayed.
+
+Note: Use the maximum rate limit for optimal performance.
+
+### Connect your Cofense Triage Account to Datadog
+
+1. Add your API Host, Client ID and Client Secret.
+   | Parameters | Description |
+   | -------- | ---------------------------------------------- |
+   | API Host | The hostname of the Cofense Triage portal. |
+   | Client ID | The Client ID of your Cofense Triage account. |
+   | Client Secret | The Client Secret of your Cofense Triage account. |
+2. Click **Save** to save your settings.
+
+#### Whitelist Datadog IP Addresses
+
+1. Use an API platform such as Postman or the curl command to make a GET request to the [Datadog API endpoint][3].
+2. After you receive the response, locate the **webhooks** section in the JSON. It looks something like this:
+   ```json
+      "webhooks": {
+         "prefixes_ipv4": [
+            "0.0.0.0/32",
+            ...
+         ],
+         "prefixes_ipv6": []
+         }
+   ```
+3. From the **prefixes_ipv4** list under the Webhooks section, copy each CIDR entry.
+4. Work with Cofense support team to get these IP ranges whitelisted.
 
 ## Data Collected
+
+### Logs
+
+Cofense Triage collects and forwards reports and threat indicators to Datadog.
 
 ### Metrics
 
@@ -31,9 +75,8 @@ Cofense Triage does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://cofense.com/pdr-platform
+[2]: https://docs.datadoghq.com/help/
+[3]: https://docs.datadoghq.com/api/latest/ip-ranges/
