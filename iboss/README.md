@@ -207,8 +207,6 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-<!-- {{< get-metrics-from-git "iboss" >}} -->
-
 ### Events
 
 The iboss integration does not include any events.
