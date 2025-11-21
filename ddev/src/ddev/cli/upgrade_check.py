@@ -57,7 +57,8 @@ def upgrade_check(app, version, cache_file=CACHE_FILE, pypi_url=PYPI_URL, check_
             logging.debug("Upgrade check failed: %s", e)
             # Record the attempt to prevent even if failed
             try:
-                write_last_run(current_version, date_now, cache_file)
+                version_to_cache = last_version if last_version else current_version
+                write_last_run(version_to_cache, date_now, cache_file)
             except OSError:
                 pass
     else:
