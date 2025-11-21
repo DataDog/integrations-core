@@ -87,8 +87,6 @@ class SQLServerSchemaCollector(SchemaCollector):
         if major_version == 0:
             self._check.log.debug("major_version is not available yet, defaulting to 2016 or earlier")
         self._is_2016_or_earlier = major_version <= 13
-        print(f"major_version: {major_version}")
-        print(f"is_2016_or_earlier: {self._is_2016_or_earlier}")
 
         super().collect_schemas()
 
@@ -109,7 +107,6 @@ class SQLServerSchemaCollector(SchemaCollector):
             with self._check.connection.get_managed_cursor() as cursor:
                 cursor.execute(SWITCH_DB_STATEMENT.format(database_name))
                 query = self._get_tables_query()
-                # print(query)
                 cursor.execute(query)
                 yield cursor
 
