@@ -110,7 +110,7 @@ EOSQL
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
     ALTER SYSTEM SET wal_level = logical;
 EOSQL
-pg_ctl -D /var/lib/postgresql/data -w restart
+pg_ctl -D ${PGDATA} -w restart
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
     SELECT * FROM pg_create_physical_replication_slot('replication_slot');
