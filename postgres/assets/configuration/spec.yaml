@@ -754,6 +754,12 @@ files:
             type: number
             example: 300
             display_default: 300
+        - name: max_query_duration
+          description: |
+            Maximum duration of the query to collect schema information in seconds.
+          value:
+            type: number
+            display_default: 60
         - name: max_columns
           description: |
             Maximum amount of columns the Agent collects per table.

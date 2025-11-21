@@ -137,7 +137,7 @@ datadog-linkerd==7.1.1
 datadog-linux-audit-logs==1.1.0; sys_platform == 'linux2'
 datadog-linux-proc-extras==4.1.0; sys_platform == 'linux2'
 datadog-litellm==2.1.1
-datadog-lustre==1.2.0
+datadog-lustre==1.2.1
 datadog-mac-audit-logs==1.1.0; sys_platform == 'darwin'
 datadog-mapr==3.1.0; sys_platform == 'linux2'
 datadog-mapreduce==7.1.1

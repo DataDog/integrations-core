@@ -258,6 +258,10 @@ coverage:
         target: 75
         flags:
         - go_expvar
+      GuardDog:
+        target: 75
+        flags:
+        - guarddog
       Gunicorn:
         target: 75
         flags:
@@ -1161,6 +1165,11 @@ flags:
     paths:
     - go_expvar/datadog_checks/go_expvar
     - go_expvar/tests
+  guarddog:
+    carryforward: true
+    paths:
+    - guarddog/datadog_checks/guarddog
+    - guarddog/tests
   gunicorn:
     carryforward: true
     paths:

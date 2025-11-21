@@ -218,6 +218,7 @@ files:
           Only useful for SNMP v1 & v2.
           Enclose the community string with single quotes to avoid special characters being interpreted. For instance:
           community_string: 'public'
+        secret: true
         value:
           type: string
       - name: snmp_version
@@ -292,6 +293,7 @@ files:
         description: |
           Authentication key to use with your Authentication type.
           SNMP v3 specific configuration.
+        secret: true
         value:
           type: string
           example: <AUTHENTICATION_TYPE_KEY>
@@ -309,6 +311,7 @@ files:
         description: |
           Privacy type key to use with your Privacy type.
           SNMP v3 specific configuration.
+        secret: true
         value:
           type: string
           example: <PRIVACY_TYPE_KEY>
