@@ -5,6 +5,8 @@
 import logging
 from typing import Any
 
+from mock import call, patch
+
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_spectrum_lsf import IbmSpectrumLsfCheck
@@ -111,3 +113,35 @@ def test_bjobs_no_output(mock_client, dd_run_check, aggregator, instance, caplog
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_client_calls(dd_run_check, aggregator, instance):
+    # assert that subprocess.run is called with the correct arguments
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    with patch('subprocess.run') as mock_run:
+        mock_run.return_value.stdout = get_mock_output('lsid')[0]
+        mock_run.return_value.stderr = ""
+        mock_run.return_value.returncode = 0
+        dd_run_check(check)
+        # assert some expected calls are happening when not mocking the client
+        assert call(('lsid',), timeout=5, capture_output=True, text=True) in mock_run.call_args_list
+        assert (
+            call(
+                ('lsload', '-o', "HOST_NAME status r15s r1m r15m ut pg io ls it tmp swp mem delimiter='|'"),
+                timeout=5,
+                capture_output=True,
+                text=True,
+            )
+            in mock_run.call_args_list
+        )
+
+
+def test_client_error(dd_run_check, aggregator, instance, caplog):
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    with patch('subprocess.run') as mock_run:
+        mock_run.side_effect = FileNotFoundError("LSID command not found")
+        dd_run_check(check)
+        assert "Failed to get lsid output: LSID command not found. Skipping check" in caplog.text
+        aggregator.assert_metric("ibm_spectrum_lsf.can_connect", 0)
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())

@@ -19,9 +19,6 @@ class LSFClient:
         except Exception as e:
             return "", str(e), 1
 
-    def start_monitoring(self, sample_period: int) -> tuple[str, str, int]:
-        return self._run_command('badmin', 'perfmon', 'start', str(sample_period))
-
     def lsid(self) -> tuple[str, str, int]:
         return self._run_command('lsid')
 
