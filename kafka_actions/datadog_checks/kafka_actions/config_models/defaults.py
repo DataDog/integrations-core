@@ -8,9 +8,29 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_disable_generic_tags():
+    return False
+
+
 def instance_empty_default_hostname():
     return False
 
 
 def instance_min_collection_interval():
     return 15
+
+
+def instance_sasl_mechanism():
+    return 'PLAIN'
+
+
+def instance_schema_registry_tls_verify():
+    return True
+
+
+def instance_schema_registry_url():
+    return 'https://schema-registry:8081'
+
+
+def instance_security_protocol():
+    return 'PLAINTEXT'

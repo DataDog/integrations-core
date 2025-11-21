@@ -7,7 +7,6 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
 from typing import Optional
@@ -17,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
-from . import defaults, validators
+from . import validators
 
 
 class SharedConfig(BaseModel):
@@ -38,8 +37,6 @@ class SharedConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'shared_{info.field_name}', identity)(value, field=field)
-        else:
-            value = getattr(defaults, f'shared_{info.field_name}', lambda: value)()
 
         return validation.utils.make_immutable(value)
 

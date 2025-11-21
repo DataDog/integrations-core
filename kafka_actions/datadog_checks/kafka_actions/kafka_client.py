@@ -211,7 +211,7 @@ class KafkaActionsClient:
         try:
             # Ensure partition is None for automatic assignment
             partition_arg = None if partition is None or partition == -1 else int(partition)
-            
+
             self.log.info(
                 "Calling producer.produce with: topic=%s, key=%s, value_len=%d, partition=%s, headers=%s",
                 topic,
@@ -220,7 +220,7 @@ class KafkaActionsClient:
                 partition_arg,
                 kafka_headers,
             )
-            
+
             # Build produce kwargs, omitting None values
             produce_kwargs = {
                 'topic': topic,
@@ -233,7 +233,7 @@ class KafkaActionsClient:
                 produce_kwargs['partition'] = partition_arg
             if kafka_headers is not None:
                 produce_kwargs['headers'] = kafka_headers
-            
+
             producer.produce(**produce_kwargs)
             producer.flush()
 
@@ -331,6 +331,96 @@ class KafkaActionsClient:
                 return True
             except Exception as e:
                 self.log.error("Failed to update topic '%s' config: %s", topic, e)
+                raise
+
+    def delete_topic_config(self, topic: str, config_keys: list[str]) -> bool:
+        """Delete (reset to default) topic configurations.
+
+        Args:
+            topic: Topic name
+            config_keys: List of configuration keys to reset to defaults
+
+        Returns:
+            True if successful
+        """
+        admin = self.get_admin_client()
+
+        # Create config resource and delete configs
+        resource = ConfigResource(ResourceType.TOPIC, topic)
+        for key in config_keys:
+            resource.set_config(key, None)  # None = delete/reset to default
+
+        futures = admin.alter_configs([resource])
+
+        for _res, future in futures.items():
+            try:
+                future.result()
+                self.log.info("Topic '%s' configuration deleted: %s", topic, config_keys)
+                return True
+            except Exception as e:
+                self.log.error("Failed to delete topic '%s' config: %s", topic, e)
+                raise
+
+    def delete_consumer_group(self, consumer_group: str) -> bool:
+        """Delete a consumer group.
+
+        Args:
+            consumer_group: Consumer group ID
+
+        Returns:
+            True if successful
+        """
+        admin = self.get_admin_client()
+
+        futures = admin.delete_consumer_groups([consumer_group])
+
+        for group_id, future in futures.items():
+            try:
+                future.result()
+                self.log.info("Consumer group '%s' deleted successfully", group_id)
+                return True
+            except Exception as e:
+                self.log.error("Failed to delete consumer group '%s': %s", group_id, e)
+                raise
+
+    def update_consumer_group_offsets(self, consumer_group: str, offsets: list[dict[str, Any]]) -> bool:
+        """Update consumer group offsets for specific topic-partitions.
+
+        Args:
+            consumer_group: Consumer group ID
+            offsets: List of offset specifications, each with:
+                - topic: Topic name
+                - partition: Partition number
+                - offset: New offset value
+
+        Returns:
+            True if successful
+        """
+        admin = self.get_admin_client()
+
+        # Build list of TopicPartition objects with new offsets
+        topic_partitions = []
+        for offset_spec in offsets:
+            topic = offset_spec.get('topic')
+            partition = offset_spec.get('partition')
+            offset = offset_spec.get('offset')
+
+            if topic is None or partition is None or offset is None:
+                raise ValueError("Each offset specification must have 'topic', 'partition', and 'offset'")
+
+            tp = TopicPartition(topic, partition, offset)
+            topic_partitions.append(tp)
+
+        # Alter consumer group offsets
+        futures = admin.alter_consumer_group_offsets(consumer_group, topic_partitions)
+
+        for group_id, future in futures.items():
+            try:
+                future.result()
+                self.log.info("Consumer group '%s' offsets updated for %d partitions", group_id, len(topic_partitions))
+                return True
+            except Exception as e:
+                self.log.error("Failed to update consumer group '%s' offsets: %s", group_id, e)
                 raise
 
     def close(self):

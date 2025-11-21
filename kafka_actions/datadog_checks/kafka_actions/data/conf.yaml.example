@@ -2,31 +2,37 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
 instances:
 
-    ## @param action - string - required
-    ## The action to perform. This check runs once per execution.
-    ## Available actions:
-    ##   - retrieve_messages: Retrieve and filter messages from topics, emit as events
-    ##   - produce_message: Produce a message to a topic
-    ##   - manage_topic: Create, update, or delete topics
-    ##   - rebalance_partitions: Trigger partition rebalancing
+    ## @param remote_config_id - string - required
+    ## Remote configuration ID for tracking purposes.
+    ## This ID is automatically set by the Datadog backend via remote configuration.
+    ## This parameter is REQUIRED - the integration will not start without it.
     #
-  - action: retrieve_messages
+  - remote_config_id: kafka-read-1732128000
 
     ## @param kafka_connect_str - string - required
-    ## Kafka bootstrap servers connection string
+    ## The Kafka connection string (bootstrap servers).
     #
     kafka_connect_str: localhost:9092
 
     ## @param security_protocol - string - optional - default: PLAINTEXT
-    ## Protocol used to communicate with brokers
+    ## Protocol used to communicate with brokers.
     ## Valid values: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
     #
     # security_protocol: PLAINTEXT
 
-    ## @param sasl_mechanism - string - optional
-    ## SASL mechanism for authentication
+    ## @param sasl_mechanism - string - optional - default: PLAIN
+    ## SASL mechanism to use for authentication.
     ## Valid values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
     #
     # sasl_mechanism: PLAIN
@@ -34,111 +40,102 @@ instances:
     ## @param sasl_plain_username - string - optional
     ## Username for SASL PLAIN authentication
     #
-    # sasl_plain_username: <USERNAME>
+    # sasl_plain_username: <SASL_PLAIN_USERNAME>
 
     ## @param sasl_plain_password - string - optional
     ## Password for SASL PLAIN authentication
     #
-    # sasl_plain_password: <PASSWORD>
+    # sasl_plain_password: <SASL_PLAIN_PASSWORD>
 
-    ## ========================================================================
-    ## retrieve_messages action configuration
-    ## ========================================================================
-    ## This action retrieves messages from Kafka topics with jq-style filtering
-    ## and emits them as Datadog events.
+    ## @param read_messages - mapping - optional
+    ## Configuration for reading messages from Kafka topics.
+    ## Fetches messages with optional jq-style filtering and emits them as Datadog events.
+    ## Supports JSON, Protobuf, and Avro with optional Schema Registry integration.
     #
-    retrieve_messages:
-      topic: orders
-      partition: -1  # -1 for all partitions
-      start_offset: -2  # -2 for earliest, -1 for latest
-      max_messages_scan: 1000  # Maximum messages to scan
-      max_messages_send: 100   # Maximum matching messages to emit as events
-      timeout_ms: 30000
-      
-      ## @param filters - list of objects - optional
-      ## jq-style filters to apply to messages
-      ## Each filter can match on key, value fields, timestamp, or offset
-      #
-      filters:
-        - field: value.status
-          operator: eq
-          value: "failed"
-        - field: value.amount
-          operator: gt
-          value: "1000"
-        - field: timestamp
-          operator: gte
-          value: "1699999999000"
+    # read_messages: {}
 
-    ## ========================================================================
-    ## produce_message action configuration
-    ## ========================================================================
-    ## Example configuration (comment out retrieve_messages and uncomment this)
+    ## @param schema_registry_url - string - optional - default: https://schema-registry:8081
+    ## Schema Registry URL (for reading messages with Schema Registry)
     #
-    # produce_message:
-    #   topic: test-topic
-    #   value: '{"order_id": "12345", "status": "pending"}'
-    #   key: "12345"
-    #   partition: -1  # -1 for automatic partitioning
-    #   headers:
-    #     source: datadog-agent
-    #     timestamp: "2024-01-01T00:00:00Z"
+    # schema_registry_url: https://schema-registry:8081
 
-    ## ========================================================================
-    ## manage_topic action configuration
-    ## ========================================================================
-    ## Example configuration for creating a topic
+    ## @param schema_registry_username - string - optional
+    ## Username for Schema Registry Basic Authentication
     #
-    # manage_topic:
-    #   operation: create  # create, update, or delete
-    #   topic: new-topic
-    #   num_partitions: 3
-    #   replication_factor: 1
-    #   configs:
-    #     retention.ms: "86400000"  # 1 day
-    #     compression.type: "snappy"
-    #     cleanup.policy: "delete"
+    # schema_registry_username: <SCHEMA_REGISTRY_USERNAME>
 
-    ## Example for updating topic configuration
+    ## @param schema_registry_password - string - optional
+    ## Password for Schema Registry Basic Authentication
     #
-    # manage_topic:
-    #   operation: update
-    #   topic: existing-topic
-    #   configs:
-    #     retention.ms: "604800000"  # 7 days
-    #     max.message.bytes: "2000000"
+    # schema_registry_password: <SCHEMA_REGISTRY_PASSWORD>
 
-    ## Example for deleting a topic
+    ## @param schema_registry_tls_verify - boolean - optional - default: true
+    ## Whether to verify Schema Registry TLS certificate
     #
-    # manage_topic:
-    #   operation: delete
-    #   topic: old-topic
+    # schema_registry_tls_verify: true
 
-    ## ========================================================================
-    ## rebalance_partitions action configuration
-    ## ========================================================================
-    ## Example configuration for partition rebalancing
-    ## Note: Full rebalancing requires external tools (kafka-reassign-partitions)
+    ## @param schema_registry_tls_ca_cert - string - optional
+    ## Path to custom CA certificate for Schema Registry
     #
-    # rebalance_partitions:
-    #   topics:
-    #     - orders
-    #     - payments
-    #   brokers:
-    #     - 1
-    #     - 2
-    #     - 3
-    #   strategy: uniform  # uniform, rack-aware, or custom
+    # schema_registry_tls_ca_cert: <SCHEMA_REGISTRY_TLS_CA_CERT>
+
+    ## @param schema_registry_tls_cert - string - optional
+    ## Path to client certificate for Schema Registry mutual TLS
+    #
+    # schema_registry_tls_cert: <SCHEMA_REGISTRY_TLS_CERT>
+
+    ## @param schema_registry_tls_key - string - optional
+    ## Path to client private key for Schema Registry mutual TLS
+    #
+    # schema_registry_tls_key: <SCHEMA_REGISTRY_TLS_KEY>
+
+    ## @param create_topic - mapping - optional
+    ## Configuration for creating a new Kafka topic.
+    #
+    # create_topic: {}
+
+    ## @param update_topic_config - mapping - optional
+    ## Configuration for updating an existing topic's configuration.
+    #
+    # update_topic_config: {}
+
+    ## @param delete_topic - mapping - optional
+    ## Configuration for deleting a Kafka topic.
+    ## WARNING: This operation is irreversible and will cause data loss.
+    #
+    # delete_topic: {}
+
+    ## @param delete_consumer_group - mapping - optional
+    ## Configuration for deleting a consumer group.
+    ## The consumer group must have no active members.
+    #
+    # delete_consumer_group: {}
+
+    ## @param update_consumer_group_offsets - mapping - optional
+    ## Configuration for updating consumer group offsets.
+    ## WARNING: Can cause duplicate processing or data loss.
+    ## Consumer group should be stopped (no active members).
+    #
+    # update_consumer_group_offsets: {}
+
+    ## @param produce_message - mapping - optional
+    ## Configuration for producing a message to a Kafka topic.
+    #
+    # produce_message: {}
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
-    #   - env:production
-    #   - service:kafka
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
     #
     # service: <SERVICE>
 
@@ -150,13 +147,15 @@ instances:
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.
-    #
+    ##
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
     #
     # metric_patterns:
     #   include:

@@ -31,6 +31,8 @@ classifiers = [
 dependencies = [
     "datadog-checks-base>=37.0.0",
     "confluent-kafka>=2.3.0",
+    "fastavro>=1.8.0",
+    "protobuf>=4.0.0",
 ]
 dynamic = [
     "version",
