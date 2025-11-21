@@ -53,10 +53,9 @@ from datadog_checks.sqlserver.database_metrics import (
 from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.health import SqlServerHealth
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
-from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
-from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
+from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_year
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
 from .config import sanitize
@@ -95,6 +94,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_RDS,
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
+    STATIC_INFO_YEAR,
     SWITCH_DB_STATEMENT,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
@@ -141,7 +141,7 @@ class SQLServer(DatabaseCheck):
         self._agent_hostname = None
         self._database_hostname = None
         self._database_identifier = None
-        self.connection = None
+        self._connection = None
         self.failed_connections = {}
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(set)
@@ -179,7 +179,6 @@ class SQLServer(DatabaseCheck):
         )  # type: TTLCache
         # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
-        self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.load_static_information)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
@@ -189,8 +188,6 @@ class SQLServer(DatabaseCheck):
         self._query_manager = None
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
-
-        self._schemas = Schemas(self, self._config)
 
         self._submit_initialization_health_event()
 
@@ -206,7 +203,6 @@ class SQLServer(DatabaseCheck):
         self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
-        self._schemas.cancel()
         self.deadlocks.cancel()
 
         # Cancel all XE session handlers
@@ -392,6 +388,13 @@ class SQLServer(DatabaseCheck):
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
+    @property
+    def dbms_version(self):
+        return "{},{}".format(
+            self.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+        )
+
     def load_static_information(self):
         engine_edition_reloaded = False
         expected_keys = {
@@ -412,17 +415,16 @@ class SQLServer(DatabaseCheck):
                         if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
                             version = results[0][0]
                             self.static_info_cache[STATIC_INFO_VERSION] = version
-                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = parse_sqlserver_major_version(version)
-                            if not self.static_info_cache[STATIC_INFO_MAJOR_VERSION]:
-                                cursor.execute(
-                                    "SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion"
-                                )
-                                result = cursor.fetchone()
-                                if result:
-                                    self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
-                                else:
-                                    self.log.warning("failed to load version static information due to empty results")
-                                self.log.warning("failed to parse SQL Server major version from version: %s", version)
+                            self.static_info_cache[STATIC_INFO_YEAR] = parse_sqlserver_year(version)
+                            if not self.static_info_cache[STATIC_INFO_YEAR]:
+                                self.log.warning("failed to parse SQL Server year from version: %s", version)
+                        else:
+                            self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_MAJOR_VERSION not in self.static_info_cache:
+                        cursor.execute("SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion")
+                        result = cursor.fetchone()
+                        if result:
+                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
                         else:
                             self.log.warning("failed to load version static information due to empty results")
                     if STATIC_INFO_SERVERNAME not in self.static_info_cache:
@@ -489,9 +491,15 @@ class SQLServer(DatabaseCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    @property
+    def connection(self):
+        if self._connection is None:
+            self.initialize_connection()
+        return self._connection
+
     def initialize_connection(self):
         # Initialize the connection object once
-        self.connection = Connection(
+        self._connection = Connection(
             init_config=self.init_config,
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
@@ -600,7 +608,7 @@ class SQLServer(DatabaseCheck):
         Will also create and cache cursors to query the db.
         """
 
-        major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
+        year = self.static_info_cache.get(STATIC_INFO_YEAR)
         metrics_to_collect = []
 
         # Load instance-level (previously Performance metrics)
@@ -608,7 +616,7 @@ class SQLServer(DatabaseCheck):
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get("include_instance_metrics", True)):
             common_metrics = list(INSTANCE_METRICS)
-            if major_version and major_version >= 2016:
+            if year and year >= 2016:
                 common_metrics.extend(INSTANCE_METRICS_NEWER_2016)
             if not self._config.dbm_enabled:
                 common_metrics.extend(DBM_MIGRATED_METRICS)
@@ -880,7 +888,6 @@ class SQLServer(DatabaseCheck):
                 self.procedure_metrics.run_job_loop(self.tag_manager.get_tags())
                 self.activity.run_job_loop(self.tag_manager.get_tags())
                 self.sql_metadata.run_job_loop(self.tag_manager.get_tags())
-                self._schemas.run_job_loop(self.tag_manager.get_tags())
                 self.deadlocks.run_job_loop(self.tag_manager.get_tags())
 
                 # Run XE session handlers
@@ -957,8 +964,8 @@ class SQLServer(DatabaseCheck):
         self.log.debug("initialized dynamic queries")
         return self._database_metrics
 
-    def log_missing_metric(self, metric_name, major_version, engine_version):
-        if major_version <= 2012:
+    def log_missing_metric(self, metric_name, year, engine_version):
+        if year <= 2012:
             self.log.warning("%s metrics are not supported on version 2012", metric_name)
         else:
             self.log.warning("%s metrics are not supported on Azure engine version: %s", metric_name, engine_version)
@@ -1115,10 +1122,7 @@ class SQLServer(DatabaseCheck):
                 "dbms": "sqlserver",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
-                "dbms_version": "{},{}".format(
-                    self.static_info_cache.get(STATIC_INFO_VERSION, ""),
-                    self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-                ),
+                "dbms_version": self.dbms_version,
                 "integration_version": __version__,
                 "tags": self.tag_manager.get_tags(),
                 "timestamp": time.time() * 1000,
