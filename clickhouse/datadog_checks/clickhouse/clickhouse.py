@@ -120,6 +120,7 @@ class ClickhouseCheck(AgentCheck):
                 compress=self._compression,
                 ca_cert=self._tls_ca_cert,
                 verify=self._verify,
+                autogenerate_session_id=False,
                 # https://clickhouse.com/docs/integrations/python#settings-argument
                 settings={},
             )

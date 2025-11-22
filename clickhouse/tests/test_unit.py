@@ -35,6 +35,7 @@ def test_config(instance):
             client_name='datadog-test-clickhouse',
             compress=False,
             settings={},
+            autogenerate_session_id=False,
         )
 
 
