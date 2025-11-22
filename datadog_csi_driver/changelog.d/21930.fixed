@@ -1,0 +1,2 @@
+Update auto_conf.yaml to use openmetrics_endpoint instead of deprecated prometheus_url parameter.
+
