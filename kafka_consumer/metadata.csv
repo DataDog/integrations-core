@@ -15,7 +15,6 @@ kafka.cluster.controller_id,gauge,,instance,,ID of the broker acting as the clus
 kafka.consumer_group.count,gauge,,item,,Total number of consumer groups.,0,kafka_consumer,consumer groups,,
 kafka.consumer_group.member.partitions,gauge,,item,,Number of partitions assigned to this consumer group member.,0,kafka_consumer,member partitions,,
 kafka.consumer_group.members,gauge,,item,,Number of members in the consumer group.,0,kafka_consumer,group members,,
-kafka.consumer_group.state,gauge,,,,Consumer group state indicator (always 1 with state as tag).,0,kafka_consumer,group state,,
 kafka.consumer_lag,gauge,,message,,Lag in messages between consumer and broker.,-1,kafka_consumer,consumer lag,,
 kafka.consumer_offset,gauge,,offset,,Current message offset on consumer.,0,kafka_consumer,consumer offset,,
 kafka.estimated_consumer_lag,gauge,,second,,Lag in seconds between consumer and broker. This metric is provided through Data Streams Monitoring. Additional charges may apply.,-1,kafka_consumer,consumer time lag,,

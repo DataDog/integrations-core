@@ -11,7 +11,6 @@ import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
 from datadog_checks.kafka_consumer.client import KafkaClient
-from datadog_checks.kafka_consumer.schema_registry_client import SchemaRegistryClient
 
 pytestmark = [pytest.mark.unit]
 
@@ -164,11 +163,10 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
     return client
 
 
-def seed_mock_schema_registry_client():
-    """Set some common defaults for the mock Schema Registry client."""
-    client = mock.create_autospec(SchemaRegistryClient)
-    client.get_subjects.return_value = ['test-topic-value']
-    client.get_versions.return_value = [1, 2]
+def mock_schema_registry_methods(metadata_collector):
+    """Mock Schema Registry methods on the metadata collector."""
+    metadata_collector._get_schema_registry_subjects = mock.Mock(return_value=['test-topic-value'])
+    metadata_collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
 
     # Mock a realistic minimal Avro schema for a user event
     avro_schema = json.dumps(
@@ -184,13 +182,14 @@ def seed_mock_schema_registry_client():
         }
     )
 
-    client.get_latest_version.return_value = {
-        'id': 1,
-        'version': 2,
-        'schema': avro_schema,
-        'schemaType': 'AVRO',
-    }
-    return client
+    metadata_collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={
+            'id': 1,
+            'version': 2,
+            'schema': avro_schema,
+            'schemaType': 'AVRO',
+        }
+    )
 
 
 @pytest.fixture
@@ -200,12 +199,6 @@ def cluster_config():
         'kafka_connect_str': 'localhost:9092',
         'enable_cluster_monitoring': True,
     }
-
-
-@pytest.fixture
-def mock_kafka_client():
-    """Mock Kafka client fixture using seed function."""
-    return seed_mock_kafka_client()
 
 
 def test_collect_cluster_metadata(check, dd_run_check, aggregator):
@@ -234,11 +227,19 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     # Also replace the client in the metadata collector since it was initialized with the old client
     kafka_consumer_check.metadata_collector.client = mock_kafka_client
 
-    # Mock schema registry client
-    kafka_consumer_check.schema_registry_client = seed_mock_schema_registry_client()
+    # Mock schema registry methods on metadata collector
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
 
     # Mock persistent cache for throughput calculation and schema registry events
-    prev_snapshot = {'ts': time.time() - 10.0, 'sums': {'test-topic': 250.0}}
+    # Using per-partition format: partition 0 was at 75, partition 1 was at 175
+    # Total was 250, now will be 300 (100 + 200), so rate = (300-250)/10 = 5.0 msg/sec
+    prev_snapshot = {
+        'ts': time.time() - 10.0,
+        'partitions': {
+            'test-topic:0': 75,
+            'test-topic:1': 175,
+        }
+    }
 
     def mocked_read_cache(key):
         if 'kafka_topic_hwm_sum_cache' in key:
@@ -256,7 +257,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     aggregator.assert_metric(
         'kafka.broker.count',
         value=2,
-        tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id'],
+        tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id', 'bootstrap_servers:localhost:9092'],
     )
 
     # Verify broker config metrics are emitted
@@ -435,19 +436,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
             'test_tag:test_value',
             'kafka_cluster_id:test-cluster-id',
             'consumer_group:test-group',
-            'state:STABLE',
-            'coordinator:1',
-        ],
-    )
-
-    aggregator.assert_metric(
-        'kafka.consumer_group.state',
-        value=1,  # STABLE state
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'consumer_group:test-group',
-            'state:STABLE',
+            'consumer_group_state:STABLE',
             'coordinator:1',
         ],
     )
@@ -459,7 +448,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
             'test_tag:test_value',
             'kafka_cluster_id:test-cluster-id',
             'consumer_group:test-group',
-            'state:STABLE',
+            'consumer_group_state:STABLE',
             'coordinator:1',
             'client_id:c1',
             'member_host:h1',
@@ -604,3 +593,110 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     ]
     for tag in expected_schema_tags:
         assert tag in schema_event['tags'], f"Missing schema event tag: {tag}"
+
+
+def test_throughput_with_offset_decrease(check, dd_run_check, aggregator):
+    """Test that negative throughput is not reported when offsets decrease (data loss scenario)."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'tags': ['test_tag:test_value'],
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+
+    # Mock current offsets: partition 0 decreased from 100 to 50 (data loss!)
+    # partition 1 increased normally from 200 to 250
+    def mock_offsets(partitions, offset=-1):
+        if offset == -1:
+            return [(topic, partition, 50 if partition == 0 else 250) for topic, partition in partitions]
+        else:
+            return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
+
+    mock_kafka_client.consumer_offsets_for_times = mock_offsets
+
+    # Mock cache with previous offsets
+    baseline_cache = {
+        'ts': time.time() - 10.0,
+        'partitions': {
+            'test-topic:0': 100,
+            'test-topic:1': 200,
+        }
+    }
+    
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(baseline_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    # Verify that message_rate was still reported (partition 1 was valid)
+    # Only partition 1 contributed: (250 - 200) / elapsed = positive rate
+    aggregator.assert_metric(
+        'kafka.topic.message_rate',
+        tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id', 'topic:test-topic'],
+    )
+
+    # The rate should be positive (only from partition 1)
+    metrics = aggregator.metrics('kafka.topic.message_rate')
+    for metric in metrics:
+        if 'topic:test-topic' in metric.tags:
+            assert metric.value > 0, f"Message rate should be positive, got {metric.value}"
+
+
+def test_throughput_with_partition_unavailable(check, dd_run_check, aggregator):
+    """Test that throughput calculation skips unavailable partitions (-1 offset)."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'tags': ['test_tag:test_value'],
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+
+    # First run: establish baseline with previous timestamp
+    baseline_cache = {
+        'ts': time.time() - 10.0,
+        'partitions': {
+            'test-topic:0': 100,
+            'test-topic:1': 200,
+        }
+    }
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(baseline_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+    aggregator.reset()
+
+    # Second run: partition 0 becomes unavailable (-1), partition 1 increases normally
+    def mock_offsets_run2(partitions, offset=-1):
+        if offset == -1:
+            return [(topic, partition, -1 if partition == 0 else 250) for topic, partition in partitions]
+        else:
+            return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
+
+    mock_kafka_client.consumer_offsets_for_times = mock_offsets_run2
+
+    prev_cache = json.dumps(baseline_cache)
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=prev_cache)
+
+    dd_run_check(kafka_consumer_check)
+
+    # Verify that message_rate was still reported (partition 1 was valid)
+    aggregator.assert_metric(
+        'kafka.topic.message_rate',
+        tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id', 'topic:test-topic'],
+    )
+
+    # The rate should be positive (only from partition 1: 250 - 200)
+    metrics = aggregator.metrics('kafka.topic.message_rate')
+    for metric in metrics:
+        if 'topic:test-topic' in metric.tags:
+            assert metric.value >= 0, f"Message rate should be non-negative, got {metric.value}"

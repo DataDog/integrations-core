@@ -22,7 +22,6 @@ from datadog_checks.kafka_consumer.constants import (
     KAFKA_INTERNAL_TOPICS,
     OFFSET_INVALID,
 )
-from datadog_checks.kafka_consumer.schema_registry_client import SchemaRegistryClient
 
 MAX_TIMESTAMPS = 1000
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
@@ -39,7 +38,6 @@ class KafkaCheck(AgentCheck):
         self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
-        self.schema_registry_client = SchemaRegistryClient(self.config, self.log, self.http)
         self.topic_partition_cache = {}
         self.check_initializations.insert(0, self.config.validate_config)
 

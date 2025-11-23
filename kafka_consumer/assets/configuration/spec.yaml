@@ -243,6 +243,10 @@ files:
           (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
           and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
           May increase resource consumption on large clusters.
+
+          When enabled, this automatically:
+            - Collects highwater mark offsets for all topic partitions (same as monitor_all_broker_highwatermarks)
+            - Collects consumer lag for all consumer groups (same as monitor_unlisted_consumer_groups)
         value:
           type: boolean
           example: false
