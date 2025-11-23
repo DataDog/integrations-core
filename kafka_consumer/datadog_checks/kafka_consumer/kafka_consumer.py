@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
 from google.protobuf.json_format import MessageToJson
 from google.protobuf.message import DecodeError, EncodeError
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
@@ -35,7 +35,7 @@ class KafkaCheck(AgentCheck):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
-        self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
+        self._data_streams_enabled = self.config._data_streams_enabled
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
         self.topic_partition_cache = {}

@@ -234,6 +234,7 @@ files:
       - name: data_streams_enabled
         description: |
           Collects consumer lag metric in seconds. It may result in additional billing charges.
+          Note: This is automatically enabled when enable_cluster_monitoring is set to true.
         value:
           type: boolean
           example: false
@@ -247,6 +248,7 @@ files:
           When enabled, this automatically:
             - Collects highwater mark offsets for all topic partitions (same as monitor_all_broker_highwatermarks)
             - Collects consumer lag for all consumer groups (same as monitor_unlisted_consumer_groups)
+            - Enables Data Streams monitoring (same as data_streams_enabled)
         value:
           type: boolean
           example: false

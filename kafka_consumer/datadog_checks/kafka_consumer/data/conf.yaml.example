@@ -306,6 +306,7 @@ instances:
 
     ## @param data_streams_enabled - boolean - optional - default: false
     ## Collects consumer lag metric in seconds. It may result in additional billing charges.
+    ## Note: This is automatically enabled when enable_cluster_monitoring is set to true.
     #
     # data_streams_enabled: false
 
@@ -317,6 +318,7 @@ instances:
     ## When enabled, this automatically:
     ##   - Collects highwater mark offsets for all topic partitions (same as monitor_all_broker_highwatermarks)
     ##   - Collects consumer lag for all consumer groups (same as monitor_unlisted_consumer_groups)
+    ##   - Enables Data Streams monitoring (same as data_streams_enabled)
     #
     # enable_cluster_monitoring: false
 

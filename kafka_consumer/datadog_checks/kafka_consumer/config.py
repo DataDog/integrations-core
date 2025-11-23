@@ -88,10 +88,19 @@ class KafkaConfig:
         if self._cluster_monitoring_enabled:
             self._monitor_unlisted_consumer_groups = True
             if not is_affirmative(instance.get('monitor_unlisted_consumer_groups', False)):
-                self.log.info(
+                self.log.debug(
                     "Cluster monitoring is enabled. Automatically enabling consumer lag collection "
                     "for all consumer groups (monitor_unlisted_consumer_groups)."
                 )
+
+            self._data_streams_enabled = True
+            if not is_affirmative(instance.get('data_streams_enabled', False)):
+                self.log.debug(
+                    "Cluster monitoring is enabled. Automatically enabling Data Streams monitoring "
+                    "(data_streams_enabled)."
+                )
+        else:
+            self._data_streams_enabled = is_affirmative(instance.get('data_streams_enabled', False))
 
         self._collect_schema_registry = instance.get('schema_registry_url')
 
