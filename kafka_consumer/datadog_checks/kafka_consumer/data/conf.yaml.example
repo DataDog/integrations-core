@@ -105,8 +105,6 @@ instances:
     ## Setting `monitor_unlisted_consumer_groups` to `true` tells the check to discover all consumer groups
     ## and fetch all their known offsets. If this is not set to true, you must specify `consumer_groups`.
     ##
-    ## NOTE: This is automatically enabled when `enable_cluster_monitoring` is set to true.
-    ##
     ## WARNING: This feature requires that your Kafka brokers be version >= 0.10.2. It is impossible to
     ## support this feature on older brokers because they do not provide a way to determine the mapping
     ## of consumer groups to topics. For details, see KIP-88. For older Kafka brokers, the consumer groups

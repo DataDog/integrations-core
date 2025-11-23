@@ -6,6 +6,7 @@
 
 import hashlib
 import json
+import random
 import time
 
 from confluent_kafka.admin import ConfigResource, ResourceType
@@ -24,11 +25,16 @@ class ClusterMetadataCollector:
         self.http = check.http
 
         self.EVENT_CACHE_TTL = 600  # 10 minutes in seconds
+        self.CONFIG_FETCH_CACHE_TTL_BASE = 45  # Base TTL in seconds for config fetch caching
+        self.CONFIG_FETCH_CACHE_TTL_JITTER = 15  # Jitter range in seconds (total: 45-60s)
 
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
+        self.BROKER_CONFIG_FETCH_CACHE_KEY = 'kafka_broker_config_fetch_cache'
         self.TOPIC_CONFIG_CACHE_KEY = 'kafka_topic_config_cache'
-        self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
+        self.TOPIC_CONFIG_FETCH_CACHE_KEY = 'kafka_topic_config_fetch_cache'
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
+        self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
+        self.SCHEMA_FETCH_CACHE_KEY = 'kafka_schema_fetch_cache'
 
         if self.config._collect_schema_registry:
             self._configure_schema_registry_http_client()
@@ -105,45 +111,108 @@ class ClusterMetadataCollector:
         except Exception as e:
             self.log.error("Error collecting schema registry info: %s", e)
 
-    def _should_emit_cached_event(self, cache_key_prefix: str, item_key: str, content: str) -> bool:
+    def _get_items_to_fetch(self, cache_key_prefix: str, item_keys: list[str]) -> list[str]:
+        """
+        Check which items need fetching based on cache expiration.
+
+        Args:
+            cache_key_prefix: Cache key to load
+            item_keys: List of item keys to check
+
+        Returns:
+            List of item keys that need fetching (not cached or expired)
+        """
         current_time = time.time()
-        content_hash = hashlib.sha256(content.encode('utf-8')).hexdigest()
+        items_to_fetch = []
 
         try:
-            cached_data_str = self.check.read_persistent_cache(cache_key_prefix)
-            if cached_data_str:
-                cache_dict = json.loads(cached_data_str)
-            else:
-                cache_dict = {}
+            cached_str = self.check.read_persistent_cache(cache_key_prefix)
+            cache_dict = json.loads(cached_str) if cached_str else {}
         except Exception as e:
-            self.log.debug("Could not read event cache: %s", e)
+            self.log.debug("Could not read cache %s: %s", cache_key_prefix, e)
             cache_dict = {}
 
-        if item_key not in cache_dict:
-            cache_dict[item_key] = {'hash': content_hash, 'last_emit': current_time}
-            self._write_cache(cache_key_prefix, cache_dict)
-            return True
+        for item_key in item_keys:
+            expire_at = cache_dict.get(item_key, 0)
 
-        cached_entry = cache_dict[item_key]
+            if current_time >= expire_at:
+                items_to_fetch.append(item_key)
 
-        if 'hash' not in cached_entry or cached_entry.get('hash') != content_hash:
-            cache_dict[item_key] = {'hash': content_hash, 'last_emit': current_time}
-            self._write_cache(cache_key_prefix, cache_dict)
-            return True
+        return items_to_fetch
 
-        if current_time - cached_entry.get('last_emit', 0) >= self.EVENT_CACHE_TTL:
-            cached_entry['last_emit'] = current_time
-            cache_dict[item_key] = cached_entry
-            self._write_cache(cache_key_prefix, cache_dict)
-            return True
+    def _mark_items_fetched(self, cache_key_prefix: str, item_keys: list[str]):
+        """
+        Mark items as fetched in cache with jittered TTL.
 
-        return False
+        Args:
+            cache_key_prefix: Cache key to update
+            item_keys: List of item keys that were fetched
+        """
+        current_time = time.time()
 
-    def _write_cache(self, cache_key: str, cache_dict: dict):
         try:
-            self.check.write_persistent_cache(cache_key, json.dumps(cache_dict))
+            cached_str = self.check.read_persistent_cache(cache_key_prefix)
+            cache_dict = json.loads(cached_str) if cached_str else {}
         except Exception as e:
-            self.log.warning("Could not write event cache: %s", e)
+            self.log.debug("Could not read cache %s for update: %s", cache_key_prefix, e)
+            cache_dict = {}
+
+        for item_key in item_keys:
+            ttl = self.CONFIG_FETCH_CACHE_TTL_BASE + random.uniform(0, self.CONFIG_FETCH_CACHE_TTL_JITTER)
+            cache_dict[item_key] = current_time + ttl
+
+        try:
+            self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
+        except Exception as e:
+            self.log.debug("Could not write cache %s: %s", cache_key_prefix, e)
+
+    def _get_events_to_send(self, cache_key_prefix: str, items: dict[str, str]) -> list[str]:
+        """
+        Determine which items should emit events based on content changes or expiration.
+
+        Args:
+            cache_key_prefix: Cache key to load/update
+            items: Dict mapping item_key -> event_content
+
+        Returns:
+            List of item keys that should emit events
+        """
+        if not items:
+            return []
+
+        current_time = time.time()
+        events_to_send = []
+
+        try:
+            cached_str = self.check.read_persistent_cache(cache_key_prefix)
+            cache_dict = json.loads(cached_str) if cached_str else {}
+        except Exception as e:
+            self.log.debug("Could not read cache %s: %s", cache_key_prefix, e)
+            cache_dict = {}
+
+        for item_key, event_content in items.items():
+            current_hash = hashlib.sha256(event_content.encode('utf-8')).hexdigest()
+
+            cached_entry = cache_dict.get(item_key)
+
+            if (
+                not cached_entry
+                or cached_entry.get('hash', '') != current_hash
+                or current_time >= cached_entry.get('expire_at', 0)
+            ):
+                events_to_send.append(item_key)
+
+            cache_dict[item_key] = {
+                'hash': current_hash,
+                'expire_at': current_time + self.EVENT_CACHE_TTL,
+            }
+
+        try:
+            self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
+        except Exception as e:
+            self.log.debug("Could not write cache %s: %s", cache_key_prefix, e)
+
+        return events_to_send
 
     def _collect_broker_metadata(self, metadata=None):
         self.log.debug("Collecting broker metadata")
@@ -190,6 +259,11 @@ class ClusterMetadataCollector:
                     if replica in broker_partition_count:
                         broker_partition_count[replica] += 1
 
+        broker_ids_to_fetch = self._get_items_to_fetch(
+            self.BROKER_CONFIG_FETCH_CACHE_KEY, [str(bid) for bid in brokers.keys()]
+        )
+        fetched_broker_configs = {}
+
         for broker_id, broker_metadata in brokers.items():
             broker_host = broker_metadata.host
             broker_port = broker_metadata.port
@@ -203,6 +277,10 @@ class ClusterMetadataCollector:
             self.check.gauge('broker.leader_count', broker_leader_count.get(broker_id, 0), tags=tags)
             self.check.gauge('broker.partition_count', broker_partition_count.get(broker_id, 0), tags=tags)
 
+            if str(broker_id) not in broker_ids_to_fetch:
+                self.log.debug("Skipping config fetch for broker %s (cache still valid)", broker_id)
+                continue
+
             try:
                 resources = [ConfigResource(ResourceType.BROKER, str(broker_id))]
                 futures = self.client.kafka_client.describe_configs(resources)
@@ -214,43 +292,54 @@ class ClusterMetadataCollector:
                     for config_name, config_entry in config_entries.items():
                         config_data[config_name] = config_entry.value
 
-                        if config_name in [
-                            'log.retention.bytes',
-                            'log.retention.ms',
-                            'log.segment.bytes',
-                            'num.partitions',
-                            'num.network.threads',
-                            'num.io.threads',
-                            'default.replication.factor',
-                            'min.insync.replicas',
-                        ]:
+                    for config_name in [
+                        'log.retention.bytes',
+                        'log.retention.ms',
+                        'log.segment.bytes',
+                        'num.partitions',
+                        'num.network.threads',
+                        'num.io.threads',
+                        'default.replication.factor',
+                        'min.insync.replicas',
+                    ]:
+                        if config_name in config_data:
                             try:
-                                value = float(config_entry.value) if config_entry.value else 0
+                                value = float(config_data[config_name]) if config_data[config_name] else 0
                                 metric_name = f"broker.config.{config_name.replace('.', '_')}"
                                 self.check.gauge(metric_name, value, tags=tags)
                             except (ValueError, TypeError):
                                 pass
 
                     truncated_config = self._truncate_config_for_event(config_data, max_configs=50)
-
                     event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
 
-                    if self._should_emit_cached_event(self.BROKER_CONFIG_CACHE_KEY, str(broker_id), event_text):
-                        self.check.event(
-                            {
-                                'timestamp': int(time.time()),
-                                'event_type': 'config_change',
-                                'source_type_name': 'kafka',
-                                'msg_title': f'Broker {broker_id} Configuration',
-                                'msg_text': event_text,
-                                'tags': tags + ['event_type:broker_config'],
-                                'aggregation_key': f'kafka_broker_config_{broker_id}',
-                                'alert_type': 'info',
-                            }
-                        )
+                    fetched_broker_configs[str(broker_id)] = {
+                        'event_text': event_text,
+                        'tags': tags,
+                    }
 
             except Exception as e:
                 self.log.warning("Failed to describe configs for broker %s: %s", broker_id, e)
+
+        self._mark_items_fetched(self.BROKER_CONFIG_FETCH_CACHE_KEY, list(fetched_broker_configs.keys()))
+
+        broker_contents = {bid: info['event_text'] for bid, info in fetched_broker_configs.items()}
+        brokers_to_emit = self._get_events_to_send(self.BROKER_CONFIG_CACHE_KEY, broker_contents)
+
+        for broker_id in brokers_to_emit:
+            info = fetched_broker_configs[broker_id]
+            self.check.event(
+                {
+                    'timestamp': int(time.time()),
+                    'event_type': 'config_change',
+                    'source_type_name': 'kafka',
+                    'msg_title': f'Broker {broker_id} Configuration',
+                    'msg_text': info['event_text'],
+                    'tags': info['tags'] + ['event_type:broker_config'],
+                    'aggregation_key': f'kafka_broker_config_{broker_id}',
+                    'alert_type': 'info',
+                }
+            )
 
     def _collect_topic_metadata(self, metadata, highwater_offsets):
         self.log.debug("Collecting topic metadata")
@@ -279,6 +368,12 @@ class ClusterMetadataCollector:
             self.log.debug("Could not read topic HWM cache: %s", e)
 
         current_partition_offsets = {}
+
+        topic_names_to_fetch = self._get_items_to_fetch(
+            self.TOPIC_CONFIG_FETCH_CACHE_KEY,
+            [name for name in topic_partitions.keys() if name not in KAFKA_INTERNAL_TOPICS],
+        )
+        fetched_topic_configs = {}
 
         for topic_name, partitions in topic_partitions.items():
             if topic_name in KAFKA_INTERNAL_TOPICS:
@@ -383,6 +478,10 @@ class ClusterMetadataCollector:
                 message_rate = (sum_latest - sum_previous) / (now_ts - prev_ts)
                 self.check.gauge('topic.message_rate', message_rate, tags=topic_tags)
 
+            if topic_name not in topic_names_to_fetch:
+                self.log.debug("Skipping config fetch for topic %s (cache still valid)", topic_name)
+                continue
+
             resources = [ConfigResource(ResourceType.TOPIC, topic_name)]
             futures = self.client.kafka_client.describe_configs(resources)
             config_result = futures[resources[0]].result(timeout=self.config._request_timeout)
@@ -394,36 +493,48 @@ class ClusterMetadataCollector:
             for config_name, config_entry in config_result.items():
                 topic_config[config_name] = config_entry.value
 
-            if topic_config:
-                truncated_config = self._truncate_config_for_event(topic_config, max_configs=30)
+            if not topic_config:
+                continue
 
-                event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
+            if 'retention.ms' in topic_config and topic_config['retention.ms'] != '-1':
+                retention_ms = int(topic_config['retention.ms'])
+                self.check.gauge('topic.config.retention_ms', retention_ms, tags=topic_tags)
 
-                if self._should_emit_cached_event(self.TOPIC_CONFIG_CACHE_KEY, topic_name, event_text):
-                    self.check.event(
-                        {
-                            'timestamp': int(time.time()),
-                            'event_type': 'info',
-                            'source_type_name': 'kafka',
-                            'msg_title': f'Topic: {topic_name} (custom config)',
-                            'msg_text': event_text,
-                            'tags': topic_tags + ['event_type:topic_config'],
-                            'aggregation_key': f'kafka_topic_config_{topic_name}',
-                            'alert_type': 'info',
-                        }
-                    )
+            if 'retention.bytes' in topic_config and topic_config['retention.bytes'] != '-1':
+                retention_bytes = int(topic_config['retention.bytes'])
+                self.check.gauge('topic.config.retention_bytes', retention_bytes, tags=topic_tags)
 
-                if 'retention.ms' in topic_config and topic_config['retention.ms'] != '-1':
-                    retention_ms = int(topic_config['retention.ms'])
-                    self.check.gauge('topic.config.retention_ms', retention_ms, tags=topic_tags)
+            if 'max.message.bytes' in topic_config:
+                max_bytes = int(topic_config['max.message.bytes'])
+                self.check.gauge('topic.config.max_message_bytes', max_bytes, tags=topic_tags)
 
-                if 'retention.bytes' in topic_config and topic_config['retention.bytes'] != '-1':
-                    retention_bytes = int(topic_config['retention.bytes'])
-                    self.check.gauge('topic.config.retention_bytes', retention_bytes, tags=topic_tags)
+            truncated_config = self._truncate_config_for_event(topic_config, max_configs=30)
+            event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
 
-                if 'max.message.bytes' in topic_config:
-                    max_bytes = int(topic_config['max.message.bytes'])
-                    self.check.gauge('topic.config.max_message_bytes', max_bytes, tags=topic_tags)
+            fetched_topic_configs[topic_name] = {
+                'event_text': event_text,
+                'tags': topic_tags,
+            }
+
+        self._mark_items_fetched(self.TOPIC_CONFIG_FETCH_CACHE_KEY, list(fetched_topic_configs.keys()))
+
+        topic_contents = {name: info['event_text'] for name, info in fetched_topic_configs.items()}
+        topics_to_emit = self._get_events_to_send(self.TOPIC_CONFIG_CACHE_KEY, topic_contents)
+
+        for topic_name in topics_to_emit:
+            info = fetched_topic_configs[topic_name]
+            self.check.event(
+                {
+                    'timestamp': int(time.time()),
+                    'event_type': 'info',
+                    'source_type_name': 'kafka',
+                    'msg_title': f'Topic: {topic_name} (custom config)',
+                    'msg_text': info['event_text'],
+                    'tags': info['tags'] + ['event_type:topic_config'],
+                    'aggregation_key': f'kafka_topic_config_{topic_name}',
+                    'alert_type': 'info',
+                }
+            )
 
         try:
             snapshot = {'ts': float(now_ts), 'partitions': current_partition_offsets}
@@ -509,8 +620,15 @@ class ClusterMetadataCollector:
 
         self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
 
+        subjects_to_fetch = self._get_items_to_fetch(self.SCHEMA_FETCH_CACHE_KEY, subjects)
+        fetched_schemas = {}
+
         for subject in subjects:
             subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
+
+            if subject not in subjects_to_fetch:
+                self.log.debug("Skipping schema fetch for subject %s (cache still valid)", subject)
+                continue
 
             try:
                 versions = self._get_schema_registry_versions(subject)
@@ -547,22 +665,37 @@ class ClusterMetadataCollector:
 
                 cache_content = f"{schema_id}:{schema_version}:{schema_content}"
 
-                if self._should_emit_cached_event(self.SCHEMA_CACHE_KEY, subject, cache_content):
-                    self.check.event(
-                        {
-                            'timestamp': int(time.time()),
-                            'event_type': 'info',
-                            'source_type_name': 'kafka',
-                            'msg_title': f'{topic_name} ({schema_for}) - Schema v{schema_version}',
-                            'msg_text': schema_content,
-                            'tags': event_tags,
-                            'aggregation_key': f'kafka_schema_{subject}_{schema_version}',
-                            'alert_type': 'info',
-                        }
-                    )
+                fetched_schemas[subject] = {
+                    'cache_content': cache_content,
+                    'schema_content': schema_content,
+                    'topic_name': topic_name,
+                    'schema_for': schema_for,
+                    'schema_version': schema_version,
+                    'event_tags': event_tags,
+                }
 
             except Exception as e:
                 self.log.warning("Error getting schema details for %s: %s", subject, e)
+
+        self._mark_items_fetched(self.SCHEMA_FETCH_CACHE_KEY, list(fetched_schemas.keys()))
+
+        schema_contents = {subject: info['cache_content'] for subject, info in fetched_schemas.items()}
+        schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, schema_contents)
+
+        for subject in schemas_to_emit:
+            info = fetched_schemas[subject]
+            self.check.event(
+                {
+                    'timestamp': int(time.time()),
+                    'event_type': 'info',
+                    'source_type_name': 'kafka',
+                    'msg_title': f'{info["topic_name"]} ({info["schema_for"]}) - Schema v{info["schema_version"]}',
+                    'msg_text': info['schema_content'],
+                    'tags': info['event_tags'],
+                    'aggregation_key': f'kafka_schema_{subject}_{info["schema_version"]}',
+                    'alert_type': 'info',
+                }
+            )
 
     def _truncate_config_for_event(self, config_data, max_configs=50):
         """

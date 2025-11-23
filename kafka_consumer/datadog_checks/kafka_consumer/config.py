@@ -84,7 +84,7 @@ class KafkaConfig:
         self.live_messages_configs = instance.get('live_messages_configs', [])
 
         self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
-        
+
         if self._cluster_monitoring_enabled:
             self._monitor_unlisted_consumer_groups = True
             if not is_affirmative(instance.get('monitor_unlisted_consumer_groups', False)):
@@ -92,7 +92,7 @@ class KafkaConfig:
                     "Cluster monitoring is enabled. Automatically enabling consumer lag collection "
                     "for all consumer groups (monitor_unlisted_consumer_groups)."
                 )
-        
+
         self._collect_schema_registry = instance.get('schema_registry_url')
 
         # Schema Registry authentication

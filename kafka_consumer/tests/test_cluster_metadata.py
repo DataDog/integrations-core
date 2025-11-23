@@ -238,7 +238,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         'partitions': {
             'test-topic:0': 75,
             'test-topic:1': 175,
-        }
+        },
     }
 
     def mocked_read_cache(key):
@@ -625,9 +625,9 @@ def test_throughput_with_offset_decrease(check, dd_run_check, aggregator):
         'partitions': {
             'test-topic:0': 100,
             'test-topic:1': 200,
-        }
+        },
     }
-    
+
     kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(baseline_cache))
     kafka_consumer_check.write_persistent_cache = mock.Mock()
 
@@ -667,7 +667,7 @@ def test_throughput_with_partition_unavailable(check, dd_run_check, aggregator):
         'partitions': {
             'test-topic:0': 100,
             'test-topic:1': 200,
-        }
+        },
     }
     kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(baseline_cache))
     kafka_consumer_check.write_persistent_cache = mock.Mock()
