@@ -163,7 +163,8 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
             matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
 
-            print(events[0]['postgres_rows'])
+            for r in events[0]['postgres_rows']:
+                print(r)
             print(matching_rows)
 
             assert len(matching_rows) == 1
