@@ -74,15 +74,16 @@ files:
         Filtering is applied after deserialization using jq-style expressions.
       value:
         type: object
+        required:
+          - cluster
+          - topic
         properties:
         - name: cluster
           type: string
-          required: true
           description: Kafka cluster identifier
           example: prod-kafka-1
         - name: topic
           type: string
-          required: true
           description: Topic to read messages from
           example: orders
         - name: partition
@@ -171,25 +172,26 @@ files:
         Configuration for creating a new Kafka topic.
       value:
         type: object
+        required:
+          - cluster
+          - topic
+          - num_partitions
+          - replication_factor
         properties:
         - name: cluster
           type: string
-          required: true
           description: Kafka cluster identifier
           example: prod-kafka-1
         - name: topic
           type: string
-          required: true
           description: Topic name to create
           example: orders-v2
         - name: num_partitions
           type: integer
-          required: true
           description: Number of partitions
           example: 6
         - name: replication_factor
           type: integer
-          required: true
           description: Replication factor
           example: 3
         - name: configs
@@ -209,15 +211,16 @@ files:
         Configuration for updating an existing topic's configuration.
       value:
         type: object
+        required:
+          - cluster
+          - topic
         properties:
         - name: cluster
           type: string
-          required: true
           description: Kafka cluster identifier
           example: prod-kafka-1
         - name: topic
           type: string
-          required: true
           description: Topic name to update
           example: orders
         - name: num_partitions
@@ -248,15 +251,16 @@ files:
         WARNING: This operation is irreversible and will cause data loss.
       value:
         type: object
+        required:
+          - cluster
+          - topic
         properties:
         - name: cluster
           type: string
-          required: true
           description: Kafka cluster identifier
           example: prod-kafka-1
         - name: topic
           type: string
-          required: true
           description: Topic name to delete
           example: old-orders
     
@@ -269,15 +273,16 @@ files:
         The consumer group must have no active members.
       value:
         type: object
+        required:
+          - cluster
+          - consumer_group
         properties:
         - name: cluster
           type: string
-          required: true
           description: Kafka cluster identifier
           example: prod-kafka-1
         - name: consumer_group
           type: string
-          required: true
           description: Consumer group ID to delete
           example: old-service-v1
     
@@ -291,35 +296,37 @@ files:
         Consumer group should be stopped (no active members).
       value:
         type: object
+        required:
+          - cluster
+          - consumer_group
+          - offsets
         properties:
         - name: cluster
           type: string
-          required: true
           description: Kafka cluster identifier
           example: prod-kafka-1
         - name: consumer_group
           type: string
-          required: true
           description: Consumer group ID to update
           example: order-processor
         - name: offsets
           type: array
-          required: true
           description: List of topic-partition-offset tuples to update
           items:
             type: object
+            required:
+              - topic
+              - partition
+              - offset
             properties:
             - name: topic
               type: string
-              required: true
               description: Topic name
             - name: partition
               type: integer
-              required: true
               description: Partition number
             - name: offset
               type: integer
-              required: true
               description: New offset value
           example:
             - topic: orders
@@ -339,15 +346,17 @@ files:
         safe transmission via YAML and support for binary data.
       value:
         type: object
+        required:
+          - cluster
+          - topic
+          - value
         properties:
         - name: cluster
           type: string
-          required: true
           description: Kafka cluster identifier
           example: prod-kafka-1
         - name: topic
           type: string
-          required: true
           description: Topic to produce to
           example: test-topic
         - name: key
@@ -359,7 +368,6 @@ files:
           example: "MTIzNDU="
         - name: value
           type: string
-          required: true
           description: |
             Message value, base64-encoded.
             Example: '{"order_id": "12345"}' -> base64 -> "eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"
