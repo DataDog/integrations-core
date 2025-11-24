@@ -38,9 +38,12 @@ def test_check_namespace_custom():
     )
 
 
-def test_e2e_metrics(dd_agent_check, instance):
+def test_unit_metrics(dd_agent_check, instance, aggregator, mock_http_response):
+    mock_http_response(file_path=common.get_fixture_path('n8n.txt'))
+    check = N8nCheck('n8n', {}, [instance], rate=True)
+    dd_agent_check(check)
     aggregator = dd_agent_check(instance, rate=True)
 
-    for metric in common.E2E_METRICS:
+    for metric in common.TEST_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()

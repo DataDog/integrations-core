@@ -24,7 +24,7 @@ E2E_METADATA = {
     'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
 }
 
-E2E_METRICS = [
+TEST_METRICS = [
     'n8n.active.workflow.count',
     'n8n.api.request.duration.seconds.count',
     'n8n.api.request.duration.seconds.sum',
