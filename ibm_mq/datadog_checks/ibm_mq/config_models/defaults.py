@@ -64,6 +64,10 @@ def instance_mqcd_version():
     return 6
 
 
+def instance_normalize_description_tags():
+    return True
+
+
 def instance_override_hostname():
     return False
 

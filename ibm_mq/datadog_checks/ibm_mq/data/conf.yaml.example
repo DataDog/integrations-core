@@ -193,6 +193,17 @@ instances:
     #
     # add_description_tags: false
 
+    ## @param normalize_description_tags - boolean - optional - default: true
+    ## Normalize description tag values when add_description_tags is enabled.
+    ## When enabled, descriptions are automatically normalized for use as tag values:
+    ## - Converted to lowercase
+    ## - Spaces and special characters replaced with underscores
+    ## - Limited to 200 characters
+    ##
+    ## See: https://docs.datadoghq.com/getting_started/tagging/#define-tags
+    #
+    # normalize_description_tags: true
+
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.
     ## If you're having connection issues make sure it matches your MQ version.
