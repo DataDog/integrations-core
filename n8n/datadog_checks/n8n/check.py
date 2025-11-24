@@ -39,6 +39,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
             namespace = f'n8n.{self.raw_metric_prefix}'
 
         return {'namespace': namespace, 'metrics': [METRIC_MAP]}
+
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
         endpoint = urljoin(self.openmetrics_endpoint, self._version_endpoint)
@@ -96,4 +97,3 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         self._submit_version_metadata()
         self._check_n8n_health()
         self._check_n8n_readiness()
-
