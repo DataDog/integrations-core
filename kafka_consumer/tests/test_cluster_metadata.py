@@ -474,7 +474,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
 
     # Verify broker configuration event structure and content
     broker_config_events = [e for e in aggregator.events if 'event_type:broker_config' in e.get('tags', [])]
-    assert len(broker_config_events) >= 1, f"Expected at least 1 broker config event, found {len(broker_config_events)}"
+    assert broker_config_events, f"Expected at least 1 broker config event, found {len(broker_config_events)}"
 
     # Check broker event structure and content
     broker_event = broker_config_events[0]
@@ -515,7 +515,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
 
     # Verify topic configuration event structure and content
     topic_config_events = [e for e in aggregator.events if 'event_type:topic_config' in e.get('tags', [])]
-    assert len(topic_config_events) >= 1, f"Expected at least 1 topic config event, found {len(topic_config_events)}"
+    assert topic_config_events, f"Expected at least 1 topic config event, found {len(topic_config_events)}"
 
     # Check topic event structure and content
     topic_event = topic_config_events[0]
