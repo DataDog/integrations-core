@@ -51,7 +51,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
 
-@pytest.fixture(autouse=False)
+@pytest.fixture(autouse=True)
 def auto_reset_pg_stat_statements(reset_pg_stat_statements):
     """
     Automatically reset pg_stat_statements before each test in this file.
@@ -112,7 +112,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
             return json.dumps({'query': normalize_query(query), 'metadata': {}})
         return json.dumps({'query': query, 'metadata': {}})
 
-    queries = ["SET application_name = %s", "SET application_name = %s"]
+    queries = ["SET application_name=%s", "SET application_name=%s"]
 
     # These queries will have the same query signature but different queryids in pg_stat_statements
     def _run_query(idx):
