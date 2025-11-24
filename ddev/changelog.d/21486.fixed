@@ -1,1 +1,0 @@
-Removed the requirement for all files to be committed before sending size metrics to Datadog.

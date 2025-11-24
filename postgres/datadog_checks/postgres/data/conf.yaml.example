@@ -567,6 +567,11 @@ instances:
         #
         # max_tables: 300
 
+        ## @param max_query_duration - number - optional - default: 60
+        ## Maximum duration of the query to collect schema information in seconds.
+        #
+        # max_query_duration: <MAX_QUERY_DURATION>
+
         ## @param max_columns - number - optional - default: 50
         ## Maximum amount of columns the Agent collects per table.
         #

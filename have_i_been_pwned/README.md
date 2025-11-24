@@ -10,6 +10,8 @@ This integration ingests the following logs:
 
 This integration collects breach logs and send them to Datadog for analysis. The logs are parsed and enriched using Datadog's built-in pipeline, which allows for searching and analysis. Dashboards and Cloud SIEM detection rules are included to help monitor message logs and improve security.
 
+**Disclaimer:** The source of this API and its data is [haveibeenpwned.com][1], under a Creative Commons Attribution 4.0 International License.
+
 ## Setup
 
 ### Get an API key from the Have I Been Pwned Portal
