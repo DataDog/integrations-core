@@ -1610,8 +1610,8 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
