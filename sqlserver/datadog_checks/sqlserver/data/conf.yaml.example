@@ -802,9 +802,20 @@ instances:
         #
         # collection_interval: 600
 
+        ## @param max_tables - integer - optional - default: 300
+        ## Set the maximum number of tables to collect. Defaults to 300.
+        #
+        # max_tables: 300
+
         ## @param max_execution_time - number - optional - default: 10
         ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
         ## Capped by `collect_schemas.collection_interval`
+        ##
+        ##
+        ## <<< DEPRECATED >>>
+        ##
+        ## Agent version: 7.74.0
+        ## Migration: This option no longer has any effect.
         #
         # max_execution_time: 10
 

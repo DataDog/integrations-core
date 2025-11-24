@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "316cf13a-3c12-4014-9cb1-e3fa6ad8dd5e",
   "app_id": "zscaler-private-access",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
