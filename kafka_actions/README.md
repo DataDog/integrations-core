@@ -1,12 +1,12 @@
 # Kafka Actions
 
-> **🚧 PREVIEW FEATURE**: This integration is currently in preview. To access and use this feature, please reach out to the **Data Streams Monitoring team** at Datadog.
+**Note:** This integration is currently in preview. To access and use this feature, reach out to the Data Streams Monitoring team at Datadog.
 
 ## Overview
 
 The Kafka Actions integration enables one-time administrative and operational actions on Kafka clusters through the Datadog Agent.
 
-> **⚠️ IMPORTANT**: This integration is **exclusively triggered via Remote Configuration** and should **never be scheduled manually** in your Agent configuration. It is not meant to run continuously like traditional checks.
+**Important:** This integration is exclusively triggered via Remote Configuration and should never be scheduled manually in your Agent configuration. It is not meant to run continuously like traditional checks.
 
 ### Supported Actions
 
@@ -35,9 +35,7 @@ The Kafka Actions integration is included in the [Datadog Agent][2] package (ver
 
 ### Configuration
 
-> **⚠️ DO NOT configure this check manually**
->
-> This integration is triggered exclusively through Remote Configuration from the Datadog UI.
+**Important:** Do not configure this check manually. This integration is triggered exclusively through Remote Configuration from the Datadog UI.
 
 Configuration is managed entirely through Remote Configuration. Actions are triggered from the Datadog platform and results are visible in Datadog Events.
 
