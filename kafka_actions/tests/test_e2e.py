@@ -5,13 +5,18 @@ import json
 
 import pytest
 
+from datadog_checks.dev._env import e2e_testing
+
 from . import common
 
 pytestmark = [pytest.mark.e2e]
 
 
-def test_e2e_read_messages(kafka_instance, check, dd_run_check, aggregator):
+def test_e2e_read_messages(dd_environment, kafka_instance, check, dd_run_check, aggregator):
     """Test reading messages from Kafka."""
+    if not e2e_testing():
+        pytest.skip("E2E tests require dd_environment fixture")
+
     # Verify cluster is available
     cluster_id = common.get_cluster_id()
     assert cluster_id is not None, "Kafka cluster is not available"
