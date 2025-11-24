@@ -205,6 +205,17 @@ files:
         value:
           example: false
           type: boolean
+      - name: add_description_tags
+        description: |
+          Add description tags to channel and queue metrics. When enabled, the following tags will be added:
+            - channel_desc:<description> for channel metrics
+            - queue_desc:<description> for queue metrics
+
+          Note: Enabling this option may increase tag cardinality depending on how many unique
+          descriptions you have configured for your channels and queues.
+        value:
+          example: false
+          type: boolean
       - name: mqcd_version
         description: |
           Which channel definition version to use. Supported values are 1 to 9 including.

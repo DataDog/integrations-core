@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    add_description_tags: Optional[bool] = None
     auto_discover_channels: Optional[bool] = None
     auto_discover_queues: Optional[bool] = None
     auto_discover_queues_via_names: Optional[bool] = None
