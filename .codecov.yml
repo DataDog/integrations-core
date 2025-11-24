@@ -306,6 +306,10 @@ coverage:
         target: 75
         flags:
         - ibm_mq
+      IBM_Spectrum_LSF:
+        target: 75
+        flags:
+        - ibm_spectrum_lsf
       IBM_WAS:
         target: 75
         flags:
@@ -1230,6 +1234,11 @@ flags:
     paths:
     - ibm_mq/datadog_checks/ibm_mq
     - ibm_mq/tests
+  ibm_spectrum_lsf:
+    carryforward: true
+    paths:
+    - ibm_spectrum_lsf/datadog_checks/ibm_spectrum_lsf
+    - ibm_spectrum_lsf/tests
   ibm_was:
     carryforward: true
     paths:
