@@ -2,3 +2,6 @@
 
 [[envs.default.matrix]]
 python = ["3.12"]
+
+[envs.default.env-vars]
+CONFLUENT_VERSION = "7.3.0"

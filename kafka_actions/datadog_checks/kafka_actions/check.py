@@ -30,6 +30,7 @@ class KafkaActionsCheck(AgentCheck):
 
         self.remote_config_id = self.config.remote_config_id
         self.action = self.config.action
+        self.cluster = 'unknown'  # Will be set by action handlers
 
         self.kafka_client = KafkaActionsClient(self.instance, self.log)
         self.deserializer = MessageDeserializer(self.log)
@@ -74,7 +75,7 @@ class KafkaActionsCheck(AgentCheck):
                 success=False,
                 action=self.action,
                 message=f"Kafka action '{self.action}' failed: {error_msg}",
-                cluster=getattr(self, 'cluster', 'unknown'),
+                cluster=self.cluster,
             )
             raise
         finally:
@@ -181,14 +182,6 @@ class KafkaActionsCheck(AgentCheck):
             'tags': tags,
         }
 
-        self.log.info(
-            "Sending Kafka action event to Datadog: action=%s, status=%s, event_type=%s",
-            action,
-            'success' if success else 'failure',
-            f'kafka_action_{event_type}',
-        )
-        self.log.info("Event payload: %s", json.dumps(event_payload, indent=2))
-
         self.event(event_payload)
 
     # =========================================================================
@@ -214,8 +207,6 @@ class KafkaActionsCheck(AgentCheck):
         """
         config = self.config.read_messages
         start_time = time.time()
-
-        self.log.info("Read messages config: %s", json.dumps(dict(config), indent=2))
 
         self.cluster = config['cluster']
         self._verify_cluster_id()
@@ -461,7 +452,6 @@ class KafkaActionsCheck(AgentCheck):
             'topic': deserialized_msg.topic,
             'partition': deserialized_msg.partition,
             'offset': deserialized_msg.offset,
-            'timestamp': deserialized_msg.timestamp,
             'key': msg_dict.get('key'),
             'value': msg_dict.get('value'),
         }
@@ -499,15 +489,6 @@ class KafkaActionsCheck(AgentCheck):
             'source_type_name': 'kafka',
             'aggregation_key': agg_key,
         }
-
-        self.log.info(
-            "Sending Kafka message event to Datadog: topic=%s, partition=%d, offset=%d, event_type=%s",
-            deserialized_msg.topic,
-            deserialized_msg.partition,
-            deserialized_msg.offset,
-            'kafka_message',
-        )
-        self.log.info("Event payload: %s", json.dumps(event_payload, indent=2))
 
         self.event(event_payload)
 
