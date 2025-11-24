@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import subprocess
 
-from datadog_checks.base.log import AgentLogger
+from datadog_checks.base.log import CheckLoggingAdapter
 
 
 class LSFClient:
-    def __init__(self, logger: AgentLogger):
+    def __init__(self, logger: CheckLoggingAdapter):
         self.log = logger
 
     def _run_command(self, *command: str) -> tuple[str, str, int]:

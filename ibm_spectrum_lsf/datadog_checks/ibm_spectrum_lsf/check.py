@@ -47,7 +47,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
             GPUHostsProcessor(self.client, self.log, self.tags),
         ]
 
-    def check(self, _):
+    def check(self, instance):
         _, err, exit_code = self.client.lsid()
         if exit_code == 0:
             self.gauge("can_connect", 1, self.tags)
