@@ -16,6 +16,7 @@ def test_check_n8n_e2e(dd_agent_check, instance):
     aggregator.assert_service_check('n8n.openmetrics.health', ServiceCheck.OK, count=2)
     assert_service_checks(aggregator)
 
+@pytest.mark.e2e
 def test_e2e(dd_agent_check, instance: InstanceBuilder):
     config = {"init_config": {}, "instances": [instance(True, True, get_docker_hostname(), 5678)]}
 
