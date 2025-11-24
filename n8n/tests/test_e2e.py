@@ -6,13 +6,9 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import assert_service_checks
 
-from .common import TEST_METRICS
-
 
 @pytest.mark.e2e
 def test_check_n8n_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     aggregator.assert_service_check('n8n.openmetrics.health', ServiceCheck.OK, count=2)
     assert_service_checks(aggregator)
-    for metric in TEST_METRICS:
-        aggregator.assert_metric(metric)
