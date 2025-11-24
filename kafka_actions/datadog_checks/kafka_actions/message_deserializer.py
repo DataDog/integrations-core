@@ -56,12 +56,10 @@ class MessageDeserializer:
             return None, None
 
         try:
-            # Build schema if needed (using cache)
             schema = None
             if format_type in ('protobuf', 'avro') and schema_str:
                 schema = self._get_or_build_schema(format_type, schema_str)
 
-            # Deserialize
             return self._deserialize_bytes_maybe_schema_registry(raw_bytes, format_type, schema, uses_schema_registry)
         except Exception as e:
             self.log.warning("Failed to deserialize message: %s", e)
@@ -72,7 +70,6 @@ class MessageDeserializer:
     ) -> tuple[str | None, int | None]:
         """Deserialize message, handling Schema Registry format if present."""
         if uses_schema_registry:
-            # When explicitly configured, expect schema registry format
             if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
                 msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
                 raise ValueError(
@@ -128,7 +125,6 @@ class MessageDeserializer:
         if not decoded:
             return None
 
-        # Validate it's valid JSON
         json.loads(decoded)
         return decoded
 
@@ -216,20 +212,16 @@ class MessageDeserializer:
         Returns:
             Schema object (cached or newly built)
         """
-        # Create cache key
         schema_hash = hashlib.sha256(schema_str.encode('utf-8')).hexdigest()
         cache_key = (message_format, schema_hash)
 
-        # Check cache
         if cache_key in self._schema_cache:
             self.log.debug("Using cached schema for %s (hash: %s...)", message_format, schema_hash[:8])
             return self._schema_cache[cache_key]
 
-        # Build schema
         self.log.debug("Building new schema for %s (hash: %s...)", message_format, schema_hash[:8])
         schema = self._build_schema(message_format, schema_str)
 
-        # Cache it
         self._schema_cache[cache_key] = schema
         return schema
 
@@ -260,21 +252,17 @@ class MessageDeserializer:
 
     def _build_protobuf_schema(self, schema_str: str):
         """Build a Protobuf schema from base64-encoded FileDescriptorSet."""
-        # Schema is encoded in base64
         schema_bytes = base64.b64decode(schema_str)
         descriptor_set = descriptor_pb2.FileDescriptorSet()
         descriptor_set.ParseFromString(schema_bytes)
 
-        # Register all file descriptors in a descriptor pool
         pool = descriptor_pool.DescriptorPool()
         for fd_proto in descriptor_set.file:
             pool.Add(fd_proto)
 
-        # Pick the first message type from the first file descriptor
         first_fd = descriptor_set.file[0]
         first_message_proto = first_fd.message_type[0]
 
-        # Construct fully qualified name
         package = first_fd.package
         message_name = first_message_proto.name
         if package:
@@ -282,7 +270,6 @@ class MessageDeserializer:
         else:
             full_name = message_name
 
-        # Get the message descriptor and create a dynamic message class
         message_descriptor = pool.FindMessageTypeByName(full_name)
         schema = message_factory.GetMessageClass(message_descriptor)()
 
@@ -414,6 +401,6 @@ class DeserializedMessage:
             'timestamp': self.timestamp,
             'topic': self.topic,
             'headers': self.headers,
-            'key': self.key,  # Lazy deserialization
-            'value': self.value,  # Lazy deserialization
+            'key': self.key,
+            'value': self.value,
         }

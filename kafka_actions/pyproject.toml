@@ -30,9 +30,9 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=37.0.0",
-    "confluent-kafka>=2.3.0",
-    "fastavro>=1.8.0",
-    "protobuf>=4.0.0",
+    "confluent-kafka==2.11.1",
+    "fastavro==1.12.0",
+    "protobuf==6.32.0",
     "pymongo==4.8.0",
 ]
 dynamic = [

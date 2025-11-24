@@ -170,18 +170,26 @@ class KafkaActionsCheck(AgentCheck):
 
         tags = self._get_tags() + [f'kafka_cluster_id:{cluster}']
 
-        self.event(
-            {
-                'timestamp': int(time.time()),
-                'event_type': f'kafka_action_{event_type}',
-                'msg_title': f'Kafka Action {action.replace("_", " ").title()}: {event_type.title()}',
-                'msg_text': event_text,
-                'alert_type': alert_type,
-                'source_type_name': 'kafka',
-                'aggregation_key': f'kafka_action_{action}_{self.remote_config_id}',
-                'tags': tags,
-            }
+        event_payload = {
+            'timestamp': int(time.time()),
+            'event_type': f'kafka_action_{event_type}',
+            'msg_title': f'Kafka Action {action.replace("_", " ").title()}: {event_type.title()}',
+            'msg_text': event_text,
+            'alert_type': alert_type,
+            'source_type_name': 'kafka',
+            'aggregation_key': f'kafka_action_{action}_{self.remote_config_id}',
+            'tags': tags,
+        }
+
+        self.log.info(
+            "Sending Kafka action event to Datadog: action=%s, status=%s, event_type=%s",
+            action,
+            'success' if success else 'failure',
+            f'kafka_action_{event_type}',
         )
+        self.log.info("Event payload: %s", json.dumps(event_payload, indent=2))
+
+        self.event(event_payload)
 
     # =========================================================================
     # Action Handlers (RFC-Compliant)
@@ -204,8 +212,6 @@ class KafkaActionsCheck(AgentCheck):
         Returns:
             Dict with stats about the operation
         """
-        import time
-
         config = self.config.read_messages
         start_time = time.time()
 
@@ -348,7 +354,6 @@ class KafkaActionsCheck(AgentCheck):
         Returns:
             Boolean result of the expression
         """
-        # Handle 'and' / 'or' operators
         if ' and ' in expression:
             parts = expression.split(' and ')
             return all(self._evaluate_jq_expression(part.strip(), context) for part in parts)
@@ -356,8 +361,6 @@ class KafkaActionsCheck(AgentCheck):
             parts = expression.split(' or ')
             return any(self._evaluate_jq_expression(part.strip(), context) for part in parts)
 
-        # Parse comparison: .field.path <operator> value
-        # Supported operators: ==, !=, >, <, >=, <=, contains
         operators = ['==', '!=', '>=', '<=', '>', '<', ' contains ']
         for op in operators:
             if op in expression:
@@ -365,13 +368,9 @@ class KafkaActionsCheck(AgentCheck):
                 left = left.strip()
                 right = right.strip()
 
-                # Evaluate left side (field access)
                 left_value = self._get_field_from_path(left, context)
-
-                # Evaluate right side (literal value)
                 right_value = self._parse_literal(right)
 
-                # Apply operator
                 if op == '==':
                     return left_value == right_value
                 elif op == '!=':
@@ -428,13 +427,11 @@ class KafkaActionsCheck(AgentCheck):
         """
         value_str = value_str.strip()
 
-        # String literals (with quotes)
         if (value_str.startswith('"') and value_str.endswith('"')) or (
             value_str.startswith("'") and value_str.endswith("'")
         ):
             return value_str[1:-1]
 
-        # Numbers
         try:
             if '.' in value_str:
                 return float(value_str)
@@ -442,7 +439,6 @@ class KafkaActionsCheck(AgentCheck):
         except ValueError:
             pass
 
-        # Booleans
         if value_str.lower() == 'true':
             return True
         if value_str.lower() == 'false':
@@ -450,7 +446,6 @@ class KafkaActionsCheck(AgentCheck):
         if value_str.lower() == 'null':
             return None
 
-        # Default: return as string
         return value_str
 
     def _emit_message_event_deserialized(self, deserialized_msg: DeserializedMessage, cluster: str):
@@ -488,23 +483,33 @@ class KafkaActionsCheck(AgentCheck):
             f'offset:{deserialized_msg.offset}',
         ]
 
-        event_title = (
-            f'Kafka Message: {deserialized_msg.topic} [P{deserialized_msg.partition}@{deserialized_msg.offset}]'
+        event_title = f'Kafka Message: {deserialized_msg.topic}'
+
+        agg_key = (
+            f'kafka_{deserialized_msg.topic}_{deserialized_msg.partition}_'
+            f'{deserialized_msg.offset}_{self.remote_config_id}'
         )
 
-        agg_key = f'kafka_{deserialized_msg.topic}_{deserialized_msg.partition}_{deserialized_msg.offset}'
+        event_payload = {
+            'timestamp': int(time.time()),
+            'event_type': 'kafka_message',
+            'msg_title': event_title,
+            'msg_text': event_text,
+            'tags': event_tags,
+            'source_type_name': 'kafka',
+            'aggregation_key': agg_key,
+        }
 
-        self.event(
-            {
-                'timestamp': int(time.time()),
-                'event_type': 'kafka_message',
-                'msg_title': event_title,
-                'msg_text': event_text,
-                'tags': event_tags,
-                'source_type_name': 'kafka',
-                'aggregation_key': agg_key,
-            }
+        self.log.info(
+            "Sending Kafka message event to Datadog: topic=%s, partition=%d, offset=%d, event_type=%s",
+            deserialized_msg.topic,
+            deserialized_msg.partition,
+            deserialized_msg.offset,
+            'kafka_message',
         )
+        self.log.info("Event payload: %s", json.dumps(event_payload, indent=2))
+
+        self.event(event_payload)
 
     def _format_for_display(self, data) -> str:
         """Format data for display in event.
@@ -522,70 +527,6 @@ class KafkaActionsCheck(AgentCheck):
         if isinstance(data, str):
             return data
         return str(data)
-
-    def _emit_message_event(self, msg, topic, cluster='unknown'):
-        """Emit a Kafka message as a Datadog event.
-
-        Args:
-            msg: Kafka message object
-            topic: Topic name
-            cluster: Kafka cluster identifier
-        """
-        try:
-            value_str = msg.value().decode('utf-8') if msg.value() else ''
-            try:
-                value_obj = json.loads(value_str)
-                value_display = json.dumps(value_obj, indent=2)
-            except json.JSONDecodeError:
-                value_display = value_str
-        except UnicodeDecodeError:
-            value_display = f"<binary data, {len(msg.value())} bytes>"
-
-        key_str = ''
-        if msg.key():
-            try:
-                key_str = msg.key().decode('utf-8')
-            except UnicodeDecodeError:
-                key_str = f"<binary, {len(msg.key())} bytes>"
-
-        ts_type, ts_value = msg.timestamp()
-        timestamp = ts_value if ts_value else int(time() * 1000)
-
-        event_tags = self._get_tags() + [
-            f'kafka_cluster_id:{cluster}',
-            f'topic:{topic}',
-            f'partition:{msg.partition()}',
-            f'offset:{msg.offset()}',
-        ]
-
-        if key_str:
-            event_tags.append(f'key:{key_str[:200]}')  # Limit key length in tags
-
-        event_title = f'Kafka Message: {topic} [P{msg.partition()}@{msg.offset()}]'
-
-        event_text = f"""**Topic:** {topic}
-**Partition:** {msg.partition()}
-**Offset:** {msg.offset()}
-**Timestamp:** {timestamp}
-**Key:** {key_str or '<none>'}
-
-**Value:**
-```
-{value_display}
-```
-"""
-
-        self.event(
-            {
-                'timestamp': int(time.time()),
-                'event_type': 'kafka_message',
-                'msg_title': event_title,
-                'msg_text': event_text,
-                'tags': event_tags,
-                'source_type_name': 'kafka',
-                'aggregation_key': f'kafka_{topic}_{msg.partition()}_{msg.offset()}',
-            }
-        )
 
     def _action_create_topic(self):
         """Create a new Kafka topic (RFC Action #2).

@@ -1,60 +1,67 @@
-# Agent Check: Kafka Actions
+# Kafka Actions
+
+> **🚧 PREVIEW FEATURE**: This integration is currently in preview. To access and use this feature, please reach out to the **Data Streams Monitoring team** at Datadog.
 
 ## Overview
 
-This check monitors [Kafka Actions][1] through the Datadog Agent. 
+The Kafka Actions integration enables one-time administrative and operational actions on Kafka clusters through the Datadog Agent.
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+> **⚠️ IMPORTANT**: This integration is **exclusively triggered via Remote Configuration** and should **never be scheduled manually** in your Agent configuration. It is not meant to run continuously like traditional checks.
+
+### Supported Actions
+
+| Action | Description |
+|--------|-------------|
+| `read_messages` | Read and filter messages with jq-style expressions, supporting JSON, String, BSON, Avro, and Protobuf formats |
+| `produce_message` | Produce messages to topics with base64-encoded payloads and headers |
+| `create_topic` | Create topics with custom partitions, replication factor, and configs |
+| `update_topic_config` | Update topic configurations and partition counts |
+| `delete_topic` | Delete topics |
+| `delete_consumer_group` | Delete consumer groups |
+| `update_consumer_group_offsets` | Reset consumer group offsets to specific positions |
+
+### Key Features
+
+- **Cluster ID Verification**: Prevents accidental operations on wrong clusters
+- **Advanced Filtering**: Supports `==`, `!=`, `>`, `<`, `>=`, `<=`, `contains`, `and`, `or`, and nested field access
+- **Real-time Streaming**: Stream messages as they arrive with configurable limits
+- **Multiple Formats**: JSON, String, BSON, Avro, and Protobuf with Schema Registry support
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
-
 ### Installation
 
-The Kafka Actions check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+The Kafka Actions integration is included in the [Datadog Agent][2] package (version 7.x+).
 
 ### Configuration
 
-1. Edit the `kafka_actions.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kafka_actions performance data. See the [sample kafka_actions.d/conf.yaml][4] for all available configuration options.
+> **⚠️ DO NOT configure this check manually**
+>
+> This integration is triggered exclusively through Remote Configuration from the Datadog UI.
 
-2. [Restart the Agent][5].
-
-### Validation
-
-[Run the Agent's status subcommand][6] and look for `kafka_actions` under the Checks section.
+Configuration is managed entirely through Remote Configuration. Actions are triggered from the Datadog platform and results are visible in Datadog Events.
 
 ## Data Collected
 
-### Metrics
-
-See [metadata.csv][7] for a list of metrics provided by this integration.
-
 ### Events
 
-The Kafka Actions integration does not include any events.
+- **Action Events** (`kafka_action_success` / `kafka_action_error`): Emitted when an action completes
+- **Message Events** (`kafka_message`): Emitted for each message retrieved by `read_messages`
+
+### Metrics
+
+This integration does not collect metrics.
 
 ### Service Checks
 
-The Kafka Actions integration does not include any service checks.
-
-See [service_checks.json][8] for a list of service checks provided by this integration.
+This integration does not include service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+**Actions not executing**: Verify Remote Configuration is enabled on your Agent and check Agent logs for errors.
+**Message deserialization failures**: Ensure the correct format is specified (`json`, `string`, `bson`, `avro`, `protobuf`) and provide schemas for Avro/Protobuf.
 
+Need help? Contact [Datadog support][9] or reach out to the **Data Streams Monitoring team** at Datadog for questions about this integration.
 
-[1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/kafka_actions/datadog_checks/kafka_actions/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/kafka_actions/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/kafka_actions/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/

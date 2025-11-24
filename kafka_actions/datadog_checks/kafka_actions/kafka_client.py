@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Kafka client wrapper for kafka_actions check."""
 
+import time
 from typing import Any
 
 from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
@@ -32,7 +33,6 @@ class KafkaActionsClient:
             'security.protocol': self.config.get('security_protocol', 'PLAINTEXT'),
         }
 
-        # Add SASL configuration if present
         if self.config.get('sasl_mechanism'):
             kafka_config['sasl.mechanism'] = self.config['sasl_mechanism']
         if self.config.get('sasl_plain_username'):
@@ -135,8 +135,6 @@ class KafkaActionsClient:
         Yields:
             Kafka messages as they arrive
         """
-        import time
-
         consumer = self.get_consumer(group_id)
         start_time = time.time()
         global_timeout_s = timeout_ms / 1000.0
@@ -209,19 +207,15 @@ class KafkaActionsClient:
         """
         producer = self.get_producer()
 
-        # Convert string to bytes if needed
         if isinstance(value, str):
             value = value.encode('utf-8')
         if isinstance(key, str):
-            # Empty string should be treated as None (null key)
             key = key.encode('utf-8') if key else None
 
-        # Convert headers to list of tuples
         kafka_headers = None
         if headers:
             kafka_headers = [(k, v.encode('utf-8') if isinstance(v, str) else v) for k, v in headers.items()]
 
-        # Delivery callback
         result = {'delivered': False, 'error': None, 'partition': None, 'offset': None}
 
         def delivery_callback(err, msg):
@@ -239,9 +233,7 @@ class KafkaActionsClient:
                     msg.offset(),
                 )
 
-        # Produce message
         try:
-            # Ensure partition is None for automatic assignment
             partition_arg = None if partition is None or partition == -1 else int(partition)
 
             self.log.debug(
@@ -253,7 +245,6 @@ class KafkaActionsClient:
                 kafka_headers,
             )
 
-            # Build produce kwargs, omitting None values
             produce_kwargs = {
                 'topic': topic,
                 'value': value,
@@ -305,7 +296,6 @@ class KafkaActionsClient:
 
         futures = admin.create_topics([new_topic])
 
-        # Wait for creation
         for topic_name, future in futures.items():
             try:
                 future.result()
@@ -349,7 +339,6 @@ class KafkaActionsClient:
         """
         admin = self.get_admin_client()
 
-        # Create config resource
         resource = ConfigResource(ResourceType.TOPIC, topic)
         for key, value in configs.items():
             resource.set_config(key, value)
@@ -377,10 +366,9 @@ class KafkaActionsClient:
         """
         admin = self.get_admin_client()
 
-        # Create config resource and delete configs
         resource = ConfigResource(ResourceType.TOPIC, topic)
         for key in config_keys:
-            resource.set_config(key, None)  # None = delete/reset to default
+            resource.set_config(key, None)
 
         futures = admin.alter_configs([resource])
 
@@ -430,7 +418,6 @@ class KafkaActionsClient:
         """
         admin = self.get_admin_client()
 
-        # Build list of TopicPartition objects with new offsets
         topic_partitions = []
         for offset_spec in offsets:
             topic = offset_spec.get('topic')
@@ -443,7 +430,6 @@ class KafkaActionsClient:
             tp = TopicPartition(topic, partition, offset)
             topic_partitions.append(tp)
 
-        # Alter consumer group offsets
         futures = admin.alter_consumer_group_offsets(consumer_group, topic_partitions)
 
         for group_id, future in futures.items():
@@ -463,6 +449,5 @@ class KafkaActionsClient:
         if self.producer:
             self.producer.flush()
             self.producer = None
-        # Admin client doesn't need explicit closing
         self.admin_client = None
         self.log.debug("Kafka clients closed")

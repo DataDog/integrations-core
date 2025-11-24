@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import base64
+
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -243,8 +245,6 @@ class TestProduceMessageValidation:
 
     def test_valid_config(self):
         """Test that valid config passes validation."""
-        import base64
-
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
