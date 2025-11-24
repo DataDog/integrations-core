@@ -12,6 +12,10 @@ def shared_queue_manager_process_limit():
     return 1
 
 
+def instance_add_description_tags():
+    return False
+
+
 def instance_auto_discover_channels():
     return True
 
