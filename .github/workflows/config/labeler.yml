@@ -741,8 +741,6 @@ integration/vault:
 - vault/**/*
 integration/velero:
 - velero/**/*
-integration/venv:
-- venv/**/*
 integration/versa:
 - versa/**/*
 integration/vertica:
