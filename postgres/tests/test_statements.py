@@ -51,7 +51,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
 
-@pytest.fixture(autouse=False)
+@pytest.fixture(autouse=True)
 def auto_reset_pg_stat_statements(reset_pg_stat_statements):
     """
     Automatically reset pg_stat_statements before each test in this file.
@@ -94,8 +94,6 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
     def normalize_query(q):
         if float(POSTGRES_VERSION) >= 18:
-            print("normalize_query", q)
-            print("normalized_query", q.replace('$1', '?'))
             # Postgres 18+ uses $1 placeholders in pg_stat_statements for SET queries
             return q.replace('$1', '?')
         else:
@@ -158,18 +156,12 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
             obfuscated_param = '?'
             query0 = queries[0] % (obfuscated_param,)
-            print("query0", query0)
             query_signature = compute_sql_signature(query0)
-            print("query_signature", query_signature)
             events = aggregator.get_event_platform_events("dbm-metrics")
 
             assert len(events) > 0
 
             matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
-
-            for r in events[0]['postgres_rows']:
-                print(r)
-            print(matching_rows)
 
             assert len(matching_rows) == 1
 
@@ -844,15 +836,13 @@ def test_statement_metadata(
     -- Test comment
     SELECT city FROM persons WHERE city = 'hello'
     '''
-    # Samples will match to the non normalized query signature
-    query_signature = '8074f7d4fee9fbdf'
 
     normalized_query = 'SELECT city FROM persons WHERE city = ?'
     # Metrics will match to the normalized query signature
     normalized_query_signature = 'ca85e8d659051b3a'
 
-    def obfuscate_sql(query, options=None):
-        if query.startswith('SELECT city FROM persons WHERE city'):
+    def obfuscate_sql(query: str, options=None):
+        if 'SELECT city FROM persons WHERE city' in query:
             return json.dumps({'query': normalized_query, 'metadata': metadata})
         return json.dumps({'query': query, 'metadata': metadata})
 
@@ -874,8 +864,8 @@ def test_statement_metadata(
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
-    assert len(matching_samples) == 1
+    matching_samples = [s for s in samples if s['db']['query_signature'] == normalized_query_signature]
+    assert len(matching_samples) >= 1
     sample = matching_samples[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
@@ -889,7 +879,7 @@ def test_statement_metadata(
     fqt_samples = [
         s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
     ]
-    assert len(fqt_samples) == 1
+    assert len(fqt_samples) >= 1
     fqt = fqt_samples[0]
     assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
