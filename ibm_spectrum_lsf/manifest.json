@@ -36,6 +36,10 @@
         "prefix": "ibm_spectrum_lsf.",
         "check": "ibm_spectrum_lsf.can_connect",
         "metadata_path": "metadata.csv"
+      },
+      "monitors": {
+        "No GPU Slots Available": "assets/monitors/no_gpu_slots_available.json",
+        "High Pending Jobs": "assets/monitors/high_pending_jobs.json"
       }
     }
   },
