@@ -12,6 +12,7 @@ import psycopg
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
@@ -99,7 +100,7 @@ MAX_CUSTOM_RESULTS = 100
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
 
-class PostgreSql(AgentCheck):
+class PostgreSql(DatabaseCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     __NAMESPACE__ = 'postgresql'
@@ -136,7 +137,7 @@ class PostgreSql(AgentCheck):
         for warning in validation_result.warnings:
             self.log.warning(warning)
 
-        self.tags = list(self._config.tags)
+        self._tags = list(self._config.tags)
         self.add_core_tags()
 
         # Submit the initialization health event in case the `check` method is never called
@@ -227,6 +228,15 @@ class PostgreSql(AgentCheck):
             self._config.idle_connection_timeout,
         )
         return discovery
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def dbms(self):
+        # Override the default to return "postgres" instead of "postgresql"
+        return "postgres"
 
     def add_core_tags(self):
         """
@@ -1045,6 +1055,10 @@ class PostgreSql(AgentCheck):
         for warning in messages:
             self.warning(warning)
 
+    @property
+    def dbms_version(self):
+        return payload_pg_version(self.version)
+
     def _send_database_instance_metadata(self):
         if self.database_identifier not in self._database_instance_emitted:
             event = {
@@ -1057,7 +1071,7 @@ class PostgreSql(AgentCheck):
                 "dbms": "postgres",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
-                'dbms_version': payload_pg_version(self.version),
+                'dbms_version': self.dbms_version,
                 'integration_version': __version__,
                 "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,

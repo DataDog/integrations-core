@@ -83,6 +83,7 @@ def instance_collect_schemas():
         exclude_schemas=[],
         include_tables=[],
         exclude_tables=[],
+        max_query_duration=60,
     )
 
 

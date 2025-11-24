@@ -47,9 +47,9 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "vmms.exe",
-        "vmwp.exe",
-        "vmcompute.exe"
+        "vmms",
+        "vmwp",
+        "vmcompute"
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
