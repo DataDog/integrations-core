@@ -51,7 +51,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=False)
 def auto_reset_pg_stat_statements(reset_pg_stat_statements):
     """
     Automatically reset pg_stat_statements before each test in this file.
