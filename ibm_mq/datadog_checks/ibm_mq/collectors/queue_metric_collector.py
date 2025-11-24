@@ -9,6 +9,7 @@ from datadog_checks.base.types import ServiceCheck  # noqa: F401
 from datadog_checks.ibm_mq import metrics
 from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
 from datadog_checks.ibm_mq.metrics import GAUGE
+from datadog_checks.ibm_mq.utils import normalize_desc_tag
 
 try:
     import pymqi
@@ -265,13 +266,16 @@ class QueueMetricCollector(object):
             for queue_info in response:
                 usage = KNOWN_USAGES.get(queue_info.get(pymqi.CMQC.MQIA_USAGE), 'unknown')
                 enriched_tags.append('queue_usage:{}'.format(usage))
-
+ 
                 # Add queue description as tag if enabled
                 if self.config.add_description_tags and pymqi.CMQC.MQCA_Q_DESC in queue_info:
                     queue_desc = to_string(queue_info[pymqi.CMQC.MQCA_Q_DESC]).strip()
                     if queue_desc:
-                        enriched_tags.append('queue_desc:{}'.format(queue_desc))
-
+                        if self.config.normalize_description_tags:
+                            queue_desc = normalize_desc_tag(queue_desc)
+                        if queue_desc:
+                            enriched_tags.append('queue_desc:{}'.format(queue_desc))
+ 
                 self._submit_queue_stats(queue_info, queue_name, enriched_tags)
         finally:
             if pcf is not None:

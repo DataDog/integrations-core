@@ -53,6 +53,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     mqcd_version: Optional[float] = Field(None, ge=1.0)
+    normalize_description_tags: Optional[bool] = None
     override_hostname: Optional[bool] = None
     password: Optional[str] = Field(None, min_length=1)
     port: Optional[int] = None
