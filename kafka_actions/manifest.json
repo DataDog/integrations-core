@@ -8,18 +8,17 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Perform one-time administrative and operational actions on Kafka clusters via Remote Configuration",
     "title": "Kafka Actions",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::Message Queues",
+      "Offering::Integration",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Events"
     ]
   },
   "assets": {
@@ -31,16 +30,13 @@
         "spec": "assets/configuration/spec.yaml"
       },
       "events": {
-        "creates_events": false
+        "creates_events": true
       },
       "metrics": {
         "prefix": "kafka_actions.",
         "check": "",
         "metadata_path": "metadata.csv"
       }
-    },
-    "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
     },
     "monitors": {},
     "saved_views": {}

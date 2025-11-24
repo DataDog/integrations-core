@@ -13,7 +13,14 @@ from datadog_checks.kafka_actions import KafkaActionsCheck
 def test_check(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     check = KafkaActionsCheck('kafka_actions', {}, [instance])
-    with patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'):
+    with (
+        patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        patch.object(
+            check.kafka_client,
+            'produce_message',
+            return_value={'delivered': True, 'error': None, 'partition': 0, 'offset': 123},
+        ),
+    ):
         dd_run_check(check)
 
     events = [e for e in aggregator.events if e.get('event_type') == 'kafka_action_success']
