@@ -22,7 +22,7 @@
         "*": null
       },
       "thresholds": {
-        "critical": 1,
+        "critical": 2,
         "ok": 2,
         "warning": 1
       },
