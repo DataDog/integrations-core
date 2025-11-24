@@ -18,6 +18,9 @@
       "notify_audit": false,
       "notify_no_data": false,
       "renotify_interval": 0,
+      "silenced": {
+        "*": null
+      },
       "thresholds": {
         "critical": 1,
         "ok": 2,
