@@ -29,24 +29,24 @@ def normalize_desc_tag(desc):
     """
     if not desc:
         return ''
-    
+
     # Convert to lowercase
     normalized = desc.lower()
-    
+
     # Replace spaces and special characters with underscores
     # Keep only alphanumeric, hyphens, and underscores
     normalized = re.sub(r'[^a-z0-9\-_]', '_', normalized)
-    
+
     # Replace multiple consecutive underscores with single underscore
     normalized = re.sub(r'_+', '_', normalized)
-    
+
     # Strip leading/trailing underscores
     normalized = normalized.strip('_')
-    
+
     # Limit length (Datadog recommends keeping tag values reasonable)
     if len(normalized) > 200:
         normalized = normalized[:200].rstrip('_')
-    
+
     return normalized
 
 

@@ -61,7 +61,7 @@ class ChannelMetricCollector(object):
             for channel_info in discovered_channels:
                 channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
- 
+
                 # Add channel description as tag if enabled
                 if self.config.add_description_tags and pymqi.CMQCFC.MQCACH_DESC in channel_info:
                     channel_desc = to_string(channel_info[pymqi.CMQCFC.MQCACH_DESC]).strip()
@@ -70,7 +70,7 @@ class ChannelMetricCollector(object):
                             channel_desc = normalize_desc_tag(channel_desc)
                         if channel_desc:
                             channel_tags.append("channel_desc:{}".format(channel_desc))
- 
+
                 self._submit_metrics_from_properties(
                     channel_info, channel_name, metrics.channel_metrics(), channel_tags
                 )
@@ -164,7 +164,7 @@ class ChannelMetricCollector(object):
                 if channel_name in channels_to_skip:
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
- 
+
                 # Add channel description as tag if enabled
                 if self.config.add_description_tags and pymqi.CMQCFC.MQCACH_DESC in channel_info:
                     channel_desc = to_string(channel_info[pymqi.CMQCFC.MQCACH_DESC]).strip()
