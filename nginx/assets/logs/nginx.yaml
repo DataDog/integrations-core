@@ -339,6 +339,7 @@ pipeline:
                 - http.status_code
               target: ocsf.status_code
               preserveSource: true
+              targetFormat: string
               overrideOnConflict: true
             - type: schema-remapper
               name: Map `duration` to `ocsf.duration`
