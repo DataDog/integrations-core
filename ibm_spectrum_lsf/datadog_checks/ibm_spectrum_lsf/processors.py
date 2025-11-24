@@ -5,7 +5,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Callable, Optional
-
+import json
 from datadog_checks.base.log import AgentLogger
 
 from .client import LSFClient
@@ -43,6 +43,13 @@ class LSFMetricMapping:
     name: str
     id: int
     transform: Callable[[str], float]
+
+@dataclass
+class BadminMetricMapping:
+    name: str
+    key: int
+    transform: Callable[[str], float]
+
 
 
 def process_table_tags(tag_mapping: list[LSFTagMapping], line_data: list[str]) -> list[str]:
@@ -396,3 +403,196 @@ class GPUHostsProcessor(LSFMetricsProcessor):
             LSFMetricMapping('num_gpus_shared_available', 7, transform_float),
         ]
         return self.parse_table_command(metrics, tags)
+
+class BadminPerfmonProcessor(LSFMetricsProcessor):
+    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+        super().__init__(client, logger, base_tags)
+        self.name = 'badmin perfmon view'
+        self.prefix = 'cluster'
+
+    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+        return self.client.badmin_perfmon_view()
+
+    def process_metrics(self) -> list[LSFMetric]:
+        output, err, exit_code = self.run_lsf_command()
+        if exit_code != 0 or output is None:
+            self.log.error("Failed to get %s output: %s", self.name, err)
+            return []
+
+        output_json = json.loads(output.strip())
+
+        metrics = [
+            BadminMetricMapping("mbatchd.processed_requests", "Processed requests: mbatchd", transform_float),
+            BadminMetricMapping("jobs.queries", "Job information queries", transform_float),
+            BadminMetricMapping("host.queries", "Host information queries", transform_float),
+            BadminMetricMapping("queue.queries", "Queue information queries", transform_float),
+            BadminMetricMapping("jobs.submission_requests", "Job submission requests", transform_float),
+            BadminMetricMapping("jobs.submitted", "Jobs submitted", transform_float),
+            BadminMetricMapping("jobs.dispatched", "Jobs dispatched", transform_float),
+            BadminMetricMapping("jobs.completed", "Jobs completed", transform_float),
+            BadminMetricMapping("jobs.sent_remote", "Jobs sent to remote cluster", transform_float),
+            BadminMetricMapping("jobs.accepted_remote", "Jobs accepted from remote cluster", transform_float),
+            BadminMetricMapping("jobs.scheduling_interval", "Scheduling interval in second(s)", transform_float),
+            BadminMetricMapping("scheduler.host_matches", "Matching host criteria", transform_float),
+            BadminMetricMapping("jobs.buckets", "Job buckets", transform_float),
+            BadminMetricMapping("jobs.reordered", "Jobs reordered", transform_float),
+            BadminMetricMapping("slots.utilization", "Slot utilization", transform_float),
+            BadminMetricMapping("memory.utilization", "Memory utilization", transform_float),
+        ]
+
+        metrics = {
+            "Processed requests: mbatchd":"mbatchd.processed_requests",
+            "Job information queries":"jobs.queries",
+            "Host information queries": "host.queries", 
+            "Queue information queries": "queue.queries",
+            "Job submission requests": "jobs.submission_requests",
+            "Jobs submitted": "jobs.submitted",
+            "Jobs dispatched": "jobs.dispatched",
+            "Jobs completed": "jobs.completed",
+            "Jobs sent to remote cluster": "jobs.sent_remote",
+            "Jobs accepted from remote cluster": "jobs.accepted_remote",
+            "Scheduling interval in second(s)": "jobs.scheduling_interval",
+            "Matching host criteria": "scheduler.host_matches", 
+            "Job buckets": "jobs.buckets",
+            "Jobs reordered": "jobs.reordered", 
+            "Slot utilization": "slots.utilization", 
+            "Memory utilization": "memory.utilization",
+        }
+
+        records = output_json.get("record")
+        for record in records:
+            name = record.get("name")
+            metric_name = metrics.get(name)
+            if metric_name is None:
+                self.log.trace("Skipping field: %s", name)
+                continue
+            
+            vals = [
+                "current", "max", "min", "avg", "total"
+            ]
+            for val in vals:
+
+
+
+        
+"""
+{
+	"num":	16,
+	"record":	[{
+			"name":	"Processed requests: mbatchd",
+			"current":	32,
+			"max":	39,
+			"min":	32,
+			"avg":	35,
+			"total":	71
+		}, {
+			"name":	"Job information queries",
+			"current":	11,
+			"max":	13,
+			"min":	11,
+			"avg":	12,
+			"total":	24
+		}, {
+			"name":	"Host information queries",
+			"current":	8,
+			"max":	8,
+			"min":	8,
+			"avg":	8,
+			"total":	16
+		}, {
+			"name":	"Queue information queries",
+			"current":	4,
+			"max":	4,
+			"min":	4,
+			"avg":	4,
+			"total":	8
+		}, {
+			"name":	"Job submission requests",
+			"current":	0,
+			"max":	3,
+			"min":	0,
+			"avg":	1,
+			"total":	3
+		}, {
+			"name":	"Jobs submitted",
+			"current":	0,
+			"max":	3,
+			"min":	0,
+			"avg":	1,
+			"total":	3
+		}, {
+			"name":	"Jobs dispatched",
+			"current":	0,
+			"max":	2,
+			"min":	0,
+			"avg":	1,
+			"total":	2
+		}, {
+			"name":	"Jobs completed",
+			"current":	0,
+			"max":	0,
+			"min":	0,
+			"avg":	0,
+			"total":	0
+		}, {
+			"name":	"Jobs sent to remote cluster",
+			"current":	0,
+			"max":	0,
+			"min":	0,
+			"avg":	0,
+			"total":	0
+		}, {
+			"name":	"Jobs accepted from remote cluster",
+			"current":	0,
+			"max":	0,
+			"min":	0,
+			"avg":	0,
+			"total":	0
+		}, {
+			"name":	"Scheduling interval in second(s)",
+			"current":	1,
+			"max":	1,
+			"min":	1,
+			"avg":	1,
+			"total":	0
+		}, {
+			"name":	"Matching host criteria",
+			"current":	1,
+			"max":	2,
+			"min":	0,
+			"avg":	1,
+			"total":	0
+		}, {
+			"name":	"Job buckets",
+			"current":	3,
+			"max":	3,
+			"min":	0,
+			"avg":	3,
+			"total":	0
+		}, {
+			"name":	"Jobs reordered",
+			"current":	0,
+			"max":	0,
+			"min":	0,
+			"avg":	0,
+			"total":	0
+		}, {
+			"name":	"Slot utilization",
+			"current":	"-",
+			"total":	"-"
+		}, {
+			"name":	"Memory utilization",
+			"current":	"-",
+			"total":	"-"
+		}],
+	"period":	60,
+	"start":	1763137581,
+	"end":	1763137701,
+	"fd":	{
+		"name":	"mbatchd file descriptor usage",
+		"free":	65513,
+		"used":	22,
+		"total":	65535
+	}
+}
+"""

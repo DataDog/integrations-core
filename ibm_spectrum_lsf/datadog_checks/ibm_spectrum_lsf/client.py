@@ -76,3 +76,13 @@ class LSFClient:
                 "HOST_NAME ngpus ngpus_alloc ngpus_excl_alloc ngpus_shared_alloc ngpus_shared_jexcl_alloc ngpus_excl_avail ngpus_shared_avail delimiter='|'",  # noqa: E501
             ]
         )
+    
+    def badmin_perfmon_view(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+        return self._run_command(
+            [
+                "badmin",
+                "perfmon",
+                "view",
+                "-json",
+            ]
+        )
