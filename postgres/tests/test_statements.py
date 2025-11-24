@@ -94,8 +94,8 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
     def normalize_query(q):
         if float(POSTGRES_VERSION) >= 18:
-            print("normalize_query",q)
-            print("normalized_query",q.replace('$1', '?'))
+            print("normalize_query", q)
+            print("normalized_query", q.replace('$1', '?'))
             # Postgres 18+ uses $1 placeholders in pg_stat_statements for SET queries
             return q.replace('$1', '?')
         else:
@@ -158,9 +158,9 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
             obfuscated_param = '?'
             query0 = queries[0] % (obfuscated_param,)
-            print("query0",query0)
+            print("query0", query0)
             query_signature = compute_sql_signature(query0)
-            print("query_signature",query_signature)
+            print("query_signature", query_signature)
             events = aggregator.get_event_platform_events("dbm-metrics")
 
             assert len(events) > 0
