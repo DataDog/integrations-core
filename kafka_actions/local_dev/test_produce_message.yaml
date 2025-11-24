@@ -1,0 +1,33 @@
+# Test configuration for kafka_actions - produce_message action
+# This produces a test message to a Kafka topic
+
+init_config:
+
+instances:
+  - action: produce_message
+    
+    kafka_connect_str: localhost:9092
+    security_protocol: PLAINTEXT
+    
+    produce_message:
+      topic: orders
+      
+      # JSON message value
+      value: '{"order_id": "test-99999", "user_id": 999, "amount": 9999.99, "timestamp": 1234567890, "status": "test"}'
+      
+      # Message key
+      key: "test-99999"
+      
+      # Automatic partition selection
+      partition: -1
+      
+      # Custom headers
+      headers:
+        source: datadog-kafka-actions
+        test: "true"
+    
+    tags:
+      - env:test
+      - integration:kafka_actions
+      - action:produce
+

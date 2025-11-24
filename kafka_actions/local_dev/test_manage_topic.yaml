@@ -1,0 +1,36 @@
+# Test configuration for kafka_actions - manage_topic action
+# This creates a new Kafka topic with specific configuration
+
+init_config:
+
+instances:
+  - action: manage_topic
+    
+    kafka_connect_str: localhost:9092
+    security_protocol: PLAINTEXT
+    
+    manage_topic:
+      # Operation: create, update, or delete
+      operation: create
+      
+      # Topic name
+      topic: test-actions-topic
+      
+      # Number of partitions
+      num_partitions: 3
+      
+      # Replication factor
+      replication_factor: 1
+      
+      # Topic configurations
+      configs:
+        retention.ms: "3600000"  # 1 hour
+        compression.type: "snappy"
+        cleanup.policy: "delete"
+        max.message.bytes: "1048576"  # 1MB
+    
+    tags:
+      - env:test
+      - integration:kafka_actions
+      - action:topic_create
+
