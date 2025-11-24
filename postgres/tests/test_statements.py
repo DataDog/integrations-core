@@ -130,7 +130,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         connections[dbname].cursor().execute(query, args)
 
     try:
-    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+        # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
         with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
             mock_agent.side_effect = obfuscate_sql
 

@@ -73,7 +73,11 @@ def dd_environment(e2e_instance, skip_env):
     with docker_run(
         os.path.join(HERE, 'compose', compose_file),
         conditions=[WaitFor(connect_to_pg)],
-        env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE, "POSTGRES_LOCALE": POSTGRES_LOCALE, "PGDATA": "/var/lib/postgresql/$PG_MAJOR/docker"},
+        env_vars={
+            "POSTGRES_IMAGE": POSTGRES_IMAGE,
+            "POSTGRES_LOCALE": POSTGRES_LOCALE,
+            "PGDATA": "/var/lib/postgresql/$PG_MAJOR/docker",
+        },
         capture=True,
     ):
         yield e2e_instance, E2E_METADATA
