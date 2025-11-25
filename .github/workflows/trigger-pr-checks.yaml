@@ -32,7 +32,7 @@ jobs:
 
           python gh_workflow.py \
             --ref ${{ github.sha }} \
-            --multiply 1
+            --multiply 2
 
       - name: Summary
         if: always()
