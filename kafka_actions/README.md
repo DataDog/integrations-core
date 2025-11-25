@@ -14,7 +14,7 @@ The Kafka Actions integration enables one-time administrative and operational ac
 
 | Action | Description |
 |--------|-------------|
-| `read_messages` | Read and filter messages with jq-style expressions, supporting JSON, String, BSON, Avro, and Protobuf formats |
+| `read_messages` | Read and filter messages with jq-style expressions, supporting JSON, string, BSON, Avro, and Protobuf formats |
 | `produce_message` | Produce messages to topics with base64-encoded payloads and headers |
 | `create_topic` | Create topics with custom partitions, replication factor, and configs |
 | `update_topic_config` | Update topic configurations and partition counts |
