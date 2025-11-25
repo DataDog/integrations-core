@@ -103,7 +103,7 @@ class ReadMessages(BaseModel):
     )
     filter: Optional[str] = Field(
         None,
-        description='jq expression to filter messages (optional).\nFiltering happens AFTER deserialization.\nExamples: \'.value.price > 100\', \'.value.user.country == "US"\'\n',
+        description='jq-style expression to filter messages (optional).\nFiltering happens AFTER deserialization.\nExamples: \'.value.price > 100\', \'.value.user.country == "US"\'\n',
         examples=['.value.status == "failed"'],
     )
     key_format: Optional[str] = Field(
@@ -132,7 +132,7 @@ class ReadMessages(BaseModel):
     topic: str = Field(..., description='Topic to read messages from', examples=['orders'])
     value_format: Optional[str] = Field(
         'json',
-        description='Message value format:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- protobuf: Protocol Buffers\n- avro: Apache Avro\nNote: If deserialization fails, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
+        description='Message value format:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- protobuf: Protocol Buffers\n- avro: Apache Avro\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
         examples=['json'],
     )
     value_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro value')
