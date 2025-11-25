@@ -2,6 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 37.24.0 / 2025-11-18
+
+***Added***:
+
+* Create shared schemas collector for the Postgres, MySQL, and SQL Server integrations ([#21720](https://github.com/DataDog/integrations-core/pull/21720))
+* [wmi_check] Allow tag aliases for wmi `tag_by` and `tag_queries` parameters ([#21792](https://github.com/DataDog/integrations-core/pull/21792))
+
+***Fixed***:
+
+* Fix YAML configuration parsing to properly handle Unicode characters on Windows systems where the UTF-8 locale is not enabled by default. ([#21852](https://github.com/DataDog/integrations-core/pull/21852))
+
+## 37.23.0 / 2025-10-31
+
+***Added***:
+
+* Bump ddtrace to version 3.16.4 ([#21773](https://github.com/DataDog/integrations-core/pull/21773))
+
+## 37.22.1 / 2025-10-29
+
+***Fixed***:
+
+* Fix missed collection event to use correct collection interval. ([#21766](https://github.com/DataDog/integrations-core/pull/21766))
+
 ## 37.22.0 / 2025-10-27
 
 ***Added***:
@@ -14,7 +37,7 @@
 * Update CA certificate loading logic to not load certificates when `tls_verify` is false ([#21607](https://github.com/DataDog/integrations-core/pull/21607))
 * Add `certifi` fallback for missing default CA certificates ([#21609](https://github.com/DataDog/integrations-core/pull/21609))
 
-## 37.21.1 / 2025-10-09
+## 37.21.1 / 2025-10-09 / Agent 7.72.0
 
 ***Fixed***:
 

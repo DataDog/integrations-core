@@ -6,8 +6,8 @@
       "id": 2074004104711888,
       "definition": {
         "type": "image",
-        "url": "/api/v2/images/abd3b6f9-af5e-4928-8f86-bc57f1905194",
-        "url_dark_theme": "/api/v2/images/68797a21-aec3-404c-9940-4110836143bc",
+        "url": "/static/images/logos/klaviyo_large.svg",
+        "url_dark_theme": "/static/images/logos/klaviyo_reversed_large.svg",
         "sizing": "cover",
         "has_background": true,
         "has_border": true,
@@ -18,7 +18,7 @@
         "x": 0,
         "y": 0,
         "width": 3,
-        "height": 1
+        "height": 2
       }
     },
     {

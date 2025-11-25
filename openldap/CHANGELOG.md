@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.1.0 / 2025-10-02
+## 3.1.1 / 2025-10-31
+
+***Fixed***:
+
+* Fix custom queries to properly use search_scope parameter ([#21385](https://github.com/DataDog/integrations-core/pull/21385))
+
+## 3.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 
