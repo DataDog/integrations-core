@@ -65,7 +65,6 @@ Ensure the correct format is specified (`json`, `string`, `bson`, `avro`, `proto
 
 Need help? Contact [Datadog support][2] or reach out to the **Data Streams Monitoring team** at Datadog for questions about this integration.
 
-[2]: https://app.datadoghq.com/account/settings/agent/latest
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/help/
 [3]: https://app.datadoghq.com/event/explorer
