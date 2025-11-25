@@ -31,7 +31,7 @@ jobs:
           echo "PR head SHA: ${{ github.event.pull_request.head.sha }}"
 
           python gh_workflow.py \
-            --ref ${{ github.sha }} \
+            --ref refs/pull/${{ github.event.pull_request.number }}/merge \
             --multiply 2
 
       - name: Summary
