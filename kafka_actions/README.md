@@ -39,7 +39,7 @@ The Kafka Actions integration is included in the [Datadog Agent][2] package (ver
 
 **Important:** Do not configure this check manually. This integration is triggered exclusively through Remote Configuration from the Datadog UI.
 
-Configuration is managed entirely through Remote Configuration. Actions are triggered from the Datadog platform and results are visible in Datadog Events.
+Actions are configured and triggered from the Datadog platform, with results visible in the [Events Explorer][3].
 
 ## Data Collected
 
