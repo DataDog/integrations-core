@@ -12,7 +12,15 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_spectrum_lsf import IbmSpectrumLsfCheck
 
-from .common import ALL_METRICS, ALL_NON_GPU_METRICS, BJOBS_METRICS, CLUSTER_METRICS, LHOST_METRICS, LSID_METRICS, LSLOAD_METRICS
+from .common import (
+    ALL_METRICS,
+    ALL_NON_GPU_METRICS,
+    BJOBS_METRICS,
+    CLUSTER_METRICS,
+    LHOST_METRICS,
+    LSID_METRICS,
+    LSLOAD_METRICS,
+)
 from .conftest import get_mock_output
 
 
@@ -209,6 +217,7 @@ def test_check_metric_sources_subset(mock_client, dd_run_check, aggregator, inst
 
     assert_metrics(CLUSTER_METRICS + LHOST_METRICS + LSID_METRICS, [], aggregator)
 
+
 def test_no_output_from_command(mock_client, dd_run_check, aggregator, instance, caplog):
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
@@ -216,7 +225,7 @@ def test_no_output_from_command(mock_client, dd_run_check, aggregator, instance,
     caplog.set_level(logging.WARNING)
     dd_run_check(check)
 
-    assert_metrics(ALL_METRICS, LSLOAD_METRICS, aggregator)
+    assert_metrics(ALL_NON_GPU_METRICS, LSLOAD_METRICS, aggregator)
 
     assert "No output from command lsload" in caplog.text
 
