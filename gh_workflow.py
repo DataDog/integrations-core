@@ -89,7 +89,7 @@ def trigger_workflow(target: str, jobs: list[dict], ref: str, dry_run: bool = Fa
         '/repos/DataDog/integrations-core/actions/workflows/zz-test-worker-poc.yaml/dispatches',
         '-f', 'ref=master',
         '-f', f'inputs[matrix_json]={matrix_json}',
-        '-f', f'inputs[ref]={ref}'
+        '-f', f'inputs[checkout_ref]={ref}'
     ]
 
     try:
@@ -137,7 +137,7 @@ def main():
     parser.add_argument(
         '--ref',
         default='master',
-        help='Git ref to run workflows on (branch, tag, or SHA). Use "HEAD" for current commit. Use PR head SHA to report as PR check. Default: master'
+        help='Git ref to run workflows on. Use "HEAD" for current commit. Use "PR_MERGE" for the PR merge commit. Default: master'
     )
     parser.add_argument(
         '--multiply',
