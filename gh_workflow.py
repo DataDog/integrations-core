@@ -120,6 +120,12 @@ def main():
         default='master',
         help='Git ref to run workflows on (branch, tag, or SHA). Use "HEAD" for current commit. Use PR head SHA to report as PR check. Default: master'
     )
+    parser.add_argument(
+        '--multiply',
+        type=int,
+        default=1,
+        help='Multiplication factor to duplicate workflows'
+    )
 
     args = parser.parse_args()
 
@@ -146,13 +152,20 @@ def main():
 
     # Trigger workflow for each target
     success_count = 0
+    total_expected = len(grouped_jobs) * args.multiply
+
     for target, target_jobs in grouped_jobs.items():
-        if trigger_workflow(target, target_jobs, args.ref, dry_run=args.dry_run):
-            success_count += 1
+        for i in range(args.multiply):
+            display_target = target
+            if args.multiply > 1:
+                display_target = f"{target} [{i + 1}/{args.multiply}]"
 
-    print(f"\n{'Would trigger' if args.dry_run else 'Triggered'} {success_count}/{len(grouped_jobs)} targets")
+            if trigger_workflow(display_target, target_jobs, args.ref, dry_run=args.dry_run):
+                success_count += 1
 
-    if success_count < len(grouped_jobs):
+    print(f"\n{'Would trigger' if args.dry_run else 'Triggered'} {success_count}/{total_expected} workflows")
+
+    if success_count < total_expected:
         sys.exit(1)
 
 
