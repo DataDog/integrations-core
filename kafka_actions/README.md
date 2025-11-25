@@ -29,7 +29,7 @@ This integration is exclusively triggered through Remote Configuration and shoul
 - **Cluster ID Verification**: Prevents accidental operations on wrong clusters
 - **Advanced Filtering**: Supports `==`, `!=`, `>`, `<`, `>=`, `<=`, `contains`, `and`, `or`, and nested field access
 - **Real-time Streaming**: Stream messages as they arrive with configurable limits
-- **Multiple Formats**: JSON, String, BSON, Avro, and Protobuf with Schema Registry support
+- **Multiple Formats**: JSON, string, BSON, Avro, and Protobuf with Schema Registry support
 
 ## Setup
 
