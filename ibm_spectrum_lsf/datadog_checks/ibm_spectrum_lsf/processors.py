@@ -102,6 +102,10 @@ class LSFMetricsProcessor(ABC):
             return []
 
         output_lines = output.strip().splitlines()
+        if len(output_lines) == 0:
+            self.log.warning("No output from command %s", self.name)
+            return []
+
         headers = output_lines.pop(0)
         if len(headers.split(self.delimiter)) != self.expected_columns:
             self.log.warning(
