@@ -115,7 +115,7 @@ files:
         - name: filter
           type: string
           description: |
-            jq expression to filter messages (optional).
+            jq-style expression to filter messages (optional).
             Filtering happens AFTER deserialization.
             Examples: '.value.price > 100', '.value.user.country == "US"'
           example: '.value.status == "failed"'
