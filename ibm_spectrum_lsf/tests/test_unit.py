@@ -11,7 +11,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_spectrum_lsf import IbmSpectrumLsfCheck
 
-from .common import ALL_METRICS, BJOBS_METRICS, CLUSTER_METRICS, LSID_METRICS, LSLOAD_METRICS
+from .common import ALL_METRICS, BJOBS_METRICS, CLUSTER_METRICS, LSLOAD_METRICS
 from .conftest import get_mock_output
 
 
