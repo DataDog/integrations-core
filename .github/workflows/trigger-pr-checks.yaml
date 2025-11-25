@@ -31,7 +31,8 @@ jobs:
           echo "PR head SHA: ${{ github.event.pull_request.head.sha }}"
 
           python gh_workflow.py \
-            --ref ${{ github.sha }} 
+            --ref ${{ github.sha }} \
+            --multiply 5
 
       - name: Summary
         if: always()
