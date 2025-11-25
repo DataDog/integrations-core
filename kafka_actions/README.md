@@ -18,7 +18,7 @@ This integration is exclusively triggered through Remote Configuration and shoul
 |--------|-------------|
 | `read_messages` | Read and filter messages with jq-style expressions, supporting JSON, string, BSON, Avro, and Protobuf formats |
 | `produce_message` | Produce messages to topics with base64-encoded payloads and headers |
-| `create_topic` | Create topics with custom partitions, replication factor, and configs |
+| `create_topic` | Create topics with custom partitions, replication factor, and configurations |
 | `update_topic_config` | Update topic configurations and partition counts |
 | `delete_topic` | Delete topics |
 | `delete_consumer_group` | Delete consumer groups |
