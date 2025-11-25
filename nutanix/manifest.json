@@ -41,7 +41,7 @@
       },
       "process_signatures": [
         "minerva_cvm_gateway",
-        "prism_monitor",
+        "prism_monitor"
       ]
     },
     "dashboards": {
