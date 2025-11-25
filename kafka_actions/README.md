@@ -8,7 +8,9 @@ This integration is in Preview. To access and use this feature, reach out to the
 
 The Kafka Actions integration enables one-time administrative and operational actions on Kafka clusters through the Datadog Agent.
 
-**Important:** This integration is exclusively triggered via Remote Configuration and should never be scheduled manually in your Agent configuration. It is not meant to run continuously like traditional checks.
+<div class="alert alert-warning">
+This integration is exclusively triggered through Remote Configuration and should never be scheduled manually in your Agent configuration. It is not meant to run continuously like traditional checks.
+</div>
 
 ### Supported Actions
 
