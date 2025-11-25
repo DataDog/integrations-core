@@ -66,7 +66,7 @@ This integration does not include service checks.
 ### Message deserialization failures
 Ensure the correct format is specified (`json`, `string`, `bson`, `avro`, `protobuf`) and provide schemas for Avro/Protobuf.
 
-Need help? Contact [Datadog support][9] or reach out to the **Data Streams Monitoring team** at Datadog for questions about this integration.
+Need help? Contact [Datadog support][2] or reach out to the **Data Streams Monitoring team** at Datadog for questions about this integration.
 
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [1]: https://app.datadoghq.com/account/settings/agent/latest
