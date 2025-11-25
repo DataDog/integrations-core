@@ -1,6 +1,8 @@
 # Kafka Actions
 
-**Note:** This integration is currently in preview. To access and use this feature, reach out to the Data Streams Monitoring team at Datadog.
+<div class="alert alert-danger">
+This integration is in Preview. To access and use this feature, reach out to the Data Streams Monitoring team at Datadog.
+</div>
 
 ## Overview
 
