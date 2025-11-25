@@ -35,7 +35,7 @@ This integration is exclusively triggered through Remote Configuration and shoul
 
 ### Installation
 
-The Kafka Actions integration is included in the [Datadog Agent][2] package (version 7.x+).
+The Kafka Actions integration is included in the [Datadog Agent][1] package (version 7.0+).
 
 ### Configuration
 
