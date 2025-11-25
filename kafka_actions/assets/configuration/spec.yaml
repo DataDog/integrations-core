@@ -128,7 +128,7 @@ files:
             - string: Plain UTF-8 text (use for non-JSON text messages)
             - protobuf: Protocol Buffers
             - avro: Apache Avro
-            Note: If deserialization fails, the read_messages action will stop immediately.
+            Note: If any message fails deserialization, the read_messages action will stop immediately.
             Ensure the format matches the actual messages in your topic.
           default: json
           example: json
