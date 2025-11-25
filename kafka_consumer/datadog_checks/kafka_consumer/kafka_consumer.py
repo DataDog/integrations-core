@@ -13,10 +13,15 @@ from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
 from google.protobuf.json_format import MessageToJson
 from google.protobuf.message import DecodeError, EncodeError
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
+from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
-from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
+from datadog_checks.kafka_consumer.constants import (
+    HIGH_WATERMARK,
+    KAFKA_INTERNAL_TOPICS,
+    OFFSET_INVALID,
+)
 
 MAX_TIMESTAMPS = 1000
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
@@ -30,11 +35,14 @@ class KafkaCheck(AgentCheck):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
-        self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
+        self._data_streams_enabled = self.config._data_streams_enabled
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
         self.topic_partition_cache = {}
         self.check_initializations.insert(0, self.config.validate_config)
+
+        # Initialize cluster metadata collector
+        self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -66,8 +74,17 @@ class KafkaCheck(AgentCheck):
         try:
             if consumer_contexts_count < self._context_limit:
                 # Fetch highwater offsets
+                # Build partitions list or use all if configured
+                # If cluster monitoring is enabled, always fetch all broker highwater marks
+                if self.config._cluster_monitoring_enabled or self.config._monitor_all_broker_highwatermarks:
+                    partitions = None
+                else:
+                    partitions = set()
+                    for _, offsets in consumer_offsets.items():
+                        for topic, partition in offsets:
+                            partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
-                highwater_offsets, cluster_id = self.get_highwater_offsets(consumer_offsets)
+                highwater_offsets, cluster_id = self.get_watermark_offsets(partitions, mode=HIGH_WATERMARK)
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
@@ -106,6 +123,14 @@ class KafkaCheck(AgentCheck):
             cluster_id,
         )
         self.data_streams_live_message(highwater_offsets or {}, cluster_id)
+
+        # Collect cluster metadata if enabled
+        if self.config._cluster_monitoring_enabled:
+            try:
+                self.metadata_collector.collect_all_metadata(highwater_offsets)
+            except Exception as e:
+                self.log.error("Error collecting cluster metadata: %s", e)
+
         if self.config._close_admin_client:
             self.client.close_admin_client()
 
@@ -345,49 +370,52 @@ class KafkaCheck(AgentCheck):
         )
         return consumer_group_state
 
-    def get_highwater_offsets(self, consumer_offsets):
-        self.log.debug('Getting highwater offsets')
+    def get_watermark_offsets(self, partitions=None, mode=HIGH_WATERMARK):
+        self.log.debug('Getting %s offsets', 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
 
-        cluster_id = ""
-        dd_consumer_group = "datadog-agent"
-        highwater_offsets = {}
+        # Build partitions set
         topic_partitions_to_check = set()
-
-        if self.config._monitor_all_broker_highwatermarks:
+        if partitions is None:
             all_topic_partitions = self.client.get_topic_partitions()
             for topic in all_topic_partitions:
                 if topic in KAFKA_INTERNAL_TOPICS:
                     self.log.debug("Skipping internal topic %s", topic)
                     continue
-
                 for partition in all_topic_partitions[topic]:
                     topic_partitions_to_check.add((topic, partition))
-
         else:
-            for _, offsets in consumer_offsets.items():
-                for topic, partition in offsets:
-                    if topic in KAFKA_INTERNAL_TOPICS:
-                        self.log.debug("Skipping internal topic %s", topic)
-                        continue
+            for topic, partition in partitions:
+                if topic in KAFKA_INTERNAL_TOPICS:
+                    self.log.debug("Skipping internal topic %s", topic)
+                    continue
+                topic_partitions_to_check.add((topic, partition))
 
-                    topic_partitions_to_check.add((topic, partition))
+        if not topic_partitions_to_check:
+            self.log.debug('No partitions to check for offsets')
+            return {}, ""
 
+        dd_consumer_group = "datadog-agent"
+
+        # Open consumer once for both cluster_id and offset fetching
         self.client.open_consumer(dd_consumer_group)
         cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+
         self.log.debug(
-            'Querying %s highwater offsets for consumer group %s',
+            'Querying %s %s offsets',
             len(topic_partitions_to_check),
-            dd_consumer_group,
+            'highwater' if mode == HIGH_WATERMARK else 'lowwater',
         )
-        if topic_partitions_to_check:
-            for topic, partition, offset in self.client.consumer_offsets_for_times(
-                partitions=topic_partitions_to_check
-            ):
-                highwater_offsets[(topic, partition)] = offset
+
+        result = {}
+        for topic, partition, offset in self.client.consumer_offsets_for_times(
+            partitions=topic_partitions_to_check, offset=mode
+        ):
+            result[(topic, partition)] = offset
 
         self.client.close_consumer()
-        self.log.debug('Got %s highwater offsets', len(highwater_offsets))
-        return highwater_offsets, cluster_id
+
+        self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+        return result, cluster_id
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
