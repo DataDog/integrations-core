@@ -455,8 +455,8 @@ class NutanixCheck(AgentCheck):
             url = next_link
 
             # we delete pagination params as they already exist in the return next_link
-            params.pop("$page")
-            params.pop("$limit")
+            params.pop("$page", None)
+            params.pop("$limit", None)
 
         return all_items
 
