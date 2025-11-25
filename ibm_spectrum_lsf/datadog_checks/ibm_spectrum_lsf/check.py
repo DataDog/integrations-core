@@ -36,15 +36,15 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
 
     def initialize_processors(self):
         self.processors = [
-            LsClustersProcessor(self.client, self.log, self.tags),
-            LSHostsProcessor(self.client, self.log, self.tags),
-            LsLoadProcessor(self.client, self.log, self.tags),
-            BHostsProcessor(self.client, self.log, self.tags),
-            BJobsProcessor(self.client, self.log, self.tags),
-            BQueuesProcessor(self.client, self.log, self.tags),
-            BSlotsProcessor(self.client, self.log, self.tags),
-            GPULoadProcessor(self.client, self.log, self.tags),
-            GPUHostsProcessor(self.client, self.log, self.tags),
+            LsClustersProcessor(self.client, self.config, self.log, self.tags),
+            LSHostsProcessor(self.client, self.config, self.log, self.tags),
+            LsLoadProcessor(self.client, self.config, self.log, self.tags),
+            BHostsProcessor(self.client, self.config, self.log, self.tags),
+            BJobsProcessor(self.client, self.config, self.log, self.tags),
+            BQueuesProcessor(self.client, self.config, self.log, self.tags),
+            BSlotsProcessor(self.client, self.config, self.log, self.tags),
+            GPULoadProcessor(self.client, self.config, self.log, self.tags),
+            GPUHostsProcessor(self.client, self.config, self.log, self.tags),
         ]
 
     def check(self, instance):
@@ -57,6 +57,9 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
             return
 
         for processor in self.processors:
-            metrics = processor.process_metrics()
-            for metric in metrics:
-                self.gauge(metric.name, metric.value, tags=metric.tags)
+            if processor.should_run():
+                metrics = processor.process_metrics()
+                for metric in metrics:
+                    self.gauge(metric.name, metric.value, tags=metric.tags)
+            else:
+                self.log.trace("Skipping %s metrics; excluded in configuration.", processor.name)
