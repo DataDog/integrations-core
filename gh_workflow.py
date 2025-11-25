@@ -85,15 +85,34 @@ def trigger_workflow(target: str, jobs: list[dict], ref: str, dry_run: bool = Fa
         '--method', 'POST',
         '-H', 'Accept: application/vnd.github+json',
         '-H', 'X-GitHub-Api-Version: 2022-11-28',
+        '--include',  # Include HTTP headers in the output
         '/repos/DataDog/integrations-core/actions/workflows/zz-test-worker-poc.yaml/dispatches',
-        '-f', f'ref=master',
+        '-f', 'ref=master',
         '-f', f'inputs[matrix_json]={matrix_json}',
         '-f', f'inputs[ref]={ref}'
     ]
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+
+        # Parse headers to find rate limit info
+        headers = {}
+        for line in result.stdout.splitlines():
+            if ':' in line:
+                key, value = line.split(':', 1)
+                headers[key.lower().strip()] = value.strip()
+            elif not line.strip():
+                # Empty line separates headers from body
+                break
+
+        remaining = headers.get('x-ratelimit-remaining', 'unknown')
+        limit = headers.get('x-ratelimit-limit', 'unknown')
+        reset = headers.get('x-ratelimit-reset', 'unknown')
+        resource = headers.get('x-ratelimit-resource', 'unknown')
+
         print(f"✓ Triggered workflow for target: {target} ({len(jobs)} jobs)")
+        print(f"  Rate Limit: {remaining}/{limit} (Resets at {reset}) | Source: {resource}")
+
         return True
     except subprocess.CalledProcessError as e:
         print(f"✗ Failed to trigger workflow for target: {target}", file=sys.stderr)
