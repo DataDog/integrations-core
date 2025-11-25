@@ -58,8 +58,13 @@ This integration does not include service checks.
 
 ## Troubleshooting
 
-**Actions not executing**: Verify Remote Configuration is enabled on your Agent and check Agent logs for errors.
-**Message deserialization failures**: Ensure the correct format is specified (`json`, `string`, `bson`, `avro`, `protobuf`) and provide schemas for Avro/Protobuf.
+### Actions not executing
+1. Confirm the Agent version meets minimum requirements
+2. Verify Remote Configuration is enabled on your Agent.
+3. Check Agent logs for errors.
+
+### Message deserialization failures
+Ensure the correct format is specified (`json`, `string`, `bson`, `avro`, `protobuf`) and provide schemas for Avro/Protobuf.
 
 Need help? Contact [Datadog support][9] or reach out to the **Data Streams Monitoring team** at Datadog for questions about this integration.
 
