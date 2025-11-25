@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.5.1-beta.1 / 2025-11-24
+
+***Added***:
+
+* Add collecting channel and queue desc fields as tags for metrics ([#21948](https://github.com/DataDog/integrations-core/pull/21948))
+
 ## 8.5.0 / 2025-10-02
 
 ***Added***:
