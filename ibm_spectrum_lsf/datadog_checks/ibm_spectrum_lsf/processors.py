@@ -21,6 +21,7 @@ from .common import (
     transform_tag,
     transform_time_left,
 )
+from .config_models import InstanceConfig
 
 
 @dataclass
@@ -75,6 +76,7 @@ class LSFMetricsProcessor(ABC):
         expected_columns: int,
         delimiter: str | None,
         client: LSFClient,
+        config: InstanceConfig,
         logger: CheckLoggingAdapter,
         base_tags: list[str],
     ):
@@ -83,6 +85,7 @@ class LSFMetricsProcessor(ABC):
         self.expected_columns = expected_columns
         self.delimiter = delimiter
         self.client = client
+        self.config = config
         self.log = logger
         self.base_tags = base_tags
 
@@ -136,15 +139,19 @@ class LSFMetricsProcessor(ABC):
     def process_metrics(self) -> list[LSFMetric]:
         pass
 
+    def should_run(self) -> bool:
+        return self.config.metric_sources is None or self.name in self.config.metric_sources
+
 
 class LsClustersProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name="lsclusters",
             prefix="cluster",
             expected_columns=6,
             delimiter=None,
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -167,13 +174,14 @@ class LsClustersProcessor(LSFMetricsProcessor):
 
 
 class BHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='bhosts',
             prefix='server',
             expected_columns=9,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -198,13 +206,14 @@ class BHostsProcessor(LSFMetricsProcessor):
 
 
 class LSHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='lshosts',
             prefix='host',
             expected_columns=12,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -234,13 +243,14 @@ class LSHostsProcessor(LSFMetricsProcessor):
 
 
 class LsLoadProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='lsload',
             prefix='load',
             expected_columns=13,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -269,13 +279,14 @@ class LsLoadProcessor(LSFMetricsProcessor):
 
 
 class BSlotsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='bslots',
             prefix='slots',
             expected_columns=2,
             delimiter=None,
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -294,13 +305,14 @@ class BSlotsProcessor(LSFMetricsProcessor):
 
 
 class BQueuesProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='bqueues',
             prefix='queue',
             expected_columns=11,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -328,13 +340,14 @@ class BQueuesProcessor(LSFMetricsProcessor):
 
 
 class BJobsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='bjobs',
             prefix='job',
             expected_columns=12,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -365,13 +378,14 @@ class BJobsProcessor(LSFMetricsProcessor):
 
 
 class GPULoadProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
-            name='lsload gpu',
+            name='lsload_gpu',
             prefix='gpu',
             expected_columns=14,
             delimiter=None,
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -402,13 +416,14 @@ class GPULoadProcessor(LSFMetricsProcessor):
 
 
 class GPUHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
-            name='bhosts gpu',
+            name='bhosts_gpu',
             prefix='server.gpu',
             expected_columns=8,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )

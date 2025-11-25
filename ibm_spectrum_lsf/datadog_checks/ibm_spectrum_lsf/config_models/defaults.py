@@ -16,5 +16,9 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_metric_sources():
+    return ['lsclusters', 'lshosts', 'bhosts', 'lsload', 'bqueues', 'bslots', 'bjobs']
+
+
 def instance_min_collection_interval():
     return 15

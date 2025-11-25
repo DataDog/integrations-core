@@ -18,6 +18,21 @@ instances:
     #
   - cluster_name: <CLUSTER_NAME>
 
+    ## @param metric_sources - list of strings - optional
+    ## Enable metrics from different IBM Spectrum LSF commands.
+    ## By default, all commands except GPU commands are enabled.
+    #
+    # metric_sources:
+    #   - lsclusters
+    #   - lshosts
+    #   - bhosts
+    #   - lsload
+    #   - bqueues
+    #   - bslots
+    #   - bjobs
+    #   - lsload_gpu
+    #   - bhosts_gpu
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
