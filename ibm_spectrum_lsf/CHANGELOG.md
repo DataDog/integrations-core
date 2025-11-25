@@ -6,6 +6,4 @@
 
 ***Added***:
 
-* Initial Release ([#21668](https://github.com/DataDog/integrations-core/pull/21668))
-* Don't collect GPU metrics by default and add ability to filter metrics. ([#21957](https://github.com/DataDog/integrations-core/pull/21957))
-* Properly handle commands that don't return any output. ([#21959](https://github.com/DataDog/integrations-core/pull/21959))
+* Initial Release ([#21668](https://github.com/DataDog/integrations-core/pull/21668)) ([#21957](https://github.com/DataDog/integrations-core/pull/21957)) ([#21959](https://github.com/DataDog/integrations-core/pull/21959))
