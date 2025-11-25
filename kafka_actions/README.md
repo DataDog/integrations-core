@@ -64,4 +64,6 @@ This integration does not include service checks.
 Need help? Contact [Datadog support][9] or reach out to the **Data Streams Monitoring team** at Datadog for questions about this integration.
 
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[9]: https://docs.datadoghq.com/help/
+[1]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: https://docs.datadoghq.com/help/
+[3]: https://app.datadoghq.com/event/explorer
