@@ -11,7 +11,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_spectrum_lsf import IbmSpectrumLsfCheck
 
-from .common import ALL_METRICS, BJOBS_METRICS, CLUSTER_METRICS
+from .common import ALL_METRICS, BJOBS_METRICS, CLUSTER_METRICS, LSLOAD_METRICS
 from .conftest import get_mock_output
 
 
@@ -145,3 +145,18 @@ def test_client_error(dd_run_check, aggregator, instance, caplog):
         aggregator.assert_metric("ibm_spectrum_lsf.can_connect", 0)
         aggregator.assert_all_metrics_covered()
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_no_output_from_command(mock_client, dd_run_check, aggregator, instance, caplog):
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    mock_client.lsload.return_value = ("", "", 0)
+    caplog.set_level(logging.WARNING)
+    dd_run_check(check)
+
+    assert_metrics(ALL_METRICS, LSLOAD_METRICS, aggregator)
+
+    assert "No output from command lsload" in caplog.text
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
