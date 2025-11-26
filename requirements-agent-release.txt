@@ -19,7 +19,7 @@ datadog-avi-vantage==6.2.0
 datadog-aws-neuron==3.2.0
 datadog-azure-iot-edge==6.3.0
 datadog-barracuda-secure-edge==1.1.0
-datadog-bentoml==1.2.0
+datadog-bentoml==1.3.0
 datadog-beyondtrust-password-safe==1.1.0
 datadog-boundary==4.1.1
 datadog-btrfs==4.1.0; sys_platform != 'win32'
