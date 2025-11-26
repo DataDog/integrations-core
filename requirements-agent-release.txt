@@ -82,7 +82,7 @@ datadog-gearmand==5.2.0; sys_platform != 'win32'
 datadog-gitlab-runner==7.2.0
 datadog-gitlab==10.2.0
 datadog-glusterfs==3.3.0; sys_platform == 'linux2'
-datadog-go-expvar==5.1.1
+datadog-go-expvar==5.2.0
 datadog-guarddog==1.0.0; sys_platform != 'win32'
 datadog-gunicorn==4.2.0; sys_platform != 'win32'
 datadog-haproxy==8.1.1
