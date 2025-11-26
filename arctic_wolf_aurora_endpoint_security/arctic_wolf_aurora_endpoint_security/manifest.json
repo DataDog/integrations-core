@@ -31,8 +31,9 @@
       }
     },
     "dashboards": {},
-    "monitors": {},
-    "saved_views": {}
+    "logs": {
+      "source": "arctic-wolf-aurora-endpoint-security"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
