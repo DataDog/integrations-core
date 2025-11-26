@@ -65,7 +65,7 @@ datadog-duckdb==1.2.0
 datadog-ecs-fargate==7.2.0
 datadog-eks-fargate==6.3.0
 datadog-elastic==9.2.0
-datadog-envoy==6.2.1
+datadog-envoy==6.3.0
 datadog-eset-protect==1.1.0
 datadog-esxi==4.1.0
 datadog-etcd==9.1.1
