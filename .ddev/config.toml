@@ -197,3 +197,12 @@ ddev = false
 docs = false
 # This is a directory that exists only in CI but need to include it to avoid tests failing in CI
 trace-captures = false
+
+# Explicitely add the platforms supported by an integration for those where the manifest has been
+# removed.
+# This is a temporary fix while we implement a metadata.json file that we can add to each integration
+# that replaces the manifest.
+# Use manifest-like platforms
+[overrides.manifest.platforms]
+krakend = ["linux", "windows", "mac_os"]
+lustre = ["linux", "windows", "mac_os"]
