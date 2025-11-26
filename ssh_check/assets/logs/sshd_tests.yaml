@@ -40,4 +40,32 @@ tests:
     message: "Received disconnect from 172.22.179.72: 11: disconnected by user"
     tags:
      - "source:LOGS_SOURCE"
+ -
+  sample: "Failed password for invalid user admin from 192.168.1.100 port 22334 ssh2"
+  result:
+    custom:
+      network:
+        client:
+          ip: "192.168.1.100"
+          port: "22334"
+      ocsf:
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.168.1.100"
+        status: "Failure"
+        status_id: 2
+        user:
+          name: "admin"
+      system:
+        action: "Failed"
+        type: "password"
+        user: "admin"
+    message: "Failed password for invalid user admin from 192.168.1.100 port 22334 ssh2"
+    tags:
+     - "source:LOGS_SOURCE"
 
