@@ -1,0 +1,528 @@
+id: cisco-asa
+metric_id: cisco-asa
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
+  - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Destination IP
+    path: network.destination.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Destination Port
+    path: network.destination.port
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+
+pipeline:
+  type: pipeline
+  name: Cisco ASA
+  enabled: true
+  filter:
+    query: source:cisco-asa
+  processors:
+    - type: grok-parser
+      name: Parse Cisco ASA logs
+      enabled: true
+      source: message
+      samples:
+        - "<190>2025-11-20T07:37:58Z: %ASA-6-302014: Teardown TCP connection
+          134712 for inside:10.10.10.10/5014 to identity:10.10.10.10/45544
+          duration 0:00:21 bytes 0 No valid adjacency"
+      grok:
+        supportRules: ""
+        matchRules: parse_header
+          (\<%{integer}\>)?%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}:\s*%{notSpace}-%{integer:severity}-%{word:message_id}:\s*%{data:message}
+    - type: message-remapper
+      name: Define `message` as official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Define `severity` as the official status of the log
+      enabled: true
+      sources:
+        - severity
+    - type: category-processor
+      name: Define `service` based on message ID
+      enabled: true
+      categories:
+        - filter:
+            query: "@message_id:(733100 OR 733102 OR 733103 OR 733104 OR 733105)"
+          name: threat-detection
+        - filter:
+            query: "@message_id:(109005 OR 109006 OR 109010 OR 109023 OR 109033 OR 109034 OR
+              109007 OR 109008 OR 109024 OR 109025 OR 502101 OR 502102 OR
+              502103)"
+          name: user-activity
+        - filter:
+            query: "@message_id:(338001 OR 338002 OR 338003 OR 338004 OR 338005 OR 338006 OR
+              338007 OR 338008 OR 338101 OR 338102 OR 338103 OR 338104 OR 338201
+              OR 338202 OR 338203 OR 338204 OR 106001 OR 106002 OR 106006 OR
+              405001)"
+          name: network-activity
+        - filter:
+            query: "@message_id:(415001 OR 415002 OR 415003 OR 415005 OR 415013 OR 415016 OR
+              110002 OR 110003 OR 110004 OR 746001 OR 746002 OR 746003 OR 746005
+              OR 746007 OR 746016)"
+          name: firewall
+        - filter:
+            query: "@message_id:*"
+          name: other
+      target: service
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: pipeline
+      name: Threat Detection
+      enabled: true
+      filter:
+        query: "@message_id:(733100 OR 733102 OR 733103 OR 733104 OR 733105)"
+      processors:
+        - type: grok-parser
+          name: Parse Threat Detection Logs
+          enabled: true
+          source: message
+          samples:
+            - "[ Scanning] drop rate-1 exceeded. Current burst rate is 19 per
+              second, max configured rate is 33; Current average rate is 50 per
+              second, max configured rate is 33; Cumulative total count is 44"
+            - Threat-detection adds host www.example.com to shun list
+            - TCP Intercept SYN flood attack detected to 192.0.2.3/1194
+              (192.0.2.14/443). Average rate of 47 SYNs/sec exceeded the
+              threshold of 48.
+            - TCP Intercept SYN flood attack detected to 11.11.11.11/80
+              (10.10.10.10/52340). Average rate of 120 SYNs/sec exceeded the
+              threshold of 100.
+            - TCP Intercept SYN flood attack detected to 11.11.11.11/80
+              (10.10.10.10/52340). Burst rate of 200 SYNs/sec exceeded the
+              threshold of 150.
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_733100 \[\s*%{regex("[^\\]]*"):object}\] drop rate(-|
+              )%{number:rate_id} exceeded. Current burst rate is
+              %{number:current_burst_rate} per (second, max|second_max)
+              configured rate is %{number:max_configured_burst_rate}; Current
+              average rate is %{number:current_average_rate} per (second,
+              max|second_max) configured rate is
+              %{number:max_configured_average_rate}; Cumulative total count is
+              %{number:cumulative_total}( \(%{number:received_instances}
+              instances received\))?
+
+              rule_733102_733103 Threat-detection %{word:action} host %{ipOrHost:host} (to|from) shun list
+
+              rule_733104_733105 %{word:protocol} Intercept SYN flood attack detected to %{ip:network.destination.ip}/%{integer:network.destination.port}\s*\(%{ip:real_ip}/%{integer:real_port}\). %{word:rate_type} rate of %{number:rate} %{notSpace:rate_unit} exceeded the threshold of %{number:rate_threshold}
+    - type: pipeline
+      name: User Authentication
+      enabled: true
+      filter:
+        query: "@message_id:(109005 OR 109006 OR 109010 OR 109023 OR 109033 OR 109034)"
+      processors:
+        - type: grok-parser
+          name: Parse User Authentication Logs
+          enabled: true
+          source: message
+          samples:
+            - Authentication succeeded for user 'james.anderson' from
+              192.0.2.2/1194 to 192.0.2.1/1194 on interface tap0
+            - Auth from 192.0.2.5/1195 to 192.0.2.4/1195 failed (too many
+              pending auths) on interface tun0
+            - User from 192.0.2.1/443 to 192.0.2.3/443 on interface eth0 using
+              test service must authenticate before using this service
+            - Authentication failed for admin user mason.young from
+              10.10.10.10. Interactive challenge processing is not supported
+              for protocol
+            - Authentication failed for admin user admin1 from 10.10.10.10.
+              Interactive challenge processing is not supported for ssh
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_109005_109006 Authentication %{notSpace:evt.outcome} for user
+              '%{regex("[^']*"):usr.name}' from
+              %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
+              on interface %{data:interface}
+
+              rule_109010 Auth from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} %{notSpace:evt.outcome} \(%{regex("[^\\)]*"):reason}\) on interface %{data:interface}
+
+              rule_109023 User from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} on interface %{regex(".*(?= using )"):interface} using %{regex(".*(?= must authenticate)"):service_name} must authenticate before using this service
+
+              rule_109033_109034 Authentication %{notSpace:evt.outcome} for %{notSpace:user_type} user %{regex(".*(?= from )"):usr.name} from (%{ip:network.client.ip}|%{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port}). Interactive challenge processing is not supported for %{notSpace:protocol}( connections)?
+    - type: pipeline
+      name: User Authorization
+      enabled: true
+      filter:
+        query: "@message_id:(109007 OR 109008 OR 109024 OR 109025)"
+      processors:
+        - type: grok-parser
+          name: Parse User Authorization Logs
+          enabled: true
+          source: message
+          samples:
+            - Authorization permitted for user 'liam.wilson' from 192.0.2.5/443
+              to 10.10.10.10/443 on interface ens160
+            - Authorization denied from 10.10.10.10/10 to 11.11.11.11/11 (not
+              authenticated) on interface ens170 using protocol to
+            - Authorization denied from 10.10.10.10/50412 to 11.11.11.11/443
+              (not authenticated) on interface test PM using tcp
+            - Authorization denied (acl=OUTBOUND-FILTER) for user 'alice' from
+              10.10.10.10/50322 to 11.11.11.11/443 on interface outside using
+              tcp
+            - Authorization denied from 10.10.10.10/10 to 11.11.11.11/11 (not
+              authenticated) on interface test using protocol to
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_109007_109008 Authorization %{word:evt.outcome} for user
+              '%{regex("[^']*"):usr.name}' from
+              %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
+              on interface %{data:interface}
+
+              rule_109024_109025 Authorization %{word:evt.outcome} (\(acl=%{regex("[^\\)]*"):acl_id}\))?( for user '%{regex("[^']*"):usr.name}' )?from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} (\(not authenticated\) )?on interface %{regex(".*(?= using )"):interface} using %{notSpace:protocol}( to)?
+    - type: pipeline
+      name: User Management
+      enabled: true
+      filter:
+        query: "@message_id:(502101 OR 502102 OR 502103)"
+      processors:
+        - type: grok-parser
+          name: Parse User Management Logs
+          enabled: true
+          source: message
+          samples:
+            - "New user added to local dbase: Uname: test Priv: 1 Encpass:
+              *****"
+            - "User deleted from local dbase: Uname: user Priv: privilege_level
+              Encpass: *****"
+            - "User priv level changed: Uname: user From: privilege_level To:
+              privilege_level"
+          grok:
+            supportRules: ""
+            matchRules: 'rule_502101_502102_502103 %{regex(".*(?=: Uname)"):action}: Uname:
+              %{regex(".*(?= (Priv:|From:))"):usr.name} (Priv:
+              %{notSpace:privilege_level}%{data}|From:
+              %{notSpace:previous_privilege_level} To:
+              %{notSpace:new_privilege_level})'
+    - type: pipeline
+      name: Application Firewall
+      enabled: true
+      filter:
+        query: "@message_id:(415001 OR 415002 OR 415003 OR 415005 OR 415013 OR 415016)"
+      processors:
+        - type: grok-parser
+          name: Parse Application Firewall Logs
+          enabled: true
+          source: message
+          samples:
+            - HTTP - matched matched_string in policy-map
+              pm_access_control_core, header field count exceeded
+              connection_action OpenVPN-TAP-Windows6:192.0.2.6/443 to
+              OpenVPN-TAP-Windows6:10.10.10.10/80
+            - HTTP - matched matched_string in policy-map map_name, header field
+              length exceeded connection_action inside:10.10.10.10/10 to
+              outside:11.11.11.11/11
+            - HTTP - matched matched_string in policy-map map_name, body length
+              exceeded connection_action inside:10.10.10.10/10 to
+              outside:11.11.11.11/11
+            - HTTP - policy-map map-name:Malformed chunked encoding
+              connection_action ens160:192.0.2.4/1194 to
+              Ethernet0:192.0.2.6/1196
+            - "policy-map WebMaxRequests: Maximum number of unanswered HTTP
+              requests exceeded drop inside test:10.10.10.10/51822 to
+              outside:10.10.10.10/443"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_415001_415002_415003_415005 HTTP - matched ("%{regex(".*(?=\"
+              in policy-map)"):matched_string}"|%{regex(".*(?= in
+              policy-map)"):matched_string}) in policy-map
+              %{regex("[^,]*"):policy_map},\s+%{regex("header field count
+              exceeded|header field length exceeded|body length exceeded|URI
+              length exceeded"):reason}
+              %{notSpace:connection_action}\s+%{regex("[^:]*"):source_interface}\s*:\s*%{ip:network.client.ip}\s*/\s*%{integer:network.client.port}
+              to
+              %{regex("[^:]*"):destination_interface}\s*:\s*%{ip:network.destination.ip}\s*/\s*%{integer:network.destination.port}
+
+              rule_415013_415016 (HTTP - )?policy-map %{regex("[^:]*"):policy_map}\s*:\s*%{regex("Maximum number of unanswered HTTP requests exceeded|Malformed chunked encoding"):reason} %{notSpace:connection_action}\s+%{regex("(.+?)(?=\\s*\\:)"):source_interface}\s*:\s*%{ip:network.client.ip}\s*/\s*%{integer:network.client.port} to %{regex("(.+?)(?=\\s*\\:)"):destination_interface}\s*:\s*%{ip:network.destination.ip}\s*/\s*%{integer:network.destination.port}
+    - type: pipeline
+      name: Transparent Firewall
+      enabled: true
+      filter:
+        query: "@message_id:(110002 OR 110003 OR 110004)"
+      processors:
+        - type: grok-parser
+          name: Parse Transparent Firewall Logs
+          enabled: true
+          source: message
+          samples:
+            - Failed to locate egress interface for protocol from
+              tap0:10.10.10.10/1194 to 192.0.2.1/1194
+            - Routing failed to locate next-hop for protocol from src_interface
+              :10.10.10.10/514 to 11.11.11.11/516
+            - Egress interface changed from eth0 to br0 on ip_protocol
+              connection 108098402 for
+              zone-new/eth0:192.0.2.5/443(192.0.2.2/1199 ) to
+              zone-dest/br0:192.0.2.2/1194(192.0.2.7/443 )
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_110002_110003 %{regex("Failed to locate egress
+              interface|Routing failed to locate (next-hop|next hop)"):reason}
+              for %{notSpace:protocol} from
+              %{regex("(.+?)(?=\\s*\\:)"):source_interface}\s*:\s*%{ip:network.client.ip}\s*/\s*%{integer:network.client.port}
+              to
+              (%{regex("(.+?)(?=\\s*\\:)"):destination_interface}\s*:\s*)?%{ip:network.destination.ip}\s*/\s*%{integer:network.destination.port}
+
+              rule_110004 %{regex("Egress interface changed"):reason} from %{regex(".*(?= to )"):old_interface} to %{regex(".*(?= on )"):new_interface} on %{notSpace:protocol} connection %{number:connection_id} for %{notSpace:outside_interface_zone}\s*/\s*%{regex("[^:]*"):outside_interface}\s*:\s*%{ip:outside_ip}\s*/\s*%{integer:outside_port}\s*\(%{ip:outside_mapped_ip}\s*/\s*%{integer:outside_mapped_port}\s*\) to %{notSpace:inside_interface_zone}\s*/\s*%{regex("[^:]*"):inside_interface}\s*:\s*%{ip:inside_ip}\s*/\s*%{integer:inside_port}\s*\(%{ip:inside_mapped_ip}\s*/\s*%{integer:inside_mapped_port}\s*\)
+    - type: pipeline
+      name: Identity Firewall
+      enabled: true
+      filter:
+        query: "@message_id:(746001 OR 746002 OR 746003 OR 746005 OR 746007 OR 746016)"
+      processors:
+        - type: grok-parser
+          name: Parse Identity Firewall Logs
+          enabled: true
+          source: message
+          samples:
+            - "user-identity: The AD Agent 10.10.10.10 cannot be reached -
+              reasonaction"
+            - "user-identity: NetBIOS response failed from User david.murphy at
+              10.10.10.10"
+            - "user-identity: 10.10.10.10 download failed - bad request"
+            - "user-identity: DNS lookup for 10.10.10.10 failed, reason: no
+              memory"
+            - "user-identity: identity_lookup_store started"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_746005 user-identity: The AD Agent %{ip:network.client.ip}
+              cannot be reached -
+              (%{regex("[^\\[]*"):reason}(\[\s*%{regex("[^\\]]*"):action}\s*\])?|%{data:reason})
+
+              rule_746007 user-identity: NetBIOS response failed from User %{regex(".*(?= at )"):usr.name} at %{ip:network.client.ip}
+
+              rule_746016 user-identity: DNS lookup for %{ip:network.client.ip} failed, reason:\s*%{data:reason}
+
+              rule_746001_746002_746003 user-identity: %{data:database} %{notSpace:download_status}(\s+-\s+%{data:reason})?
+    - type: pipeline
+      name: ARP Collision Insights
+      enabled: true
+      filter:
+        query: "@message_id:405001"
+      processors:
+        - type: grok-parser
+          name: Parse ARP collision Logs
+          enabled: true
+          source: message
+          samples:
+            - Received ARP request collision from 10.10.10.10/00:25:96:AA:3F:11
+              on interface inside with existing ARP entry
+              10.10.10.10/00:50:56:C0:12:9A
+            - Received ARP response collision from 10.10.10.10/3A:4F:B9:27:88:10
+              on interface tap1 with existing ARP entry
+              192.0.2.4/02:1A:6C:3F:92:11
+          grok:
+            supportRules: ""
+            matchRules: rule_405001 Received ARP (request|response) collision from
+              %{ip:network.client.ip}\s*/\s*%{mac:source_mac_address} on
+              interface %{regex(".*(?= with existing ARP)"):interface} with
+              existing ARP entry
+              %{ip:existing_arp_ip}\s*/\s*%{mac:existing_arp_ip_mac_address}
+    - type: pipeline
+      name: Connection insights
+      enabled: true
+      filter:
+        query: "@message_id:(106001 OR 106002 OR 106006)"
+      processors:
+        - type: grok-parser
+          name: Parse connection Logs
+          enabled: true
+          source: message
+          samples:
+            - Inbound TCP connection denied from 192.0.2.3/443 to 192.0.2.3/1194
+              flags tcp_flags on interface br1
+            - TCP Connection denied by outbound list OUTBOUND-ACL src
+              10.10.10.10 dest 10.10.10.10
+            - Deny inbound UDP from 10.10.10.10/137 to 10.10.10.10/137 on
+              interface inside
+            - protocol Connection denied by outbound list acl_ID src 192.0.2.3
+              dest 192.0.2.4
+            - Deny inbound UDP from 192.0.2.10/1194 to 192.0.2.12/1195 on
+              interface Ethernet0
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_106001 Inbound %{regex("TCP"):protocol} connection denied
+              from %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
+              flags %{notSpace:tcp_flag}\s+on\s+interface %{data:interface}
+
+              rule_106002 %{notSpace:protocol} Connection denied by outbound list %{notSpace:outbound_list} src %{ip:network.client.ip} dest %{ip:network.destination.ip}
+
+              rule_106006 Deny inbound %{regex("UDP"):protocol} from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} on interface %{data:interface}
+    - type: pipeline
+      name: Dynamic traffic insights
+      enabled: true
+      filter:
+        query: "@message_id:(338001 OR 338002 OR 338003 OR 338004 OR 338005 OR 338006 OR
+          338007 OR 338008 OR 338101 OR 338102 OR 338103 OR 338104 OR 338201 OR
+          338202 OR 338203 OR 338204)"
+      processors:
+        - type: grok-parser
+          name: Parse dynamic traffic Logs
+          enabled: true
+          source: message
+          samples:
+            - "Dynamic Filter monitored blacklisted protocol traffic from
+              inside:10.10.10.10/10 (11.11.11.11/11) to outside:11.11.11.11/22
+              (13.13.13.13/13), destination malicious_address resolved from
+              local_or_dynamic list: domain_name, threat-level: level_value,
+              category: category_name"
+            - "Dynamic Filter permitted black listed TCP traffic from
+              inside:10.10.10.10/6798 (11.11.11.11/7890) to
+              outside:12.12.12.12/80 (13.13.13.13/80), destination
+              13.13.13.13 resolved from dynamic list: bad.example.com"
+            - "Dynamic Filter monitored blacklisted UDP traffic from
+              inside:10.10.10.10/49211 (11.11.11.11/49211) to
+              outside:12.12.12.12/443 (13.13.13.13/443) source
+              13.13.13.13/24 resolved from dynamic list: 13.13.13.13/24,
+              threat-level: medium, category: phishing"
+            - "Dynamic filter dropped greylisted TCP traffic from
+              eth0:10.10.10.1/1234 (source.example.net/11234) to
+              wan:13.13.13.13/80 (www.example.org/80), destination
+              malicious_address resolved from dynamic list: example.org,
+              threat-level: high, category: malware"
+            - "Dynamic Filter monitored blacklisted protocol traffic from
+              br0:10.10.10.10/443 (11.11.11.11/443) to ens33:12.12.12.12/1194
+              (13.13.13.13/80) source malware-test-example1.badsite resolved from
+              local list: mycoolapp-preview.mock, threat-level: 0, category:
+              malware"
+          grok:
+            supportRules: ""
+            matchRules: 'rule Dynamic (Filter|filter)
+              %{regex("monitored|permitted|dropped|denied|action"):action}
+              %{regex("blacklisted|black listed|whitelisted|white
+              listed|greylisted|grey listed"):traffic_type} %{notSpace:protocol}
+              traffic from
+              %{regex("(.+?)(?=\\s*\\:)"):in_interface}\s*:\s*%{ip:network.client.ip}\s*/\s*%{integer:network.client.port}\s*\(%{ipOrHost:client_mapped_ip}\s*/\s*%{integer:client_mapped_port}\)(\))?
+              to
+              %{regex("(.+?)(?=\\s*\\:)"):out_interface}\s*:\s*%{ip:network.destination.ip}\s*/\s*%{integer:network.destination.port}\s*\(%{ipOrHost:destination_mapped_ip}\s*/\s*%{integer:destination_mapped_port}\)(\),|,\),|,)?
+              (source|destination)
+              (%{ip:malicious_address}\s*/\s*%{notSpace:malicious_address_netmask}|%{notSpace:malicious_address})
+              resolved from %{notSpace:list_type} list:
+              (%{ip:dynamic_list_ip_address}\s*/\s*%{notSpace:dynamic_list_netmask}|%{notSpace:domain_name})(,
+              threat-level: %{notSpace:threat_level}, category:
+              %{data:category})?'
+    - type: geo-ip-parser
+      name: Extract geolocation information from the Client IP
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: geo-ip-parser
+      name: Extract geolocation information from the Destination IP
+      enabled: true
+      sources:
+        - network.destination.ip
+      target: network.destination.geoip
+      ip_processing_behavior: do-nothing
