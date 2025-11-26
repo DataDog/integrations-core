@@ -201,7 +201,7 @@ jobs:
         > ${{ env.OUT_DIR }}/image_digest
 
     - name: Persist current image digest
-      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'false'
+      if: needs.check-should-run.outputs.should_run_build == 'true' && needs.check-should-run.outputs.builder_changed == 'false'
       run: >-
         jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
         > ${{ env.OUT_DIR }}/image_digest
