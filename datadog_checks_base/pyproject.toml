@@ -61,9 +61,6 @@ http = [
     "pyopenssl==25.1.0",
     "pysocks==1.7.1",
     "requests-kerberos==0.15.0",
-    # Pinned becasue 0.9.0 does not build in py3.13.9
-    # Should remove when the build is fixed.
-    "krb5=0.8.0",
     "requests-ntlm==1.3.0",
     "requests-oauthlib==2.0.0",
 ]
