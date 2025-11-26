@@ -526,31 +526,8 @@ pipeline:
               Process File Path: c:\\windows\\system32\\sdbinst.exe"
           grok:
             supportRules: PARSE_TILL_COMMA %{regex("(.*?)(?=,)")}
-            matchRules: 'parse_process_rule Device Name: %{PARSE_TILL_COMMA:device_name},
-              Zone Names: %{data:zone_names:array("()",",")}, Event Id:
-              %{PARSE_TILL_COMMA:event_id}, Severity:
-              ()?(%{notSpace:severity})?, Description:
-              %{PARSE_TILL_COMMA:description}, Instigating Process Name:
-              %{PARSE_TILL_COMMA:instigating_process_name}, Instigating Process
-              Owner: %{PARSE_TILL_COMMA:instigating_process_owner}, Instigating
-              Process ImageFileSha256:
-              ()?(%{notSpace:instigating_process_imagefilesha256})?, Event
-              Timestamp: %{PARSE_TILL_COMMA:event_timestamp}, Event Received
-              Timestamp: %{PARSE_TILL_COMMA:event_received_timestamp}, Device
-              Last Reported Users:
-              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{data:zone_ids:array("()",",")}, Detection Rule Id:
-              %{PARSE_TILL_COMMA:detection_rule_id}, Instigating Process Command
-              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
-              Instigating Process File Path:
-              %{PARSE_TILL_COMMA:instigating_process_file_path}, Target Process
-              Name: %{PARSE_TILL_COMMA:target_process_name}, Target Process
-              Owner: %{PARSE_TILL_COMMA:target_process_owner}, Target Process
-              ImageFileSha256: ()?(%{notSpace:target_process_imagefilesha256})?,
-              Device Id: %{PARSE_TILL_COMMA:device_id}, Target Process Command
-              Line: %{PARSE_TILL_COMMA:target_process_command_line}, Target
-              Process File Path: %{data:target_process_file_path}(, test1:
-              %{data}, test2: %{data}, test3: %{data}, test4: %{data})?'
+            matchRules: 'parse_process_rule %{regex("[^,]*")}
+             %{regex("[^,]*")}%{regex("[^,]*")} %{regex("[^,]*")} %{regex("[^,]*")}'
     - type: pipeline
       name: Processing Aurora Focus File Based Detection Events
       enabled: true
