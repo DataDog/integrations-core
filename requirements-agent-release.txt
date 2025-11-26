@@ -150,7 +150,7 @@ datadog-mcache==6.3.0; sys_platform != 'win32'
 datadog-mesos-master==6.2.0; sys_platform != 'win32'
 datadog-mesos-slave==6.2.0; sys_platform != 'win32'
 datadog-microsoft-dns==1.2.0; sys_platform == 'win32'
-datadog-microsoft-sysmon==1.1.0; sys_platform == 'win32'
+datadog-microsoft-sysmon==1.2.0; sys_platform == 'win32'
 datadog-milvus==2.2.0
 datadog-mongo==10.5.0
 datadog-mysql==15.10.0
