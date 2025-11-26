@@ -5,6 +5,7 @@
 import mock
 import pytest
 from click.testing import CliRunner
+
 from datadog_checks.dev.errors import ManifestError
 from datadog_checks.dev.fs import read_file_lines
 from datadog_checks.dev.tooling.release import (
@@ -69,6 +70,7 @@ def test_get_agent_requirement_line_with_overrides_no_manifest_no_override():
         app = mock.MagicMock(repo=mock.MagicMock(config={'/overrides/manifest/platforms': {}}))
         with pytest.raises(ManifestError):
             get_agent_requirement_line('my_check', '1.1.0', app)
+
 
 @pytest.mark.parametrize(
     'check,new_version,expected_result',
