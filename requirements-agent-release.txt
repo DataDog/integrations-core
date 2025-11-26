@@ -113,7 +113,7 @@ datadog-jboss-wildfly==3.3.0
 datadog-journald==3.2.0
 datadog-juniper-srx-firewall==1.2.0
 datadog-kafka-consumer==6.9.1
-datadog-kafka==4.2.0
+datadog-kafka==4.3.0
 datadog-karpenter==3.1.1
 datadog-keda==2.1.1
 datadog-keycloak==1.1.0
