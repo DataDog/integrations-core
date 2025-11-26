@@ -13,7 +13,7 @@ datadog-appgate-sdp==2.2.0; sys_platform != 'win32'
 datadog-arangodb==4.2.0
 datadog-argo-rollouts==3.2.0
 datadog-argo-workflows==3.2.0
-datadog-argocd==4.1.1
+datadog-argocd==4.2.0
 datadog-aspdotnet==4.4.0; sys_platform == 'win32'
 datadog-avi-vantage==6.1.1
 datadog-aws-neuron==3.1.1
