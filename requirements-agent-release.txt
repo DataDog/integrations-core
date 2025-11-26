@@ -1,7 +1,7 @@
 # DO NOT PASS THIS TO PIP DIRECTLY
 # THIS FILE IS AUTO-GENERATED, DO NOT EDIT BY HAND
 --no-index
-datadog-active-directory==4.4.1; sys_platform == 'win32'
+datadog-active-directory==4.5.0; sys_platform == 'win32'
 datadog-activemq-xml==5.2.1
 datadog-activemq==5.1.0
 datadog-aerospike==5.1.1; sys_platform == 'linux2'
