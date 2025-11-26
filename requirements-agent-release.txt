@@ -167,7 +167,7 @@ datadog-openmetrics==7.2.0
 datadog-openstack-controller==9.3.0
 datadog-openstack==4.2.0
 datadog-openvpn==1.2.0
-datadog-oracle==6.1.0
+datadog-oracle==6.2.0
 datadog-ossec-security==2.1.0
 datadog-palo-alto-panorama==1.1.0
 datadog-pan-firewall==3.1.0
