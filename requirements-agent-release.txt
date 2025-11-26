@@ -174,7 +174,7 @@ datadog-pan-firewall==3.2.0
 datadog-pdh-check==4.5.0; sys_platform == 'win32'
 datadog-pgbouncer==8.7.0; sys_platform != 'win32'
 datadog-php-fpm==6.2.0
-datadog-ping-federate==2.1.0
+datadog-ping-federate==2.2.0
 datadog-postfix==3.1.0; sys_platform != 'win32'
 datadog-postgres==23.2.0
 datadog-powerdns-recursor==5.1.1
