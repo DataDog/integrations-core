@@ -167,7 +167,7 @@ Then create the same user from a mongos proxy. This action creates the local use
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](#docker), [Kubernetes](#kubernetes), or [ECS](#ecs) sections.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
