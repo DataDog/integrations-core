@@ -464,13 +464,60 @@ tests:
       timestamp: 1764055022000
   - sample: "<190>2025-11-25T07:19:23Z: %ASA-2-106006: Deny inbound UDP from 192.0.2.10/1194 to 192.0.2.12/1195 on interface Ethernet0"
     result:
-      custom: {}
-      message: "<190>2025-11-25T07:19:23Z: %ASA-2-106006: Deny inbound UDP from 192.0.2.10/1194 to 192.0.2.12/1195 on interface Ethernet0"
+      custom:
+        interface: "Ethernet0"
+        message_id: "106006"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.10"
+            port: "1194"
+          destination:
+            geoip: {}
+            ip: "192.0.2.12"
+            port: "1195"
+        service: "network-activity"
+        severity: 2
+        timestamp: 1764055163000
+      message: "Deny inbound UDP from 192.0.2.10/1194 to 192.0.2.12/1195 on interface Ethernet0"
+      service: "network-activity"
+      status: "critical"
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
+      timestamp: 1764055163000
   - sample: "<190>2025-11-25T07:17:09Z: %ASA-4-338001: Dynamic Filter monitored blacklisted protocol traffic from br0:192.0.2.4/443 (192.0.2.1/443) to ens33:192.0.2.1/1194 (192.0.2.1/80) source malware-test-example1.badsite resolved from local list: mycoolapp-preview.mock, threat-level: 0, category: category_name"
     result:
-      custom: {}
-      message: "<190>2025-11-25T07:17:09Z: %ASA-4-338001: Dynamic Filter monitored blacklisted protocol traffic from br0:192.0.2.4/443 (192.0.2.1/443) to ens33:192.0.2.1/1194 (192.0.2.1/80) source malware-test-example1.badsite resolved from local list: mycoolapp-preview.mock, threat-level: 0, category: category_name"
+      custom:
+        action: "monitored"
+        category: "category_name"
+        client_mapped_ip: "192.0.2.1"
+        client_mapped_port: "443"
+        destination_mapped_ip: "192.0.2.1"
+        destination_mapped_port: "80"
+        domain_name: "mycoolapp-preview.mock"
+        in_interface: "br0"
+        list_type: "local"
+        malicious_address: "malware-test-example1.badsite"
+        message_id: "338001"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.4"
+            port: "443"
+          destination:
+            geoip: {}
+            ip: "192.0.2.1"
+            port: "1194"
+        out_interface: "ens33"
+        protocol: "protocol"
+        service: "network-activity"
+        severity: 4
+        threat_level: "0"
+        timestamp: 1764055029000
+        traffic_type: "blacklisted"
+      message: "Dynamic Filter monitored blacklisted protocol traffic from br0:192.0.2.4/443 (192.0.2.1/443) to ens33:192.0.2.1/1194 (192.0.2.1/80) source malware-test-example1.badsite resolved from local list: mycoolapp-preview.mock, threat-level: 0, category: category_name"
+      service: "network-activity"
+      status: "warn"
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
+      timestamp: 1764055029000
