@@ -93,6 +93,7 @@ class Tenant:
             pass
 
     def submit_raw_obj(self, raw_stats, tags, obj_type):
+        got_health = False
         for s in raw_stats:
             name = list(s.keys())[0]
             # we only want to collect the 15 minutes metrics.
@@ -118,8 +119,28 @@ class Tenant:
                     json_attrs = s.get(name, {}).get("attributes", {})
                     if mval and helpers.check_metric_can_be_zero(cisco_metric, mval, json_attrs):
                         metrics[dd_metric] = mval
-
+            if 'fvOverallHealth' in name:
+                got_health = True
             self.submit_metrics(metrics, tags, instance=self.instance)
+
+        if got_health:
+            return
+        self.log.debug("No fvOverallHealth reported, looking for healthInst instead")
+        health_insts = [s for s in raw_stats if list(s.keys())[0] == "healthInst"]
+        if not health_insts:
+            self.log.debug("No healthInst reported")
+            return
+        s = health_insts[0]
+        self.log.debug("submitting metrics for: %s", 'healthInst')
+        metrics = {}
+
+        ms = self.tenant_metrics.get(obj_type, {}).get('healthInst', {})
+        for cisco_metric, dd_metric in ms.items():
+            mval = s.get('healthInst', {}).get("attributes", {}).get(cisco_metric)
+            json_attrs = s.get('healthInst', {}).get("attributes", {})
+            if mval and helpers.check_metric_can_be_zero(cisco_metric, mval, json_attrs):
+                metrics[dd_metric] = mval
+        self.submit_metrics(metrics, tags, instance=self.instance)
 
     def collect_events(self, tenant, page=0, page_size=15):
         # If there are too many events, it'll break the agent
