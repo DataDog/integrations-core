@@ -93,12 +93,9 @@ def validate_fields(
     invalid_fields = [field for field in fields_dict if field not in allowed_fields]
 
     if invalid_fields:
-        invalid_fields_str = '\n'.join(f"- {field!r}" for field in invalid_fields)
-        valid_fields_str = '\n'.join(f"- {field!r}" for field in sorted(allowed_fields))
-
+        invalid_fields_str = '\n'.join(f"    - {field!r}" for field in invalid_fields)
         writer.new_error(
-            f"Option name {option_name!r} contains the following invalid {field_level} fields:\n{invalid_fields_str}\n"
-            f"{field_level.capitalize()} fields must be one of the following:\n{valid_fields_str}"
+            f"Option name {option_name!r} contains the following invalid {field_level} fields:\n{invalid_fields_str}"
         )
 
 
@@ -301,6 +298,24 @@ class ExampleConsumer(object):
                     # No new line necessary after the last option
                     if i != num_options:
                         writer.write('\n')
+
+                if writer.errors:
+                    has_option_level_errors = any('option-level' in error for error in writer.errors)
+                    has_value_level_errors = any('value-level' in error for error in writer.errors)
+                    
+                    if has_option_level_errors or has_value_level_errors:
+                        valid_fields = []
+                        
+                        if has_option_level_errors:
+                            fields_list = '\n'.join(f"    - {field!r}" for field in sorted(ALLOWED_OPTION_FIELDS))
+                            valid_fields.append(f"Option-level fields must be one of the following:\n{fields_list}")
+                        
+                        if has_value_level_errors:
+                            fields_list = '\n'.join(f"    - {field!r}" for field in sorted(ALLOWED_VALUE_FIELDS))
+                            valid_fields.append(f"Value-level fields must be one of the following:\n{fields_list}")
+                        
+                        if valid_fields:
+                            writer.errors.append('\n'.join(valid_fields))
 
                 files[file['example_name']] = (writer.contents, writer.errors)
 
