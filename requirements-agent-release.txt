@@ -244,7 +244,7 @@ datadog-watchguard-firebox==1.2.0
 datadog-wazuh==1.3.0
 datadog-weaviate==4.2.0
 datadog-weblogic==3.2.0
-datadog-win32-event-log==5.4.0; sys_platform == 'win32'
+datadog-win32-event-log==5.5.0; sys_platform == 'win32'
 datadog-windows-performance-counters==3.2.0; sys_platform == 'win32'
 datadog-windows-service==6.5.0; sys_platform == 'win32'
 datadog-wmi-check==3.4.0; sys_platform == 'win32'
