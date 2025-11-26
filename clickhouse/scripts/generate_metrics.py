@@ -21,14 +21,14 @@ stats = collections.Counter()
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(HERE, 'templates')
 INTEGRATION_DIR = os.path.join(HERE, '..')
-QUERIES_DIR = os.path.join(INTEGRATION_DIR, 'datadog_checks', 'clickhouse', 'queries')
+QUERIES_DIR = os.path.join(INTEGRATION_DIR, 'datadog_checks', 'clickhouse', 'advanced_queries')
 TESTS_DIR = os.path.join(INTEGRATION_DIR, 'tests')
 METADATAFILE_PATH = os.path.join(INTEGRATION_DIR, 'metadata.csv')
 
-PREFIX_CURRENT_METRICS = 'ClickHouseMetrics'
-PREFIX_PROFILE_EVENTS = 'ClickHouseProfileEvents'
-PREFIX_ASYNC_METRICS = 'ClickHouseAsyncMetrics'
-PREFIX_ERRORS = 'ClickHouseErrors'
+PREFIX_ASYNC_METRICS = 'asynchronous_metrics'
+PREFIX_ERRORS = 'errors'
+PREFIX_PROFILE_EVENTS = 'events'
+PREFIX_CURRENT_METRICS = 'metrics'
 
 METRIC_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)"\)\s*\\?')
 METRIC_TYPE_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)",\s*(?P<type>[\w:]+)\)\s*\\?')
@@ -142,6 +142,9 @@ def generate_queries_file(template: Template, config: dict):
         exit(1)
 
     data = read_file(source_path)
+    target_dir = os.path.dirname(template.target_path)
+    if not os.path.exists(target_dir):
+        os.mkdir(target_dir)
     write_file(template.target_path, data.format(**config))
 
 
@@ -159,7 +162,7 @@ class ClickhouseMetric:
         return self.name < other.name
 
     def metric_name(self) -> str:
-        return f'{self.prefix}_{self.name}'
+        return f'{self.prefix}.{self.name}'
 
     def integration_name(self, postfix: str = '') -> str:
         if len(postfix) > 0:
@@ -518,7 +521,7 @@ def generate():
 def print_stats() -> None:
     print('The number of metrics:')
     for kind, count in stats.items():
-        print(f'- {kind}: ', count)
+        print(f'- {kind}:', count)
     print(f'Total: {stats.total()}')
 
 

@@ -6,7 +6,7 @@ import clickhouse_connect
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
-from . import queries
+from . import advanced_queries
 from .utils import ErrorSanitizer
 
 
@@ -45,11 +45,10 @@ class ClickhouseCheck(AgentCheck):
             self,
             self.execute_query_raw,
             queries=[
-                queries.SystemMetrics,
-                queries.SystemEventsToDeprecate,
-                queries.SystemEvents,
-                queries.SystemAsynchronousMetrics,
-                queries.SystemErrors,
+                advanced_queries.SystemMetrics,
+                advanced_queries.SystemEvents,
+                advanced_queries.SystemAsynchronousMetrics,
+                advanced_queries.SystemErrors,
             ],
             tags=self._tags,
             error_handler=self._error_sanitizer.clean,
