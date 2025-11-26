@@ -152,7 +152,7 @@ datadog-mesos-slave==6.2.0; sys_platform != 'win32'
 datadog-microsoft-dns==1.2.0; sys_platform == 'win32'
 datadog-microsoft-sysmon==1.2.0; sys_platform == 'win32'
 datadog-milvus==2.3.0
-datadog-mongo==10.5.0
+datadog-mongo==10.6.0
 datadog-mysql==15.10.0
 datadog-nagios==3.1.0
 datadog-network==5.4.0
