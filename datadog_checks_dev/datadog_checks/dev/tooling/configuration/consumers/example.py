@@ -302,18 +302,18 @@ class ExampleConsumer(object):
                 if writer.errors:
                     has_option_level_errors = any('option-level' in error for error in writer.errors)
                     has_value_level_errors = any('value-level' in error for error in writer.errors)
-                    
+
                     if has_option_level_errors or has_value_level_errors:
                         valid_fields = []
-                        
+
                         if has_option_level_errors:
                             fields_list = '\n'.join(f"    - {field!r}" for field in sorted(ALLOWED_OPTION_FIELDS))
                             valid_fields.append(f"Option-level fields must be one of the following:\n{fields_list}")
-                        
+
                         if has_value_level_errors:
                             fields_list = '\n'.join(f"    - {field!r}" for field in sorted(ALLOWED_VALUE_FIELDS))
                             valid_fields.append(f"Value-level fields must be one of the following:\n{fields_list}")
-                        
+
                         if valid_fields:
                             writer.errors.append('\n'.join(valid_fields))
 
