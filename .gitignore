@@ -137,4 +137,7 @@ size-compressed.txt
 *compressed_status.md
 *compressed_status.png
 *compressed_status.json
+
+# Docker secrets
+.env
 treemap*.png

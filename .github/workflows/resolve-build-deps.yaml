@@ -217,9 +217,9 @@ jobs:
       matrix:
         job:
         - arch: x86_64
-          os: macos-13
+          os: macos-14-large
         - arch: aarch64
-          os: macos-13-xlarge # "macOS 13 Arm64" as per https://github.com/actions/runner-images/blob/main/README.md
+          os: macos-14 # "macOS 14 Arm64" as per https://github.com/actions/runner-images/blob/main/README.md
     env:
       TARGET_NAME: macos-${{ matrix.job.arch }}
       OUT_DIR: output/macos-${{ matrix.job.arch }}
@@ -239,7 +239,7 @@ jobs:
     - name: Set up Python
       env:
         # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
-        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.13.7/python-3.13.7-macos11.pkg"
+        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.13.9/python-3.13.9-macos11.pkg"
       run: |-
         curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
         sudo installer -pkg python3.pkg -target /
