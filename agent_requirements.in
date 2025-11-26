@@ -17,7 +17,7 @@ foundationdb==6.3.25
 hazelcast-python-client==5.5.0
 in-toto==2.0.0
 jellyfish==1.2.0
-krb5==0.8.0
+krb5==0.8.0; sys_platform != 'win32'
 kubernetes==33.1.0
 lazy-loader==0.4
 ldap3==2.9.1
