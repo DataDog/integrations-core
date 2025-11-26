@@ -1,0 +1,9 @@
+id: "arctic-wolf-aurora-endpoint-security"
+tests:
+ -
+  sample: "<135>1 2025-11-26T12:21:09.000000+00:00 sysloghost CylancePROTECT - - [cds-test] Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: AuditLog, Event Name: LoginFailure, Message: {\"data\":[[\"Cylance Administrator Password\",\"One-Time Password\"]],\"clientIp\":\"163.116.213.162\"}, User: Nilay Modi (nilay.modi@crestdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Bs="
+  result:
+    custom: {}
+    message: "<135>1 2025-11-26T12:21:09.000000+00:00 sysloghost CylancePROTECT - - [cds-test] Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: AuditLog, Event Name: LoginFailure, Message: {\"data\":[[\"Cylance Administrator Password\",\"One-Time Password\"]],\"clientIp\":\"163.116.213.162\"}, User: Nilay Modi (nilay.modi@crestdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Bs="
+    tags:
+     - "source:LOGS_SOURCE"
