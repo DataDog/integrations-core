@@ -30,7 +30,7 @@ datadog-cassandra==3.2.0
 datadog-celery==2.2.0
 datadog-ceph==4.3.0; sys_platform != 'win32'
 datadog-cert-manager==6.2.0
-datadog-checkpoint-harmony-endpoint==1.0.0
+datadog-checkpoint-harmony-endpoint==1.1.0
 datadog-checkpoint-quantum-firewall==1.1.0
 datadog-checks-base==37.24.0
 datadog-checks-dependency-provider==3.1.0
