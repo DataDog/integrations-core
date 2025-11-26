@@ -6,4 +6,4 @@
 
 ***Added***:
 
-* Initial Release* Initial Release ([#21668](https://github.com/DataDog/integrations-core/pull/21668)) ([#21957](https://github.com/DataDog/integrations-core/pull/21957)) ([#21959](https://github.com/DataDog/integrations-core/pull/21959))
+* Initial Release ([#21668](https://github.com/DataDog/integrations-core/pull/21668)) ([#21957](https://github.com/DataDog/integrations-core/pull/21957)) ([#21959](https://github.com/DataDog/integrations-core/pull/21959))
