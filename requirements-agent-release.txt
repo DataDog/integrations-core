@@ -105,7 +105,7 @@ datadog-ibm-was==5.3.0
 datadog-iboss==1.2.0
 datadog-ignite==3.3.0
 datadog-iis==5.5.0; sys_platform == 'win32'
-datadog-impala==4.1.1
+datadog-impala==4.2.0
 datadog-infiniband==1.2.0; sys_platform == 'linux2'
 datadog-istio==9.1.1
 datadog-ivanti-connect-secure==1.1.0
