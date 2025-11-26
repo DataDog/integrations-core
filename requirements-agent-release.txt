@@ -16,7 +16,7 @@ datadog-argo-workflows==3.2.0
 datadog-argocd==4.2.0
 datadog-aspdotnet==4.5.0; sys_platform == 'win32'
 datadog-avi-vantage==6.2.0
-datadog-aws-neuron==3.1.1
+datadog-aws-neuron==3.2.0
 datadog-azure-iot-edge==6.2.1
 datadog-barracuda-secure-edge==1.0.0
 datadog-bentoml==1.2.0
