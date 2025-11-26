@@ -89,13 +89,10 @@ def get_platforms_from_overrides(check, app) -> list[str]:
     Get the platforms from the overrides file for the given check.
     """
     overrides = app.repo.config.get('/overrides/manifest/platforms', {})
-    # If the manifest is not there and we do not have any override, assume all platforms are supported
-    platforms = overrides.get(check)
+    if platforms := overrides.get(check):
+        return platforms
 
-    if not platforms:
-        raise ManifestError(f"The check {check!r} does not have a manifest neither platforms override")
-
-    return sorted(platforms)
+    raise ManifestError(f"The check {check!r} does not have a manifest neither platforms override")
 
 
 def get_agent_requirement_line(check, version, app):
