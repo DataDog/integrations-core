@@ -6,9 +6,6 @@
 python = ["3.13"]
 version = ["18", "19", "20", "21.8", "22.7", "24.8", "25.3", "25.8"]
 
-[envs.default.env-vars]
-CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
-
 [envs.default.overrides]
 matrix.version.env-vars = [
     { key = "CLICKHOUSE_VERSION" },
@@ -18,14 +15,14 @@ matrix.version.env-vars = [
 [envs.latest.env-vars]
 CLICKHOUSE_VERSION = "latest"
 
-[envs.data]
+[envs.metrics]
 dependencies = [
     "requests==2.32.5"
 ]
 
-[envs.data.env-vars]
+[envs.metrics.env-vars]
 # keep in sync with default version matrix
 VERSIONS = "24.8,25.3,25.8"
 
-[envs.data.scripts]
+[envs.metrics.scripts]
 generate = "python scripts/generate_metrics.py"

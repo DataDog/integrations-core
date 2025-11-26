@@ -546,7 +546,7 @@ def main():
     """
     parser = argparse.ArgumentParser(
         description=main.__doc__,
-        epilog='Example: hatch run data:generate',
+        epilog='Example: hatch run metrics:generate',
     )
     _ = parser.parse_args()
     generate()
