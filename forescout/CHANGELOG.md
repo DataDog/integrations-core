@@ -7,4 +7,3 @@
 ***Added***:
 
 * Initial Release ([#21617](https://github.com/DataDog/integrations-core/pull/21617))
-* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
