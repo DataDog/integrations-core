@@ -133,7 +133,7 @@ datadog-kubevirt-api==2.2.0
 datadog-kubevirt-controller==2.2.0
 datadog-kubevirt-handler==2.3.0
 datadog-kuma==2.2.0
-datadog-kyototycoon==4.2.1
+datadog-kyototycoon==4.3.0
 datadog-kyverno==3.1.1
 datadog-lighttpd==5.2.1
 datadog-linkerd==7.1.1
