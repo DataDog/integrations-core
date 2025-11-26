@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 15.11.0 / 2025-11-26
+
+***Added***:
+
+* Migrate SQL Server to new schema collector. This collector provides improved performance in the agent and allows the backend to handle larger schema collections. ([#21729](https://github.com/DataDog/integrations-core/pull/21729))
+* Add DBM agent health events to MySQL. Events include basic initialization check, unhandled error, and missed collection. ([#21867](https://github.com/DataDog/integrations-core/pull/21867))
+* Upgrade base version for Postgres, MySQL, SQLServer ([#21906](https://github.com/DataDog/integrations-core/pull/21906))
+
 ## 15.10.0 / 2025-10-31
 
 ***Added***:
