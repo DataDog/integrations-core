@@ -82,15 +82,16 @@ jobs:
           else
             FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
 
-            cat << EOF > dependency_files.txt
-            agent_requirements\.in
-            \.github/workflows/resolve-build-deps\.yaml
-            \.builders/
-            EOF
+          # We use unindented heredocs to avoid issues with YAML/Bash indentation
+          cat << EOF > dependency_files.txt
+          agent_requirements\.in
+          \.github/workflows/resolve-build-deps\.yaml
+          \.builders/
+          EOF
 
-            cat <<EOF > builder_files.txt
-            \.builders/
-            EOF
+          cat <<EOF > builder_files.txt
+          \.builders/
+          EOF
 
             SHOULD_RUN_BUILD=$(
                 echo "$FILES_CHANGED" | \
