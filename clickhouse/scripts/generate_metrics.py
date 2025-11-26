@@ -523,6 +523,8 @@ def print_stats() -> None:
     for kind, count in stats.items():
         print(f'- {kind}:', count)
     print(f'Total: {stats.total()}')
+    print()
+    print('Note: Run `ddev test --fmt clickhouse` to fix formatting and linting errors.')
 
 
 def main():

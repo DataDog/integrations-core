@@ -461,7 +461,6 @@ SystemMetrics = {
                 'MySQLConnection': {'name': 'metrics.MySQLConnection', 'type': 'gauge'},
                 'NetworkReceive': {'name': 'metrics.NetworkReceive', 'type': 'gauge'},
                 'NetworkSend': {'name': 'metrics.NetworkSend', 'type': 'gauge'},
-                'NonAbortedMergeFailures': {'name': 'metrics.NonAbortedMergeFailures', 'type': 'gauge'},
                 'ObjectStorageAzureThreads': {'name': 'metrics.ObjectStorageAzureThreads', 'type': 'gauge'},
                 'ObjectStorageAzureThreadsActive': {'name': 'metrics.ObjectStorageAzureThreadsActive', 'type': 'gauge'},
                 'ObjectStorageAzureThreadsScheduled': {
@@ -765,7 +764,6 @@ SystemMetrics = {
                     'type': 'gauge',
                 },
                 'ThreadsInOvercommitTracker': {'name': 'metrics.ThreadsInOvercommitTracker', 'type': 'gauge'},
-                'TotalMergeFailures': {'name': 'metrics.TotalMergeFailures', 'type': 'gauge'},
                 'TotalTemporaryFiles': {'name': 'metrics.TotalTemporaryFiles', 'type': 'gauge'},
                 'UncompressedCacheBytes': {'name': 'metrics.UncompressedCacheBytes', 'type': 'gauge'},
                 'UncompressedCacheCells': {'name': 'metrics.UncompressedCacheCells', 'type': 'gauge'},
