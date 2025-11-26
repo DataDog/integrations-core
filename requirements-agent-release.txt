@@ -249,6 +249,6 @@ datadog-windows-performance-counters==3.3.0; sys_platform == 'win32'
 datadog-windows-service==6.6.0; sys_platform == 'win32'
 datadog-wmi-check==4.0.0; sys_platform == 'win32'
 datadog-yarn==8.2.0
-datadog-zeek==1.1.0; sys_platform != 'win32'
+datadog-zeek==1.2.0; sys_platform != 'win32'
 datadog-zk==6.2.0; sys_platform != 'win32'
 datadog-zscaler-private-access==1.0.0; sys_platform != 'win32'
