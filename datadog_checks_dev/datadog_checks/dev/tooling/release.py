@@ -96,7 +96,10 @@ def get_agent_requirement_line(check, version):
         return f'{package_name}=={version}'
 
     m = load_manifest(check)
-    if 'tile' in m:
+    # Temporary patch to avoid relying on the manifest when releasing Krakend and Lustre
+    if not m:
+        platforms = ALL_PLATFORMS
+    elif 'tile' in m:
         platforms = []
         for classifier_tag in m['tile']['classifier_tags']:
             key, value = classifier_tag.split('::', 1)
