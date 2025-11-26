@@ -26,6 +26,9 @@
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       }
+    },
+    "logs": {
+      "source": "cisco-asa"
     }
   },
   "author": {
