@@ -1,5 +1,5 @@
-id: arctic-wolf-aurora-endpoint-security
-metric_id: arctic-wolf-aurora-endpoint-security
+id: arctic_wolf_aurora_endpoint_security
+metric_id: arctic_wolf_aurora_endpoint_security
 backend_only: false
 facets:
   - groups:
@@ -117,16 +117,13 @@ pipeline:
               Zone Names: (Script Test,Server Test)"
           grok:
             supportRules: PARSE_TILL_COMMA %{regex("(.*?)(?=,)")}
-            matchRules: >-
-              parse_device_rule1 Device Name: %{PARSE_TILL_COMMA:device_name},
-              IP Address: %{data:ip_addresses:array("()",",")}, Action:
+            matchRules: 'parse_appcontrol_rule Device Name: %{PARSE_TILL_COMMA:device_name},
+              IP Address: %{notSpace:ip_addresses:array("()",",")}, Action:
               %{word:action}, Action Type: %{PARSE_TILL_COMMA:action_type}, File
               Path: %{PARSE_TILL_COMMA:file_path}, SHA256:
               %{PARSE_TILL_COMMA:sha256}, Zone Names:
-              %{data:zone_names:array("()",",")}, Device Id:
-              %{PARSE_TILL_COMMA:device_id}, Policy Name: %{data:policy_name}
-
-              parse_device_rule2 Device Name: %{PARSE_TILL_COMMA:device_name}, IP Address: %{data:ip_addresses:array("()",",")}, Action: %{word:action}, Action Type: %{PARSE_TILL_COMMA:action_type}, File Path: %{PARSE_TILL_COMMA:file_path}, SHA256: %{PARSE_TILL_COMMA:sha256}, Zone Names: %{data:zone_names:array("()",",")}
+              %{data:zone_names:array("()",",")}(, Device Id:
+              %{PARSE_TILL_COMMA:device_id}, Policy Name: %{data:policy_name})?'
     - type: pipeline
       name: Processing Aurora Protect Desktop Audit Events
       enabled: true
@@ -505,7 +502,8 @@ pipeline:
               7E6B42AF9D8B1E1A4EFDEEB152997C7C9BBFA010B2FCE65BEF29A2903819E0E5,
               Device Id: 191c967b-264c-46c3-999b-94c071e2e790, Target Process
               Command Line: C:\\Windows\\System32\\sdbinst.exe -m -bg, Target
-              Process File Path: c:\\windows\\system32\\sdbinst.exe"
+              Process File Path: c:\\windows\\system32\\sdbinst.exe, test1:
+              test1, test2: test2, test3: test3, test4: test4"
             - "Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
               Id: 72de5df2-5700-4977-9b66-580e6e697428, Severity: Low,
               Description: Application Shimming Persistence (MITRE), Instigating
@@ -551,7 +549,8 @@ pipeline:
               ImageFileSha256: ()?(%{notSpace:target_process_imagefilesha256})?,
               Device Id: %{PARSE_TILL_COMMA:device_id}, Target Process Command
               Line: %{PARSE_TILL_COMMA:target_process_command_line}, Target
-              Process File Path: %{data:target_process_file_path}'
+              Process File Path: %{data:target_process_file_path}(, test1:
+              %{data}, test2: %{data}, test3: %{data}, test4: %{data})?'
     - type: pipeline
       name: Processing Aurora Focus File Based Detection Events
       enabled: true
