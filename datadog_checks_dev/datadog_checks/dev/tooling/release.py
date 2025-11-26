@@ -84,7 +84,18 @@ def get_folder_name(package_name):
     return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX) :]
 
 
-def get_agent_requirement_line(check, version):
+def get_platforms_from_overrides(check, app) -> list[str]:
+    """
+    Get the platforms from the overrides file for the given check.
+    """
+    overrides = app.repo.config.get('/overrides/manifest/platforms', {})
+    # If the manifest is not there and we do not have any override, assume all platforms are supported
+    print("Custom platforms")
+    platforms = overrides.get(check, ALL_PLATFORMS)
+    print(platforms)
+    return sorted(platforms)
+
+def get_agent_requirement_line(check, version, app):
     """
     Compose a text line to be used in a requirements.txt file to install a check
     pinned to a specific version.
@@ -96,6 +107,7 @@ def get_agent_requirement_line(check, version):
         return f'{package_name}=={version}'
 
     m = load_manifest(check)
+
     if 'tile' in m:
         platforms = []
         for classifier_tag in m['tile']['classifier_tags']:
@@ -107,11 +119,16 @@ def get_agent_requirement_line(check, version):
             platforms.append(value.lower())
         platforms.sort()
     else:
-        platforms = sorted(m.get('supported_os', []))
+        if not m:
+            platforms = get_platforms_from_overrides(check, app)
+        else:
+            platforms = sorted(m.get('supported_os', []))
 
     # all platforms
-    if platforms == ALL_PLATFORMS:
+    # using sets to ignore possible sorting in the overrides, if any
+    if set(platforms) == set(ALL_PLATFORMS):
         return f'{package_name}=={version}'
+
     # one specific platform
     elif len(platforms) == 1:
         return f"{package_name}=={version}; sys_platform == '{PLATFORMS_TO_PY.get(platforms[0])}'"
