@@ -219,7 +219,7 @@ datadog-system-swap==3.2.0
 datadog-tcp-check==6.2.0
 datadog-teamcity==7.2.0
 datadog-tekton==3.2.0
-datadog-teleport==3.1.1
+datadog-teleport==3.2.0
 datadog-temporal==4.1.1
 datadog-tenable==3.1.0
 datadog-teradata==4.1.0; sys_platform != 'darwin'
