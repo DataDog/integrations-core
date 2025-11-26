@@ -71,7 +71,7 @@ datadog-esxi==4.2.0
 datadog-etcd==9.2.0
 datadog-exchange-server==4.5.0; sys_platform == 'win32'
 datadog-external-dns==6.2.0
-datadog-falco==2.1.1
+datadog-falco==2.2.0
 datadog-flink==3.1.0
 datadog-fluentd==5.2.1
 datadog-fluxcd==3.1.1
