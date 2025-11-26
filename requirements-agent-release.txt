@@ -238,7 +238,7 @@ datadog-vault==7.2.0
 datadog-velero==3.2.0
 datadog-vertica==6.3.0
 datadog-vllm==3.2.0
-datadog-voltdb==6.1.1
+datadog-voltdb==6.2.0
 datadog-vsphere==9.1.1
 datadog-watchguard-firebox==1.1.0
 datadog-wazuh==1.2.0
