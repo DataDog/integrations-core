@@ -16,26 +16,20 @@ from . import common
 def dd_environment():
     config = get_instance_config()
 
-    conditions = []
-    for i in range(common.CLICKHOUSE_NODE_NUM):
-        conditions.append(
-            CheckDockerLogs(
-                identifier='clickhouse-0{}'.format(i + 1),
-                patterns='Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log',
-                wait=5,
-            )
-        )
-        conditions.append(
-            CheckEndpoints(endpoints=['http://{}:{}'.format(config['server'], common.HTTP_START_PORT + i)], wait=5),
-        )
-        conditions.append(
-            WaitFor(
-                func=ping_clickhouse(
-                    config['server'], common.HTTP_START_PORT + i, config['username'], config['password']
-                ),
-                wait=5,
-            )
-        )
+    conditions = [
+        CheckDockerLogs(
+            identifier='clickhouse',
+            patterns='Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log',
+            wait=5,
+        ),
+        CheckEndpoints(endpoints=['http://{}:{}'.format(config['server'], config['port'])], wait=5),
+        WaitFor(
+            func=ping_clickhouse(
+                config['server'], config['port'], config['username'], config['password']
+            ),
+            wait=5,
+        ),
+    ]
 
     compose_file, mount_logs = common.get_compose_file()
     with docker_run(compose_file, conditions=conditions, sleep=10, attempts=2, mount_logs=mount_logs):

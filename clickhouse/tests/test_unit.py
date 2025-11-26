@@ -6,7 +6,7 @@ import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.clickhouse import ClickhouseCheck, queries
+from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
@@ -55,12 +55,12 @@ def test_error_query(instance, dd_run_check):
     'metrics, ignored_columns, metric_source_url',
     [
         (
-            queries.SystemMetrics['columns'][1]['items'],
+            advanced_queries.SystemMetrics['columns'][1]['items'],
             {'Revision', 'VersionInteger'},
             'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/CurrentMetrics.cpp',
         ),
         (
-            queries.SystemEvents['columns'][1]['items'],
+            advanced_queries.SystemEvents['columns'][1]['items'],
             set(),
             'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/ProfileEvents.cpp',
         ),

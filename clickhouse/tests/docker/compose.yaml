@@ -1,40 +1,41 @@
 # https://github.com/ClickHouse/examples/tree/main/docker-compose-recipes
 
-include:
-  - compose-keepers.yaml
-
 services:
-
-  clickhouse-01: &clickhouse-node
+  clickhouse:
     image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
     user: '101:101'
-    container_name: clickhouse-01
-    hostname: clickhouse-01
+    container_name: clickhouse
+    hostname: clickhouse
     networks:
       - clickhouse-network
     volumes:
-      - ./volumes/clickhouse-01.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./volumes/clickhouse.xml:/etc/clickhouse-server/config.d/config.xml
       - ./volumes/users.xml:/etc/clickhouse-server/users.d/users.xml
       - ./volumes/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - '8123:8123'
       - '9000:9000'
     depends_on:
-      clickhouse-keeper-01:
-        condition: service_healthy
-      clickhouse-keeper-02:
-        condition: service_healthy
-      clickhouse-keeper-03:
+      clickhouse-keeper:
         condition: service_healthy
 
-  clickhouse-02:
-    <<: *clickhouse-node
-    container_name: clickhouse-02
-    hostname: clickhouse-02
+  clickhouse-keeper:
+    image: clickhouse/clickhouse-keeper:${CLICKHOUSE_VERSION}
+    user: '101:101'
+    container_name: clickhouse-keeper
+    hostname: clickhouse-keeper
+    networks:
+      - clickhouse-network
     volumes:
-      - ./volumes/clickhouse-02.xml:/etc/clickhouse-server/config.d/config.xml
-      - ./volumes/users.xml:/etc/clickhouse-server/users.d/users.xml
-      - ./volumes/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./volumes/keeper.xml:/etc/clickhouse-keeper/keeper_config.xml
     ports:
-      - '8124:8123'
-      - '9001:9000'
+      - '9181:9181'
+    healthcheck:
+      test: echo ruok | nc 0.0.0.0 9181 || exit -1
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
+  clickhouse-network: {}

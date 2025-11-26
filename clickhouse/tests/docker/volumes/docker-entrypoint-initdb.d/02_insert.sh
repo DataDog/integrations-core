@@ -3,5 +3,5 @@
 set -e
 
 clickhouse client -n <<-EOSQL
-INSERT INTO table_name VALUES (123),(456),(789);
+INSERT INTO test (id) VALUES (1),(2),(3);
 EOSQL
