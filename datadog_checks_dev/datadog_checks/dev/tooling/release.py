@@ -95,6 +95,7 @@ def get_platforms_from_overrides(check, app) -> list[str]:
     print(platforms)
     return sorted(platforms)
 
+
 def get_agent_requirement_line(check, version, app):
     """
     Compose a text line to be used in a requirements.txt file to install a check
