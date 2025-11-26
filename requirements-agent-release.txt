@@ -228,7 +228,7 @@ datadog-tls==5.3.0
 datadog-tokumx==3.4.0
 datadog-tomcat==4.2.0
 datadog-torchserve==4.2.0
-datadog-traefik-mesh==3.1.1
+datadog-traefik-mesh==3.2.0
 datadog-traffic-server==3.3.1
 datadog-trend-micro-cloud-one==1.0.0
 datadog-twemproxy==3.1.0
