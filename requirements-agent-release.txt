@@ -54,7 +54,7 @@ datadog-crio==5.2.0
 datadog-datadog-cluster-agent==6.3.0
 datadog-datadog-csi-driver==1.3.0; sys_platform != 'win32'
 datadog-dcgm==4.2.0
-datadog-delinea-privilege-manager==1.1.0
+datadog-delinea-privilege-manager==1.2.0
 datadog-delinea-secret-server==1.2.0
 datadog-directory==4.2.0
 datadog-disk==7.2.0
