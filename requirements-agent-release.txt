@@ -76,12 +76,14 @@ datadog-flink==3.1.0
 datadog-fluentd==5.2.1
 datadog-fluxcd==3.1.1
 datadog-fly-io==3.1.1
+datadog-forescout==1.0.0
 datadog-foundationdb==3.4.0
 datadog-gearmand==5.1.0; sys_platform != 'win32'
 datadog-gitlab-runner==7.1.1
 datadog-gitlab==10.1.1
 datadog-glusterfs==3.2.0; sys_platform == 'linux2'
 datadog-go-expvar==5.1.1
+datadog-guarddog==1.0.0; sys_platform != 'win32'
 datadog-gunicorn==4.2.0; sys_platform != 'win32'
 datadog-haproxy==8.1.1
 datadog-harbor==6.1.1
@@ -98,6 +100,7 @@ datadog-ibm-ace==4.2.0
 datadog-ibm-db2==4.1.0
 datadog-ibm-i==4.2.0; sys_platform != 'win32'
 datadog-ibm-mq==8.5.0
+datadog-ibm-spectrum-lsf==1.0.0
 datadog-ibm-was==5.2.1
 datadog-iboss==1.1.0
 datadog-ignite==3.2.0
