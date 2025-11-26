@@ -90,9 +90,11 @@ def get_platforms_from_overrides(check, app) -> list[str]:
     """
     overrides = app.repo.config.get('/overrides/manifest/platforms', {})
     # If the manifest is not there and we do not have any override, assume all platforms are supported
-    print("Custom platforms")
-    platforms = overrides.get(check, ALL_PLATFORMS)
-    print(platforms)
+    platforms = overrides.get(check)
+
+    if not platforms:
+        raise ManifestError(f"The check {check!r} does not have a manifest neither platforms override")
+
     return sorted(platforms)
 
 

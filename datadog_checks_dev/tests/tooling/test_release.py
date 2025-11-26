@@ -52,9 +52,8 @@ def test_get_agent_requirement_line():
         ({"my_check": ["linux"]}, "datadog-my-check==1.1.0; sys_platform == 'linux2'"),
         ({"my_check": ["mac_os", "windows"]}, "datadog-my-check==1.1.0; sys_platform != 'linux2'"),
         ({"my_check": ["linux", "mac_os", "windows"]}, "datadog-my-check==1.1.0"),
-        ({}, "datadog-my-check==1.1.0"),
     ],
-    ids=["one_platform", "all_except_one", "all_platforms", "no_platforms"],
+    ids=["one_platform", "all_except_one", "all_platforms"],
 )
 def test_get_agent_requirement_line_with_overrides(overrides: dict[str, list[str]], expected_line: str):
     with mock.patch('datadog_checks.dev.tooling.release.load_manifest') as load:
@@ -63,6 +62,13 @@ def test_get_agent_requirement_line_with_overrides(overrides: dict[str, list[str
         res = get_agent_requirement_line('my_check', '1.1.0', app)
         assert res == expected_line
 
+
+def test_get_agent_requirement_line_with_overrides_no_manifest_no_override():
+    with mock.patch('datadog_checks.dev.tooling.release.load_manifest') as load:
+        load.return_value = {}
+        app = mock.MagicMock(repo=mock.MagicMock(config={'/overrides/manifest/platforms': {}}))
+        with pytest.raises(ManifestError):
+            get_agent_requirement_line('my_check', '1.1.0', app)
 
 @pytest.mark.parametrize(
     'check,new_version,expected_result',
