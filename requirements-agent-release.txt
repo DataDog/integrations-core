@@ -63,7 +63,7 @@ datadog-dotnetclr==4.5.0; sys_platform == 'win32'
 datadog-druid==5.2.0
 datadog-duckdb==1.2.0
 datadog-ecs-fargate==7.2.0
-datadog-eks-fargate==6.2.1
+datadog-eks-fargate==6.3.0
 datadog-elastic==9.1.1
 datadog-envoy==6.2.1
 datadog-eset-protect==1.1.0
