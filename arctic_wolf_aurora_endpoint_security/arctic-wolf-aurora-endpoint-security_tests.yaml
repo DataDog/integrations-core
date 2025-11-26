@@ -1,4 +1,4 @@
-id: "arctic_wolf_aurora_endpoint_security"
+id: "arctic-wolf-aurora-endpoint-security"
 tests:
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: Threat, Event Name: threat_changed, Device Name: Unknown (test1), IP Address: (), File Name: , Path: , Drive Type: Internal Hard Drive, SHA256: C62CB66498344FC2374C0924D813711FF6FA00CAEA8581AE104C3C03B9233455, MD5: CF2A00CDA850B570F0AA6266B9A5463E, Status: Quarantined, Cylance Score: 100, Found Date: 11/14/2025 9:02:49 AM, File Type: Executable, Is Running: False, Auto Run: False, Detected By: ExecutionControl, Zone Names: (Windows Zone (Default)), Is Malware: True, Is Unique To Cylance: False, Threat Classification: Malware - Trojan - supernovaminer/vsntfc23, Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8c, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"

@@ -1,5 +1,5 @@
-id: arctic_wolf_aurora_endpoint_security
-metric_id: arctic_wolf_aurora_endpoint_security
+id: arctic-wolf-aurora-endpoint-security
+metric_id: arctic-wolf-aurora-endpoint-security
 backend_only: false
 facets:
   - groups:
