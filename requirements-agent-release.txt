@@ -49,7 +49,7 @@ datadog-confluent-platform==3.2.0
 datadog-consul==5.2.0
 datadog-coredns==6.2.0; sys_platform == 'linux2'
 datadog-couch==9.2.0
-datadog-couchbase==6.2.0
+datadog-couchbase==6.3.0
 datadog-crio==5.1.1
 datadog-datadog-cluster-agent==6.2.1
 datadog-datadog-csi-driver==1.2.0; sys_platform != 'win32'
