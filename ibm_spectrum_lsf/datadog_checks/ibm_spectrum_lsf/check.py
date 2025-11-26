@@ -7,6 +7,7 @@ from datadog_checks.base import AgentCheck
 from .client import LSFClient
 from .config_models import ConfigMixin
 from .processors import (
+    BadminPerfmonProcessor,
     BHostsProcessor,
     BJobsProcessor,
     BQueuesProcessor,
@@ -34,7 +35,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
     def parse_config(self):
         self.tags = list[str](self.config.tags or []) + [f"lsf_cluster_name:{self.config.cluster_name}"]
 
-    def initialize_processors(self):
+    def initialize_processors(self) -> None:
         self.processors = [
             LsClustersProcessor(self.client, self.config, self.log, self.tags),
             LSHostsProcessor(self.client, self.config, self.log, self.tags),
@@ -45,6 +46,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
             BSlotsProcessor(self.client, self.config, self.log, self.tags),
             GPULoadProcessor(self.client, self.config, self.log, self.tags),
             GPUHostsProcessor(self.client, self.config, self.log, self.tags),
+            BadminPerfmonProcessor(self.client, self.config, self.log, self.tags),
         ]
 
     def check(self, instance):

@@ -1091,6 +1091,89 @@ BHOST_GPU_METRICS = [
     },
 ]
 
+BADMIN_PERFMON_METRICS = [
+    {
+        "name": "ibm_spectrum_lsf.perfmon.mbatchd.processed_requests.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 32,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.queries.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 11,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.host.queries.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 8,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.queue.queries.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 4,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submission_requests.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submitted.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.dispatched.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.completed.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.sent_remote.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.accepted_remote.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.scheduling_interval.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.scheduler.host_matches.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.buckets.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 3,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.reordered.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.slots.utilization.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": -1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.memory.utilization.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": -1,
+    },
+]
+
 ALL_METRICS = (
     LSID_METRICS
     + CLUSTER_METRICS
@@ -1102,9 +1185,10 @@ ALL_METRICS = (
     + BQUEUES_METRICS
     + BJOBS_METRICS
     + GPULOAD_METRICS
+    + BADMIN_PERFMON_METRICS
 )
 
-ALL_NON_GPU_METRICS = (
+ALL_DEFAULT_METRICS = (
     LSID_METRICS
     + CLUSTER_METRICS
     + BHOST_METRICS
