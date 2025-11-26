@@ -178,7 +178,7 @@ datadog-ping-federate==2.2.0
 datadog-postfix==3.2.0; sys_platform != 'win32'
 datadog-postgres==23.3.0
 datadog-powerdns-recursor==5.2.0
-datadog-presto==3.2.0
+datadog-presto==3.3.0
 datadog-process==5.2.0
 datadog-prometheus==6.1.1
 datadog-proxmox==2.2.0
