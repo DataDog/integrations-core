@@ -222,7 +222,7 @@ datadog-tekton==3.2.0
 datadog-teleport==3.2.0
 datadog-temporal==4.2.0
 datadog-tenable==3.2.0
-datadog-teradata==4.1.0; sys_platform != 'darwin'
+datadog-teradata==4.2.0; sys_platform != 'darwin'
 datadog-tibco-ems==2.2.0; sys_platform != 'win32'
 datadog-tls==5.2.0
 datadog-tokumx==3.3.0
