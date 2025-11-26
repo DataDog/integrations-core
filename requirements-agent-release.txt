@@ -90,7 +90,7 @@ datadog-harbor==6.2.0
 datadog-hazelcast==6.4.0
 datadog-hdfs-datanode==7.2.0; sys_platform != 'win32'
 datadog-hdfs-namenode==7.2.0; sys_platform != 'win32'
-datadog-hive==2.2.0
+datadog-hive==2.3.0
 datadog-hivemq==2.2.0
 datadog-http-check==12.2.1
 datadog-hudi==4.1.0
