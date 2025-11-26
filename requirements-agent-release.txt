@@ -156,7 +156,7 @@ datadog-mongo==10.6.0
 datadog-mysql==15.11.0
 datadog-nagios==3.2.0
 datadog-network==5.5.0
-datadog-nfsstat==3.2.0; sys_platform == 'linux2'
+datadog-nfsstat==3.3.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==5.1.1
 datadog-nginx==9.1.1
 datadog-nvidia-nim==2.1.1
