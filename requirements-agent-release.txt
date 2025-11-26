@@ -198,7 +198,7 @@ datadog-silk==4.3.0
 datadog-silverstripe-cms==1.6.0
 datadog-singlestore==4.4.0
 datadog-slurm==2.2.0; sys_platform == 'linux2'
-datadog-snmp==12.1.0
+datadog-snmp==12.2.0
 datadog-snowflake==7.8.0
 datadog-solr==2.2.0
 datadog-sonarqube==5.4.1
