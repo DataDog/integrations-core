@@ -238,7 +238,7 @@ files:
         value:
           type: boolean
           example: false
-        display_default: false
+          display_default: false
       - name: enable_cluster_monitoring
         description: |
           (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
@@ -252,7 +252,7 @@ files:
         value:
           type: boolean
           example: false
-        display_default: false
+          display_default: false
       - name: schema_registry_url
         description: |
           Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
@@ -281,7 +281,7 @@ files:
         value:
           type: boolean
           example: true
-        display_default: true
+          display_default: true
       - name: schema_registry_tls_ca_cert
         description: |
           Path to a custom CA certificate file for Schema Registry TLS verification.
