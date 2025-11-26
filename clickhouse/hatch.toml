@@ -4,10 +4,16 @@
 # https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["24.8", "25.3", "25.8"]
+version = ["18", "19", "20", "21.8", "22.7", "24.8", "25.3", "25.8"]
+
+[envs.default.env-vars]
+CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
 
 [envs.default.overrides]
-matrix.version.env-vars = "CLICKHOUSE_VERSION"
+matrix.version.env-vars = [
+    { key = "CLICKHOUSE_VERSION" },
+    { key = "LEGACY_IMAGE", value = "true", if = ["18", "19", "20", "21.8"] },
+]
 
 [envs.latest.env-vars]
 CLICKHOUSE_VERSION = "latest"

@@ -12,6 +12,7 @@ CLICKHOUSE_VERSION = os.environ['CLICKHOUSE_VERSION']
 
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'compose.yaml')
 COMPOSE_LOGS_FILE = os.path.join(HERE, 'docker', 'compose-logs.yaml')
+COMPOSE_LEGACY_FILE = os.path.join(HERE, 'docker', 'compose-legacy.yaml')
 
 CONFIG = {
     'server': get_docker_hostname(),
@@ -23,6 +24,9 @@ CONFIG = {
 
 
 def get_compose_file() -> tuple[str, bool]:
+    if is_affirmative(os.getenv('LEGACY_IMAGE', False)):
+        return COMPOSE_LEGACY_FILE, False
+
     if is_affirmative(os.getenv('MOUNT_LOGS', False)):
         return COMPOSE_LOGS_FILE, True
 

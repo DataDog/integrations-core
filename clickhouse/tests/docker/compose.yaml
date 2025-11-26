@@ -20,7 +20,7 @@ services:
         condition: service_healthy
 
   clickhouse-keeper:
-    image: clickhouse/clickhouse-keeper:${CLICKHOUSE_VERSION}
+    image: clickhouse/clickhouse-keeper:${KEEPER_VERSION:-25.8}
     user: '101:101'
     container_name: clickhouse-keeper
     hostname: clickhouse-keeper

@@ -1,0 +1,25 @@
+# https://hub.docker.com/r/yandex/clickhouse-server
+
+services:
+  clickhouse:
+    extends:
+      file: compose.yaml
+      service: clickhouse
+    image: yandex/clickhouse-server:${CLICKHOUSE_VERSION}
+    user: root
+    cap_add:
+      - IPC_LOCK
+      - NET_ADMIN
+    ulimits:
+      nproc: 65536
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  clickhouse-keeper:
+    extends:
+      file: compose.yaml
+      service: clickhouse-keeper
+
+networks:
+  clickhouse-network: {}
