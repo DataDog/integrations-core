@@ -123,7 +123,7 @@ datadog-kube-apiserver-metrics==7.3.0
 datadog-kube-controller-manager==8.2.0
 datadog-kube-dns==7.2.0
 datadog-kube-metrics-server==6.2.0
-datadog-kube-proxy==9.1.1
+datadog-kube-proxy==9.2.0
 datadog-kube-scheduler==7.1.1
 datadog-kubeflow==2.1.1
 datadog-kubelet==10.1.1
