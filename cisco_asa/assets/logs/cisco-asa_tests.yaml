@@ -1,0 +1,142 @@
+id: "cisco-asa"
+tests:
+ -
+  sample: "<190>2025-11-25T07:19:40Z: %ASA-4-733100: [ Scanning] drop rate-1 exceeded. Current burst rate is 19 per second, max configured rate is 33; Current average rate is 50 per second, max configured rate is 33; Cumulative total count is 44"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:19:40Z: %ASA-4-733100: [ Scanning] drop rate-1 exceeded. Current burst rate is 19 per second, max configured rate is 33; Current average rate is 50 per second, max configured rate is 33; Cumulative total count is 44"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:17:18Z: %ASA-4-733102: Threat-detection adds host 192.0.2.3 to shun list"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:17:18Z: %ASA-4-733102: Threat-detection adds host 192.0.2.3 to shun list"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:16:55Z: %ASA-4-733104: TCP Intercept SYN flood attack detected to 192.0.2.3/1194 (192.0.2.14/443). Average rate of 47 SYNs/sec exceeded the threshold of 48"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:16:55Z: %ASA-4-733104: TCP Intercept SYN flood attack detected to 192.0.2.3/1194 (192.0.2.14/443). Average rate of 47 SYNs/sec exceeded the threshold of 48"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:19:27Z: %ASA-6-109005: Authentication succeeded for user 'james.anderson' from 192.0.2.2/1194 to 192.0.2.1/1194 on interface tap0"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:19:27Z: %ASA-6-109005: Authentication succeeded for user 'james.anderson' from 192.0.2.2/1194 to 192.0.2.1/1194 on interface tap0"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:17:53Z: %ASA-3-109010: Auth from 192.0.2.5/1195 to 192.0.2.4/1195 failed (too many pending auths) on interface tun0"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:17:53Z: %ASA-3-109010: Auth from 192.0.2.5/1195 to 192.0.2.4/1195 failed (too many pending auths) on interface tun0"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:16:22Z: %ASA-3-109023: User from 192.0.2.1/443 to 192.0.2.3/443 on interface eth0 using test service must authenticate before using this service"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:16:22Z: %ASA-3-109023: User from 192.0.2.1/443 to 192.0.2.3/443 on interface eth0 using test service must authenticate before using this service"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:19:14Z: %ASA-4-109033: Authentication failed for admin user mason.young from 198.51.100.11. Interactive challenge processing is not supported for protocol"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:19:14Z: %ASA-4-109033: Authentication failed for admin user mason.young from 198.51.100.11. Interactive challenge processing is not supported for protocol"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:19:29Z: %ASA-6-109007: Authorization permitted for user 'liam.wilson' from 192.0.2.5/443 to 198.51.100.8/443 on interface ens160"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:19:29Z: %ASA-6-109007: Authorization permitted for user 'liam.wilson' from 192.0.2.5/443 to 198.51.100.8/443 on interface ens160"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:15:47Z: %ASA-6-109024: Authorization denied from 10.10.10.10/10 to 11.11.11.11/11 (not authenticated) on interface ens140 using protocol to"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:15:47Z: %ASA-6-109024: Authorization denied from 10.10.10.10/10 to 11.11.11.11/11 (not authenticated) on interface ens140 using protocol to"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:17:10Z: %ASA-5-502101: New user added to local dbase: Uname: sophia.lee Priv: 4 Encpass: *****"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:17:10Z: %ASA-5-502101: New user added to local dbase: Uname: sophia.lee Priv: 4 Encpass: *****"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:17:38Z: %ASA-6-415001: HTTP - matched matched_string in policy-map pm_access_control_core, header field count exceeded connection_action OpenVPN-TAP-Windows6:192.0.2.6/443 to OpenVPN-TAP-Windows6:198.51.100.8/80"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:17:38Z: %ASA-6-415001: HTTP - matched matched_string in policy-map pm_access_control_core, header field count exceeded connection_action OpenVPN-TAP-Windows6:192.0.2.6/443 to OpenVPN-TAP-Windows6:198.51.100.8/80"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:17:52Z: %ASA-5-415013: HTTP - policy-map map-name:Malformed chunked encoding connection_action ens160:192.0.2.4/1194 to Ethernet0:192.0.2.6/1196"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:17:52Z: %ASA-5-415013: HTTP - policy-map map-name:Malformed chunked encoding connection_action ens160:192.0.2.4/1194 to Ethernet0:192.0.2.6/1196"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:19:48Z: %ASA-6-110002: Failed to locate egress interface for protocol from tap0:198.51.100.8/1194 to 192.0.2.1/1194"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:19:48Z: %ASA-6-110002: Failed to locate egress interface for protocol from tap0:198.51.100.8/1194 to 192.0.2.1/1194"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:18:29Z: %ASA-6-110004: Egress interface changed from eth0 to br0 on ip_protocol connection 108098402 for zone-new/eth0:192.0.2.5/443(192.0.2.2/1199 ) to zone-dest/br0:192.0.2.2/1194(192.0.2.7/443 )"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:18:29Z: %ASA-6-110004: Egress interface changed from eth0 to br0 on ip_protocol connection 108098402 for zone-new/eth0:192.0.2.5/443(192.0.2.2/1199 ) to zone-dest/br0:192.0.2.2/1194(192.0.2.7/443 )"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:17:02Z: %ASA-5-746007: user-identity: NetBIOS response failed from User david.murphy at 203.0.113.7"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:17:02Z: %ASA-5-746007: user-identity: NetBIOS response failed from User david.murphy at 203.0.113.7"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:19:21Z: %ASA-3-746016: user-identity: DNS lookup for 192.0.2.13 failed, reason:reason"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:19:21Z: %ASA-3-746016: user-identity: DNS lookup for 192.0.2.13 failed, reason:reason"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:16:11Z: %ASA-6-746001: user-identity: identity_lookup_store started"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:16:11Z: %ASA-6-746001: user-identity: identity_lookup_store started"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:19:30Z: %ASA-4-405001: Received ARP response collision from 203.0.113.1/3A:4F:B9:27:88:10 on interface tap1 with existing ARP entry 192.0.2.4/02:1A:6C:3F:92:11"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:19:30Z: %ASA-4-405001: Received ARP response collision from 203.0.113.1/3A:4F:B9:27:88:10 on interface tap1 with existing ARP entry 192.0.2.4/02:1A:6C:3F:92:11"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:16:58Z: %ASA-2-106001: Inbound TCP connection denied from 192.0.2.3/443 to 192.0.2.3/1194 flags tcp_flags on interface br1"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:16:58Z: %ASA-2-106001: Inbound TCP connection denied from 192.0.2.3/443 to 192.0.2.3/1194 flags tcp_flags on interface br1"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-11-25T07:17:02Z: %ASA-2-106002: protocol Connection denied by outbound list acl_ID src 192.0.2.3 dest 192.0.2.4"
+  result:
+    custom: {}
+    message: "<190>2025-11-25T07:17:02Z: %ASA-2-106002: protocol Connection denied by outbound list acl_ID src 192.0.2.3 dest 192.0.2.4"
+    tags:
+     - "source:LOGS_SOURCE"
