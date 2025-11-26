@@ -163,7 +163,7 @@ datadog-nvidia-nim==2.2.0
 datadog-nvidia-triton==3.2.0
 datadog-octopus-deploy==2.2.0
 datadog-openldap==3.2.0
-datadog-openmetrics==7.1.1
+datadog-openmetrics==7.2.0
 datadog-openstack-controller==9.2.1
 datadog-openstack==4.1.0
 datadog-openvpn==1.1.0
