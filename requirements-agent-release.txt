@@ -44,7 +44,7 @@ datadog-clickhouse==6.2.0
 datadog-cloud-foundry-api==5.4.0
 datadog-cloudera==3.4.0
 datadog-cloudgen-firewall==1.1.0
-datadog-cockroachdb==6.1.1
+datadog-cockroachdb==6.2.0
 datadog-confluent-platform==3.1.0
 datadog-consul==5.1.1
 datadog-coredns==6.1.1; sys_platform == 'linux2'
