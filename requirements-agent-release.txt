@@ -160,7 +160,7 @@ datadog-nfsstat==3.3.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==5.2.0
 datadog-nginx==9.2.0
 datadog-nvidia-nim==2.2.0
-datadog-nvidia-triton==3.1.1
+datadog-nvidia-triton==3.2.0
 datadog-octopus-deploy==2.1.1
 datadog-openldap==3.1.1
 datadog-openmetrics==7.1.1
