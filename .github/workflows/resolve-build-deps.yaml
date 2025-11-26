@@ -1,6 +1,7 @@
 name: Resolve Dependencies and Build Wheels
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
     - master
@@ -26,22 +27,23 @@ env:
   # https://reproducible-builds.org/specs/source-date-epoch/
   SOURCE_DATE_EPOCH: "1580601600"
 
-jobs: 
+jobs:
   # measure-disk-usage.yml depends on this workflow being triggered and completed,
   # so it can wait for the build to calculate dependency sizes.
   # The 'on' setting ensures it runs, but this job cancels it if no dependency changes are detected.
 
-  check-dependency-changes:
-    name: Check dependency changes
+  check-should-run:
+    name: Check if build should run
     runs-on: ubuntu-22.04
     permissions:
       actions: write
     outputs:
-      dependency_changed: ${{ steps.dependency-check.outputs.dependency_changed }}
       builder_changed: ${{ steps.dependency-check.outputs.builder_changed }}
+      should_run_build: ${{ steps.dependency-check.outputs.should_run_build }}
     steps:
       - name: Define diff commits
         id: set_sha
+        if: github.event_name != 'workflow_dispatch'
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             PREV_SHA=${{ github.event.pull_request.base.sha }}
@@ -59,6 +61,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
+        if: github.event_name != 'workflow_dispatch'
         run: |
           REPO="${{ github.repository }}"
 
@@ -70,35 +73,39 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check for dependency changes
+      - name: Check if build should run
         id: dependency-check
         run: |
-          FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
+          if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
+            BUILDER_CHANGED="false"
+            SHOULD_RUN_BUILD="true"
+          else
+            FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
 
-          cat << EOF > dependency_files.txt
-          agent_requirements\.in
-          \.github/workflows/resolve-build-deps\.yaml
-          \.builders/
-          EOF
+            cat << EOF > dependency_files.txt
+            agent_requirements\.in
+            \.github/workflows/resolve-build-deps\.yaml
+            \.builders/
+            EOF
 
-          cat <<EOF > builder_files.txt
-          \.builders/
-          EOF
+            cat <<EOF > builder_files.txt
+            \.builders/
+            EOF
 
-          DEPENDENCY_CHANGED=$(
-              echo "$FILES_CHANGED" | \
-              grep -qf dependency_files.txt \
-              && echo "true" || echo "false"
-          ) 
+            SHOULD_RUN_BUILD=$(
+                echo "$FILES_CHANGED" | \
+                grep -qf dependency_files.txt \
+                && echo "true" || echo "false"
+            )
 
-          BUILDER_CHANGED=$(
-              echo "$FILES_CHANGED" | \
-              grep -qf builder_files.txt \
-              && echo "true" || echo "false"
-          )
+            BUILDER_CHANGED=$(
+                echo "$FILES_CHANGED" | \
+                grep -qf builder_files.txt \
+                && echo "true" || echo "false"
+            )
+          fi
 
-
-          echo "dependency_changed=$DEPENDENCY_CHANGED" | tee -a $GITHUB_OUTPUT
+          echo "should_run_build=$SHOULD_RUN_BUILD" | tee -a $GITHUB_OUTPUT
           echo "builder_changed=$BUILDER_CHANGED" | tee -a $GITHUB_OUTPUT
 
         env:
@@ -107,13 +114,13 @@ jobs:
   test:
     name: Run tests
     needs:
-      - check-dependency-changes
-    if: needs.check-dependency-changes.outputs.dependency_changed == 'true'
+      - check-should-run
+    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Set up Python ${{ env.PYTHON_VERSION }} 
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -129,8 +136,8 @@ jobs:
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
     needs:
-      - check-dependency-changes
-    if: needs.check-dependency-changes.outputs.dependency_changed == 'true'
+      - check-should-run
+    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -172,29 +179,29 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build image and wheels
-      if: needs.check-dependency-changes.outputs.builder_changed == 'true'
+      if: needs.check-should-run.outputs.builder_changed == 'true'
       run: |-
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
 
     - name: Pull image and build wheels
-      if: needs.check-dependency-changes.outputs.builder_changed == 'false'
+      if: needs.check-should-run.outputs.builder_changed == 'false'
       run: |-
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
 
     - name: Publish image
-      if: github.event_name == 'push' && needs.check-dependency-changes.outputs.builder_changed == 'true'
+      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
       run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
     - name: Save new image digest
-      if: github.event_name == 'push' && needs.check-dependency-changes.outputs.builder_changed == 'true'
+      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
       run: >-
         ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
         > ${{ env.OUT_DIR }}/image_digest
 
     - name: Persist current image digest
-      if: github.event_name == 'push' && needs.check-dependency-changes.outputs.builder_changed == 'false'
+      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'false'
       run: >-
         jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
         > ${{ env.OUT_DIR }}/image_digest
@@ -208,8 +215,8 @@ jobs:
   build-macos:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
     needs:
-      - check-dependency-changes
-    if: needs.check-dependency-changes.outputs.dependency_changed == 'true'
+      - check-should-run
+    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -282,11 +289,11 @@ jobs:
 
   publish:
     name: Publish artifacts and update lockfiles via PR
-    if: needs.check-dependency-changes.outputs.dependency_changed == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.')))) 
+    if: needs.check-should-run.outputs.should_run_build == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.'))))
     needs:
     - build
     - build-macos
-    - check-dependency-changes
+    - check-should-run
     runs-on: ubuntu-latest
 
     permissions:
