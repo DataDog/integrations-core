@@ -3,24 +3,64 @@ tests:
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: AppControl, Event Name: pechange, Device Name: Unknown (test1), IP Address: (), Action: Deny, Action Type: PE File Change, File Path: , SHA256: 7D2113B7046867BC643CD621D2CBA7365609675505BAA66585FC44747C0D1EF4, Zone Names: (Windows Zone (Default)), Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8c, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
   result:
-    custom: {}
+    custom:
+      action: "Deny"
+      action_type: "PE File Change"
+      additional_details: ""
+      device_id: "0929f443-2a56-46b3-bcfe-fc598da81d8c"
+      device_name: "Unknown (test1)"
+      event_type: "AppControl"
+      evt:
+        name: "pechange"
+      ip_addresses: []
+      policy_name: "Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+      service: "desktop-events"
+      sha256: "7D2113B7046867BC643CD621D2CBA7365609675505BAA66585FC44747C0D1EF4"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_names: "(Windows Zone (Default))"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: AppControl, Event Name: pechange, Device Name: Unknown (test1), IP Address: (), Action: Deny, Action Type: PE File Change, File Path: , SHA256: 7D2113B7046867BC643CD621D2CBA7365609675505BAA66585FC44747C0D1EF4, Zone Names: (Windows Zone (Default)), Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8c, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: AuditLog, Event Name: LoginSuccess, Message: Provider: CylancePROTECT, Source IP: 163.116.205.118, User: Nilay Modi (nilay.modi@crestdata.ai)"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      event_type: "AuditLog"
+      evt:
+        name: "LoginSuccess"
+      message: "Provider: CylancePROTECT, Source IP: 163.116.205.118"
+      service: "desktop-events"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      user: "Nilay Modi (nilay.modi@crestdata.ai)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: AuditLog, Event Name: LoginSuccess, Message: Provider: CylancePROTECT, Source IP: 163.116.205.118, User: Nilay Modi (nilay.modi@crestdata.ai)"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: Device, Event Name: Registration, Device Name: AssetTag-EID, Zone Names: (), Device Id: b1f8e376-cee3-4319-a076-f587c51e68aa"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      device_id: "b1f8e376-cee3-4319-a076-f587c51e68aa"
+      device_name: "AssetTag-EID"
+      event_type: "Device"
+      evt:
+        name: "Registration"
+      service: "desktop-events"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_names: "()"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: Device, Event Name: Registration, Device Name: AssetTag-EID, Zone Names: (), Device Id: b1f8e376-cee3-4319-a076-f587c51e68aa"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeComEvent, Event Name: OpticsCaeComEvent, Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id: 9e5ac116-a20c-4929-9087-10fd7fdcb105, Severity: High, Description: Device - Application COM Event, Instigating Process Name: GoogleUpdate.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 63854E78780866D2AE56A58958A1FDA017A71F54B71FE70CF5403958E961862A, Event Timestamp: 2023-08-23T07:28:59.588Z, Event Received Timestamp: 2023-08-23T07:29:01Z, Device Last Reported Users: (Window Manager\\DWM-1), Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id: 15b11fa2-fc61-4aa3-aa04-082c488f8a86, Instigating Process Command Line: \"C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe\" /svc, Instigating Process File Path: c:\\program files (x86)\\google\\update\\googleupdate.exe, COM Interface ID: 2933bf81-7b36-11d2-b20e-00c04f983e60, COM Program: msxml, COM Interface: IXMLDOMDocument, Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bf"
   result:
