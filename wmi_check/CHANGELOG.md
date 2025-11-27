@@ -10,7 +10,7 @@
 
 ***Added***:
 
-* Allow tag aliases for wmi `tag_by` and `tag_queries` parameters ([#21792](https://github.com/DataDog/integrations-core/pull/21792))
+* Allow tag aliases for WMI `tag_by` and `tag_queries` parameters ([#21792](https://github.com/DataDog/integrations-core/pull/21792))
 * Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
 
 ## 3.4.0 / 2025-10-02 / Agent 7.72.0
