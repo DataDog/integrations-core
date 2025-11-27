@@ -13,7 +13,7 @@
 
 ***Fixed***:
 
-* Fixed a bug where excluding "postgres" database when configuring autodiscovery would still fallback to "postgres" if `dbname` wasn't also configured ([#21884](https://github.com/DataDog/integrations-core/pull/21884))
+* Fix a bug where database_autodiscovery still tries to connect to the "postgres" DB if "postgres" is defined in the `exclude` field, but `dbname` isn't configured ([#21884](https://github.com/DataDog/integrations-core/pull/21884))
 * Fix token expiration handling in Azure connection pool ([#21896](https://github.com/DataDog/integrations-core/pull/21896))
 * Making sure database_autodiscovery exclude defaults are used ([#21927](https://github.com/DataDog/integrations-core/pull/21927))
 
