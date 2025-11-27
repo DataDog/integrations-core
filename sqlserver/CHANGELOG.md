@@ -12,7 +12,7 @@
 
 ***Fixed***:
 
-* Support `only_custom_queries` configuration option in sqlserver integration. ([#21304](https://github.com/DataDog/integrations-core/pull/21304))
+* Support `only_custom_queries` configuration option in the SQL Server integration ([#21304](https://github.com/DataDog/integrations-core/pull/21304))
 
 ## 22.11.0 / 2025-10-31
 
