@@ -29,7 +29,6 @@ hazelcast-python-client,PyPI,Apache-2.0,"Copyright (c) 2008-2023, Hazelcast, Inc
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
 kentik-snmp-profiles,"https://github.com/kentik/snmp-profiles",Apache-2.0,
-krb5,PyPI,MIT,"Copyright (c) 2021 Jordan Borean, Red Hat"
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 lazy-loader,PyPI,BSD-3-Clause,"Copyright (c) 2022--2023, Scientific Python project"
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
