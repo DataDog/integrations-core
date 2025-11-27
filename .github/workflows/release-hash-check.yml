@@ -26,9 +26,11 @@ jobs:
         python-version: '3.13'
 
     - id: files
+      env:
+        BASE_BRANCH: ${{ github.base_ref }}
       run: |
-        git fetch origin master
-        LAST_COMMON_COMMIT=$(git merge-base HEAD origin/master)
+        git fetch origin $BASE_BRANCH
+        LAST_COMMON_COMMIT=$(git merge-base HEAD origin/$BASE_BRANCH)
         FILES=$(git --no-pager diff --name-only $LAST_COMMON_COMMIT -- .in-toto | xargs echo)
         echo "all=$FILES" >> "$GITHUB_OUTPUT"
 
