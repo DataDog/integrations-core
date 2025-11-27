@@ -18,7 +18,7 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-connect @ https://agent-int-packages.datadoghq.com/external/clickhouse-connect/clickhouse_connect-0.8.18-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=0036960dcb6bf88b262e9b461ddafb7597c0beb36700aab1e74dde64f02c8cfd
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20250930221814-py3-none-manylinux2014_x86_64.whl#sha256=72f55306e2e3df9291ee55e3a6b2f6698fe3999db9570a14da0ea56bbf51e5a9
 confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.11.1-20251119171248-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=8625bd6deea9232871b65bcced21a7816eb23bcba00175877405dc813c12e9b4
-cryptography @ https://agent-int-packages.datadoghq.com/built/cryptography/cryptography-45.0.6-20251127101110-cp313-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=9e17a69f4b723eb537eab028c7f1627608acf2ba81230db17034c836c437bfeb
+cryptography @ https://agent-int-packages.datadoghq.com/built/cryptography/cryptography-45.0.6-20251127141347-cp313-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=3f384c1ff465c9ea6fc87d0b3f17192ce082b4770ca31580d19250c8a651e45d
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.16.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=7796384aa766f584c1b33eb8f8529c646792cbc7479d597c3d3194678537ac5d
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
 dnspython @ https://agent-int-packages.datadoghq.com/external/dnspython/dnspython-2.7.0-py3-none-any.whl#sha256=b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86
@@ -29,7 +29,7 @@ fastavro @ https://agent-int-packages.datadoghq.com/external/fastavro/fastavro-1
 filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3.20.0-py3-none-any.whl#sha256=339b4732ffda5cd79b13f4e2711a31b0365ce445d95d243bb996273d072546a2
 foundationdb @ https://agent-int-packages.datadoghq.com/built/foundationdb/foundationdb-6.3.25-20250513155645-py3-none-manylinux2014_x86_64.whl#sha256=cc09ffb2fb9b2a3f7cdb28669648c42bda418f0af83dacb91077c48fc1b06ae6
 google-auth @ https://agent-int-packages.datadoghq.com/external/google-auth/google_auth-2.43.0-py2.py3-none-any.whl#sha256=af628ba6fa493f75c7e9dbe9373d148ca9f4399b5ea29976519e0a3848eddd16
-gssapi @ https://agent-int-packages.datadoghq.com/built/gssapi/gssapi-1.10.1-20251127101111-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=aac176be807af825d1008f73bd1bece1b4b6f3a929417c72e1183c1b36bdf6a8
+gssapi @ https://agent-int-packages.datadoghq.com/built/gssapi/gssapi-1.10.1-20251127141348-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=418b5e359b5bbb7627d97e30a8869ea9eb923f403cf59f1992d09604b781c597
 hazelcast-python-client @ https://agent-int-packages.datadoghq.com/external/hazelcast-python-client/hazelcast_python_client-5.5.0-py3-none-any.whl#sha256=c797c23c219971d225f8590f6359692c14059c26baa15c2762c95667ae38b90a
 idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.11-py3-none-any.whl#sha256=771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea
 importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-8.7.0-py3-none-any.whl#sha256=e5dd1551894c77868a30651cef00984d50e1002d06942a7101d34870c5f02afd
@@ -40,7 +40,7 @@ jmespath @ https://agent-int-packages.datadoghq.com/external/jmespath/jmespath-1
 jsonpatch @ https://agent-int-packages.datadoghq.com/external/jsonpatch/jsonpatch-1.33-py2.py3-none-any.whl#sha256=0ae28c0cd062bbd8b8ecc26d7d164fbbea9652a1a3693f3b956c1eae5145dade
 jsonpointer @ https://agent-int-packages.datadoghq.com/external/jsonpointer/jsonpointer-3.0.0-py2.py3-none-any.whl#sha256=13e088adc14fca8b6aa8177c044e12701e6ad4b28ff10e65f2267a90109c9942
 keystoneauth1 @ https://agent-int-packages.datadoghq.com/built/keystoneauth1/keystoneauth1-5.12.0-20250929144616-py3-none-any.whl#sha256=78a3f72720c877cdb7df47aea15942cb36a3311855474215e25b63ee721dbbf2
-krb5 @ https://agent-int-packages.datadoghq.com/built/krb5/krb5-0.8.0-20251127101111-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=b89d524f83279a537924eea3f8edc41675028f37361ae71ad0159c5624f4d720
+krb5 @ https://agent-int-packages.datadoghq.com/built/krb5/krb5-0.9.0-20251127141348-cp311-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=b2668f0fc5bab26feb04647adac39c2d0db5423ba6cc00534d592a55320df13b
 kubernetes @ https://agent-int-packages.datadoghq.com/external/kubernetes/kubernetes-33.1.0-py2.py3-none-any.whl#sha256=544de42b24b64287f7e0aa9513c93cb503f7f40eea39b20f66810011a86eabc5
 lazy-loader @ https://agent-int-packages.datadoghq.com/built/lazy-loader/lazy_loader-0.4-20250929144617-py3-none-any.whl#sha256=8a0e48065225ff214f449a3e0f8b82cbf6b5e436a27e4a1b419aa8727e46cafe
 ldap3 @ https://agent-int-packages.datadoghq.com/external/ldap3/ldap3-2.9.1-py2.py3-none-any.whl#sha256=5869596fc4948797020d3f03b7939da938778a0f9e2009f7a072ccf92b8e8d70
