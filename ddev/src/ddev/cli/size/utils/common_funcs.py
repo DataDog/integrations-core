@@ -843,7 +843,6 @@ def send_metrics_to_dd(
     key: str | None,
     compressed: bool,
 ) -> None:
-
     if not commit:
         app.display_error("In order to send metrics to Datadog, you need to provide a commit hash")
         return
