@@ -6,7 +6,7 @@
 
 ***Changed***:
 
-* Bump minimum base check requirement. ([#21921](https://github.com/DataDog/integrations-core/pull/21921))
+* Bump minimum base check requirement ([#21921](https://github.com/DataDog/integrations-core/pull/21921))
 
 ***Added***:
 
