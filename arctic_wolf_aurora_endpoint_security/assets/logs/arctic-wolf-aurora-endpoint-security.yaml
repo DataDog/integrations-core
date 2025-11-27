@@ -1,92 +1,7 @@
 id: arctic-wolf-aurora-endpoint-security
 metric_id: arctic-wolf-aurora-endpoint-security
 backend_only: false
-facets: 
-  - groups:
-      - Web Access
-    name: Browser
-    path: http.useragent_details.browser.family
-    source: log
-  - groups:
-      - Web Access
-    name: Device
-    path: http.useragent_details.device.family
-    source: log
-  - groups:
-      - Web Access
-    name: OS
-    path: http.useragent_details.os.family
-    source: log
-  - groups:
-      - Geoip
-    name: City Name
-    path: network.client.geoip.city.name
-    source: log
-  - groups:
-      - Geoip
-    name: Continent Code
-    path: network.client.geoip.continent.code
-    source: log
-  - groups:
-      - Geoip
-    name: Continent Name
-    path: network.client.geoip.continent.name
-    source: log
-  - groups:
-      - Geoip
-    name: Country ISO Code
-    path: network.client.geoip.country.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Country Name
-    path: network.client.geoip.country.name
-    source: log
-  - groups:
-      - Geoip
-    name: Subdivision ISO Code
-    path: network.client.geoip.subdivision.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Subdivision Name
-    path: network.client.geoip.subdivision.name
-    source: log
-  - groups:
-      - Geoip
-    name: Destination City Name
-    path: network.destination.geoip.city.name
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Continent Code
-    path: network.destination.geoip.continent.code
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Continent Name
-    path: network.destination.geoip.continent.name
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Country ISO Code
-    path: network.destination.geoip.country.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Country Name
-    path: network.destination.geoip.country.name
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Subdivision ISO Code
-    path: network.destination.geoip.subdivision.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Subdivision Name
-    path: network.destination.geoip.subdivision.name
-    source: log
+facets: null
 pipeline:
   type: pipeline
   name: Arctic Wolf Aurora Endpoint Security
@@ -211,8 +126,7 @@ pipeline:
               %{notSpace:ip_addresses:array("()",",")}, Action:
               (%{word:action})?, Action Type: %{PARSE_TILL_COMMA2:action_type},
               File Path: %{PARSE_TILL_COMMA2:file_path}, SHA256:
-              (%{notSpace:sha256})?, Zone Names:
-              %{data:zone_names:array("()",",")}(, Device Id:
+              (%{notSpace:sha256})?, Zone Names: %{data:zone_names}(, Device Id:
               (%{notSpace:device_id})?)?(, Policy Name: %{data:policy_name})?'
     - type: pipeline
       name: Processing Aurora Protect Desktop Audit Events
@@ -247,6 +161,61 @@ pipeline:
         query: "@event_type:Device"
       processors:
         - type: grok-parser
+          name: Parsing Aurora Protect Desktop Device Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: Unknown (Windows VM) Crest, Last Scan: 11/21/2025
+              15:11:31"
+            - "Device Name: admin, Zone Names: (), Device Id:
+              5cea413d-a8b2-4c19-8aef-8af1419e4b58"
+            - "Device Message: Renamed: '' to 'Unknown (Windows VM) Crest';
+              Policy Changed: 'Focus' to 'Focus BDE', User: Nilay Modi
+              (nilay.modi@crestdata.ai), Zone Names: (Windows Zone (Default)),
+              Device Id: e68ac8b2-bfc5-46da-b764-b9e405625c15"
+            - "Device Names: (admin), User: Nilay Modi
+              (nilay.modi@crestdata.ai), Zone Names: (Windows Zone (Default)),
+              Device Ids: (5cea413d-a8b2-4c19-8aef-8af1419e4b58)"
+            - "Device Message: Device: admin; Policy Changed: 'Stage 3 - All
+              Threats AQT + Critical Exploit Prevention + Malicious Script
+              Prevention (Cylance Reference Policy)' to 'Focus'; Zones Added:
+              'IRV1', User: Nilay Modi (nilay.modi@crestdata.ai), Zone Names:
+              (Windows Zone (Default)), Device Id:
+              191c967b-264c-46c3-999b-94c071e2e790"
+          grok:
+            supportRules: PARSE_TILL_COMMA %{regex("(.*?)(?=,)")}
+            matchRules: >-
+              rule1 Device Name: %{PARSE_TILL_COMMA:device_name}, Agent Version:
+              %{PARSE_TILL_COMMA:agent_version}, IP Address:
+              %{PARSE_TILL_COMMA:ip_address}, MAC Address:
+              %{PARSE_TILL_COMMA:mac_address}, Logged On Users:
+              %{PARSE_TILL_COMMA:logged_on_users}, OS: %{PARSE_TILL_COMMA:os},
+              Kernel Version: %{PARSE_TILL_COMMA:kernel_version}, Optics
+              Version: %{PARSE_TILL_COMMA:optics_version}, Zone Names:
+              %{regex("(.*?)(?=)"):zone_names}
+
+              rule2 Device Name: %{PARSE_TILL_COMMA:device_name}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{regex("(.*?)(?=)"):device_id}
+
+              rule3 Device Names: %{PARSE_TILL_COMMA:device_names}, Policy Name: %{PARSE_TILL_COMMA:policy_name}, User: %{PARSE_TILL_COMMA:user}, Zone Names: %{regex("(.*?)(?=)"):zone_names}
+
+              rule4 Device Names: %{PARSE_TILL_COMMA:device_names}, User: %{PARSE_TILL_COMMA:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Ids: %{regex("(.*?)(?=)"):device_ids}
+
+              rule5 Device Message: Device: %{regex("(.*?)(?=;)"):device_name}; Policy Changed: '%{regex("(.*?)(?=')"):previous_policy}' to '%{regex("(.*?)(?=')"):policy_name}'(; Zones Added: '%{regex("(.*?)(?=')"):zones_added}')?, User: %{PARSE_TILL_COMMA:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{regex("(.*?)(?=)"):device_id}
+
+              rule6 Device Name: %{PARSE_TILL_COMMA:device_name}, Agent Version: %{PARSE_TILL_COMMA:agent_version}, IP Address: %{PARSE_TILL_COMMA:ip_address}, MAC Address: %{PARSE_TILL_COMMA:mac_address}, Logged On Users: %{PARSE_TILL_COMMA:logged_on_users}, OS: %{regex("(.*?)(?=)"):os}
+
+              rule7 Device Name: %{PARSE_TILL_COMMA:device_name}, Last Scan: %{regex("(.*?)(?=)"):last_scan}
+
+              rule8 Device Names: %{PARSE_TILL_COMMA:device_name}, User: %{regex("(.*?)(?=)"):user}
+
+              rule11 Device Message: Renamed: '%{regex("(.*?)(?=')"):previous_device}' to '%{regex("(.*?)(?=')"):device_name}'(; Policy Changed: '%{regex("(.*?)(?=')"):previous_policy}' to '%{regex("(.*?)(?=')"):policy_name}')?(; Zones Added: '%{regex("(.*?)(?=')"):zones_added}')?, User: %{regex("(.*?)(?=)"):user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{regex("(.*?)(?=)"):device_id}
+
+              rule9 Device Message: Renamed: '%{regex("(.*?)(?=')"):previous_device}' to '%{regex("(.*?)(?=')"):device_name}'; Policy Changed: '%{regex("(.*?)(?=')"):previous_policy}' to '%{regex("(.*?)(?=')"):policy_name}'(; Zones Added: '%{regex("(.*?)(?=')"):zones_added}')?, User: %{regex("(.*?)(?=)"):user}
+
+              rule10 Device Name: %{regex("(.*?)(?=)"):device_name}
+
+              rule12 Device Message: Device: %{PARSE_TILL_COMMA:device_name}, User: %{PARSE_TILL_COMMA:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{regex("(.*?)(?=)"):device_id}
+        - type: grok-parser
           name: Grok Parser
           enabled: true
           source: additional_details
@@ -273,18 +242,18 @@ pipeline:
             matchRules: >-
               parse_rule_device1 Device Message: Device:
               %{PARSE_TILL_COMMA2:device_name}, User: %{PARSE_TILL_COMMA2:user},
-              Zone Names: %{data:zone_names:array("()",",")}, Device Id:
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id:
               (%{notSpace:device_id})?
 
-              parse_rule_device2 Device Message: Renamed: '%{regex("[^']*"):previous_device}' to '%{regex("[^']*"):device_name}'(; Policy Changed: '%{regex("[^']*"):previous_policy}' to '%{regex("[^']*"):policy_name}')?(; Zones Added: '%{regex("[^']*"):zones_added}')?, User: %{PARSE_TILL_COMMA2:user}, Zone Names: %{data:zone_names:array("()",",")}, Device Id: %{notSpace:device_id}
+              parse_rule_device2 Device Message: Renamed: '%{regex("[^']*"):previous_device}' to '%{regex("[^']*"):device_name}'(; Policy Changed: '%{regex("[^']*"):previous_policy}' to '%{regex("[^']*"):policy_name}')?(; Zones Added: '%{regex("[^']*"):zones_added}')?, User: %{PARSE_TILL_COMMA2:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{notSpace:device_id}
 
-              parse_rule_device3 Device Names: %{data:device_names:array("()",",")}, Zone Name: %{PARSE_TILL_COMMA2:zone_name}, User: %{PARSE_TILL_COMMA2:user}
+              parse_rule_device3 Device Names: %{data:device_names:array("()",",")}, Zone Name: %{PARSE_TILL_COMMA2:zone_name}, User: %{data:user}
 
-              parse_rule_device4 Device Names: %{data:device_names:array("()",",")}, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{data:zone_names:array("()",",")})?(, Device Ids: %{data:device_ids:array("()",",")})?
+              parse_rule_device4 Device Names: %{data:device_names:array("()",",")}, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{data:zone_names})?(, Device Ids: %{notSpace:device_ids:array("()",",")})?
 
-              parse_rule_device5 Device Name: %{PARSE_TILL_COMMA2:device_name}, Agent Version: %{PARSE_TILL_COMMA2:agent_version}, IP Address: %{notSpace:ip_addresses:array("()",",")}, MAC Address: %{notSpace:mac_addresses:array("()",",")}, Logged On Users: %{data:logged_on_users:array("()",",")}, OS: %{PARSE_TILL_COMMA2:os}, Kernel Version: %{PARSE_TILL_COMMA2:kernel_version}, Optics Version: %{PARSE_TILL_COMMA2:optics_version}, Zone Names: %{data:zone_names:array("()",",")}
+              parse_rule_device5 Device Name: %{PARSE_TILL_COMMA2:device_name}, Agent Version: %{PARSE_TILL_COMMA2:agent_version}, IP Address: %{notSpace:ip_addresses:array("()",",")}, MAC Address: %{notSpace:mac_addresses:array("()",",")}, Logged On Users: %{data:logged_on_users}, OS: %{PARSE_TILL_COMMA2:os}, Kernel Version: %{PARSE_TILL_COMMA2:kernel_version}, Optics Version: %{PARSE_TILL_COMMA2:optics_version}, Zone Names: %{data:zone_names}
 
-              parse_rule_device6 Device Name: %{data:device_name}(, Zone Names: %{data:zone_names:array("()",",")})?(, Device Id: (%{notSpace:device_id})?)?
+              parse_rule_device6 Device Name: %{data:device_name}(, Zone Names: %{data:zone_names})?(, Device Id: (%{notSpace:device_id})?)?
 
               parse_rule_device7 Device Name: %{PARSE_TILL_COMMA2:device_name}, Last Scan: %{data:last_scan}
     - type: pipeline
@@ -312,15 +281,15 @@ pipeline:
               (test_zone_02)"
           grok:
             supportRules: PARSE_TILL_COMMA2 %{regex("[^,]*")}
-            matchRules: 'parse_device_control_rule Device Name:
+            matchRules: "parse_device_control_rule Device Name:
               %{PARSE_TILL_COMMA2:device_name}, External Device Type:
               (%{notSpace:external_device_type})?, External Device Vendor ID:
               (%{notSpace:external_device_vendor_id})?, External Device Name:
               %{PARSE_TILL_COMMA2:external_device_name}, External Device Product
               ID: (%{notSpace:external_device_product_id})?, External Device
               Serial Number: (%{notSpace:external_device_serial_number})?, Zone
-              Names: %{data:zone_names:array("()",",")}(, Device Id:
-              %{notSpace:device_id})?(, Policy Name: %{data:policy_name})?'
+              Names: %{data:zone_names}(, Device Id: %{notSpace:device_id})?(,
+              Policy Name: %{data:policy_name})?"
     - type: pipeline
       name: Processing Aurora Protect Desktop Memory Protection Events
       enabled: true
@@ -355,8 +324,8 @@ pipeline:
               Process Name: %{PARSE_TILL_COMMA2:process_name}, User Name:
               %{PARSE_TILL_COMMA2:usr.name}, Violation Type:
               %{PARSE_TILL_COMMA2:violation_type}, Zone Names:
-              %{data:zone_names:array("()",",")}(, Device Id:
-              (%{notSpace:device_id})?)?(, Policy Name: %{data:policy_name})?'
+              %{data:zone_names}(, Device Id: (%{notSpace:device_id})?)?(,
+              Policy Name: %{data:policy_name})?'
     - type: pipeline
       name: Processing Aurora Protect Desktop Script Control Events
       enabled: true
@@ -399,15 +368,15 @@ pipeline:
             supportRules: |-
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
-            matchRules: 'parse_script_control_rule Device Name:
+            matchRules: "parse_script_control_rule Device Name:
               %{PARSE_TILL_COMMA2:device_name}, File Path:
               %{PARSE_TILL_COMMA2:file_path}, SHA256: (%{notSpace:sha256})?,
               (Status: %{PARSE_TILL_COMMA2:script_control_status},
               )?Interpreter: (%{notSpace:interpreter})?, Interpreter Version:
               %{PARSE_TILL_COMMA2:interpreter_version}, Zone Names:
-              %{data:zone_names:array("()",",")}, (User Name:
+              %{PARSE_TILL_COMMA:zone_names}, (User Name:
               %{PARSE_TILL_COMMA:user}, )?Device I(d|D):
-              (%{notSpace:device_id})?, Policy Name: %{data:policy_name}'
+              (%{notSpace:device_id})?, Policy Name: %{data:policy_name}"
     - type: pipeline
       name: Processing of Aurora Protect Desktop Threat Events
       enabled: true
@@ -485,10 +454,9 @@ pipeline:
               %{PARSE_TILL_COMMA2:file_type}, Is Running: (%{word:is_running})?,
               Auto Run: (%{word:auto_run})?, Detected By:
               (%{notSpace:detected_by})?, Zone Names:
-              %{data:zone_names:array("()",",")}, Is Malware:
-              (%{word:is_malware})?, Is Unique (t|T)o Cylance:
-              (%{word:is_unique_to_cylance})?, Threat Classification:
-              %{data:threat_classification}(, Device Id:
+              %{PARSE_TILL_COMMA:zone_names}, Is Malware: (%{word:is_malware})?,
+              Is Unique (t|T)o Cylance: (%{word:is_unique_to_cylance})?, Threat
+              Classification: %{data:threat_classification}(, Device Id:
               %{notSpace:device_id})?(, Policy Name: %{data:policy_name})?'
         - type: category-processor
           name: Category processor for `file_state`
@@ -608,7 +576,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_process_rule Device Name: %{PARSE_TILL_COMMA2:device_name},
-              Zone Names: %{data:zone_names:array("()",",")}, Event Id:
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -619,7 +587,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -709,7 +677,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_file_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
-              Names: %{data:zone_names:array("()",",")}, Event Id:
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -720,7 +688,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -766,7 +734,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_registry_rule Device Name: %{PARSE_TILL_COMMA2:device_name},
-              Zone Names: %{data:zone_names:array("()",",")}, Event Id:
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id}), Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -777,14 +745,14 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
               %{PARSE_TILL_COMMA2:instigating_process_file_path}, Target
               Registry KeyPath: %{PARSE_TILL_COMMA2:target_registry_keypath},
               Target Registry ValueName:
-              %{PARSE_TILL_COMMA2:target_registry_keypath}, Device Id:
+              %{PARSE_TILL_COMMA2:target_registry_valuename}, Device Id:
               (%{notSpace:device_id})?'
     - type: pipeline
       name: Processing Aurora Focus Network Based Detection Events
@@ -855,7 +823,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_network_rule Device Name: %{PARSE_TILL_COMMA2:device_name},
-              Zone Names: %{data:zone_names:array("()",",")}, Event Id:
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -866,7 +834,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -920,7 +888,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_memory_rule Device Name: %{PARSE_TILL_COMMA2:device_name},
-              Zone Names: %{data:zone_names:array("()",",")}, Event Id:
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -931,7 +899,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -971,7 +939,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_dns_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
-              Names: %{data:zone_names:array("()",",")}, Event Id:
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -982,7 +950,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -1024,7 +992,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_log_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
-              Names: %{data:zone_names:array("()",",")}, Event Id:
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -1035,7 +1003,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -1081,18 +1049,18 @@ pipeline:
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_powershell_trace_rule Device Name:
               %{PARSE_TILL_COMMA2:device_name}, Zone Names:
-              %{data:zone_names:array("()",",")}, Event Id:
-              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
-              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
-              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
-              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
-              Instigating Process ImageFileSha256:
+              %{PARSE_TILL_COMMA:zone_names}, Event Id: (%{notSpace:event_id})?,
+              Severity: (%{notSpace:severity})?, Description:
+              %{PARSE_TILL_COMMA2:description}, Instigating Process Name:
+              %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating Process
+              Owner: %{PARSE_TILL_COMMA2:instigating_process_owner}, Instigating
+              Process ImageFileSha256:
               (%{notSpace:instigating_process_imagefilesha256})?, Event
               Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -1137,7 +1105,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_wmi_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
-              Names: %{data:zone_names:array("()",",")}, Event Id:
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -1148,7 +1116,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -1189,7 +1157,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_api_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
-              Names: %{data:zone_names:array("()",",")}, Event Id:
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -1200,7 +1168,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -1241,7 +1209,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_com_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
-              Names: %{data:zone_names:array("()",",")}, Event Id:
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -1252,7 +1220,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
@@ -1298,7 +1266,7 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_http_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
-              Names: %{data:zone_names:array("()",",")}, Event Id:
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
               (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
               Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
               Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
@@ -1309,7 +1277,7 @@ pipeline:
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
               Last Reported Users:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
-              %{notSpace:zone_ids:array("()",",")}, Detection Rule Id:
+              %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
               Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
               Instigating Process File Path:
