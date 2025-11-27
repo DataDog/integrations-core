@@ -1,4 +1,4 @@
-id: "REPLACE_WITH_APP_ID"
+id: "arctic-wolf-aurora-endpoint-security"
 tests:
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: AppControl, Event Name: pechange, Device Name: Unknown (test1), IP Address: (), Action: Deny, Action Type: PE File Change, File Path: , SHA256: 7D2113B7046867BC643CD621D2CBA7365609675505BAA66585FC44747C0D1EF4, Zone Names: (Windows Zone (Default)), Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8c, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
