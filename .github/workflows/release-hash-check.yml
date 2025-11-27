@@ -33,12 +33,14 @@ jobs:
         echo "all=$FILES" >> "$GITHUB_OUTPUT"
 
     - id: merge
-      name: Merge branch into latest master
+      name: Merge branch into latest target branch
       env:
         HEAD_BRANCH: ${{ github.head_ref }}
+        BASE_BRANCH: ${{ github.base_ref }}
       run: |
         git fetch origin $HEAD_BRANCH
-        git checkout origin/master
+        git fetch origin $BASE_BRANCH
+        git checkout origin/$BASE_BRANCH
         git config user.name "release-hash-check"
         git config user.email "<>"
         git merge --no-commit --no-edit origin/$HEAD_BRANCH
