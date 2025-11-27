@@ -8,7 +8,7 @@
 
 * Migrate PostgreSQL to a new schema collector, which provides improved performance in the Agent and allows the backend to handle larger schema collections ([#21727](https://github.com/DataDog/integrations-core/pull/21727))
 * PG: Add sent, write, flush, and replay metrics for pg_stat_replication ([#21844](https://github.com/DataDog/integrations-core/pull/21844))
-* Upgrade base version for Postgres, MySQL, SQLServer ([#21906](https://github.com/DataDog/integrations-core/pull/21906))
+* Upgrade base version for Postgres, MySQL, and SQLServer ([#21906](https://github.com/DataDog/integrations-core/pull/21906))
 * Added support for Postgres 18. ([#21947](https://github.com/DataDog/integrations-core/pull/21947))
 
 ***Fixed***:
