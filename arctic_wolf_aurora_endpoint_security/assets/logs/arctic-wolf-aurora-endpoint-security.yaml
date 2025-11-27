@@ -161,62 +161,7 @@ pipeline:
         query: "@event_type:Device"
       processors:
         - type: grok-parser
-          name: Parsing Aurora Protect Desktop Device Events
-          enabled: true
-          source: additional_details
-          samples:
-            - "Device Name: Unknown (Windows VM) Crest, Last Scan: 11/21/2025
-              15:11:31"
-            - "Device Name: admin, Zone Names: (), Device Id:
-              5cea413d-a8b2-4c19-8aef-8af1419e4b58"
-            - "Device Message: Renamed: '' to 'Unknown (Windows VM) Crest';
-              Policy Changed: 'Focus' to 'Focus BDE', User: Nilay Modi
-              (nilay.modi@crestdata.ai), Zone Names: (Windows Zone (Default)),
-              Device Id: e68ac8b2-bfc5-46da-b764-b9e405625c15"
-            - "Device Names: (admin), User: Nilay Modi
-              (nilay.modi@crestdata.ai), Zone Names: (Windows Zone (Default)),
-              Device Ids: (5cea413d-a8b2-4c19-8aef-8af1419e4b58)"
-            - "Device Message: Device: admin; Policy Changed: 'Stage 3 - All
-              Threats AQT + Critical Exploit Prevention + Malicious Script
-              Prevention (Cylance Reference Policy)' to 'Focus'; Zones Added:
-              'IRV1', User: Nilay Modi (nilay.modi@crestdata.ai), Zone Names:
-              (Windows Zone (Default)), Device Id:
-              191c967b-264c-46c3-999b-94c071e2e790"
-          grok:
-            supportRules: PARSE_TILL_COMMA %{regex("(.*?)(?=,)")}
-            matchRules: >-
-              rule1 Device Name: %{PARSE_TILL_COMMA:device_name}, Agent Version:
-              %{PARSE_TILL_COMMA:agent_version}, IP Address:
-              %{PARSE_TILL_COMMA:ip_address}, MAC Address:
-              %{PARSE_TILL_COMMA:mac_address}, Logged On Users:
-              %{PARSE_TILL_COMMA:logged_on_users}, OS: %{PARSE_TILL_COMMA:os},
-              Kernel Version: %{PARSE_TILL_COMMA:kernel_version}, Optics
-              Version: %{PARSE_TILL_COMMA:optics_version}, Zone Names:
-              %{regex("(.*?)(?=)"):zone_names}
-
-              rule2 Device Name: %{PARSE_TILL_COMMA:device_name}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{regex("(.*?)(?=)"):device_id}
-
-              rule3 Device Names: %{PARSE_TILL_COMMA:device_names}, Policy Name: %{PARSE_TILL_COMMA:policy_name}, User: %{PARSE_TILL_COMMA:user}, Zone Names: %{regex("(.*?)(?=)"):zone_names}
-
-              rule4 Device Names: %{PARSE_TILL_COMMA:device_names}, User: %{PARSE_TILL_COMMA:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Ids: %{regex("(.*?)(?=)"):device_ids}
-
-              rule5 Device Message: Device: %{regex("(.*?)(?=;)"):device_name}; Policy Changed: '%{regex("(.*?)(?=')"):previous_policy}' to '%{regex("(.*?)(?=')"):policy_name}'(; Zones Added: '%{regex("(.*?)(?=')"):zones_added}')?, User: %{PARSE_TILL_COMMA:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{regex("(.*?)(?=)"):device_id}
-
-              rule6 Device Name: %{PARSE_TILL_COMMA:device_name}, Agent Version: %{PARSE_TILL_COMMA:agent_version}, IP Address: %{PARSE_TILL_COMMA:ip_address}, MAC Address: %{PARSE_TILL_COMMA:mac_address}, Logged On Users: %{PARSE_TILL_COMMA:logged_on_users}, OS: %{regex("(.*?)(?=)"):os}
-
-              rule7 Device Name: %{PARSE_TILL_COMMA:device_name}, Last Scan: %{regex("(.*?)(?=)"):last_scan}
-
-              rule8 Device Names: %{PARSE_TILL_COMMA:device_name}, User: %{regex("(.*?)(?=)"):user}
-
-              rule11 Device Message: Renamed: '%{regex("(.*?)(?=')"):previous_device}' to '%{regex("(.*?)(?=')"):device_name}'(; Policy Changed: '%{regex("(.*?)(?=')"):previous_policy}' to '%{regex("(.*?)(?=')"):policy_name}')?(; Zones Added: '%{regex("(.*?)(?=')"):zones_added}')?, User: %{regex("(.*?)(?=)"):user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{regex("(.*?)(?=)"):device_id}
-
-              rule9 Device Message: Renamed: '%{regex("(.*?)(?=')"):previous_device}' to '%{regex("(.*?)(?=')"):device_name}'; Policy Changed: '%{regex("(.*?)(?=')"):previous_policy}' to '%{regex("(.*?)(?=')"):policy_name}'(; Zones Added: '%{regex("(.*?)(?=')"):zones_added}')?, User: %{regex("(.*?)(?=)"):user}
-
-              rule10 Device Name: %{regex("(.*?)(?=)"):device_name}
-
-              rule12 Device Message: Device: %{PARSE_TILL_COMMA:device_name}, User: %{PARSE_TILL_COMMA:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{regex("(.*?)(?=)"):device_id}
-        - type: grok-parser
-          name: Grok Parser
+          name: Parsing Aurora Protect Device Desktop Event
           enabled: true
           source: additional_details
           samples:
@@ -232,9 +177,8 @@ pipeline:
               'Default' to 'IRVPolicy1'; Zones Added: 'IRV1', User: Nilay Modi
               (nilay.modi@crestdata.ai), Zone Names: (Windows Zone (Default)),
               Device Id: 4af77c47-6b60-4807-ad95-ddabad5f4528"
-            - "Device Message: Device: AssetTag-EID, User: Nilay Modi
-              (nilay.modi@crestdata.ai), Zone Names: (Windows Zone (Default)),
-              Device Id: 531a38d2-acc2-43d6-844d-14d4ca408739"
+            - "Device Name: Unknown (test1), Last Scan: 11/25/2025 09:39:31,
+              Next Scan: 11/26/2025 06:53:24"
           grok:
             supportRules: |-
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
@@ -245,17 +189,17 @@ pipeline:
               Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id:
               (%{notSpace:device_id})?
 
-              parse_rule_device2 Device Message: Renamed: '%{regex("[^']*"):previous_device}' to '%{regex("[^']*"):device_name}'(; Policy Changed: '%{regex("[^']*"):previous_policy}' to '%{regex("[^']*"):policy_name}')?(; Zones Added: '%{regex("[^']*"):zones_added}')?, User: %{PARSE_TILL_COMMA2:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: %{notSpace:device_id}
+              parse_rule_device2 Device Message: Renamed: '%{regex("[^']*"):previous_device}' to '%{regex("[^']*"):device_name}'(; Policy Changed: '%{regex("[^']*"):previous_policy}' to '%{regex("[^']*"):policy_name}')?(; Zones Added: '%{regex("[^']*"):zones_added}')?, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{PARSE_TILL_COMMA:zone_names})?(, Device Id: %{notSpace:device_id})?
 
               parse_rule_device3 Device Names: %{data:device_names:array("()",",")}, Zone Name: %{PARSE_TILL_COMMA2:zone_name}, User: %{data:user}
 
-              parse_rule_device4 Device Names: %{data:device_names:array("()",",")}, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{data:zone_names})?(, Device Ids: %{notSpace:device_ids:array("()",",")})?
+              parse_rule_device4 Device Names: %{data:device_names:array("()",",")}(, Policy Name: %{PARSE_TILL_COMMA2:policy_name})?, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{data:zone_names})?(, Device Ids: %{notSpace:device_ids:array("()",",")})?
 
               parse_rule_device5 Device Name: %{PARSE_TILL_COMMA2:device_name}, Agent Version: %{PARSE_TILL_COMMA2:agent_version}, IP Address: %{notSpace:ip_addresses:array("()",",")}, MAC Address: %{notSpace:mac_addresses:array("()",",")}, Logged On Users: %{data:logged_on_users}, OS: %{PARSE_TILL_COMMA2:os}, Kernel Version: %{PARSE_TILL_COMMA2:kernel_version}, Optics Version: %{PARSE_TILL_COMMA2:optics_version}, Zone Names: %{data:zone_names}
 
-              parse_rule_device6 Device Name: %{data:device_name}(, Zone Names: %{data:zone_names})?(, Device Id: (%{notSpace:device_id})?)?
+              parse_rule_device6 Device Name: %{PARSE_TILL_COMMA2:device_name}, Last Scan: %{data:last_scan}(, Next Scan: %{data:next_scan})?
 
-              parse_rule_device7 Device Name: %{PARSE_TILL_COMMA2:device_name}, Last Scan: %{data:last_scan}
+              parse_rule_device7 Device Name: %{data:device_name}(, Zone Names: %{data:zone_names})?(, Device Id: (%{notSpace:device_id})?)?
     - type: pipeline
       name: Processing Aurora Protect Desktop Device Control Events
       enabled: true
