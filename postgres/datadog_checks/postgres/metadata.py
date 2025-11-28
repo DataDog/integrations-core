@@ -587,7 +587,7 @@ class PostgresMetadata(DBMAsyncJob):
         rows = cursor.fetchall()
         table_info = [dict(row) for row in rows]
 
-        limit = self._config.collect_schemas.max_tables
+        limit = int(self._config.collect_schemas.max_tables)
 
         if len(table_info) <= limit:
             return table_info
