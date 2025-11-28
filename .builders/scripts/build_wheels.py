@@ -90,6 +90,11 @@ def main():
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
 
+    print("--------------------------------")
+    print("[DEBUGGING INFO]")
+    print("python_path: ", python_path)
+    print("Platform:",sys.platform)
+    print("--------------------------------")
     with TemporaryDirectory() as d:
         staged_wheel_dir = Path(d).resolve()
         env_vars = dict(os.environ)
