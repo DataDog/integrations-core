@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -95,6 +96,7 @@ def main():
     print("--------------------------------")
     print("[DEBUGGING INFO]")
     print("running on: ", sys.platform)
+    print("architecture: ", platform.machine())
     print("sys.version: ", sys.version)
     print("python_path: ", python_path)
     subprocess.run([python_path, "--version"])
