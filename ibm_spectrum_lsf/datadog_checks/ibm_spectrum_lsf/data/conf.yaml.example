@@ -18,7 +18,7 @@ instances:
     #
   - cluster_name: <CLUSTER_NAME>
 
-    ## @param metric_sources - list of strings - optional
+    ## @param metric_sources - list of strings - optional - default: ['lsclusters', 'lshosts', 'bhosts', 'lsload', 'bqueues', 'bslots', 'bjobs']
     ## Enable metrics from different IBM Spectrum LSF commands.
     ## By default, all commands except GPU commands are enabled.
     #
