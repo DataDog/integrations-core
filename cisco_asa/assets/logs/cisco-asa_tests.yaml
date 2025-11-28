@@ -40,10 +40,6 @@ tests:
       custom:
         message_id: "733104"
         network:
-          client:
-            geoip: {}
-            ip: "192.0.2.14"
-            port: "443"
           destination:
             geoip: {}
             ip: "192.0.2.3"
@@ -53,6 +49,8 @@ tests:
         rate_threshold: 48.0
         rate_type: "Average"
         rate_unit: "SYNs/sec"
+        real_ip: "192.0.2.14"
+        real_port: "443"
         service: "threat-detection"
         severity: 4
         timestamp: 1764055015000

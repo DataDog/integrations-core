@@ -160,9 +160,9 @@ pipeline:
               110002 OR 110003 OR 110004 OR 746001 OR 746002 OR 746003 OR 746005
               OR 746007 OR 746016)"
           name: firewall
-        - name: other
-          filter:
+        - filter:
             query: "@message_id:*"
+          name: other
       target: service
     - type: service-remapper
       name: Define `service` as the official service of the log
@@ -183,7 +183,7 @@ pipeline:
             - "[ Scanning] drop rate-1 exceeded. Current burst rate is 19 per
               second, max configured rate is 33; Current average rate is 50 per
               second, max configured rate is 33; Cumulative total count is 44"
-            - Threat-detection adds host 192.0.2.3 to shun list
+            - Threat-detection adds host www.example.com to shun list
             - TCP Intercept SYN flood attack detected to 192.0.2.3/1194
               (192.0.2.14/443). Average rate of 47 SYNs/sec exceeded the
               threshold of 48.
@@ -208,7 +208,7 @@ pipeline:
 
               rule_733102_733103 Threat-detection %{word:action} host %{ipOrHost:host} (to|from) shun list
 
-              rule_733104_733105 %{word:protocol} Intercept SYN flood attack detected to %{ip:network.destination.ip}/%{port:network.destination.port}\s*\(%{ip:real_ip}/%{port:real_port}\). %{word:rate_type} rate of %{number:rate} %{notSpace:rate_unit} exceeded the threshold of %{number:rate_threshold}
+              rule_733104_733105 %{word:protocol} Intercept SYN flood attack detected to %{ip:network.destination.ip}/%{integer:network.destination.port}\s*\(%{ip:real_ip}/%{integer:real_port}\). %{word:rate_type} rate of %{number:rate} %{notSpace:rate_unit} exceeded the threshold of %{number:rate_threshold}
     - type: pipeline
       name: User Authentication
       enabled: true
@@ -236,15 +236,15 @@ pipeline:
             matchRules: >-
               rule_109005_109006 Authentication %{notSpace:evt.outcome} for user
               '%{regex("[^']*"):usr.name}' from
-              %{ip:network.client.ip}/%{port:network.client.port} to
-              %{ip:network.destination.ip}/%{port:network.destination.port} on
-              interface %{data:interface}
+              %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
+              on interface %{data:interface}
 
-              rule_109010 Auth from %{ip:network.client.ip}/%{port:network.client.port} to %{ip:network.destination.ip}/%{port:network.destination.port} %{notSpace:evt.outcome} \(%{regex("[^\\)]*"):reason}\) on interface %{data:interface}
+              rule_109010 Auth from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} %{notSpace:evt.outcome} \(%{regex("[^\\)]*"):reason}\) on interface %{data:interface}
 
-              rule_109023 User from %{ip:network.client.ip}/%{port:network.client.port} to %{ip:network.destination.ip}/%{port:network.destination.port} on interface %{regex(".*(?= using )"):interface} using %{regex(".*(?= must authenticate)"):service_name} must authenticate before using this service
+              rule_109023 User from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} on interface %{regex(".*(?= using )"):interface} using %{regex(".*(?= must authenticate)"):service_name} must authenticate before using this service
 
-              rule_109033_109034 Authentication %{notSpace:evt.outcome} for %{notSpace:user_type} user %{regex(".*(?= from )"):usr.name} from (%{ip:network.client.ip}|%{ip:network.client.ip}/%{port:network.client.port} to %{ip:network.destination.ip}/%{port:network.destination.port}). Interactive challenge processing is not supported for %{notSpace:protocol}( connections)?
+              rule_109033_109034 Authentication %{notSpace:evt.outcome} for %{notSpace:user_type} user %{regex(".*(?= from )"):usr.name} from (%{ip:network.client.ip}|%{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port}). Interactive challenge processing is not supported for %{notSpace:protocol}( connections)?
     - type: pipeline
       name: User Authorization
       enabled: true
@@ -272,11 +272,11 @@ pipeline:
             matchRules: >-
               rule_109007_109008 Authorization %{word:evt.outcome} for user
               '%{regex("[^']*"):usr.name}' from
-              %{ip:network.client.ip}/%{port:network.client.port} to
-              %{ip:network.destination.ip}/%{port:network.destination.port} on
-              interface %{data:interface}
+              %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
+              on interface %{data:interface}
 
-              rule_109024_109025 Authorization %{word:evt.outcome} (\(acl=%{regex("[^\\)]*"):acl_id}\))?( for user '%{regex("[^']*"):usr.name}' )?from %{ip:network.client.ip}/%{port:network.client.port} to %{ip:network.destination.ip}/%{port:network.destination.port} (\(not authenticated\) )?on interface %{regex(".*(?= using )"):interface} using %{notSpace:protocol}( to)?
+              rule_109024_109025 Authorization %{word:evt.outcome} (\(acl=%{regex("[^\\)]*"):acl_id}\))?( for user '%{regex("[^']*"):usr.name}' )?from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} (\(not authenticated\) )?on interface %{regex(".*(?= using )"):interface} using %{notSpace:protocol}( to)?
     - type: pipeline
       name: User Management
       enabled: true
@@ -308,7 +308,7 @@ pipeline:
         query: "@message_id:(415001 OR 415002 OR 415003 OR 415005 OR 415013 OR 415016)"
       processors:
         - type: grok-parser
-          name: Parse Application Firewall
+          name: Parse Application Firewall Logs
           enabled: true
           source: message
           samples:
@@ -329,7 +329,7 @@ pipeline:
               requests exceeded drop inside test:10.10.10.10/51822 to
               outside:10.10.10.10/443"
           grok:
-            supportRules: _parse_till_colon %{regex(".*(?=\\:)")}
+            supportRules: ""
             matchRules: >-
               rule_415001_415002_415003_415005 HTTP - matched ("%{regex(".*(?=\"
               in policy-map)"):matched_string}"|%{regex(".*(?= in
@@ -337,11 +337,11 @@ pipeline:
               %{regex("[^,]*"):policy_map},\s+%{regex("header field count
               exceeded|header field length exceeded|body length exceeded|URI
               length exceeded"):reason}
-              %{notSpace:connection_action}\s+%{_parse_till_colon:source_interface}:%{ip:network.client.ip}/%{port:network.client.port}
+              %{notSpace:connection_action}\s+%{regex("[^:]*"):source_interface}:%{ip:network.client.ip}/%{integer:network.client.port}
               to
-              %{_parse_till_colon:destination_interface}:%{ip:network.destination.ip}/%{port:network.destination.port}
+              %{regex("[^:]*"):destination_interface}:%{ip:network.destination.ip}/%{integer:network.destination.port}
 
-              rule_415013_415016 (HTTP - )?policy-map %{regex("[^:]*"):policy_map}\s*:\s*%{regex("Maximum number of unanswered HTTP requests exceeded|Malformed chunked encoding"):reason} %{notSpace:connection_action}\s+%{_parse_till_colon:source_interface}:%{ip:network.client.ip}/%{port:network.client.port} to %{_parse_till_colon:destination_interface}:%{ip:network.destination.ip}/%{port:network.destination.port}
+              rule_415013_415016 (HTTP - )?policy-map %{regex("[^:]*"):policy_map}\s*:\s*%{regex("Maximum number of unanswered HTTP requests exceeded|Malformed chunked encoding"):reason} %{notSpace:connection_action}\s+%{regex(".*(?=\\:)"):source_interface}:%{ip:network.client.ip}/%{integer:network.client.port} to %{regex(".*(?=\\:)"):destination_interface}:%{ip:network.destination.ip}/%{integer:network.destination.port}
     - type: pipeline
       name: Transparent Firewall
       enabled: true
@@ -349,7 +349,7 @@ pipeline:
         query: "@message_id:(110002 OR 110003 OR 110004)"
       processors:
         - type: grok-parser
-          name: Parse Transparent Firewall
+          name: Parse Transparent Firewall Logs
           enabled: true
           source: message
           samples:
@@ -362,16 +362,16 @@ pipeline:
               zone-new/eth0:192.0.2.5/443(192.0.2.2/1199 ) to
               zone-dest/br0:192.0.2.2/1194(192.0.2.7/443 )
           grok:
-            supportRules: _parse_till_colon %{regex(".*(?=\\:)")}
+            supportRules: ""
             matchRules: >-
               rule_110002_110003 %{regex("Failed to locate egress
-              interface|Routing failed to locate next-hop"):reason} for
-              %{notSpace:protocol} from
-              %{_parse_till_colon:source_interface}\s*:%{ip:network.client.ip}/%{port:network.client.port}
+              interface|Routing failed to locate (next-hop|next hop)"):reason}
+              for %{notSpace:protocol} from
+              %{regex(".*(?=\\:)"):source_interface}\s*:%{ip:network.client.ip}/%{integer:network.client.port}
               to
-              (%{_parse_till_colon:destination_interface}\s*:)?%{ip:network.destination.ip}/%{port:network.destination.port}
+              (%{regex(".*(?=\\:)"):destination_interface}\s*:)?%{ip:network.destination.ip}/%{integer:network.destination.port}
 
-              rule_110004 %{regex("Egress interface changed"):reason} from %{regex(".*(?= to )"):old_interface} to %{regex(".*(?= on )"):new_interface} on %{notSpace:protocol} connection %{number:connection_id} for %{notSpace:outside_interface_zone}\s*/\s*%{_parse_till_colon:outside_interface}\s*:%{ip:outside_ip}\s*/\s*%{port:outside_port}\s*\(%{ip:outside_mapped_ip}\s*/\s*%{port:outside_mapped_port}\s*\) to %{notSpace:inside_interface_zone}\s*/\s*%{_parse_till_colon:inside_interface}\s*:%{ip:inside_ip}\s*/\s*%{port:inside_port}\s*\(%{ip:inside_mapped_ip}\s*/\s*%{port:inside_mapped_port}\s*\)
+              rule_110004 %{regex("Egress interface changed"):reason} from %{regex(".*(?= to )"):old_interface} to %{regex(".*(?= on )"):new_interface} on %{notSpace:protocol} connection %{number:connection_id} for %{notSpace:outside_interface_zone}\s*/\s*%{regex("[^:]*"):outside_interface}\s*:%{ip:outside_ip}\s*/\s*%{integer:outside_port}\s*\(%{ip:outside_mapped_ip}\s*/\s*%{integer:outside_mapped_port}\s*\) to %{notSpace:inside_interface_zone}\s*/\s*%{regex("[^:]*"):inside_interface}\s*:%{ip:inside_ip}\s*/\s*%{integer:inside_port}\s*\(%{ip:inside_mapped_ip}\s*/\s*%{integer:inside_mapped_port}\s*\)
     - type: pipeline
       name: Identity Firewall
       enabled: true
@@ -379,7 +379,7 @@ pipeline:
         query: "@message_id:(746001 OR 746002 OR 746003 OR 746005 OR 746007 OR 746016)"
       processors:
         - type: grok-parser
-          name: Parse Identity Firewall
+          name: Parse Identity Firewall Logs
           enabled: true
           source: message
           samples:
@@ -400,7 +400,7 @@ pipeline:
 
               rule_746007 user-identity: NetBIOS response failed from User %{regex(".*(?= at )"):usr.name} at %{ip:network.client.ip}
 
-              rule_746016 user-identity: DNS lookup for %{ip:network.client.ip} failed, reason:\s+%{data:reason}
+              rule_746016 user-identity: DNS lookup for %{ip:network.client.ip} failed, reason:\s*%{data:reason}
 
               rule_746001_746002_746003 user-identity: %{data:database} %{notSpace:download_status}(\s+-\s+%{data:reason})?
     - type: pipeline
@@ -410,7 +410,7 @@ pipeline:
         query: "@message_id:405001"
       processors:
         - type: grok-parser
-          name: Parsing ARP collision logs
+          name: Parse ARP collision Logs
           enabled: true
           source: message
           samples:
@@ -434,7 +434,7 @@ pipeline:
         query: "@message_id:(106001 OR 106002 OR 106006)"
       processors:
         - type: grok-parser
-          name: Parse connection logs
+          name: Parse connection Logs
           enabled: true
           source: message
           samples:
@@ -451,14 +451,14 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              rule_106001 %{regex("Inbound TCP connection denied"):reason} from
-              %{ip:network.client.ip}/%{port:network.client.port} to
-              %{ip:network.destination.ip}/%{port:network.destination.port}
+              rule_106001 Inbound %{regex("TCP"):protocol} connection denied
+              from %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
               flags %{notSpace:tcp_flag}\s+on\s+interface %{data:interface}
 
               rule_106002 %{notSpace:protocol} Connection denied by outbound list %{notSpace:outbound_list} src %{ip:network.client.ip} dest %{ip:network.destination.ip}
 
-              rule_106006 Deny inbound UDP from %{ip:network.client.ip}/%{port:network.client.port} to %{ip:network.destination.ip}/%{port:network.destination.port} on interface %{data:interface}
+              rule_106006 Deny inbound %{regex("UDP"):protocol} from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} on interface %{data:interface}
     - type: pipeline
       name: Dynamic traffic insights
       enabled: true
@@ -468,7 +468,7 @@ pipeline:
           338202 OR 338203 OR 338204)"
       processors:
         - type: grok-parser
-          name: Parse dynamic traffic logs
+          name: Parse dynamic traffic Logs
           enabled: true
           source: message
           samples:
@@ -497,15 +497,15 @@ pipeline:
               local list: mycoolapp-preview.mock, threat-level: 0, category:
               malware"
           grok:
-            supportRules: _parse_till_colon %{regex(".*(?=:)")}
+            supportRules: ""
             matchRules: 'rule Dynamic (Filter|filter)
               %{regex("monitored|permitted|dropped|denied|action"):action}
               %{regex("blacklisted|black listed|whitelisted|white
               listed|greylisted|grey listed"):traffic_type} %{notSpace:protocol}
               traffic from
-              %{_parse_till_colon:in_interface}:%{ip:network.client.ip}/%{port:network.client.port}\s*\(%{ipOrHost:client_mapped_ip}/%{port:client_mapped_port}\)(\))?
+              %{regex(".*(?=:)"):in_interface}:%{ip:network.client.ip}/%{integer:network.client.port}\s*\(%{ipOrHost:client_mapped_ip}/%{integer:client_mapped_port}\)(\))?
               to
-              %{_parse_till_colon:out_interface}:%{ip:network.destination.ip}/%{port:network.destination.port}\s*\(%{ipOrHost:destination_mapped_ip}/%{port:destination_mapped_port}\)(\),|,\),|,)?
+              %{regex(".*(?=:)"):out_interface}:%{ip:network.destination.ip}/%{integer:network.destination.port}\s*\(%{ipOrHost:destination_mapped_ip}/%{integer:destination_mapped_port}\)(\),|,\),|,)?
               (source|destination)
               (%{ip:malicious_address}/%{notSpace:malicious_address_netmask}|%{notSpace:malicious_address})
               resolved from %{notSpace:list_type} list:
