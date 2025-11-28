@@ -169,8 +169,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install management dependencies
-      run: |
-        pip install -r .builders/deps/host_dependencies.txt
+      run: pip install -r .builders/deps/host_dependencies.txt
 
     - name: Log in to GitHub Packages
       uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
@@ -181,12 +180,11 @@ jobs:
 
     - name: Build image and wheels
       if: needs.check-should-run.outputs.builder_changed == 'true'
-      run: |-
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
+      run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
 
     - name: Pull image and build wheels
       if: needs.check-should-run.outputs.builder_changed == 'false'
-      run: |-
+      run: |
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
 
@@ -202,7 +200,7 @@ jobs:
         > ${{ env.OUT_DIR }}/image_digest
 
     - name: Persist current image digest
-      if: needs.check-should-run.outputs.should_run_build == 'true' && needs.check-should-run.outputs.builder_changed == 'false'
+      if: needs.check-should-run.outputs.builder_changed == 'false'
       run: >-
         jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
         > ${{ env.OUT_DIR }}/image_digest
@@ -237,7 +235,7 @@ jobs:
 
     steps:
     - name: Set up environment
-      run: |-
+      run: |
         # We remove everything that comes pre-installed via Homebrew to avoid depending on or shipping stuff that
         # comes in the runner through Homebrew to better control what might get shipped in the wheels via `delocate`
         brew remove --force --ignore-dependencies $(brew list --formula)
@@ -247,7 +245,7 @@ jobs:
       env:
         # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
         PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.13.9/python-3.13.9-macos11.pkg"
-      run: |-
+      run: |
         curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
         sudo installer -pkg python3.pkg -target /
 
@@ -263,8 +261,7 @@ jobs:
       id: cache-builder-root
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
-        path: |
-          ~/builder_root
+        path: ~/builder_root
         key: macos-${{ matrix.job.arch }}-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/resolve-build-deps.yml') }}
 
     - name: Run the build
@@ -272,7 +269,7 @@ jobs:
         # This sets the minimum macOS version compatible for all built artifacts
         MACOSX_DEPLOYMENT_TARGET: "11.0" # https://docs.datadoghq.com/agent/supported_platforms/?tab=macos
         CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
-      run: |-
+      run: |
         # If we hit the cache, we can skip the builder setup
         if [[ ${CACHE_HIT} == "true" ]]; then
           ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
@@ -336,7 +333,7 @@ jobs:
       run: python .builders/lock.py targets
 
     - name: Clean up repository
-      run: |-
+      run: |
         rm ${{ steps.auth.outputs.credentials_file_path }}
         rm -rf targets
 
