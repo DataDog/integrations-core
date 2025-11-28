@@ -70,5 +70,17 @@ services:
     depends_on:
       - cert-builder
 
+  starttls-smtp:
+    container_name: smtp-valid
+    image: axllent/mailpit:v1.27.11
+    hostname: valid.mock
+    volumes:
+      - certs:/var/lib/certs/:ro
+    ports:
+      - "1025:1025"
+    command: --smtp-tls-cert=/var/lib/certs/smtp.valid.mock.crt --smtp-tls-key=/var/lib/certs/smtp.valid.mock.key
+    depends_on:
+      - cert-builder
+
 volumes:
   certs:
