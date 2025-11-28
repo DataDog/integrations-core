@@ -203,9 +203,7 @@ pipeline:
               F8DBABDFA03068130C277CE49C60E35C029FF29D9E3C74C362521F3FB02670D5),
               Zone Names: (Script Test,Server Test)"
           grok:
-            supportRules: |-
-              PARSE_TILL_COMMA2 %{regex("[^,]*")}
-              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+            supportRules: PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_appcontrol_rule Device Name:
               %{PARSE_TILL_COMMA2:device_name}, IP Address:
               %{notSpace:ip_addresses:array("()",",")}, Action:
@@ -238,7 +236,7 @@ pipeline:
           grok:
             supportRules: PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
             matchRules: "parse_audit_rule Message: %{PARSE_TILL_COMMA:message}, User:(
-              %{data:user})?(, Eco Id: %{data:eco_id})?"
+              %{data:user})?(, Eco Id: %{notSpace:eco_id})?"
     - type: pipeline
       name: Processing Aurora Protect Desktop Device Events
       enabled: true
@@ -268,13 +266,14 @@ pipeline:
             supportRules: |-
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
+              PARSE_TILL_SINGLE_QUOTE %{regex("[^']*")}
             matchRules: >-
               parse_rule_device1 Device Message: Device:
               %{PARSE_TILL_COMMA2:device_name}, User: %{PARSE_TILL_COMMA2:user},
               Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id:
               (%{notSpace:device_id})?
 
-              parse_rule_device2 Device Message: Renamed: '%{regex("[^']*"):previous_device}' to '%{regex("[^']*"):device_name}'(; Policy Changed: '%{regex("[^']*"):previous_policy}' to '%{regex("[^']*"):policy_name}')?(; Zones Added: '%{regex("[^']*"):zones_added}')?, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{PARSE_TILL_COMMA:zone_names})?(, Device Id: %{notSpace:device_id})?
+              parse_rule_device2 Device Message: Renamed: '%{PARSE_TILL_SINGLE_QUOTE:previous_device}' to '%{PARSE_TILL_SINGLE_QUOTE:device_name}'(; Policy Changed: '%{PARSE_TILL_SINGLE_QUOTE:previous_policy}' to '%{PARSE_TILL_SINGLE_QUOTE:policy_name}')?(; Zones Added: '%{PARSE_TILL_SINGLE_QUOTE:zones_added}')?, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{PARSE_TILL_COMMA:zone_names})?(, Device Id: %{notSpace:device_id})?
 
               parse_rule_device3 Device Names: %{data:device_names:array("()",",")}, Zone Name: %{PARSE_TILL_COMMA2:zone_name}, User: %{data:user}
 
@@ -618,7 +617,7 @@ pipeline:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
               %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
-              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Line: %{PARSE_TILL_COMMA2:instigating_process_command_line},
               Instigating Process File Path:
               %{PARSE_TILL_COMMA2:instigating_process_file_path}, Target Process
               Name: %{PARSE_TILL_COMMA2:target_process_name}, Target Process
@@ -626,7 +625,7 @@ pipeline:
               ImageFileSha256: (%{notSpace:target_process_imagefilesha256})?,
               Device Id: (%{notSpace:device_id})?, Target Process Command Line:
               %{PARSE_TILL_COMMA:target_process_command_line}, Target Process
-              File Path: %{data:target_process_file_path}'
+              File Path: (%{notSpace:target_process_file_path})?'
     - type: pipeline
       name: Processing Aurora Focus File Based Detection Events
       enabled: true
@@ -1186,12 +1185,12 @@ pipeline:
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: 'parse_api_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
-              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
-              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
-              Description: %{PARSE_TILL_COMMA:description}, Instigating Process
-              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
-              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
-              Instigating Process ImageFileSha256:
+              Names: %{data:zone_names}, Event Id: (%{notSpace:event_id})?,
+              Severity: (%{notSpace:severity})?, Description:
+              %{PARSE_TILL_COMMA:description}, Instigating Process Name:
+              %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating Process
+              Owner: %{PARSE_TILL_COMMA2:instigating_process_owner}, Instigating
+              Process ImageFileSha256:
               (%{notSpace:instigating_process_imagefilesha256})?, Event
               Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
               Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
@@ -1199,12 +1198,12 @@ pipeline:
               %{data:device_last_reported_users:array("()",",")}, Zone Ids:
               %{notSpace:zone_ids}, Detection Rule Id:
               (%{notSpace:detection_rule_id})?, Instigating Process Command
-              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Line: %{PARSE_TILL_COMMA2:instigating_process_command_line},
               Instigating Process File Path:
               %{PARSE_TILL_COMMA2:instigating_process_file_path}, API DLL:
               %{PARSE_TILL_COMMA2:api_dll}, API Function:
               %{PARSE_TILL_COMMA2:api_function}, API Parameters:
-              %{data:api_parameters}'
+              %{regex("[^$]*"):api_parameters}'
     - type: pipeline
       name: Processing Aurora Focus COM Based Detection Events
       enabled: true
