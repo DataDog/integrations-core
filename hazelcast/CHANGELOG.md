@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.4.0 / 2025-11-26
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
 ## 6.3.1 / 2025-10-31
 
 ***Fixed***:
