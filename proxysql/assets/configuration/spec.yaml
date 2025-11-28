@@ -31,6 +31,7 @@ files:
       required: true
       description: |
         The ProxySQL admin password.
+      secret: true
       value:
         type: string
         example: <PROXYSQL_ADMIN_PASSWORD>

@@ -55,5 +55,6 @@ files:
       - name: password
         required: true
         description: The password used together with the username for authentication against the Harbor API.
+        secret: true
         value:
           type: string

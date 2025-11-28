@@ -33,6 +33,7 @@ files:
         type: string
     - name: password
       description: Password for the Mcache status endpoint authentication.
+      secret: true
       value:
         type: string
     - name: options

@@ -50,6 +50,7 @@ files:
     - name: password
       description: |
         The password to use for authentication.
+      secret: true
       value:
         type: string
     - name: connection_scheme

@@ -34,6 +34,7 @@ files:
         display_default: "datadog"
     - name: password
       description: The password associated with the Datadog user.
+      secret: true
       value:
         type: string
     - name: dbname

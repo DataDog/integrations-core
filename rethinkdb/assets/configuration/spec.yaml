@@ -31,6 +31,7 @@ files:
 
           - name: password
             description: The password for the user account to connect as.
+            secret: true
             value:
               type: string
 

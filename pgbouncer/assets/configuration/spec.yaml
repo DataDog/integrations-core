@@ -32,6 +32,7 @@ files:
       - name: password
         description: |
           If `database_url` is not used, set up the password to use with the `password` parameter.
+        secret: true
         value:
           type: string
       - name: use_cached

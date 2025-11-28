@@ -45,6 +45,7 @@ files:
             description: |
               Password associated to the MySQL user.
             enabled: true
+            secret: true
             value:
               type: string
 

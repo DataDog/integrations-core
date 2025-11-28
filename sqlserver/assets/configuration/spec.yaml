@@ -48,6 +48,7 @@ files:
         type: string
     - name: password
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
+      secret: true
       value:
         type: string
     - name: server_version

@@ -22,6 +22,7 @@ files:
         example: <USER_DISTINGUISHED_NAME>
     - name: password
       description: Password associated with `username`
+      secret: true
       value:
         type: string
     - name: ssl_verify

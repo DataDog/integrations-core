@@ -41,6 +41,7 @@ files:
             example: <USERNAME>
         - name: password
           description: Required only if a password is configured.
+          secret: true
           value:
             type: string
             example: <PASSWORD>
