@@ -399,13 +399,13 @@ pipeline:
               PARSE_TILL_COMMA2 %{regex("[^,]*")}
             matchRules: "parse_script_control_rule Device Name:
               %{PARSE_TILL_COMMA2:device_name}, File Path:
-              %{PARSE_TILL_COMMA2:file_path}, SHA256: (%{notSpace:sha256})?,
-              (Status: %{PARSE_TILL_COMMA2:script_control_status},
-              )?Interpreter: (%{notSpace:interpreter})?, Interpreter Version:
+              %{PARSE_TILL_COMMA2:file_path}, SHA256: (%{notSpace:sha256})?(,
+              Status: %{PARSE_TILL_COMMA2:script_control_status})?, Interpreter:
+              (%{notSpace:interpreter})?, Interpreter Version:
               %{PARSE_TILL_COMMA2:interpreter_version}, Zone Names:
-              %{PARSE_TILL_COMMA:zone_names}, (User Name:
-              %{PARSE_TILL_COMMA:user}, )?Device I(d|D):
-              (%{notSpace:device_id})?, Policy Name: %{data:policy_name}"
+              %{data:zone_names}(, User Name: %{PARSE_TILL_COMMA:user})?, Device
+              I(d|D): (%{notSpace:device_id})?, Policy Name:
+              %{data:policy_name}"
     - type: pipeline
       name: Processing of Aurora Protect Desktop Threat Events
       enabled: true

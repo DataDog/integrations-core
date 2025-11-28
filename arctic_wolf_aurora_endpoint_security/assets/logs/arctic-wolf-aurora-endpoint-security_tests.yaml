@@ -258,7 +258,7 @@ tests:
       sha256: "DBEDAAF4FB3BFCB676F851C981351966E096DD25138AD07EC4D1A095A6485C5F"
       tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f3"
       tenant_name: "Mimecast"
-      zone_names: "(Windows Zone (Default)), User Name: "
+      zone_names: "(Windows Zone (Default))"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name: Mimecast, Event Type: ScriptControl, Event Name: Alert, Device Name: Unknown CLW 381, File Path: , SHA256: DBEDAAF4FB3BFCB676F851C981351966E096DD25138AD07EC4D1A095A6485C5F, Status: Unscored, Interpreter: PowershellScript, Interpreter Version: 10.0.22621.1 (WinBuild.160101.0800), Zone Names: (Windows Zone (Default)), User Name: , Device Id: cf753b5b-6ce6-4648-b2df-a827d3560b6f, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
     service: "desktop-events"
     tags:
