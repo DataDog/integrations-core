@@ -106,7 +106,7 @@ def status(
         if to_dd_org or to_dd_key:
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
 
-            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, compressed)
+            send_metrics_to_dd(app, commit, modules_plat_ver, to_dd_org, to_dd_key, compressed)
     except Exception as e:
         app.abort(str(e))
 
