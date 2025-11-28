@@ -17,9 +17,11 @@ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 
+
 class WheelSizes(TypedDict):
     compressed: int
     uncompressed: int
+
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -92,8 +94,11 @@ def main():
 
     print("--------------------------------")
     print("[DEBUGGING INFO]")
+    print("running on: ", sys.platform)
+    print("sys.version: ", sys.version)
     print("python_path: ", python_path)
-    print("Platform:",sys.platform)
+    subprocess.run([python_path, "--version"])
+    print("Platform:", sys.platform)
     print("--------------------------------")
     with TemporaryDirectory() as d:
         staged_wheel_dir = Path(d).resolve()
@@ -171,7 +176,6 @@ def main():
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
-
 
             sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
 
