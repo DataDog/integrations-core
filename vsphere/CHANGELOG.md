@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.0 / 2025-11-26
+
+***Added***:
+
+* Add infra_mode tag to vsphere metrics ([#21730](https://github.com/DataDog/integrations-core/pull/21730))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
 ## 9.1.1 / 2025-10-31
 
 ***Fixed***:
