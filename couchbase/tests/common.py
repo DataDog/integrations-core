@@ -37,8 +37,18 @@ COUCHBASE_MAJOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[0])
 COUCHBASE_MINOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[1])
 COUCHBASE_SYNCGW_MAJOR_VERSION = int(os.getenv('COUCHBASE_SYNCGW_VERSION').split(".")[0])
 COUCHBASE_SYNCGW_MINOR_VERSION = int(os.getenv('COUCHBASE_SYNCGW_VERSION').split(".")[1])
+COUCHBASE_METRIC_SOURCE = os.getenv('COUCHBASE_METRIC_SOURCE', 'rest')
+
+PROMETHEUS_URL = '{}/metrics'.format(URL)
 
 DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 1, 'tags': CUSTOM_TAGS}
+PROMETHEUS_INSTANCE = {
+    'prometheus_url': PROMETHEUS_URL,
+    'user': USER,
+    'password': PASSWORD,
+    'timeout': 1,
+    'tags': CUSTOM_TAGS,
+}
 
 SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.admin_net_bytes_recv",
@@ -211,6 +221,7 @@ INDEX_STATS_GAUGE_METRICS = [
     'couchbase.index.disk_size',
     'couchbase.index.frag_percent',
     'couchbase.index.initial_build_progress',
+    'couchbase.index.items_count',
     'couchbase.index.last_known_scan_time',
     'couchbase.index.num_docs_pending',
     'couchbase.index.num_docs_queued',
@@ -218,13 +229,11 @@ INDEX_STATS_GAUGE_METRICS = [
     'couchbase.index.recs_in_mem',
     'couchbase.index.recs_on_disk',
     'couchbase.index.resident_percent',
-    'couchbase.index.total_scan_duration',
 ]
 
 INDEX_STATS_COUNT_METRICS = [
     'couchbase.index.cache_hits',
     'couchbase.index.cache_misses',
-    'couchbase.index.items_count',
     'couchbase.index.num_docs_indexed',
     'couchbase.index.num_items_flushed',
     'couchbase.index.num_requests',
@@ -232,6 +241,7 @@ INDEX_STATS_COUNT_METRICS = [
     'couchbase.index.num_scan_errors',
     'couchbase.index.num_scan_timeouts',
     'couchbase.index.scan_bytes_read',
+    'couchbase.index.total_scan_duration',
 ]
 
 OPTIONAL_BY_BUCKET_METRICS = [
