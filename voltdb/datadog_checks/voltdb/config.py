@@ -39,6 +39,23 @@ STATISTICS_COMPONENTS_MAP = {
     "QUEUE": queries.QueueMetrics,
     "SNAPSHOTSTATUS": queries.SnapshotStatusMetrics,
     "TABLE": queries.TableMetrics,
+    "LIVECLIENTS": queries.LiveClientsMetrics,
+    "INITIATOR": queries.InitiatorMetrics,
+    "PARTITIONCOUNT": queries.PartitionCountMetrics,
+    "TTL": queries.TtlMetrics,
+    "COMPOUNDPROCCALLS": queries.CompoundProcCallsMetrics,
+    "COMPOUNDPROCSUMMARY": queries.CompoundProcSummaryMetrics,
+    "PROCEDUREDETAIL": queries.ProcedureDetailMetrics,
+    "PROCEDUREINPUT": queries.ProcedureInputMetrics,
+    "TASK": queries.TaskMetrics,
+    "TOPIC": queries.TopicMetrics,
+    "REBALANCE": queries.RebalanceMetrics,
+    "PLANNER": queries.PlannerMetrics,
+    "CLOCKSKEW": queries.ClockSkewMetrics,
+    "LIMITS": queries.LimitsMetrics,
+    "SNAPSHOTSUMMARY": queries.SnapshotsSummaryMetrics,
+    "COMPOUNDPROC": queries.CompoundProcMetrics,
+    "QUEUEPRIORITY": queries.QueuePriorityMetrics,
 }
 
 
