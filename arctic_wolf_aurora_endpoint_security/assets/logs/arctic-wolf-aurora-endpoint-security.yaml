@@ -1,92 +1,7 @@
 id: arctic-wolf-aurora-endpoint-security
 metric_id: arctic-wolf-aurora-endpoint-security
 backend_only: false
-facets: 
-  - groups:
-      - Web Access
-    name: Browser
-    path: http.useragent_details.browser.family
-    source: log
-  - groups:
-      - Web Access
-    name: Device
-    path: http.useragent_details.device.family
-    source: log
-  - groups:
-      - Web Access
-    name: OS
-    path: http.useragent_details.os.family
-    source: log
-  - groups:
-      - Geoip
-    name: City Name
-    path: network.client.geoip.city.name
-    source: log
-  - groups:
-      - Geoip
-    name: Continent Code
-    path: network.client.geoip.continent.code
-    source: log
-  - groups:
-      - Geoip
-    name: Continent Name
-    path: network.client.geoip.continent.name
-    source: log
-  - groups:
-      - Geoip
-    name: Country ISO Code
-    path: network.client.geoip.country.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Country Name
-    path: network.client.geoip.country.name
-    source: log
-  - groups:
-      - Geoip
-    name: Subdivision ISO Code
-    path: network.client.geoip.subdivision.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Subdivision Name
-    path: network.client.geoip.subdivision.name
-    source: log
-  - groups:
-      - Geoip
-    name: Destination City Name
-    path: network.destination.geoip.city.name
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Continent Code
-    path: network.destination.geoip.continent.code
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Continent Name
-    path: network.destination.geoip.continent.name
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Country ISO Code
-    path: network.destination.geoip.country.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Country Name
-    path: network.destination.geoip.country.name
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Subdivision ISO Code
-    path: network.destination.geoip.subdivision.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Destination Subdivision Name
-    path: network.destination.geoip.subdivision.name
-    source: log
+facets: null
 pipeline:
   type: pipeline
   name: Arctic Wolf Aurora Endpoint Security
@@ -104,25 +19,25 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - 'Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name:
-          Mimecast, Event Type: AuditLog, Event Name: LoginFailure, Message:
+        - 'Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f4, Tenant Name:
+          TenantName, Event Type: AuditLog, Event Name: LoginFailure, Message:
           {"data":[["Cylance Administrator Password","One-Time
-          Password"]],"clientIp":"163.116.205.114"}, User: Nilay Modi
-          (nilay.modi@crestdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Bs='
-        - 'Tenant Name: Mimecast, Event Type: AuditLog, Event Name:
+          Password"]],"clientIp":"163.116.205.118"}, User: John Carter
+          (john.carter@example.com), Eco Id: AqplNaZ7IyIQjDzBguyH5Ba='
+        - 'Tenant Name: TenantName, Event Type: AuditLog, Event Name:
           LoginFailure, Message: {"data":[["Cylance Administrator
-          Password","One-Time Password"]],"clientIp":"163.116.205.114"}, User:
-          Nilay Modi (nilay.modi@crestdata.ai), Eco Id:
-          AqplNaZ7IyIQjDzBguyH5Bs='
+          Password","One-Time Password"]],"clientIp":"163.116.205.118"}, User:
+          John Carter (john.carter@example.com), Eco Id:
+          AqplNaZ7IyIQjDzBguyH5Ba='
         - 'Event Type: AuditLog, Event Name: LoginFailure, Message:
           {"data":[["Cylance Administrator Password","One-Time
-          Password"]],"clientIp":"163.116.205.114"}, User: Nilay Modi
-          (nilay.modi@crestdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Bs='
-        - 'Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Event Type:
+          Password"]],"clientIp":"163.116.205.118"}, User: John Carter
+          (john.carter@example.com), Eco Id: AqplNaZ7IyIQjDzBguyH5Ba='
+        - 'Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f4, Event Type:
           AuditLog, Event Name: LoginFailure, Message: {"data":[["Cylance
           Administrator Password","One-Time
-          Password"]],"clientIp":"163.116.205.114"}, User: Nilay Modi
-          (nilay.modi@crestdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Bs='
+          Password"]],"clientIp":"163.116.205.118"}, User: John Carter
+          (john.carter@example.com), Eco Id: AqplNaZ7IyIQjDzBguyH5Ba='
         - "Event Name: OpticsCaeApiEvent, Device Name: SECURITYSERVER3, Zone
           Names: (ZoneOne,ZoneTwo), Event Id:
           d29ee101-a2a2-42f1-b9ab-7e4b18aeeef1, Severity: High, Description:
@@ -162,7 +77,8 @@ pipeline:
           name: detection-events
       target: service
     - type: category-processor
-      name: Categorize `service` for `evt.name`
+      name: Categorize `service` based on `evt.name` for Aurora Protect API Sensor
+        Desktop Events
       enabled: true
       categories:
         - filter:
@@ -185,19 +101,19 @@ pipeline:
           enabled: true
           source: additional_details
           samples:
-            - "Device Name: Unknown (test1), IP Address: (), Action: Deny,
+            - "Device Name: Unknown (test1), IP Address: (10.0.0.0), Action: Deny,
               Action Type: PE File Change, File Path: , SHA256:
-              56D1590A0D04771A1D5DBDEBEC7D4609A22B42085CEC07F0CF63222668FA5091,
+              56D1590A0D04771A1D5DBDEBEC7D4609A22B42085CEC07F0CF63222668FA5092,
               Zone Names: (Windows Zone (Default)), Device Id:
-              0929f443-2a56-46b3-bcfe-fc598da81d8c, Policy Name: Stage 3 - All
+              0929f443-2a56-46b3-bcfe-fc598da81d8b, Policy Name: Stage 3 - All
               Threats AQT + Critical Exploit Prevention + Malicious Script
               Prevention (Cylance Reference Policy)"
-            - "Device Name: WIN-7entSh64, IP Address: (192.168.119.128), Action:
+            - "Device Name: WIN-7entSh64, IP Address: (192.168.119.125), Action:
               Deny, Action Type: PEFileChange, File Path:
               C:\\Users\\admin\\AppData\\Local\\Temp\\MyInstaller.exe, SHA256:
               04D4DC02D96673ECA9050FE7201044FDB380E3CFE0D727E93DB35A709B45EDAA),
               Zone Names: (Script Test,Server Test)"
-            - "Device Name: WIN-7entSh64, IP Address: (192.168.119.128), Action:
+            - "Device Name: WIN-7entSh64, IP Address: (192.168.119.125), Action:
               Deny, Action Type: PEFileChange, File Path:
               \\\\shared1\\psexec.exe, SHA256:
               F8DBABDFA03068130C277CE49C60E35C029FF29D9E3C74C362521F3FB02670D5),
@@ -223,13 +139,13 @@ pipeline:
           source: additional_details
           samples:
             - 'Message: {"data":[["Cylance Administrator Password","One-Time
-              Password"]],"clientIp":"163.116.205.114"}, User: Nilay Modi
-              (nilay.modi@crestdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Bs='
-            - "Message: Policy Assigned: Focus; Devices: DESKTOP-Q401L6N, User:
-              Nilay Modi (nilay.modi@crestdata.ai)"
+              Password"]],"clientIp":"163.116.205.115"}, User: John Carter
+              (john.carter@example.com), Eco Id: AqplNaZ7IyIQjDzBguyH5Ba='
+            - "Message: Policy Assigned: Focus; Devices: DESKTOP-Q401L6B, User:
+              John Carter (john.carter@example.com)"
             - 'Message:
               {"Enable":true,"Siem":"Other","UseSsl":false,"ServerAddress":"103.108.207.59","ServerPort":"9809","Protocol":"tcp","Severity":7,"Facility":16,"TenantIdentifierLogging":0,"EnableForAppControl":true,"EnableForAuditLog":true,"EnableForDevice":true,"EnableForExploitAttempt":true,"EnableForDeviceControl":true,"EnableForOptics":true,"EnableForThreat":true,"EnableForThreatClassification":true,"EnableForScriptControl":true,"EnableForMobileAlerts":true,"EnableForNetworkThreats":true,"EnableForDirectorySync":false,"EnableForAvert":true,"EnableForRiskAssessment":false,"EnableMessagesOver2KB":true,"EnableForCloudWorkload":false,"CustomToken":"","TenantPreferredNotificationEmails":null},
-              User: Nilay Modi (nilay.modi@crestdata.ai)'
+              User: John Carter (john.carter@example.com)'
             - "Message: Device: IT’s MacBook Air was auto assigned to Zone: Mac
               Zone (Default); Policy Changed: 'Default' to 'Stage 1 - Threat
               Monitoring (Cylance Reference Policy)', User:"
@@ -248,18 +164,17 @@ pipeline:
           enabled: true
           source: additional_details
           samples:
-            - "Device Names: (AssetTag-EID, , , IT’s MacBook Air, , , ,
-              CREST-E7E9A2EH1, , , , ), Zone Name: CDS Devices, User: Nilay Modi
-              (nilay.modi@crestdata.ai)"
+            - "Device Names: (AssetTag-EID,IT’s MacBook Air,TEST-E7E9A2EH1), Zone Name: Test Devices, User: John Carter
+              (john.carter@example.com)"
             - "Device Name: AssetTag-EID, Zone Names: (), Device Id:
-              b1f8e376-cee3-4319-a076-f587c51e68aa"
-            - "Device Names: (), User: Nilay Modi (nilay.modi@crestdata.ai),
+              b1f8e376-cee3-4319-a076-f587c51e68ab"
+            - "Device Names: (device1), User: John Carter (john.carter@example.com),
               Zone Names: (Mac Zone (Default)), Device Ids:
-              (4ce89db7-c31f-4279-a979-35d78548a673)"
-            - "Device Message: Renamed: '' to 'Unknown'; Policy Changed:
-              'Default' to 'IRVPolicy1'; Zones Added: 'IRV1', User: Nilay Modi
-              (nilay.modi@crestdata.ai), Zone Names: (Windows Zone (Default)),
-              Device Id: 4af77c47-6b60-4807-ad95-ddabad5f4528"
+              (4ce89db7-c31f-4279-a979-35d78548a674)"
+            - "Device Message: Renamed: 'default' to 'Unknown'; Policy Changed:
+              'Default' to 'IRVPolicy1'; Zones Added: 'IRV1', User: John Carter
+              (john.carter@example.com), Zone Names: (Windows Zone (Default)),
+              Device Id: 4af77c47-6b60-4807-ad95-ddabad5f4524"
             - "Device Name: Unknown (test1), Last Scan: 11/25/2025 09:39:31,
               Next Scan: 11/26/2025 06:53:24"
           grok:
@@ -279,7 +194,7 @@ pipeline:
 
               parse_rule_device4 Device Names: %{data:device_names:array("()",",")}(, Policy Name: %{PARSE_TILL_COMMA2:policy_name})?, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{data:zone_names})?(, Device Ids: %{notSpace:device_ids:array("()",",")})?
 
-              parse_rule_device5 Device Name: %{PARSE_TILL_COMMA2:device_name}, Agent Version: %{PARSE_TILL_COMMA2:agent_version}, IP Address: %{notSpace:ip_addresses:array("()",",")}, MAC Address: %{notSpace:mac_addresses:array("()",",")}, Logged On Users: %{data:logged_on_users}, OS: %{PARSE_TILL_COMMA2:os}, Kernel Version: %{PARSE_TILL_COMMA2:kernel_version}, Optics Version: %{PARSE_TILL_COMMA2:optics_version}, Zone Names: %{data:zone_names}
+              parse_rule_device5 Device Name: %{PARSE_TILL_COMMA2:device_name}, Agent Version: %{PARSE_TILL_COMMA2:agent_version}, IP Address: %{notSpace:ip_addresses:array("()",",")}, MAC Address: %{notSpace:mac_addresses:array("()",",")}, Logged On Users: %{data:logged_on_users}, OS: %{PARSE_TILL_COMMA2:os}(, Kernel Version: %{PARSE_TILL_COMMA2:kernel_version})?(, Optics Version: %{PARSE_TILL_COMMA2:optics_version})?(, Zone Names: %{data:zone_names})?
 
               parse_rule_device6 Device Name: %{PARSE_TILL_COMMA2:device_name}, Last Scan: %{data:last_scan}(, Next Scan: %{data:next_scan})?
 
@@ -295,14 +210,14 @@ pipeline:
           enabled: true
           source: additional_details
           samples:
-            - "Device Name: , External Device Type: USBDrive, External Device
-              Vendor ID: 090C, External Device Name: USB Flash DISK USB Device,
-              External Device Product ID: 1000, External Device Serial Number:
-              1408033910001641, Zone Names: (Windows Zone (Default)), Device Id:
-              cf753b5b-6ce6-4648-b2df-a827d3560b6f, Policy Name: Stage 3 - All
+            - "Device Name: Test_Device_1, External Device Type: USBDrive, External Device
+              Vendor ID: 090B, External Device Name: USB Flash DISK USB Device,
+              External Device Product ID: 1001, External Device Serial Number:
+              1408033910001642, Zone Names: (Windows Zone (Default)), Device Id:
+              cf753b5b-6ce6-4648-b2df-a827d3560b6a, Policy Name: Stage 3 - All
               Threats AQT + Critical Exploit Prevention + Malicious Script
               Prevention (Cylance Reference Policy)"
-            - "Device Name: Test_Device_1, External Device Type: iOS, External
+            - "Device Name: Test_Device_1, External Device Type: USBDrive, External
               Device Vendor ID: 1953, External Device Name: Generic USB Drive -
               2017/02/16-01, External Device Product ID: 0202, External Device
               Serial Number: 575833314133343210041246, Zone Names:
@@ -329,18 +244,18 @@ pipeline:
           enabled: true
           source: additional_details
           samples:
-            - "Device Name: Unknown (test1), IP Address: (), Action: Terminated,
-              Process ID: 18288, Process Name: SearchProtocolHost.exe, User
-              Name: , Violation Type: Direct System Calls, Zone Names: (Windows
-              Zone (Default)), Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8c,
+            - "Device Name: Unknown (test1), IP Address: (10.0.0.0), Action: Terminated,
+              Process ID: 18280, Process Name: SearchProtocolHost.exe, User
+              Name: admin, Violation Type: Direct System Calls, Zone Names: (Windows
+              Zone (Default)), Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8t,
               Policy Name: Stage 3 - All Threats AQT + Critical Exploit
               Prevention + Malicious Script Prevention (Cylance Reference
               Policy)"
-            - "Device Name: WIN-7entSh64, IP Address: (192.168.119.128), Action:
+            - "Device Name: WIN-7entSh64, IP Address: (192.168.119.125), Action:
               Blocked, Process ID: 3804, Process Name: C:\\AttackTest64.exe,
               User Name: admin, Violation Type: LSASS Read, Zone Names: (Script
               Test,Server Test), Device ID:
-              e378dacb-9324-453a-b8c6-5a8406952195"
+              e378dacb-9324-453a-b8c6-5a8406952192"
           grok:
             supportRules: |-
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
@@ -365,24 +280,24 @@ pipeline:
           enabled: true
           source: additional_details
           samples:
-            - "Device Name: Unknown (test1), File Path: , SHA256:
-              FEA0867AE0769D8858FFD94EA93EFBFE5C4531DB8CA75719D42BF074FE22F902,
+            - "Device Name: Unknown (test1), File Path: c:/test1/test2, SHA256:
+              FEA0867AE0769D8858FFD94EA93EFBFE5C4531DB8CA75719D42BF074FE22F906,
               Status: Unscored, Interpreter: Jscript, Interpreter Version:
-              10.0.22621.5983, Zone Names: (Windows Zone (Default)), User Name:
-              , Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8c, Policy Name:
+              10.0.22621.5982, Zone Names: (Windows Zone (Default)), User Name: user1
+              , Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8b, Policy Name:
               Stage 3 - All Threats AQT + Critical Exploit Prevention +
               Malicious Script Prevention (Cylance Reference Policy)"
-            - "Device Name: , File Path: , SHA256:
-              fe9b64defd8bf214c7490aa7f35b495a79a95e81f8943ee279dc99998d3d3440,
+            - "Device Name: test1, File Path: c:/test1/test2, SHA256:
+              fe9b64defd8bf214c7490aa7f35b495a79a95e81f8943ee279dc99998d3d3444,
               Status: Unscored, Interpreter: PowershellConsole, Interpreter
-              Version: 10.0.22621.1 (WinBuild.160101.0800), Zone Names: (Windows
-              Zone (Default)), User Name: , Device Id:
+              Version: 10.0.22621.1 (WinBuild.160101.0803), Zone Names: (Windows
+              Zone (Default)), User Name: user1, Device Id:
               191c967b-264c-46c3-999b-94c071e2e790, Policy Name: Focus"
-            - "Device Name: , File Path: , SHA256:
-              fe9b64defd8bf214c7490aa7f35b495a79a95e81f8943ee279dc99998d3d3440,
+            - "Device Name: test1, File Path: c:/test1/test2, SHA256:
+              fe9b64defd8bf214c7490aa7f35b495a79a95e81f8943ee279dc99998d3d3441,
               Interpreter: PowershellConsole, Interpreter Version: 10.0.22621.1
-              (WinBuild.160101.0800), Zone Names: (Windows Zone (Default)), User
-              Name: , Device Id: 191c967b-264c-46c3-999b-94c071e2e790, Policy
+              (WinBuild.160101.0803), Zone Names: (Windows Zone (Default)), User
+              Name: , Device Id: 191c967b-264c-46c3-999b-94c071e2e79u, Policy
               Name: Focus"
             - "Device Name: Fake_Device, File Path:
               d:\\windows\\system32\\windowspowershell\\v2.1\\newlyMade.vbs,
@@ -416,17 +331,17 @@ pipeline:
           enabled: true
           source: additional_details
           samples:
-            - "Device Name: , IP Address: (), File Name: , Path: , Drive Type:
+            - "Device Name: Fakedevice, IP Address: (10.0.0.0), File Name: file_1, Path: c:/test1/test2, Drive Type:
               Internal Hard Drive, SHA256:
-              1C7E66126306537A453D7A792978464AA8AD5AC2F34BD1FCCFFFE7E0B9C6D85C,
-              MD5: D2EBA7BA9D87AC9D902D39540C7854EB, Status: Quarantined,
+              1C7E66126306537A453D7A792978464AA8AD5AC2F34BD1FCCFFFE7E0B9C6D85A,
+              MD5: D2EBA7BA9D87AC9D902D39540C7854EA, Status: Quarantined,
               Cylance Score: 100, Found Date: 11/18/2025 12:06:53 PM, File Type:
               Executable, Is Running: False, Auto Run: False, Detected By:
               FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware:
               True, Is Unique To Cylance: False, Threat Classification: Malware
               - Trojan - msil/convagent, Device Id:
-              3daa966a-3b70-4a5a-90fd-33aee165ea1f, Policy Name: Focus"
-            - "Device Name: , IP Address: (), File Name: , Path: , Drive Type:
+              3daa966a-3b70-4a5a-90fd-33aee165ea1a, Policy Name: Focus"
+            - "Device Name: Fake_Device, IP Address: (10.0.0.0), File Name: testfile, Path: c:/test/test1, Drive Type:
               Internal Hard Drive, SHA256:
               93502C2277984F26EE5C0B7F74AA1045C5CF648F8511939CDAE130F051BCF7B4,
               MD5: BA1D384701CD80CF80428F3729369584, Status: Default, Cylance
@@ -436,7 +351,7 @@ pipeline:
               False, Is Unique To Cylance: False, Threat Classification:
               UNCLASSIFIED, Device Id: 3daa966a-3b70-4a5a-90fd-33aee165ea1f,
               Policy Name: Focus"
-            - "Device Name: , IP Address: (), File Name: , Path: , Drive Type:
+            - "Device Name: Fake_Device, IP Address: (10.0.0.0), File Name: testfile, Path: c:/test/test1, Drive Type:
               Internal Hard Drive, SHA256:
               780BB152049A5921FABBE0DE066B53C36BF45D895B60B1651E35C69052E6703D,
               MD5: EDF913F2D9993F003E5FE25BE9A48929, Status: FileRemoved,
@@ -446,7 +361,7 @@ pipeline:
               False, Is Unique To Cylance: False, Threat Classification:
               UNCLASSIFIED, Device Id: 3daa966a-3b70-4a5a-90fd-33aee165ea1f,
               Policy Name: Focus"
-            - "Device Name: , IP Address: (), File Name: , Path: , Drive Type:
+            - "Device Name: Fake_Device, IP Address: (10.0.0.0), File Name: file_1, Path: c:/test/test1, Drive Type:
               Internal Hard Drive, SHA256:
               FD4BB08C311EB04165C7DE20F21B2A4BF78776ABAB859448976BDE951BC8F593,
               MD5: 2E2D79BAF18F763D0059ED1149871D79, Status: Quarantined,
@@ -461,7 +376,7 @@ pipeline:
               c:\\ruby\\host_automation\\test\\data\\test_files\\, Drive Type:
               None, File Owner: SH-Win81-1\\Exampleuser, SHA256:
               1EBF3B8A61A7E0023AAB3B0CB24938536A1D87BCE1FCC6442E137FB2A7DD510B,
-              MD5: , Status: Unsafe, Cylance Score: 100, Found Date: 6/1/2015
+              MD5: 1EBF3B8A61A7E0023AAB3B0CB24938536A1D87BCE1FCC6442E137FB2A7DD510A, Status: Unsafe, Cylance Score: 100, Found Date: 6/1/2015
               10:57:42 PM, File Type: Executable, Is Running: False, Auto Run:
               False, Detected By: FileWatcher, Zone Names: (Script Test,Server
               Test), Is Malware: False, Is Unique to Cylance: False, Threat
@@ -510,10 +425,10 @@ pipeline:
           samples:
             - "Threat Class: Malware, Threat Subclass: Dropper, Threat Family:
               injuke, SHA256:
-              5B63698F6FC9FBEE366BD01AF6A383652B09FC1B136A3408EB4187FD3C12973A,
-              MD5: 30AD7FF97EEDC9D14F06F9A8C96DC066"
+              5B63698F6FC9FBEE366BD01AF6A383652B09FC1B136A3408EB4187FD3C12973B,
+              MD5: 30AD7FF97EEDC9D14F06F9A8C96DC065"
             - "SHA256:
-              1218493137321C1D1F897B0C25BEF17CDD0BE9C99B84B4DD8B51EAC8F9794F65,
+              1218493137321C1D1F897B0C25BEF17CDD0BE9C99B84B4DD8B51EAC8F9794F68,
               Threat Classification: Malware - Worm - QuKart"
           grok:
             supportRules: |-
@@ -538,42 +453,42 @@ pipeline:
           source: additional_details
           samples:
             - "Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
-              Id: 1ac592a3-357f-43b9-86f5-6f750f809a2f, Severity: Low,
+              Id: 1ac592a3-357f-43b9-86f5-6f750f809a2a, Severity: Low,
               Description: Application Shimming Persistence (MITRE), Instigating
               Process Name: svchost.exe, Instigating Process Owner: NT
               AUTHORITY//SYSTEM, Instigating Process ImageFileSha256:
-              949BFB5B4C7D58D92F3F9C5F8EC7CA4CEAFFD10EC5F0020F0A987C472D61C54B,
+              949BFB5B4C7D58D92F3F9C5F8EC7CA4CEAFFD10EC5F0020F0A987C472D61C54A,
               Event Timestamp: 2025-11-20T04:46:43.792Z, Event Received
               Timestamp: 2025-11-20T04:46:51Z, Device Last Reported Users:
-              (admin\\crest,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone
+              (admin\\test,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone
               Ids: (E79C47BC6292419DBD0AE117798FB353), Detection Rule Id:
-              5e5b01a7-2bdf-49c9-a58b-82703706a84d, Instigating Process Command
+              5e5b01a7-2bdf-49c9-a58b-82703706a84f, Instigating Process Command
               Line: C:\\Windows\\system32\\svchost.exe -k
               LocalSystemNetworkRestricted -p -s PcaSvc, Instigating Process
               File Path: c:\\windows\\system32\\svchost.exe, Target Process
               Name: sdbinst.exe, Target Process Owner: NT AUTHORITY//SYSTEM,
               Target Process ImageFileSha256:
-              7E6B42AF9D8B1E1A4EFDEEB152997C7C9BBFA010B2FCE65BEF29A2903819E0E5,
+              7E6B42AF9D8B1E1A4EFDEEB152997C7C9BBFA010B2FCE65BEF29A2903819E0E6,
               Device Id: 191c967b-264c-46c3-999b-94c071e2e790, Target Process
               Command Line: C:\\Windows\\System32\\sdbinst.exe -m -bg, Target
               Process File Path: c:\\windows\\system32\\sdbinst.exe"
             - "Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
-              Id: 72de5df2-5700-4977-9b66-580e6e697428, Severity: Low,
+              Id: 72de5df2-5700-4977-9b66-580e6e697426, Severity: Low,
               Description: Application Shimming Persistence (MITRE), Instigating
               Process Name: svchost.exe, Instigating Process Owner: NT
               AUTHORITY//SYSTEM, Instigating Process ImageFileSha256:
-              949BFB5B4C7D58D92F3F9C5F8EC7CA4CEAFFD10EC5F0020F0A987C472D61C54B,
+              949BFB5B4C7D58D92F3F9C5F8EC7CA4CEAFFD10EC5F0020F0A987C472D61C54A,
               Event Timestamp: 2025-11-19T21:46:33.166Z, Event Received
               Timestamp: 2025-11-19T21:46:42Z, Device Last Reported Users:
-              (admin\\crest,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone
-              Ids: (E79C47BC6292419DBD0AE117798FB353), Detection Rule Id:
-              5e5b01a7-2bdf-49c9-a58b-82703706a84d, Instigating Process Command
+              (admin\\test,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone
+              Ids: (E79C47BC6292419DBD0AE117798FB354), Detection Rule Id:
+              5e5b01a7-2bdf-49c9-a58b-82703706a84f, Instigating Process Command
               Line: C:\\Windows\\system32\\svchost.exe -k
               LocalSystemNetworkRestricted -p -s PcaSvc, Instigating Process
               File Path: c:\\windows\\system32\\svchost.exe, Target Process
               Name: sdbinst.exe, Target Process Owner: NT AUTHORITY//SYSTEM,
               Target Process ImageFileSha256:
-              7E6B42AF9D8B1E1A4EFDEEB152997C7C9BBFA010B2FCE65BEF29A2903819E0E5,
+              7E6B42AF9D8B1E1A4EFDEEB152997C7C9BBFA010B2FCE65BEF29A2903819E0E8,
               Device Id: 191c967b-264c-46c3-999b-94c071e2e790, Target Process
               Command Line: C:\\Windows\\System32\\sdbinst.exe -m -bg, Target
               Process File Path: c:\\windows\\system32\\sdbinst.exe"
@@ -638,31 +553,31 @@ pipeline:
           source: additional_details
           samples:
             - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
-              Id: 3013d82e-6b4c-4677-a334-3fd4934fed7a, Severity: Informational,
+              Id: 3013d82e-6b4c-4677-a334-3fd4934fed7f, Severity: Informational,
               Description: Win Browser CredTheft Mitre T1003, Instigating
-              Process Name: msedge.exe, Instigating Process Owner: admin//crest,
+              Process Name: msedge.exe, Instigating Process Owner: admin//test,
               Instigating Process ImageFileSha256:
-              2C853AA78C45045C540668AC2EE63407CEF02EE55BFAFD6F678EC9E84EC23CBB,
+              2C853AA78C45045C540668AC2EE63407CEF02EE55BFAFD6F678EC9E84EC23CBA,
               Event Timestamp: 2025-11-19T09:45:11.336Z, Event Received
               Timestamp: 2025-11-19T09:45:17Z, Device Last Reported Users:
-              (admin\crest1,admin\crest,Window Manager\DWM-1,Window
+              (admin\test1,admin\test,Window Manager\DWM-1,Window
               Manager\DWM-2,Window Manager\DWM-3), Zone Ids:
-              (E79C47BC6292419DBD0AE117798FB353), Detection Rule Id:
-              26cadfe8-1b8c-489c-ae29-115b5bc9d591, Instigating Process Command
+              (E79C47BC6292419DBD0AE117798FB355), Detection Rule Id:
+              26cadfe8-1b8c-489c-ae29-115b5bc9d592, Instigating Process Command
               Line: "C:\Program Files
               (x86)\Microsoft\Edge\Application\msedge.exe" --type=utility
               --utility-sub-type=chrome.mojom.ProfileImport --lang=en-US
               --service-sandbox-type=none --skip-read-main-dll
-              --metrics-shmem-handle=5020,i,3478498035652716424,1717516754338192010,524288
+              --metrics-shmem-handle=5020,i,3478498035652716424,1717516754338292010,524288
               --field-trial-handle=2372,i,11122849255781664600,8070874040734229388,262144
               --variations-seed-version
               --trace-process-track-uuid=3190708991934122588
               --mojo-platform-channel-handle=5012 /prefetch:14, Instigating
               Process File Path: c:\program files
               (x86)\microsoft\edge\application\msedge.exe, Target File Path:
-              c:\users\crest\appdata\local\google\chrome\user data\default\login
-              data for account, Target File Owner: admin//crest, Target File
-              Sha256: , Device Id: 191c967b-264c-46c3-999b-94c071e2e790'
+              c:\users\test\appdata\local\google\chrome\user data\default\login
+              data for account, Target File Owner: admin//test, Target File
+              Sha256: hduy64t8459u59590i95923099, Device Id: 191c967b-264c-46c3-999b-94c071e2e790'
             - 'Device Name: SECURITYSERVER3, Zone Names:
               (JeffTesting,JeffSecurityServer), Event Id:
               f4739af7-9c8b-4dc0-aeb7-2d4533445d49, Severity: Medium,
@@ -680,25 +595,25 @@ pipeline:
               Instigating Process File Path: c:\windows\system32\cmd.exe, Target
               File Path:
               c:\users\administrator.pentest\downloads\syslog_test_cae_rules\cylancetest.txt,
-              Target File Owner: BUILTIN//Administrators, Target File Sha256: ,
+              Target File Owner: BUILTIN//Administrators, Target File Sha256: hduy64t8459u59590i95923099,
               Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954'
-            - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default),CDS
+            - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default),test
               Devices), Event Id: c259013f-7294-41c4-8d5a-426dfd117d68,
               Severity: Informational, Description: Win Browser CredentialTheft
               Mitre T1003, Instigating Process Name: chrome.exe, Instigating
-              Process Owner: admin//crest, Instigating Process ImageFileSha256:
+              Process Owner: admin//test, Instigating Process ImageFileSha256:
               5186B823F4E174B13B9F60BB76ED89FE8FD44487B34B79DFE283275A13BD948B,
               Event Timestamp: 2025-11-26T15:55:36.812Z, Event Received
               Timestamp: 2025-11-26T15:55:54Z, Device Last Reported Users:
-              (admin\crest,Window Manager\DWM-1,Window Manager\DWM-2), Zone Ids:
+              (admin\test,Window Manager\DWM-1,Window Manager\DWM-2), Zone Ids:
               (E79C47BC6292419DBD0AE117798FB353,8F852781BD6E413285B0CD324F055674),
               Detection Rule Id: d935a7df-2114-442f-a44a-728485ff1cc5,
               Instigating Process Command Line: "C:\Program
               Files\Google\Chrome\Application\chrome.exe" , Instigating Process
               File Path: c:\program files\google\chrome\application\chrome.exe,
-              Target File Path: c:\users\crest\appdata\local\google\chrome\user
+              Target File Path: c:\users\test\appdata\local\google\chrome\user
               data\default\preferences~rf24ba61f2.tmp, Target File Owner:
-              admin//crest, Target File Sha256: , Device Id:
+              admin//test, Target File Sha256: hduy64t8459u59590i95923099, Device Id:
               191c967b-264c-46c3-999b-94c071e2e790'
           grok:
             supportRules: |-
@@ -755,7 +670,7 @@ pipeline:
               c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\
               \\icreatepersistencepoints.exe, Target Registry KeyPath:
               HKLM\\software\\classes\\*\\shellex\\contextmenuhandlers\\cywares\
-              hlext, Target Registry ValueName: , Device Id:
+              hlext, Target Registry ValueName: Unknown, Device Id:
               c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
           grok:
             supportRules: |-
@@ -794,25 +709,25 @@ pipeline:
           source: additional_details
           samples:
             - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
-              Id: fbc31190-9974-48b9-956c-5e080bd6ad5a, Severity: Low,
+              Id: fbc31190-9974-48b9-956c-5e080bd6ad5b, Severity: Low,
               Description: Unsigned Application Network Beaconing, Instigating
-              Process Name: FXAALZ.exe, Instigating Process Owner: admin//crest,
+              Process Name: FXAALZ.exe, Instigating Process Owner: admin//test,
               Instigating Process ImageFileSha256:
-              F0AAAE0364306BB7A4681D01935C96C2AC76B3576B7982990F86BCAF811A45BA,
+              F0AAAE0364306BB7A4681D01935C96C2AC76B3576B7982990F86BCAF811A45BC,
               Event Timestamp: 2025-11-19T09:52:15.782Z, Event Received
               Timestamp: 2025-11-19T09:52:22Z, Device Last Reported Users:
-              (admin\crest1,admin\crest,Window Manager\DWM-1,Window
+              (admin\test1,admin\test,Window Manager\DWM-1,Window
               Manager\DWM-2,Window Manager\DWM-3), Zone Ids:
-              (E79C47BC6292419DBD0AE117798FB353), Detection Rule Id:
-              6ab20572-8eb4-41a8-a8ea-d16766de0e44, Instigating Process Command
+              (E79C47BC6292419DBD0AE117798FB356), Detection Rule Id:
+              6ab20572-8eb4-41a8-a8ea-d16766de0e47, Instigating Process Command
               Line: "C:\CPZIVC\FXAALZ.exe" -f C:\CPZIVC\NGHVQE, Instigating
               Process File Path: c:\cpzivc\fxaalz.exe, Destination IP:
-              142.202.51.68, Destination Port: 9001, Device Id:
-              191c967b-264c-46c3-999b-94c071e2e790, Source IP: 192.168.90.23,
-              Source Port: 61132'
+              142.202.51.69, Destination Port: 9006, Device Id:
+              191c967b-264c-46c3-999b-94c071e2e797, Source IP: 192.168.90.24,
+              Source Port: 61130'
             - "Device Name: SECURITYSERVER3, Zone Names:
               (JeffTesting,JeffSecurityServer), Event Id:
-              23a04c4c-1a97-4a58-b4bc-fadadb729e32, Severity: Medium,
+              23a04c4c-1a97-4a58-b4bc-fadadb729e37, Severity: Medium,
               Description: SYSLOG detections - Looking for NetworkConnection
               8.8.8.8, Instigating Process Name: ICreateNetworkConnections.exe,
               Instigating Process Owner: PENTEST//Administrator, Instigating
@@ -830,22 +745,22 @@ pipeline:
               Destination Port: 29281, Device Id:
               c7b79f9f-4fbe-4f90-9658-ec7e17af1954, Source IP: 192.168.254.102,
               Source Port: 52912"
-            - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default),CDS
-              Devices), Event Id: c202bf55-4a24-4f8a-9922-f4627db91f8b,
+            - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default),test
+              Devices), Event Id: c202bf55-4a24-4f8a-9922-f4627db91f8a,
               Severity: Low, Description: Unsigned Application Network
               Beaconing, Instigating Process Name: FXAALZ.exe, Instigating
-              Process Owner: admin//crest, Instigating Process ImageFileSha256:
-              F0AAAE0364306BB7A4681D01935C96C2AC76B3576B7982990F86BCAF811A45BA,
+              Process Owner: admin//test, Instigating Process ImageFileSha256:
+              F0AAAE0364306BB7A4681D01935C96C2AC76B3576B7982990F86BCAF811A45Bb,
               Event Timestamp: 2025-11-26T13:58:04.424Z, Event Received
               Timestamp: 2025-11-26T13:58:21Z, Device Last Reported Users:
-              (admin\crest,Window Manager\DWM-1,Window Manager\DWM-2), Zone Ids:
-              (E79C47BC6292419DBD0AE117798FB353,8F852781BD6E413285B0CD324F055674),
-              Detection Rule Id: 6ab20572-8eb4-41a8-a8ea-d16766de0e44,
+              (admin\test,Window Manager\DWM-1,Window Manager\DWM-2), Zone Ids:
+              (E79C47BC6292419DBD0AE117798FB358,8F852781BD6E413285B0CD324F055676),
+              Detection Rule Id: 6ab20572-8eb4-41a8-a8ea-d16766de0e43,
               Instigating Process Command Line: "C:\CPZIVC\FXAALZ.exe" -f
               C:\CPZIVC\NGHVQE, Instigating Process File Path:
-              c:\cpzivc\fxaalz.exe, Destination IP: 45.9.156.105, Destination
-              Port: 8430, Device Id: 191c967b-264c-46c3-999b-94c071e2e790,
-              Source IP: 192.168.90.23, Source Port: 10007'
+              c:\cpzivc\fxaalz.exe, Destination IP: 45.9.156.106, Destination
+              Port: 8438, Device Id: 191c967b-264c-46c3-999b-94c071e2e793,
+              Source IP: 192.168.90.24, Source Port: 10067'
           grok:
             supportRules: |-
               PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
