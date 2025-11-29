@@ -1,0 +1,9 @@
+name: Arctic Wolf Aurora Endpoint Security
+files:
+- name: arctic_wolf_aurora_endpoint_security.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/arctic_wolf_aurora_endpoint_security.log
+      source: arctic_wolf_aurora_endpoint_security
