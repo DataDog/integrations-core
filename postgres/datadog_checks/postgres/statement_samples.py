@@ -875,6 +875,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         if explain_err_code:
             collection_errors = [{'code': explain_err_code.value, 'message': err_msg if err_msg else None}]
 
+        plan_type = "explain"
+        if explain_err_code == DBExplainError.explained_with_prepared_statement:
+            plan_type = "explain_generic"
+
         raw_plan, normalized_plan, obfuscated_plan, plan_signature, raw_plan_signature = None, None, None, None, None
         if plan_dict:
             raw_plan = json.dumps(plan_dict)
@@ -916,6 +920,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                         "definition": obfuscated_plan,
                         "signature": plan_signature,
                         "collection_errors": collection_errors,
+                        "source": "datadog_agent",
+                        "type": plan_type
                     },
                     "query_signature": row['query_signature'],
                     "resource_hash": row['query_signature'],
