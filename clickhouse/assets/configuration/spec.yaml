@@ -14,7 +14,6 @@ files:
   - template: instances
     options:
     - name: server
-      required: true
       description: The hostname used to connect to the system.
       value:
         type: string
@@ -51,7 +50,7 @@ files:
       description: |
         The compression algorithm to use. The default is no compression.
         If br is specified, the brotli library must be installed separately.
-        
+
         Valid values are:
           - lz4
           - zstd
@@ -73,6 +72,151 @@ files:
       value:
         type: boolean
         example: True
+    - name: dbm
+      description: |
+        Enable Database Monitoring (DBM) to collect query samples and execution plans.
+        This feature provides deep observability into query performance.
+      value:
+        type: boolean
+        example: false
+    - name: query_samples
+      description: |
+        Configuration for collecting query samples when Database Monitoring (DBM) is enabled.
+        Query samples provide insights into the queries being executed on your ClickHouse instance.
+      options:
+        - name: enabled
+          description: Enable collection of query samples.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            The interval in seconds between query sample collections.
+            Lower values provide more granular data but increase overhead.
+          value:
+            type: number
+            example: 10
+        - name: samples_per_hour_per_query
+          description: |
+            The maximum number of samples to collect per unique query signature per hour.
+            This helps limit the volume of data collected while still providing useful insights.
+          value:
+            type: number
+            example: 15
+        - name: seen_samples_cache_maxsize
+          description: |
+            The maximum size of the cache used to track which query samples have been collected.
+            A larger cache can help avoid collecting duplicate samples.
+          value:
+            type: number
+            example: 10000
+        - name: run_sync
+          description: |
+            Whether to run query sample collection synchronously in the check run.
+            Set to false (default) to run asynchronously in a separate thread.
+          value:
+            type: boolean
+            example: false
+        - name: activity_enabled
+          description: |
+            Enable collection of database activity snapshots.
+            Activity snapshots capture currently executing queries and active connections.
+          value:
+            type: boolean
+            example: true
+        - name: activity_collection_interval
+          description: |
+            The interval in seconds between activity snapshot collections.
+            Lower values capture more activity data but increase overhead.
+            For fast ClickHouse queries, consider using 1-5 seconds.
+          value:
+            type: number
+            example: 10
+        - name: activity_max_rows
+          description: |
+            The maximum number of active sessions to include in each activity snapshot.
+          value:
+            type: number
+            example: 1000
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists.
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        default: 300
+    - name: aws
+      description: |
+        This block defines the configuration for AWS RDS and Aurora instances.
+
+        Complete this section if you have installed the Datadog AWS Integration to enrich instances
+        with ClickHouse integration telemetry.
+      options:
+        - name: instance_endpoint
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to.
+            This value is optional if the value of `server` is already configured to the instance endpoint.
+
+            For more information on instance endpoints,
+            see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+          value:
+            type: string
+            example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+    - name: gcp
+      description: |
+        This block defines the configuration for Google Cloud SQL instances.
+
+        Complete this section if you have installed the Datadog GCP Integration to enrich instances
+        with ClickHouse integration telemetry.
+      options:
+        - name: project_id
+          description: |
+            Equal to the GCP resource's project ID.
+
+            For more information on project IDs,
+            see the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+          value:
+            type: string
+            example: foo-project
+        - name: instance_id
+          description: |
+            Equal to the GCP resource's instance ID.
+
+            For more information on instance IDs,
+            see the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+          value:
+            type: string
+            example: foo-database
+    - name: azure
+      description: |
+        This block defines the configuration for Azure Database for ClickHouse.
+
+        Complete this section if you have installed the Datadog Azure Integration to enrich instances
+        with ClickHouse integration telemetry.
+      options:
+        - name: deployment_type
+          description: |
+            Equal to the deployment type for the managed database.
+
+            For Azure, this is typically 'flexible_server' or 'single_server'.
+          value:
+            type: string
+            example: flexible_server
+        - name: fully_qualified_domain_name
+          description: |
+            Equal to the fully qualified domain name of the Azure database.
+
+            This value is optional if the value of `server` is already configured to the fully qualified domain name.
+          value:
+            type: string
+            example: my-clickhouse.database.windows.net
+        - name: database_name
+          description: |
+            The database name for the Azure instance.
+          value:
+            type: string
     - template: instances/db
       overrides:
         custom_queries.value.example:
