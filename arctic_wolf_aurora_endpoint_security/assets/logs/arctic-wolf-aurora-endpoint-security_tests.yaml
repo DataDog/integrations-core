@@ -3,31 +3,104 @@ tests:
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: AppControl, Event Name: pechange, Device Name: Unknown (test1), IP Address: (10.0.0.0), Action: Deny, Action Type: PE File Change, File Path: c:/test/test1, SHA256: 7D2113B7046867BC643CD621D2CBA7365609675505BAA66585FC44747C0D1EF5, Zone Names: (Windows Zone (Default)), Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8a, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
   result:
-    custom: {}
+    custom:
+      action: "Deny"
+      action_type: "PE File Change"
+      additional_details: ""
+      device_id: "0929f443-2a56-46b3-bcfe-fc598da81d8a"
+      device_name: "Unknown (test1)"
+      event_type: "AppControl"
+      evt:
+        name: "pechange"
+      file_path: "c:/test/test1"
+      ip_addresses:
+       - "10.0.0.0"
+      policy_name: "Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+      service: "desktop-events"
+      sha256: "7D2113B7046867BC643CD621D2CBA7365609675505BAA66585FC44747C0D1EF5"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      zone_names: "(Windows Zone (Default))"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: AppControl, Event Name: pechange, Device Name: Unknown (test1), IP Address: (10.0.0.0), Action: Deny, Action Type: PE File Change, File Path: c:/test/test1, SHA256: 7D2113B7046867BC643CD621D2CBA7365609675505BAA66585FC44747C0D1EF5, Zone Names: (Windows Zone (Default)), Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8a, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: AuditLog, Event Name: LoginSuccess, Message: Provider: CylancePROTECT, Source IP: 163.116.205.119, User: John Carter (john.carter@example.com)"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      event_type: "AuditLog"
+      evt:
+        name: "LoginSuccess"
+      message: "Provider: CylancePROTECT, Source IP: 163.116.205.119"
+      service: "desktop-events"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      user: "John Carter (john.carter@example.com)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: AuditLog, Event Name: LoginSuccess, Message: Provider: CylancePROTECT, Source IP: 163.116.205.119, User: John Carter (john.carter@example.com)"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: Device, Event Name: Registration, Device Name: AssetTag-EID, Zone Names: (zone1,zone2), Device Id: b1f8e376-cee3-4319-a076-f587c51e68ac"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      device_id: "b1f8e376-cee3-4319-a076-f587c51e68ac"
+      device_name: "AssetTag-EID"
+      event_type: "Device"
+      evt:
+        name: "Registration"
+      service: "desktop-events"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      zone_names: "(zone1,zone2)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: Device, Event Name: Registration, Device Name: AssetTag-EID, Zone Names: (zone1,zone2), Device Id: b1f8e376-cee3-4319-a076-f587c51e68ac"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeComEvent, Event Name: OpticsCaeComEvent, Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id: 9e5ac116-a20c-4929-9087-10fd7fdcb105, Severity: High, Description: Device - Application COM Event, Instigating Process Name: GoogleUpdate.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 63854E78780866D2AE56A58958A1FDA017A71F54B71FE70CF5403958E961862A, Event Timestamp: 2023-08-23T07:28:59.588Z, Event Received Timestamp: 2023-08-23T07:29:01Z, Device Last Reported Users: (Window Manager\\DWM-1), Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id: 15b11fa2-fc61-4aa3-aa04-082c488f8a86, Instigating Process Command Line: \"C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe\" /svc, Instigating Process File Path: c:\\program files (x86)\\google\\update\\googleupdate.exe, COM Interface ID: 2933bf81-7b36-11d2-b20e-00c04f983e60, COM Program: msxml, COM Interface: IXMLDOMDocument, Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bf"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      com_interface: "IXMLDOMDocument"
+      com_interface_id: "2933bf81-7b36-11d2-b20e-00c04f983e60"
+      com_program: "msxml"
+      description: "Device - Application COM Event"
+      detection_rule_id: "15b11fa2-fc61-4aa3-aa04-082c488f8a86"
+      device_id: "744ac660-9704-4edb-a8d0-ae13a343f3bf"
+      device_last_reported_users:
+       - "Window Manager\\DWM-1"
+      device_name: "DEVICE-W19"
+      event_id: "9e5ac116-a20c-4929-9087-10fd7fdcb105"
+      event_received_timestamp: "2023-08-23T07:29:01Z"
+      event_timestamp: "2023-08-23T07:28:59.588Z"
+      event_type: "OpticsCaeComEvent"
+      evt:
+        name: "OpticsCaeComEvent"
+      instigating_process_command_line: "\"C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe\" /svc"
+      instigating_process_file_path: "c:\\program files (x86)\\google\\update\\googleupdate.exe"
+      instigating_process_imagefilesha256: "63854E78780866D2AE56A58958A1FDA017A71F54B71FE70CF5403958E961862A"
+      instigating_process_name: "GoogleUpdate.exe"
+      instigating_process_owner: "NT AUTHORITY//SYSTEM"
+      service: "detection-events"
+      severity: "High"
+      status: "critical"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      zone_ids: "(D215191148D64DEE826768B62D64B244)"
+      zone_names: "(Zone_3.x)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeComEvent, Event Name: OpticsCaeComEvent, Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id: 9e5ac116-a20c-4929-9087-10fd7fdcb105, Severity: High, Description: Device - Application COM Event, Instigating Process Name: GoogleUpdate.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 63854E78780866D2AE56A58958A1FDA017A71F54B71FE70CF5403958E961862A, Event Timestamp: 2023-08-23T07:28:59.588Z, Event Received Timestamp: 2023-08-23T07:29:01Z, Device Last Reported Users: (Window Manager\\DWM-1), Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id: 15b11fa2-fc61-4aa3-aa04-082c488f8a86, Instigating Process Command Line: \"C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe\" /svc, Instigating Process File Path: c:\\program files (x86)\\google\\update\\googleupdate.exe, COM Interface ID: 2933bf81-7b36-11d2-b20e-00c04f983e60, COM Program: msxml, COM Interface: IXMLDOMDocument, Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bf"
+    service: "detection-events"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeHttpEvent, Event Name: OpticsCaeHttpEvent, Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id: 41ea5ce4-6501-4c13-a7a2-80f9afec9eee, Severity: High, Description: DEVICE - Trigger on ANY http sensor event, Instigating Process Name: svchost.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 2B105FB153B1BCD619B95028612B3A93C60B953EEF6837D3BB0099E4207AAF6B, Event Timestamp: 2023-08-23T15:48:52.992Z, Event Received Timestamp: 2023-08-23T15:48:57Z, Device Last Reported Users: (RIMNET\\adminuser,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id: 9a82a2d3-e6b0-4177-9bac-80ba5b1ef982, Instigating Process Command Line: C:\\WINDOWS\\system32\\svchost.exe -k netsvcs -p -s wlidsvc, Instigating Process File Path: c:\\windows\\system32\\svchost.exe, Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bf, User Agent: Microsoft-CryptoAPI/10.0, Request Domain: ocsp.digicert.com, Request Path: /MFEwTzBNMEswSTAJBgUrDgMCGgUABBSAUQYBMq2awn1Rh6Doh%2FsBYgFV7gQUA95QNVbRTLtm8KPiGxvDl7I90VUCEAJ0LqoXyo4hxxe7H%2Fz9DKA%3D, Request Method: GET, Request Port: 80, Request Version: HTTP/1.1, Request Headers: 0, Request Length: 0, Response Status: 0, Response Headers: 0, Response Length: 0"
   result:
