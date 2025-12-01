@@ -177,7 +177,16 @@ pipeline:
           template: "F5"
           target: ocsf.metadata.product.name
           replaceMissing: false
-
+        - type: grok-parser
+          name: Parsing `ocsf.http_request.url.query_string` from `http.url`
+          enabled: true
+          source: http.url
+          samples:
+            - /datadoghq/company?test=var1%20Pl
+          grok:
+            supportRules: ""
+            matchRules: |
+              extract_query_string %{regex("[^?@#]+")}\?%{regex(".*"):ocsf.http_request.url.query_string}
         - type: schema-processor
           name: Apply OCSF schema for 4002
           enabled: true
