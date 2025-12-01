@@ -220,7 +220,6 @@ def test_check_metric_sources_all(mock_client, dd_run_check, aggregator, instanc
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
     dd_run_check(check)
-
     assert_metrics(ALL_METRICS, [], aggregator)
 
     aggregator.assert_all_metrics_covered()

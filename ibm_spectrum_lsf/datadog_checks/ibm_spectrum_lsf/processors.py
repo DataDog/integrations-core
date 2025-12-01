@@ -507,9 +507,7 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
                 self.log.trace("Skipping metric record with missing name %s: %s", name, record)
                 continue
 
-            aggregations = ["current"]
-
-            # aggregations = ["current", "max", "min", "avg", "total"]
+            aggregations = ["current", "max", "min", "avg", "total"]
             for aggr in aggregations:
                 val = record.get(aggr)
                 if val is None:
