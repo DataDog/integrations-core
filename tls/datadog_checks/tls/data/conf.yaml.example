@@ -223,7 +223,7 @@ instances:
 
     ## @param tls_ciphers - list of strings - optional
     ## The list of ciphers suites to use when connecting to an endpoint. If not specified,
-    ## `ALL` ciphers are used. For list of ciphers see:
+    ## `ALL` ciphers are used. For the list of ciphers, see:
     ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
     #
     # tls_ciphers:
