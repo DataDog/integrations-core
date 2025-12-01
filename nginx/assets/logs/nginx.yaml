@@ -292,6 +292,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `ocsf.http_request.url.query_string` to `ocsf.http_request.url.query_string`
+              sources:
+                - ocsf.http_request.url.query_string
+              target: ocsf.http_request.url.query_string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `http.useragent` to `ocsf.http_request.user_agent`
               sources:
                 - http.useragent
