@@ -93,6 +93,7 @@ tests:
             referrer: "http://www.perdu.com/"
             url:
               path: "/datadoghq/company"
+              query_string: "test=var1%20Pl"
             user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
           http_response:
             code: 404
@@ -159,6 +160,7 @@ tests:
             referrer: "http://www.perdu.com/"
             url:
               path: "/datadoghq/company"
+              query_string: "test=var1%20Pl"
             user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
           http_response:
             code: 200
