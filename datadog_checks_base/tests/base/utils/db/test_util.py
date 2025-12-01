@@ -20,6 +20,7 @@ from datadog_checks.base.utils.db.utils import (
     RateLimitingTTLCache,
     TagManager,
     TagType,
+    batch_obfuscate_sql_with_metadata,
     default_json_event_encoding,
     get_agent_host_tags,
     obfuscate_sql_with_metadata,
@@ -299,6 +300,120 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
         mock_agent.side_effect = _mock_obfuscate_sql
         statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
         assert statement['query'] == expected_query
+
+
+def test_batch_obfuscate_sql_with_metadata_basic():
+    """Test basic batch obfuscation with simple string results"""
+
+    def _mock_batch_obfuscate_sql(queries_json, options_json=None):
+        queries = json.decode(queries_json)
+        # Simulate simple string results (no metadata)
+        results = [query.strip() for query in queries]
+        return json.encode(results)
+
+    with mock.patch.object(datadog_agent, 'batch_obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_batch_obfuscate_sql
+        queries = ['SELECT * FROM users', 'SELECT * FROM orders', 'INSERT INTO logs VALUES (1, 2)']
+        results = batch_obfuscate_sql_with_metadata(queries, None)
+
+        assert len(results) == 3
+        assert results[0] == {'query': 'SELECT * FROM users', 'metadata': {}}
+        assert results[1] == {'query': 'SELECT * FROM orders', 'metadata': {}}
+        assert results[2] == {'query': 'INSERT INTO logs VALUES (1, 2)', 'metadata': {}}
+
+
+def test_batch_obfuscate_sql_with_metadata_with_metadata():
+    """Test batch obfuscation with metadata results"""
+
+    def _mock_batch_obfuscate_sql(queries_json, options_json=None):
+        queries = json.decode(queries_json)
+        # Simulate results with metadata
+        results = [
+            {
+                'query': query.strip(),
+                'metadata': {'tables_csv': 'table1, table2', 'commands': ['SELECT'], 'comments': None},
+            }
+            for query in queries
+        ]
+        return json.encode(results)
+
+    with mock.patch.object(datadog_agent, 'batch_obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_batch_obfuscate_sql
+        queries = ['SELECT * FROM table1 JOIN table2', 'SELECT * FROM table1']
+        # Options should be a JSON string
+        options = json.encode({'return_json_metadata': True})
+        results = batch_obfuscate_sql_with_metadata(queries, options)
+
+        assert len(results) == 2
+        assert results[0]['query'] == 'SELECT * FROM table1 JOIN table2'
+        assert results[0]['metadata']['tables'] == ['table1', 'table2']
+        assert results[0]['metadata']['commands'] == ['SELECT']
+        assert results[0]['metadata']['comments'] is None
+
+
+def test_batch_obfuscate_sql_with_metadata_empty_list():
+    """Test batch obfuscation with empty queries list"""
+    results = batch_obfuscate_sql_with_metadata([])
+    assert results == []
+
+
+def test_batch_obfuscate_sql_with_metadata_replace_null_characters():
+    """Test batch obfuscation with null character replacement"""
+
+    def _mock_batch_obfuscate_sql(queries_json, options_json=None):
+        queries = json.decode(queries_json)
+        results = [{'query': query, 'metadata': {}} for query in queries]
+        return json.encode(results)
+
+    with mock.patch.object(datadog_agent, 'batch_obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_batch_obfuscate_sql
+        queries = ["SELECT * FROM table1 WHERE name = '123\x00'", "SELECT * FROM table2 WHERE id = '456\x00'"]
+        results = batch_obfuscate_sql_with_metadata(queries, None, replace_null_character=True)
+
+        assert len(results) == 2
+        assert results[0]['query'] == "SELECT * FROM table1 WHERE name = '123'"
+        assert results[1]['query'] == "SELECT * FROM table2 WHERE id = '456'"
+
+
+def test_batch_obfuscate_sql_with_metadata_tables_csv_parsing():
+    """Test batch obfuscation properly parses tables_csv into tables list"""
+
+    def _mock_batch_obfuscate_sql(queries_json, options_json=None):
+        return json.encode(
+            [
+                {'query': 'SELECT * FROM t1', 'metadata': {'tables_csv': 'table1, table2, table3', 'commands': []}},
+                {'query': 'SELECT * FROM t2', 'metadata': {'tables_csv': '   table4  ,  table5    ', 'commands': []}},
+                {'query': 'COMMIT', 'metadata': {'tables_csv': '', 'commands': ['COMMIT']}},
+                {'query': 'SELECT * FROM t3', 'metadata': {'tables_csv': None, 'commands': []}},
+            ]
+        )
+
+    with mock.patch.object(datadog_agent, 'batch_obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_batch_obfuscate_sql
+        queries = ['SELECT * FROM t1', 'SELECT * FROM t2', 'COMMIT', 'SELECT * FROM t3']
+        # Options should be a JSON string
+        options = json.encode({'return_json_metadata': True})
+        results = batch_obfuscate_sql_with_metadata(queries, options)
+
+        assert len(results) == 4
+        assert results[0]['metadata']['tables'] == ['table1', 'table2', 'table3']
+        assert results[1]['metadata']['tables'] == ['table4', 'table5']
+        assert results[2]['metadata']['tables'] is None
+        assert results[3]['metadata']['tables'] is None
+
+
+def test_batch_obfuscate_sql_with_metadata_error_handling():
+    """Test batch obfuscation error handling"""
+
+    def _mock_batch_obfuscate_sql_error(queries_json, options_json=None):
+        raise RuntimeError("Failed to obfuscate query at index 1: syntax error")
+
+    with mock.patch.object(datadog_agent, 'batch_obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_batch_obfuscate_sql_error
+        queries = ['SELECT * FROM t1', 'INVALID SQL', 'SELECT * FROM t2']
+
+        with pytest.raises(RuntimeError, match="Failed to obfuscate query at index 1"):
+            batch_obfuscate_sql_with_metadata(queries)
 
 
 class JobForTesting(DBMAsyncJob):

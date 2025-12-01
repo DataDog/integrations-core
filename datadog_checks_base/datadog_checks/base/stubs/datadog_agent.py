@@ -142,6 +142,40 @@ class DatadogAgentStub(object):
                 return json.encode({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
         return re.sub(r'\s+', ' ', query or '').strip()
 
+    def batch_obfuscate_sql(self, queries_json, options_json=None):
+        """
+        Batch obfuscate multiple SQL queries.
+        :param str queries_json: JSON-encoded array of SQL query strings.
+        :param str options_json: Optional JSON-encoded object with obfuscation options.
+        :return: JSON-encoded array of obfuscated queries or result objects.
+        :rtype: str
+        :raises RuntimeError: If obfuscation fails (includes query index in error message).
+        """
+        try:
+            queries = json.decode(queries_json)
+            options = json.decode(options_json) if options_json else None
+
+            if not isinstance(queries, list):
+                raise RuntimeError("queries_json must be a JSON array")
+
+            results = []
+            for idx, query in enumerate(queries):
+                try:
+                    obfuscated = re.sub(r'\s+', ' ', query or '').strip()
+
+                    if options and options.get('return_json_metadata', False):
+                        results.append({'query': obfuscated, 'metadata': {}})
+                    else:
+                        results.append(obfuscated)
+                except Exception as e:
+                    raise RuntimeError(f"Failed to obfuscate query at index {idx}: {e}")
+
+            return json.encode(results)
+        except RuntimeError:
+            raise
+        except Exception as e:
+            raise RuntimeError(f"Batch obfuscation failed: {e}")
+
     def obfuscate_sql_exec_plan(self, plan, normalize=False):
         # Passthrough stub: obfuscation implementation is in Go code.
         return plan

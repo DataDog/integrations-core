@@ -271,6 +271,49 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     return statement_with_metadata
 
 
+def batch_obfuscate_sql_with_metadata(queries, options=None, replace_null_character=False):
+    """
+    Obfuscate multiple SQL queries in a single call and return the obfuscated queries with metadata.
+    :param list[str] queries: List of SQL queries to obfuscate.
+    :param str options: JSON-encoded obfuscation options to pass to the obfuscator.
+    :param bool replace_null_character: Whether to replace embedded null characters \x00 before obfuscating.
+        Note: Setting this parameter to true involves an extra string traversal and copy.
+        Do set this to true if the database allows embedded null characters in text fields, for example SQL Server.
+        Otherwise obfuscation will fail if the query contains embedded null characters.
+    :return: A list of dicts, each containing the obfuscated query and metadata.
+    :rtype: list[dict]
+    """
+    if not queries:
+        return []
+
+    if replace_null_character:
+        # replace embedded null characters \x00 before obfuscating
+        queries = [query.replace('\x00', '') if query else query for query in queries]
+
+    # Serialize queries to JSON for the agent
+    queries_json = json.encode(queries)
+
+    # Call the batch obfuscation function
+    results_json = datadog_agent.batch_obfuscate_sql(queries_json, options)
+    results = json.decode(results_json)
+
+    # Process results based on whether metadata is requested
+    processed_results = []
+    for result in results:
+        if isinstance(result, dict):
+            # Result with metadata (when return_json_metadata=True)
+            metadata = result.get('metadata', {})
+            tables = metadata.pop('tables_csv', None)
+            tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
+            result['metadata']['tables'] = tables
+            processed_results.append(result)
+        else:
+            # Simple string result (when return_json_metadata=False or not specified)
+            processed_results.append({'query': result, 'metadata': {}})
+
+    return processed_results
+
+
 class DBMAsyncJob(object):
     # Set an arbitrary high limit so that dbm async jobs (which aren't CPU bound) don't
     # get artificially limited by the default max_workers count. Note that since threads are
