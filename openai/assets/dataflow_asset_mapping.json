@@ -1,0 +1,56 @@
+{
+  "openai-usage-metrics": {
+    "metrics": [
+      "openai.audio_speeches.characters",
+      "openai.audio_speeches.num_model_requests",
+      "openai.audio_transcriptions.num_model_requests",
+      "openai.audio_transcriptions.seconds",
+      "openai.code_interpreter_sessions.num_sessions",
+      "openai.completions.input_audio_tokens",
+      "openai.completions.input_cached_tokens",
+      "openai.completions.input_tokens",
+      "openai.completions.num_model_requests",
+      "openai.completions.output_audio_tokens",
+      "openai.completions.output_tokens",
+      "openai.embeddings.input_tokens",
+      "openai.embeddings.num_model_requests",
+      "openai.images.images",
+      "openai.images.num_model_requests",
+      "openai.moderations.input_tokens",
+      "openai.moderations.num_model_requests",
+      "openai.organization.ratelimit.requests.remaining",
+      "openai.organization.ratelimit.tokens.remaining",
+      "openai.ratelimit.requests",
+      "openai.ratelimit.tokens",
+      "openai.request.duration",
+      "openai.request.error"
+    ],
+    "dashboards": [
+      "OpenAI Overview Dashboard",
+      "OpenAI Admin Usage Overview"
+    ],
+    "monitors": [
+      "OpenAI API usage is approaching rate limit",
+      "OpenAI tokens usage is approaching rate limit"
+    ]
+  },
+  "openai-cloud-cost-data": {
+    "metrics": [
+      "openai.tokens.completion",
+      "openai.tokens.prompt",
+      "openai.tokens.total",
+      "openai.vector_stores.usage_bytes"
+    ],
+    "dashboards": [
+      "OpenAI Cost Overview"
+    ],
+    "monitors": [
+      "Token usage is abnormally high"
+    ]
+  },
+  "openai-llm-completions": {
+    "app-builder-blueprints": [
+      "openai-prompter"
+    ]
+  }
+}
