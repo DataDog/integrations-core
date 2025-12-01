@@ -1,9 +1,12 @@
 provides:
   - id: openai-usage-metrics
     always_on: true
+    source: agent
   - id: openai-cloud-cost-data
     always_on: false
     granular: true
+    source: api
   - id: openai-llm-completions
     always_on: false
     granular: true
+    source: api
