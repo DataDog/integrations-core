@@ -38,7 +38,7 @@ requires-python = ">=3.9"
 [project.optional-dependencies]
 deps = [
     "psutil==6.0.0",
-    "pymqi==1.12.11",
+    "pymqi==1.12.13",
 ]
 
 [project.urls]
