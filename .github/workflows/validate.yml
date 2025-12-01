@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run:
+  validate-repo:
     uses: ./.github/workflows/run-validations.yml
     with:
       repo: core
