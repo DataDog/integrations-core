@@ -347,6 +347,7 @@ pipeline:
                 - duration
               target: ocsf.duration
               preserveSource: true
+              targetFormat: double
               overrideOnConflict: true
             - type: schema-remapper
               name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
