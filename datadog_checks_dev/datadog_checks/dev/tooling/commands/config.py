@@ -23,8 +23,9 @@ from datadog_checks.dev.tooling.utils import string_to_toml_type
 from .console import CONTEXT_SETTINGS, echo_info, echo_success
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the config file')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def config():
+    """Manage configuration settings."""
     pass
 
 

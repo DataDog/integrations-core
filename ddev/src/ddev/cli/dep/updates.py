@@ -18,13 +18,14 @@ from ddev.cli.dep.common import (
 )
 
 
-@click.command(short_help='Automatically check for dependency updates')
+@click.command()
 @click.option('--sync', '-s', 'sync_dependencies', is_flag=True, help='Update the dependency definitions')
 @click.option('--include-security-deps', '-i', is_flag=True, help="Attempt to update security dependencies")
 @click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
 @click.pass_context
 @click.pass_obj
 def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
+    """Check for dependency updates."""
     ignore_deps = set(app.repo.config.get('/overrides/dep/updates/exclude', []))
 
     if not include_security_deps:

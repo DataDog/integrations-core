@@ -11,8 +11,9 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-@click.group(short_help='Manage the config file')
+@click.group()
 def config():
+    """Manage environment configuration."""
     pass
 
 

@@ -18,8 +18,9 @@ DASHBOARD_API = 'https://api.{site}/api/v1/dashboard/{board_id}'
 REQUIRED_FIELDS = ["layout_type", "title", "description", "template_variables", "widgets"]
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='Dashboard utilities')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def dash():
+    """Manage dashboards."""
     pass
 
 
