@@ -203,7 +203,7 @@ tests:
               name: "Test Test"
               type: "User"
               type_id: 1
-              uid: ""
+              uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
           category_name: "Identity & Access Management"
           category_uid: 3
           class_name: "Authentication"
@@ -245,25 +245,27 @@ tests:
             name: "Test Test"
             type: "User"
             type_id: 1
-            uid: ""
+            uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
         operationName: "Sign-in activity"
         operationVersion: "1.0"
         properties:
           appDisplayName: "ACOM Azure Website"
           appId: "23523755-3a2b-41ca-9315-f81f3f566a95"
           appliedConditionalAccessPolicies:
-            - result: "success"
-              conditionsNotSatisfied: 0
-              conditionsSatisfied: 3
-              enforcedGrantControls:
-                - "Mfa"
-              displayName: "Require MFA"
-              id: "ccb90f89-cdaf-4ae6-9dd1-a9ee6ea86a90"
+          -
+            result: "success"
+            conditionsNotSatisfied: 0
+            conditionsSatisfied: 3
+            enforcedGrantControls:
+            - "Mfa"
+            displayName: "Require MFA"
+            id: "ccb90f89-cdaf-4ae6-9dd1-a9ee6ea86a90"
           authenticationDetails:
-            - authenticationStepDateTime: "2020-05-13T12:35:19.6363979+00:00"
-              authenticationStepResultDetail: "MFA requirement satisfied by claim in the token"
-              authenticationStepRequirement: "MultiConditionalAccess"
-              succeeded: false
+          -
+            authenticationStepDateTime: "2020-05-13T12:35:19.6363979+00:00"
+            authenticationStepResultDetail: "MFA requirement satisfied by claim in the token"
+            authenticationStepRequirement: "MultiConditionalAccess"
+            succeeded: false
           clientAppUsed: "Browser"
           conditionalAccessStatus: "success"
           correlationId: "d47198c3-f726-47b8-b683-3f6244c9ceb5"
@@ -310,7 +312,7 @@ tests:
           name: "Test Test"
       message: "MFA requirement satisfied by claim in the token"
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1589373319636
   - sample: |-
       {
@@ -632,6 +634,15 @@ tests:
         ocsf:
           activity_id: 1
           activity_name: "Assign Privileges"
+          actor:
+            session:
+              uid: "5d3c3340-5c5e-419c-9ae9-193b1669f84e"
+            user:
+              email_addr: "test.user@datadoghq.com"
+              name: "test.user@datadoghq.com"
+              type: "User"
+              type_id: 1
+              uid: "9ff6ab06-49d6-49e8-9974-e979522283c1"
           category_name: "Identity & Access Management"
           category_uid: 3
           class_name: "User Access Management"
@@ -887,6 +898,15 @@ tests:
         ocsf:
           activity_id: 3
           activity_name: "Add User"
+          actor:
+            session:
+              uid: "67c2eef3-4b38-4017-82dd-ecc064c38151"
+            user:
+              email_addr: "test.user@datadoghq.com"
+              name: "test.user@datadoghq.com"
+              type: "User"
+              type_id: 1
+              uid: "9ff6ab06-49d6-49e8-9974-e979522283c1"
           category_name: "Identity & Access Management"
           category_uid: 3
           class_name: "Group Management"
@@ -921,10 +941,12 @@ tests:
           activityDateTime: "2020-04-08T07:40:53.1695436+00:00"
           activityDisplayName: "Add member to group"
           additionalDetails:
-            - value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-              key: "User-Agent"
-            - value: "9205c433-2781-42be-a046-c21ef6b5e608"
-              key: "AppId"
+          -
+            value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+            key: "User-Agent"
+          -
+            value: "9205c433-2781-42be-a046-c21ef6b5e608"
+            key: "AppId"
           category: "GroupManagement"
           correlationId: "67c2eef3-4b38-4017-82dd-ecc064c38151"
           id: "Directory_67c2eef3-4b38-4017-82dd-ecc064c38151_M4V7T_12366951"
@@ -942,19 +964,24 @@ tests:
           resultReason: ""
           resultType: ""
           targetResources:
-            - displayName: "Test Application"
-              modifiedProperties:
-                - newValue: '"3b3bf2cd-049a-4f35-9e63-dc2a0a830807"'
-                  displayName: "Group.ObjectID"
-                - newValue: '"Security-Research-Admins"'
-                  displayName: "Group.DisplayName"
-                - newValue: '"9205c433-2781-42be-a046-c21ef6b5e608"'
-                  displayName: "TargetId.ServicePrincipalNames"
-              id: "febf6383-8bed-4efb-8244-c9a456a1f172"
-              type: "ServicePrincipal"
-            - groupType: "unknownFutureValue"
-              id: "3b3bf2cd-049a-4f35-9e63-dc2a0a830807"
-              type: "Group"
+          -
+            displayName: "Test Application"
+            modifiedProperties:
+            -
+              newValue: "\"3b3bf2cd-049a-4f35-9e63-dc2a0a830807\""
+              displayName: "Group.ObjectID"
+            -
+              newValue: "\"Security-Research-Admins\""
+              displayName: "Group.DisplayName"
+            -
+              newValue: "\"9205c433-2781-42be-a046-c21ef6b5e608\""
+              displayName: "TargetId.ServicePrincipalNames"
+            id: "febf6383-8bed-4efb-8244-c9a456a1f172"
+            type: "ServicePrincipal"
+          -
+            groupType: "unknownFutureValue"
+            id: "3b3bf2cd-049a-4f35-9e63-dc2a0a830807"
+            type: "Group"
           tenantGeo: "NA"
           tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
@@ -1030,7 +1057,7 @@ tests:
           "resultSignature" : "None"
         }
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1586331653169
   - sample: |-
       {
