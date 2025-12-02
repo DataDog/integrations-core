@@ -467,8 +467,15 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
             logger=logger,
             base_tags=base_tags,
         )
+        self.collection_started = False
 
     def run_lsf_command(self) -> tuple[str, str, int]:
+        if not self.collection_started:
+            collection_interval = (
+                self.config.min_collection_interval if self.config.min_collection_interval is not None else 60
+            )
+            self.client.badmin_perfmon_start(collection_interval)
+            self.collection_started = True
         return self.client.badmin_perfmon()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -477,7 +484,11 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
             self.log.error("Failed to get %s output: %s", self.name, err)
             return []
 
-        output_json = json.loads(output.strip())
+        try:
+            output_json = json.loads(output.strip())
+        except json.JSONDecodeError:
+            self.log.error("Invalid JSON output from %s: %s", self.name, output)
+            return []
 
         metric_name_mapping = {
             "Processed requests: mbatchd": "mbatchd.processed_requests",
@@ -504,14 +515,14 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
             name = record.get("name")
             metric_name = metric_name_mapping.get(name)
             if metric_name is None or name is None:
-                self.log.trace("Skipping metric record with missing name %s: %s", name, record)
+                self.log.debug("Skipping metric record with missing name %s: %s", name, record)
                 continue
 
             aggregations = ["current", "max", "min", "avg", "total"]
             for aggr in aggregations:
                 val = record.get(aggr)
                 if val is None:
-                    self.log.trace("Skipping metric aggregation with missing value %s: %s", aggr, record)
+                    self.log.debug("Skipping metric aggregation with missing value %s: %s", aggr, record)
                     continue
                 metric_value = transform_float(str(val))
                 metrics.append(LSFMetric(f"{self.prefix}.{metric_name}.{aggr}", metric_value, self.base_tags))

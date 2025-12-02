@@ -21,6 +21,11 @@ instances:
     ## @param metric_sources - list of strings - optional
     ## Enable metrics from different IBM Spectrum LSF commands.
     ## By default, all commands except GPU commands are enabled.
+    ##
+    ## Note: Enabling `badmin_perfmon` will run the command `badmin perfmon start <YOUR_MIN_COLLECTION_INTERVAL>`.
+    ## By default, this is set to 15 seconds. It is recommended to set this to a higher value such as 60 seconds
+    ## to decrease load on the cluster. We recommend creating a separate instance to collect `badmin_perfmon` metrics
+    ## with a higher min_collection_interval.
     #
     # metric_sources:
     #   - lsclusters

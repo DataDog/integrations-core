@@ -74,3 +74,11 @@ class LSFClient:
             "view",
             "-json",
         )
+
+    def badmin_perfmon_start(self, min_collection_interval: float) -> tuple[str, str, int]:
+        return self._run_command(
+            "badmin",
+            "perfmon",
+            "start",
+            str(min_collection_interval),
+        )

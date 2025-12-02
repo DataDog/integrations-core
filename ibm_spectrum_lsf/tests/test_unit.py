@@ -36,7 +36,7 @@ def assert_metrics(
 def test_lsid_err(mock_client, dd_run_check, aggregator, instance, caplog):
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
-    mock_client.lsid.return_value = (None, "Can't connect to LIM", 1)
+    mock_client.lsid.return_value = ("", "Can't connect to LIM", 1)
     dd_run_check(check)
 
     aggregator.assert_metric("ibm_spectrum_lsf.can_connect", 0)
@@ -121,7 +121,7 @@ def test_check_tags(mock_client, dd_run_check, aggregator, instance):
 def test_lscluster_error(mock_client, dd_run_check, aggregator, instance):
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
-    mock_client.lsclusters.return_value = (None, "Can't connect", 1)
+    mock_client.lsclusters.return_value = ("", "Can't connect", 1)
     dd_run_check(check)
 
     assert_metrics(ALL_DEFAULT_METRICS, CLUSTER_METRICS, aggregator)
@@ -268,3 +268,177 @@ def test_badmin_perfmon(mock_client, dd_run_check, aggregator, instance):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_badmin_perfmon_start_only_called_once(mock_client, dd_run_check, aggregator, instance):
+    instance['metric_sources'] = ['badmin_perfmon']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert mock_client.badmin_perfmon_start.call_count == 1
+    assert mock_client.badmin_perfmon_start.call_args_list == [call(15)]
+
+    assert_metrics(BADMIN_PERFMON_METRICS + LSID_METRICS, [], aggregator)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.parametrize(
+    'min_collection_interval, metric_sources, expected_call_count, expected_call_args, expected_metrics',
+    [
+        pytest.param(
+            15,
+            [
+                'badmin_perfmon',
+            ],
+            1,
+            [call(15)],
+            BADMIN_PERFMON_METRICS + LSID_METRICS,
+            id='no change',
+        ),
+        pytest.param(
+            60,
+            ['badmin_perfmon'],
+            1,
+            [call(60)],
+            BADMIN_PERFMON_METRICS + LSID_METRICS,
+            id='default collection interval',
+        ),
+        pytest.param(
+            300,
+            ['badmin_perfmon', 'lsclusters'],
+            1,
+            [call(300)],
+            BADMIN_PERFMON_METRICS + LSID_METRICS + CLUSTER_METRICS,
+            id='high collection interval',
+        ),
+        pytest.param(
+            60,
+            ['lsclusters', 'lshosts', 'bhosts', 'lsload', 'bqueues', 'bslots', 'bjobs', 'lsload_gpu', 'bhosts_gpu'],
+            0,
+            [],
+            ALL_DEFAULT_METRICS,
+            id='no badmin_perfmon',
+        ),
+        pytest.param(
+            60,
+            [
+                'badmin_perfmon',
+                'lsclusters',
+                'lshosts',
+                'bhosts',
+                'lsload',
+                'bqueues',
+                'bslots',
+                'bjobs',
+                'lsload_gpu',
+                'bhosts_gpu',
+            ],
+            1,
+            [call(60)],
+            ALL_METRICS,
+            id='all metrics',
+        ),
+    ],
+)
+def test_badmin_perfmon_start_diff_configs(
+    mock_client,
+    dd_run_check,
+    aggregator,
+    instance,
+    min_collection_interval,
+    metric_sources,
+    expected_call_count,
+    expected_call_args,
+    expected_metrics,
+):
+    instance['metric_sources'] = metric_sources
+    instance['min_collection_interval'] = min_collection_interval
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    dd_run_check(check)
+
+    assert mock_client.badmin_perfmon_start.call_count == expected_call_count
+    assert mock_client.badmin_perfmon_start.call_args_list == expected_call_args
+
+    assert_metrics(expected_metrics, [], aggregator)
+
+
+def test_badmin_perfmon_start_unknown_metric(mock_client, dd_run_check, aggregator, instance, caplog):
+    instance['metric_sources'] = ['badmin_perfmon']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    caplog.set_level(logging.DEBUG)
+    mock_client.badmin_perfmon.return_value = get_mock_output('badmin_perfmon_view_invalid_metrics')
+    dd_run_check(check)
+
+    assert (
+        "Skipping metric record with missing name Job information: {'name': 'Job information',"
+        " 'current': 11, 'max': 13, 'min': 11, 'avg': 12, 'total': 24}" in caplog.text
+    )
+
+    assert_metrics(BADMIN_PERFMON_METRICS + LSID_METRICS, [], aggregator)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_badmin_perfmon_start_unknown_aggregation(mock_client, dd_run_check, aggregator, instance, caplog):
+    instance['metric_sources'] = ['badmin_perfmon']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    caplog.set_level(logging.DEBUG)
+    mock_client.badmin_perfmon.return_value = get_mock_output('badmin_perfmon_view_invalid_aggregation')
+    dd_run_check(check)
+
+    assert (
+        "Skipping metric aggregation with missing value current: {'name': 'Job submission requests',"
+        " 'last': 0, 'max': 3, 'min': 0, 'avg': 1, 'total': 3}" in caplog.text
+    )
+
+    assert_metrics(
+        BADMIN_PERFMON_METRICS + LSID_METRICS,
+        [
+            {
+                'name': 'ibm_spectrum_lsf.perfmon.jobs.submission_requests.current',
+                'tags': ['lsf_cluster_name:test-cluster'],
+                'val': 0,
+            }
+        ],
+        aggregator,
+    )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_badmin_perfmon_no_output(mock_client, dd_run_check, aggregator, instance, caplog):
+    instance['metric_sources'] = ['badmin_perfmon']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    caplog.set_level(logging.WARNING)
+    mock_client.badmin_perfmon.return_value = ("", "Invalid Command", 1)
+    dd_run_check(check)
+
+    assert "Failed to get badmin_perfmon output: Invalid Command" in caplog.text
+
+    assert_metrics(LSID_METRICS, [], aggregator)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_badmin_perfmon_invalid_json(mock_client, dd_run_check, aggregator, instance, caplog):
+    instance['metric_sources'] = ['badmin_perfmon']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    caplog.set_level(logging.ERROR)
+    mock_client.badmin_perfmon.return_value = ("Invalid JSON", "", 0)
+    dd_run_check(check)
+
+    assert "Invalid JSON output from badmin_perfmon: Invalid JSON" in caplog.text
+
+    assert_metrics(LSID_METRICS, [], aggregator)
+    aggregator.assert_all_metrics_covered()
