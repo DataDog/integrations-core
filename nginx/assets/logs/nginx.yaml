@@ -186,7 +186,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |
-              extract_query_string %{regex("[^?@#]+")}\?%{regex(".*"):ocsf.http_request.url.query_string}
+              extract_query_string %{regex("[^?]+")}\?%{regex(".*"):ocsf.http_request.url.query_string}
         - type: schema-processor
           name: Apply OCSF schema for 4002
           enabled: true
