@@ -15,6 +15,7 @@ def initialize_instance(values, **kwargs):
             'bjobs',
             'lsload_gpu',
             'bhosts_gpu',
+            'badmin_perfmon',
         }
         for val in values['metric_sources']:
             if val not in valid_options:
