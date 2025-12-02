@@ -46,7 +46,7 @@ def test(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects
                     if instance is None:
                         tags = global_tags
                     else:
-                        if '_Total' in instance:
+                        if instance.lower() == '_total':
                             continue
 
                         tags = ['instance:{}'.format(instance)]
