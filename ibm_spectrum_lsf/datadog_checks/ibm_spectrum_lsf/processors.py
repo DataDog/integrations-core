@@ -470,13 +470,24 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
         self.collection_started = False
 
     def run_lsf_command(self) -> tuple[str, str, int]:
-        if not self.collection_started:
-            collection_interval = (
-                self.config.min_collection_interval if self.config.min_collection_interval is not None else 60
-            )
-            self.client.badmin_perfmon_start(collection_interval)
-            self.collection_started = True
-        return self.client.badmin_perfmon()
+        if self.config.badmin_perfmon_auto:
+            if not self.collection_started:
+                collection_interval = (
+                    self.config.min_collection_interval if self.config.min_collection_interval is not None else 60
+                )
+                self.client.badmin_perfmon_start(collection_interval)
+                self.collection_started = True
+            perfmon_output = self.client.badmin_perfmon()
+            if (
+                "Performance metric sampling has not been started" in perfmon_output[0]
+                or "No performance metric data available." in perfmon_output[0]
+            ):
+                # Collection was stopped manually, restart it
+                self.client.badmin_perfmon_start(collection_interval)
+                self.collection_started = True
+        else:
+            perfmon_output = self.client.badmin_perfmon()
+        return perfmon_output
 
     def process_metrics(self) -> list[LSFMetric]:
         output, err, exit_code = self.run_lsf_command()
@@ -487,7 +498,7 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
         try:
             output_json = json.loads(output.strip())
         except json.JSONDecodeError:
-            self.log.error("Invalid JSON output from %s: %s", self.name, output)
+            self.log.warning("Invalid JSON output from %s: %s", self.name, output)
             return []
 
         metric_name_mapping = {

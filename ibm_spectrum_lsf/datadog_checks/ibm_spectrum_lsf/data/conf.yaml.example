@@ -38,6 +38,14 @@ instances:
     #   - lsload_gpu
     #   - bhosts_gpu
 
+    ## @param badmin_perfmon_auto - boolean - optional - default: false
+    ## Whether or not to call `badmin perfmon start` when starting badmin perfmon metrics collection and
+    ## `badmin perfmon stop` when the check is unscheduled by the Datadog Agent.
+    ## By default, this is set to true to reduce load on the cluster. However, if you would prefer configuring
+    ## it manually, set this to false.
+    #
+    # badmin_perfmon_auto: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

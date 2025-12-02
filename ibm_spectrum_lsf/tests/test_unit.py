@@ -434,7 +434,7 @@ def test_badmin_perfmon_invalid_json(mock_client, dd_run_check, aggregator, inst
     instance['metric_sources'] = ['badmin_perfmon']
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
-    caplog.set_level(logging.ERROR)
+    caplog.set_level(logging.WARNING)
     mock_client.badmin_perfmon.return_value = ("Invalid JSON", "", 0)
     dd_run_check(check)
 
@@ -460,4 +460,41 @@ def test_cancel_no_badmin_perfmon(mock_client, dd_run_check, aggregator, instanc
     check.client = mock_client
     dd_run_check(check)
     check.cancel()
+    assert mock_client.badmin_perfmon_stop.call_count == 0
+
+
+def test_badmin_perfmon_collection_not_started_auto(mock_client, dd_run_check, aggregator, instance, caplog):
+    instance['metric_sources'] = ['badmin_perfmon']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    mock_client.badmin_perfmon.return_value = get_mock_output('badmin_perfmon_view_collection_not_started')
+    dd_run_check(check)
+    assert_metrics(LSID_METRICS, [], aggregator)
+
+    # no metrics collected, start collection
+    assert mock_client.badmin_perfmon_start.call_count == 2
+    mock_client.badmin_perfmon.return_value = get_mock_output('badmin_perfmon_view')
+
+    dd_run_check(check)
+    # collection started, no need to start again
+    assert mock_client.badmin_perfmon_start.call_count == 2
+    assert_metrics(BADMIN_PERFMON_METRICS + LSID_METRICS, [], aggregator)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_badmin_perfmon_collection_not_started_manual(mock_client, dd_run_check, aggregator, instance, caplog):
+    instance['metric_sources'] = ['badmin_perfmon']
+    instance['badmin_perfmon_auto'] = False
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    mock_client.badmin_perfmon.return_value = get_mock_output('badmin_perfmon_view_collection_not_started')
+
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+    check.cancel()
+
+    assert_metrics(LSID_METRICS, [], aggregator)
+    assert mock_client.badmin_perfmon_start.call_count == 0
     assert mock_client.badmin_perfmon_stop.call_count == 0

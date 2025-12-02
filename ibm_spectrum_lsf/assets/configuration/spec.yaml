@@ -43,4 +43,15 @@ files:
         - bhosts_gpu
         items:
           type: string
+    - name: badmin_perfmon_auto
+      required: false
+      description: |
+        Whether or not to call `badmin perfmon start` when starting badmin perfmon metrics collection and
+        `badmin perfmon stop` when the check is unscheduled by the Datadog Agent.
+        By default, this is set to true to reduce load on the cluster. However, if you would prefer configuring
+        it manually, set this to false.
+      value:
+        type: boolean
+        default: true
+        example: false
     - template: instances/default
