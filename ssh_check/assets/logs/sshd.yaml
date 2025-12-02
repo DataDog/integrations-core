@@ -59,6 +59,10 @@ pipeline:
           sshd.identification %{regex("Did not receive identification string"):system.action} from %{_client_ip}
 
           sshd.reversemappingchecking.failed %{regex("reverse mapping checking"):system.action} getaddrinfo for %{notSpace} \[%{_client_ip}\] failed%{greedyData}
+      samples:
+        - 'pam_unix(sshd:session): session closed for user marc.szalkiewicz'
+        - 'Accepted publickey for toptop from 172.22.179.72 port 58599 ssh2: RSA 01:fa:c1:75:ee:fbxxxx:xxxxx'
+        - 'Received disconnect from 172.22.179.72: 11: disconnected by user'
     - type: pipeline
       name: OCSF pipeline for SSH Authentication [3002]
       enabled: true
@@ -79,7 +83,7 @@ pipeline:
           template: "OpenBSD"
           target: ocsf.metadata.product.vendor_name
         - type: schema-processor
-          name: Apply OCSF schema for 4002
+          name: Apply OCSF schema for 3002
           enabled: true
           mappers:
             - type: schema-category-mapper
@@ -162,8 +166,3 @@ pipeline:
             classUid: 3002
             extensions: []
             profiles: []
-        
-      samples:
-        - 'pam_unix(sshd:session): session closed for user marc.szalkiewicz'
-        - 'Accepted publickey for toptop from 172.22.179.72 port 58599 ssh2: RSA 01:fa:c1:75:ee:fbxxxx:xxxxx'
-        - 'Received disconnect from 172.22.179.72: 11: disconnected by user'
