@@ -65,3 +65,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
                     self.gauge(metric.name, metric.value, tags=metric.tags)
             else:
                 self.log.trace("Skipping %s metrics; excluded in configuration.", processor.name)
+
+    def cancel(self):
+        if self.config.metric_sources and 'badmin_perfmon' in self.config.metric_sources:
+            self.client.badmin_perfmon_stop()

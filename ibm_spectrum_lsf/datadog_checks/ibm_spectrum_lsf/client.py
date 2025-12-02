@@ -82,3 +82,10 @@ class LSFClient:
             "start",
             str(min_collection_interval),
         )
+
+    def badmin_perfmon_stop(self) -> tuple[str, str, int]:
+        return self._run_command(
+            "badmin",
+            "perfmon",
+            "stop",
+        )

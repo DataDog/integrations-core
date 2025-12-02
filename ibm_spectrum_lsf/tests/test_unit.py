@@ -442,3 +442,22 @@ def test_badmin_perfmon_invalid_json(mock_client, dd_run_check, aggregator, inst
 
     assert_metrics(LSID_METRICS, [], aggregator)
     aggregator.assert_all_metrics_covered()
+
+
+def test_badmin_perfmon_stop(mock_client, dd_run_check, aggregator, instance):
+    instance['metric_sources'] = ['badmin_perfmon']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    dd_run_check(check)
+    dd_run_check(check)
+    assert mock_client.badmin_perfmon_stop.call_count == 0
+    check.cancel()
+    assert mock_client.badmin_perfmon_stop.call_count == 1
+
+
+def test_cancel_no_badmin_perfmon(mock_client, dd_run_check, aggregator, instance):
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    dd_run_check(check)
+    check.cancel()
+    assert mock_client.badmin_perfmon_stop.call_count == 0
