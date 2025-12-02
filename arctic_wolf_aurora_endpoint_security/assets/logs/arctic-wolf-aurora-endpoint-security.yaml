@@ -104,7 +104,7 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - 'Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f4, Tenant Name:
+        - 'Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f3, Tenant Name:
           TenantName, Event Type: AuditLog, Event Name: LoginFailure, Message:
           {"data":[["Cylance Administrator Password","One-Time
           Password"]],"clientIp":"163.116.205.118"}, User: John Carter
