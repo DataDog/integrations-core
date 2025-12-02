@@ -44,20 +44,11 @@ jobs:
       - name: Define diff commits
         id: set_sha
         if: github.event_name != 'workflow_dispatch'
-        run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            PREV_SHA=${{ github.event.pull_request.base.sha }}
-            CURR_SHA=${{ github.event.pull_request.head.sha }}
-          else
-            PREV_SHA=${{ github.event.before }}
-            CURR_SHA=${{ github.sha }}
-          fi
-
-          echo "prev_sha=$PREV_SHA" >> $GITHUB_OUTPUT
-          echo "curr_sha=$CURR_SHA" >> $GITHUB_OUTPUT
-
-          echo "Current SHA: $CURR_SHA"
-          echo "Previous SHA: $PREV_SHA"
+        run: ./.github/workflows/scripts/resolve_deps_define_diff_commits.sh
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_BEFORE: ${{ github.event.before }}
 
       - name: Get changed files
         id: changed-files
@@ -75,42 +66,10 @@ jobs:
 
       - name: Check if build should run
         id: dependency-check
-        run: |
-          if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
-            BUILDER_CHANGED="false"
-            SHOULD_RUN_BUILD="true"
-          else
-            FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
-
-          # We use unindented heredocs to avoid issues with YAML/Bash indentation
-          cat << EOF > dependency_files.txt
-          agent_requirements\.in
-          \.github/workflows/resolve-build-deps\.yaml
-          \.builders/
-          EOF
-
-          cat <<EOF > builder_files.txt
-          \.builders/
-          EOF
-
-            SHOULD_RUN_BUILD=$(
-                echo "$FILES_CHANGED" | \
-                grep -qf dependency_files.txt \
-                && echo "true" || echo "false"
-            )
-
-            BUILDER_CHANGED=$(
-                echo "$FILES_CHANGED" | \
-                grep -qf builder_files.txt \
-                && echo "true" || echo "false"
-            )
-          fi
-
-          echo "should_run_build=$SHOULD_RUN_BUILD" | tee -a $GITHUB_OUTPUT
-          echo "builder_changed=$BUILDER_CHANGED" | tee -a $GITHUB_OUTPUT
-
+        run: ./.github/workflows/scripts/resolve_deps_check_should_run.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILES_CHANGED: ${{ steps.changed-files.outputs.files_changed }}
 
   test:
     name: Run tests
