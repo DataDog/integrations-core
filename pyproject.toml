@@ -117,5 +117,8 @@ version = "0.0.0"
 dev-mode-dirs = ["."]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["hatchling", "wheel", "pathspec"]
+build-backend = "scripts.build_backend"
+backend-path = [".builders"]
+
+
