@@ -22,9 +22,8 @@ instances:
 
     ## @param raw_metric_prefix - string - optional - default: n8n
     ## The prefix prepended to all metrics from n8n.
-    ## If not set, the default prefix is used.
-    ## The default prefix is 'n8n'.
-    ## If you are using a custom prefix in n8n through N8N_METRICS_PREFIX, you can set it here.
+    ## If not set, the default prefix n8n is used.
+    ## If you are using a custom prefix in n8n through N8N_METRICS_PREFIX, you need to set it here.
     #
     # raw_metric_prefix: n8n
 
