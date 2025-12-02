@@ -16,10 +16,7 @@ from . import common
 def dd_environment():
     compose_file = common.COMPOSE_FILE
     conditions = [
-        # CheckDockerLogs(identifier='n8n', patterns=['server running']),
         CheckEndpoints(common.INSTANCE["openmetrics_endpoint"]),
-        CheckEndpoints(f'{common.OPENMETRICS_URL}/healthz', attempts=60, wait=3),
-        CheckEndpoints(f'{common.OPENMETRICS_URL}/metrics', attempts=60, wait=3),
     ]
     with docker_run(compose_file, conditions=conditions):
         yield {

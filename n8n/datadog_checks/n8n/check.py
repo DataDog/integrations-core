@@ -32,40 +32,42 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         self.raw_metric_prefix = self.instance.get('raw_metric_prefix', 'n8n')
 
     def get_default_config(self):
-        # If raw_metric_prefix is 'n8n', metrics start with 'n8n'
-        if self.raw_metric_prefix == 'n8n':
-            namespace = 'n8n'
-        else:
-            namespace = f'n8n.{self.raw_metric_prefix}'
-
-        return {'namespace': namespace, 'metrics': [METRIC_MAP]}
+        return {
+            'metrics': [METRIC_MAP],
+            'rename_labels': {
+                'version': 'n8n_version',
+            },
+        }
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
         endpoint = urljoin(self.openmetrics_endpoint, self._version_endpoint)
-        response = self.http.get(endpoint)
+        try:
+            response = self.http.get(endpoint)
 
-        if response.ok:
-            data = response.json()
-            version = data.get("versionCli", "")
-            version_split = version.split(".")
-            if len(version_split) >= 3:
-                major = version_split[0]
-                minor = version_split[1]
-                patch = version_split[2]
+            if response.ok:
+                data = response.json()
+                version = data.get("versionCli", "")
+                version_split = version.split(".")
+                if len(version_split) >= 3:
+                    major = version_split[0]
+                    minor = version_split[1]
+                    patch = version_split[2]
 
-                version_raw = f'{major}.{minor}.{patch}'
+                    version_raw = f'{major}.{minor}.{patch}'
 
-                version_parts = {
-                    'major': major,
-                    'minor': minor,
-                    'patch': patch,
-                }
-                self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+                    version_parts = {
+                        'major': major,
+                        'minor': minor,
+                        'patch': patch,
+                    }
+                    self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+                else:
+                    self.log.debug("Malformed N8N Server version format: %s", version)
             else:
-                self.log.debug("Malformed N8N Server version format: %s", version)
-        else:
-            self.log.debug("Could not retrieve version metadata.")
+                self.log.debug("Could not retrieve version metadata.")
+        except Exception as e:
+            self.log.debug("Error retrieving version metadata: %s", e)
 
     def _check_n8n_health(self):
         endpoint = urljoin(self.openmetrics_endpoint, self._health_endpoint)
@@ -84,7 +86,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         response = self.http.get(endpoint)
 
         # Any 4xx or 5xx response from the API endpoint (/healthz/readiness)
-        # means the n8n is not ready to accept requests
+        # means the n8n Database is not ready to accept requests
         if 400 <= response.status_code and response.status_code < 600:
             self.service_check('health.status', AgentCheck.CRITICAL, self.tags)
         if response.status_code == 200:
