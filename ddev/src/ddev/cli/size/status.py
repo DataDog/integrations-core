@@ -103,7 +103,7 @@ def status(
             from ddev.cli.size.utils.common_funcs import export_format
 
             export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
-        if to_dd_org or to_dd_key:
+        if (to_dd_org or to_dd_key) and commit:
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
 
             send_metrics_to_dd(app, commit, modules_plat_ver, to_dd_org, to_dd_key, compressed)
