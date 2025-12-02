@@ -50,12 +50,14 @@ def test_exclude_default(aggregator, dd_run_check, mock_performance_objects):
 
     aggregator.assert_all_metrics_covered()
 
+
 def test_exclude_case_insensitive(aggregator, dd_run_check, mock_performance_objects):
     mock_performance_objects({'Foo': (['0,_total', 'baz'], {'Bar': [1, 2]})})
     check = get_check({'metrics': {'Foo': {'name': 'foo', 'exclude': ['Baz'], 'counters': [{'Bar': 'bar'}]}}})
     dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
+
 
 def test_include_case_insensitive(aggregator, dd_run_check, mock_performance_objects):
     mock_performance_objects({'Foo': (['Foobar', 'Bar', 'Barbat'], {'Bar': [1, 2, 3]})})
