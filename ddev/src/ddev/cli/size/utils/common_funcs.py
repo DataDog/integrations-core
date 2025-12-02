@@ -837,16 +837,12 @@ def draw_treemap_rects_with_labels(
 
 def send_metrics_to_dd(
     app: Application,
-    commit: str | None,
+    commit: str,
     modules: list[FileDataEntryPlatformVersion],
     org: str | None,
     key: str | None,
     compressed: bool,
 ) -> None:
-    if not commit:
-        app.display_error("In order to send metrics to Datadog, you need to provide a commit hash")
-        return
-
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
