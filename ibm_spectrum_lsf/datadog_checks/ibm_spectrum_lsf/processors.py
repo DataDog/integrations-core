@@ -6,6 +6,7 @@ import json
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 from datadog_checks.base.log import CheckLoggingAdapter
 
@@ -16,10 +17,13 @@ from .common import (
     transform_error,
     transform_float,
     transform_job_id,
+    transform_job_name,
+    transform_job_with_task,
     transform_open,
     transform_runtime,
     transform_status,
     transform_tag,
+    transform_task_id,
     transform_time_left,
 )
 from .config_models import InstanceConfig
@@ -102,7 +106,7 @@ class LSFMetricsProcessor(ABC):
         pass
 
     def parse_table_command(
-        self, metric_mapping: list[LSFMetricMapping], tag_mapping: list[LSFTagMapping]
+        self, metric_mapping: list[LSFMetricMapping], tag_mapping: list[LSFTagMapping], remove_first_line: bool = False
     ) -> list[LSFMetric]:
         output, err, exit_code = self.run_lsf_command()
         if exit_code != 0:
@@ -110,9 +114,12 @@ class LSFMetricsProcessor(ABC):
             return []
 
         output_lines = output.strip().splitlines()
-        if len(output_lines) == 0:
+        if len(output_lines) == 0 or (remove_first_line and len(output_lines) == 1):
             self.log.warning("No output from command %s", self.name)
             return []
+
+        if remove_first_line:
+            output_lines.pop(0)
 
         headers = output_lines.pop(0)
         if len(headers.split(self.delimiter)) != self.expected_columns:
@@ -539,3 +546,45 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
                 metrics.append(LSFMetric(f"{self.prefix}.{metric_name}.{aggr}", metric_value, self.base_tags))
 
         return metrics
+
+
+class BHistProcessor(LSFMetricsProcessor):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
+        super().__init__(
+            name='bhist',
+            prefix='job.completed',
+            expected_columns=10,
+            delimiter=None,
+            client=client,
+            config=config,
+            logger=logger,
+            base_tags=base_tags,
+        )
+        self.last_check_time = datetime.now().strftime('%Y/%m/%d/%H:%M')
+
+    def run_lsf_command(self) -> tuple[str, str, int]:
+        start_time = self.last_check_time
+        end_time = datetime.now().strftime('%Y/%m/%d/%H:%M')
+        if start_time == end_time:
+            # the highest granularity is 1 minute, so we need to go back 1 minute if collection interval < 60
+            start_time = (datetime.now() - timedelta(minutes=1)).strftime('%Y/%m/%d/%H:%M')
+        self.last_check_time = end_time
+        return self.client.bhist(start_time, end_time)
+
+    def process_metrics(self) -> list[LSFMetric]:
+        tags = [
+            LSFTagMapping('job_id', 0, transform_job_with_task),
+            LSFTagMapping('task_id', 0, transform_task_id),
+            LSFTagMapping('user', 1, transform_tag),
+            LSFTagMapping('job_name', 2, transform_job_name),
+        ]
+        metrics = [
+            LSFMetricMapping('pending', 3, transform_float),
+            LSFMetricMapping('pending_user_suspended', 4, transform_float),
+            LSFMetricMapping('running', 5, transform_float),
+            LSFMetricMapping('user_suspended', 6, transform_float),
+            LSFMetricMapping('system_suspended', 7, transform_float),
+            LSFMetricMapping('unknown', 8, transform_float),
+            LSFMetricMapping('total', 9, transform_float),
+        ]
+        return self.parse_table_command(metrics, tags, remove_first_line=True)

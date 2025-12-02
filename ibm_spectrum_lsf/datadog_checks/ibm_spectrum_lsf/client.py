@@ -89,3 +89,13 @@ class LSFClient:
             "perfmon",
             "stop",
         )
+
+    def bhist(self, start_time: str, end_time: str) -> tuple[str, str, int]:
+        return self._run_command(
+            "bhist",
+            "-C",
+            f"{start_time},{end_time}",
+            "-w",
+            "-u",
+            "all",
+        )

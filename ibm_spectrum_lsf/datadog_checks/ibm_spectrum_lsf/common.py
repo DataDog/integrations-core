@@ -46,6 +46,29 @@ def transform_tag(val: str) -> str | None:
         return parsed
 
 
+def transform_job_with_task(val):
+    parts = val.split("[")
+    job_id = parts[0]
+    return job_id
+
+
+def transform_task_id(val):
+    parts = val.split("[")
+    if len(parts) > 1:
+        second_part = parts[1].split("]")
+        task_id = second_part[0]
+        return task_id
+    return None
+
+
+def transform_job_name(val):
+    parts = val.split("[")
+    if len(parts) > 1:
+        job_name = parts[0]
+        return job_name
+    return transform_tag(val)
+
+
 def transform_error(val: str) -> bool:
     parsed = val.strip()
     return not parsed == '-'

@@ -65,6 +65,7 @@ def test_check_gpu_enabled(mock_client, dd_run_check, aggregator, instance):
         'bqueues',
         'bslots',
         'bjobs',
+        'bhist',
         'lsload_gpu',
         'bhosts_gpu',
     ]
@@ -88,6 +89,7 @@ def test_check_all_metric_sources(mock_client, dd_run_check, aggregator, instanc
         'bqueues',
         'bslots',
         'bjobs',
+        'bhist',
         'lsload_gpu',
         'bhosts_gpu',
         'badmin_perfmon',
@@ -98,7 +100,6 @@ def test_check_all_metric_sources(mock_client, dd_run_check, aggregator, instanc
     dd_run_check(check)
 
     assert_metrics(ALL_METRICS, [], aggregator)
-
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
 
@@ -204,28 +205,6 @@ def test_client_error(dd_run_check, aggregator, instance, caplog):
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_check_metric_sources_all(mock_client, dd_run_check, aggregator, instance):
-    instance["metric_sources"] = [
-        'lsclusters',
-        'lshosts',
-        'bhosts',
-        'lsload',
-        'bqueues',
-        'bslots',
-        'bjobs',
-        'lsload_gpu',
-        'bhosts_gpu',
-        'badmin_perfmon',
-    ]
-    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
-    check.client = mock_client
-    dd_run_check(check)
-    assert_metrics(ALL_METRICS, [], aggregator)
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
 def test_check_metric_sources_invalid(mock_client, dd_run_check, instance):
     instance["metric_sources"] = ['test']
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
@@ -320,7 +299,18 @@ def test_badmin_perfmon_start_only_called_once(mock_client, dd_run_check, aggreg
         ),
         pytest.param(
             60,
-            ['lsclusters', 'lshosts', 'bhosts', 'lsload', 'bqueues', 'bslots', 'bjobs', 'lsload_gpu', 'bhosts_gpu'],
+            [
+                'lsclusters',
+                'lshosts',
+                'bhosts',
+                'lsload',
+                'bqueues',
+                'bslots',
+                'bjobs',
+                'bhist',
+                'lsload_gpu',
+                'bhosts_gpu',
+            ],
             0,
             [],
             ALL_DEFAULT_METRICS,
@@ -337,6 +327,7 @@ def test_badmin_perfmon_start_only_called_once(mock_client, dd_run_check, aggreg
                 'bqueues',
                 'bslots',
                 'bjobs',
+                'bhist',
                 'lsload_gpu',
                 'bhosts_gpu',
             ],
