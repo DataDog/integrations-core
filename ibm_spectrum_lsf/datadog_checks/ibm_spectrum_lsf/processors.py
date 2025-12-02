@@ -471,10 +471,10 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
 
     def run_lsf_command(self) -> tuple[str, str, int]:
         if self.config.badmin_perfmon_auto:
+            collection_interval = (
+                self.config.min_collection_interval if self.config.min_collection_interval is not None else 60
+            )
             if not self.collection_started:
-                collection_interval = (
-                    self.config.min_collection_interval if self.config.min_collection_interval is not None else 60
-                )
                 self.client.badmin_perfmon_start(collection_interval)
                 self.collection_started = True
             perfmon_output = self.client.badmin_perfmon()
