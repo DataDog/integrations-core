@@ -510,7 +510,7 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
         }
 
         metrics = []
-        records = output_json.get("record")
+        records = output_json.get("record", [])
         for record in records:
             name = record.get("name")
             metric_name = metric_name_mapping.get(name)
