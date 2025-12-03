@@ -28,7 +28,7 @@ The `/metrics` endpoint is disabled by default and must be enabled by setting `N
 
 Note that the `/metrics` endpoint is only available for self-hosted instances and is not available on n8n Cloud.
 
-For the datadog agent to collect metrics, you will need to follow the instructions provided [here][10].
+For the Datadog Agent to collect metrics, follow the instructions to [enable Prometheus metrics][10].
 
 1. Edit the `n8n.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your n8n performance data. See the [sample n8n.d/conf.yaml][4] for all available configuration options.
 
