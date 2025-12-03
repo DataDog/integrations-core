@@ -14,7 +14,11 @@ from psycopg.rows import dict_row
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    batch_obfuscate_sql_with_metadata,
+    default_json_event_encoding,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
@@ -615,18 +619,28 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
-        for row in rows:
-            normalized_row = dict(copy.copy(row))
-            try:
-                query_text = row['query']
-                statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
-            except Exception as e:
-                if self._config.log_unobfuscated_queries:
-                    self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
-                else:
-                    self._log.debug("Failed to obfuscate query | err=[%s]", e)
-                continue
+        if not rows:
+            return normalized_rows
 
+        # Extract queries for batch obfuscation
+        queries = [row['query'] for row in rows]
+
+        try:
+            # Batch obfuscate all queries at once
+            self._check.gauge("dd.postgres.statement_metrics.batch_obfuscation_queries", len(queries))
+            statements = batch_obfuscate_sql_with_metadata(queries, self._obfuscate_options)
+        except RuntimeError as e:
+            # Error message includes the failing query index
+            # e.g., "Failed to obfuscate query at index 1: malformed SQL"
+            if self._config.log_unobfuscated_queries:
+                self._log.warning("Batch obfuscation failed | err=[%s]", e)
+            else:
+                self._log.debug("Batch obfuscation failed | err=[%s]", e)
+            return normalized_rows
+
+        # Process the obfuscated results
+        for row, statement in zip(rows, statements):
+            normalized_row = dict(copy.copy(row))
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)

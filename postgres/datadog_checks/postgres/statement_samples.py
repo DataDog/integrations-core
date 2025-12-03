@@ -32,8 +32,8 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, comput
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
+    batch_obfuscate_sql_with_metadata,
     default_json_event_encoding,
-    obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
@@ -346,6 +346,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         insufficient_privilege_count = 0
         total_count = 0
         normalized_rows = []
+        rows_to_obfuscate = []
+        row_indices = []
+
+        # First pass: filter and prepare rows for batch obfuscation
         for row in rows:
             total_count += 1
 
@@ -370,7 +374,57 @@ class PostgresStatementSamples(DBMAsyncJob):
                 row['query_start'] and row['query_start'] > self._activity_last_query_start
             ):
                 self._activity_last_query_start = row['query_start']
-            normalized_rows.append(self._normalize_row(row))
+
+            # Collect rows that need obfuscation
+            backend_type = row.get('backend_type', 'client backend') or 'client backend'
+            if backend_type == 'client backend':
+                rows_to_obfuscate.append(row)
+                row_indices.append(len(normalized_rows))
+                # Add placeholder that will be updated
+                normalized_rows.append(None)
+            else:
+                # Non-client backend rows don't need obfuscation
+                normalized_row = dict(copy.copy(row))
+                normalized_row['query_signature'] = compute_sql_signature(backend_type)
+                normalized_row['statement'] = backend_type
+                normalized_rows.append(normalized_row)
+
+        # Batch obfuscate all client backend queries
+        if rows_to_obfuscate:
+            queries = [row['query'] for row in rows_to_obfuscate]
+            try:
+                self._check.gauge("dd.postgres.statement_samples.batch_obfuscation_queries", len(queries))
+                statements = batch_obfuscate_sql_with_metadata(queries, self._obfuscate_options)
+
+                # Update the placeholder rows with obfuscated results
+                for row, statement, idx in zip(rows_to_obfuscate, statements, row_indices):
+                    normalized_row = dict(copy.copy(row))
+                    obfuscated_query = statement['query']
+                    metadata = statement['metadata']
+                    normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+                    normalized_row['dd_tables'] = metadata.get('tables', None)
+                    normalized_row['dd_commands'] = metadata.get('commands', None)
+                    normalized_row['dd_comments'] = metadata.get('comments', None)
+                    normalized_row['statement'] = obfuscated_query
+                    normalized_rows[idx] = normalized_row
+            except RuntimeError as e:
+                # Error message includes the failing query index
+                # e.g., "Failed to obfuscate query at index 1: malformed SQL"
+                if self._config.log_unobfuscated_queries:
+                    self._log.warning("Batch obfuscation failed | err=[%s]", e)
+                else:
+                    self._log.debug("Batch obfuscation failed | err=[%s]", e)
+                self._check.count(
+                    "dd.postgres.statement_samples.error",
+                    1,
+                    tags=self.tags + ["error:sql-obfuscate-batch"] + self._check._get_debug_tags(),
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+
+        # Filter out any None placeholders that failed to obfuscate
+        normalized_rows = [row for row in normalized_rows if row is not None]
+
         if insufficient_privilege_count > 0:
             self._log.warning(
                 "Insufficient privilege for %s/%s queries when collecting from %s.",
@@ -386,37 +440,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                 raw=True,
             )
         return normalized_rows
-
-    def _normalize_row(self, row):
-        normalized_row = dict(copy.copy(row))
-        obfuscated_query = None
-        backend_type = normalized_row.get('backend_type', 'client backend') or 'client backend'
-        try:
-            if backend_type != 'client backend':
-                obfuscated_query = backend_type
-                normalized_row['query_signature'] = compute_sql_signature(backend_type)
-            else:
-                statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
-                obfuscated_query = statement['query']
-                metadata = statement['metadata']
-                normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-                normalized_row['dd_tables'] = metadata.get('tables', None)
-                normalized_row['dd_commands'] = metadata.get('commands', None)
-                normalized_row['dd_comments'] = metadata.get('comments', None)
-        except Exception as e:
-            if self._config.log_unobfuscated_queries:
-                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
-            else:
-                self._log.debug("Failed to obfuscate query | err=[%s]", e)
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-        normalized_row['statement'] = obfuscated_query
-        return normalized_row
 
     def _get_extra_filters_and_params(self, filter_stale_idle_conn=False):
         extra_filters = ""
