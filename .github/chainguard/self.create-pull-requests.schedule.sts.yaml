@@ -34,7 +34,7 @@ subject: repo:DataDog/integrations-core:ref:refs/heads/master
 claim_pattern:
   ref: refs/heads/master
   ref_protected: "true"
-  job_workflow_ref: DataDog/integrations-core/.github/workflows/.*\.ya?ml@refs/heads/master
+  workflow: "ZZ - POC - Trigger PR Checks"
   event_name: (schedule|workflow_dispatch)
 
 permissions:
