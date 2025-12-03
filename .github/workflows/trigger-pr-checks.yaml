@@ -22,9 +22,15 @@ jobs:
         with:
           python-version: '3.13'
 
+      - uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.test-dispatcher
+
       - name: Trigger workflows for PR
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
         run: |
           echo "Triggering workflows for PR #${{ github.event.pull_request.number }}"
           echo "Merge commit SHA: ${{ github.sha }}"
