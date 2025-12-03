@@ -89,7 +89,7 @@ def trigger_workflow(target: str, jobs: list[dict], ref: str, dry_run: bool = Fa
         '/repos/DataDog/integrations-core/actions/workflows/zz-test-worker-poc.yaml/dispatches',
         '-f', 'ref=master',
         '-f', f'inputs[matrix_json]={matrix_json}',
-        '-f', f'inputs[checkout_ref]={ref}'
+        '-f', f'inputs[ref]={ref}'
     ]
 
     try:
