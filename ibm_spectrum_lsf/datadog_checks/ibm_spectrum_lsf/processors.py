@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -45,6 +46,13 @@ class LSFMetricMapping:
     transform: Callable[[str], float]
 
 
+@dataclass
+class BadminMetricMapping:
+    name: str
+    key: str
+    transform: Callable[[str], float]
+
+
 def process_table_tags(tag_mapping: list[LSFTagMapping], line_data: list[str]) -> list[str]:
     tags = []
     for tag in tag_mapping:
@@ -73,7 +81,7 @@ class LSFMetricsProcessor(ABC):
         self,
         name: str,
         prefix: str,
-        expected_columns: int,
+        expected_columns: int | None,
         delimiter: str | None,
         client: LSFClient,
         config: InstanceConfig,
@@ -432,10 +440,6 @@ class GPUHostsProcessor(LSFMetricsProcessor):
         return self.client.bhosts_gpu()
 
     def process_metrics(self) -> list[LSFMetric]:
-        """
-        HOST_NAME|NGPUS|NGPUS_ALLOC|NGPUS_EXCL_ALLOC|NGPUS_SHARED_ALLOC|NGPUS_SHARED_JEXCL_ALLOC|NGPUS_EXCL_AVAIL|NGPUS_SHARED_AVAIL
-        ip-10-11-220-181.ec2.internal|1|0|0|0|0|1|1
-        """
         tags = [
             LSFTagMapping('lsf_host', 0, transform_tag),
         ]
@@ -449,3 +453,89 @@ class GPUHostsProcessor(LSFMetricsProcessor):
             LSFMetricMapping('num_gpus_shared_available', 7, transform_float),
         ]
         return self.parse_table_command(metrics, tags)
+
+
+class BadminPerfmonProcessor(LSFMetricsProcessor):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
+        super().__init__(
+            name='badmin_perfmon',
+            prefix='perfmon',
+            expected_columns=None,
+            delimiter=None,
+            client=client,
+            config=config,
+            logger=logger,
+            base_tags=base_tags,
+        )
+        self.collection_started = False
+
+    def run_lsf_command(self) -> tuple[str, str, int]:
+        if self.config.badmin_perfmon_auto:
+            collection_interval = (
+                self.config.min_collection_interval if self.config.min_collection_interval is not None else 60
+            )
+            if not self.collection_started:
+                self.client.badmin_perfmon_start(collection_interval)
+                self.collection_started = True
+            perfmon_output = self.client.badmin_perfmon()
+            if (
+                "Performance metric sampling has not been started" in perfmon_output[0]
+                or "No performance metric data available." in perfmon_output[0]
+            ):
+                # Collection was stopped manually, restart it
+                self.client.badmin_perfmon_start(collection_interval)
+                self.collection_started = True
+        else:
+            perfmon_output = self.client.badmin_perfmon()
+        return perfmon_output
+
+    def process_metrics(self) -> list[LSFMetric]:
+        output, err, exit_code = self.run_lsf_command()
+        if exit_code != 0 or output is None:
+            self.log.error("Failed to get %s output: %s", self.name, err)
+            return []
+
+        try:
+            output_json = json.loads(output.strip())
+        except json.JSONDecodeError:
+            self.log.warning("Invalid JSON output from %s: %s", self.name, output)
+            return []
+
+        metric_name_mapping = {
+            "Processed requests: mbatchd": "mbatchd.processed_requests",
+            "Job information queries": "jobs.queries",
+            "Host information queries": "host.queries",
+            "Queue information queries": "queue.queries",
+            "Job submission requests": "jobs.submission_requests",
+            "Jobs submitted": "jobs.submitted",
+            "Jobs dispatched": "jobs.dispatched",
+            "Jobs completed": "jobs.completed",
+            "Jobs sent to remote cluster": "jobs.sent_remote",
+            "Jobs accepted from remote cluster": "jobs.accepted_remote",
+            "Scheduling interval in second(s)": "jobs.scheduling_interval",
+            "Matching host criteria": "scheduler.host_matches",
+            "Job buckets": "jobs.buckets",
+            "Jobs reordered": "jobs.reordered",
+            "Slot utilization": "slots.utilization",
+            "Memory utilization": "memory.utilization",
+        }
+
+        metrics = []
+        records = output_json.get("record", [])
+        for record in records:
+            name = record.get("name")
+            metric_name = metric_name_mapping.get(name)
+            if metric_name is None or name is None:
+                self.log.debug("Skipping metric record with missing name %s: %s", name, record)
+                continue
+
+            aggregations = ["current", "max", "min", "avg", "total"]
+            for aggr in aggregations:
+                val = record.get(aggr)
+                if val is None:
+                    self.log.debug("Skipping metric aggregation with missing value %s: %s", aggr, record)
+                    continue
+                metric_value = transform_float(str(val))
+                metrics.append(LSFMetric(f"{self.prefix}.{metric_name}.{aggr}", metric_value, self.base_tags))
+
+        return metrics
