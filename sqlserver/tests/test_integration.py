@@ -21,6 +21,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
+    STATIC_INFO_YEAR,
     TABLE_SIZE_METRICS,
 )
 
@@ -498,6 +499,35 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_only_custom_queries(aggregator, dd_run_check, instance_docker):
+    """Test that only_custom_queries=True skips regular metrics but executes custom queries."""
+    instance = copy(instance_docker)
+    instance['only_custom_queries'] = True
+    instance['custom_queries'] = [
+        {
+            'query': "SELECT 42 as custom_value",
+            'columns': [{'name': 'custom_value', 'type': 'gauge'}],
+            'tags': ['test:only_custom'],
+        }
+    ]
+    instance['procedure_metrics'] = {'enabled': False}
+
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    # Verify that custom query metrics ARE collected
+    instance_tags = check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME).lower()),
+    ]
+    aggregator.assert_metric('sqlserver.custom_value', value=42, tags=instance_tags + ['test:only_custom'], count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_load_static_information(aggregator, dd_run_check, instance_docker):
     instance = copy(instance_docker)
     check = SQLServer(CHECK_NAME, {}, [instance])
@@ -851,7 +881,8 @@ def test_resolved_hostname_set(
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     if engine_edition:
         sqlserver_check.static_info_cache[STATIC_INFO_VERSION] = "Microsoft SQL Server 2019"
-        sqlserver_check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 2019
+        sqlserver_check.static_info_cache[STATIC_INFO_YEAR] = 2019
+        sqlserver_check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 15
         sqlserver_check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
     dd_run_check(sqlserver_check)
     assert sqlserver_check.resolved_hostname == expected_hostname
@@ -1049,21 +1080,21 @@ def test_check_static_information_expire(aggregator, dd_run_check, init_config, 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually clear static information cache
     sqlserver_check.static_info_cache.clear()
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually pop STATIC_INFO_ENGINE_EDITION to make sure it is reloaded
     sqlserver_check.static_info_cache.pop(STATIC_INFO_ENGINE_EDITION)
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
 

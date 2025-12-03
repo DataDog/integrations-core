@@ -89,7 +89,7 @@ class AzureTokenProvider(TokenProvider):
         from .azure import generate_managed_identity_token
 
         token = generate_managed_identity_token(client_id=self.client_id, identity_scope=self.identity_scope)
-        return token.token, float(token.expires_at)
+        return token.token, float(token.expires_on)
 
 
 class TokenAwareConnection(Connection):
