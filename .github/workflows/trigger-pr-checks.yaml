@@ -12,6 +12,7 @@ jobs:
       contents: read
       actions: write
       pull-requests: read
+      id-token: write
 
     steps:
       - name: Check out repository
