@@ -6,9 +6,10 @@ import json
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.utils.time import get_current_datetime
 
 from .client import LSFClient
 from .common import (
@@ -560,14 +561,16 @@ class BHistProcessor(LSFMetricsProcessor):
             logger=logger,
             base_tags=base_tags,
         )
-        self.last_check_time = datetime.now().strftime('%Y/%m/%d/%H:%M')
+        self.last_check_time = get_current_datetime().strftime('%Y/%m/%d/%H:%M')
 
     def run_lsf_command(self) -> tuple[str, str, int]:
         start_time = self.last_check_time
-        end_time = datetime.now().strftime('%Y/%m/%d/%H:%M')
+        end_time = get_current_datetime().strftime('%Y/%m/%d/%H:%M')
+        self.log.trace("Last check time: %s, end time: %s", start_time, end_time)
         if start_time == end_time:
+            self.log.trace("Start time %s is equal to end time %s, going back 1 minute", start_time, end_time)
             # the highest granularity is 1 minute, so we need to go back 1 minute if collection interval < 60
-            start_time = (datetime.now() - timedelta(minutes=1)).strftime('%Y/%m/%d/%H:%M')
+            start_time = (get_current_datetime() - timedelta(minutes=1)).strftime('%Y/%m/%d/%H:%M')
         self.last_check_time = end_time
         return self.client.bhist(start_time, end_time)
 

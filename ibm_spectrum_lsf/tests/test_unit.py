@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -16,6 +17,7 @@ from .common import (
     ALL_DEFAULT_METRICS,
     ALL_METRICS,
     BADMIN_PERFMON_METRICS,
+    BHIST_METRICS,
     BJOBS_METRICS,
     CLUSTER_METRICS,
     LHOST_METRICS,
@@ -489,3 +491,27 @@ def test_badmin_perfmon_collection_not_started_manual(mock_client, dd_run_check,
     assert_metrics(LSID_METRICS, [], aggregator)
     assert mock_client.badmin_perfmon_start.call_count == 0
     assert mock_client.badmin_perfmon_stop.call_count == 0
+
+
+def test_bhist_correct_time_intervals(mock_client, dd_run_check, aggregator, instance):
+    instance['metric_sources'] = ['bhist']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    with patch('datadog_checks.ibm_spectrum_lsf.processors.get_current_datetime') as mock_get_current_datetime:
+        mock_get_current_datetime.side_effect = [
+            datetime(2025, 12, 1, 10, 0),
+            datetime(2025, 12, 1, 10, 0),
+            datetime(2025, 12, 1, 10, 0),
+            datetime(2025, 12, 1, 10, 22),
+        ]
+
+        dd_run_check(check)
+        dd_run_check(check)
+        assert mock_client.bhist.call_count == 2
+        # first call is start of check, subtract 1 minute, second call is 22 minutes later
+        assert mock_client.bhist.call_args_list == [
+            call('2025/12/01/09:59', '2025/12/01/10:00'),
+            call('2025/12/01/10:00', '2025/12/01/10:22'),
+        ]
+        assert_metrics(BHIST_METRICS + LSID_METRICS, [], aggregator)
+        aggregator.assert_all_metrics_covered()
