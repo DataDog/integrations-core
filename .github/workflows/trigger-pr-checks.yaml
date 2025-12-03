@@ -39,7 +39,7 @@ jobs:
 
           python gh_workflow.py \
             --ref refs/pull/${{ github.event.pull_request.number }}/merge \
-            --multiply 2
+            --multiply 1
 
       - name: Summary
         if: always()
