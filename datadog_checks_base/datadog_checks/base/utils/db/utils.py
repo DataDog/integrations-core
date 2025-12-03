@@ -290,11 +290,8 @@ def batch_obfuscate_sql_with_metadata(queries, options=None, replace_null_charac
         # replace embedded null characters \x00 before obfuscating
         queries = [query.replace('\x00', '') if query else query for query in queries]
 
-    # Serialize queries to JSON for the agent
-    queries_json = json.encode(queries)
-
     # Call the batch obfuscation function
-    results_json = datadog_agent.batch_obfuscate_sql(queries_json, options)
+    results_json = datadog_agent.batch_obfuscate_sql(queries, options)
     results = json.decode(results_json)
 
     # Process results based on whether metadata is requested
