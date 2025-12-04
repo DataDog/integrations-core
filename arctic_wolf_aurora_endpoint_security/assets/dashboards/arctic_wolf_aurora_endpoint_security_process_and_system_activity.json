@@ -1,0 +1,3778 @@
+{
+    "title": "Arctic Wolf Aurora Endpoint Security Process and System Activity",
+    "description": "This dashboard provides a comprehensive summary of aurora focus process-based, file-based, registry-based, memory-based, log-based events.",
+    "widgets": [
+        {
+            "id": 3421322770581315,
+            "definition": {
+                "type": "image",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbu-PsqDTq7UQK1kgth4yXsd5JM3_HMlRuOw&s",
+                "url_dark_theme": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbu-PsqDTq7UQK1kgth4yXsd5JM3_HMlRuOw&s",
+                "sizing": "none",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 7658500067818814,
+            "definition": {
+                "type": "note",
+                "content": "[Arctic Wolf Aurora Endpoint Security](https://docs.arcticwolf.com/bundle/AES-Overview/page/What-is-Aurora-Endpoint-Security.html) is a unified solution that helps  to tackle modern threats. It provides comprehensive capabilities to detect and protect against threats across endpoints.\n\nThis dashboard provides a comprehensive summary of aurora focus process-based, file-based, registry-based, memory-based, log-based events.\n\nFor more information, see the [Arctic Wolf Aurora Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/arctic_wolf_aurora_platform/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 8672667804411017,
+            "definition": {
+                "title": "Process Based Detection Events",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8642711539020095,
+                        "definition": {
+                            "type": "note",
+                            "content": "Tracks detection events involving target processes, including the instigating process, target process details, command lines, file paths, hashes, severity, device and user information, and detection rule details. Helps monitor suspicious or malicious process activity and provides insight into which processes triggered detections on endpoints.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2048589264647084,
+                        "definition": {
+                            "title": "Process-based detection events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f2f6fd"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2767942491661448,
+                        "definition": {
+                            "title": "Process-based detection events over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5103778130741831,
+                        "definition": {
+                            "title": "Top process-based detection rules",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@description"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5854589253074232,
+                        "definition": {
+                            "title": "Severity distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@severity"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6198882914723323,
+                        "definition": {
+                            "title": "Top devices",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@device_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1735611564706850,
+                        "definition": {
+                            "title": "Top instigating processes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2893053884569087,
+                        "definition": {
+                            "title": "Top target processes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@target_process_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8842253408958264,
+                        "definition": {
+                            "title": "Instigating processes by severity",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_name",
+                                                    "@severity"
+                                                ],
+                                                "limit": 100,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1497791191570811,
+                        "definition": {
+                            "title": "Target processes by severity",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@target_process_name",
+                                                    "@severity"
+                                                ],
+                                                "limit": 100,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8842816597576186,
+                        "definition": {
+                            "title": "Instigating process details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "@instigating_process_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_command_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_owner",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_imagefilesha256",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 17,
+                            "width": 6,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 2378398408510444,
+                        "definition": {
+                            "title": "Target process details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "@target_process_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@target_process_file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@target_process_command_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@target_process_owner",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@target_process_imagefilesha256",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 17,
+                            "width": 6,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 8769901716961794,
+                        "definition": {
+                            "title": "Process-based detection event details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeProcessEvent $event_type $event_name $severity $target_process_name $target_process_owner $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 22,
+                            "width": 12,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 1
+            }
+        },
+        {
+            "id": 3380723793251160,
+            "definition": {
+                "title": "File Based Detection Events",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1295444125441289,
+                        "definition": {
+                            "type": "note",
+                            "content": "Tracks detection events involving target processes, including the instigating process, target file details, command lines, file paths, hashes, severity, device and user information, and detection rule details. Helps monitor suspicious or malicious process activity and provides insight into which processes triggered detections on endpoints.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4266912449946620,
+                        "definition": {
+                            "title": "File-based detection events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f0f5ff"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5500005216915720,
+                        "definition": {
+                            "title": "File-based detection events over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2878769287650243,
+                        "definition": {
+                            "title": "Top file-based detection rules",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@description"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 968594702342520,
+                        "definition": {
+                            "title": "Severity over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Severity",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@severity"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1849751412361798,
+                        "definition": {
+                            "title": "Top devices",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@device_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6676101425948371,
+                        "definition": {
+                            "title": "Top instigating processes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2710122169778009,
+                        "definition": {
+                            "title": "Top instigating process owner",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_owner"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5640973859123250,
+                        "definition": {
+                            "title": "Top target file owners",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@target_file_owner"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2834987334602293,
+                        "definition": {
+                            "title": "Instigating processes by severity",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_name",
+                                                    "@severity"
+                                                ],
+                                                "limit": 100,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2500317970698425,
+                        "definition": {
+                            "title": "Targeted files by severity",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@target_file_path",
+                                                    "@target_process_imagefilesha256",
+                                                    "@severity"
+                                                ],
+                                                "limit": 100,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8039094248523423,
+                        "definition": {
+                            "title": "Instigating process details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_command_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_owner",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_imagefilesha256",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 17,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5340632065872456,
+                        "definition": {
+                            "title": "Target file details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "@target_file_owner",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@target_file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@target_process_imagefilesha256",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 17,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4900505041793632,
+                        "definition": {
+                            "title": "File-based detection event details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeFileEvent $event_type $event_name $severity $target_file_owner $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 21,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 1
+            }
+        },
+        {
+            "id": 6282746951262244,
+            "definition": {
+                "title": "Memory Based Detection Events",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2318422851057686,
+                        "definition": {
+                            "type": "note",
+                            "content": "Captures memory based events on devices, including the detection rule triggered, device details, instigating process information, event severity and many more. Provides context on processes accessing or modifying memory, timestamps of events, and zone information, helping track potentially malicious or suspicious memory activity, understand which process caused the event.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8494862788240259,
+                        "definition": {
+                            "title": "Memory-based detection events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f0f5ff"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8519543940281683,
+                        "definition": {
+                            "title": "Memory-based detection events over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6972370577217698,
+                        "definition": {
+                            "title": "Top memory-based detection rules",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@description"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4969810333330771,
+                        "definition": {
+                            "title": "Severity over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Severity",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@severity"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5060372662900078,
+                        "definition": {
+                            "title": "Top devices",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@device_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3962805356314787,
+                        "definition": {
+                            "title": "Top instigating process owners",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_owner"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6903289328252620,
+                        "definition": {
+                            "title": "Instigating processes by severity",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_name",
+                                                    "@severity"
+                                                ],
+                                                "limit": 100,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3895051412512635,
+                        "definition": {
+                            "title": "Instigating process details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "@instigating_process_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_command_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_owner",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_imagefilesha256",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8396079574841390,
+                        "definition": {
+                            "title": "Memory-based detection event details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeMemoryEvent $event_type $event_name $severity $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 1,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 217135171244172,
+            "definition": {
+                "title": "Registry Based Detection Events",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8859840542491966,
+                        "definition": {
+                            "type": "note",
+                            "content": "Tracks detection events involving registry items on devices, including the instigating process, target registry key and value, severity, device and user information, and detection rule details. Helps monitor suspicious or malicious registry changes and provides insight into which processes triggered these events on endpoints.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2306015667872927,
+                        "definition": {
+                            "title": "Registry-based detection events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#edf3fd"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6684911223982582,
+                        "definition": {
+                            "title": "Registry-based detection events over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1434474910267658,
+                        "definition": {
+                            "title": "Top registry-based detection rules",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@description"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1160925216439311,
+                        "definition": {
+                            "title": "Events severity distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@severity"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7927247127513465,
+                        "definition": {
+                            "title": "Top devices",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@device_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6050616073161799,
+                        "definition": {
+                            "title": "Top instigating processes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3986335731128083,
+                        "definition": {
+                            "title": "Top target registries",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@target_registry_valuename"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8421886715028853,
+                        "definition": {
+                            "title": "Instigating processes by severity",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_name",
+                                                    "@instigating_process_owner",
+                                                    "@severity"
+                                                ],
+                                                "limit": 100,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3714302789538414,
+                        "definition": {
+                            "title": "Instigating process details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "@instigating_process_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_command_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_owner",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_imagefilesha256",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6689852798892897,
+                        "definition": {
+                            "title": "Target registry details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@target_registry_keypath",
+                                                    "@target_registry_valuename",
+                                                    "@device_name"
+                                                ],
+                                                "limit": 1000,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 17,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 384071253480063,
+                        "definition": {
+                            "title": "Registry-based detection event details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeRegistryEvent $event_type $event_name $severity $target_registry_valuename $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 17,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 12,
+                "height": 1
+            }
+        },
+        {
+            "id": 2675844679889850,
+            "definition": {
+                "title": "Log Based Detection Events",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8813249971631640,
+                        "definition": {
+                            "type": "note",
+                            "content": "Log-based events captures detection rule details, device information, and event identifiers. They include the instigating process’s name, file path, SHA256, command line, and owner, along with the security provider generating the Windows event log message. Severity levels (High, Medium, Low, Info) and the Windows Event ID are also recorded, providing full context for log-based detection activity.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1263397165467624,
+                        "definition": {
+                            "title": "Log-based detection events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f1f6fe"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4108628016896091,
+                        "definition": {
+                            "title": "Log-based detection events over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2265241503499503,
+                        "definition": {
+                            "title": "Top log-based detection rules",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@description"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4804598315884457,
+                        "definition": {
+                            "title": "Severity distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@severity"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4983333246540148,
+                        "definition": {
+                            "title": "Top security provider",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@security_provider"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8913809457545569,
+                        "definition": {
+                            "title": "Top instigating process owners",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_owner"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 9,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 845435537451865,
+                        "definition": {
+                            "title": "Instigating processes by severity",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@instigating_process_name",
+                                                    "@severity"
+                                                ],
+                                                "limit": 100,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6227965858968485,
+                        "definition": {
+                            "title": "Instigating process details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "@instigating_process_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_command_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_owner",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@instigating_process_imagefilesha256",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1748810477385136,
+                        "definition": {
+                            "title": "Log-based detection event details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:OpticsCaeLogEvent $event_type $event_name $security_provider $severity $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 12,
+                "height": 1
+            }
+        },
+        {
+            "id": 4544565862728994,
+            "definition": {
+                "title": "Logs",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7417150526632315,
+                        "definition": {
+                            "type": "note",
+                            "content": "Gives a focused view of incoming Process, File, Registry, Memory and Log based logs, showing event statuses over time and highlighting critical entries to help with quick review and investigation of important security events.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2611194058673172,
+                        "definition": {
+                            "title": "Count per Log Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:(OpticsCaeProcessEvent OR OpticsCaeFileEvent OR OpticsCaeRegistryEvent OR OpticsCaeMemoryEvent OR OpticsCaeLogEvent) $event_type $event_name $severity $device_name $security_provider $target_registry_valuename $target_file_owner $target_process_name $target_process_owner"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6479716259006479,
+                        "definition": {
+                            "title": "Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:detection-events @event_type:(OpticsCaeProcessEvent OR OpticsCaeFileEvent OR OpticsCaeRegistryEvent OR OpticsCaeMemoryEvent OR OpticsCaeLogEvent) @status:critical $event_type $event_name $severity $device_name $security_provider $target_registry_valuename $target_file_owner $target_process_name $target_process_owner",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 8
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "event_type",
+            "prefix": "@event_type",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "event_name",
+            "prefix": "@evt.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "security_provider",
+            "prefix": "@security_provider",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "severity",
+            "prefix": "@severity",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "target_registry_valuename",
+            "prefix": "@target_registry_valuename",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "target_file_owner",
+            "prefix": "@target_file_owner",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "target_process_name",
+            "prefix": "@target_process_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "target_process_owner",
+            "prefix": "@target_process_owner",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "device_name",
+            "prefix": "@device_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "pause_auto_refresh": false
+}

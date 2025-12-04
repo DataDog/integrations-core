@@ -1,0 +1,1381 @@
+{
+    "title": "Arctic Wolf Aurora Endpoint Security Memory Protection and Script Control Insights",
+    "description": "This dashboard provides a comprehensive summary of aurora protect memory protection, and script control events.",
+    "widgets": [
+        {
+            "id": 2804451244063344,
+            "definition": {
+                "type": "image",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbu-PsqDTq7UQK1kgth4yXsd5JM3_HMlRuOw&s",
+                "url_dark_theme": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbu-PsqDTq7UQK1kgth4yXsd5JM3_HMlRuOw&s",
+                "sizing": "none",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 3717764831504589,
+            "definition": {
+                "type": "note",
+                "content": "[Arctic Wolf Aurora Endpoint Security](https://docs.arcticwolf.com/bundle/AES-Overview/page/What-is-Aurora-Endpoint-Security.html) is a unified solution that helps  to tackle modern threats. It provides comprehensive capabilities to detect and protect against threats across endpoints.\n\nThis dashboard provides a comprehensive summary of aurora protect memory protection, and script control events.\n\nFor more information, see the [Arctic Wolf Aurora Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/arctic_wolf_aurora_platform/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 7180752014242010,
+            "definition": {
+                "title": "Memory Protection Events",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1062939694727766,
+                        "definition": {
+                            "type": "note",
+                            "content": "Shows exploit-related activity detected on devices, including allowed, blocked, or terminated attempts involving suspicious memory behavior. Includes details such as violation type, process name, policy, user, and device information, helping identify possible code injection, remote thread creation, payload execution, or other memory-based attacks that may indicate exploitation attempts.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4809294005436343,
+                        "definition": {
+                            "title": "Memory exploit attempts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#edf4fd"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 129981139697591,
+                        "definition": {
+                            "title": "Memory exploit attempts over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4391421849855266,
+                        "definition": {
+                            "title": "Top devices",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@device_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7516719399851979,
+                        "definition": {
+                            "title": "Event actions distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1383727699830785,
+                        "definition": {
+                            "title": "Top policies",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@policy_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 991856997933274,
+                        "definition": {
+                            "title": "Top processes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@process_name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6360047968889945,
+                        "definition": {
+                            "title": "Top Users",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@usr.name"
+                                                ],
+                                                "limit": 10,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4542108929101592,
+                        "definition": {
+                            "title": "Violation type distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@violation_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7608688501777016,
+                        "definition": {
+                            "title": "Memory protection event details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ExploitAttempt $event_type $event_name $policy_name $action $violation_type $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 18
+            }
+        },
+        {
+            "id": 5945383504820380,
+            "definition": {
+                "title": "Script Control Events",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8886068511467766,
+                        "definition": {
+                            "type": "note",
+                            "content": "Tracks script activity on devices, including alerts, blocked scripts, and allowed executions. Provides details such as file path, interpreter type and version, policy applied, file hash, and device zones to help monitor and control script-based actions across endpoints.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8963833076453112,
+                        "definition": {
+                            "title": "Script control events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#c5d9ec"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8877315738726758,
+                        "definition": {
+                            "title": "Script control events over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7884462333172666,
+                        "definition": {
+                            "title": "Blocked events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl @evt.name:Blocked $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6658168563150520,
+                        "definition": {
+                            "title": "Top devices",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@device_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8765334846532890,
+                        "definition": {
+                            "title": "Events distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@evt.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1475844371389202,
+                        "definition": {
+                            "title": "Top file paths",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@file_path",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2993849688436922,
+                        "definition": {
+                            "title": "Top file hashes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@sha256",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7385200958889832,
+                        "definition": {
+                            "title": "Interpreter distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@interpreter_version",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@interpreter",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 900003499990759,
+                        "definition": {
+                            "title": "Policies associated with device",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "@policy_name",
+                                                    "@device_name"
+                                                ],
+                                                "limit": 100,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 13,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5255801893829338,
+                        "definition": {
+                            "title": "Script control event details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:desktop-events @event_type:ScriptControl $event_type $event_name $policy_name $interpreter $device_name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 17,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 12,
+                "height": 22,
+                "is_column_break": true
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "event_type",
+            "prefix": "@event_type",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "event_name",
+            "prefix": "@evt.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "policy_name",
+            "prefix": "@policy_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "interpreter",
+            "prefix": "@interpreter",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "action",
+            "prefix": "@action",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "violation_type",
+            "prefix": "@violation_type",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "device_name",
+            "prefix": "@device_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "pause_auto_refresh": false
+}

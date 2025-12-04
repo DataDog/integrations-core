@@ -1,0 +1,1154 @@
+{
+    "title": "Arctic Wolf Aurora Endpoint Security Overview",
+    "description": "This dashboard provides a comprehensive summary of all events.",
+    "widgets": [
+        {
+            "id": 2077620759824943,
+            "definition": {
+                "type": "image",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbu-PsqDTq7UQK1kgth4yXsd5JM3_HMlRuOw&s",
+                "url_dark_theme": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbu-PsqDTq7UQK1kgth4yXsd5JM3_HMlRuOw&s",
+                "sizing": "none",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 5794957673907575,
+            "definition": {
+                "type": "note",
+                "content": "[Arctic Wolf Aurora Endpoint Security](https://docs.arcticwolf.com/bundle/AES-Overview/page/What-is-Aurora-Endpoint-Security.html) is a unified solution that helps  to tackle modern threats. It provides comprehensive capabilities to detect and protect against threats across endpoints.\n\nThis dashboard provides a comprehensive summary of all events.\n\nFor more information, see the [Arctic Wolf Aurora Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/arctic_wolf_aurora_platform/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 8094755508110935,
+            "definition": {
+                "title": "Overview",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4875284350187510,
+                        "definition": {
+                            "type": "note",
+                            "content": "Provides a high-level view of all Aurora Protect Desktop and Focus Detection events by showing total events, event over time, devices, events types, status and event details for quick understanding of overall endpoint behavior.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2478209799618014,
+                        "definition": {
+                            "title": "Total events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) $event_type $event_name $device_name $status"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#c8ddf9"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {},
+                                "type": "bars"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1011652926361093,
+                        "definition": {
+                            "title": "Events over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) $event_type $event_name $device_name $status"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2018876277518177,
+                        "definition": {
+                            "title": "Top events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) $event_type $event_name $device_name $status"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@evt.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1232584749891410,
+                        "definition": {
+                            "title": "Event types distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) $event_type $event_name $device_name $status"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5134755116956061,
+                        "definition": {
+                            "title": "Top devices",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) $event_type $event_name $device_name $status"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@device_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8044596116913202,
+                        "definition": {
+                            "title": "Status distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) $event_type $event_name $device_name $status"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 9,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6216739655960055,
+                        "definition": {
+                            "title": "Event details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) $event_type $event_name $device_name $status",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 1,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 4233896858873484,
+            "definition": {
+                "title": "Logs",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7840722797626320,
+                        "definition": {
+                            "type": "note",
+                            "content": "Gives a focused view of incoming Protect and Focus logs, showing event statuses over time and highlighting critical entries to help with quick review and investigation of important security events.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6015267049256313,
+                        "definition": {
+                            "title": "Count per Log Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {},
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) $event_type $event_name $device_name $status"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 792309448461027,
+                        "definition": {
+                            "title": "Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:arctic-wolf-aurora-endpoint-security service:(desktop-events OR detection-events) @status:critical $event_type $event_name $device_name $status",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 1
+            }
+        },
+        {
+            "id": 8676234976844430,
+            "definition": {
+                "title": "Datadog Cloud SIEM",
+                "title_align": "center",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1956161656415257,
+                        "definition": {
+                            "type": "note",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates **Aurora Protect Desktop and Aurora Focus Detection** events to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security/home). ",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2374739504692765,
+                        "definition": {
+                            "title": "CRITICALs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#bc303c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security status:critical"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 853689630279726,
+                        "definition": {
+                            "title": "HIGHs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#d33043",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security status:high"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1978176452507936,
+                        "definition": {
+                            "title": "Critical security signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#bc303c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security status:critical"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5983157385812686,
+                        "definition": {
+                            "title": "MEDIUMs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#e5a21c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security status:medium"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2483321991345234,
+                        "definition": {
+                            "title": "LOWs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#ffb52b",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security status:low"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 74267427431631,
+                        "definition": {
+                            "title": "High security signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#d33043",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security status:high"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6070086842667384,
+                        "definition": {
+                            "title": "Medium security signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#e5a21c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:arctic-wolf-aurora-endpoint-security status:medium"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 1
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "event_type",
+            "prefix": "@event_type",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "event_name",
+            "prefix": "@evt.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "device_name",
+            "prefix": "@device_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "status",
+            "prefix": "@status",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "pause_auto_refresh": false
+}

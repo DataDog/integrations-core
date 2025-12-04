@@ -1,0 +1,96 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "da21a0d6-d2ba-446b-9a5e-5f14c1d2e37b",
+  "app_id": "arctic-wolf-aurora-endpoint-security",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Arctic Wolf Aurora Endpoint Security logs.",
+    "title": "Arctic Wolf Aurora Endpoint Security",
+    "media": [
+      {
+        "caption": "Arctic Wolf Aurora Endpoint Security Overview",
+        "image_url": "images/arctic_wolf_aurora_endpoint_security_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Arctic Wolf Aurora Endpoint Security Overview",
+        "image_url": "images/arctic_wolf_aurora_endpoint_security_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Arctic Wolf Aurora Endpoint Security Threat Insights",
+        "image_url": "images/arctic_wolf_aurora_endpoint_security_threat_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Arctic Wolf Aurora Endpoint Security Application and Device Control Insights",
+        "image_url": "images/arctic_wolf_aurora_endpoint_security_application_and_device_control_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Arctic Wolf Aurora Endpoint Security Memory protection and Script Control Insights",
+        "image_url": "images/arctic_wolf_aurora_endpoint_security_memory_protection_and_script_control_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Arctic Wolf Aurora Endpoint Security Network Insights",
+        "image_url": "images/arctic_wolf_aurora_endpoint_security_network_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Arctic Wolf Aurora Endpoint Security Process and System Activity",
+        "image_url": "images/arctic_wolf_aurora_endpoint_security_process_and_system_activity.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Arctic Wolf Aurora Endpoint Security System Tool Activity",
+        "image_url": "images/arctic_wolf_aurora_endpoint_security_system_tool_activity.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 64304238,
+      "source_type_name": "Arctic Wolf Aurora Endpoint Security",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Arctic Wolf Aurora Endpoint Security Overview": "assets/dashboards/arctic_wolf_aurora_endpoint_security_overview",
+      "Arctic Wolf Aurora Endpoint Security Threat Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_threat_insights",
+      "Arctic Wolf Aurora Endpoint Security Application and Device Control Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_application_and_device_control_insights",
+      "Arctic Wolf Aurora Endpoint Security Memory protection and Script Control Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_memory_protection_and_script_control_insights",
+      "Arctic Wolf Aurora Endpoint Security Network Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_network_insights",
+      "Arctic Wolf Aurora Endpoint Security Process and System Activity": "assets/dashboards/arctic_wolf_aurora_endpoint_security_process_and_system_activity",
+      "Arctic Wolf Aurora Endpoint Security System Tool Activity": "assets/dashboards/arctic_wolf_aurora_endpoint_security_system_tool_activity"
+    },
+    "logs": {
+      "source": "arctic-wolf-aurora-endpoint-security"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -63,6 +63,8 @@ integration/appgate_sdp:
 - appgate_sdp/**/*
 integration/arangodb:
 - arangodb/**/*
+integration/arctic_wolf_aurora_endpoint_security:
+- arctic_wolf_aurora_endpoint_security/**/*
 integration/argo_rollouts:
 - argo_rollouts/**/*
 integration/argo_workflows:
