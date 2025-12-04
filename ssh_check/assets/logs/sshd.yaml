@@ -87,6 +87,13 @@ pipeline:
           name: Apply OCSF schema for 3002
           enabled: true
           mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata` to `ocsf.metadata`
+              sources:
+                - ocsf.metadata
+              target: ocsf.metadata
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
