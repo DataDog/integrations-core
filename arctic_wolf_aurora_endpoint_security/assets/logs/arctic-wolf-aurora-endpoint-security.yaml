@@ -1379,7 +1379,7 @@ pipeline:
           encoded: false
           combineVersionDetails: false
         - type: category-processor
-          name: Categorize status code
+          name: HTTP status category processor
           enabled: true
           categories:
             - filter:
