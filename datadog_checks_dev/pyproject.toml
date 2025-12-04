@@ -29,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "boto3==1.40.21",
     "coverage>=5.0.3",
     "flaky>=3.8.0",
     "mock",

@@ -164,5 +164,80 @@ def build_package(package_path, sdist):
                 result = run_command([sys.executable, 'setup.py', 'sdist'], capture='out')
                 if result.code != 0:
                     return result
+        # Create pointer artifact in JSON/yaml format for TUF
+        # uri:
+        # digest:
+        import glob
+        import hashlib
+        import os
+
+        import yaml
+
+        # Get the most recent file in the dist directory
+        list_of_wheels = glob.glob(os.path.join(package_path, "dist", "*"))
+        wheel_path = max(list_of_wheels, key=os.path.getctime)
+        URI_TEMPLATE = "dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/{}/{}"
+        package_name = os.path.basename(package_path)
+        wheel_name = os.path.basename(wheel_path)
+        version = wheel_name.split("-")[1]
+        uri = URI_TEMPLATE.format(package_name, wheel_name)
+        print("Using URI: ", uri)
+        with open(wheel_path, "rb") as wheel:
+            digest = hashlib.sha256(wheel.read()).hexdigest()
+        pointer = {"pointer": {"name": package_name, "version": version, "uri": uri, "digest": digest}}
+        print("Using digest: ", digest)
+        with open(
+            os.path.join(package_path, "dist", f"{os.path.basename(package_path)}-{version}.pointer"), "w"
+        ) as pointer_file:
+            yaml.safe_dump(pointer, pointer_file)
+            print("Created ", pointer_file.name, " with contents ", pointer)
 
     return result
+
+
+def upload_package(package_path, version, public=False):
+    """Upload package wheel and/or pointer file to the S3 bucket.
+
+    Note: This requires AWS credentials to be available. Use aws-vault to run:
+    aws-vault exec sso-agent-integrations-dev-account-admin -- ddev release upload <check>
+    """
+    import glob
+    import os
+
+    import boto3
+
+    S3_BUCKET = "test-public-integration-wheels"
+    S3_REGION = "eu-north-1"
+
+    # Initialize S3 client (uses default credential chain: env vars, ~/.aws/credentials, IAM role, etc.)
+    # When using aws-vault, credentials are injected via environment variables
+    s3 = boto3.client("s3", region_name=S3_REGION)
+
+    folder_name = os.path.basename(package_path)
+    package_name = get_package_name(folder_name)
+    dist_dir = os.path.join(package_path, "dist")
+    pointer_file_name = f"{folder_name}-{version}.pointer"
+    pointer_file_path = os.path.join(dist_dir, pointer_file_name)
+
+    # Find the actual wheel file (e.g., package_name-version-py3-none-any.whl)
+    wheel_pattern = os.path.join(dist_dir, f"{package_name.replace('-', '_')}-{version}-*.whl")
+    wheel_files = glob.glob(wheel_pattern)
+
+    if not wheel_files:
+        raise FileNotFoundError(f"No wheel file found matching pattern: {wheel_pattern}")
+
+    # Use the most recent wheel if multiple exist
+    wheel_file_path = max(wheel_files, key=os.path.getctime)
+    wheel_file_name = os.path.basename(wheel_file_path)
+
+    if public:
+        # Upload both the pointer and the wheel
+        if not os.path.exists(pointer_file_path):
+            raise FileNotFoundError(f"Pointer file not found: {pointer_file_path}")
+        s3.upload_file(pointer_file_path, S3_BUCKET, pointer_file_name)
+        s3.upload_file(wheel_file_path, S3_BUCKET, wheel_file_name)
+        print(f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}")
+    else:
+        # Upload only the wheel
+        s3.upload_file(wheel_file_path, S3_BUCKET, wheel_file_name)
+        print(f"Uploaded {wheel_file_name} to S3 bucket {S3_BUCKET}")
