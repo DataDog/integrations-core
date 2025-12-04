@@ -19,7 +19,7 @@ from ddev.utils.platform import Platform
 class Application(Terminal):
     def __init__(self, exit_func, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.platform = Platform(self.output)
+        self.platform = Platform(self.escaped_output)
         self.__exit_func = exit_func
 
         self.config_file = ConfigFileWithOverrides()

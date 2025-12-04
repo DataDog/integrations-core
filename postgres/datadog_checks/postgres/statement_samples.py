@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 import copy
 import re
@@ -8,15 +9,22 @@ import time
 from enum import Enum
 from typing import Dict, Optional, Tuple  # noqa: F401
 
-import psycopg2
+import psycopg
 from cachetools import TTLCache
+from psycopg.rows import dict_row
 
-from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+from datadog_checks.postgres.config_models import InstanceConfig
 
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
+
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
@@ -128,10 +136,6 @@ class StatementTruncationState(Enum):
     unknown = 'unknown'
 
 
-DEFAULT_COLLECTION_INTERVAL = 1
-DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
-
-
 def agent_check_getter(self):
     return self._check
 
@@ -141,34 +145,24 @@ class PostgresStatementSamples(DBMAsyncJob):
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config, shutdown_callback):
-        collection_interval = float(
-            config.statement_samples_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
-        )
-        if collection_interval <= 0:
-            collection_interval = DEFAULT_COLLECTION_INTERVAL
+    def __init__(self, check: PostgreSql, config: InstanceConfig):
+        collection_interval = config.query_samples.collection_interval
 
         # if regular samples is disabled, only need to collect as often as activity is sampled
-        if not is_affirmative(config.statement_samples_config.get('enabled', True)):
-            collection_interval = config.statement_activity_config.get(
-                'collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL
-            )
+        if not config.query_samples.enabled:
+            collection_interval = config.query_activity.collection_interval
 
         self.db_pool = check.db_pool
 
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
-            run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(
-                config.statement_samples_config.get('enabled', True)
-                or is_affirmative(config.statement_activity_config.get('enabled', True))
-            ),
+            run_sync=config.query_samples.run_sync,
+            enabled=config.query_samples.enabled or config.query_activity.enabled,
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            expected_db_exceptions=(psycopg2.errors.DatabaseError,),
+            expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config
@@ -177,50 +171,53 @@ class PostgresStatementSamples(DBMAsyncJob):
         self.tags = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
-        self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
+        self._explain_function = config.query_samples.explain_function
         self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self._explain_function)
-        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
-        self._collect_raw_query_statement = config.collect_raw_query_statement.get("enabled", False)
+        obfuscate_options = self._config.obfuscator_options.model_dump()
+        # Backfill old keys used in the agent obfuscator
+        obfuscate_options['table_names'] = self._config.obfuscator_options.collect_tables
+        obfuscate_options['dollar_quoted_func'] = self._config.obfuscator_options.keep_dollar_quoted_func
+        obfuscate_options['return_json_metadata'] = self._config.obfuscator_options.collect_metadata
+        self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
+
+        self._collect_raw_query_statement = config.collect_raw_query_statement.enabled
 
         self._collection_strategy_cache = TTLCache(
-            maxsize=config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
-            ttl=config.statement_samples_config.get('collection_strategy_cache_ttl', 300),
+            maxsize=1000,
+            ttl=300,
         )
 
         self._explain_errors_cache = TTLCache(
-            maxsize=config.statement_samples_config.get('explain_errors_cache_maxsize', 5000),
+            maxsize=self._config.query_samples.explain_errors_cache_maxsize,
             # only try to re-explain invalid statements once per day
-            ttl=config.statement_samples_config.get('explain_errors_cache_ttl', 24 * 60 * 60),
+            ttl=self._config.query_samples.explain_errors_cache_ttl,
         )
 
         # explained_statements_ratelimiter: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
-            maxsize=int(config.statement_samples_config.get('explained_queries_cache_maxsize', 5000)),
-            ttl=60 * 60 / int(config.statement_samples_config.get('explained_queries_per_hour_per_query', 60)),
+            maxsize=int(config.query_samples.explained_queries_cache_maxsize),
+            ttl=60 * 60 / int(config.query_samples.explained_queries_per_hour_per_query),
         )
 
         # seen_samples_ratelimiter: limit the ingestion rate per (query_signature, plan_signature)
         self._seen_samples_ratelimiter = RateLimitingTTLCache(
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
             # total size: 10k * 100 = 1 Mb
-            maxsize=int(config.statement_samples_config.get('seen_samples_cache_maxsize', 10000)),
-            ttl=60 * 60 / int(config.statement_samples_config.get('samples_per_hour_per_query', 15)),
+            maxsize=int(config.query_samples.seen_samples_cache_maxsize),
+            ttl=60 * 60 / config.query_samples.samples_per_hour_per_query,
         )
 
         self._raw_statement_text_cache = RateLimitingTTLCache(
-            maxsize=config.collect_raw_query_statement["cache_max_size"],
-            ttl=60 * 60 / config.collect_raw_query_statement["samples_per_hour_per_query"],
+            maxsize=10000,
+            ttl=60 * 60 / 1,
         )
 
-        self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
-        self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
+        self._activity_coll_enabled = self._config.query_activity.enabled
+        self._explain_plan_coll_enabled = self._config.query_samples.enabled
 
         # activity events cannot be reported more often than regular samples
-        self._activity_coll_interval = max(
-            self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
-            collection_interval,
-        )
-        self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
+        self._activity_coll_interval = max(self._config.query_activity.collection_interval, collection_interval)
+        self._activity_max_rows = self._config.query_activity.payload_row_limit
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
         self._pg_stat_activity_cols = None
@@ -243,8 +240,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -276,9 +275,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
 
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -296,8 +297,10 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 try:
                     cursor.execute(
                         "select * from {pg_stat_activity_view} LIMIT 0".format(
@@ -312,12 +315,12 @@ class PostgresStatementSamples(DBMAsyncJob):
                             "missing the following expected columns from pg_stat_activity: %s", missing_columns
                         )
                     self._log.debug("found available pg_stat_activity columns: %s", available_columns)
-                except psycopg2.errors.InvalidSchemaName as e:
+                except psycopg.errors.InvalidSchemaName as e:
                     self._log.warning(
                         "cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e)
                     )
                     return None
-                except psycopg2.DatabaseError as e:
+                except psycopg.DatabaseError as e:
                     # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
                     # incorrect definition)
                     self._check.record_warning(
@@ -345,14 +348,17 @@ class PostgresStatementSamples(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             total_count += 1
-            if row.get('backend_type') is not None:
-                try:
-                    row['backend_type'] = row['backend_type'].tobytes().decode('utf-8')
-                except UnicodeDecodeError:
-                    row['backend_type'] = 'unknown'
-            if (not row['datname'] or not row['query']) and row.get(
-                'backend_type', 'client backend'
-            ) == 'client backend':
+
+            # Manually decode backend_type to handle bad encodings in Azure
+            row['backend_type'] = (
+                row['backend_type'].decode('utf-8', errors='backslashreplace')
+                if isinstance(row.get('backend_type'), bytes)
+                else row.get('backend_type')
+            )
+
+            if not row.get('query'):
+                continue
+            if (not row.get('datname')) and row.get('backend_type', 'client backend') == 'client backend':
                 continue
             if row['client_addr']:
                 row['client_addr'] = str(row['client_addr'])
@@ -384,7 +390,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _normalize_row(self, row):
         normalized_row = dict(copy.copy(row))
         obfuscated_query = None
-        backend_type = normalized_row.get('backend_type', 'client backend')
+        backend_type = normalized_row.get('backend_type', 'client backend') or 'client backend'
         try:
             if backend_type != 'client backend':
                 obfuscated_query = backend_type
@@ -460,7 +466,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self._collect_statement_samples()
-        self.db_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
@@ -641,13 +646,13 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self.db_pool.get_connection(dbname, self._conn_ttl_ms)
-        except psycopg2.OperationalError as e:
+            self.db_pool.get_connection(dbname)
+        except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainError.connection_error, e
-        except psycopg2.DatabaseError as e:
+        except psycopg.DatabaseError as e:
             self._log.warning(
                 "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
             )
@@ -655,14 +660,14 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
-        except psycopg2.errors.InvalidSchemaName as e:
+        except psycopg.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             self._emit_run_explain_error(dbname, DBExplainError.invalid_schema, e)
             return DBExplainError.invalid_schema, e
-        except psycopg2.errors.DatatypeMismatch as e:
+        except psycopg.errors.DatatypeMismatch as e:
             self._emit_run_explain_error(dbname, DBExplainError.datatype_mismatch, e)
             return DBExplainError.datatype_mismatch, e
-        except psycopg2.DatabaseError as e:
+        except psycopg.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._emit_run_explain_error(dbname, DBExplainError.failed_function, e)
@@ -705,8 +710,17 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+        with self.db_pool.get_connection(dbname) as conn:
+            # When sending potentially non-ascii data, e.g. UTF8, we need to force
+            # the client encoding to UTF-8 to match Python string encoding
+            if conn.info.encoding.lower() in ["ascii", "sqlascii", "sql_ascii"]:
+                self._log.debug(
+                    "Setting client encoding to UTF-8 for dbname=%s, as the current encoding is SQLASCII", dbname
+                )
+                conn.execute("SET client_encoding TO UTF8")
+            with conn.cursor() as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
@@ -784,11 +798,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             # we should directly jump into self._explain_parameterized_queries.explain_statement
             # instead of trying to explain it then failing
             if self._explain_parameterized_queries._is_parameterized_query(statement):
-                if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
+                if is_affirmative(self._config.query_samples.explain_parameterized_queries):
                     return self._explain_parameterized_queries.explain_statement(
                         dbname, statement, obfuscated_statement, query_signature
                     )
-                e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
+                e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
                     "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
                     " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
@@ -799,30 +813,30 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
                 return error_response
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
-        except psycopg2.errors.UndefinedTable as e:
+        except psycopg.errors.UndefinedTable as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
             return error_response
-        except psycopg2.errors.UndefinedFunction as e:
+        except psycopg.errors.UndefinedFunction as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_function, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_function, e)
             return error_response
-        except psycopg2.errors.IndeterminateDatatype as e:
+        except psycopg.errors.IndeterminateDatatype as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.indeterminate_datatype, e)
             return error_response
-        except psycopg2.errors.DatabaseError as e:
+        except psycopg.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
             self._emit_run_explain_error(dbname, DBExplainError.database_error, e)
-            if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
-                e, psycopg2.errors.InsufficientPrivilege
+            if isinstance(e, psycopg.errors.ProgrammingError) and not isinstance(
+                e, psycopg.errors.InsufficientPrivilege
             ):
                 # ProgrammingError is things like InvalidName, InvalidSchema, SyntaxError
                 # we don't want to cache things like permission errors for a very long time because they can be fixed
@@ -947,7 +961,10 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _collect_plans(self, rows):
         for row in rows:
             try:
-                if row['statement'] is None or row.get('backend_type', 'client backend') != 'client backend':
+                if (
+                    row['statement'] is None
+                    or (row.get('backend_type', 'client backend') or 'client backend') != 'client backend'
+                ):
                     continue
                 yield from self._collect_plan_for_statement(row)
             except Exception:

@@ -8,6 +8,7 @@ DO NOT add new metrics to this module. Instead, use the `database_metrics` modul
 
 Collection of metric classes for specific SQL Server tables.
 """
+
 from __future__ import division
 
 from collections import defaultdict
@@ -90,9 +91,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_performance_counters'
     DEFAULT_METRIC_TYPE = None  # can be either rate or gauge
     QUERY_BASE = """select counter_name, instance_name, object_name, cntr_value
-                    from {table} where counter_name in ({{placeholders}})""".format(
-        table=TABLE
-    )
+                    from {table} where counter_name in ({{placeholders}})""".format(table=TABLE)
     OPERATION_NAME = 'simple_metrics'
 
     @classmethod
@@ -128,9 +127,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
     QUERY_BASE = """select counter_name, cntr_type, cntr_value, instance_name, object_name
                     from {table}
                     where counter_name in ({{placeholders}})
-                    order by cntr_type;""".format(
-        table=TABLE
-    )
+                    order by cntr_type;""".format(table=TABLE)
     OPERATION_NAME = 'fraction_metrics'
 
     @classmethod

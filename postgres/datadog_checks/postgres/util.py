@@ -91,6 +91,8 @@ class DBExplainError(Enum):
     # PostgreSQL cannot determine the data type of a parameter in the query
     indeterminate_datatype = 'indeterminate_datatype'
 
+    unknown_error = 'unknown_error'
+
 
 class DatabaseHealthCheckError(Exception):
     pass
@@ -246,6 +248,34 @@ QUERY_PG_STAT_DATABASE_CONFLICTS = {
         {'name': 'conflicts.snapshot', 'type': 'monotonic_count'},
         {'name': 'conflicts.bufferpin', 'type': 'monotonic_count'},
         {'name': 'conflicts.deadlock', 'type': 'monotonic_count'},
+    ],
+}
+
+QUERY_PG_STAT_RECOVERY_PREFETCH = {
+    'name': 'pg_stat_recovery_prefetch',
+    'query': """
+        SELECT
+            prefetch,
+            hit,
+            skip_init,
+            skip_new,
+            skip_fpw,
+            skip_rep,
+            wal_distance,
+            block_distance,
+            io_depth
+        FROM pg_stat_recovery_prefetch
+    """.strip(),
+    'columns': [
+        {'name': 'recovery_prefetch.prefetch', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.hit', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_init', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_new', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_fpw', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_rep', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.wal_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.block_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.io_depth', 'type': 'gauge'},
     ],
 }
 
@@ -420,19 +450,27 @@ QUERY_PG_REPLICATION_STATS_METRICS = {
     'name': 'replication_stats_metrics',
     'query': """
 SELECT
-    pg_stat_replication.application_name,
-    pg_stat_replication.state,
-    pg_stat_replication.sync_state,
-    pg_stat_replication.client_addr,
-    pg_stat_replication_slot.slot_name,
-    pg_stat_replication_slot.slot_type,
-    GREATEST (0, age(pg_stat_replication.backend_xmin)) as backend_xmin_age,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.flush_lag)) as flush_lag,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag
-FROM pg_stat_replication as pg_stat_replication
-LEFT JOIN pg_replication_slots as pg_stat_replication_slot
-ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
+    rep.application_name,
+    rep.state,
+    rep.sync_state,
+    rep.client_addr,
+    slot.slot_name,
+    slot.slot_type,
+    GREATEST (0, age(rep.backend_xmin)) as backend_xmin_age,
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, sent_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, write_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, flush_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, replay_lsn),
+    GREATEST (0, EXTRACT(epoch from rep.write_lag)) as write_lag,
+    GREATEST (0, EXTRACT(epoch from rep.flush_lag)) as flush_lag,
+    GREATEST (0, EXTRACT(epoch from rep.replay_lag)) AS replay_lag
+FROM pg_stat_replication as rep
+LEFT JOIN pg_replication_slots as slot
+ON rep.pid = slot.active_pid;
 """.strip(),
     'columns': [
         {'name': 'wal_app_name', 'type': 'tag'},
@@ -442,6 +480,10 @@ ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
         {'name': 'slot_name', 'type': 'tag_not_null'},
         {'name': 'slot_type', 'type': 'tag_not_null'},
         {'name': 'replication.backend_xmin_age', 'type': 'gauge'},
+        {'name': 'replication.sent_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.write_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.flush_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.replay_lsn_delay', 'type': 'gauge'},
         {'name': 'replication.wal_write_lag', 'type': 'gauge'},
         {'name': 'replication.wal_flush_lag', 'type': 'gauge'},
         {'name': 'replication.wal_replay_lag', 'type': 'gauge'},
@@ -526,6 +568,23 @@ SELECT
     total_txns, total_bytes
 FROM pg_stat_replication_slots AS stat
 JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
+""".strip(),
+}
+
+QUERY_PG_WAIT_EVENT_METRICS = {
+    'name': 'wait_event_stats',
+    'columns': [
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag_not_null'},
+        {'name': 'user', 'type': 'tag_not_null'},
+        {'name': 'wait_event', 'type': 'tag'},
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'activity.wait_event', 'type': 'gauge'},
+    ],
+    'query': """
+SELECT application_name, datname, usename, COALESCE(wait_event, 'NoWaitEvent'), backend_type, COUNT(*)
+FROM pg_stat_activity
+GROUP BY application_name, datname, usename, backend_type, wait_event
 """.strip(),
 }
 
@@ -744,7 +803,7 @@ EXTRACT (EPOCH FROM now() - min(modification))
     ],
 }
 
-STAT_WAL_METRICS = {
+STAT_WAL_METRICS_LT_18 = {
     'name': 'stat_wal_metrics',
     'query': """
 SELECT wal_records, wal_fpi,
@@ -762,6 +821,22 @@ SELECT wal_records, wal_fpi,
         {'name': 'wal.sync', 'type': 'monotonic_count'},
         {'name': 'wal.write_time', 'type': 'monotonic_count'},
         {'name': 'wal.sync_time', 'type': 'monotonic_count'},
+    ],
+}
+
+# TODO: Handle missing wal IO metrics for PG18
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'wal.records', 'type': 'monotonic_count'},
+        {'name': 'wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'wal.buffers_full', 'type': 'monotonic_count'},
     ],
 }
 
@@ -1036,5 +1111,47 @@ LIMIT 200
         {'name': 'io.reads', 'type': 'monotonic_count'},
         {'name': 'io.write_time', 'type': 'monotonic_count'},
         {'name': 'io.writes', 'type': 'monotonic_count'},
+    ],
+}
+
+# Measures the age (in seconds) of idle-in-transaction sessions holding exclusive relation locks.
+# Limits result set to 10 rows to avoid tag explosion.
+IDLE_TX_LOCK_AGE_METRICS = {
+    'name': 'idle_tx_lock_age_metrics',
+    'query': (
+        """
+SELECT
+    l.pid,
+    a.datname,
+    a.usename             AS session_user,
+    a.application_name,
+    a.client_hostname,
+    l.mode,
+    c.oid::regclass       AS relation,
+    r.rolname             AS relation_owner,
+    EXTRACT(EPOCH FROM (now() - a.xact_start)) AS xact_age
+FROM pg_locks l
+JOIN pg_stat_activity a ON a.pid = l.pid
+JOIN pg_class c         ON c.oid = l.relation
+JOIN pg_roles r         ON r.oid = c.relowner
+WHERE l.locktype = 'relation'
+  AND l.granted = true
+  AND l.mode like '%Exclusive%'
+  AND a.state = 'idle in transaction'
+  AND a.state_change IS NOT NULL
+  AND now() - a.state_change > interval '60 seconds'
+ORDER BY xact_age DESC
+LIMIT {max_rows} ;        """
+    ).strip(),
+    'columns': [
+        {'name': 'pid', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'session_user', 'type': 'tag'},
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'client_hostname', 'type': 'tag_not_null'},
+        {'name': 'lock_mode', 'type': 'tag'},
+        {'name': 'relation', 'type': 'tag'},
+        {'name': 'relation_owner', 'type': 'tag'},
+        {'name': 'locks.idle_in_transaction_age', 'type': 'gauge'},
     ],
 }

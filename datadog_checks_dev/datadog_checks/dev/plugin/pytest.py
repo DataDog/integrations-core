@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
 
-from .._env import (
+from datadog_checks.dev._env import (
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
     E2E_RESULT_FILE,
@@ -289,10 +289,10 @@ def mock_http_response(mocker):
     # Lazily import `requests` as it may be costly under certain conditions
     global MockResponse
     if MockResponse is None:
-        from ..http import MockResponse
+        from datadog_checks.dev.http import MockResponse
 
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.get'), return_value=MockResponse(*args, **kwargs)
+        kwargs.pop('method', 'requests.Session.get'), return_value=MockResponse(*args, **kwargs)
     )
 
 
@@ -320,7 +320,7 @@ def mock_performance_objects(mocker, dd_default_hostname):
         counters = {}
         for object_name, data in perf_objects.items():
             instances, counter_values = data
-            instance_counts = {instance_name: 0 for instance_name in instances}
+            instance_counts = dict.fromkeys(instances, 0)
             instance_indices = []
             for instance_name in instances:
                 instance_indices.append(instance_counts[instance_name])

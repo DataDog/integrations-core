@@ -10,6 +10,8 @@ Enable [Database Monitoring][28] (DBM) for enhanced insights into query performa
 
 Postgres versions 9.6-16 are supported.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 <div class="alert alert-info">This page describes the standard Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -171,8 +173,6 @@ Datadog APM integrates with Postgres to see the traces across your distributed s
 2. [Instrument your application that makes requests to Postgres][6].
 
 ##### Log collection
-
-_Available for Agent versions >6.0_
 
 PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. See the PostgreSQL documentation on[Error Reporting and Logging][7] for more information.
 

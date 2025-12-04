@@ -12,14 +12,8 @@
         {
             "available_values": [],
             "default": "*",
-            "name": "host",
-            "prefix": "host"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "node",
-            "prefix": "node"
+            "name": "node_ip",
+            "prefix": "ip"
         },
         {
             "available_values": [],
@@ -144,9 +138,11 @@
                             "count": 50,
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
                             "query": "ray.io",
                             "show_last_triggered": false,
                             "show_priority": false,
+                            "show_status": true,
                             "sort": "status,asc",
                             "start": 0,
                             "summary_type": "groups",
@@ -199,12 +195,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:ray.cluster.active_nodes{$service,$host}"
+                                            "query": "sum:ray.cluster.active_nodes{$service,$component}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "bars",
                                 "yaxis": {}
@@ -269,11 +266,7 @@
                                     "formulas": [
                                         {
                                             "cell_display_mode": "bar",
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         },
                                         {
                                             "cell_display_mode": "number",
@@ -310,28 +303,38 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.component.mem_shared{*} by {component}"
+                                            "query": "avg:ray.component.mem_shared{$service,$node_ip,$component} by {component}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:ray.component.cpu_percentage{*} by {component}"
+                                            "query": "avg:ray.component.cpu_percentage{$service,$node_ip,$component} by {component}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "avg:ray.component.uss{*} by {component}"
+                                            "query": "avg:ray.component.uss{$service,$node_ip,$component} by {component}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "avg:ray.component.rss{*} by {component}"
+                                            "query": "avg:ray.component.rss{$service,$node_ip,$component} by {component}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
                             "title": "Resource Usage by Components ",
@@ -372,12 +375,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ray.node.network.received{*} by {service}"
+                                            "query": "avg:ray.node.network.received{$service,$node_ip} by {service}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:ray.node.network.sent{*} by {service}"
+                                            "query": "avg:ray.node.network.sent{$service,$node_ip} by {service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -389,6 +392,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Node Network Speeds",
                             "title_align": "left",
                             "title_size": "16",
@@ -411,10 +415,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 + query2",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1 + query2"
                                         }
                                     ],
                                     "queries": [
@@ -422,21 +423,32 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.cluster.active_nodes{*} by {service}"
+                                            "query": "avg:ray.cluster.active_nodes{$service} by {service}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ray.cluster.active_nodes{*} by {service}"
+                                            "query": "avg:ray.cluster.active_nodes{$service} by {service}"
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
                                     "style": {
                                         "palette": "datadog16"
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Nodes (Active/Fail/Pending)",
                             "title_align": "left",
                             "title_size": "16",
@@ -466,12 +478,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.component.cpu_percentage{$service}"
+                                            "query": "avg:ray.component.cpu_percentage{$service,$node_ip,$component}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area"
                             },
@@ -523,22 +536,22 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.node.mem.available{*} by {service}"
+                                            "query": "avg:ray.node.mem.available{$service,$node_ip} by {service}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ray.node.mem.shared{*} by {service}"
+                                            "query": "avg:ray.node.mem.shared{$service,$node_ip} by {service}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:ray.node.mem.total{*} by {service}"
+                                            "query": "avg:ray.node.mem.total{$service,$node_ip} by {service}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "avg:ray.node.mem.used{*} by {service}"
+                                            "query": "avg:ray.node.mem.used{$service,$node_ip} by {service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -591,12 +604,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.node.disk.free{$service,$host}"
+                                            "query": "avg:ray.node.disk.free{$service,$node_ip}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ray.node.disk.usage{$service,$host}"
+                                            "query": "avg:ray.node.disk.usage{$service,$node_ip}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -608,6 +621,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Disk Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -647,7 +661,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.node.gpus_utilization{*} by {host}"
+                                            "query": "avg:ray.node.gpus_utilization{$service,$node_ip} by {ip}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -659,6 +673,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Node GPU Utilization",
                             "title_align": "left",
                             "title_size": "16",
@@ -699,12 +714,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:ray.serve.deployment.queued_queries{*}"
+                                            "query": "sum:ray.serve.deployment.queued_queries{$service,$node_ip}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:ray.serve.deployment.replica.starts{*}"
+                                            "query": "sum:ray.serve.deployment.replica.starts{$service,$node_ip}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -716,6 +731,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Queries Waiting for Replica Assignments vs Replica Restarts",
                             "title_align": "left",
                             "title_size": "16",
@@ -799,6 +815,7 @@
                                                     "should_exclude_missing": true,
                                                     "sort": {
                                                         "aggregation": "count",
+                                                        "metric": "count",
                                                         "order": "desc"
                                                     }
                                                 }
@@ -808,9 +825,9 @@
                                             ],
                                             "name": "a",
                                             "search": {
-                                                "query": "source:ray "
+                                                "query": "source:ray"
                                             },
-                                            "storage": "online_archives"
+                                            "storage": "flex_tier"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -822,6 +839,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Count per Log Status",
                             "title_align": "left",
                             "title_size": "16",
@@ -864,14 +882,16 @@
                                     "query": {
                                         "data_source": "logs_stream",
                                         "indexes": [],
-                                        "query_string": "source:ray status:error ",
+                                        "query_string": "source:ray status:error",
                                         "storage": "hot"
                                     },
                                     "response_format": "event_list"
                                 }
                             ],
                             "time": {
-                                "live_span": "1mo"
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
                             },
                             "title": "Error Logs",
                             "title_align": "left",
@@ -934,10 +954,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -945,15 +962,26 @@
                                             "aggregator": "max",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:ray.scheduler.unscheduleable_tasks{*} by {reason,nodeaddress}"
+                                            "query": "max:ray.scheduler.unscheduleable_tasks{$service, $component} by {reason,nodeaddress}"
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
                                     "style": {
                                         "palette": "datadog16"
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Pending Tasks with Reason for Blocker",
                             "title_align": "left",
                             "title_size": "16",
@@ -976,11 +1004,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -988,15 +1012,26 @@
                                             "aggregator": "max",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:ray.scheduler.failed_worker_startup{*} by {reason,nodeaddress}"
+                                            "query": "max:ray.scheduler.failed_worker_startup{$service, $component} by {reason,nodeaddress}"
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
                                     "style": {
                                         "palette": "datadog16"
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Failed Tasks with Reason for Worker Unavailability",
                             "title_align": "left",
                             "title_size": "16",
@@ -1031,12 +1066,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:ray.scheduler.placement_time.sum{*} by {workloadtype,workerid}.as_count()"
+                                            "query": "sum:ray.scheduler.placement_time.sum{$service, $component} by {workloadtype,workerid}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "Time for Workload to be placed",
                             "title_align": "left",
                             "title_size": "16",
@@ -1121,17 +1157,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.internal_num.processes.started{*}"
+                                            "query": "avg:ray.internal_num.processes.started{$service, $component}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ray.internal_num.processes.started.from_cache{*}"
+                                            "query": "avg:ray.internal_num.processes.started.from_cache{$service, $component}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:ray.internal_num.spilled_tasks{*}"
+                                            "query": "avg:ray.internal_num.spilled_tasks{$service, $component}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1143,6 +1179,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Processes Started",
                             "title_align": "left",
                             "title_size": "16",
@@ -1183,12 +1220,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:ray.internal_num.processes.skipped.job_mismatch{*} by {service,component}"
+                                            "query": "sum:ray.internal_num.processes.skipped.job_mismatch{$service, $component} by {service,component}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:ray.internal_num.processes.skipped.runtime_environment_mismatch{*} by {service,component}"
+                                            "query": "sum:ray.internal_num.processes.skipped.runtime_environment_mismatch{$service, $component} by {service,component}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1200,6 +1237,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Processes Skipped",
                             "title_align": "left",
                             "title_size": "16",
@@ -1235,7 +1273,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:ray.process.cpu_seconds.count{$service,$host}.as_count()"
+                                            "query": "sum:ray.process.cpu_seconds.count{$service}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1292,12 +1330,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.process.open_fds{$service,$host}"
+                                            "query": "avg:ray.process.open_fds{$service}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ray.process.max_fds{$service,$host}"
+                                            "query": "avg:ray.process.max_fds{$service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1309,6 +1347,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "File descriptors",
                             "title_align": "left",
                             "title_size": "16",
@@ -1353,12 +1392,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.process.virtual_memory{$service,$host}"
+                                            "query": "avg:ray.process.virtual_memory{$service}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ray.process.resident_memory{$service,$host}"
+                                            "query": "avg:ray.process.resident_memory{$service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1370,6 +1409,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Virtual and Resident Memory",
                             "title_align": "left",
                             "title_size": "16",
@@ -1448,7 +1488,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ray.serve.num_http_requests{$service, $host} by {status_code,application}"
+                                            "query": "sum:ray.serve.num_http_requests.count{$service, $component} by {status_code,application}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1460,6 +1500,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Number of HTTP Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -1495,7 +1536,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:ray.serve.http_request_latency.sum{$service,$host} by {application}.as_count()"
+                                            "query": "sum:ray.serve.http_request_latency.sum{$service, $component} by {application}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1507,6 +1548,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "HTTP Request Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1529,11 +1571,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -1541,15 +1579,26 @@
                                             "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:ray.serve.deployment.queued_queries{$service,$host} by {application}"
+                                            "query": "sum:ray.serve.deployment.queued_queries{$service, $component} by {application}"
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
                                     "style": {
                                         "palette": "classic"
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Current Number of Queued Queries per Application",
                             "title_align": "left",
                             "title_size": "16",
@@ -1588,12 +1637,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:ray.serve.deployment.queued_queries{$service,$host} by {application}"
+                                            "query": "sum:ray.serve.deployment.queued_queries{$service, $component} by {application}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:ray.serve.deployment.queued_queries{$service,$host} by {application}"
+                                            "query": "sum:ray.serve.deployment.queued_queries{$service, $component} by {application}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1605,6 +1654,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Queued queries",
                             "title_align": "left",
                             "title_size": "16",

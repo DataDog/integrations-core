@@ -26,6 +26,8 @@ STATIC_INFO_SERVERNAME = 'servername'
 STATIC_INFO_INSTANCENAME = 'instancename'
 STATIC_INFO_FULL_SERVERNAME = 'full_servername'
 STATIC_INFO_VERSION = 'version'
+STATIC_INFO_YEAR = 'year'
+# Major version is the engine version, eg 16 for 2022
 STATIC_INFO_MAJOR_VERSION = 'major_version'
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'
 STATIC_INFO_RDS = 'is_rds'
@@ -212,6 +214,7 @@ DATABASE_FILES_METRICS = [
     ('sqlserver.database.files.state', 'sys.database_files', 'state'),
 ]
 DATABASE_STATS_METRICS = [
+    ('sqlserver.database.user_access', 'sys.databases', 'user_access'),
     ('sqlserver.database.state', 'sys.databases', 'state'),
     ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
     ('sqlserver.database.is_in_standby', 'sys.databases', 'is_in_standby'),
@@ -251,6 +254,13 @@ DATABASE_FRAGMENTATION_METRICS = [
 DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
+]
+
+TABLE_SIZE_METRICS = [
+    ('sqlserver.table.row_count', 'sys.dm_db_partition_stats', 'row_count'),
+    ('sqlserver.table.total_size', 'sys.dm_db_partition_stats', 'total_size'),
+    ('sqlserver.table.used_size', 'sys.dm_db_partition_stats', 'used_size'),
+    ('sqlserver.table.data_size', 'sys.dm_db_partition_stats', 'data_size'),
 ]
 
 TEMPDB_FILE_SPACE_USAGE_METRICS = [

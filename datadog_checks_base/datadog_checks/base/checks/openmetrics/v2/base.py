@@ -6,9 +6,10 @@ from contextlib import contextmanager
 
 from requests.exceptions import RequestException
 
-from ....errors import ConfigurationError
-from ....utils.tracing import traced_class
-from ... import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.tracing import traced_class
+
 from .scraper import OpenMetricsScraper
 
 

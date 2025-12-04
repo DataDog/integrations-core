@@ -64,9 +64,9 @@ class TestNfsstat:
         tags_unicode = list(instance['tags'])
         tags_unicode.extend(
             [
-                u'nfs_server:192.168.34.1',
-                u'nfs_export:/exports/nfs/datadog/thr\u00E9\u00E9',
-                u'nfs_mount:/mnt/datadog/thr\u00E9\u00E9',
+                'nfs_server:192.168.34.1',
+                'nfs_export:/exports/nfs/datadog/thr\u00e9\u00e9',
+                'nfs_mount:/mnt/datadog/thr\u00e9\u00e9',
             ]
         )
 

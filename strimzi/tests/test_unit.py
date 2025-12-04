@@ -56,7 +56,7 @@ def test_check_unique_operator(
     tag,
     mocker,
 ):
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
     dd_run_check(check(instance))
 
     for expected_metric in metrics:
@@ -76,7 +76,7 @@ def test_check_unique_operator(
 
 
 def test_check_all_operators(dd_run_check, aggregator, check, mocker):
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
     dd_run_check(
         check(
             {

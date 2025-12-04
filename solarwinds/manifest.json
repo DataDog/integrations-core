@@ -1,0 +1,44 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b9c52007-5909-44c7-b4a2-624f0efffa9e",
+  "app_id": "solarwinds",
+  "owner": "event-management",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Troubleshooting",
+    "changelog": "CHANGELOG.md",
+    "description": "Ingest alerts from SolarWinds Orion into your Datadog Event Stream.",
+    "title": "SolarWinds",
+    "media": [],
+    "classifier_tags": [
+      "Category::Event Management",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 320,
+      "source_type_name": "SolarWinds",
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "solarwinds.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

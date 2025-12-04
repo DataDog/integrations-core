@@ -463,9 +463,9 @@ def test_history_output(instance_docker, sa_conn):
             )
             cursor.execute(query)
             results = cursor.fetchall()
-            assert (
-                len(results) == 4
-            ), "should only have 4 steps associated with completed jobs when filtering with last collection time"
+            assert len(results) == 4, (
+                "should only have 4 steps associated with completed jobs when filtering with last collection time"
+            )
 
 
 @pytest.mark.flaky
@@ -516,9 +516,9 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
     assert len(job_events) == 2, "new sample taken"
-    assert (
-        len(job_events[1]['sqlserver_job_history']) == 0
-    ), "successive checks should not collect new rows for same history entries"
+    assert len(job_events[1]['sqlserver_job_history']) == 0, (
+        "successive checks should not collect new rows for same history entries"
+    )
     with sa_conn as conn:
         with conn.cursor() as cursor:
             run_date, run_time = history_date_time_from_time(time.time() + 10)

@@ -13,7 +13,6 @@ from .metrics import METRICS
 
 @pytest.mark.e2e
 def test(dd_agent_check):
-
     instance = {}
     aggregator = dd_agent_check(instance, rate=True)
     aggregator.assert_service_check("weblogic.can_connect", ServiceCheck.OK)

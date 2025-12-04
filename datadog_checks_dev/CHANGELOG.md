@@ -2,6 +2,75 @@
 
 <!-- towncrier release notes start -->
 
+## 35.3.1 / 2025-11-19
+
+***Fixed***:
+
+* Add a fallback mechanism when mount_logs is True and no manifest is present in the integration ([#21784](https://github.com/DataDog/integrations-core/pull/21784))
+* Update event integration template. ([#21897](https://github.com/DataDog/integrations-core/pull/21897))
+
+## 35.3.0 / 2025-11-03
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+* Add KindLoad wrapper utility that allows to load Docker images into kind for testing ([#21288](https://github.com/DataDog/integrations-core/pull/21288))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+* Add helper method to get a list of N free ports ([#21662](https://github.com/DataDog/integrations-core/pull/21662))
+* Add new template for creating event integrations ([#21717](https://github.com/DataDog/integrations-core/pull/21717))
+
+***Fixed***:
+
+* Fix validate models error reporting which would not report an invalid schema in the config spec and just fail ([#20445](https://github.com/DataDog/integrations-core/pull/20445))
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+* Fix wait_for_health flag win docker_run ([#21209](https://github.com/DataDog/integrations-core/pull/21209))
+* Move KindLoad to a built-in condition instead of a wrapper ([#21292](https://github.com/DataDog/integrations-core/pull/21292))
+* Remove license validation overrides for `pycryptodomex` dependency. ([#21378](https://github.com/DataDog/integrations-core/pull/21378))
+* Fixes InstanceConfig model generation when validators functions are defined in spec.yaml ([#21409](https://github.com/DataDog/integrations-core/pull/21409))
+* Fix schema issue on `ignore_metrics_by_labels` field ([#21583](https://github.com/DataDog/integrations-core/pull/21583))
+
+## 35.2.0 / 2025-08-20
+
+***Added***:
+
+* Add option to specify container to check logs from and to wait for health when running docker compose up ([#21104](https://github.com/DataDog/integrations-core/pull/21104))
+
+***Fixed***:
+
+* Updating check_only to not have support_type = 'partner' ([#21109](https://github.com/DataDog/integrations-core/pull/21109))
+
+## 35.1.4 / 2025-08-07
+
+***Fixed***:
+
+* Improve descriptions and examples in configuration templates ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Fix codeowners validation to use proper team ([#20974](https://github.com/DataDog/integrations-core/pull/20974))
+
+## 35.1.3 / 2025-07-30
+
+***Fixed***:
+
+* Update required owner of logs files ([#20817](https://github.com/DataDog/integrations-core/pull/20817))
+* Fail config validation if templates are missing. ([#20832](https://github.com/DataDog/integrations-core/pull/20832))
+
+## 35.1.2 / 2025-07-14
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Use non-dot-prefixed JUnit XML path to avoid ddtrace import errors ([#20435](https://github.com/DataDog/integrations-core/pull/20435))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* [MINPROC-2319] remove the integration exception mapper ([#20697](https://github.com/DataDog/integrations-core/pull/20697))
+* Update new integration readme template. ([#20749](https://github.com/DataDog/integrations-core/pull/20749))
+
+## 35.1.1 / 2025-06-04
+
+***Fixed***:
+
+* Stop relying on manifest.json to validate spec.yaml. Also stop checking the 'name' field in spec.yaml. ([#20398](https://github.com/DataDog/integrations-core/pull/20398))
+* Ignore missing readmes in extras and marketplace repos. This is to temporarily unblock contributors while we discuss how to handle readmes in Publishing Platform. ([#20438](https://github.com/DataDog/integrations-core/pull/20438))
+
 ## 35.1.0 / 2025-05-27
 
 ***Added***:

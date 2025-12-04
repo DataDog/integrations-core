@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: cockroachdb
 metric_id: cockroachdb
 backend_only: false

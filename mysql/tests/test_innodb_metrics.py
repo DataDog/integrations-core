@@ -8,13 +8,14 @@ import os
 import mock
 import pytest
 
+from datadog_checks.mysql import MySql
 from datadog_checks.mysql.innodb_metrics import InnoDBMetrics
 
-from .common import HERE
+from . import common
 
 
 def get_test_file_path(filename):
-    return os.path.join(HERE, filename)
+    return os.path.join(common.HERE, filename)
 
 
 def get_innodb_status_fixture(version):
@@ -66,3 +67,31 @@ def test_get_stats_from_innodb_status(caplog, version):
     mocked_cursor.fetchone.return_value = ('InnoDB', '', innodb_status)
     result = idb.get_stats_from_innodb_status(db)
     assert result == exepcted_result
+
+
+@pytest.mark.unit
+def test_check_innodb_engine_enabled_with_config_disabled():
+    """Test that disable_innodb_metrics config properly disables InnoDB metrics collection"""
+
+    # Create instance with disable_innodb_metrics set to True
+    instance = {
+        'host': 'localhost',
+        'user': 'datadog',
+        'options': {
+            'disable_innodb_metrics': True,
+        },
+    }
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance])
+
+    # Mock database connection
+    db = mock.MagicMock()
+
+    # Call the method
+    result = mysql_check._check_innodb_engine_enabled(db)
+
+    # Assert that InnoDB is disabled
+    assert result is False
+
+    # Verify database cursor was never called
+    db.cursor.assert_not_called()

@@ -1,0 +1,274 @@
+id: bitwarden
+metric_id: bitwarden
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Bitwarden
+  enabled: true
+  filter:
+    query: source:bitwarden
+  processors:
+    - type: date-remapper
+      name: Define `event.date` as the official date of the log
+      enabled: true
+      sources:
+        - event.date
+    - name: Lookup on `event.type` to `evt.name`
+      enabled: true
+      source: event.type
+      target: evt.name
+      lookupTable: |-
+        1000,User_LoggedIn
+        1001,User_ChangedPassword
+        1002,User_Updated/Enabled2fa
+        1003,User_Disabled2fa
+        1004,User_RecoveredAccountFromTwoStepLogin
+        1005,User_LoginFailedIncorrectPassword 
+        1006,User_LoginFailedIncorrect2fa
+        1007,User_ExportedIndividualVault
+        1008,User_UpdatedRecoveryPassword
+        1009,User_MigratedDecryptionKeyToKeyConnector
+        1010,User_RequestedDeviceApproval
+        1100,Item_Created
+        1101,Item_Updated
+        1102,Item_DeletedPermanently
+        1103,Item_AttachmentCreated
+        1104,Item_AttachmentDeleted
+        1105,Item_MovedtoOrganization
+        1106,Item_UpdatedCollections
+        1107,Item_UserViewed
+        1108,Item_UserViewedPassword
+        1109,Item_UserViewedHiddenField
+        1110,Item_UserViewedSecurityCode
+        1111,Item_UserCopiedPassword
+        1112,Item_UserCopiedHiddenField
+        1113,Item_UserCopiedSecurityCode
+        1114,Item_UserAutofilled
+        1115,Item_SentToTrash
+        1116,Item_Restored
+        1117,Item_UserViewedCardNumber
+        1300,Collection_Created
+        1301,Collection_Updated
+        1302,Collection_Deleted
+        1400,Group_Created
+        1401,Group_Updated
+        1402,Group_Deleted
+        1500,OrganizationUser_Invited
+        1501,OrganizationUser_Confirmed
+        1502,OrganizationUser_Updated
+        1503,OrganizationUser_Removed
+        1504,OrganizationUser_UpdatedGroups
+        1505,OrganizationUser_UnlinkedSso
+        1506,OrganizationUser_ResetPassword_Enroll
+        1507,OrganizationUser_ResetPassword_Withdraw
+        1508,OrganizationUser_MasterPassword_Reset
+        1509,OrganizationUser_ResetSsoLink
+        1510,OrganizationUser_FirstSsoLogin
+        1511,OrganizationUser_AccessRevoked
+        1512,OrganizationUser_AccessRestored
+        1513,OrganizationUser_ApprovedDevice
+        1514,OrganizationUser_DeniedDevice
+        1515,OrganizationUser_UserAccount_Deleted
+        1516,OrganizationUser_Left
+        1600,Organization_EditedSetting
+        1601,Organization_PurgedVault
+        1602,Organization_UserExportedVault
+        1603,Organization_Provider_Accessed_Vault
+        1604,Organization_EnabledSso
+        1605,Organization_DisabledSso
+        1606,Organization_EnabledKeyConnector
+        1607,Organization_DisabledKeyConnector
+        1608,Organization_FamiliesSponsorships_Synced
+        1609,Organization_CollectionManagement_Updated
+        1700,Policy_Updated
+        2000,OrganizationDomain_Added
+        2001,OrganizationDomain_Removed
+        2002,OrganizationDomain_Verified
+        2003,OrganizationDomain_NotVerified
+      type: lookup-processor
+    - name: Lookup on `event.device` to `event.deviceType`
+      enabled: true
+      source: event.device
+      target: event.deviceType
+      lookupTable: |-
+        0,Android
+        1,iOS
+        2,Chrome Extension
+        3,Firefox Extension
+        4,Opera Extension
+        5,Edge Extension
+        6,Windows
+        7,macOS
+        8,Linux
+        9,Chrome
+        10,Firefox
+        11,Opera
+        12,Edge
+        13,Internet Explorer
+        14,Unknown Browser
+        15,Android
+        16,UWP
+        17,Safari
+        18,Vivaldi
+        19,Vivaldi Extension
+        20,Safari Extension
+        21,SDK
+        22,Server
+        23,Windows CLI
+        24,MacOs CLI
+        25,Linux CLI
+      defaultLookup: Other
+      type: lookup-processor
+    - name: Lookup on `enrichment_details.actingUser.type` to
+        `enrichment_details.actingUser.userType`
+      enabled: true
+      source: enrichment_details.actingUser.type
+      target: enrichment_details.actingUser.userType
+      lookupTable: |-
+        0,Owner
+        1,Admin
+        2,User
+        4,Custom
+      defaultLookup: Other
+      type: lookup-processor
+    - name: Lookup on `enrichment_details.member.type` to
+        `enrichment_details.member.userType`
+      enabled: true
+      source: enrichment_details.member.type
+      target: enrichment_details.member.userType
+      lookupTable: |-
+        0,Owner
+        1,Admin
+        2,User
+        4,Custom
+      defaultLookup: Other
+      type: lookup-processor
+    - type: category-processor
+      name: Categorize `event.type`
+      enabled: true
+      categories:
+        - filter:
+            query: "@event.type:[1000 TO 1010]"
+          name: user-events
+        - filter:
+            query: "@event.type:[1100 TO 1117]"
+          name: item-events
+        - filter:
+            query: "@event.type:[1300 TO 1302]"
+          name: collection-events
+        - filter:
+            query: "@event.type:[1400 TO 1402]"
+          name: group-events
+        - filter:
+            query: "@event.type:([1500 TO 1516] OR [1600 TO 1609] OR 1700 OR [2000 TO
+              2003])"
+          name: organization-events
+      target: eventCategory
+    - type: attribute-remapper
+      name: Map `enrichment_details.actingUser.name` to `usr.name`
+      enabled: true
+      sources:
+        - enrichment_details.actingUser.name
+      sourceType: attribute
+      target: usr.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `enrichment_details.actingUser.email` to `usr.email`
+      enabled: true
+      sources:
+        - enrichment_details.actingUser.email
+      sourceType: attribute
+      target: usr.email
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `event.actingUserId` to `usr.id`
+      enabled: true
+      sources:
+        - event.actingUserId
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `event.ipAddress` to `network.client.ip`
+      enabled: true
+      sources:
+        - event.ipAddress
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: geo-ip-parser
+      name: GeoIP Parser for `network.client.ip`
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing

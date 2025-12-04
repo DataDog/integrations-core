@@ -23,6 +23,7 @@ TARGET_TAG_PATTERNS = {
     'linux-aarch64': 'manylinux.*_aarch64|linux_aarch64',
     'windows-x86_64': 'win_amd64',
     'macos-x86_64': 'macosx.*_(x86_64|intel|universal2)',
+    'macos-aarch64': 'macosx.*_(aarch64|arm64|universal2)',
 }
 
 
@@ -106,6 +107,11 @@ def generate_lock_file(
                     continue
 
                 if not is_compatible_wheel(target, python_major, interpreter, abi, platform):
+                    continue
+
+                if build and 'WID' in build:
+                    # TODO: we're skipping any wheels with WID in them until we merge
+                    # the final changes to use this format
                     continue
 
                 build_number = int(build[0]) if build else -1

@@ -96,6 +96,14 @@ def instance_rabbitmq_api_url():
     return 'http://localhost:15672/api/'
 
 
+def instance_rabbitmq_pass():
+    return 'guest'
+
+
+def instance_rabbitmq_user():
+    return 'guest'
+
+
 def instance_request_size():
     return 16
 

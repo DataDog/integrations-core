@@ -1,0 +1,57 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "67feed3c-1676-4d6b-9d72-3ca8c0a6e3dc",
+  "app_id": "windows-certificate",
+  "owner": "windows-products",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your Windows hosts' certificates stores for certificate expiration.",
+    "title": "Windows Certificate Store",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::OS & System",
+      "Category::Windows",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 46050783,
+      "source_type_name": "Windows Certificate Store",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "windows_certificate.",
+        "check": "windows_certificate.days_remaining",
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "CERTLM.MSC"
+      ],
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Windows Certificate Store Overview": "assets/dashboards/windows_certificate_overview.json"
+    },
+    "monitors": {
+      "A certificate is expired or about to expire": "assets/monitors/windows_certificate_expiration.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

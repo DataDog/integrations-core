@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....constants import CHANGELOG_TYPE_NONE
-from ....git import get_commits_since
-from ....github import get_changelog_types, get_pr, parse_pr_numbers
-from ....release import get_release_tag_string
-from ....utils import get_valid_checks, get_version_string
-from ...console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_warning
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_warning
+from datadog_checks.dev.tooling.constants import CHANGELOG_TYPE_NONE
+from datadog_checks.dev.tooling.git import get_commits_since
+from datadog_checks.dev.tooling.github import get_changelog_types, get_pr, parse_pr_numbers
+from datadog_checks.dev.tooling.release import get_release_tag_string
+from datadog_checks.dev.tooling.utils import get_valid_checks, get_version_string
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the checks that can be released.')
@@ -64,7 +64,7 @@ def ready(ctx, quiet):
             if quiet:
                 msg = target
             else:
-                msg = 'Check {} has {} out of {} merged PRs that could be released' ''.format(
+                msg = 'Check {} has {} out of {} merged PRs that could be released'.format(
                     target, shippable_prs, len(pr_numbers)
                 )
             echo_info(msg)

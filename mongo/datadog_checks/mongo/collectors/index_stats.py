@@ -5,6 +5,7 @@
 from pymongo.errors import OperationFailure
 
 from datadog_checks.mongo.collectors.base import MongoCollector, collection_interval_checker
+from datadog_checks.mongo.common import ReplicaSetDeployment
 from datadog_checks.mongo.metrics import INDEX_METRICS
 
 
@@ -20,7 +21,16 @@ class IndexStatsCollector(MongoCollector):
         self._collector_key = (self.__class__.__name__, db_name)  # db_name is part of collector key
 
     def compatible_with(self, deployment):
-        # Can only be run once per cluster.
+        if isinstance(deployment, ReplicaSetDeployment):
+            # Collecting index stats on both primary and secondary nodes for replica set
+            if deployment.is_arbiter:
+                self.log.debug("IndexStatsCollector can not be run on arbiter nodes.")
+                return False
+            if deployment.use_shards:
+                self.log.debug("IndexStatsCollector can not be run on shards on sharded clusters.")
+                return False
+            return True
+        # Collecting index stats for standalone or mongos on sharding deployments
         return deployment.is_principal()
 
     def _get_collections(self, api):

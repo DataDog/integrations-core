@@ -7,7 +7,6 @@ from datadog_checks.base.utils.models.validation.utils import make_immutable
 
 
 def test_make_immutable():
-
     obj = make_immutable(
         {
             'string': 'foo',

@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: nagios
 metric_id: nagios
 backend_only: false

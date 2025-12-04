@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
-from . import defaults, validators
+from . import defaults, deprecations, validators
 
 
 class AgentJobs(BaseModel):
@@ -48,12 +48,33 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str] = None
 
 
+class CollectDeadlocks(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_deadlocks: Optional[float] = None
+
+
 class CollectRawQueryStatement(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     enabled: Optional[bool] = None
+
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
+    max_tables: Optional[int] = None
 
 
 class CollectSettings(BaseModel):
@@ -63,6 +84,36 @@ class CollectSettings(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+
+
+class QueryCompletions(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_events: Optional[int] = Field(None, examples=[1000])
+
+
+class QueryErrors(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_events: Optional[int] = Field(None, examples=[1000])
+
+
+class CollectXe(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    debug_sample_events: Optional[int] = None
+    query_completions: Optional[QueryCompletions] = None
+    query_errors: Optional[QueryErrors] = None
 
 
 class CustomQuery(BaseModel):
@@ -197,6 +248,15 @@ class ServerStateMetrics(BaseModel):
     enabled: Optional[bool] = Field(None, examples=[True])
 
 
+class TableSizeMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[600])
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
 class TaskSchedulerMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -239,6 +299,7 @@ class DatabaseMetrics(BaseModel):
     primary_log_shipping_metrics: Optional[PrimaryLogShippingMetrics] = None
     secondary_log_shipping_metrics: Optional[SecondaryLogShippingMetrics] = None
     server_state_metrics: Optional[ServerStateMetrics] = None
+    table_size_metrics: Optional[TableSizeMetrics] = None
     task_scheduler_metrics: Optional[TaskSchedulerMetrics] = None
     tempdb_file_space_usage_metrics: Optional[TempdbFileSpaceUsageMetrics] = None
     xe_metrics: Optional[XeMetrics] = None
@@ -299,6 +360,7 @@ class ObfuscatorOptions(BaseModel):
     keep_trailing_semicolon: Optional[bool] = None
     obfuscation_mode: Optional[str] = None
     remove_space_between_parentheses: Optional[bool] = None
+    replace_bind_parameter: Optional[bool] = None
     replace_digits: Optional[bool] = None
 
 
@@ -347,26 +409,6 @@ class SchemasCollection(BaseModel):
     max_execution_time: Optional[float] = None
 
 
-class QueryCompletions(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    collection_interval: Optional[float] = Field(None, examples=[10])
-    enabled: Optional[bool] = Field(None, examples=[False])
-    max_events: Optional[int] = Field(None, examples=[1000])
-
-
-class QueryErrors(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    collection_interval: Optional[float] = Field(None, examples=[10])
-    enabled: Optional[bool] = Field(None, examples=[False])
-    max_events: Optional[int] = Field(None, examples=[1000])
-
-
 class XeCollection(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -390,8 +432,11 @@ class InstanceConfig(BaseModel):
     autodiscovery_include: Optional[tuple[str, ...]] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
+    collect_deadlocks: Optional[CollectDeadlocks] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
+    collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
+    collect_xe: Optional[CollectXe] = None
     command_timeout: Optional[int] = None
     connection_string: Optional[str] = None
     connector: Optional[str] = None
@@ -437,6 +482,12 @@ class InstanceConfig(BaseModel):
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
     xe_collection: Optional[XeCollection] = None
+
+    @model_validator(mode='before')
+    def _handle_deprecations(cls, values, info):
+        fields = info.context['configured_fields']
+        validation.utils.handle_deprecations('instances', deprecations.instance(), fields, info.context)
+        return values
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

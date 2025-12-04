@@ -1,0 +1,10 @@
+{
+  "package": "{package}",
+  "version": "{version}",
+  "opens": "{opens}",
+  "reqs": "{reqs}",
+  "badconns": "{badconns}",
+  "deniedconns": "{deniedconns}",
+  "refusedconns": "{refusedconns}",
+  "website": "{website}"
+}

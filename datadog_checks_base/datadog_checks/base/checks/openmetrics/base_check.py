@@ -5,9 +5,10 @@ from copy import deepcopy
 
 import requests
 
-from ...errors import CheckException
-from ...utils.tracing import traced_class
-from .. import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.tracing import traced_class
+
 from .mixins import OpenMetricsScraperMixin
 
 STANDARD_FIELDS = [

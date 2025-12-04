@@ -90,10 +90,10 @@ NOT_TILES = [
 CHECK_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/{repository}/blob/master/{name}/metadata.csv
 [8]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
@@ -102,17 +102,17 @@ CHECK_LINKS = """\
 CHECK_ONLY_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [9]: https://docs.datadoghq.com/help/
 """
 
 LOGS_LINKS = """\
 [1]: https://docs.datadoghq.com/help/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[3]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [4]: **LINK_TO_INTEGRATION_SITE**
 [5]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
 """
@@ -121,10 +121,10 @@ JMX_LINKS = """\
 [1]: **LINK_TO_INTEGERATION_SITE**
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [5]: https://docs.datadoghq.com/integrations/java/
 [6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
 """
 
@@ -142,6 +142,11 @@ TILE_LINKS = """\
 [3]: https://docs.datadoghq.com/help/
 """
 
+EVENT_TILE_LINKS = """\
+[1]: **LINK_TO_INTEGRATION_SITE**
+[2]: https://docs.datadoghq.com/help/
+"""
+
 integration_type_links = {
     'check': CHECK_LINKS,
     'check_only': CHECK_ONLY_LINKS,
@@ -150,6 +155,7 @@ integration_type_links = {
     'snmp_tile': SNMP_TILE_LINKS,
     'tile': TILE_LINKS,
     'metrics_crawler': TILE_LINKS,
+    'event': EVENT_TILE_LINKS,
 }
 
 # If a file changes in a PR with any of these file extensions,

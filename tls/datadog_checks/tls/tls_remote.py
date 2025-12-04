@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import ssl
+from collections import ChainMap
 from hashlib import sha256
 from struct import pack, unpack
 
@@ -11,6 +11,7 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.http import create_ssl_context
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import SERVICE_CHECK_CAN_CONNECT, SERVICE_CHECK_EXPIRATION, SERVICE_CHECK_VALIDATION
@@ -32,8 +33,7 @@ class TLSRemoteCheck(object):
         )
         self._intermediate_cert_refresh_interval = (
             # Convert minutes to seconds
-            float(self.agent_check.instance.get('intermediate_cert_refresh_interval', 60))
-            * 60
+            float(self.agent_check.instance.get('intermediate_cert_refresh_interval', 60)) * 60
         )
 
     def check(self):
@@ -179,8 +179,7 @@ class TLSRemoteCheck(object):
 
         with sock:
             try:
-                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-                context.verify_mode = ssl.CERT_NONE
+                context = create_ssl_context(ChainMap({'tls_verify': False}, self.agent_check.http.tls_config))
 
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)

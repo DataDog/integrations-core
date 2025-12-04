@@ -1,0 +1,35 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./api.py:/app/api.py
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/valid/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  krakend:
+    image: krakend:${KRAKEND_VERSION}
+    ports:
+      - "8080:8080"  # KrakenD gateway port
+      - "9090:9090"  # OpenTelemetry metrics port
+    volumes:
+      - ./krakend.json:/etc/krakend/krakend.json:ro
+    command: ["run", "-d", "-c", "/etc/krakend/krakend.json"]
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+

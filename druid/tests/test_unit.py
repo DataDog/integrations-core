@@ -22,7 +22,8 @@ def test_missing_url_config(aggregator):
 def test_service_check_can_connect_success(aggregator, instance):
     check = DruidCheck('druid', {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+    req = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
         mock_resp = mock.MagicMock(status_code=200)
         mock_resp.json.return_value = {'abc': '123'}
         req.get.return_value = mock_resp
@@ -41,7 +42,8 @@ def test_service_check_can_connect_success(aggregator, instance):
 def test_service_check_can_connect_failure(aggregator, instance, exception_class):
     check = DruidCheck('druid', {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+    req = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
         attrs = {'raise_for_status.side_effect': exception_class}
         req.get.side_effect = [mock.MagicMock(status_code=500, **attrs)]
 

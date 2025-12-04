@@ -26,6 +26,7 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS_DATABASE_SINGLE,
     OS_SCHEDULER_METRICS,
     SERVICE_CHECK_NAME,
+    STATIC_INFO_SERVERNAME,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
@@ -38,11 +39,11 @@ from .common import (
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON,
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY,
     SERVER_METRICS,
-    SQLSERVER_MAJOR_VERSION,
+    SQLSERVER_YEAR,
 )
 from .utils import always_on, is_always_on, not_windows_ci
 
-INCR_FRACTION_METRICS = {'sqlserver.latches.latch_wait_time'}
+INCR_FRACTION_METRICS = {'sqlserver.latches.latch_waits'}
 AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test-1']
 
 
@@ -57,7 +58,12 @@ def test_check_server_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -83,7 +89,12 @@ def test_check_instance_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, False
@@ -119,7 +130,12 @@ def test_check_instance_metrics_autodiscovery(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, True
@@ -167,7 +183,12 @@ def test_check_database_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, database_autodiscovery
@@ -246,7 +267,12 @@ def test_check_index_usage_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -273,7 +299,12 @@ def test_check_task_scheduler_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -301,7 +332,12 @@ def test_check_master_files_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -340,7 +376,12 @@ def test_check_db_fragmentation_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, database_autodiscovery
@@ -370,7 +411,12 @@ def test_check_tempdb_file_space_usage_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -381,7 +427,7 @@ def test_check_tempdb_file_space_usage_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.skipif(SQLSERVER_MAJOR_VERSION < 2016, reason='Metric not supported')
+@pytest.mark.skipif(SQLSERVER_YEAR < 2016, reason='Metric not supported')
 def test_check_incr_fraction_metrics(
     aggregator,
     dd_run_check,
@@ -424,15 +470,25 @@ def test_check_incr_fraction_metrics(
     sqlserver_check.run()
     cursor.close()
 
-    tags = sqlserver_check._config.tags
+    key_tags = sqlserver_check._config.tags
+    tags = key_tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
     for metric_name in INCR_FRACTION_METRICS:
-        key = "{}:{}".format(metric_name, "".join(tags))
-        if previous_value[key] == sqlserver_check.sqlserver_incr_fraction_metric_previous_values[key]:
+        key = "{}:{}".format(metric_name, "".join(key_tags))
+        if (
+            key in previous_value
+            and key in sqlserver_check.sqlserver_incr_fraction_metric_previous_values
+            and previous_value[key] == sqlserver_check.sqlserver_incr_fraction_metric_previous_values[key]
+        ):
             continue
-        aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
+        aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname)
 
     sqlserver_check.cancel()
 

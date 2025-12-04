@@ -2,33 +2,113 @@ id: cisco-duo
 metric_id: cisco-duo
 backend_only: false
 facets:
-- facetType: range
-  groups:
-  - Cisco Duo
-  name: Credits
-  path: cisco.duo.credits
-  source: log
-  type: double
-- groups:
-  - User
-  name: User Email
-  path: usr.email
-  source: log
-- groups:
-  - User
-  name: User Name
-  path: usr.name
-  source: log
-- groups:
-  - Event
-  name: Event Name
-  path: evt.name
-  source: log
-- groups:
-  - Event
-  name: Event Outcome
-  path: evt.outcome
-  source: log
+  - facetType: range
+    groups:
+      - Cisco Duo
+    name: Credits
+    path: cisco.duo.credits
+    source: log
+    type: double
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Unique ID
+    path: ocsf.actor.user.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Email Address
+    path: ocsf.actor.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Target Unique ID
+    path: ocsf.user.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Target Name
+    path: ocsf.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Target Email Address
+    path: ocsf.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
 pipeline:
   type: pipeline
   name: Cisco Duo
@@ -85,7 +165,7 @@ pipeline:
           sourceType: attribute
           target: usr.email
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `event_type` to `evt.name`
@@ -105,7 +185,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Activity
@@ -128,7 +208,28 @@ pipeline:
           sourceType: attribute
           target: duo_target
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parsing actor.details
+          enabled: true
+          source: actor.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              actor_json %{data:actor.details:json}
+        - type: attribute-remapper
+          name: Map `email`, `actor.details.email` to `usr.email`
+          enabled: true
+          sources:
+            - email
+            - actor.details.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Administrator
@@ -144,7 +245,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Offline Enrollment
@@ -160,7 +261,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: attribute-remapper
       name: Map `action` to `cisco.duo.action`
@@ -170,7 +271,7 @@ pipeline:
       sourceType: attribute
       target: cisco.duo.action
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `credits` to `cisco.duo.credits`
@@ -182,4 +283,1755 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
-
+    # OCSF transformations
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: string-builder-processor
+          name: Add version
+          enabled: true
+          template: "1.5.0"
+          target: ocsf.metadata.version
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: "Cisco Duo"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: "Cisco"
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `service` to `ocsf.metadata.log_name`
+          enabled: true
+          sources:
+            - service
+          sourceType: attribute
+          target: ocsf.metadata.log_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `activity_id`, `txid` to `ocsf.metadata.uid`
+          enabled: true
+          sources:
+            - activity_id
+            - txid
+          sourceType: attribute
+          target: ocsf.metadata.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event_type`, `action.name`, `action` to `ocsf.metadata.event_code`
+          enabled: true
+          sources:
+            - event_type
+            - action.name
+            - action
+          sourceType: attribute
+          target: ocsf.metadata.event_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `isotimestamp`, `ts` to `ocsf.time`
+          enabled: true
+          sources:
+            - isotimestamp
+            - ts
+          sourceType: attribute
+          target: ocsf.time
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse timestamp to ocsf.time
+          enabled: true
+          source: ocsf.time
+          samples:
+            - "2025-07-18T13:08:08.119056+00:00"
+            - "2025-07-18T03:14:43+00:00"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              nine %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ"):ocsf.time}
+              eight %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSZ"):ocsf.time}
+              seven %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZ"):ocsf.time}
+              six %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              five %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              four %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              three %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              two %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              one %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              zero %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+        - type: string-builder-processor
+          name: Add severity
+          enabled: true
+          template: "1"
+          target: ocsf.severity_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add severity
+          enabled: true
+          template: "Informational"
+          target: ocsf.severity
+          replaceMissing: false
+        - type: grok-parser
+          name: Parsing action.details
+          enabled: true
+          source: action.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              action_json %{data:action.details:json}
+        - type: grok-parser
+          name: Parsing actor.details
+          enabled: true
+          source: actor.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              actor_json %{data:actor.details:json}
+        - type: grok-parser
+          name: Parsing description
+          enabled: true
+          source: description
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              description_json %{data:description:json}
+        - type: grok-parser
+          name: Parsing target.details
+          enabled: true
+          source: target.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              target_details_json %{data:target.details:json}
+    - type: pipeline
+      name: OCSF sub pipeline for device enrichment
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.event_code:* (@access_device.ip.address:* OR @access_device.ip:*)"
+      processors:
+        - type: attribute-remapper
+          name: Map `access_device.ip.address`, `access_device.ip` to `ocsf.device.ip`
+          enabled: true
+          sources:
+            - access_device.ip.address
+            - access_device.ip
+          sourceType: attribute
+          target: ocsf.device.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `access_device.epkey` to `ocsf.device.uid`
+          enabled: true
+          sources:
+            - access_device.epkey
+          sourceType: attribute
+          target: ocsf.device.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `access_device.hostname` to `ocsf.device.hostname`
+          enabled: true
+          sources:
+            - access_device.hostname
+          sourceType: attribute
+          target: ocsf.device.hostname
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add device type id
+          enabled: true
+          template: "0"
+          target: ocsf.device.type_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.device.type_id` to `ocsf.device.type_id`
+          enabled: true
+          sources:
+            - ocsf.device.type_id
+          sourceType: attribute
+          target: ocsf.device.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add device type
+          enabled: true
+          template: "Unknown"
+          target: ocsf.device.type
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `access_device.location.city` to `ocsf.device.location.city`
+          enabled: true
+          sources:
+            - access_device.location.city
+          sourceType: attribute
+          target: ocsf.device.location.city
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add OCSF profiles
+          enabled: true
+          template: "[host]"
+          target: ocsf.metadata.profiles
+          replaceMissing: false
+        - type: grok-parser
+          name: Profiles string to array
+          enabled: true
+          source: ocsf.metadata.profiles
+          samples:
+            - "[host]"
+          grok:
+            supportRules: ""
+            matchRules: ProfileStrToArray %{data:ocsf.metadata.profiles:array("[]",",")}
+    - type: pipeline
+      name: OCSF sub pipeline for class Account Change [3001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.event_code:(enrollment OR admin_activate_duo_push OR admin_reactivates_duo_push OR admin_reset_password OR admin_send_reset_password_email OR user_adminapi_lockout OR user_create OR user_delete OR user_lockout_cleared OR user_not_enrolled_lockout OR user_pending_delete OR user_restore OR user_update OR activation_set_password)"
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.metadata.event_code:user_create"
+              name: "1"
+            - filter:
+                query: "@ocsf.metadata.event_code:admin_reset_password"
+              name: "3"
+            - filter:
+                query: "@ocsf.metadata.event_code:admin_send_reset_password_email"
+              name: "4"
+            - filter:
+                query: "@ocsf.metadata.event_code:user_delete"
+              name: "6"
+            - filter:
+                query: "@ocsf.metadata.event_code:user_adminapi_lockout"
+              name: "9"
+            - filter:
+                query: "@ocsf.metadata.event_code:(enrollment OR admin_activate_duo_push)"
+              name: "10"
+            - filter:
+                query: "@ocsf.metadata.event_code:user_lockout_cleared"
+              name: "12"
+            - filter:
+                query: "@ocsf.metadata.event_code:*"
+              name: "99"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.activity_id:1"
+              name: "Create"
+            - filter:
+                query: "@ocsf.activity_id:3"
+              name: "Password Change"
+            - filter:
+                query: "@ocsf.activity_id:4"
+              name: "Password Reset"
+            - filter:
+                query: "@ocsf.activity_id:6"
+              name: "Delete"
+            - filter:
+                query: "@ocsf.activity_id:9"
+              name: "Lock"
+            - filter:
+                query: "@ocsf.activity_id:10"
+              name: "MFA Factor Enable"
+            - filter:
+                query: "@ocsf.activity_id:12"
+              name: "Unlock"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: "Identity & Access Management"
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3001"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: "Account Change"
+          target: ocsf.class_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `user.key`, `actor.key` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - user.key
+            - actor.key
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `user.name`, `actor.name`, `username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - user.name
+            - actor.name
+            - username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `email`, `actor.details.email` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - email
+            - actor.details.email
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.type` to `ocsf.actor.user.type`
+          enabled: true
+          sources:
+            - actor.type
+          sourceType: attribute
+          target: ocsf.actor.user.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: User type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.actor.user.type:user"
+              name: "1"
+            - filter:
+                query: "@ocsf.actor.user.type:(admin OR adminapi OR admin_sync)"
+              name: "2"
+            - filter:
+                query: "@ocsf.actor.user.type:system"
+              name: "3"
+            - filter:
+                query: "@ocsf.actor.user.type:*"
+              name: "99"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
+          enabled: true
+          sources:
+            - ocsf.actor.user.type_id
+          sourceType: attribute
+          target: ocsf.actor.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: User type name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.actor.user.type_id:1"
+              name: "User"
+            - filter:
+                query: "@ocsf.actor.user.type_id:2"
+              name: "Admin"
+            - filter:
+                query: "@ocsf.actor.user.type_id:3"
+              name: "System"
+          target: ocsf.actor.user.type
+        - type: attribute-remapper
+          name: Map `application.name` to `ocsf.actor.app_name`
+          enabled: true
+          sources:
+            - application.name
+          sourceType: attribute
+          target: ocsf.actor.app_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `application.key` to `ocsf.actor.app_uid`
+          enabled: true
+          sources:
+            - application.key
+          sourceType: attribute
+          target: ocsf.actor.app_uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `access_device.ip.address`, `access_device.ip` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - access_device.ip.address
+            - access_device.ip
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `result`, `outcome.result` to `ocsf.status`
+          enabled: true
+          sources:
+            - result
+            - outcome.result
+          sourceType: attribute
+          target: ocsf.status
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: Status mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.status:(success OR SUCCESS)"
+              name: "1"
+            - filter:
+                query: "@ocsf.status:(denied OR failure OR error OR fraud OR FAILURE)"
+              name: "2"
+            - filter:
+                query: "@ocsf.status:*"
+              name: "99"
+          target: ocsf.status_id
+        - type: attribute-remapper
+          name: Map `ocsf.status_id` to `ocsf.status_id`
+          enabled: true
+          sources:
+            - ocsf.status_id
+          sourceType: attribute
+          target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: Status name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.status_id:1"
+              name: "Success"
+            - filter:
+                query: "@ocsf.status_id:2"
+              name: "Failure"
+          target: ocsf.status
+        - type: attribute-remapper
+          name: Map `user.key`, `target.key` to `ocsf.user.uid`
+          enabled: true
+          sources:
+            - user.key
+            - target.key
+          sourceType: attribute
+          target: ocsf.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `user.name`, `target.name`, `object` to `ocsf.user.name`
+          enabled: true
+          sources:
+            - user.name
+            - target.name
+            - object
+          sourceType: attribute
+          target: ocsf.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `email`, `actor.details.email`, `target.details.email` to `ocsf.user.email_addr`
+          enabled: true
+          sources:
+            - email
+            - actor.details.email
+            - target.details.email
+          sourceType: attribute
+          target: ocsf.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `target.type` to `ocsf.user.type`
+          enabled: true
+          sources:
+            - target.type
+          sourceType: attribute
+          target: ocsf.user.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: Target user type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.user.type:user"
+              name: "1"
+            - filter:
+                query: "@ocsf.user.type:admin"
+              name: "2"
+          target: ocsf.user.type_id
+        - type: attribute-remapper
+          name: Map `ocsf.user.type_id` to `ocsf.user.type_id`
+          enabled: true
+          sources:
+            - ocsf.user.type_id
+          sourceType: attribute
+          target: ocsf.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: Target user type name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.user.type_id:1"
+              name: "User"
+            - filter:
+                query: "@ocsf.user.type_id:2"
+              name: "Admin"
+          target: ocsf.user.type
+    - type: pipeline
+      name: OCSF sub pipeline for class Authentication [3002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.event_code:(authentication OR admin_login)"
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add activity_id
+          enabled: true
+          template: "1"
+          target: ocsf.activity_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add activity_name
+          enabled: true
+          template: "Logon"
+          target: ocsf.activity_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: "Identity & Access Management"
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3002"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: "Authentication"
+          target: ocsf.class_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `user.key`, `actor.key` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - user.key
+            - actor.key
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `user.name`, `actor.name`, `username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - user.name
+            - actor.name
+            - username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `email`, `actor.details.email` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - email
+            - actor.details.email
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.type` to `ocsf.actor.user.type`
+          enabled: true
+          sources:
+            - actor.type
+          sourceType: attribute
+          target: ocsf.actor.user.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: User type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.actor.user.type:user"
+              name: "1"
+            - filter:
+                query: "@ocsf.actor.user.type:(admin OR adminapi OR admin_sync)"
+              name: "2"
+            - filter:
+                query: "@ocsf.actor.user.type:system"
+              name: "3"
+            - filter:
+                query: "@ocsf.actor.user.type:*"
+              name: "99"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
+          enabled: true
+          sources:
+            - ocsf.actor.user.type_id
+          sourceType: attribute
+          target: ocsf.actor.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: User type name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.actor.user.type_id:1"
+              name: "User"
+            - filter:
+                query: "@ocsf.actor.user.type_id:2"
+              name: "Admin"
+            - filter:
+                query: "@ocsf.actor.user.type_id:3"
+              name: "System"
+          target: ocsf.actor.user.type
+        - type: string-builder-processor
+          name: Add service name for admin login
+          enabled: true
+          template: "admin_login"
+          target: ocsf.service.name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `application.name` to `ocsf.service.name`
+          enabled: true
+          sources:
+            - application.name
+          sourceType: attribute
+          target: ocsf.service.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `application.key` to `ocsf.service.uid`
+          enabled: true
+          sources:
+            - application.key
+          sourceType: attribute
+          target: ocsf.service.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `factor`, `action.details.factor`, `description.factor` to `ocsf.auth_factor.factor_type`
+          enabled: true
+          sources:
+            - factor
+            - action.details.factor
+            - description.factor
+          sourceType: attribute
+          target: ocsf.auth_factor.factor_type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: category-processor
+          name: Auth factor type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.auth_factor.factor_type:(sms_passcode)"
+              name: "1"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type:(phone_call)"
+              name: "3"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type:(duo_push OR verified_duo_push OR verified_push)"
+              name: "5"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type:(hardware_token)"
+              name: "6"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type:(bypass_code OR duo_mobile_passcode OR duo_mobile_passcode_hotp OR duo_mobile_passcode_totp OR passcode OR yubikey_passcode)"
+              name: "7"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type:(u2f_token)"
+              name: "9"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type:(WebAuthn_Chrome_Touch_ID OR WebAuthn_Credential OR WebAuthn_Security_Key)"
+              name: "10"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type:*"
+              name: "99"
+          target: ocsf.auth_factor.factor_type_id
+        - type: attribute-remapper
+          name: Map `ocsf.auth_factor.factor_type_id` to `ocsf.auth_factor.factor_type_id`
+          enabled: true
+          sources:
+            - ocsf.auth_factor.factor_type_id
+          sourceType: attribute
+          target: ocsf.auth_factor.factor_type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: Auth factor type name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.auth_factor.factor_type_id:1"
+              name: "SMS"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type_id:3"
+              name: "Phone Call"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type_id:5"
+              name: "Push Notification"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type_id:6"
+              name: "Hardware Token"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type_id:7"
+              name: "OTP"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type_id:9"
+              name: "U2F"
+            - filter:
+                query: "@ocsf.auth_factor.factor_type_id:10"
+              name: "WebAuthn"
+          target: ocsf.auth_factor.factor_type
+        - type: attribute-remapper
+          name: Map `reasons` to `ocsf.message`
+          enabled: true
+          sources:
+            - reasons
+          sourceType: attribute
+          target: ocsf.message
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `action.details.error_msg`, `description.error` to `ocsf.status_detail`
+          enabled: true
+          sources:
+            - action.details.error_msg
+            - description.error
+          sourceType: attribute
+          target: ocsf.status_detail
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `result`, `outcome.result` to `ocsf.status`
+          enabled: true
+          sources:
+            - result
+            - outcome.result
+          sourceType: attribute
+          target: ocsf.status
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: Status mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.status:(success OR SUCCESS)"
+              name: "1"
+            - filter:
+                query: "@ocsf.status:(denied OR failure OR error OR fraud OR FAILURE) OR @ocsf.metadata.event_code:admin_login_error"
+              name: "2"
+            - filter:
+                query: "@ocsf.status:*"
+              name: "99"
+          target: ocsf.status_id
+        - type: attribute-remapper
+          name: Map `ocsf.status_id` to `ocsf.status_id`
+          enabled: true
+          sources:
+            - ocsf.status_id
+          sourceType: attribute
+          target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: Status name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.status_id:1"
+              name: "Success"
+            - filter:
+                query: "@ocsf.status_id:2"
+              name: "Failure"
+          target: ocsf.status
+        - type: attribute-remapper
+          name: Map `access_device.ip.address`, `access_device.ip`, `description.ip_address` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - access_device.ip.address
+            - access_device.ip
+            - description.ip_address
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `user.key`, `actor.key` to `ocsf.user.uid`
+          enabled: true
+          sources:
+            - user.key
+            - actor.key
+          sourceType: attribute
+          target: ocsf.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `user.name`, `actor.name`, `object`, `username` to `ocsf.user.name`
+          enabled: true
+          sources:
+            - user.name
+            - actor.name
+            - object
+            - username
+          sourceType: attribute
+          target: ocsf.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `email`, `actor.details.email` to `ocsf.user.email_addr`
+          enabled: true
+          sources:
+            - email
+            - actor.details.email
+          sourceType: attribute
+          target: ocsf.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: OCSF sub pipeline for auth factor device enrichment
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.event_code:* @ocsf.class_name:Authentication @auth_device.ip:*"
+      processors:
+        - type: attribute-remapper
+          name: Map `auth_device.ip` to `ocsf.auth_factor.device.ip`
+          enabled: true
+          sources:
+            - auth_device.ip
+          sourceType: attribute
+          target: ocsf.auth_factor.device.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `auth_device.key` to `ocsf.auth_factor.device.uid`
+          enabled: true
+          sources:
+            - auth_device.key
+          sourceType: attribute
+          target: ocsf.auth_factor.device.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add auth device type id
+          enabled: true
+          template: "0"
+          target: ocsf.auth_factor.device.type_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.auth_factor.device.type_id` to `ocsf.auth_factor.device.type_id`
+          enabled: true
+          sources:
+            - ocsf.auth_factor.device.type_id
+          sourceType: attribute
+          target: ocsf.auth_factor.device.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add auth device type
+          enabled: true
+          template: "Unknown"
+          target: ocsf.auth_factor.device.type
+          replaceMissing: false
+        - type: array-processor
+          name: Move attributes into auth_factors array
+          enabled: true
+          operation:
+            source: ocsf.auth_factor
+            target: ocsf.auth_factors
+            type: append
+            preserveSource: false
+    - type: pipeline
+      name: OCSF sub pipeline for class User Access Management [3005]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.event_code:(admin_create)"
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.metadata.event_code:admin_create"
+              name: "1"
+            - filter:
+                query: "@ocsf.metadata.event_code:admin_delete"
+              name: "2"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.activity_id:1"
+              name: "Assign Privileges"
+            - filter:
+                query: "@ocsf.activity_id:2"
+              name: "Revoke Privileges"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: "Identity & Access Management"
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3005"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: "User Access Management"
+          target: ocsf.class_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add privileges
+          enabled: true
+          template: "[ADMIN_PRIVILEGES_ASSIGNED]"
+          target: ocsf.privileges
+          replaceMissing: false
+        - type: grok-parser
+          name: Privileges string to array
+          enabled: true
+          source: ocsf.privileges
+          samples:
+            - "[ADMIN_PRIVILEGES_ASSIGNED]"
+          grok:
+            supportRules: ""
+            matchRules: ProfileStrToArray %{data:ocsf.privileges:array("[]",",")}
+        - type: attribute-remapper
+          name: Map `target.key` to `ocsf.user.uid`
+          enabled: true
+          sources:
+            - target.key
+          sourceType: attribute
+          target: ocsf.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `object`, `target.name` to `ocsf.user.name`
+          enabled: true
+          sources:
+            - object
+            - target.name
+          sourceType: attribute
+          target: ocsf.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `description.email`, `target.details.email` to `ocsf.user.email_addr`
+          enabled: true
+          sources:
+            - description.email
+            - target.details.email
+          sourceType: attribute
+          target: ocsf.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: OCSF sub pipeline for class Group Management [3006]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.event_code:(group_create OR group_delete OR group_update)"
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.metadata.event_code:group_delete"
+              name: "5"
+            - filter:
+                query: "@ocsf.metadata.event_code:group_create"
+              name: "6"
+            - filter:
+                query: "@ocsf.metadata.event_code:*"
+              name: "99"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.activity_id:5"
+              name: "Delete"
+            - filter:
+                query: "@ocsf.activity_id:6"
+              name: "Create"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: "Identity & Access Management"
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3006"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: "Group Management"
+          target: ocsf.class_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `actor.key` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - actor.key
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.name`, `username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - actor.name
+            - username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.details.email` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - actor.details.email
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.type` to `ocsf.actor.user.type`
+          enabled: true
+          sources:
+            - actor.type
+          sourceType: attribute
+          target: ocsf.actor.user.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: User type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.actor.user.type:user"
+              name: "1"
+            - filter:
+                query: "@ocsf.actor.user.type:(admin OR adminapi OR admin_sync)"
+              name: "2"
+            - filter:
+                query: "@ocsf.actor.user.type:system"
+              name: "3"
+            - filter:
+                query: "@ocsf.actor.user.type:*"
+              name: "99"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
+          enabled: true
+          sources:
+            - ocsf.actor.user.type_id
+          sourceType: attribute
+          target: ocsf.actor.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: User type name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.actor.user.type_id:1"
+              name: "User"
+            - filter:
+                query: "@ocsf.actor.user.type_id:2"
+              name: "Admin"
+            - filter:
+                query: "@ocsf.actor.user.type_id:3"
+              name: "System"
+          target: ocsf.actor.user.type
+        - type: attribute-remapper
+          name: Map `target.key` to `ocsf.group.uid`
+          enabled: true
+          sources:
+            - target.key
+          sourceType: attribute
+          target: ocsf.group.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `description.desc`, `target.details.desc` to `ocsf.group.desc`
+          enabled: true
+          sources:
+            - description.desc
+            - target.details.desc
+          sourceType: attribute
+          target: ocsf.group.desc
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `target.name`, `object` to `ocsf.group.name`
+          enabled: true
+          sources:
+            - target.name
+            - object
+          sourceType: attribute
+          target: ocsf.group.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `access_device.ip.address`, `access_device.ip` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - access_device.ip.address
+            - access_device.ip
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: OCSF sub pipeline for class API Activity [6003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "-@ocsf.category_uid:* (@access_device.ip.address:* OR @access_device.ip:* OR @description.ip_address:*)"
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_id
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.metadata.event_code:(*_create* OR cloudsso_add_*)"
+              name: "1"
+            - filter:
+                query: "@ocsf.metadata.event_code:(*_view* OR *_get_*)"
+              name: "2"
+            - filter:
+                query: "@ocsf.metadata.event_code:(*_update* OR *change* OR *patch* OR *modified* OR cloudsso_update_*)"
+              name: "3"
+            - filter:
+                query: "@ocsf.metadata.event_code:(*_delete*)"
+              name: "4"
+            - filter:
+                query: "@ocsf.metadata.event_code:*"
+              name: "99"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: activity_name
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.activity_id:1"
+              name: "Create"
+            - filter:
+                query: "@ocsf.activity_id:2"
+              name: "Read"
+            - filter:
+                query: "@ocsf.activity_id:3"
+              name: "Update"
+            - filter:
+                query: "@ocsf.activity_id:4"
+              name: "Delete"
+          target: ocsf.activity_name
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "6"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: "Application Activity"
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "6003"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: "API Activity"
+          target: ocsf.class_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.api.operation`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.api.operation
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.key` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - actor.key
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.name`, `username` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - actor.name
+            - username
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.details.email` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - actor.details.email
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.type` to `ocsf.actor.user.type`
+          enabled: true
+          sources:
+            - actor.type
+          sourceType: attribute
+          target: ocsf.actor.user.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: User type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.actor.user.type:user"
+              name: "1"
+            - filter:
+                query: "@ocsf.actor.user.type:(admin OR adminapi OR admin_sync)"
+              name: "2"
+            - filter:
+                query: "@ocsf.actor.user.type:system"
+              name: "3"
+            - filter:
+                query: "@ocsf.actor.user.type:*"
+              name: "99"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
+          enabled: true
+          sources:
+            - ocsf.actor.user.type_id
+          sourceType: attribute
+          target: ocsf.actor.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: User type name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.actor.user.type_id:1"
+              name: "User"
+            - filter:
+                query: "@ocsf.actor.user.type_id:2"
+              name: "Admin"
+            - filter:
+                query: "@ocsf.actor.user.type_id:3"
+              name: "System"
+          target: ocsf.actor.user.type
+        - type: attribute-remapper
+          name: Map `access_device.ip.address`, `access_device.ip`, `description.ip_address` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - access_device.ip.address
+            - access_device.ip
+            - description.ip_address
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `outcome.result` to `ocsf.status`
+          enabled: true
+          sources:
+            - outcome.result
+          sourceType: attribute
+          target: ocsf.status
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: Status mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.status:(success OR SUCCESS)"
+              name: "1"
+            - filter:
+                query: "@ocsf.status:(denied OR failure OR error OR fraud OR FAILURE)"
+              name: "2"
+            - filter:
+                query: "@ocsf.status:*"
+              name: "99"
+          target: ocsf.status_id
+        - type: attribute-remapper
+          name: Map `ocsf.status_id` to `ocsf.status_id`
+          enabled: true
+          sources:
+            - ocsf.status_id
+          sourceType: attribute
+          target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: Status name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.status_id:1"
+              name: "Success"
+            - filter:
+                query: "@ocsf.status_id:2"
+              name: "Failure"
+          target: ocsf.status
+        - type: attribute-remapper
+          name: Map `target.key` to `ocsf.resource.uid`
+          enabled: true
+          sources:
+            - target.key
+          sourceType: attribute
+          target: ocsf.resource.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `target.name` to `ocsf.resource.name`
+          enabled: true
+          sources:
+            - target.name
+          sourceType: attribute
+          target: ocsf.resource.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `target.type` to `ocsf.resource.type`
+          enabled: true
+          sources:
+            - target.type
+          sourceType: attribute
+          target: ocsf.resource.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Move resource into resources array
+          enabled: true
+          operation:
+            source: ocsf.resource
+            target: ocsf.resources
+            type: append
+            preserveSource: false
+    - type: pipeline
+      name: OCSF sub pipeline for class Base Event [0]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "-@ocsf.category_uid:*"
+      processors:
+        - type: string-builder-processor
+          name: Add activity_id
+          enabled: true
+          template: "99"
+          target: ocsf.activity_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "0"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: "Uncategorized"
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "0"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: "Base Event"
+          target: ocsf.class_name
+          replaceMissing: false
+    - type: pipeline
+      name: OCSF post transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: attribute-remapper
+          name: Map `ocsf.category_uid` to `ocsf.category_uid`
+          enabled: true
+          sources:
+            - ocsf.category_uid
+          sourceType: attribute
+          target: ocsf.category_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.class_uid` to `ocsf.class_uid`
+          enabled: true
+          sources:
+            - ocsf.class_uid
+          sourceType: attribute
+          target: ocsf.class_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.severity_id` to `ocsf.severity_id`
+          enabled: true
+          sources:
+            - ocsf.severity_id
+          sourceType: attribute
+          target: ocsf.severity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.status_id` to `ocsf.status_id`
+          enabled: true
+          sources:
+            - ocsf.status_id
+          sourceType: attribute
+          target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: arithmetic-processor
+          name: Type ID calculator
+          enabled: true
+          expression: (ocsf.class_uid * 100) + ocsf.activity_id
+          target: ocsf.type_uid_float
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.type_uid_float` to `ocsf.type_uid`
+          enabled: true
+          sources:
+            - ocsf.type_uid_float
+          sourceType: attribute
+          target: ocsf.type_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false

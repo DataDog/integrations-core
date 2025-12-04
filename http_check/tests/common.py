@@ -1,11 +1,11 @@
-﻿# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-MOCKBIN_URL = "http://localhost:8080/request"
+MOCKBIN_URL = "http://localhost:8080"
 
 CONFIG = {
     "instances": [
@@ -269,65 +269,73 @@ FAKE_CERT = (
     b"\xddB*\xb24r\x08\x82\x95"
 )
 
+
+def _infer_url(inst):
+    return {**inst, "url": f"{MOCKBIN_URL}/{inst['method']}"}
+
+
 CONFIG_DATA_METHOD = {
     "instances": [
-        {
-            "name": "post_json",
-            "url": MOCKBIN_URL,
-            "timeout": 1,
-            "method": "post",
-            "data": {"foo": "bar", "baz": ["qux", "quux"]},
-        },
-        {
-            "name": "post_str",
-            "url": MOCKBIN_URL,
-            "timeout": 1,
-            "method": "post",
-            "data": '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"'
-            'xmlns:m="http://www.example.org/stocks"><soap:Header></soap:Header><soap:Body><m:GetStockPrice>'
-            "<m:StockName>EXAMPLE</m:StockName></m:GetStockPrice></soap:Body></soap:Envelope>",
-        },
-        {
-            "name": "put_json",
-            "url": MOCKBIN_URL,
-            "timeout": 1,
-            "method": "put",
-            "data": {"foo": "bar", "baz": ["qux", "quux"]},
-        },
-        {
-            "name": "put_str",
-            "url": MOCKBIN_URL,
-            "timeout": 1,
-            "method": "put",
-            "data": "Lorem ipsum",
-        },
-        {
-            "name": "patch_json",
-            "url": MOCKBIN_URL,
-            "timeout": 1,
-            "method": "patch",
-            "data": {"foo": "bar", "baz": ["qux", "quux"]},
-        },
-        {
-            "name": "patch_str",
-            "url": MOCKBIN_URL,
-            "timeout": 1,
-            "method": "patch",
-            "data": "Lorem ipsum",
-        },
-        {
-            "name": "delete_json",
-            "url": MOCKBIN_URL,
-            "timeout": 1,
-            "method": "delete",
-            "data": {"foo": "bar", "baz": ["qux", "quux"]},
-        },
-        {
-            "name": "delete_str",
-            "url": MOCKBIN_URL,
-            "timeout": 1,
-            "method": "delete",
-            "data": "Lorem ipsum",
-        },
+        _infer_url(inst)
+        for inst in [
+            {
+                "name": "post_json",
+                "url": MOCKBIN_URL,
+                "timeout": 1,
+                "method": "post",
+                "data": {"foo": "bar", "baz": ["qux", "quux"]},
+            },
+            {
+                "name": "post_str",
+                "url": MOCKBIN_URL,
+                "timeout": 1,
+                "method": "post",
+                "data": '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"'
+                'xmlns:m="http://www.example.org/stocks"><soap:Header></soap:Header><soap:Body><m:GetStockPrice>'
+                "<m:StockName>EXAMPLE</m:StockName></m:GetStockPrice></soap:Body></soap:Envelope>",
+            },
+            {
+                "name": "put_json",
+                "url": MOCKBIN_URL,
+                "timeout": 1,
+                "method": "put",
+                "data": {"foo": "bar", "baz": ["qux", "quux"]},
+            },
+            {
+                "name": "put_str",
+                "url": MOCKBIN_URL,
+                "timeout": 1,
+                "method": "put",
+                "data": "Lorem ipsum",
+            },
+            {
+                "name": "patch_json",
+                "url": MOCKBIN_URL,
+                "timeout": 1,
+                "method": "patch",
+                "data": {"foo": "bar", "baz": ["qux", "quux"]},
+            },
+            {
+                "name": "patch_str",
+                "url": MOCKBIN_URL,
+                "timeout": 1,
+                "method": "patch",
+                "data": "Lorem ipsum",
+            },
+            {
+                "name": "delete_json",
+                "url": MOCKBIN_URL,
+                "timeout": 1,
+                "method": "delete",
+                "data": {"foo": "bar", "baz": ["qux", "quux"]},
+            },
+            {
+                "name": "delete_str",
+                "url": MOCKBIN_URL,
+                "timeout": 1,
+                "method": "delete",
+                "data": "Lorem ipsum",
+            },
+        ]
     ]
 }

@@ -28,6 +28,7 @@ class SharedConfig(BaseModel):
     access_denied_cache_duration: Optional[int] = None
     pid_cache_duration: Optional[int] = None
     procfs_path: Optional[str] = None
+    reset_cache_on_process_changes: Optional[bool] = None
     service: Optional[str] = None
     shared_process_list_cache_duration: Optional[int] = None
 

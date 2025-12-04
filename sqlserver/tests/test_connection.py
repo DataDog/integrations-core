@@ -23,7 +23,7 @@ from datadog_checks.sqlserver.connection_errors import (
     obfuscate_error_msg,
 )
 
-from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
+from .common import CHECK_NAME, SQLSERVER_YEAR
 
 
 @pytest.mark.unit
@@ -208,10 +208,7 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
                 },
             },
             True,
-            (
-                "Azure Managed Identity Authentication is not properly configured "
-                "missing required property, client_id"
-            ),
+            ("Azure Managed Identity Authentication is not properly configured missing required property, client_id"),
         ),
     ],
 )
@@ -290,7 +287,7 @@ def test_config_with_and_without_port(instance_minimal_defaults, host, port, exp
 @pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_YEAR == 2019, reason='Test flakes on this set up')
 def test_query_timeout(instance_docker):
     instance_docker['command_timeout'] = 1
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -364,7 +361,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
 
     try:
         # Break the connection
-        check.connection = Connection({}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check)
+        check._connection = Connection({}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check)
         dd_run_check(check)
     except Exception:
         aggregator.assert_service_check(
@@ -397,8 +394,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             {
                 "odbc-linux": "TCP-connection\\(OK\\).*"
                 "Can't open lib .* file not found .* configured odbc driver .* not in list of installed drivers",
-                "odbc-windows": "TCP-connection\\(OK\\).*"
-                "Data source name not found.* and no default driver specified",
+                "odbc-windows": "TCP-connection\\(OK\\).*Data source name not found.* and no default driver specified",
             },
             ConnectionErrorCode.driver_not_found,
         ),
@@ -429,8 +425,8 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             "failed_tcp_connection",
             {"host": "localhost,9999"},
             {
-                "odbc-windows|MSOLEDBSQL": "TCP Provider: No connection could be made"
-                " because the target machine actively refused it",
+                "odbc-windows|MSOLEDBSQL": "(TCP Provider: No connection could be made"
+                " because the target machine actively refused it|TCP Provider: The wait operation timed out)",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(ERROR: No connection could be made "
                 "because the target machine actively refused it\\).*"
                 "could not open database requested by login",

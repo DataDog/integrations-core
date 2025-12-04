@@ -9,7 +9,7 @@ import toml
 from atomicwrites import atomic_write
 from platformdirs import user_data_dir
 
-from ..fs import ensure_parent_dir_exists, file_exists, read_file
+from datadog_checks.dev.fs import ensure_parent_dir_exists, file_exists, read_file
 
 APP_DIR = user_data_dir('dd-checks-dev', False)
 CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')

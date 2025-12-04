@@ -35,7 +35,7 @@ HERE = get_here()
 
 
 def mock_get_factory(fixture_group):
-    def mock_get(url, *args, **kwargs):
+    def mock_get(session, url, *args, **kwargs):
         split_url = url.split('/')
         path = split_url[-1]
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
@@ -45,10 +45,9 @@ def mock_get_factory(fixture_group):
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
 def test_check(aggregator, instance, fixture_group):
-
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True):
+    with mock.patch('requests.Session.get', side_effect=mock_get_factory(fixture_group), autospec=True):
         check.check(instance)
         check.check(instance)
 
@@ -62,7 +61,6 @@ def test_check(aggregator, instance, fixture_group):
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
 def test_config_project(aggregator, instance, fixture_group):
-
     project = 'foo'
     project_tag = 'project:{}'.format(project)
     qparams = {'project': project}
@@ -70,11 +68,12 @@ def test_config_project(aggregator, instance, fixture_group):
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True) as r:
+    with mock.patch('requests.Session.get', side_effect=mock_get_factory(fixture_group), autospec=True) as r:
         check.check(instance)
 
         r.assert_called_with(
-            mock.ANY,
+            mock.ANY,  # The session object is passed as the first argument
+            mock.ANY,  # The URL is passed as the second argument
             params=qparams,
             auth=mock.ANY,
             cert=mock.ANY,
@@ -101,18 +100,18 @@ def test_report_image_scan_empty_instances(aggregator, instance, fixture_group):
             return MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'empty_images.json'))
 
-    with mock.patch('requests.get', side_effect=mock_get):
+    with mock.patch('requests.Session.get', side_effect=mock_get):
         check.check(instance)
         check.check(instance)
 
 
 def test_err_response(aggregator, instance):
-
     check = TwistlockCheck('twistlock', {}, [instance])
 
     with pytest.raises(Exception, match='^Error in response'):
-        with mock.patch('requests.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
-
+        with mock.patch(
+            'requests.Session.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True
+        ):
             check.check(instance)
 
 

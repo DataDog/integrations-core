@@ -50,7 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .benchmarks/
-.junit/
+junit/
 .docker/
 
 # Translations
@@ -98,6 +98,7 @@ tmp
 .python-version
 
 # Common IDEs & editors
+.cursor/
 .idea/
 .vscode/
 *.iml
@@ -128,3 +129,15 @@ benchmark_*.svg
 
 ## Local overrides for ddev
 .ddev.toml
+
+## Size metrics
+size-uncompressed.txt
+size-compressed.txt
+*compressed_status.csv
+*compressed_status.md
+*compressed_status.png
+*compressed_status.json
+
+# Docker secrets
+.env
+treemap*.png

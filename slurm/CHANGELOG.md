@@ -2,7 +2,33 @@
 
 <!-- towncrier release notes start -->
 
-## 2.0.0 / 2025-05-15
+## 2.2.0 / 2025-11-26
+
+***Added***:
+
+* Add process-level tags to scontrol metrics ([#21822](https://github.com/DataDog/integrations-core/pull/21822))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 2.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 2.0.2 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Update configuration spec to better match the code for the collect_scontrol_stats param ([#20541](https://github.com/DataDog/integrations-core/pull/20541))
+
+## 2.0.1 / 2025-06-12 / Agent 7.68.0
+
+***Fixed***:
+
+* Fix collection of metrics from sinfo on `collection_level` 2 ([#20456](https://github.com/DataDog/integrations-core/pull/20456))
+
+## 2.0.0 / 2025-05-15 / Agent 7.67.0
 
 ***Changed***:
 

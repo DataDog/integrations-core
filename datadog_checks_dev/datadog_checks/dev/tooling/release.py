@@ -4,9 +4,18 @@
 import re
 import sys
 
-from ..errors import ManifestError
-from ..fs import chdir, file_exists, path_join, read_file, read_file_lines, write_file, write_file_lines
-from ..subprocess import run_command
+from datadog_checks.dev.errors import ManifestError
+from datadog_checks.dev.fs import (
+    chdir,
+    file_exists,
+    path_join,
+    read_file,
+    read_file_lines,
+    write_file,
+    write_file_lines,
+)
+from datadog_checks.dev.subprocess import run_command
+
 from .utils import get_version_file, load_manifest
 
 # Maps the Python platform strings to the ones we have in the manifest
@@ -75,7 +84,18 @@ def get_folder_name(package_name):
     return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX) :]
 
 
-def get_agent_requirement_line(check, version):
+def get_platforms_from_overrides(check, app) -> list[str]:
+    """
+    Get the platforms from the overrides file for the given check.
+    """
+    overrides = app.repo.config.get('/overrides/manifest/platforms', {})
+    if platforms := overrides.get(check):
+        return platforms
+
+    raise ManifestError(f"The check {check!r} does not have a manifest neither platforms override")
+
+
+def get_agent_requirement_line(check, version, app):
     """
     Compose a text line to be used in a requirements.txt file to install a check
     pinned to a specific version.
@@ -87,6 +107,7 @@ def get_agent_requirement_line(check, version):
         return f'{package_name}=={version}'
 
     m = load_manifest(check)
+
     if 'tile' in m:
         platforms = []
         for classifier_tag in m['tile']['classifier_tags']:
@@ -98,11 +119,16 @@ def get_agent_requirement_line(check, version):
             platforms.append(value.lower())
         platforms.sort()
     else:
-        platforms = sorted(m.get('supported_os', []))
+        if not m:
+            platforms = get_platforms_from_overrides(check, app)
+        else:
+            platforms = sorted(m.get('supported_os', []))
 
     # all platforms
-    if platforms == ALL_PLATFORMS:
+    # using sets to ignore possible sorting in the overrides, if any
+    if set(platforms) == set(ALL_PLATFORMS):
         return f'{package_name}=={version}'
+
     # one specific platform
     elif len(platforms) == 1:
         return f"{package_name}=={version}; sys_platform == '{PLATFORMS_TO_PY.get(platforms[0])}'"

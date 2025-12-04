@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt  # noqa: F401
 import functools
-import ssl
 from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
 
 import vsanapiutils
@@ -11,6 +10,7 @@ from pyVim import connect
 from pyVmomi import SoapStubAdapter, vim, vmodl
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
+from datadog_checks.base.utils.http import create_ssl_context
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import (
     ALL_PROPERTIES,
@@ -117,14 +117,11 @@ class VSphereAPI(object):
         context = None
         if not self.config.ssl_verify:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
-            context.verify_mode = ssl.CERT_NONE
+            context = create_ssl_context({"tls_verify": False})  # type: ignore
         elif self.config.ssl_capath or self.config.ssl_cafile:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
-            context.verify_mode = ssl.CERT_REQUIRED
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
-            context.check_hostname = True
+            context = create_ssl_context({"tls_verify": True, 'tls_check_hostname': True})  # type: ignore
             if self.config.ssl_capath:
                 context.load_verify_locations(cafile=None, capath=self.config.ssl_capath)
             else:

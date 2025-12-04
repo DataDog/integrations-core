@@ -33,6 +33,9 @@ def dd_environment():
             conditions.append(WaitFor(wait_for_cp_kafka_topics, attempts=10, wait=10))
             common.E2E_METADATA["docker_volumes"].append(f"{secret_dir}:/var/lib/secret")
 
+        if common.AUTHENTICATION == "ssl":
+            conditions.append(WaitFor(wait_for_ssl_ready, attempts=30, wait=5))
+
         conditions.extend(
             [
                 WaitFor(create_topics, attempts=60, wait=3),
@@ -54,10 +57,13 @@ def dd_environment():
             },
             build=True,
         ):
-            yield {
-                'instances': [common.E2E_INSTANCE],
-                'init_config': {'kafka_timeout': 30},
-            }, common.E2E_METADATA
+            yield (
+                {
+                    'instances': [common.E2E_INSTANCE],
+                    'init_config': {'kafka_timeout': 30},
+                },
+                common.E2E_METADATA,
+            )
 
 
 def is_cluster_id_available():
@@ -108,12 +114,23 @@ def initialize_topics():
             time.sleep(5)
 
 
+def wait_for_ssl_ready():
+    try:
+        client = _create_admin_client()
+        metadata = client.list_topics(timeout=5)
+        return metadata.cluster_id is not None
+    except Exception as e:
+        print(f"SSL not ready yet: {e}")
+        return False
+
+
 def _create_admin_client():
     config = {
         "bootstrap.servers": common.INSTANCE['kafka_connect_str'],
-        "socket.timeout.ms": 1000,
+        "socket.timeout.ms": 5000,  # Increased for SSL handshake
         "topic.metadata.refresh.interval.ms": 2000,
     }
-    config.update(common.get_authentication_configuration(common.INSTANCE))
+    auth_config = common.get_authentication_configuration(common.INSTANCE)
+    config.update(auth_config)
 
     return AdminClient(config)

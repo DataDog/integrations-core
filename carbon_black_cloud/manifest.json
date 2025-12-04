@@ -1,0 +1,81 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "64e7b99e-cfc1-4649-adbf-03ef095648aa",
+  "app_id": "carbon-black-cloud",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Carbon Black Cloud Events.",
+    "title": "Carbon Black Cloud",
+    "media": [
+      {
+        "caption": "Carbon Black Cloud - Overview",
+        "image_url": "images/carbon_black_cloud_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Carbon Black Cloud - Alerts",
+        "image_url": "images/carbon_black_cloud_alerts.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Carbon Black Cloud - Audit Logs",
+        "image_url": "images/carbon_black_cloud_audit_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Carbon Black Cloud - Auth Events",
+        "image_url": "images/carbon_black_cloud_auth_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Carbon Black Cloud - Watchlist Hits",
+        "image_url": "images/carbon_black_cloud_watchlist_hits.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Carbon Black Cloud - Endpoint Events",
+        "image_url": "images/carbon_black_cloud_endpoint_events.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::AWS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 49446668,
+      "source_type_name": "Carbon Black Cloud",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Carbon Black Cloud - Overview": "assets/dashboards/carbon_black_cloud_overview.json",
+      "Carbon Black Cloud - Alerts": "assets/dashboards/carbon_black_cloud_alerts.json",
+      "Carbon Black Cloud - Audit Logs": "assets/dashboards/carbon_black_cloud_audit_logs.json",
+      "Carbon Black Cloud - Auth Events": "assets/dashboards/carbon_black_cloud_auth_events.json",
+      "Carbon Black Cloud - Watchlist Hits": "assets/dashboards/carbon_black_cloud_watchlist_hits.json",
+      "Carbon Black Cloud - Endpoint Events": "assets/dashboards/carbon_black_cloud_endpoint_events.json"
+    },
+    "logs": {
+      "source": "carbon-black-cloud"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

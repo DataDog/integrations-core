@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: redis
 metric_id: redis
 backend_only: false

@@ -1,0 +1,3 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+datadog.csi_driver.node_publish_volume_attempts.count,count,,,"","The number of publish volume requests received by the CSI node server",0,datadog_csi_driver,,,
+datadog.csi_driver.node_unpublish_volume_attempts.count,count,,,"","The number of unpublish volume requests received by the CSI node server",0,datadog_csi_driver,,,

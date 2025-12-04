@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2019-present
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
@@ -64,7 +64,7 @@ def test_make_inventory_path():
 def test_is_realtime_resource_collected_by_filters(realtime_instance):
     realtime_instance['resource_filters'] = [
         {'resource': 'vm', 'property': 'name', 'patterns': [r'^\$VM5$', r'^VM4-2\d$']},
-        {'resource': 'vm', 'property': 'inventory_path', 'patterns': [u'\\/D\xe4tacenter\\/vm\\/m.*']},
+        {'resource': 'vm', 'property': 'inventory_path', 'patterns': ['\\/D\xe4tacenter\\/vm\\/m.*']},
         {'resource': 'vm', 'property': 'hostname', 'patterns': [r'10\.0\.0\.103']},
         {'resource': 'vm', 'property': 'guest_hostname', 'patterns': [r'ubuntu-test']},
         {'resource': 'vm', 'property': 'tag', 'patterns': [r'env:production']},
@@ -79,7 +79,7 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
         '10.0.0.101',
         '10.0.0.102',
         '10.0.0.104',
-        u'VM1-6ê',
+        'VM1-6ê',
         'VM3-1',
         'VM4-20',
         'migrationTest',

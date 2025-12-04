@@ -2,10 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import json
+import logging
 import os
 import re
-import time
 from collections import namedtuple
 
 import mock
@@ -14,24 +13,31 @@ import pytest
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.const import STATIC_INFO_FULL_SERVERNAME, STATIC_INFO_INSTANCENAME, STATIC_INFO_SERVERNAME
+from datadog_checks.sqlserver.const import (
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_FULL_SERVERNAME,
+    STATIC_INFO_INSTANCENAME,
+    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_RDS,
+    STATIC_INFO_SERVERNAME,
+    STATIC_INFO_VERSION,
+)
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
-from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
     extract_sql_comments_and_procedure_name,
     get_unixodbc_sysconfig,
     is_non_empty_file,
-    parse_sqlserver_major_version,
+    parse_sqlserver_year,
     set_default_driver_conf,
 )
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
-from .utils import deep_compare, not_windows_ci, windows_ci
+from .utils import not_windows_ci, windows_ci
 
 try:
-    import pyodbc
+    import pyodbc  # type: ignore
 except ImportError:
     pyodbc = None
 
@@ -66,6 +72,18 @@ def test_missing_db(instance_docker, dd_run_check):
     instance['ignore_missing_database'] = True
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         check = SQLServer(CHECK_NAME, {}, [instance])
+        # Saturate static information to avoid trying to connect to the database
+        expected_keys = {
+            STATIC_INFO_VERSION,
+            STATIC_INFO_MAJOR_VERSION,
+            STATIC_INFO_ENGINE_EDITION,
+            STATIC_INFO_RDS,
+            STATIC_INFO_SERVERNAME,
+            STATIC_INFO_INSTANCENAME,
+        }
+        for key in expected_keys:
+            check.static_info_cache[key] = 'foo'
+
         check.initialize_connection()
         check.make_metric_list_to_collect()
         dd_run_check(check)
@@ -444,7 +462,12 @@ def test_set_default_driver_conf_linux():
 def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    check_tags = sqlserver_check._config.tags
+    check_tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
     expected_tags = check_tags + [
         'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
         'connection_host:{}'.format(DOCKER_SERVER),
@@ -469,10 +492,10 @@ Microsoft SQL Server 2019 (RTM-CU12) (KB5004524) - 15.0.4153.1 (X64)
 
 
 @pytest.mark.parametrize(
-    "version,expected_major_version", [(SQL_SERVER_2012_VERSION_EXAMPLE, 2012), (SQL_SERVER_2019_VERSION_EXAMPLE, 2019)]
+    "version,expected_year", [(SQL_SERVER_2012_VERSION_EXAMPLE, 2012), (SQL_SERVER_2019_VERSION_EXAMPLE, 2019)]
 )
-def test_parse_sqlserver_major_version(version, expected_major_version):
-    assert parse_sqlserver_major_version(version) == expected_major_version
+def test_parse_sqlserver_year(version, expected_year):
+    assert parse_sqlserver_year(version) == expected_year
 
 
 @pytest.mark.parametrize(
@@ -723,157 +746,6 @@ def test_extract_sql_comments_and_procedure_name(query, expected_comments, is_pr
     assert re.match(name, expected_name, re.IGNORECASE) if expected_name else expected_name == name
 
 
-class DummyLogger:
-    def debug(*args):
-        pass
-
-    def error(*args):
-        pass
-
-
-def set_up_submitter_unit_test():
-    submitted_data = []
-    base_event = {
-        "host": "some",
-        "agent_version": 0,
-        "dbms": "sqlserver",
-        "kind": "sqlserver_databases",
-        "collection_interval": 1200,
-        "dbms_version": "some",
-        "tags": "some",
-        "cloud_metadata": "some",
-    }
-
-    def submitData(data):
-        submitted_data.append(data)
-
-    dataSubmitter = SubmitData(submitData, base_event, DummyLogger())
-    return dataSubmitter, submitted_data
-
-
-def test_submit_data():
-
-    dataSubmitter, submitted_data = set_up_submitter_unit_test()
-
-    dataSubmitter.store_db_infos(
-        [{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}], ["test_db1", "test_db2"]
-    )
-    schema1 = {"id": "1"}
-    schema2 = {"id": "2"}
-    schema3 = {"id": "3"}
-
-    dataSubmitter.store("test_db1", schema1, [1, 2], 5)
-    dataSubmitter.store("test_db2", schema3, [1, 2], 5)
-    assert dataSubmitter.columns_since_last_submit() == 10
-    dataSubmitter.store("test_db1", schema2, [1, 2], 10)
-
-    dataSubmitter.submit()
-
-    assert dataSubmitter.columns_since_last_submit() == 0
-
-    expected_data = {
-        "host": "some",
-        "agent_version": 0,
-        "dbms": "sqlserver",
-        "kind": "sqlserver_databases",
-        "collection_interval": 1200,
-        "dbms_version": "some",
-        "tags": "some",
-        "cloud_metadata": "some",
-        "metadata": [
-            {"id": 3, "name": "test_db1", "schemas": [{"id": "1", "tables": [1, 2]}, {"id": "2", "tables": [1, 2]}]},
-            {"id": 4, "name": "test_db2", "schemas": [{"id": "3", "tables": [1, 2]}]},
-        ],
-    }
-    data = json.loads(submitted_data[0])
-    data.pop("timestamp")
-    assert deep_compare(data, expected_data)
-
-
-@pytest.mark.parametrize(
-    "db_infos, databases, expected_dbs",
-    [
-        pytest.param(
-            [
-                {"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CI_AS"},
-                {"id": 4, "name": "TEST_DB2", "collation": "SQL_Latin1_General_CP1_CI_AS"},
-            ],
-            ["test_db1", "test_db2"],
-            ["test_db1", "test_db2"],
-            id="case_insensitive",
-        ),
-        pytest.param(
-            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
-            ["TEST_DB1"],
-            [],
-            id="case_sensitive",
-        ),
-        pytest.param(
-            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
-            ["test_db1"],
-            ["test_db1"],
-            id="case_sensitive_lowercase",
-        ),
-        pytest.param(
-            [{"id": 3, "name": "TEST_DB1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
-            ["TEST_DB1"],
-            ["TEST_DB1"],
-            id="case_sensitive_uppercase",
-        ),
-    ],
-)
-def test_store_db_infos_case_sensitive(db_infos, databases, expected_dbs):
-    dataSubmitter, _ = set_up_submitter_unit_test()
-    dataSubmitter.db_info.clear()
-
-    dataSubmitter.store_db_infos(db_infos, databases)
-    assert list(dataSubmitter.db_info.keys()) == expected_dbs
-
-
-def test_fetch_throws(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    schemas = Schemas(check, check._config)
-    with mock.patch('time.time', side_effect=[0, 9999999]), mock.patch(
-        'datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}
-    ), mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]):
-        with pytest.raises(StopIteration):
-            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
-
-
-def test_submit_is_called_if_too_many_columns(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    schemas = Schemas(check, check._config)
-    with mock.patch('time.time', side_effect=[0, 0]), mock.patch(
-        'datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}
-    ), mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]), mock.patch(
-        'datadog_checks.sqlserver.schemas.SubmitData.submit'
-    ) as mocked_submit, mock.patch(
-        'datadog_checks.sqlserver.schemas.Schemas._get_tables_data', return_value=(1000_000, {"id": 1})
-    ):
-        with pytest.raises(StopIteration):
-            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
-            mocked_submit.called_once()
-
-
-def test_exception_handling_by_do_for_dbs(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    check.initialize_connection()
-    schemas = Schemas(check, check._config)
-    mock_cursor = mock.MagicMock()
-    with mock.patch(
-        'datadog_checks.sqlserver.schemas.Schemas._fetch_schema_data', side_effect=Exception("Can't connect to DB")
-    ), mock.patch('datadog_checks.sqlserver.sqlserver.SQLServer.get_databases', return_value=["db1"]), mock.patch(
-        'cachetools.TTLCache.get', return_value="dummy"
-    ), mock.patch(
-        'datadog_checks.sqlserver.connection.Connection.open_managed_default_connection'
-    ), mock.patch(
-        'datadog_checks.sqlserver.connection.Connection.get_managed_cursor', return_value=mock_cursor
-    ), mock.patch(
-        'datadog_checks.sqlserver.utils.is_azure_sql_database', return_value={}
-    ):
-        schemas._fetch_for_databases()
-
-
 def test_get_unixodbc_sysconfig():
     etc_dir = os.path.sep
     for dir in ["opt", "datadog-agent", "embedded", "bin", "python"]:
@@ -894,8 +766,8 @@ def test_get_unixodbc_sysconfig():
         ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:22', ['env:prod', 'port:1']),
         ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
         ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
-        ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
-        ('$env-$server_name/$instance_name', 'prod,staging-server/instance', ['env:prod', 'env:staging']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$server_name/$instance_name', 'prod-server/instance', ['env:prod']),
         ('$full_server_name', 'server\\instance', ['env:prod']),
     ],
 )
@@ -914,3 +786,137 @@ def test_database_identifier(instance_docker, template, expected, tags):
     check._database_identifier = None
 
     assert check.database_identifier == expected
+
+
+def test_only_custom_queries_validation_warnings(caplog):
+    """Test that appropriate warning logs are emitted when only_custom_queries conflicts with other configurations."""
+    from datadog_checks.sqlserver.config import SQLServerConfig
+
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+
+    # Use a real logger that will be captured by caplog
+    real_logger = logging.getLogger('test_sqlserver_config')
+
+    # Test case 1: only_custom_queries with DBM enabled
+    instance_with_dbm = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'dbm': True,
+        'custom_queries': [
+            {
+                'query': "SELECT 1 as test_value",
+                'columns': [{'name': 'test_value', 'type': 'gauge'}],
+                'tags': ['test:dbm_warning'],
+            }
+        ],
+    }
+
+    config = SQLServerConfig({}, instance_with_dbm, real_logger)
+    config._validate_only_custom_queries(instance_with_dbm)
+
+    # Check for DBM warning
+    dbm_warning_found = any("only_custom_queries is enabled with DBM" in record.message for record in caplog.records)
+    assert dbm_warning_found, "Expected warning about only_custom_queries with DBM not found"
+
+    # Test case 2: only_custom_queries with stored procedure
+    caplog.clear()
+    instance_with_proc = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'stored_procedure': 'pyStoredProc',
+        'custom_queries': [
+            {
+                'query': "SELECT 1 as test_value",
+                'columns': [{'name': 'test_value', 'type': 'gauge'}],
+                'tags': ['test:proc_warning'],
+            }
+        ],
+    }
+
+    config = SQLServerConfig({}, instance_with_proc, real_logger)
+    config._validate_only_custom_queries(instance_with_proc)
+
+    # Check for stored procedure warning
+    proc_warning_found = any("`stored_procedure` is deprecated" in record.message for record in caplog.records)
+    assert proc_warning_found, "Expected warning about only_custom_queries with stored_procedure not found"
+
+    # Test case 3: only_custom_queries with no custom queries defined
+    caplog.clear()
+    instance_no_queries = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'custom_queries': [],
+    }
+
+    config = SQLServerConfig({}, instance_no_queries, real_logger)
+    config._validate_only_custom_queries(instance_no_queries)
+
+    # Check for no custom queries warning
+    no_queries_warning_found = any(
+        "only_custom_queries is enabled but no custom queries are defined" in record.message
+        for record in caplog.records
+    )
+    assert no_queries_warning_found, "Expected warning about only_custom_queries with no custom queries not found"
+
+    # Test case 4: only_custom_queries with all conflicts (should emit all warnings)
+    caplog.clear()
+    instance_all_conflicts = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'dbm': True,
+        'stored_procedure': 'pyStoredProc',
+        'custom_queries': [],
+    }
+
+    config = SQLServerConfig({}, instance_all_conflicts, real_logger)
+    config._validate_only_custom_queries(instance_all_conflicts)
+
+    # Check that all three warnings are emitted
+    dbm_warning_found = any("only_custom_queries is enabled with DBM" in record.message for record in caplog.records)
+    proc_warning_found = any("`stored_procedure` is deprecated" in record.message for record in caplog.records)
+    no_queries_warning_found = any(
+        "only_custom_queries is enabled but no custom queries are defined" in record.message
+        for record in caplog.records
+    )
+
+    assert dbm_warning_found, "Expected warning about only_custom_queries with DBM not found in all-conflicts test"
+    assert proc_warning_found, (
+        "Expected warning about only_custom_queries with stored_procedure not found in all-conflicts test"
+    )
+    assert no_queries_warning_found, (
+        "Expected warning about only_custom_queries with no custom queries not found in all-conflicts test"
+    )
+
+    # Test case 5: only_custom_queries with no conflicts (should emit no warnings)
+    caplog.clear()
+    instance_no_conflicts = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'dbm': False,
+        'custom_queries': [
+            {
+                'query': "SELECT 1 as test_value",
+                'columns': [{'name': 'test_value', 'type': 'gauge'}],
+                'tags': ['test:no_conflicts'],
+            }
+        ],
+    }
+
+    config = SQLServerConfig({}, instance_no_conflicts, real_logger)
+    config._validate_only_custom_queries(instance_no_conflicts)
+
+    # Check that no warnings are emitted
+    warning_count = len([record for record in caplog.records if record.levelno >= logging.WARNING])
+    warning_messages = [record.message for record in caplog.records if record.levelno >= logging.WARNING]
+    assert warning_count == 0, f"Expected no warnings but found {warning_count} warnings: {warning_messages}"

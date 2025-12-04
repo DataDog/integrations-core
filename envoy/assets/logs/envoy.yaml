@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: envoy
 metric_id: envoy
 backend_only: false

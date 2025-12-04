@@ -32,7 +32,13 @@ The Genesys integration collects conversations (Voice, Email, Message, Callback,
     |Client ID| Client ID for your Genesys account.                                                        |
     |Client Secret| Client Secret for your Genesys account.                                                 |
 
-2. Enable Metrics Collection:
+2. Choose the region of your Genesys account
+
+    |Parameters| Description |
+    |--------------------|------------------------------------------------------------------------------------------------|
+    | Region   | Select the region in which your Genesys organization exists. Refer to [this documentation][7] to identify your region based on web-app URL.<br><blockquote>Example: App URL: https://apps.usw2.pure.cloud -> Region: US West (Oregon)</blockquote>|
+
+3. Enable Metrics Collection:
 
     |Parameters| Description |
     |--------------------|------------------------------------------------------------------------------------------------|
@@ -42,7 +48,7 @@ The Genesys integration collects conversations (Voice, Email, Message, Callback,
     |Get Message Metrics| Enable to collect Message Metrics from Genesys. By default, it is enabled. |
     |Get Voice Metrics| Enable to collect Voice Metrics from Genesys. By default, it is enabled. |
 
-3. Click the **Save** button to save your settings.
+4. Click the **Save** button to save your settings.
 
 ## Data Collected
 
@@ -51,7 +57,7 @@ The Genesys integration collects and forwards audit logs to Datadog.
 
 ### Metrics
 
-The Genesys integration collects and forwards conversation analytics metrics to Datadog. See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -67,3 +73,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://help.mypurecloud.com/articles/assign-roles-divisions-licenses-and-add-ons/#citem_3b80-08e1
 [5]: https://github.com/DataDog/integrations-core/blob/master/genesys/metadata.csv
 [6]: https://docs.datadoghq.com/help/
+[7]: https://developer.genesys.cloud/platform/api/

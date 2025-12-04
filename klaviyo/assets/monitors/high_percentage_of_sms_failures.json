@@ -1,0 +1,88 @@
+{
+  "version": 2,
+  "created_at": "2025-07-28",
+  "last_updated_at": "2025-07-28",
+  "title": "High percentage of SMS delivery failures",
+  "description": "Alert when percentage of recent SMS failures exceeds threshold.",
+  "definition": {
+	"id": 177257688,
+	"name": "High percentage of SMS delivery failures",
+	"type": "log alert",
+	"query": "formula(\"query / (query + query1)\").last(\"1h\") > 10",
+	"message": "The percentage of SMS delivery failures has exceeded the {{#is_warning}} warning {{/is_warning}} {{#is_alert}} alert  {{/is_alert}} threshold.",
+	"tags": [
+		"source:klaviyo",
+		"service:marketing-events"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 10,
+			"warning": 5
+		},
+		"enable_logs_sample": false,
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"new_group_delay": 0,
+		"variables": [
+			{
+				"name": "query",
+				"data_source": "logs",
+				"search": {
+					"query": "source:klaviyo service:marketing-events @metric_name:\"Failed to Deliver SMS\""
+				},
+				"indexes": [
+					"*"
+				],
+				"group_by": [
+					{
+						"facet": "@klaviyo.campaign_name",
+						"limit": 10,
+						"sort": {
+							"aggregation": "count",
+							"order": "desc",
+							"metric": "count"
+						},
+						"should_exclude_missing": true
+					}
+				],
+				"compute": {
+					"aggregation": "count"
+				},
+				"storage": "hot"
+			},
+			{
+				"name": "query1",
+				"data_source": "logs",
+				"search": {
+					"query": "source:klaviyo service:marketing-events @metric_name:\"Received SMS\""
+				},
+				"indexes": [
+					"*"
+				],
+				"group_by": [
+					{
+						"facet": "@klaviyo.campaign_name",
+						"limit": 10,
+						"sort": {
+							"aggregation": "count",
+							"order": "desc",
+							"metric": "count"
+						},
+						"should_exclude_missing": true
+					}
+				],
+				"compute": {
+					"aggregation": "count"
+				},
+				"storage": "hot"
+			}
+		],
+		"groupby_simple_monitor": false
+	},
+	"priority": null
+  },
+  "tags": [
+    "integration:klaviyo"
+  ]
+}

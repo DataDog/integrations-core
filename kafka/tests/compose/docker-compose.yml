@@ -1,23 +1,32 @@
 services:
   zookeeper:
-    image: bitnami/zookeeper:3.8.0
+    image: confluentinc/cp-zookeeper:7.2.0
     ports:
       - 2181:2181
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'srvr' | nc localhost 2181 | grep -q 'Mode:'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   kafka:
-    image: bitnami/kafka:${KAFKA_VERSION}
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
     ports:
       - 9092:9092
       - 9999:9999
     environment:
       KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_CREATE_TOPICS: "marvel:2:1,dc:2:1"
-      ALLOW_PLAINTEXT_LISTENER: yes
-      KAFKA_CFG_ADVERTISED_HOST_NAME: localhost
-      KAFKA_CFG_ADVERTISED_PORT: "9092"
-      KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
-      JMX_PORT: "9999"
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: localhost
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
+

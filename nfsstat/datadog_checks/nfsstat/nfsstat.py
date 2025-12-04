@@ -10,7 +10,6 @@ EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
 
 class NfsStatCheck(AgentCheck):
-
     metric_prefix = 'system.nfs.'
 
     def __init__(self, name, init_config, instances):
@@ -31,6 +30,9 @@ class NfsStatCheck(AgentCheck):
                     '(through nfs-utils) or set the path to the installed version'
                 )
         self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
+        self.disable_missing_mountpoints_warning = is_affirmative(
+            self.instance.get('disable_missing_mountpoints_warning', False)
+        )
 
     def check(self, instance):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
@@ -41,7 +43,8 @@ class NfsStatCheck(AgentCheck):
 
         if 'No NFS mount point' in stats[0]:
             if not self.autofs_enabled:
-                self.warning("No NFS mount points were found.")
+                if not self.disable_missing_mountpoints_warning:
+                    self.warning("No NFS mount points were found.")
             else:
                 self.log.debug("AutoFS enabled: no mount points currently.")
             return
@@ -117,9 +120,9 @@ class Device(object):
 
     def _parse_tags(self):
         self.tags = []
-        self.tags.append(u'nfs_server:{0}'.format(ensure_unicode(self.nfs_server)))
-        self.tags.append(u'nfs_export:{0}'.format(ensure_unicode(self.nfs_export)))
-        self.tags.append(u'nfs_mount:{0}'.format(ensure_unicode(self.mount)))
+        self.tags.append('nfs_server:{0}'.format(ensure_unicode(self.nfs_server)))
+        self.tags.append('nfs_export:{0}'.format(ensure_unicode(self.nfs_export)))
+        self.tags.append('nfs_mount:{0}'.format(ensure_unicode(self.mount)))
 
     def send_metrics(self, gauge, tags):
         metric_prefix = 'system.nfs.'

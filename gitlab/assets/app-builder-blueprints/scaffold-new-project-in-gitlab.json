@@ -1,0 +1,1230 @@
+{
+    "slug": "scaffold-new-project-in-gitlab",
+    "name": "Scaffold New Project in GitLab",
+    "description": "Scaffolder app is used to create new software components from template repositories. It takes inputs from developers and generates a new repository or a PR based on the provided data and the template.",
+    "definition": {
+        "components": [
+            {
+                "events": [],
+                "name": "grid0",
+                "properties": {
+                    "backgroundColor": "default",
+                    "children": [
+                        {
+                            "events": [],
+                            "name": "gridCell6",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "info_container",
+                                        "properties": {
+                                            "children": [
+                                                {
+                                                    "events": [],
+                                                    "name": "grid3",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 91
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell1_copy",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 6,
+                                                                            "x": 6,
+                                                                            "y": 270
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "owner_name",
+                                                                            "properties": {
+                                                                                "defaultValue": "${global?.user?.name}",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Name",
+                                                                                "placeholder": "DataDog"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 10
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell2",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 4,
+                                                                            "width": 8,
+                                                                            "x": 2,
+                                                                            "y": 190
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell5_copy2",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 3,
+                                                                            "width": 9,
+                                                                            "x": 0,
+                                                                            "y": 211
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell5_copy3",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 3,
+                                                                            "width": 9,
+                                                                            "x": 0,
+                                                                            "y": 207
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell4",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "your_info_title",
+                                                                            "properties": {
+                                                                                "isDisabled": false,
+                                                                                "isLoading": "false",
+                                                                                "isVisible": "true",
+                                                                                "label": "Part 1/2",
+                                                                                "size": "sm",
+                                                                                "style": "purple",
+                                                                                "unit": "",
+                                                                                "value": "Your Information"
+                                                                            },
+                                                                            "type": "calloutValue"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 9,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 0
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell1",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "owner_email",
+                                                                            "properties": {
+                                                                                "defaultValue": "${global?.user?.handle}",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": true,
+                                                                                "label": "Email",
+                                                                                "placeholder": ""
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 7,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 18
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            }
+                                                        ]
+                                                    },
+                                                    "type": "grid"
+                                                }
+                                            ],
+                                            "hasBackground": true,
+                                            "isVisible": "true"
+                                        },
+                                        "type": "container"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 31,
+                                        "width": 12,
+                                        "x": 0,
+                                        "y": 17
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell6_copy1",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "template_container",
+                                        "properties": {
+                                            "children": [
+                                                {
+                                                    "events": [],
+                                                    "name": "grid3_copy1",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell1_copy3",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 6,
+                                                                            "x": 6,
+                                                                            "y": 270
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy32",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 103
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell5_copy7",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 5,
+                                                                            "width": 9,
+                                                                            "x": 0,
+                                                                            "y": 73
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy33",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 149
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy34",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 157
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell3_copy5",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 5,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 165
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell5_copy8",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 3,
+                                                                            "width": 9,
+                                                                            "x": 0,
+                                                                            "y": 211
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell3_copy6",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 4,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 115
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell5_copy9",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 3,
+                                                                            "width": 9,
+                                                                            "x": 0,
+                                                                            "y": 207
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy37",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 121
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy41",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 132
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy43",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "Schedule",
+                                                                            "properties": {
+                                                                                "defaultValue": "",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Schedule",
+                                                                                "placeholder": "y"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 33
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy44",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "endpoint",
+                                                                            "properties": {
+                                                                                "defaultValue": "",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Endpoint",
+                                                                                "placeholder": "y"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 41
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy45",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "timeout",
+                                                                            "properties": {
+                                                                                "defaultValue": "",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Timeout",
+                                                                                "placeholder": "60"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 49
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy46",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "version",
+                                                                            "properties": {
+                                                                                "defaultValue": "",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Version",
+                                                                                "placeholder": "0.1.0"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 57
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell4_copy3",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 9,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 78
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell3_copy7",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 6,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 87
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell4_copy4",
+                                                                "properties": {
+                                                                    "children": [],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 9,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 140
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell5_copy10",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "template_parameters",
+                                                                            "properties": {
+                                                                                "isDisabled": false,
+                                                                                "isLoading": "false",
+                                                                                "isVisible": "true",
+                                                                                "label": "Part 2/2",
+                                                                                "size": "sm",
+                                                                                "style": "purple",
+                                                                                "unit": "",
+                                                                                "value": "Template Parameters"
+                                                                            },
+                                                                            "type": "calloutValue"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 9,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 0
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy47",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "release_date",
+                                                                            "properties": {
+                                                                                "defaultValue": "",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Release Date",
+                                                                                "placeholder": "08/01/24"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 65
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy23",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "project_description",
+                                                                            "properties": {
+                                                                                "defaultValue": "",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Project Description",
+                                                                                "placeholder": "Short description of the project"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 17
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy21",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "project_name",
+                                                                            "properties": {
+                                                                                "defaultValue": "",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Project Name",
+                                                                                "placeholder": "Project name for new service"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 9
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            },
+                                                            {
+                                                                "events": [],
+                                                                "name": "gridCell0_copy25",
+                                                                "properties": {
+                                                                    "children": [
+                                                                        {
+                                                                            "events": [],
+                                                                            "name": "project_slug",
+                                                                            "properties": {
+                                                                                "defaultValue": "",
+                                                                                "isDisabled": false,
+                                                                                "isVisible": "true",
+                                                                                "label": "Project Slug",
+                                                                                "placeholder": "package"
+                                                                            },
+                                                                            "type": "textInput"
+                                                                        }
+                                                                    ],
+                                                                    "isVisible": "true",
+                                                                    "layout": {
+                                                                        "default": {
+                                                                            "height": 8,
+                                                                            "width": 12,
+                                                                            "x": 0,
+                                                                            "y": 25
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "type": "gridCell"
+                                                            }
+                                                        ]
+                                                    },
+                                                    "type": "grid"
+                                                }
+                                            ],
+                                            "isVisible": "true"
+                                        },
+                                        "type": "container"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 79,
+                                        "width": 12,
+                                        "x": 0,
+                                        "y": 48
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell2_copy1",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [
+                                            {
+                                                "name": "click",
+                                                "type": "setStateVariableValue",
+                                                "value": "true",
+                                                "variableName": "formSubmitted"
+                                            },
+                                            {
+                                                "modalName": "workflow_modal",
+                                                "name": "click",
+                                                "type": "openModal"
+                                            },
+                                            {
+                                                "name": "click",
+                                                "queryName": "triggerScaffoldNewServiceWorkflow",
+                                                "type": "triggerQuery"
+                                            }
+                                        ],
+                                        "name": "generate_project",
+                                        "properties": {
+                                            "iconLeft": "lightningEmpty",
+                                            "isBorderless": false,
+                                            "isDisabled": false,
+                                            "isLoading": "${triggerScaffoldNewServiceWorkflow?.isLoading}",
+                                            "isPrimary": true,
+                                            "isVisible": true,
+                                            "label": "Generate Project",
+                                            "level": "default"
+                                        },
+                                        "type": "button"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 5,
+                                        "width": 4,
+                                        "x": 4,
+                                        "y": 129
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell3",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "scaffolder_title",
+                                        "properties": {
+                                            "content": "# Scaffolder",
+                                            "contentType": "markdown",
+                                            "isVisible": true,
+                                            "textAlign": "center",
+                                            "verticalAlign": "top"
+                                        },
+                                        "type": "text"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 6,
+                                        "width": 7,
+                                        "x": 2,
+                                        "y": 11
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "workflow_modal",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "grid1",
+                                        "properties": {
+                                            "children": [
+                                                {
+                                                    "events": [],
+                                                    "name": "gridCell7",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "workflow_status_bar",
+                                                                "properties": {
+                                                                    "isBorderless": false,
+                                                                    "isCentered": false,
+                                                                    "isDisabled": false,
+                                                                    "isLoading": false,
+                                                                    "isVisible": true,
+                                                                    "label": "${triggerScaffoldNewServiceWorkflow.isLoading ? \"Please Wait, Worfklow is Running...\" : \n    'WORKFLOW STATUS'}\n",
+                                                                    "size": "sm",
+                                                                    "style": "${triggerScaffoldNewServiceWorkflow.isLoading ? 'gray' : \n    triggerScaffoldNewServiceWorkflow?.error ? \n        'red' : 'green'}",
+                                                                    "unit": "",
+                                                                    "value": "${triggerScaffoldNewServiceWorkflow.isLoading ? \"Running...\" : \n    triggerScaffoldNewServiceWorkflow?.error ? \n        'Error' : 'Success'}"
+                                                                },
+                                                                "type": "calloutValue"
+                                                            }
+                                                        ],
+                                                        "isVisible": "true",
+                                                        "layout": {
+                                                            "default": {
+                                                                "height": 8,
+                                                                "width": 12,
+                                                                "x": 0,
+                                                                "y": 0
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "gridCell"
+                                                },
+                                                {
+                                                    "events": [],
+                                                    "name": "gridCell5",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "workflow_wait_notice",
+                                                                "properties": {
+                                                                    "content": "This may take a few minutes to run depending on the size of the repository.",
+                                                                    "contentType": "markdown",
+                                                                    "isVisible": true,
+                                                                    "textAlign": "left",
+                                                                    "verticalAlign": "top"
+                                                                },
+                                                                "type": "text"
+                                                            }
+                                                        ],
+                                                        "isVisible": "true",
+                                                        "layout": {
+                                                            "default": {
+                                                                "height": 3,
+                                                                "width": 12,
+                                                                "x": 0,
+                                                                "y": 9
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "gridCell"
+                                                },
+                                                {
+                                                    "events": [],
+                                                    "name": "gridCell5_copy",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "generated_project_link",
+                                                                "properties": {
+                                                                    "content": "---\n### Link to Generated GitLab Project\n\n${triggerScaffoldNewServiceWorkflow.isLoading ? \"Loading...\" : \n    triggerScaffoldNewServiceWorkflow?.error ? \n        triggerScaffoldNewServiceWorkflow?.error : triggerScaffoldNewServiceWorkflow?.outputs?.workflowOutputs?.output_url}",
+                                                                    "contentType": "markdown",
+                                                                    "isVisible": true,
+                                                                    "textAlign": "left",
+                                                                    "verticalAlign": "top"
+                                                                },
+                                                                "type": "text"
+                                                            }
+                                                        ],
+                                                        "isVisible": "true",
+                                                        "layout": {
+                                                            "default": {
+                                                                "height": 44,
+                                                                "width": 12,
+                                                                "x": 0,
+                                                                "y": 12
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "gridCell"
+                                                }
+                                            ]
+                                        },
+                                        "type": "grid"
+                                    }
+                                ],
+                                "isVisible": true,
+                                "size": "md",
+                                "title": "Scaffolding Workflow"
+                            },
+                            "type": "modal"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell8",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [
+                                            {
+                                                "modalName": "info_modal",
+                                                "name": "click",
+                                                "type": "openModal"
+                                            }
+                                        ],
+                                        "name": "info_button",
+                                        "properties": {
+                                            "iconLeft": "eye",
+                                            "iconRight": "",
+                                            "isBorderless": false,
+                                            "isDisabled": false,
+                                            "isLoading": false,
+                                            "isPrimary": false,
+                                            "isVisible": true,
+                                            "label": "View Info",
+                                            "level": "default"
+                                        },
+                                        "type": "button"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 4,
+                                        "width": 2,
+                                        "x": 10,
+                                        "y": 11
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "info_modal",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "grid2",
+                                        "properties": {
+                                            "children": [
+                                                {
+                                                    "events": [],
+                                                    "name": "gridCell9",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "information_description",
+                                                                "properties": {
+                                                                    "content": "*This is a Scaffolding template that can be used to instantiate new repositories or create PRs from templates*\n\n>It comes with a pre-built integration that gets triggered whenever a user clicks **\"Generate\"**. Click **\"Connection\"** to configure your credentials with your source code provider.\n\n>To customize the form, click **\"Save\"** and edit it. You can add your own input types to match your template repository.\n\n>Set your template repository (org_name/repo_name) and path in the **\"Workflow Inputs\"**. Set your generated project repository name in the **\"Workflow Inputs\"** based on the inputs to the App.\n\n> If you set create_repo to true, the workflow will create the new project repository and upload the template files. Otherwise, it will upload the template files to a branch and create a Pull Request for review.\n\n>After updating your app with the desired fields, make sure they are passed to **\"Template Variables\"** in the Workflow Inputs as key value pairs.\n\n>If you need to customize the Scaffolding Workflow, navigate to the **\"Actions\"** section to locate the workflow and customize it to suit your needs.",
+                                                                    "contentType": "markdown",
+                                                                    "isVisible": true,
+                                                                    "textAlign": "left",
+                                                                    "verticalAlign": "top"
+                                                                },
+                                                                "type": "text"
+                                                            }
+                                                        ],
+                                                        "isVisible": "true",
+                                                        "layout": {
+                                                            "default": {
+                                                                "height": 42,
+                                                                "width": 12,
+                                                                "x": 0,
+                                                                "y": 0
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "gridCell"
+                                                }
+                                            ]
+                                        },
+                                        "type": "grid"
+                                    }
+                                ],
+                                "isVisible": true,
+                                "size": "lg",
+                                "title": "Info"
+                            },
+                            "type": "modal"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell10",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [
+                                            {
+                                                "modalName": "workflow_modal",
+                                                "name": "click",
+                                                "type": "openModal"
+                                            }
+                                        ],
+                                        "name": "status_button",
+                                        "properties": {
+                                            "iconLeft": "",
+                                            "iconRight": "",
+                                            "isBorderless": false,
+                                            "isDisabled": false,
+                                            "isLoading": false,
+                                            "isPrimary": true,
+                                            "isVisible": "${formSubmitted?.value}",
+                                            "label": "View Status",
+                                            "level": "default"
+                                        },
+                                        "type": "button"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 4,
+                                        "width": 2,
+                                        "x": 10,
+                                        "y": 7
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell11",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "integrationLogo0",
+                                        "properties": {
+                                            "horizontalAlign": "center",
+                                            "integrationId": "_datadog",
+                                            "isLoading": false,
+                                            "isVisible": true,
+                                            "verticalAlign": "center"
+                                        },
+                                        "type": "integrationLogo"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 11,
+                                        "width": 1,
+                                        "x": 5,
+                                        "y": 0
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        }
+                    ]
+                },
+                "type": "grid"
+            }
+        ],
+        "queries": [
+            {
+                "name": "triggerScaffoldNewServiceWorkflow",
+                "type": "action",
+                "properties": {
+                    "onlyTriggerManually": true,
+                    "outputs": "${((outputs) => {// Use `outputs` to reference the query's unformatted output.\n\n// TODO: Apply transformations to the raw query output\n\nreturn outputs})(self.rawOutputs)}",
+                    "requiresConfirmation": false,
+                    "showToastOnError": false,
+                    "spec": {
+                        "fqn": "com.datadoghq.dd.workflow_automation.triggerWorkflow",
+                        "inputs": {
+                            "timeoutSeconds": 600,
+                            "workflowId": "99dec6a0-11e7-43b1-ac37-29bf67c61517",
+                            "workflowInputs": {
+                                "nativeActions": {},
+                                "create_repo": true,
+                                "generated_project_repo": "destination-org/${project_name.value}",
+                                "project_name": "${project_name.value}",
+                                "template_repo": "template-org/template-repo",
+                                "template_variables": {
+                                    "cookiecutter": {
+                                        "project_slug": "${project_slug.value}"
+                                    },
+                                    "endpoint": "${endpoint.value}",
+                                    "project_description": "${project_description.value}",
+                                    "project_name": "${project_name.value}",
+                                    "project_slug": "${project_slug.value}",
+                                    "release_date": "${release_date.value}",
+                                    "schedule": "${Schedule.value}",
+                                    "timeout": "${timeout.value}",
+                                    "version": "${version.value}"
+                                }
+                            }
+                        }
+                    }
+                },
+                "events": [
+                    {
+                        "name": "executionFinished",
+                        "type": "setStateVariableValue",
+                        "value": "${triggerScaffoldNewServiceWorkflow?.error}",
+                        "variableName": "workflow_output"
+                    }
+                ]
+            },
+            {
+                "name": "workflow_output",
+                "type": "stateVariable",
+                "properties": {
+                    "defaultValue": "${[triggerScaffoldNewServiceWorkflow?.outputs.output_url]}"
+                }
+            },
+            {
+                "name": "output_message",
+                "type": "dataTransform",
+                "properties": {
+                    "outputs": "${(() => {if (triggerScaffoldNewServiceWorkflow?.error) {\n    return \"Scaffolding workflow failed with error:\\n\\n\" + triggerScaffoldNewServiceWorkflow?.error;\n}\n\nreturn \"Successfully completed scaffolding\";})()}"
+                }
+            },
+            {
+                "name": "formSubmitted",
+                "type": "stateVariable",
+                "properties": {
+                    "defaultValue": "false"
+                }
+            }
+        ],
+        "name": "Scaffold New Project in GitLab",
+        "description": "Scaffolder app is used to create new software components from template repositories. It takes inputs from developers and generates a new repository or a PR based on the provided data and the template.",
+        "rootInstanceName": "grid0"
+    },
+    "mocked_outputs": {
+        "formSubmitted": {},
+        "output_message": {},
+        "triggerScaffoldNewServiceWorkflow": {},
+        "workflow_output": {}
+    },
+    "tile_background": "table-with-modal",
+    "tile_icon_action_fqn": "com.datadoghq.gitlab.getProjectDeployments",
+    "tags": [
+        "software_delivery"
+    ],
+    "embedded_workflow_blueprints": {},
+    "embedded_datastore_blueprints": {},
+    "embedded_native_actions": [
+        {
+            "id": "99dec6a0-11e7-43b1-ac37-29bf67c61517",
+            "name": "Scaffold New Project in GitLab"
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import os
 import ssl
 from ssl import SSLContext
@@ -9,6 +10,7 @@ import pytest
 from mock import MagicMock, patch  # noqa: F401
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http import get_tls_config_from_options
 from datadog_checks.base.utils.tls import TlsContextWrapper
 from datadog_checks.dev import TempDir
 
@@ -173,11 +175,13 @@ class TestTLSContext:
             context = check.get_tls_context()  # type: MagicMock
             context.load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
 
-    def test_no_ca_certs_default_tls_verify_false(self):
+    def test_no_ca_certs_default_tls_verify_false(self, caplog):
         check = AgentCheck('test', {}, [{'tls_verify': False}])
-        with patch('ssl.SSLContext'):
+        with patch('ssl.SSLContext'), caplog.at_level(logging.DEBUG):
             context = check.get_tls_context()  # type: MagicMock
-            context.load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
+            context.load_default_certs.assert_not_called()
+            context.load_verify_locations.assert_not_called()
+            assert 'skipping CA certificate configuration' in caplog.text
 
     def test_ca_cert_file(self):
         with patch('ssl.SSLContext'), TempDir("test_ca_cert_file") as tmp_dir:
@@ -356,6 +360,49 @@ class TestTLSContext:
         expected_ciphers_list = sorted(cipher['name'] for cipher in expected_context.get_ciphers())
 
         assert actual_ciphers == expected_ciphers_list
+
+    @pytest.mark.parametrize(
+        'options, expected_config',
+        [
+            pytest.param(
+                {'verify': False, 'cert': 'foo'},
+                {'tls_verify': False, 'tls_cert': 'foo'},
+                id='verify false and cert',
+            ),
+            pytest.param(
+                {'verify': True, 'cert': 'foo'},
+                {'tls_verify': True, 'tls_cert': 'foo'},
+                id='verify true and cert',
+            ),
+            pytest.param(
+                {'verify': 'bar', 'cert': 'foo'},
+                {'tls_verify': True, 'tls_cert': 'foo', 'tls_ca_cert': 'bar'},
+                id='verify string and cert',
+            ),
+            pytest.param(
+                {'verify': 'bar', 'cert': ('foo', 'key')},
+                {'tls_verify': True, 'tls_cert': 'foo', 'tls_ca_cert': 'bar', 'tls_private_key': 'key'},
+                id='verify string and cert with key',
+            ),
+            pytest.param(
+                {'cert': 'foo'},
+                {'tls_cert': 'foo'},
+                id='only cert',
+            ),
+            pytest.param(
+                {'verify': 'foo'},
+                {'tls_verify': True, 'tls_ca_cert': 'foo'},
+                id='only verify',
+            ),
+            pytest.param(
+                {},
+                {},
+                id='empty',
+            ),
+        ],
+    )
+    def test_tls_config_from_options(self, options, expected_config):
+        assert get_tls_config_from_options(options) == expected_config
 
 
 class TestTLSContextOverrides:

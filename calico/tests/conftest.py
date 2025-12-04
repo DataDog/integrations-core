@@ -41,12 +41,14 @@ def setup_calico():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-
-    with kind_run(
-        conditions=[setup_calico], kind_config=path.join(HERE, 'kind', 'kind-calico.yaml'), sleep=10
-    ) as kubeconfig, port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc') as (
-        calico_host,
-        calico_port,
+    with (
+        kind_run(
+            conditions=[setup_calico], kind_config=path.join(HERE, 'kind', 'kind-calico.yaml'), sleep=10
+        ) as kubeconfig,
+        port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc') as (
+            calico_host,
+            calico_port,
+        ),
     ):
         endpoint = 'http://{}:{}/metrics'.format(calico_host, calico_port)
 

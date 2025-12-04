@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 import click
@@ -40,11 +41,46 @@ ddev test postgres:py3.11-9.6,py3.11-16.0 -- -k test_my_special_test
 '''
 
 
+def on_error_lint_callback(app: Application) -> Callable[[int, str], None]:
+    def callback(code: int, stdout: str):
+        output = "Linting failed. "
+        if "`--unsafe-fixes`" in stdout:
+            output += (
+                "To fix any errors, run 'ddev test --fmt-unsafe'. "
+                "This will fix even those errors marked as unsafe by ruff. "
+                "Make sure that these fixes do not have any side effects."
+            )
+        else:
+            output += "To fix any errors, run 'ddev test --fmt'."
+
+        app.display_warning(output)
+
+    return callback
+
+
+def on_error_fmt_callback(app: Application) -> Callable[[int, str], None]:
+    def callback(code: int, stdout: str):
+        if "`--unsafe-fixes`" in stdout:
+            app.display_warning(
+                "Some formatting errors are still found that could be fixed with unsafe fixes. "
+                "You can try running 'ddev test --fmt-unsafe' to fix them."
+            )
+        else:
+            app.display_warning(
+                "Some formatting errors are still found for which ruff has no fixes available. "
+                "You would need to fix them manually."
+            )
+
+    return callback
+
+
 @click.command(epilog=epilog)
 @click.argument('target_spec', required=False)
 @click.argument('pytest_args', nargs=-1)
 @click.option('--lint', '-s', is_flag=True, help='Run only lint & style checks')
-@click.option('--fmt', '-fs', is_flag=True, help='Run only the code formatter')
+@click.option('--lint-unsafe', '-su', is_flag=True, help='Show unsafe fixes proposed by the linter')
+@click.option('--fmt', '-fs', is_flag=True, help='Fix formatting and linting errors')
+@click.option('--fmt-unsafe', '-fsu', is_flag=True, help='Fix formatting and linting errors including unsafe fixes')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
@@ -65,7 +101,9 @@ def test(
     target_spec: str | None,
     pytest_args: tuple[str, ...],
     lint: bool,
+    lint_unsafe: bool,
     fmt: bool,
+    fmt_unsafe: bool,
     bench: bool,
     latest: bool,
     coverage: bool,
@@ -92,8 +130,8 @@ def test(
     import sys
 
     from ddev.testing.constants import EndToEndEnvVars, TestEnvVars
-    from ddev.testing.hatch import get_hatch_env_vars
     from ddev.utils.ci import running_in_ci
+    from ddev.utils.hatch import get_hatch_env_vars
 
     if target_spec is None:
         target_spec = 'changed'
@@ -153,10 +191,13 @@ def test(
         global_env_vars['DD_API_KEY'] = api_key
 
     # Only enable certain functionality when running standard tests
-    standard_tests = not (lint or fmt or bench or latest)
+    standard_tests = not (lint or lint_unsafe or fmt or fmt_unsafe or bench or latest)
 
     # Keep track of environments so that they can first be removed if requested
     chosen_environments = []
+
+    # Define the on_error callback
+    on_error = None
 
     base_command = [sys.executable, '-m', 'hatch', 'env', 'run']
     if environments and not standard_tests:
@@ -164,9 +205,18 @@ def test(
     elif lint:
         chosen_environments.append('lint')
         base_command.extend(('--env', 'lint', '--', 'all'))
+        on_error = on_error_lint_callback(app)
+    elif lint_unsafe:
+        chosen_environments.append('lint')
+        base_command.extend(('--env', 'lint', '--', 'style-unsafe'))
     elif fmt:
         chosen_environments.append('lint')
         base_command.extend(('--env', 'lint', '--', 'fmt'))
+        on_error = on_error_fmt_callback(app)
+    elif fmt_unsafe:
+        chosen_environments.append('lint')
+        base_command.extend(('--env', 'lint', '--', 'fmt-unsafe'))
+        on_error = on_error_fmt_callback(app)
     elif bench:
         filter_data = json.dumps({'benchmark-env': True})
         base_command.extend(('--filter', filter_data, '--', 'benchmark'))
@@ -247,7 +297,7 @@ def test(
                 # In order to handle multiple environments the report files must contain the environment name.
                 # Hatch injects the `HATCH_ENV_ACTIVE` environment variable, see:
                 # https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars
-                command.extend(('--junit-xml', f'.junit/test-{"e2e" if e2e else "unit"}-$HATCH_ENV_ACTIVE.xml'))
+                command.extend(('--junit-xml', f'junit/test-{"e2e" if e2e else "unit"}-$HATCH_ENV_ACTIVE.xml'))
                 # Test results class prefix
                 command.extend(('--junit-prefix', target.name))
 
@@ -277,7 +327,11 @@ def test(
                     for env_name in chosen_environments:
                         app.platform.check_command([sys.executable, '-m', 'hatch', 'env', 'remove', env_name])
 
-            app.platform.check_command(command)
+            # We use check_command_output to get the output of the command on the on_error callback
+            # And force color to be enabled
+            env = os.environ.copy()
+            env['FORCE_COLOR'] = '1'
+            app.platform.check_command_output(command, on_error=on_error, print_output=True, env=env)
             if standard_tests and coverage:
                 app.display_header('Coverage report')
                 app.platform.check_command([sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc'])

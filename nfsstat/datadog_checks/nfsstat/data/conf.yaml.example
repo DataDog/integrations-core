@@ -27,6 +27,11 @@ init_config:
 instances:
 
   -
+    ## @param disable_missing_mountpoints_warning - boolean - optional - default: false
+    ## If true, no warning is logged if host has check enabled but no NFS mount point is found.
+    #
+    # disable_missing_mountpoints_warning: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

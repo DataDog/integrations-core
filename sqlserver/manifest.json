@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "bfa2f276-da05-4153-b8d4-48d4e41f5e40",
   "app_id": "sql-server",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -69,6 +70,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
+      "process_signatures": [
+        "sqlservr"
+      ],
       "source_type_id": 45,
       "auto_install": true
     },
@@ -82,7 +86,8 @@
       "Processes are blocked": "assets/monitors/sqlserver_high_processes_blocked.json",
       "Auto-parameterization attempts are failing": "assets/monitors/sqlserver_high_number_failed_auto_param.json",
       "Database is not online": "assets/monitors/sqlserver_db_not_online.json",
-      "Database not in sync": "assets/monitors/sqlserver_db_not_sync.json"
+      "Database not in sync": "assets/monitors/sqlserver_db_not_sync.json",
+      "Availability group failover detected": "assets/monitors/sqlserver_ao_failover.json"
     }
   }
 }

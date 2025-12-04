@@ -7,6 +7,8 @@ This check collects [Presto][1] metrics, for example:
 - Overall activity metrics: completed/failed queries, data input/output size, execution time.
 - Performance metrics: cluster memory, input CPU, execution CPU time.
 
+**Minimum Agent version:** 6.11.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.

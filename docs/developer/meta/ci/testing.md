@@ -113,7 +113,7 @@ Configuration for targets [lives](https://github.com/DataDog/integrations-core/b
 | --- | --- | --- |
 | Linux | `linux` | [Ubuntu 22.04](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md) |
 | Windows | `windows` | [Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md) |
-| macOS | `macos` | [macOS 13](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md) |
+| macOS | `macos` | [macOS 14](https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md) |
 
 If an integration's `manifest.json` indicates that the only supported platform is Windows then that will be used to run tests, otherwise they will run on Linux.
 
@@ -130,7 +130,7 @@ To override the runners for each platform, one can set the `overrides.ci.<TARGET
 
 ```toml
 [overrides.ci.sqlserver]
-runners = { windows = ["windows-2019"] }
+runners = { windows = ["windows-2025"] }
 ```
 
 ### Exclusion

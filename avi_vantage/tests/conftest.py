@@ -58,29 +58,31 @@ def get_expected_metrics():
 
 @pytest.fixture
 def mock_client():
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+    def mock_get(url: AnyStr, *__: Any, **___: Any):
+        parsed = urlparse(url)
+        resource = [part for part in parsed.path.split('/') if len(part) > 0][-1]
+        query_params = parsed.query
 
-        def get(url: AnyStr, *_: Any, **__: Any):
-            parsed = urlparse(url)
-            resource = [part for part in parsed.path.split('/') if len(part) > 0][-1]
-            query_params = parsed.query
+        path = {}
 
-            path = {}
+        path['tenant=admin'] = ADMIN_TENANT_METRICS_FOLDER
+        path['tenant=admin%2Ctenant_a%2Ctenant_b'] = MULTIPLE_TENANTS_METRICS_FOLDER
 
-            path['tenant=admin'] = ADMIN_TENANT_METRICS_FOLDER
-            path['tenant=admin%2Ctenant_a%2Ctenant_b'] = MULTIPLE_TENANTS_METRICS_FOLDER
-
-            if query_params:
-                return MockResponse(
-                    file_path=os.path.join(HERE, 'compose', 'fixtures', path[query_params], f'{resource}_metrics')
-                )
-
+        if query_params:
             return MockResponse(
-                file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics')
+                file_path=os.path.join(HERE, 'compose', 'fixtures', path[query_params], f'{resource}_metrics')
             )
 
-        req.Session = mock.MagicMock(return_value=mock.MagicMock(get=get))
-        yield
+        return MockResponse(
+            file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics')
+        )
+
+    def mock_post(url: AnyStr, *__: Any, **___: Any):
+        return mock.MagicMock(status_code=200, content=b'{"results": []}')
+
+    with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.get', side_effect=mock_get):
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.post', new=mock_post):
+            yield
 
 
 @pytest.fixture(scope='session')

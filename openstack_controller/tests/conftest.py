@@ -1009,7 +1009,7 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         return mock.MagicMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
 
     mock_get = mock.MagicMock(side_effect=get)
-    monkeypatch.setattr('requests.get', mock_get)
+    monkeypatch.setattr('requests.Session.get', mock_get)
     return mock_get
 
 
@@ -1041,5 +1041,5 @@ def mock_http_post(request, monkeypatch, mock_http_call):
         return MockResponse(json_data=json_data, status_code=200, headers=headers)
 
     mock_post = mock.MagicMock(side_effect=post)
-    monkeypatch.setattr('requests.post', mock_post)
+    monkeypatch.setattr('requests.Session.post', mock_post)
     return mock_post

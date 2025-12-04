@@ -25,17 +25,13 @@ class DNSCheck(AgentCheck):
         if not self.hostname:
             raise ConfigurationError('A valid "hostname" must be specified')
         self.nameserver = self.instance.get('nameserver')  # type: Optional[str]
-        self.timeout = float(
-            self.instance.get('timeout', init_config.get('default_timeout', self.DEFAULT_TIMEOUT))
-        )  # type: float
+        self.timeout = float(self.instance.get('timeout', init_config.get('default_timeout', self.DEFAULT_TIMEOUT)))  # type: float
 
         self.record_type = self.instance.get('record_type', 'A')  # type: str
         resolved_as = self.instance.get('resolves_as', '')
         if resolved_as and self.record_type not in ['A', 'CNAME', 'MX']:
             raise ConfigurationError('"resolves_as" can currently only support A, CNAME and MX records')
-        self.resolves_as_ips = (
-            [x.strip().lower() for x in resolved_as.split(',')] if resolved_as else []
-        )  # type: List[str]
+        self.resolves_as_ips = [x.strip().lower() for x in resolved_as.split(',')] if resolved_as else []  # type: List[str]
 
         self.base_tags = self.instance.get('tags', []) + [
             'resolved_hostname:{}'.format(self.hostname),

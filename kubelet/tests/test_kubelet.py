@@ -41,17 +41,17 @@ KUBE_PRE_1_14 = '1.13'
 KUBE_1_21 = '1.21'
 
 NODE_SPEC = {
-    u'cloud_provider': u'GCE',
-    u'instance_type': u'n1-standard-1',
-    u'num_cores': 1,
-    u'system_uuid': u'5556DC4F-C198-07C8-BE37-ACB98B1BA490',
-    u'network_devices': [{u'mtu': 1460, u'speed': 0, u'name': u'eth0', u'mac_address': u'42:01:0a:84:00:04'}],
-    u'hugepages': [{u'num_pages': 0, u'page_size': 2048}],
-    u'memory_capacity': 3885424640,
-    u'instance_id': u'8153046835786593062',
-    u'boot_id': u'789bf9ff-77be-4f43-8352-62f84d5e4356',
-    u'cpu_frequency_khz': 2600000,
-    u'machine_id': u'5556dc4fc19807c8be37acb98b1ba490',
+    'cloud_provider': 'GCE',
+    'instance_type': 'n1-standard-1',
+    'num_cores': 1,
+    'system_uuid': '5556DC4F-C198-07C8-BE37-ACB98B1BA490',
+    'network_devices': [{'mtu': 1460, 'speed': 0, 'name': 'eth0', 'mac_address': '42:01:0a:84:00:04'}],
+    'hugepages': [{'num_pages': 0, 'page_size': 2048}],
+    'memory_capacity': 3885424640,
+    'instance_id': '8153046835786593062',
+    'boot_id': '789bf9ff-77be-4f43-8352-62f84d5e4356',
+    'cpu_frequency_khz': 2600000,
+    'machine_id': '5556dc4fc19807c8be37acb98b1ba490',
 }
 
 EXPECTED_METRICS_COMMON = [
@@ -563,7 +563,7 @@ def test_kubelet_credentials_update(monkeypatch, aggregator):
     get = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
     )
-    with mock.patch('requests.get', return_value=get):
+    with mock.patch('requests.Session.get', return_value=get):
         check.check(instance)
 
     assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is True
@@ -573,8 +573,9 @@ def test_kubelet_credentials_update(monkeypatch, aggregator):
         status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
     )
     kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
-    with mock.patch('requests.get', return_value=get), mock.patch(
-        'datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info
+    with (
+        mock.patch('requests.Session.get', return_value=get),
+        mock.patch('datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info),
     ):
         check.check(instance)
 
@@ -1049,7 +1050,7 @@ def test_perform_kubelet_check(monkeypatch):
 
     instance_tags = ["one:1"]
     get = MockedResponse()
-    with mock.patch("requests.get", side_effect=get):
+    with mock.patch('requests.Session.get', side_effect=get):
         check._perform_kubelet_check(instance_tags)
 
     get.assert_has_calls(
@@ -1093,7 +1094,7 @@ def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
 
     get = mock.MagicMock(status_code=404, iter_lines=lambda **kwargs: "Error Code")
     get.raise_for_status.side_effect = requests.HTTPError('error')
-    with mock.patch('requests.get', return_value=get):
+    with mock.patch('requests.Session.get', return_value=get):
         check._report_node_metrics(['foo:bar'])
         aggregator.assert_all_metrics_covered()
 

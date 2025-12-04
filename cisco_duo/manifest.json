@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8d3e0e2f-df52-4a12-a976-3ded71553a3a",
   "app_id": "cisco-duo",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

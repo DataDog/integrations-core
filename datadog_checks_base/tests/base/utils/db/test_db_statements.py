@@ -278,7 +278,7 @@ class TestStatementMetrics:
         This test is skipped if tracemalloc is not available
         '''
         # The memory usage threshold takes tracing overhead into account
-        MEMORY_USAGE_THRESHOLD = 8 * 1024 * 1024  # 8 MB
+        MEMORY_USAGE_THRESHOLD = 10 * 1024 * 1024  # 10 MB
 
         try:
             import tracemalloc

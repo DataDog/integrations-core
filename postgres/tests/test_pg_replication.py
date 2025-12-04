@@ -19,11 +19,13 @@ from .common import (
     check_file_wal_metrics,
     check_metrics_metadata,
     check_performance_metrics,
+    check_recovery_prefetch_metrics,
     check_replication_delay,
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_wal_metrics,
     check_uptime_metrics,
+    check_wait_event_metrics,
     check_wal_receiver_metrics,
 )
 from .utils import _get_superconn, _wait_for_value, requires_over_10
@@ -53,6 +55,15 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
     check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_file_wal_metrics(aggregator, expected_tags=expected_tags)
+    check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
+    expected_wait_event_tags = expected_tags + [
+        'app:datadog-agent',
+        'user:datadog',
+        'db:datadog_test',
+        'backend_type:client backend',
+        'wait_event:NoWaitEvent',
+    ]
+    check_wait_event_metrics(aggregator, expected_tags=expected_wait_event_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'])
 
@@ -121,13 +132,11 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
     check = integration_check(pg_replica_instance2)
 
     replica_con = _get_superconn(pg_replica_instance2)
-    replica_con.set_session(autocommit=False)
     replica_cur = replica_con.cursor()
     replica_cur.execute('BEGIN;')
     replica_cur.execute('select * from persons;')
 
     conn = _get_superconn(pg_instance)
-    conn.set_session(autocommit=True)
     cur = conn.cursor()
     cur.execute('update persons SET personid = 1 where personid = 1;')
     cur.execute('vacuum full persons;')
@@ -153,13 +162,11 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     check = integration_check(pg_replica_instance2)
 
     replica2_con = _get_superconn(pg_replica_instance2)
-    replica2_con.set_session(autocommit=False)
     replica2_cur = replica2_con.cursor()
     replica2_cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     replica2_cur.execute('select * from persons;')
 
-    conn = _get_superconn(pg_instance)
-    conn.set_session(autocommit=True)
+    conn = _get_superconn(pg_instance, autocommit=True)
     cur = conn.cursor()
     cur.execute('update persons SET personid = 1 where personid = 1;')
     time.sleep(1.2)
@@ -214,20 +221,16 @@ def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_repl
 
 
 @requires_over_10
-def test_pg_control_replication(aggregator, integration_check, pg_instance, pg_replica_instance):
-    check = integration_check(pg_replica_instance)
+def test_pg_control_replication(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
     check.run()
 
-    dd_agent_tags = _get_expected_tags(check, pg_replica_instance, role='standby')
+    dd_agent_tags = _get_expected_tags(check, pg_instance, role='master')
     aggregator.assert_metric('postgresql.control.timeline_id', count=1, value=1, tags=dd_agent_tags)
 
     # Also checkpoint on primary to generate changes
     master_conn = _get_superconn(pg_instance)
     with master_conn.cursor() as cur:
-        cur.execute("CHECKPOINT;")
-
-    postgres_conn = _get_superconn(pg_replica_instance)
-    with postgres_conn.cursor() as cur:
         cur.execute("CHECKPOINT;")
 
     aggregator.reset()

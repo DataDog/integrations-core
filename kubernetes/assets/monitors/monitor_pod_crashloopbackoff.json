@@ -1,7 +1,7 @@
 {
   "version": 2,
   "created_at": "2020-07-28",
-  "last_updated_at": "2023-07-05",
+  "last_updated_at": "2025-06-12",
   "title": "Pod is in a CrashloopBackOff state",
   "tags": [
     "integration:kubernetes"
@@ -9,7 +9,7 @@
   "description": "The status CrashloopBackOff means that a container in the Pod is started, crashes, and is restarted, over and over again. This monitor tracks when a pod is in a CrashloopBackOff state for your Kubernetes integration.",
   "definition": {
     "message": "pod {{pod_name.name}} is in CrashloopBackOff on {{kube_namespace.name}} \n This alert could generate several alerts for a bad deployment. Adjust the thresholds of the query to suit your infrastructure.",
-    "name": "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
+    "name": "[Kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
     "options": {
       "escalation_message": "",
       "include_tags": true,

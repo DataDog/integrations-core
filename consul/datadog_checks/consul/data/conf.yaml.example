@@ -46,11 +46,16 @@ init_config:
 instances:
 
     ## @param url - string - required
-    ## Where your Consul HTTP server lives,
-    ## point the URL at the leader to get metrics about your Consul cluster.
-    ## Use HTTPS instead of HTTP if your Consul setup is configured to do so.
+    ## The URL of your Consul HTTP server. Point it at the leader to get metrics
+    ## about your Consul cluster. Use HTTPS if your Consul setup supports it.
     #
   - url: http://localhost:8500
+
+    ## @param disable_legacy_service_tag - boolean - optional - default: false
+    ## Whether to stop submitting the `service` tag, which has been renamed to `consul_service`, and to disable 
+    ## the associated deprecation warning. Datadog recommends setting this to `true`.
+    #
+    disable_legacy_service_tag: true
 
     ## @param use_prometheus_endpoint - boolean - optional - default: false
     ## Whether to use the Prometheus endpoint to get more metrics.
@@ -64,8 +69,8 @@ instances:
     # catalog_checks: false
 
     ## @param network_latency_checks - boolean - optional - default: false
-    ## Whether to enable network latency metrics collection. When enabled
-    ## Consul network coordinates is retrieved and latency calculated for
+    ## Whether to enable network latency metric collection. When enabled, Consul
+    ## network coordinates are retrieved and latency is calculated for
     ## each node and between data centers.
     ## See https://www.consul.io/docs/internals/coordinates.html
     #
@@ -81,11 +86,11 @@ instances:
     # use_node_name_as_hostname: true
 
     ## @param self_leader_check - boolean - optional - default: false
-    ## Whether to enable self leader checks. Each instance with this enabled
-    ## watches for itself to become the leader and emits an event when that
-    ## happens. It is safe/expected to enable this on all nodes in a Consul
-    ## cluster since only the new leader emits the (single) event. This
-    ## flag takes precedence over new_leader_checks.
+    ## Whether to enable self-leader checks. Each enabled instance watches for
+    ## when it becomes the leader and emits an event when that happens. It is
+    ## safe and expected to enable this on all nodes in a Consul cluster since
+    ## only the new leader emits the event. This flag takes precedence over
+    ## new_leader_checks.
     #
     # self_leader_check: false
 
@@ -95,23 +100,23 @@ instances:
     # acl_token: <ACL_TOKEN>
 
     ## @param single_node_install - boolean - optional - default: false
-    ## Whether or not to perform the full check even when not the leader. Useful
-    ## if you don't want to install the Agent on every node in a data center.
+    ## Whether to perform the full check even when this node is not the leader.
+    ## Useful if you don't want to install the Agent on every node in a data center.
     #
     # single_node_install: false
 
     ## @param new_leader_checks - boolean - optional - default: false
-    ## Whether to enable new leader checks from this instance
-    ## Note: If this is set on multiple instances or Agents in the same cluster
-    ## you receive one event per leader change per instance. See
+    ## Whether to enable new-leader checks from this instance.
+    ## Note: If this is set on multiple instances or Agents in the same cluster,
+    ## you will receive one event per leader change per instance. See
     ## self_leader_check for a more robust option.
     #
     # new_leader_checks: false
 
     ## @param services_include - list of strings - optional
-    ## Services to restrict catalog querying to
-    ## the default settings query up to 50 services. If you have more than
-    ## services in your Consul service catalog, use this include list.
+    ## Services to which catalog querying is restricted. By default, the check
+    ## queries up to 50 services. If you have more than 50 services in your
+    ## Consul service catalog, use this include list.
     #
     # services_include:
     #   - <SERVICE_1>
@@ -132,15 +137,15 @@ instances:
     # max_services: 50
 
     ## @param threads_count - number - optional - default: 1
-    ## Increase the number of threads to collect consul services checks.
+    ## Increase the number of threads used to collect Consul service checks.
     #
     # threads_count: 1
 
-    ## @param disable_legacy_service_tag - boolean - optional - default: false
-    ## Whether or not to stop submitting the tag `service` that has been renamed
-    ## to `consul_service` and disable the associated deprecation warning.
+    ## @param collect_health_checks - boolean - optional - default: false
+    ## Whether to enable new service health checks from this instance. Enabling this will
+    ## also emit an event for every failed service health check.
     #
-    disable_legacy_service_tag: true
+    # collect_health_checks: true
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -175,7 +180,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -198,7 +203,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #

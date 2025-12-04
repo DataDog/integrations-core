@@ -1,0 +1,182 @@
+id: workato
+tests:
+  -
+    sample: >-
+      {
+        "completed_at": "2025-06-14T16:17:14.000-07:00",
+        "recipe": {
+          "name": "MDM Migrate",
+          "job_succeeded_count": 6244,
+          "lifetime_task_count": 12473,
+          "description": "",
+          "id": 62567615,
+          "folder_id": 25081370,
+          "tags": [
+            "critical",
+            "capture"
+          ]
+        },
+        "project": {
+          "name": "Admin Ops",
+          "description": "",
+          "id": 12466695,
+          "folder_id": 25081360
+        },
+        "started_at": "2025-06-14T16:17:11.000-07:00",
+        "is_error": false,
+        "id": "j-ATC9XJmT-hGWfsa",
+        "title": "Scheduler by Workato: new recurring event: Scheduled time=2025-06-14T16:17:11.164120-07:00, Scheduled day=Saturday, and Scheduled week=23",
+        "status": "success",
+        "duration": 3000000
+      }
+    result:
+        custom:
+            completed_at: "2025-06-14T16:17:14.000-07:00"
+            duration: 3000000
+            id: "j-ATC9XJmT-hGWfsa"
+            is_error: false
+            project:
+                description: ""
+                folder_id: 25081360
+                id: 12466695
+            recipe:
+                description: ""
+                folder_id: 25081370
+                id: 62567615
+                job_succeeded_count: 6244
+                lifetime_task_count: 12473
+                tags:
+                    - "critical"
+                    - "capture"
+            started_at: "2025-06-14T16:17:11.000-07:00"
+            status: "success"
+            title: "Scheduler by Workato: new recurring event: Scheduled time=2025-06-14T16:17:11.164120-07:00, Scheduled day=Saturday, and Scheduled week=23"
+            workato:
+                duration: 3.0E9
+                project_name: "Admin Ops"
+                recipe_name: "MDM Migrate"
+        message: |-
+          {
+            "duration" : 3000000,
+            "completed_at" : "2025-06-14T16:17:14.000-07:00",
+            "recipe" : {
+              "job_succeeded_count" : 6244,
+              "lifetime_task_count" : 12473,
+              "name" : "MDM Migrate",
+              "description" : "",
+              "id" : 62567615,
+              "folder_id" : 25081370,
+              "tags" : [ "critical", "capture" ]
+            },
+            "project" : {
+              "name" : "Admin Ops",
+              "description" : "",
+              "id" : 12466695,
+              "folder_id" : 25081360
+            },
+            "started_at" : "2025-06-14T16:17:11.000-07:00",
+            "is_error" : false,
+            "id" : "j-ATC9XJmT-hGWfsa",
+            "title" : "Scheduler by Workato: new recurring event: Scheduled time=2025-06-14T16:17:11.164120-07:00, Scheduled day=Saturday, and Scheduled week=23",
+            "status" : "success"
+          }
+        status: "ok"
+        tags:
+         - "source:LOGS_SOURCE"
+        timestamp: 1749943034000
+  -
+    sample: >-
+      {
+        "recipe": {
+          "name": "MDM Ingest",
+          "job_succeeded_count": 27941,
+          "lifetime_task_count": 55882,
+          "description": "",
+          "id": 62605996,
+          "folder_id": 25077197,
+          "tags": [
+            "critical"
+          ]
+        },
+        "project": {
+          "name": "Backend Batch Ops",
+          "description": "Processes running as batch in the backend",
+          "id": 12464630,
+          "folder_id": 25077197
+        },
+        "title": "Webhooks: new event via webhook: Accept=*/*, Content length=35, and Content type=application/x-www-form-urlencoded",
+        "error_parts": {
+          "error_type": "Database adapter error",
+          "error_id": "d7f969a3-ad6b-48f0-b3f0-19fe6a666c02",
+          "message": "Database bridge error: PreparedStatementCallback; ERROR: duplicate key value violates unique constraint."
+        },
+        "completed_at": "2025-06-14T16:06:52.000-07:00",
+        "started_at": "2025-06-14T16:06:52.000-07:00",
+        "is_error": true,
+        "id": "j-ATC9M4zB-arY9wA",
+        "status": "error",
+        "duration": 0
+      }
+    result:
+      custom:
+        completed_at: "2025-06-14T16:06:52.000-07:00"
+        duration: 0
+        error: "Database adapter error"
+        error_parts:
+          error_id: "d7f969a3-ad6b-48f0-b3f0-19fe6a666c02"
+          message: "Database bridge error: PreparedStatementCallback; ERROR: duplicate key value violates unique constraint."
+        id: "j-ATC9M4zB-arY9wA"
+        is_error: true
+        project:
+          description: "Processes running as batch in the backend"
+          folder_id: 25077197
+          id: 12464630
+        recipe:
+          description: ""
+          folder_id: 25077197
+          id: 62605996
+          job_succeeded_count: 27941
+          lifetime_task_count: 55882
+          tags:
+            - "critical"
+        started_at: "2025-06-14T16:06:52.000-07:00"
+        status: "error"
+        title: "Webhooks: new event via webhook: Accept=*/*, Content length=35, and Content type=application/x-www-form-urlencoded"
+        workato:
+          duration: 0.0
+          project_name: "Backend Batch Ops"
+          recipe_name: "MDM Ingest"
+      message: |-
+        {
+          "duration" : 0,
+          "completed_at" : "2025-06-14T16:06:52.000-07:00",
+          "recipe" : {
+            "job_succeeded_count" : 27941,
+            "lifetime_task_count" : 55882,
+            "name" : "MDM Ingest",
+            "description" : "",
+            "id" : 62605996,
+            "folder_id" : 25077197,
+            "tags" : [ "critical" ]
+          },
+          "project" : {
+            "name" : "Backend Batch Ops",
+            "description" : "Processes running as batch in the backend",
+            "id" : 12464630,
+            "folder_id" : 25077197
+          },
+          "started_at" : "2025-06-14T16:06:52.000-07:00",
+          "is_error" : true,
+          "id" : "j-ATC9M4zB-arY9wA",
+          "title" : "Webhooks: new event via webhook: Accept=*/*, Content length=35, and Content type=application/x-www-form-urlencoded",
+          "error_parts" : {
+            "error_id" : "d7f969a3-ad6b-48f0-b3f0-19fe6a666c02",
+            "error_type" : "Database adapter error",
+            "message" : "Database bridge error: PreparedStatementCallback; ERROR: duplicate key value violates unique constraint."
+          },
+          "status" : "error"
+        }
+      status: "error"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1749942412000

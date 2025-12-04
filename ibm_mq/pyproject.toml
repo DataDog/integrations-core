@@ -22,12 +22,12 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.0.0",
+    "datadog-checks-base>=37.24.0",
 ]
 dynamic = [
     "version",
@@ -38,7 +38,7 @@ requires-python = ">=3.9"
 [project.optional-dependencies]
 deps = [
     "psutil==6.0.0",
-    "pymqi==1.12.11; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "pymqi==1.12.11",
 ]
 
 [project.urls]

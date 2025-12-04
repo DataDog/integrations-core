@@ -8,7 +8,7 @@ from collections import namedtuple
 import click
 from tabulate import tabulate
 
-from ...console import CONTEXT_SETTINGS, echo_info, echo_warning
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_info, echo_warning
 
 OPTION_ALL = '*'
 

@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from ..common import exclude_undefined_keys
+from datadog_checks.base.utils.common import exclude_undefined_keys
 
 # https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 SEMVER_PATTERN = re.compile(

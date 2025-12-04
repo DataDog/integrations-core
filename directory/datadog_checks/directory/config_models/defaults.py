@@ -36,6 +36,10 @@ def instance_ignore_missing():
     return False
 
 
+def instance_max_filegauge_count():
+    return 20
+
+
 def instance_min_collection_interval():
     return 15
 

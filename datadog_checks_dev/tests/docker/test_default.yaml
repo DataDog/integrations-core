@@ -12,3 +12,8 @@ services:
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
     ports:
       - "8200:8200"
+
+  logging-service:
+    image: alpine
+    container_name: ddev_logging_service
+    command: sh -c 'while true; do echo "I am a logging service"; sleep 1; done'

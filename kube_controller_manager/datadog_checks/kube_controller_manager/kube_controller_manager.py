@@ -129,8 +129,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin
                         {'node_collector_unhealthy_nodes_in_zone': 'nodes.unhealthy'},
                         {'node_collector_zone_size': 'nodes.count'},
                         {
-                            "job_controller_terminated_pods_"
-                            "tracking_finalizer_total": "job_controller.terminated"
+                            "job_controller_terminated_pods_tracking_finalizer_total": "job_controller.terminated"
                             "_pods_tracking_finalizer"
                         },
                         NEW_1_24_COUNTERS,

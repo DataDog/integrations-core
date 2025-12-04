@@ -1,6 +1,13 @@
 import click
 
-from ...console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_success, echo_warning
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
+
 from . import validators
 from .validators.utils import (
     exist_profile_in_path,

@@ -4,6 +4,7 @@
 """
 Type declarations, for type checking purposes only.
 """
+
 from typing import Literal, NamedTuple, Tuple, TypedDict, TypeVar
 
 T = TypeVar("T")

@@ -16,7 +16,7 @@ from datadog_checks.http_check import HTTPCheck
 
 from .common import CONFIG_E2E, HERE
 
-MOCKED_HOSTS = ['valid.mock', 'expired.mock', 'wronghost.mock', 'selfsigned.mock']
+MOCKED_HOSTS = ['valid.mock', 'expired.mock', 'wronghost.mock', 'selfsigned.mock', 'tinyproxy.mock']
 
 
 @pytest.fixture(scope='session')
@@ -29,7 +29,7 @@ def dd_environment(mock_local_http_dns):
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yml'),
         build=True,
-        log_patterns=["starting server on port"],
+        log_patterns=["start worker process"],
         conditions=[WaitFor(call_endpoint, args=("https://127.0.0.1",))],
     ):
         yield CONFIG_E2E, e2e_metadata
@@ -43,7 +43,7 @@ def call_endpoint(url):
 
 @pytest.fixture(scope='session')
 def mock_local_http_dns():
-    mapping = {x: ('127.0.0.1', 443) for x in MOCKED_HOSTS}
+    mapping = dict.fromkeys(MOCKED_HOSTS, ('127.0.0.1', 443))
     with mock_local(mapping):
         yield
 
@@ -53,6 +53,14 @@ def http_check():
     # Patch the function to return the certs located in the `tests/` folder
     with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
         yield HTTPCheck('http_check', {}, [{}])
+
+
+@pytest.fixture(scope='function')
+def http_check_via_proxy():
+    # Patch the function to return the certs located in the `tests/` folder
+    # configured with a HTTPS proxy
+    with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
+        yield HTTPCheck('http_check', {'proxy': {'https': 'http://localhost:8008', 'no_proxy': ['any']}}, [{}])
 
 
 @pytest.fixture(scope='session')

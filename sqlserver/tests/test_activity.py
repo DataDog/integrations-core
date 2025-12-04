@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -22,8 +22,11 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
+from datadog_checks.sqlserver.const import (
+    STATIC_INFO_SERVERNAME,
+)
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_YEAR
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -122,6 +125,7 @@ def test_collect_load_activity(
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
     expected_instance_tags.add("database_hostname:stubbed.hostname")
     expected_instance_tags.add("database_instance:stubbed.hostname")
+    expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
     if collect_raw_query_statement:
         instance["collect_raw_query_statement"] = {"enabled": True}
         expected_instance_tags.add("raw_query_statement:enabled")
@@ -185,6 +189,10 @@ def test_collect_load_activity(
     # and shutdown executor
     fred_conn.close()
     executor.shutdown(wait=True)
+
+    expected_instance_tags.add(
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower())
+    )
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -265,7 +273,7 @@ def test_collect_load_activity(
 
 
 @pytest.mark.flaky
-@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_YEAR == 2019, reason='Test flakes on this set up')
 @pytest.mark.skipif(running_on_windows_ci(), reason="Test disabled due to failure impacting master pipeline")
 def test_activity_nested_blocking_transactions(
     aggregator,
@@ -290,9 +298,7 @@ def test_activity_nested_blocking_transactions(
             id int,
             name varchar(10),
             city varchar(20)
-        )""".format(
-            TABLE_NAME
-        ),
+        )""".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1001, 'tire', 'sfo')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1002, 'wisth', 'nyc')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1003, 'tire', 'aus')".format(TABLE_NAME),
@@ -824,7 +830,12 @@ def _get_conn_for_user(instance_docker, user, _autocommit=False):
 
 
 def _expected_dbm_instance_tags(check):
-    return check._config.tags
+    return check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
 
 
 @pytest.mark.integration
@@ -926,6 +937,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
                 'row_count': 1,
                 'query_hash': b'f\x8b\xa3Xc\xb3T\xfb',
                 'query_plan_hash': b'\xb0qh9\x0c\xa9\xa3\xb8',
+                'client_interface_name': 'Microsoft JDBC Driver 7.2',
             },
             id="no_statement_text",
         ),
@@ -965,6 +977,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
                 'row_count': 0,
                 'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
                 'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+                'client_interface_name': 'Microsoft JDBC Driver 7.2',
             },
             id="with_statement_text",
         ),

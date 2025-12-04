@@ -80,6 +80,38 @@ class KafkaConfig:
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 
+        # Data Streams live messages
+        self.live_messages_configs = instance.get('live_messages_configs', [])
+
+        self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
+
+        if self._cluster_monitoring_enabled:
+            self._monitor_unlisted_consumer_groups = True
+            if not is_affirmative(instance.get('monitor_unlisted_consumer_groups', False)):
+                self.log.debug(
+                    "Cluster monitoring is enabled. Automatically enabling consumer lag collection "
+                    "for all consumer groups (monitor_unlisted_consumer_groups)."
+                )
+
+            self._data_streams_enabled = True
+            if not is_affirmative(instance.get('data_streams_enabled', False)):
+                self.log.debug(
+                    "Cluster monitoring is enabled. Automatically enabling Data Streams monitoring "
+                    "(data_streams_enabled)."
+                )
+        else:
+            self._data_streams_enabled = is_affirmative(instance.get('data_streams_enabled', False))
+
+        self._collect_schema_registry = instance.get('schema_registry_url')
+
+        # Schema Registry authentication
+        self._schema_registry_username = instance.get('schema_registry_username')
+        self._schema_registry_password = instance.get('schema_registry_password')
+        self._schema_registry_tls_verify = is_affirmative(instance.get('schema_registry_tls_verify', True))
+        self._schema_registry_tls_cert = instance.get('schema_registry_tls_cert')
+        self._schema_registry_tls_key = instance.get('schema_registry_tls_key')
+        self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
+
     def validate_config(self):
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')
@@ -124,6 +156,70 @@ class KafkaConfig:
             )
 
         self._validate_consumer_groups()
+        self._validate_live_messages_configs()
+
+    def _validate_live_messages_configs(self):
+        live_messages_configs = []
+        for config in self.live_messages_configs:
+            if 'id' not in config:
+                self.log.debug('Data Streams live messages configuration has no ID')
+                continue
+            kafka = config.get('kafka', None)
+            if not kafka:
+                self.log.debug('Data Streams live messages configuration has no kafka configuration')
+                continue
+            if not (
+                'cluster' in kafka
+                and 'topic' in kafka
+                and 'partition' in kafka
+                and 'start_offset' in kafka
+                and 'n_messages' in kafka
+            ):
+                self.log.debug('Data Streams live messages configuration missing required kafka parameters.', kafka)
+                continue
+
+            # Validate value format
+            if kafka.get('value_format', '') == '':
+                kafka['value_format'] = 'json'
+            value_format = kafka['value_format']
+            if value_format not in ['json', 'avro', 'protobuf']:
+                self.log.debug(
+                    'Unsupported value format for Data Streams live messages, got %s. '
+                    'Supported formats: json, avro, protobuf',
+                    value_format,
+                )
+                continue
+
+            # Validate key format
+            if kafka.get('key_format', '') == '':
+                kafka['key_format'] = 'json'
+            key_format = kafka['key_format']
+            if key_format not in ['json', 'avro', 'protobuf']:
+                self.log.debug(
+                    'Unsupported key format for Data Streams live messages, got %s. '
+                    'Supported formats: json, avro, protobuf',
+                    key_format,
+                )
+                continue
+
+            # Validate schemas for non-JSON formats
+            if value_format in ['avro', 'protobuf']:
+                if 'value_schema' not in kafka or not kafka['value_schema']:
+                    self.log.debug(
+                        'Value schema is required for %s format in Data Streams live messages configuration',
+                        value_format,
+                    )
+                    continue
+
+            if key_format in ['avro', 'protobuf']:
+                if 'key_schema' not in kafka or not kafka['key_schema']:
+                    self.log.debug(
+                        'Key schema is required for %s format in Data Streams live messages configuration', key_format
+                    )
+                    continue
+
+            live_messages_configs.append(config)
+        self.live_messages_configs = live_messages_configs
 
     def _compile_regex(self, consumer_groups_regex, consumer_groups):
         # Turn the dict of regex dicts into a single string and compile
