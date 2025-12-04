@@ -339,6 +339,20 @@ def test_mysql_ok(aggregator, instance_remote_mysql_valid):
     aggregator.assert_all_metrics_covered()
 
 
+def test_smtp_ok(aggregator, instance_remote_smtp_valid):
+    c = TLSCheck('tls', {}, [instance_remote_smtp_valid])
+    c.check(None)
+
+    aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_VERSION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
+
+    aggregator.assert_metric('tls.days_left', count=1)
+    aggregator.assert_metric('tls.seconds_left', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
 def test_valid_version_with_critical_certificate_validation_and_critial_certificate_expiration(
     aggregator, instance_remote_ok
 ):
