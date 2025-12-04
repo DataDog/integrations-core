@@ -104,10 +104,65 @@ tests:
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f4, Tenant Name: TestTenant, Event Type: OpticsCaeHttpEvent, Event Name: OpticsCaeHttpEvent, Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id: 41ea5ce4-6501-4c13-a7a2-80f9afec9eef, Severity: High, Description: DEVICE - Trigger on ANY http sensor event, Instigating Process Name: svchost.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 2B105FB153B1BCD619B95028612B3A93C60B953EEF6837D3BB0099E4207AAF6A, Event Timestamp: 2023-08-23T15:48:52.992Z, Event Received Timestamp: 2023-08-23T15:48:57Z, Device Last Reported Users: (RIMNET\\adminuser,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id: 9a82a2d3-e6b0-4177-9bac-80ba5b1ef984, Instigating Process Command Line: C:\\WINDOWS\\system32\\svchost.exe -k netsvcs -p -s wlidsvc, Instigating Process File Path: c:\\windows\\system32\\svchost.exe, Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bq, User Agent: Microsoft-CryptoAPI/10.0, Request Domain: ocsp.digicert.com, Request Path: /MFEwTzBNMEswSTAJBgUrDgMCGgUABBSAUQYBMq2awn1Rh6Doh%2FsBYgFV7gQUA95QNVbRTLtm8KPiGxvDl7I90VUCEAJ0LqoXyo4hxxe7H%2Fz9DKA%3A, Request Method: GET, Request Port: 80, Request Version: HTTP/1.1, Request Headers: 0, Request Length: 0, Response Status: 200, Response Headers: 0, Response Length: 0"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "DEVICE - Trigger on ANY http sensor event"
+      detection_rule_id: "9a82a2d3-e6b0-4177-9bac-80ba5b1ef984"
+      device_id: "744ac660-9704-4edb-a8d0-ae13a343f3bq"
+      device_last_reported_users:
+       - "RIMNET\\adminuser"
+       - "Window Manager\\DWM-1"
+       - "Window Manager\\DWM-2"
+      device_name: "DEVICE-W19"
+      dns:
+        question:
+          name: "ocsp.digicert.com"
+      event_id: "41ea5ce4-6501-4c13-a7a2-80f9afec9eef"
+      event_received_timestamp: "2023-08-23T15:48:57Z"
+      event_timestamp: "2023-08-23T15:48:52.992Z"
+      event_type: "OpticsCaeHttpEvent"
+      evt:
+        name: "OpticsCaeHttpEvent"
+      http:
+        status_category: "Successful"
+        useragent: "Microsoft-CryptoAPI/10.0"
+        useragent_details:
+          browser:
+            family: "Microsoft-CryptoAPI"
+            major: "10"
+            minor: "0"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      instigating_process_command_line: "C:\\WINDOWS\\system32\\svchost.exe -k netsvcs -p -s wlidsvc"
+      instigating_process_file_path: "c:\\windows\\system32\\svchost.exe"
+      instigating_process_imagefilesha256: "2B105FB153B1BCD619B95028612B3A93C60B953EEF6837D3BB0099E4207AAF6A"
+      instigating_process_name: "svchost.exe"
+      instigating_process_owner: "NT AUTHORITY//SYSTEM"
+      request_headers: "0"
+      request_length: 0
+      request_method: "GET"
+      request_path: "/MFEwTzBNMEswSTAJBgUrDgMCGgUABBSAUQYBMq2awn1Rh6Doh%2FsBYgFV7gQUA95QNVbRTLtm8KPiGxvDl7I90VUCEAJ0LqoXyo4hxxe7H%2Fz9DKA%3A"
+      request_port: "80"
+      request_version: "HTTP/1.1"
+      response_headers: "0"
+      response_length: 0
+      response_status: "200"
+      service: "detection-events"
+      severity: "High"
+      status: "critical"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f4"
+      tenant_name: "TestTenant"
+      zone_ids: "(D215191148D64DEE826768B62D64B244)"
+      zone_names: "(Zone_3.x)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f4, Tenant Name: TestTenant, Event Type: OpticsCaeHttpEvent, Event Name: OpticsCaeHttpEvent, Device Name: DEVICE-W19, Zone Names: (Zone_3.x), Event Id: 41ea5ce4-6501-4c13-a7a2-80f9afec9eef, Severity: High, Description: DEVICE - Trigger on ANY http sensor event, Instigating Process Name: svchost.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 2B105FB153B1BCD619B95028612B3A93C60B953EEF6837D3BB0099E4207AAF6A, Event Timestamp: 2023-08-23T15:48:52.992Z, Event Received Timestamp: 2023-08-23T15:48:57Z, Device Last Reported Users: (RIMNET\\adminuser,Window Manager\\DWM-1,Window Manager\\DWM-2), Zone Ids: (D215191148D64DEE826768B62D64B244), Detection Rule Id: 9a82a2d3-e6b0-4177-9bac-80ba5b1ef984, Instigating Process Command Line: C:\\WINDOWS\\system32\\svchost.exe -k netsvcs -p -s wlidsvc, Instigating Process File Path: c:\\windows\\system32\\svchost.exe, Device Id: 744ac660-9704-4edb-a8d0-ae13a343f3bq, User Agent: Microsoft-CryptoAPI/10.0, Request Domain: ocsp.digicert.com, Request Path: /MFEwTzBNMEswSTAJBgUrDgMCGgUABBSAUQYBMq2awn1Rh6Doh%2FsBYgFV7gQUA95QNVbRTLtm8KPiGxvDl7I90VUCEAJ0LqoXyo4hxxe7H%2Fz9DKA%3A, Request Method: GET, Request Port: 80, Request Version: HTTP/1.1, Request Headers: 0, Request Length: 0, Response Status: 200, Response Headers: 0, Response Length: 0"
+    service: "detection-events"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeMemoryEvent, Event Name: OpticsCaeMemoryEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,Jeff_3.0), Event Id: c4e7d4e1-8739-4996-83a3-19d9ba583882, Severity: Medium, Description: Looking for a protect memory event, Instigating Process Name: AttackTest32.exe, Instigating Process Owner: PENTEST/Administrator, Instigating Process ImageFileSha256: 2762CB5818C67BDD28DFE88FB528EF06B0C1AB5C175E2206B49C85BB8672C2EC, Event Timestamp: 2022-07-21T12:55:02.277Z, Event Received Timestamp: 2022-07-21T12:55:25Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: edf530c6-6b0e-4be2-aeb6-d3f8001fce05, Instigating Process Command Line: AttackTest32.exe -p:8000, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\attacktest\\attacktest32.exe, Device Id: e378dacb-9324-453a-b8c6-5a8406952195"
   result:
@@ -392,10 +447,47 @@ tests:
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeNetworkEvent, Event Name: OpticsCaeNetworkEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 23a04c4c-1a97-4a58-b4bc-fadadb729e30, Severity: Medium, Description: SYSLOG detections - Looking for NetworkConnection 8.8.8.9, Instigating Process Name: ICreateNetworkConnections.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: F816E73FFAD0CA8684B6E44292276DD9B9CB8890ABAA732A7AEB283B46D32009, Event Timestamp: 2022-06-28T18:09:56.392Z, Event Received Timestamp: 2022-06-28T18:10:00Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470202C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAB), Detection Rule Id: fdac76c0-5c6b-4b6f-8062-e074457afe3e, Instigating Process Command Line: ICreateNetworkConnections.exe --sequential 8.9.8.8, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatenetworkconnections.exe, Destination IP: 103.224.182.1, Destination Port: 29286, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1959, Source IP: 103.224.182.1, Source Port: 52910"
   result:
-    custom: {}
+    custom:
+      additional_details: ""
+      description: "SYSLOG detections - Looking for NetworkConnection 8.8.8.9"
+      detection_rule_id: "fdac76c0-5c6b-4b6f-8062-e074457afe3e"
+      device_id: "c7b79f9f-4fbe-4f90-9658-ec7e17af1959"
+      device_last_reported_users:
+       - "PENTEST\\Administrator"
+      device_name: "SECURITYSERVER3"
+      event_id: "23a04c4c-1a97-4a58-b4bc-fadadb729e30"
+      event_received_timestamp: "2022-06-28T18:10:00Z"
+      event_timestamp: "2022-06-28T18:09:56.392Z"
+      event_type: "OpticsCaeNetworkEvent"
+      evt:
+        name: "OpticsCaeNetworkEvent"
+      instigating_process_command_line: "ICreateNetworkConnections.exe --sequential 8.9.8.8"
+      instigating_process_file_path: "c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatenetworkconnections.exe"
+      instigating_process_imagefilesha256: "F816E73FFAD0CA8684B6E44292276DD9B9CB8890ABAA732A7AEB283B46D32009"
+      instigating_process_name: "ICreateNetworkConnections.exe"
+      instigating_process_owner: "PENTEST//Administrator"
+      network:
+        client:
+          geoip: {}
+          ip: "103.224.182.1"
+          port: "52910"
+        destination:
+          geoip: {}
+          ip: "103.224.182.1"
+          port: "29286"
+      service: "detection-events"
+      severity: "Medium"
+      status: "warning"
+      tenant_id: "82ee77a2-76a6-4d8f-97de-231bd4d5a4f7"
+      tenant_name: "TestTenant"
+      zone_ids: "(F568A8A8E401470202C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAB)"
+      zone_names: "(JeffTesting,JeffSecurityServer)"
     message: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeNetworkEvent, Event Name: OpticsCaeNetworkEvent, Device Name: SECURITYSERVER3, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 23a04c4c-1a97-4a58-b4bc-fadadb729e30, Severity: Medium, Description: SYSLOG detections - Looking for NetworkConnection 8.8.8.9, Instigating Process Name: ICreateNetworkConnections.exe, Instigating Process Owner: PENTEST//Administrator, Instigating Process ImageFileSha256: F816E73FFAD0CA8684B6E44292276DD9B9CB8890ABAA732A7AEB283B46D32009, Event Timestamp: 2022-06-28T18:09:56.392Z, Event Received Timestamp: 2022-06-28T18:10:00Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470202C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAB), Detection Rule Id: fdac76c0-5c6b-4b6f-8062-e074457afe3e, Instigating Process Command Line: ICreateNetworkConnections.exe --sequential 8.9.8.8, Instigating Process File Path: c:\\users\\administrator.pentest\\downloads\\syslog_test_cae_rules\\icreatenetworkconnections.exe, Destination IP: 103.224.182.1, Destination Port: 29286, Device Id: c7b79f9f-4fbe-4f90-9658-ec7e17af1959, Source IP: 103.224.182.1, Source Port: 52910"
+    service: "detection-events"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: "Tenant ID: 82ee77a2-76a6-4d8f-97de-231bd4d5a4f7, Tenant Name: TestTenant, Event Type: OpticsCaeDnsEvent, Event Name: OpticsCaeDnsEvent, Device Name: SECURITYSERVER, Zone Names: (JeffTesting,JeffSecurityServer), Event Id: 6458f3ac-e527-4922-83ac-654518c3137e, Severity: Medium, Description: Win_Suspicious_DNSLength_MitreT1071, Instigating Process Name: lsass.exe, Instigating Process Owner: NT AUTHORITY//SYSTEM, Instigating Process ImageFileSha256: 91EAB6178A9BB2B268E7438E54B128F939C0BDF5BD8AC8B15EFCAF0572AADC3F, Event Timestamp: 2022-06-28T17:34:12.772Z, Event Received Timestamp: 2022-06-28T17:34:33Z, Device Last Reported Users: (PENTEST\\Administrator), Zone Ids: (F568A8A8E401470282C1FE98FDD1703C,161EB91D79D6466A80182CF685FA7CAA), Detection Rule Id: 0da4f7c3-af0d-46be-8f6b-1884a1c67331, Instigating Process Command Line: C:\\Windows\\system32\\lsass.exe, Instigating Process File Path: c:\\windows\\system32\\lsass.exe, Target Domain Name: 7f2a98df-486e-4cec-8d6e-c227073955e6._msdcs.Pentest.Local., Resolved Address: securityserver.Pentest.Local, Resolved Address Count: 1, Device Id: 41666e82-50e6-4777-88b6-5f2b567027b9"
   result:

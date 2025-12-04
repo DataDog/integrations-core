@@ -75,13 +75,13 @@
       }
     },
     "dashboards": {
-      "Arctic Wolf Aurora Endpoint Security Overview": "assets/dashboards/arctic_wolf_aurora_endpoint_security_overview",
-      "Arctic Wolf Aurora Endpoint Security Threat Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_threat_insights",
-      "Arctic Wolf Aurora Endpoint Security Application and Device Control Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_application_and_device_control_insights",
-      "Arctic Wolf Aurora Endpoint Security Memory protection and Script Control Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_memory_protection_and_script_control_insights",
-      "Arctic Wolf Aurora Endpoint Security Network Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_network_insights",
-      "Arctic Wolf Aurora Endpoint Security Process and System Activity": "assets/dashboards/arctic_wolf_aurora_endpoint_security_process_and_system_activity",
-      "Arctic Wolf Aurora Endpoint Security System Tool Activity": "assets/dashboards/arctic_wolf_aurora_endpoint_security_system_tool_activity"
+      "Arctic Wolf Aurora Endpoint Security Overview": "assets/dashboards/arctic_wolf_aurora_endpoint_security_overview.json",
+      "Arctic Wolf Aurora Endpoint Security Threat Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_threat_insights.json",
+      "Arctic Wolf Aurora Endpoint Security Application and Device Control Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_application_and_device_control_insights.json",
+      "Arctic Wolf Aurora Endpoint Security Memory protection and Script Control Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_memory_protection_and_script_control_insights.json",
+      "Arctic Wolf Aurora Endpoint Security Network Insights": "assets/dashboards/arctic_wolf_aurora_endpoint_security_network_insights.json",
+      "Arctic Wolf Aurora Endpoint Security Process and System Activity": "assets/dashboards/arctic_wolf_aurora_endpoint_security_process_and_system_activity.json",
+      "Arctic Wolf Aurora Endpoint Security System Tool Activity": "assets/dashboards/arctic_wolf_aurora_endpoint_security_system_tool_activity.json"
     },
     "logs": {
       "source": "arctic-wolf-aurora-endpoint-security"

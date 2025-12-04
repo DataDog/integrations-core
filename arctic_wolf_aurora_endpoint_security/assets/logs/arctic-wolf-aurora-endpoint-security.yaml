@@ -122,6 +122,11 @@ facets:
     name: Event Name
     path: evt.name
     source: log
+  - groups:
+      - DNS
+    name: Question Name
+    path: dns.question.name
+    source: log
 pipeline:
   type: pipeline
   name: Arctic Wolf Aurora Endpoint Security
