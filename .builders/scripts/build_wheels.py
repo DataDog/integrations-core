@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -17,9 +18,11 @@ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 
+
 class WheelSizes(TypedDict):
     compressed: int
     uncompressed: int
+
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -90,6 +93,15 @@ def main():
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
 
+    print("--------------------------------")
+    print("[DEBUGGING INFO]")
+    print("running on: ", sys.platform)
+    print("architecture: ", platform.machine())
+    print("sys.version: ", sys.version)
+    print("python_path: ", python_path)
+    subprocess.run([python_path, "--version"])
+    print("Platform:", sys.platform)
+    print("--------------------------------")
     with TemporaryDirectory() as d:
         staged_wheel_dir = Path(d).resolve()
         env_vars = dict(os.environ)
@@ -166,7 +178,6 @@ def main():
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
-
 
             sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
 
