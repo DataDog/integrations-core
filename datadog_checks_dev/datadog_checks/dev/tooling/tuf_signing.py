@@ -193,12 +193,14 @@ def generate_targets_metadata(
             # Download and parse pointer file
             try:
                 response = s3_client.get_object(Bucket=bucket, Key=key)
-                pointer_content = yaml.safe_load(response['Body'])
+                # Read body once (StreamingBody is not seekable)
+                pointer_bytes = response['Body'].read()
+
+                # Parse YAML from bytes
+                pointer_content = yaml.safe_load(pointer_bytes)
                 pointer = pointer_content.get('pointer', {})
 
                 # Calculate hash of pointer file itself
-                response['Body'].seek(0)
-                pointer_bytes = response['Body'].read()
                 pointer_hash = hashlib.sha256(pointer_bytes).hexdigest()
 
                 # Add to targets

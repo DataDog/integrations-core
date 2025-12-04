@@ -177,7 +177,8 @@ def build_package(package_path, sdist):
         list_of_wheels = glob.glob(os.path.join(package_path, "dist", "*"))
         wheel_path = max(list_of_wheels, key=os.path.getctime)
         URI_TEMPLATE = "https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/{}/{}"
-        package_name = os.path.basename(package_path)
+        folder_name = os.path.basename(package_path)
+        package_name = get_package_name(folder_name)
         wheel_name = os.path.basename(wheel_path)
         version = wheel_name.split("-")[1]
         uri = URI_TEMPLATE.format(package_name, wheel_name)
@@ -197,7 +198,7 @@ def build_package(package_path, sdist):
         }
         print("Using digest: ", digest)
         with open(
-            os.path.join(package_path, "dist", f"{os.path.basename(package_path)}-{version}.pointer"), "w"
+            os.path.join(package_path, "dist", f"{folder_name}-{version}.pointer"), "w"
         ) as pointer_file:
             yaml.safe_dump(pointer, pointer_file)
             print("Created ", pointer_file.name, " with contents ", pointer)
