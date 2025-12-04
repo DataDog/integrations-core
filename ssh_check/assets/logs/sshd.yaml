@@ -81,6 +81,7 @@ pipeline:
           name: Add ocsf.metadata.product.vendor_name
           enabled: true
           template: "OpenBSD"
+          replaceMissing: false
           target: ocsf.metadata.product.vendor_name
         - type: schema-processor
           name: Apply OCSF schema for 3002
