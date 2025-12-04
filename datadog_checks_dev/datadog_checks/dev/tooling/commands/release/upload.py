@@ -19,9 +19,28 @@ from datadog_checks.dev.tooling.utils import complete_valid_checks, get_valid_ch
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--pypi', is_flag=True, help='Upload to PyPI instead of S3')
 @click.option('--public', is_flag=True, help='Upload both wheel and pointer files to S3 (for public packages)')
+@click.option(
+    '--aws-vault-profile',
+    default=None,
+    help='AWS Vault profile to use for S3 authentication (default: sso-agent-integrations-dev-account-admin)',
+)
 @click.pass_context
-def upload(ctx, check, sdist, dry_run, pypi, public):
-    """Release a specific check to S3 (default) or PyPI (with --pypi flag) as it is on the repo HEAD."""
+def upload(ctx, check, sdist, dry_run, pypi, public, aws_vault_profile):
+    """Release a specific check to S3 (default) or PyPI (with --pypi flag) as it is on the repo HEAD.
+
+    For S3 uploads, AWS credentials are required. If not available, the command will
+    automatically use aws-vault with the specified profile (or the default profile).
+
+    Examples:
+        # Upload with automatic aws-vault (uses default profile)
+        ddev release upload --public postgres
+
+        # Upload with specific aws-vault profile
+        ddev release upload --public postgres --aws-vault-profile my-profile
+
+        # Upload to PyPI instead of S3
+        ddev release upload --pypi postgres
+    """
     if check in get_valid_checks():
         check_dir = os.path.join(get_root(), check)
     else:
@@ -54,7 +73,11 @@ def upload(ctx, check, sdist, dry_run, pypi, public):
                     abort(code=result.code)
     else:
         # Upload to S3
+        from datadog_checks.dev.tooling.aws_helpers import ensure_aws_credentials
         from datadog_checks.dev.tooling.utils import get_version_string
+
+        # Ensure AWS credentials are available (may re-exec with aws-vault)
+        ensure_aws_credentials(profile=aws_vault_profile)
 
         echo_waiting(f'Building and uploading `{check}` to S3...')
 

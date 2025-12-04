@@ -176,7 +176,7 @@ def build_package(package_path, sdist):
         # Get the most recent file in the dist directory
         list_of_wheels = glob.glob(os.path.join(package_path, "dist", "*"))
         wheel_path = max(list_of_wheels, key=os.path.getctime)
-        URI_TEMPLATE = "dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/{}/{}"
+        URI_TEMPLATE = "https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/{}/{}"
         package_name = os.path.basename(package_path)
         wheel_name = os.path.basename(wheel_path)
         version = wheel_name.split("-")[1]
@@ -184,7 +184,17 @@ def build_package(package_path, sdist):
         print("Using URI: ", uri)
         with open(wheel_path, "rb") as wheel:
             digest = hashlib.sha256(wheel.read()).hexdigest()
-        pointer = {"pointer": {"name": package_name, "version": version, "uri": uri, "digest": digest}}
+        wheel_size = os.path.getsize(wheel_path)
+        pointer = {
+            "pointer": {
+                "name": package_name,
+                "version": version,
+                "uri": uri,
+                "digest": digest,
+                "length": wheel_size,
+                "custom": {},
+            }
+        }
         print("Using digest: ", digest)
         with open(
             os.path.join(package_path, "dist", f"{os.path.basename(package_path)}-{version}.pointer"), "w"
@@ -202,9 +212,11 @@ def upload_package(package_path, version, public=False):
     aws-vault exec sso-agent-integrations-dev-account-admin -- ddev release upload <check>
     """
     import glob
+    import hashlib
     import os
 
     import boto3
+    from botocore.exceptions import ClientError
 
     S3_BUCKET = "test-public-integration-wheels"
     S3_REGION = "eu-north-1"
@@ -230,14 +242,69 @@ def upload_package(package_path, version, public=False):
     wheel_file_path = max(wheel_files, key=os.path.getctime)
     wheel_file_name = os.path.basename(wheel_file_path)
 
+    # Calculate wheel hash
+    with open(wheel_file_path, 'rb') as f:
+        wheel_hash = hashlib.sha256(f.read()).hexdigest()
+
     if public:
-        # Upload both the pointer and the wheel
+        # Upload both the pointer and the wheel to organized paths
         if not os.path.exists(pointer_file_path):
             raise FileNotFoundError(f"Pointer file not found: {pointer_file_path}")
-        s3.upload_file(pointer_file_path, S3_BUCKET, pointer_file_name)
-        s3.upload_file(wheel_file_path, S3_BUCKET, wheel_file_name)
+
+        # Check for idempotency: if pointer already exists with same hash, skip
+        pointer_s3_key = f"pointers/{package_name}/{pointer_file_name}"
+        try:
+            existing_pointer = s3.head_object(Bucket=S3_BUCKET, Key=pointer_s3_key)
+            existing_digest = existing_pointer.get('Metadata', {}).get('digest', '')
+            if existing_digest == wheel_hash:
+                print(f"Version {version} already uploaded with same hash, skipping")
+                return
+            print(f"Warning: Version {version} exists with different hash, overwriting")
+        except ClientError as e:
+            if e.response['Error']['Code'] != '404':
+                raise
+            # Doesn't exist, proceed with upload
+
+        # Upload pointer file
+        s3.upload_file(
+            pointer_file_path,
+            S3_BUCKET,
+            pointer_s3_key,
+            ExtraArgs={'Metadata': {'digest': wheel_hash, 'version': version}},
+        )
+
+        # Upload wheel file with hash metadata
+        wheel_s3_key = f"simple/{package_name}/{wheel_file_name}"
+        s3.upload_file(
+            wheel_file_path,
+            S3_BUCKET,
+            wheel_s3_key,
+            ExtraArgs={'Metadata': {'sha256': wheel_hash}},
+        )
+
         print(f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}")
+
+        # Generate indexes
+        from datadog_checks.dev.tooling.simple_index import generate_package_index, generate_root_index
+
+        print(f"Generating simple indexes...")
+        generate_package_index(s3, S3_BUCKET, package_name, use_pointers=True)
+        generate_root_index(s3, S3_BUCKET)
+        print(f"Updated simple indexes for {package_name}")
+
     else:
-        # Upload only the wheel
-        s3.upload_file(wheel_file_path, S3_BUCKET, wheel_file_name)
+        # Upload only the wheel to organized path
+        wheel_s3_key = f"simple/{package_name}/{wheel_file_name}"
+        s3.upload_file(
+            wheel_file_path,
+            S3_BUCKET,
+            wheel_s3_key,
+            ExtraArgs={'Metadata': {'sha256': wheel_hash}},
+        )
         print(f"Uploaded {wheel_file_name} to S3 bucket {S3_BUCKET}")
+
+        # Generate package index
+        from datadog_checks.dev.tooling.simple_index import generate_package_index
+
+        print(f"Generating simple index for {package_name}...")
+        generate_package_index(s3, S3_BUCKET, package_name, use_pointers=False)
