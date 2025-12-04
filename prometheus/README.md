@@ -56,7 +56,7 @@ Note: Bucket data for a given `<HISTOGRAM_METRIC_NAME>` Prometheus histogram met
 
 ### Events
 
-Prometheus Alertmanager alerts are automatically sent to your Datadog event stream following the webhook configuration.
+Prometheus Alertmanager alerts are automatically sent to your Datadog event stream following the webhook configuration. See the [Prometheus Alertmanager](#prometheus-alertmanager) section for setup instructions.
 
 ### Service Checks
 
@@ -66,8 +66,75 @@ The Prometheus check does not include any service checks.
 Send Prometheus Alertmanager alerts in the event stream. Natively, Alertmanager sends all alerts simultaneously to the configured webhook. To see alerts in Datadog, you must configure your instance of Alertmanager to send alerts one at a time. You can add a group-by parameter under `route` to have alerts grouped by the actual name of the alert rule.
 
 ### Setup
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "V2 (preferred)" xxx -->
+
 1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
+
+{{< highlight yaml "hl_lines=3-5" >}}
+receivers:
+- name: datadog
+  webhook_configs: 
+  - send_resolved: true
+    url: https://event-management-intake.datadoghq.com/api/v2/events/webhook?dd-api-key=<DATADOG_API_KEY>&integration_id=prometheus
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 5m
+  receiver: datadog
+  repeat_interval: 3h
+{{< /highlight >}}
+
+<div class="alert alert-info">
+The <code>group_by</code> parameter determines how alerts are grouped together when sent to Datadog. Alerts sharing the same values for the specified labels will be grouped into a single notification. For more details on routing configuration, see the <a href="https://prometheus.io/docs/alerting/latest/configuration/">Prometheus Alertmanager documentation</a>.
+</div>
+
+**Note**: This endpoint accepts only one event in the payload at a time.
+
+2. (Optional) Use matchers to redirect specific alerts to different receivers. Alertmanager supports matchers to route notifications based on any label. For more information on matcher syntax, see the [Alertmanager matcher documentation][12].
+
+The V2 webhook supports additional query parameters. For example, use the `oncall_team` parameter to integrate with the [Datadog On-Call][11] product and redirect pages to different teams:
+
+{{< highlight yaml "hl_lines=5 9 18-19" >}}
+receivers:
+- name: datadog-ops
+  webhook_configs: 
+  - send_resolved: true
+    url: https://event-management-intake.datadoghq.com/api/v2/events/webhook?dd-api-key=<DATADOG_API_KEY>&integration_id=prometheus&oncall_team=ops
+- name: datadog-db
+  webhook_configs:
+  - send_resolved: true
+    url: https://event-management-intake.datadoghq.com/api/v2/events/webhook?dd-api-key=<DATADOG_API_KEY>&integration_id=prometheus&oncall_team=database
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 5m
+  receiver: datadog-ops
+  repeat_interval: 3h
+  routes:
+  - matchers:
+    - team="database"
+    receiver: datadog-db
+{{< /highlight >}}
+
+<div class="alert alert-tip">
+Setting <code>send_resolved: true</code> (the default value) enables Alertmanager to send notifications when alerts are resolved in Prometheus. This is particularly important when using the <code>oncall_team</code> parameter to ensure pages are marked as resolved. Note that resolved notifications may take up to the next <code>group_interval</code> to be sent.
+</div>
+
+3. Restart the Prometheus and Alertmanager services.
+
+```shell
+sudo systemctl restart prometheus.service alertmanager.service
 ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "V1" xxx -->
+
+1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
+
+{{< highlight yaml "hl_lines=3-5" >}}
 receivers:
 - name: datadog
   webhook_configs: 
@@ -79,14 +146,18 @@ route:
   group_interval: 5m
   receiver: datadog
   repeat_interval: 3h
-```
+{{< /highlight >}}
 
 **Note**: This endpoint accepts only one event in the payload at a time.
 
 2. Restart the Prometheus and Alertmanager services.
-```
+
+```shell
 sudo systemctl restart prometheus.service alertmanager.service
 ```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ## Troubleshooting
 
@@ -108,3 +179,5 @@ Need help? Contact [Datadog support][7].
 [8]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
 [9]: https://docs.datadoghq.com/agent/prometheus/
 [10]: https://docs.datadoghq.com/developers/prometheus/
+[11]: https://docs.datadoghq.com/service_management/on-call/
+[12]: https://prometheus.io/docs/alerting/latest/configuration/#matcher
