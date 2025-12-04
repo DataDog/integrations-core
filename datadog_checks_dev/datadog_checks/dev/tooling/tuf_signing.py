@@ -16,6 +16,55 @@ from typing import Any
 import yaml
 
 
+def _generate_ed25519_key_with_cryptography() -> dict:
+    """Generate Ed25519 key using cryptography library.
+
+    Returns:
+        Key dictionary in securesystemslib format
+    """
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    from cryptography.hazmat.primitives import serialization
+
+    # Generate Ed25519 key pair
+    private_key = ed25519.Ed25519PrivateKey.generate()
+    public_key = private_key.public_key()
+
+    # Serialize keys to raw bytes (32 bytes each for Ed25519)
+    private_bytes = private_key.private_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PrivateFormat.Raw,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    public_bytes = public_key.public_bytes(
+        encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
+    )
+
+    # Convert to hex for securesystemslib format
+    private_hex = private_bytes.hex()
+    public_hex = public_bytes.hex()
+
+    # Calculate keyid (SHA256 of the canonical JSON representation)
+    keyid_dict = {
+        'keytype': 'ed25519',
+        'scheme': 'ed25519',
+        'keyid_hash_algorithms': ['sha256', 'sha512'],
+        'keyval': {'public': public_hex},
+    }
+    from securesystemslib.formats import encode_canonical
+
+    canonical = encode_canonical(keyid_dict)
+    keyid = hashlib.sha256(canonical.encode('utf-8')).hexdigest()
+
+    # Return in securesystemslib format
+    return {
+        'keytype': 'ed25519',
+        'scheme': 'ed25519',
+        'keyid': keyid,
+        'keyid_hash_algorithms': ['sha256', 'sha512'],
+        'keyval': {'public': public_hex, 'private': private_hex},
+    }
+
+
 def generate_dummy_keys(keys_dir: Path) -> dict[str, dict]:
     """Generate Ed25519 keys for TUF roles (POC only).
 
@@ -23,25 +72,24 @@ def generate_dummy_keys(keys_dir: Path) -> dict[str, dict]:
     timestamp roles. These are for POC purposes only and should NOT
     be used in production.
 
+    Uses the standard cryptography library for key generation.
+
     Args:
         keys_dir: Directory to store generated keys
 
     Returns:
         Dictionary mapping role names to public key dictionaries
     """
-    from securesystemslib.keys import generate_ed25519_key
-    from securesystemslib import interface
-
     roles = ['root', 'targets', 'snapshot', 'timestamp']
     keys = {}
 
     keys_dir.mkdir(parents=True, exist_ok=True)
 
     for role in roles:
-        # Generate key
-        key_dict = generate_ed25519_key()
+        # Generate key using cryptography library
+        key_dict = _generate_ed25519_key_with_cryptography()
 
-        # Save private key with password
+        # Save private key
         private_key_path = keys_dir / f"{role}_key"
         with open(private_key_path, 'w') as f:
             json.dump(key_dict, f, indent=2)
