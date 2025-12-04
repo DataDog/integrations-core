@@ -26,7 +26,7 @@ DISPLAY_NAME_MAPPING = {
 REMOVED_INTEGRATIONS = {
     # name --> display name
     'kaspersky': 'Kaspersky',
-    'zscaler_private_access': 'Zscaler Private Access'
+    'zscaler_private_access': 'Zscaler Private Access',
 }
 
 
