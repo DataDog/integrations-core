@@ -279,7 +279,15 @@ class DockerAgent(AgentInterface):
                 process = self._run_command(formatted_command)
                 if process.returncode:
                     self._show_logs()
-                    raise RuntimeError(f'Unable to run start-up command in Agent container `{self._container_name}`')
+                    error_message = f'Unable to run start-up command in Agent container `{self._container_name}`\n'
+                    error_message = "-------------- COMMAND OUTPUT --------------\n"
+                    error_message += f'Command: {start_command}\n'
+                    if process.stdout:
+                        error_message += f'Output: {process.stdout.decode("utf-8")}\n'
+                    if process.stderr:
+                        error_message += f'Error: {process.stderr.decode("utf-8")}\n'
+                    error_message += "-------------- END OF COMMAND OUTPUT --------------\n"
+                    raise RuntimeError(error_message)
 
         if local_packages:
             base_pip_command = self._format_command(
