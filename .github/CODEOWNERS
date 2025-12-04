@@ -680,11 +680,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cofense_triage/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
 /cofense_triage/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/zscaler_private_access/                                             @DataDog/agent-integrations
-/zscaler_private_access/*.md                                         @DataDog/agent-integrations @DataDog/documentation
-/zscaler_private_access/manifest.json                                @DataDog/agent-integrations @DataDog/documentation
-/zscaler_private_access/assets/logs/                                 @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
-
 /push_security/                                                      @DataDog/saas-integrations
 /push_security/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /push_security/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
