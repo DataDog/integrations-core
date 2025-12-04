@@ -23,6 +23,7 @@ def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
 
 class WheelName(NamedTuple):
     """Helper class to manipulate wheel names."""
+
     # Note: this implementation ignores build tags (it drops them on parsing)
     name: str
     version: str
@@ -39,9 +40,7 @@ class WheelName(NamedTuple):
         return cls(*parts)
 
     def __str__(self):
-        return '-'.join([
-            self.name, self.version, self.python_tag, self.abi_tag, self.platform_tag
-        ]) + '.whl'
+        return '-'.join([self.name, self.version, self.python_tag, self.abi_tag, self.platform_tag]) + '.whl'
 
 
 def check_unacceptable_files(
@@ -65,10 +64,12 @@ def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str
     from auditwheel.repair import repair_wheel
     from auditwheel.wheel_abi import NonPlatformWheel
 
-    exclusions = frozenset({
-        # pymqi
-        'libmqic_r.so',
-    })
+    exclusions = frozenset(
+        {
+            # pymqi
+            'libmqic_r.so',
+        }
+    )
 
     external_invalid_file_patterns = [
         # We don't accept OpenSSL in external wheels
@@ -95,7 +96,6 @@ def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str
         )
         shutil.move(wheel, external_dir)
         continue
-
 
     for wheel in iter_wheels(source_built_dir):
         print(f'--> {wheel.name}')
@@ -142,7 +142,6 @@ def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: s
         shutil.move(wheel, external_dir)
         continue
 
-
     for wheel in iter_wheels(source_built_dir):
         print(f'--> {wheel.name}')
         # Platform independent wheels: move and rename to make platform specific
@@ -152,12 +151,20 @@ def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: s
             shutil.move(wheel, Path(built_dir) / dest)
             continue
 
-        process = subprocess.run([
-            sys.executable, '-m', 'delvewheel', 'repair', wheel,
-            '--wheel-dir', built_dir,
-            '--no-dll', os.pathsep.join(exclusions),
-            '--no-diagnostic',
-        ])
+        process = subprocess.run(
+            [
+                sys.executable,
+                '-m',
+                'delvewheel',
+                'repair',
+                wheel,
+                '--wheel-dir',
+                built_dir,
+                '--no-dll',
+                os.pathsep.join(exclusions),
+                '--no-diagnostic',
+            ]
+        )
         if process.returncode:
             print('Repairing failed')
             sys.exit(process.returncode)
@@ -167,40 +174,43 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
     from delocate import delocate_wheel
     from packaging.version import Version
 
-    exclusions = [re.compile(s) for s in [
-        # pymqi
-        r'pymqe\.cpython-\d+-darwin\.so',
-        # confluent_kafka
-        # We leave cyrus-sasl out of the wheel because of the complexity involved in bundling it portably.
-        # This means the confluent-kafka wheel will have a runtime dependency on this library
-        r'libsasl2.\d\.dylib',
-        # Whitelisted libraries based on the health check default whitelist that we have on omnibus:
-        # https://github.com/DataDog/omnibus-ruby/blob/044a81fa1b0f1c50fc7083cb45e7d8f90d96905b/lib/omnibus/health_check.rb#L133-L152
-        # We use that instead of the more relaxed policy that delocate_wheel defaults to.
-        r'libobjc\.A\.dylib',
-        r'libSystem\.B\.dylib',
-        # Symlink of the previous one
-        r'libgcc_s\.1\.dylib',
-        r'CoreFoundation',
-        r'CoreServices',
-        r'Tcl$',
-        r'Cocoa$',
-        r'Carbon$',
-        r'IOKit$',
-        r'Kerberos',
-        r'Tk$',
-        r'libutil\.dylib',
-        r'libffi\.dylib',
-        r'libncurses\.5\.4\.dylib',
-        r'libiconv',
-        r'libstdc\+\+\.6\.dylib',
-        r'libc\+\+\.1\.dylib',
-        r'^/System/Library/',
-    ]]
+    exclusions = [
+        re.compile(s)
+        for s in [
+            # pymqi
+            r'pymqe\.cpython-\d+-darwin\.so',
+            # confluent_kafka
+            # We leave cyrus-sasl out of the wheel because of the complexity involved in bundling it portably.
+            # This means the confluent-kafka wheel will have a runtime dependency on this library
+            r'libsasl2.\d\.dylib',
+            # Whitelisted libraries based on the health check default whitelist that we have on omnibus:
+            # https://github.com/DataDog/omnibus-ruby/blob/044a81fa1b0f1c50fc7083cb45e7d8f90d96905b/lib/omnibus/health_check.rb#L133-L152
+            # We use that instead of the more relaxed policy that delocate_wheel defaults to.
+            r'libobjc\.A\.dylib',
+            r'libSystem\.B\.dylib',
+            # Symlink of the previous one
+            r'libgcc_s\.1\.dylib',
+            r'CoreFoundation',
+            r'CoreServices',
+            r'Tcl$',
+            r'Cocoa$',
+            r'Carbon$',
+            r'IOKit$',
+            r'Kerberos',
+            r'Tk$',
+            r'libutil\.dylib',
+            r'libffi\.dylib',
+            r'libncurses\.5\.4\.dylib',
+            r'libiconv',
+            r'libstdc\+\+\.6\.dylib',
+            r'libc\+\+\.1\.dylib',
+            r'^/System/Library/',
+        ]
+    ]
 
     def copy_filt_func(libname):
         return not any(excl.search(libname) for excl in exclusions)
-      
+
     min_macos_version = Version(os.environ["MACOSX_DEPLOYMENT_TARGET"])
 
     for wheel in iter_wheels(source_external_dir):
@@ -214,7 +224,11 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
         # Platform independent wheels: move and rename to make platform specific
         wheel_name = WheelName.parse(wheel.name)
         if wheel_name.platform_tag == 'any':
-            dest = str(wheel_name._replace(platform_tag=f'macosx_{min_macos_version.major}_{min_macos_version.minor}_universal2'))
+            dest = str(
+                wheel_name._replace(
+                    platform_tag=f'macosx_{min_macos_version.major}_{min_macos_version.minor}_universal2'
+                )
+            )
             shutil.move(wheel, Path(built_dir) / dest)
             continue
 
