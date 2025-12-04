@@ -138,7 +138,7 @@ def load_keys(keys_dir: Path) -> dict[str, dict]:
 
 
 def sign_metadata_dict(metadata: dict[str, Any], key_dict: dict) -> dict[str, Any]:
-    """Sign TUF metadata with given key.
+    """Sign TUF metadata with given key using cryptography library.
 
     Args:
         metadata: Metadata dictionary with 'signed' key
@@ -147,14 +147,28 @@ def sign_metadata_dict(metadata: dict[str, Any], key_dict: dict) -> dict[str, An
     Returns:
         Metadata dictionary with added signature
     """
+    from cryptography.hazmat.primitives.asymmetric import ed25519
     from securesystemslib.formats import encode_canonical
-    from securesystemslib.keys import create_signature
 
     # Canonicalize the signed portion
     canonical_bytes = encode_canonical(metadata['signed']).encode('utf-8')
 
-    # Create signature
-    signature = create_signature(key_dict, canonical_bytes)
+    # Get private key from key_dict
+    private_hex = key_dict['keyval']['private']
+    private_bytes = bytes.fromhex(private_hex)
+
+    # Load private key using cryptography library
+    private_key = ed25519.Ed25519PrivateKey.from_private_bytes(private_bytes)
+
+    # Sign the canonical bytes
+    signature_bytes = private_key.sign(canonical_bytes)
+    signature_hex = signature_bytes.hex()
+
+    # Create signature in securesystemslib format
+    signature = {
+        'keyid': key_dict['keyid'],
+        'sig': signature_hex,
+    }
 
     # Add signature to metadata
     if 'signatures' not in metadata:
