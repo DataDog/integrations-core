@@ -14,7 +14,12 @@ TABLE_SIZE_STATS_QUERY = {
         t.name AS table_name,
         s.name AS schema_name,
         db_name() AS database_name,
-        SUM(p.row_count) AS row_count,
+        SUM(
+            CASE 
+                WHEN p.index_id IN (0, 1) THEN p.row_count 
+                ELSE 0 
+            END
+        ) AS row_count,
         CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS total_size,
         CAST(SUM(a.used_pages) * 8.0 AS DECIMAL(18,2)) AS used_size,
         CAST(SUM(a.data_pages) * 8.0 AS DECIMAL(18,2)) AS data_size
