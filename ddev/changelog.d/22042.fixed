@@ -1,0 +1,1 @@
+Add context message when a start-up command fails while spinning up a Docker agent for E2E testing
