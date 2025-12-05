@@ -38,7 +38,8 @@ jobs:
           echo "PR head SHA: ${{ github.event.pull_request.head.sha }}"
 
           python gh_workflow.py \
-            --ref refs/pull/${{ github.event.pull_request.number }}/merge \
+            --checkout_ref refs/pull/${{ github.event.pull_request.number }}/merge \
+            --source_sha ${{ github.sha }} \
             --multiply 1 \
             --limit 5
 
