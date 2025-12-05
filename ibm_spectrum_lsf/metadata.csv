@@ -136,7 +136,7 @@ ibm_spectrum_lsf.queue.running,gauge,,task,,"The total number of tasks for all r
 ibm_spectrum_lsf.queue.suspended,gauge,,task,,The total number of tasks for all suspended jobs in the queue. [Reported by bqueues],0,ibm_spectrum_lsf,lsf queue suspended,,
 ibm_spectrum_lsf.server.gpu.num_gpus,gauge,,,,The total number of GPUs. [Reported by bhosts_gpu],0,ibm_spectrum_lsf,lsf gpu num,,
 ibm_spectrum_lsf.server.gpu.num_gpus_alloc,gauge,,,,The current total number of GPUs that are allocated to be used by a job. [Reported by bhosts_gpu],0,ibm_spectrum_lsf,lsf gpu alloc,,
-ibm_spectrum_lsf.server.gpu.num_gpus_exclusive_alloc,gauge,,,,"The current total number of GPUs that are allocated to be used exclusive by the job. [Reported by bhosts_gpu]""",0,ibm_spectrum_lsf,lsf gpu excl alloc,,
+ibm_spectrum_lsf.server.gpu.num_gpus_exclusive_alloc,gauge,,,,"The current total number of GPUs that are allocated to be used exclusive by the job. [Reported by bhosts_gpu]",0,ibm_spectrum_lsf,lsf gpu excl alloc,,
 ibm_spectrum_lsf.server.gpu.num_gpus_exclusive_available,gauge,,,,The current total number of GPUs that are used exclusive by the job. [Reported by bhosts_gpu],0,ibm_spectrum_lsf,lsf gpu excl avail,,
 ibm_spectrum_lsf.server.gpu.num_gpus_jexclusive_alloc,gauge,,,,The total number of GPUs allocated exclusively for a job. [Reported by bhosts_gpu],0,ibm_spectrum_lsf,lsf gpu jexcl alloc,,
 ibm_spectrum_lsf.server.gpu.num_gpus_shared_alloc,gauge,,,,The total number of GPUs allocated but shared. [Reported by bhosts_gpu],0,ibm_spectrum_lsf,lsf gpu shared alloc,,
