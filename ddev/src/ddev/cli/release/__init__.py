@@ -4,6 +4,7 @@
 import click
 from datadog_checks.dev.tooling.commands.release.build import build
 from datadog_checks.dev.tooling.commands.release.make import make
+from datadog_checks.dev.tooling.commands.release.sign import sign
 from datadog_checks.dev.tooling.commands.release.tag import tag
 from datadog_checks.dev.tooling.commands.release.upload import upload
 
@@ -29,6 +30,7 @@ release.add_command(changelog)
 release.add_command(list_versions)
 release.add_command(make)
 release.add_command(show)
+release.add_command(sign)
 release.add_command(stats)
 release.add_command(tag)
 release.add_command(upload)

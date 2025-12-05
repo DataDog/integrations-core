@@ -181,5 +181,148 @@ def build_package(package_path, sdist):
                 result = run_command([sys.executable, 'setup.py', 'sdist'], capture='out')
                 if result.code != 0:
                     return result
+        # Create pointer artifact in JSON/yaml format for TUF
+        # uri:
+        # digest:
+        import glob
+        import hashlib
+        import os
+
+        import yaml
+
+        # Get the most recent file in the dist directory
+        list_of_wheels = glob.glob(os.path.join(package_path, "dist", "*"))
+        wheel_path = max(list_of_wheels, key=os.path.getctime)
+        URI_TEMPLATE = "https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/{}/{}"
+        folder_name = os.path.basename(package_path)
+        package_name = get_package_name(folder_name)
+        wheel_name = os.path.basename(wheel_path)
+        version = wheel_name.split("-")[1]
+        uri = URI_TEMPLATE.format(package_name, wheel_name)
+        print("Using URI: ", uri)
+        with open(wheel_path, "rb") as wheel:
+            digest = hashlib.sha256(wheel.read()).hexdigest()
+        wheel_size = os.path.getsize(wheel_path)
+        pointer = {
+            "pointer": {
+                "name": package_name,
+                "version": version,
+                "uri": uri,
+                "digest": digest,
+                "length": wheel_size,
+                "custom": {},
+            }
+        }
+        print("Using digest: ", digest)
+        with open(
+            os.path.join(package_path, "dist", f"{folder_name}-{version}.pointer"), "w"
+        ) as pointer_file:
+            yaml.safe_dump(pointer, pointer_file)
+            print("Created ", pointer_file.name, " with contents ", pointer)
 
     return result
+
+
+def upload_package(package_path, version, public=False):
+    """Upload package wheel and/or pointer file to the S3 bucket.
+
+    Note: This requires AWS credentials to be available. Use aws-vault to run:
+    aws-vault exec sso-agent-integrations-dev-account-admin -- ddev release upload <check>
+    """
+    import glob
+    import hashlib
+    import os
+
+    import boto3
+    from botocore.exceptions import ClientError
+
+    S3_BUCKET = "test-public-integration-wheels"
+    S3_REGION = "eu-north-1"
+
+    # Initialize S3 client (uses default credential chain: env vars, ~/.aws/credentials, IAM role, etc.)
+    # When using aws-vault, credentials are injected via environment variables
+    s3 = boto3.client("s3", region_name=S3_REGION)
+
+    folder_name = os.path.basename(package_path)
+    package_name = get_package_name(folder_name)
+    dist_dir = os.path.join(package_path, "dist")
+    pointer_file_name = f"{folder_name}-{version}.pointer"
+    pointer_file_path = os.path.join(dist_dir, pointer_file_name)
+
+    # Find the actual wheel file (e.g., package_name-version-py3-none-any.whl)
+    wheel_pattern = os.path.join(dist_dir, f"{package_name.replace('-', '_')}-{version}-*.whl")
+    wheel_files = glob.glob(wheel_pattern)
+
+    if not wheel_files:
+        raise FileNotFoundError(f"No wheel file found matching pattern: {wheel_pattern}")
+
+    # Use the most recent wheel if multiple exist
+    wheel_file_path = max(wheel_files, key=os.path.getctime)
+    wheel_file_name = os.path.basename(wheel_file_path)
+
+    # Calculate wheel hash
+    with open(wheel_file_path, 'rb') as f:
+        wheel_hash = hashlib.sha256(f.read()).hexdigest()
+
+    if public:
+        # Upload both the pointer and the wheel to organized paths
+        if not os.path.exists(pointer_file_path):
+            raise FileNotFoundError(f"Pointer file not found: {pointer_file_path}")
+
+        # Check for idempotency: if pointer already exists with same hash, skip
+        pointer_s3_key = f"pointers/{package_name}/{pointer_file_name}"
+        try:
+            existing_pointer = s3.head_object(Bucket=S3_BUCKET, Key=pointer_s3_key)
+            existing_digest = existing_pointer.get('Metadata', {}).get('digest', '')
+            if existing_digest == wheel_hash:
+                print(f"Version {version} already uploaded with same hash, skipping")
+                return
+            print(f"Warning: Version {version} exists with different hash, overwriting")
+        except ClientError as e:
+            if e.response['Error']['Code'] != '404':
+                raise
+            # Doesn't exist, proceed with upload
+
+        # Upload pointer file with metadata (public for TUF access)
+        s3.upload_file(
+            pointer_file_path,
+            S3_BUCKET,
+            pointer_s3_key,
+            ExtraArgs={'Metadata': {'digest': wheel_hash, 'version': version}, 'ACL': 'public-read'},
+        )
+
+        # Upload wheel file with hash metadata (private, requires authentication)
+        wheel_s3_key = f"simple/{package_name}/{wheel_file_name}"
+        s3.upload_file(
+            wheel_file_path,
+            S3_BUCKET,
+            wheel_s3_key,
+            ExtraArgs={'Metadata': {'sha256': wheel_hash}},
+        )
+
+        print(f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}")
+
+        # Generate indexes
+        from datadog_checks.dev.tooling.simple_index import generate_package_index, generate_root_index
+
+        print(f"Generating simple indexes...")
+        generate_package_index(s3, S3_BUCKET, package_name, use_pointers=True)
+        generate_root_index(s3, S3_BUCKET)
+        print(f"Updated simple indexes for {package_name}")
+
+    else:
+        # Upload only the wheel to organized path
+        wheel_s3_key = f"simple/{package_name}/{wheel_file_name}"
+        s3.upload_file(
+            wheel_file_path,
+            S3_BUCKET,
+            wheel_s3_key,
+            ExtraArgs={'Metadata': {'sha256': wheel_hash}},
+        )
+        print(f"Uploaded {wheel_file_name} to S3 bucket {S3_BUCKET}")
+
+        # Generate package index
+        from datadog_checks.dev.tooling.simple_index import generate_package_index
+
+        print(f"Generating simple index for {package_name}...")
+        generate_package_index(s3, S3_BUCKET, package_name, use_pointers=False)
