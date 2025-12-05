@@ -47,6 +47,8 @@ REPOSITORIES_DIR = os.path.join(here, 'data')
 # abspath = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
 REPOSITORY_DIR = 'repo'
 REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
+# POC: New S3 bucket for manual wheel uploads
+REPOSITORY_URL_PREFIX_POC = 'https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com'
 # Where to find our in-toto root layout.
 IN_TOTO_METADATA_DIR = 'in-toto-metadata'
 ROOT_LAYOUTS = {'core': '7.core.root.layout', 'extras': '1.extras.root.layout'}
@@ -64,6 +66,7 @@ class TUFDownloader:
         root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE,
         verbose=0,
         disable_verification=False,
+        use_poc=False,
     ):
         # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
@@ -96,10 +99,14 @@ class TUFDownloader:
         # respectively.
         # NOTE: This updater will store files under:
         # os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
+        # POC uses 'metadata/' instead of 'metadata.staged/'
+        metadata_path = 'metadata/' if use_poc else 'metadata.staged/'
+        target_path = '' if use_poc else 'targets/'
+
         self.__updater = Updater(
             metadata_dir=os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata'),
-            metadata_base_url=f'{repository_url_prefix}/metadata.staged/',
-            target_base_url=f'{repository_url_prefix}/targets/',
+            metadata_base_url=f'{repository_url_prefix}/{metadata_path}',
+            target_base_url=f'{repository_url_prefix}/{target_path}',
             target_dir=self.__targets_dir,
         )
 

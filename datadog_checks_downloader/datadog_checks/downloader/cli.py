@@ -10,7 +10,13 @@ import re
 import sys
 
 # 2nd party.
-from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
+from .download import (
+    DEFAULT_ROOT_LAYOUT_TYPE,
+    REPOSITORY_URL_PREFIX,
+    REPOSITORY_URL_PREFIX_POC,
+    ROOT_LAYOUTS,
+    TUFDownloader,
+)
 from .exceptions import NonCanonicalVersion, NonDatadogPackage
 
 # Private module functions.
@@ -66,6 +72,12 @@ def instantiate_downloader():
         '--repository', type=str, default=REPOSITORY_URL_PREFIX, help='The complete URL prefix for the TUF repository.'
     )
 
+    parser.add_argument(
+        '--use-poc',
+        action='store_true',
+        help='Use POC S3 bucket (test-public-integration-wheels) instead of production repository.',
+    )
+
     parser.add_argument('--version', type=str, default=None, help='The version number of the desired Datadog check.')
 
     parser.add_argument(
@@ -96,7 +108,13 @@ def instantiate_downloader():
     )
 
     args = parser.parse_args()
-    repository_url_prefix = args.repository
+
+    # Use POC repository if requested
+    if args.use_poc:
+        repository_url_prefix = REPOSITORY_URL_PREFIX_POC
+    else:
+        repository_url_prefix = args.repository
+
     standard_distribution_name = args.standard_distribution_name
     version = args.version
     root_layout_type = args.type
@@ -126,6 +144,7 @@ def instantiate_downloader():
         root_layout_type=root_layout_type,
         verbose=verbose,
         disable_verification=args.unsafe_disable_verification,
+        use_poc=args.use_poc,
     )
 
     return tuf_downloader, standard_distribution_name, version, ignore_python_version
