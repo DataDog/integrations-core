@@ -13,7 +13,6 @@ import sys
 from .download import (
     DEFAULT_ROOT_LAYOUT_TYPE,
     REPOSITORY_URL_PREFIX,
-    REPOSITORY_URL_PREFIX_POC,
     ROOT_LAYOUTS,
     TUFDownloader,
 )
@@ -72,12 +71,6 @@ def instantiate_downloader():
         '--repository', type=str, default=REPOSITORY_URL_PREFIX, help='The complete URL prefix for the TUF repository.'
     )
 
-    parser.add_argument(
-        '--use-poc',
-        action='store_true',
-        help='Use POC S3 bucket (test-public-integration-wheels) instead of production repository.',
-    )
-
     parser.add_argument('--version', type=str, default=None, help='The version number of the desired Datadog check.')
 
     parser.add_argument(
@@ -96,25 +89,20 @@ def instantiate_downloader():
         '--unsafe-disable-verification',
         action='store_true',
         help=(
-            'Disable TUF and in-toto integrity verification. '
-            'To use only if TUF or in-toto verification fails due to a bug and not an attack.'
+            'Disable TUF integrity verification. '
+            'To use only if TUF verification fails due to a bug and not an attack.'
         ),
     )
 
     parser.add_argument('--ignore-python-version', action='store_true', help='Ignore Python version requirements.')
 
     parser.add_argument(
-        '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
+        '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF.'
     )
 
     args = parser.parse_args()
 
-    # Use POC repository if requested
-    if args.use_poc:
-        repository_url_prefix = REPOSITORY_URL_PREFIX_POC
-    else:
-        repository_url_prefix = args.repository
-
+    repository_url_prefix = args.repository
     standard_distribution_name = args.standard_distribution_name
     version = args.version
     root_layout_type = args.type
@@ -144,7 +132,6 @@ def instantiate_downloader():
         root_layout_type=root_layout_type,
         verbose=verbose,
         disable_verification=args.unsafe_disable_verification,
-        use_poc=args.use_poc,
     )
 
     return tuf_downloader, standard_distribution_name, version, ignore_python_version

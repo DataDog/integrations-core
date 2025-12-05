@@ -2,16 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import collections
-import glob
 import hashlib
 import logging
 import logging.config
 import os
 import pathlib
 import re
-import shutil
 import sys
-import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -19,27 +16,18 @@ import urllib.request
 import boto3
 import yaml
 
-from in_toto import verifylib
-from in_toto.exceptions import LinkNotFoundError
-from in_toto.models.metadata import Metablock
 from packaging.version import parse as parse_version
-from securesystemslib import interface
 from tuf.ngclient import Updater
 
 from .exceptions import (
     DuplicatePackage,
     InconsistentSimpleIndex,
-    IncorrectRootLayoutType,
     MissingVersions,
-    NoInTotoLinkMetadataFound,
-    NoInTotoRootLayoutPublicKeysFound,
     NoSuchDatadogPackage,
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
-    RevokedDeveloperOrMachine,
     TargetNotFoundError,
 )
-from .parameters import substitute
 
 # After we import everything we need, shut off all existing loggers.
 logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})
@@ -48,13 +36,8 @@ logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})
 # CONSTANTS.
 here = os.path.abspath(os.path.dirname(__file__))
 REPOSITORIES_DIR = os.path.join(here, 'data')
-# abspath = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
 REPOSITORY_DIR = 'repo'
-REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
-# POC: New S3 bucket for manual wheel uploads
-REPOSITORY_URL_PREFIX_POC = 'https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com'
-# Where to find our in-toto root layout.
-IN_TOTO_METADATA_DIR = 'in-toto-metadata'
+REPOSITORY_URL_PREFIX = 'https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com'
 ROOT_LAYOUTS = {'core': '7.core.root.layout', 'extras': '1.extras.root.layout'}
 DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 
@@ -70,7 +53,6 @@ class TUFDownloader:
         root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE,
         verbose=0,
         disable_verification=False,
-        use_poc=False,
     ):
         # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
@@ -87,13 +69,12 @@ class TUFDownloader:
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
 
         self.__disable_verification = disable_verification
-        self.__use_poc = use_poc
         self.__current_version = None
         self.__current_wheel_href = None
 
         if self.__disable_verification:
             logger.warning(
-                'Running with TUF and in-toto verification disabled. Integrity is only protected with TLS (HTTPS).'
+                'Running with TUF verification disabled. Integrity is only protected with TLS (HTTPS).'
             )
 
         # NOTE: The directory where the targets for *this* repository is
@@ -106,14 +87,10 @@ class TUFDownloader:
         # respectively.
         # NOTE: This updater will store files under:
         # os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
-        # POC uses 'metadata/' instead of 'metadata.staged/'
-        metadata_path = 'metadata/' if use_poc else 'metadata.staged/'
-        target_path = '' if use_poc else 'targets/'
-
         self.__updater = Updater(
             metadata_dir=os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata'),
-            metadata_base_url=f'{repository_url_prefix}/{metadata_path}',
-            target_base_url=f'{repository_url_prefix}/{target_path}',
+            metadata_base_url=f'{repository_url_prefix}/metadata/',
+            target_base_url=f'{repository_url_prefix}/',
             target_dir=self.__targets_dir,
         )
 
@@ -180,143 +157,6 @@ class TUFDownloader:
 
         return target_abspath, target
 
-    def __download_in_toto_root_layout(self):
-        # NOTE: We expect the root layout to be signed with *offline* keys.
-        # NOTE: We effectively tie every version of this downloader to its
-        # expected version of the root layout. This is so that, for example, we
-        # can introduce new parameters w/o breaking old downloaders that don't
-        # know how to substitute them.
-        target_relpath = f'{IN_TOTO_METADATA_DIR}/{self.__root_layout}'
-        return self._download_with_tuf(target_relpath)
-
-    def __download_custom(self, target, extension):
-        # A set to collect where in-toto pubkeys / links live.
-        target_abspaths = set()
-
-        custom = target.custom
-
-        root_layout_type = custom.get('root-layout-type', DEFAULT_ROOT_LAYOUT_TYPE)
-        if root_layout_type != self.__root_layout_type:
-            raise IncorrectRootLayoutType(root_layout_type, self.__root_layout_type)
-
-        in_toto_metadata = custom.get('in-toto', [])
-
-        for target_relpath in in_toto_metadata:
-            # Download in-toto *link* metadata files using TUF,
-            # which, among other things, prevents mix-and-match
-            # attacks by MitM attackers, and rollback attacks even
-            # by attackers who control the repository:
-            # https://www.usenix.org/conference/atc17/technical-sessions/presentation/kuppusamy
-            # NOTE: Avoid recursively downloading in-toto metadata
-            # for in-toto metadata themselves, and so on ad
-            # infinitum.
-            if target_relpath.endswith(extension):
-                target_abspath, _ = self._download_with_tuf(target_relpath)
-
-                # Add this file to the growing collection of where
-                # in-toto pubkeys / links live.
-                target_abspaths.add(target_abspath)
-
-        # Return list of where in-toto metadata files live.
-        return target_abspaths
-
-    def __download_in_toto_layout_pubkeys(self, target, target_relpath):
-        """
-        NOTE: We assume that all the public keys needed to verify any in-toto
-        root layout, or sublayout, metadata file has been directly signed by
-        the top-level TUF targets role using *OFFLINE* keys. This is a
-        reasonable assumption, as TUF does not offer meaningful security
-        guarantees if _ALL_ targets were signed using _online_ keys.
-        """
-
-        pubkey_abspaths = self.__download_custom(target, '.pub')
-        if not len(pubkey_abspaths):
-            raise NoInTotoRootLayoutPublicKeysFound(target_relpath)
-        else:
-            return pubkey_abspaths
-
-    def __download_in_toto_links(self, target, target_relpath):
-        link_abspaths = self.__download_custom(target, '.link')
-        if not len(link_abspaths):
-            raise NoInTotoLinkMetadataFound(target_relpath)
-        else:
-            return link_abspaths
-
-    def __load_root_layout(self, target_relpath):
-        root_layout = Metablock.load(self.__root_layout)
-        root_layout_pubkeys = glob.glob('*.pub')
-        root_layout_pubkeys = interface.import_publickeys_from_file(root_layout_pubkeys)
-        # Parameter substitution.
-        root_layout_params = substitute(target_relpath)
-        return root_layout, root_layout_pubkeys, root_layout_params
-
-    def __handle_in_toto_verification_exception(self, target_relpath, e):
-        logger.exception('in-toto failed to verify %s', target_relpath)
-
-        if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloperOrMachine.MSG:
-            raise RevokedDeveloperOrMachine(target_relpath, self.__root_layout)
-        else:
-            raise e
-
-    def __in_toto_verify(self, inspection_packet, target_relpath):
-        # Make a temporary directory in a parent directory we control.
-        tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
-
-        try:
-            # Copy files over into temp dir.
-            for abs_path in inspection_packet:
-                shutil.copy(abs_path, tempdir)
-
-            # Switch to the temp dir.
-            os.chdir(tempdir)
-
-            # Load the root layout and public keys in this temp dir.
-            root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
-
-            verifylib.in_toto_verify(root_layout, root_layout_pubkeys, substitution_parameters=root_layout_params)
-        except Exception as e:
-            self.__handle_in_toto_verification_exception(target_relpath, e)
-        else:
-            logger.info('in-toto verified %s', target_relpath)
-        finally:
-            # Switch back to a parent directory we control, so that we can
-            # safely delete temp dir.
-            os.chdir(REPOSITORIES_DIR)
-            # Delete temp dir.
-            shutil.rmtree(tempdir)
-
-    def __download_and_verify_in_toto_metadata(self, target_relpath, target_abspath, target):
-        # First, get our in-toto root layout.
-        root_layout_abspath, root_layout_target = self.__download_in_toto_root_layout()
-        inspection_packet = {target_abspath, root_layout_abspath}
-
-        # Second, get the public keys for the root layout.
-        pubkey_abspaths = self.__download_in_toto_layout_pubkeys(root_layout_target, target_relpath)
-
-        # Third, get the in-toto links for the target of interest.
-        link_abspaths = self.__download_in_toto_links(target, target_relpath)
-
-        # Everything we need for in-toto inspection to work: the wheel,
-        # the in-toto root layout, in-toto links, and public keys to
-        # verify the in-toto layout.
-        inspection_packet |= pubkey_abspaths | link_abspaths
-        self.__in_toto_verify(inspection_packet, target_relpath)
-
-    def _download_with_tuf_in_toto(self, target_relpath):
-        target_abspath, target = self._download_with_tuf(target_relpath)
-
-        # Next, we use in-toto to verify the supply chain of the target.
-        # NOTE: We use a flag to avoid recursively downloading in-toto
-        # metadata for in-toto metadata themselves, and so on ad infinitum.
-        # All other files, presumably packages, should also be
-        # inspected.
-        try:
-            self.__download_and_verify_in_toto_metadata(target_relpath, target_abspath, target)
-        except Exception:
-            os.remove(target_abspath)
-            raise
-        else:
-            return target_abspath
 
     def __download_wheel_from_pointer(self, pointer_abspath, standard_distribution_name):
         """Download wheel using pointer file.
@@ -396,41 +236,39 @@ class TUFDownloader:
     def download(self, target_relpath):
         """
         Returns:
-            If download over TUF and in-toto is successful, this function will
-            return the complete filepath to the desired target.
+            If download over TUF is successful, this function will
+            return the complete filepath to the desired wheel.
         """
-        # For POC mode with pointers, use pointer-based download
-        if self.__use_poc and 'simple/' in target_relpath:
-            # Extract package name from path like 'simple/datadog-postgres/...'
-            path_parts = target_relpath.split('/')
-            if len(path_parts) >= 2:
-                standard_distribution_name = path_parts[1]
+        # Extract package name from path like 'simple/datadog-postgres/...'
+        path_parts = target_relpath.split('/')
+        if len(path_parts) >= 2 and path_parts[0] == 'simple':
+            standard_distribution_name = path_parts[1]
 
-                # Construct pointer file path
-                # Format: pointers/{package}/{package}-{version}.pointer
-                pointer_filename = f"{standard_distribution_name}-{self.__current_version}.pointer"
-                pointer_relpath = f"pointers/{standard_distribution_name}/{pointer_filename}"
+            # Construct pointer file path
+            # Format: pointers/{package}/{package}-{version}.pointer
+            pointer_filename = f"{standard_distribution_name}-{self.__current_version}.pointer"
+            pointer_relpath = f"pointers/{standard_distribution_name}/{pointer_filename}"
 
-                logger.info(f'POC mode: downloading pointer file: {pointer_relpath}')
+            logger.info(f'Downloading pointer file: {pointer_relpath}')
 
-                # Download pointer via TUF
-                if self.__disable_verification:
-                    pointer_abspath = self._download_without_tuf_in_toto(pointer_relpath)
-                else:
-                    pointer_abspath = self._download_with_tuf_in_toto(pointer_relpath)
+            # Download pointer via TUF
+            if self.__disable_verification:
+                pointer_abspath = self._download_without_tuf_in_toto(pointer_relpath)
+            else:
+                pointer_abspath, _ = self._download_with_tuf(pointer_relpath)
 
-                # Download wheel using pointer
-                wheel_abspath = self.__download_wheel_from_pointer(pointer_abspath, standard_distribution_name)
+            # Download wheel using pointer
+            wheel_abspath = self.__download_wheel_from_pointer(pointer_abspath, standard_distribution_name)
 
-                # Always return the posix version of the path for consistency across platforms
-                return pathlib.Path(wheel_abspath).as_posix()
+            # Always return the posix version of the path for consistency across platforms
+            return pathlib.Path(wheel_abspath).as_posix()
 
-        # Original behavior for non-POC mode
+        # Fallback for non-wheel targets (shouldn't happen in normal operation)
+        logger.warning(f'Unexpected target path format: {target_relpath}')
         if self.__disable_verification:
             target_abspath = self._download_without_tuf_in_toto(target_relpath)
         else:
-            target_abspath = self._download_with_tuf_in_toto(target_relpath)
-        # Always return the posix version of the path for consistency across platforms
+            target_abspath, _ = self._download_with_tuf(target_relpath)
         return pathlib.Path(target_abspath).as_posix()
 
     def __get_versions(self, standard_distribution_name):
