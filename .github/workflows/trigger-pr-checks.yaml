@@ -39,7 +39,7 @@ jobs:
 
           python gh_workflow.py \
             --checkout_ref refs/pull/${{ github.event.pull_request.number }}/merge \
-            --source_sha ${{ github.sha }} \
+            --source_sha ${{ github.event.pull_request.head.sha }} \
             --multiply 1 \
             --limit 5
 
