@@ -85,7 +85,7 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
                         changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url})\n')
 
             new_change = any(ver[1] for ver in version_changes.values())
-            if new_change:        
+            if new_change:
                 changelog_contents.write("### New Changes\n")
                 for name, ver in version_changes.items():
                     if ver[1]:
