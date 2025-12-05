@@ -401,8 +401,8 @@ def generate_tuf_metadata(s3_client, bucket: str, keys: dict[str, dict], output_
     with open(root_path, 'w') as f:
         json.dump(root_metadata, f, indent=2, sort_keys=True)
 
-    s3_client.upload_file(str(root_path), bucket, 'metadata/root.json')
-    print(f"Uploaded root.json")
+    s3_client.upload_file(str(root_path), bucket, 'metadata/root.json', ExtraArgs={'ACL': 'public-read'})
+    print(f"Uploaded root.json (public-read)")
 
     # 2. Generate and sign targets.json
     print("Generating targets.json...")
@@ -413,8 +413,8 @@ def generate_tuf_metadata(s3_client, bucket: str, keys: dict[str, dict], output_
     with open(targets_path, 'w') as f:
         json.dump(targets_metadata, f, indent=2, sort_keys=True)
 
-    s3_client.upload_file(str(targets_path), bucket, 'metadata/targets.json')
-    print(f"Uploaded targets.json with {len(targets_metadata['signed']['targets'])} targets")
+    s3_client.upload_file(str(targets_path), bucket, 'metadata/targets.json', ExtraArgs={'ACL': 'public-read'})
+    print(f"Uploaded targets.json with {len(targets_metadata['signed']['targets'])} targets (public-read)")
 
     # 3. Generate and sign snapshot.json
     print("Generating snapshot.json...")
@@ -425,8 +425,8 @@ def generate_tuf_metadata(s3_client, bucket: str, keys: dict[str, dict], output_
     with open(snapshot_path, 'w') as f:
         json.dump(snapshot_metadata, f, indent=2, sort_keys=True)
 
-    s3_client.upload_file(str(snapshot_path), bucket, 'metadata/snapshot.json')
-    print(f"Uploaded snapshot.json")
+    s3_client.upload_file(str(snapshot_path), bucket, 'metadata/snapshot.json', ExtraArgs={'ACL': 'public-read'})
+    print(f"Uploaded snapshot.json (public-read)")
 
     # 4. Generate and sign timestamp.json
     print("Generating timestamp.json...")
@@ -437,8 +437,8 @@ def generate_tuf_metadata(s3_client, bucket: str, keys: dict[str, dict], output_
     with open(timestamp_path, 'w') as f:
         json.dump(timestamp_metadata, f, indent=2, sort_keys=True)
 
-    s3_client.upload_file(str(timestamp_path), bucket, 'metadata/timestamp.json')
-    print(f"Uploaded timestamp.json")
+    s3_client.upload_file(str(timestamp_path), bucket, 'metadata/timestamp.json', ExtraArgs={'ACL': 'public-read'})
+    print(f"Uploaded timestamp.json (public-read)")
 
     print(f"\nTUF metadata generated successfully!")
     print(f"Local files: {output_dir}")

@@ -160,6 +160,7 @@ def generate_package_index(s3_client, bucket: str, package_name: str, use_pointe
         Body=index_html.encode('utf-8'),
         ContentType='text/html',
         CacheControl='public, max-age=600',  # Cache for 10 minutes
+        ACL='public-read',
     )
 
     print(f"Updated index for {normalized_name} at s3://{bucket}/{index_key}")
@@ -200,6 +201,7 @@ def generate_root_index(s3_client, bucket: str) -> None:
         Body=index_html.encode('utf-8'),
         ContentType='text/html',
         CacheControl='public, max-age=600',
+        ACL='public-read',
     )
 
     print(f"Updated root index at s3://{bucket}/{index_key}")
