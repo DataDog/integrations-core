@@ -372,7 +372,7 @@ Metrics are collected with [DogStatsD][13] through UDP port 8125.
 
 #### Other environment variables
 
-For environment variables available with the Docker Agent container, see the [Docker Agent][14] page. **Note**: Some variables are not be available for Fargate.
+For environment variables available with the Docker Agent container, see the [Docker Agent][14] and [Assigning Tags][76] pages. **Note**: Some variables are not be available for Fargate.
 
 
 | Environment Variable               | Description                                    |
@@ -381,6 +381,8 @@ For environment variables available with the Docker Agent container, see the [Do
 | `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
 | `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
 | `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
+
+On Fargate, it is recommended to set `DD_DOGSTATSD_TAG_CARDINALITY=orchestrator` to add the `task_arn` tag to ensure count metrics are not [underreported][77].
 
 For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your container labels. This requires you to add the appropriate labels to your other containers. Labels can be added directly in the [task definition][15].
 
@@ -1365,3 +1367,5 @@ Need help? Contact [Datadog support][18].
 [73]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
 [74]: https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest/submodules/ecs_fargate
 [75]: https://docs.datadoghq.com/infrastructure/containers/amazon_elastic_container_explorer
+[76]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/?tab=noncontainerizedenvironments#environment-variables
+[77]: https://github.com/DataDog/datadog-agent/issues/3159
