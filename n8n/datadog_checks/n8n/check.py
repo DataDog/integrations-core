@@ -8,7 +8,6 @@ from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.n8n.metrics import METRIC_MAP
 
 DEFAULT_READY_ENDPOINT = '/healthz/readiness'
-DEFAULT_HEALTH_ENDPOINT = '/healthz'
 DEFAULT_VERSION_ENDPOINT = '/rest/settings'
 
 
@@ -25,7 +24,6 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         self.openmetrics_endpoint = self.instance["openmetrics_endpoint"]
         self.tags = self.instance.get('tags', [])
         self._ready_endpoint = DEFAULT_READY_ENDPOINT
-        self._health_endpoint = DEFAULT_HEALTH_ENDPOINT
         self._version_endpoint = DEFAULT_VERSION_ENDPOINT
         # Get the N8N API port if specified, otherwise use the default 5678.
         self.server_port = str(self.instance.get('server_port', 5678))
@@ -69,33 +67,20 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         except Exception as e:
             self.log.debug("Error retrieving version metadata: %s", e)
 
-    def _check_n8n_health(self):
-        endpoint = urljoin(self.openmetrics_endpoint, self._health_endpoint)
-        response = self.http.get(endpoint)
-
-        # Any 4xx or 5xx response from the API endpoint (/healthz) means the n8n process is not responding
-        if 400 <= response.status_code and response.status_code < 600:
-            self.service_check('health.status', AgentCheck.CRITICAL, self.tags)
-        if response.status_code == 200:
-            self.service_check('health.status', AgentCheck.OK, self.tags)
-        else:
-            self.service_check('health.status', AgentCheck.UNKNOWN, self.tags)
-
     def _check_n8n_readiness(self):
         endpoint = urljoin(self.openmetrics_endpoint, self._ready_endpoint)
         response = self.http.get(endpoint)
 
-        # Any 4xx or 5xx response from the API endpoint (/healthz/readiness)
-        # means the n8n Database is not ready to accept requests
-        if 400 <= response.status_code and response.status_code < 600:
-            self.service_check('health.status', AgentCheck.CRITICAL, self.tags)
-        if response.status_code == 200:
-            self.service_check('health.status', AgentCheck.OK, self.tags)
+        # Check if status_code is available
+        if response.status_code is None:
+            self.log.warning("The readiness endpoint did not return a status code")
         else:
-            self.service_check('health.status', AgentCheck.UNKNOWN, self.tags)
+            metric_tags = self.tags + [f'status_code:{response.status_code}']
+
+        # Submit metric with value 1 and status_code as tag
+        self.gauge('readiness.check', 1, tags=metric_tags)
 
     def check(self, instance):
         super().check(instance)
         self._submit_version_metadata()
-        self._check_n8n_health()
         self._check_n8n_readiness()

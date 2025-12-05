@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.n8n import N8nCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -15,6 +16,7 @@ def test_unit_metrics(dd_run_check, instance, aggregator, mock_http_response):
     for metric in common.TEST_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_metrics_custom_prefx(dd_run_check, aggregator, mock_http_response):
@@ -29,3 +31,4 @@ def test_metrics_custom_prefx(dd_run_check, aggregator, mock_http_response):
     for metric in common.TEST_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

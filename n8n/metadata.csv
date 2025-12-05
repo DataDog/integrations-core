@@ -66,6 +66,7 @@ n8n.queue.job.waiting.total,gauge,,,,Number of jobs currently waiting in the que
 n8n.queue.jobs.count,count,,,,Total number of queue jobs,0,n8n,,,
 n8n.queue.jobs.duration.seconds.count,count,,,,The count of job duration in seconds,0,n8n,,,
 n8n.queue.jobs.duration.seconds.sum,count,,,,The sum of job duration in seconds,0,n8n,,,
+n8n.readiness.check,gauge,,,,Readiness check metric with status code as tag,0,n8n,,,status_code
 n8n.version.info,gauge,,,,n8n version info.,0,n8n,,,
 n8n.workflow.executions.active,gauge,,,,Number of active workflow executions,0,n8n,,,
 n8n.workflow.executions.count,count,,,,Total number of workflow executions,0,n8n,,,
