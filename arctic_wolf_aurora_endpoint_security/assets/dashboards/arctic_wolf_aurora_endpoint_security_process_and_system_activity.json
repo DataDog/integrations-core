@@ -1245,7 +1245,7 @@
                     {
                         "id": 2710122169778009,
                         "definition": {
-                            "title": "Top instigating process owner",
+                            "title": "Top instigating process owners",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

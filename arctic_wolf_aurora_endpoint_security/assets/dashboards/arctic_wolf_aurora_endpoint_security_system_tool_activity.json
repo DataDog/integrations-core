@@ -331,7 +331,7 @@
                     {
                         "id": 4981654230039382,
                         "definition": {
-                            "title": "Top Devices",
+                            "title": "Top devices",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -471,7 +471,7 @@
                     {
                         "id": 6198882914723323,
                         "definition": {
-                            "title": "Top Insitigating Process Owners",
+                            "title": "Top insitigating process owners",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

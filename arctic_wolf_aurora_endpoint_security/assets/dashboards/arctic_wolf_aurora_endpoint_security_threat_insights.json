@@ -1086,7 +1086,7 @@
                     {
                         "id": 1648667419321608,
                         "definition": {
-                            "title": "Abnormal Files",
+                            "title": "Abnormal files",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1141,7 +1141,7 @@
                     {
                         "id": 2854294980193743,
                         "definition": {
-                            "title": "Unsafe Files",
+                            "title": "Unsafe files",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",

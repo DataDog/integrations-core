@@ -471,7 +471,7 @@
                     {
                         "id": 6360047968889945,
                         "definition": {
-                            "title": "Top Users",
+                            "title": "Top users",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
