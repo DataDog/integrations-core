@@ -1,0 +1,10 @@
+name: Arctic Wolf Aurora Endpoint Security
+files:
+- name: arctic_wolf_aurora_endpoint_security.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp/udp
+      port: <PORT>
+      service: arctic-wolf-aurora-endpoint-security
+      source: arctic-wolf-aurora-endpoint-security
