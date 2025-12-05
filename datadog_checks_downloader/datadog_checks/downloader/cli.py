@@ -7,6 +7,7 @@
 import argparse
 import os
 import re
+import subprocess
 import sys
 
 # 2nd party.
@@ -19,6 +20,38 @@ from .download import (
 from .exceptions import NonCanonicalVersion, NonDatadogPackage
 
 # Private module functions.
+
+
+def __check_aws_credentials():
+    """Check if AWS credentials are available."""
+    import boto3
+    try:
+        sts = boto3.client('sts')
+        sts.get_caller_identity()
+        return True
+    except Exception:
+        return False
+
+
+def __exec_with_aws_vault(profile, command_args):
+    """Execute command with aws-vault profile."""
+    aws_vault_cmd = ['aws-vault', 'exec', profile, '--'] + command_args
+    sys.stderr.write(f"Re-executing with aws-vault profile: {profile}\n")
+    sys.stderr.flush()
+    os.execvp('aws-vault', aws_vault_cmd)
+
+
+def __ensure_aws_credentials(profile=None):
+    """Ensure AWS credentials are available, re-exec with aws-vault if needed."""
+    if profile:
+        # User explicitly specified a profile, re-exec with aws-vault
+        __exec_with_aws_vault(profile, sys.argv)
+    elif not __check_aws_credentials():
+        # No credentials available, try to find default profile
+        default_profile = os.environ.get('AWS_VAULT_PROFILE') or 'sso-agent-integrations-dev-account-admin'
+        sys.stderr.write(f"No AWS credentials found. Using aws-vault profile: {default_profile}\n")
+        sys.stderr.flush()
+        __exec_with_aws_vault(default_profile, sys.argv)
 
 
 def __is_canonical(version):
@@ -100,7 +133,17 @@ def instantiate_downloader():
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF.'
     )
 
+    parser.add_argument(
+        '--aws-vault-profile',
+        type=str,
+        default=None,
+        help='AWS Vault profile to use for authentication. If not specified, will auto-detect or re-exec with aws-vault if needed.',
+    )
+
     args = parser.parse_args()
+
+    # Ensure AWS credentials are available (will re-exec with aws-vault if needed)
+    __ensure_aws_credentials(profile=args.aws_vault_profile)
 
     repository_url_prefix = args.repository
     standard_distribution_name = args.standard_distribution_name

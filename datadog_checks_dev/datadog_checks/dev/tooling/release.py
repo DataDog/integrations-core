@@ -266,7 +266,7 @@ def upload_package(package_path, version, public=False):
                 raise
             # Doesn't exist, proceed with upload
 
-        # Upload pointer file (public for TUF)
+        # Upload pointer file with metadata (public for TUF access)
         s3.upload_file(
             pointer_file_path,
             S3_BUCKET,
@@ -274,13 +274,13 @@ def upload_package(package_path, version, public=False):
             ExtraArgs={'Metadata': {'digest': wheel_hash, 'version': version}, 'ACL': 'public-read'},
         )
 
-        # Upload wheel file with hash metadata (public for direct download)
+        # Upload wheel file with hash metadata (private, requires authentication)
         wheel_s3_key = f"simple/{package_name}/{wheel_file_name}"
         s3.upload_file(
             wheel_file_path,
             S3_BUCKET,
             wheel_s3_key,
-            ExtraArgs={'Metadata': {'sha256': wheel_hash}, 'ACL': 'public-read'},
+            ExtraArgs={'Metadata': {'sha256': wheel_hash}},
         )
 
         print(f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}")
