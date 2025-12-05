@@ -56,6 +56,7 @@ def test_changelog_since_to(fake_changelog, ddev, mocker):
     expected_output = (
         """## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
 
+### New Changes
 * bar [2.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md) **BREAKING CHANGE**
 """
         "* datadog_checks_base [3.0.0]"
@@ -73,16 +74,26 @@ def repo_with_fake_changelog(repo_with_history, config_file):
     # ruff: noqa: E501
     expected_output = (
         """
+## Datadog Agent version [7.42.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7420)
+
+### New Integrations
+* baz [1.0.0](https://github.com/DataDog/integrations-core/blob/master/baz/CHANGELOG.md)
+### New Changes
+* datadog_checks_downloader [5.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
+
 ## Datadog Agent version [7.41.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7410)
 
+### New Integrations
 * datadog_checks_downloader [4.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
 
 ## Datadog Agent version [7.40.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7400)
 
+### New Integrations
 * onlywin [1.0.0](https://github.com/DataDog/integrations-core/blob/master/onlywin/CHANGELOG.md)
 
 ## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
 
+### New Changes
 * bar [2.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md) **BREAKING CHANGE**
 """
         "* datadog_checks_base [3.0.0]"
@@ -92,6 +103,7 @@ def repo_with_fake_changelog(repo_with_history, config_file):
 
 ## Datadog Agent version [7.38.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7380)
 
+### New Integrations
 * foo [1.5.0](https://github.com/DataDog/integrations-core/blob/master/foo/CHANGELOG.md)
 * bar [1.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md)
 * datadog_checks_base [2.1.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
