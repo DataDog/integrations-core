@@ -1,0 +1,101 @@
+id: microsoft-copilot
+metric_id: microsoft-copilot
+backend_only: false
+facets:
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft Copilot Chat Last Activity Date
+    path: report.copilotChatLastActivityDate
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft Copilot User Display Name
+    path: report.displayName
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft Copilot User Principal Name
+    path: report.userPrincipalName
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft Excel Copilot Last Activity Date
+    path: report.excelCopilotLastActivityDate
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft Loop Copilot Last Activity Date
+    path: report.loopCopilotLastActivityDate
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft OneNote Copilot Last Activity Date
+    path: report.oneNoteCopilotLastActivityDate
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft Outlook Copilot Last Activity Date
+    path: report.outlookCopilotLastActivityDate
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft PowerPoint Copilot Last Activity Date
+    path: report.powerPointCopilotLastActivityDate
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft Teams Copilot Last Activity Date
+    path: report.microsoftTeamsCopilotLastActivityDate
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Microsoft 365
+    name: Microsoft Word Copilot Last Activity Date
+    path: report.wordCopilotLastActivityDate
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Microsoft Copilot
+  enabled: true
+  filter:
+    query: source:microsoft-copilot
+  processors:
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
