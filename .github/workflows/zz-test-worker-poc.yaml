@@ -16,7 +16,7 @@ on:
         type: string
 
 jobs:
-  create-check-run:
+  create_check_run:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -52,7 +52,7 @@ jobs:
             return response.data.id;
 
   setup:
-    needs: create-check-run
+    needs: create_check_run
     runs-on: ubuntu-latest
     outputs:
       work_matrix: ${{ steps.set_matrix.outputs.work_matrix }}
@@ -105,10 +105,10 @@ jobs:
           echo "Target: ${{ matrix.target }}"
           echo "Git SHA: $(git rev-parse HEAD)"
 
-  complete-check-run:
+  complete_check_run:
     runs-on: ubuntu-latest
     if: always()
-    needs: [create-check-run, run_work]
+    needs: [create_check_run, run_work]
     permissions:
       id-token: write
       contents: read
@@ -125,7 +125,7 @@ jobs:
         with:
           github-token: ${{ steps.octo-sts.outputs.token }}
           script: |
-            const check_run_id = ${{ needs.create-check-run.outputs.check_run_id }};
+            const check_run_id = ${{ needs.create_check_run.outputs.check_run_id }};
             const conclusion = '${{ needs.run_work.result }}';
 
             // Map actions conclusion to check run conclusion
