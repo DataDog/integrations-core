@@ -142,24 +142,24 @@ pipeline:
       enabled: true
       categories:
         - filter:
-            query: "@message_id:(733100 OR 733102 OR 733103 OR 733104 OR 733105)"
-          name: threat-detection
-        - filter:
             query: "@message_id:(109005 OR 109006 OR 109010 OR 109023 OR 109033 OR 109034 OR
               109007 OR 109008 OR 109024 OR 109025 OR 502101 OR 502102 OR
               502103)"
           name: user-activity
         - filter:
-            query: "@message_id:(338001 OR 338002 OR 338003 OR 338004 OR 338005 OR 338006 OR
-              338007 OR 338008 OR 338101 OR 338102 OR 338103 OR 338104 OR 338201
-              OR 338202 OR 338203 OR 338204 OR 106001 OR 106002 OR 106006 OR
-              405001)"
-          name: network-activity
-        - filter:
             query: "@message_id:(415001 OR 415002 OR 415003 OR 415005 OR 415013 OR 415016 OR
               110002 OR 110003 OR 110004 OR 746001 OR 746002 OR 746003 OR 746005
               OR 746007 OR 746016)"
           name: firewall
+        - name: threat-detection
+          filter:
+            query: "@message_id:(733100 OR 733101 OR 733102 OR 733103 OR 733104 OR 733105)"
+        - name: network-activity
+          filter:
+            query: "@message_id:(338001 OR 338002 OR 338003 OR 338004 OR 338005 OR 338006 OR
+              338007 OR 338008 OR 338101 OR 338102 OR 338103 OR 338104 OR 338201
+              OR 338202 OR 338203 OR 338204 OR 106001 OR 106002 OR 106006 OR
+              106022 OR 405001 OR 322002 OR 322003 OR 106016)"
         - filter:
             query: "@message_id:*"
           name: other
@@ -173,7 +173,7 @@ pipeline:
       name: Threat Detection
       enabled: true
       filter:
-        query: "@message_id:(733100 OR 733102 OR 733103 OR 733104 OR 733105)"
+        query: "@message_id:(733100 OR 733101 OR 733102 OR 733103 OR 733104 OR 733105)"
       processors:
         - type: grok-parser
           name: Parse Threat Detection Logs
@@ -190,14 +190,16 @@ pipeline:
             - TCP Intercept SYN flood attack detected to 11.11.11.11/80
               (10.10.10.10/52340). Average rate of 120 SYNs/sec exceeded the
               threshold of 100.
-            - TCP Intercept SYN flood attack detected to 11.11.11.11/80
-              (10.10.10.10/52340). Burst rate of 200 SYNs/sec exceeded the
-              threshold of 150.
+            - Subnet 100.0.0.0 is targeted. Current burst rate is 19 per second,
+              max configured rate is 33; Current average rate is 50 per second,
+              max configured rate is 33; Cumulative total count is 44.
           grok:
             supportRules: ""
             matchRules: >-
-              rule_733100 \[\s*%{regex("[^\\]]*"):object}\] drop rate(-|
-              )%{number:rate_id} exceeded. Current burst rate is
+              rule_733100_733101 (\[\s*%{regex("[^\\]]*"):object}\] drop rate(-|
+              )%{number:rate_id} exceeded|Subnet %{ip:object_ip} is
+              targeted|Host %{ip:object_ip} is attacking|%{regex(".*(?=. Current
+              burst rate)"):object}). Current burst rate is
               %{number:current_burst_rate} per (second, max|second_max)
               configured rate is %{number:max_configured_burst_rate}; Current
               average rate is %{number:current_average_rate} per (second,
@@ -404,13 +406,13 @@ pipeline:
 
               rule_746001_746002_746003 user-identity: %{data:database} %{notSpace:download_status}(\s+-\s+%{data:reason})?
     - type: pipeline
-      name: ARP Collision Insights
+      name: ARP Collision/IP Spoof Insights
       enabled: true
       filter:
-        query: "@message_id:405001"
+        query: "@message_id:(405001 OR 322002 OR 322003 OR 106016)"
       processors:
         - type: grok-parser
-          name: Parse ARP collision Logs
+          name: Parse ARP collision/IP spoof Logs
           enabled: true
           source: message
           samples:
@@ -420,18 +422,32 @@ pipeline:
             - Received ARP response collision from 10.10.10.10/3A:4F:B9:27:88:10
               on interface tap1 with existing ARP entry
               192.0.2.4/02:1A:6C:3F:92:11
+            - ARP inspection check failed for arp request received from host
+              00:25:96:AA:3F:11 on interface wan1. This host is advertising MAC
+              Address 00:25:96:AA:3F:11 for IP Address 10.10.10.10, which is
+              statically bound to MAC Address 00:25:96:AA:3F:14
+            - ARP inspection check failed for arp request received from host
+              00:25:96:AA:3F:11 on interface wan1. This host is advertising MAC
+              Address 00:25:96:AA:3F:11 for IP Address 10.10.10.10, which is not
+              bound to any MAC Address
+            - Deny IP spoof from (10.10.10.10) to 11.11.11.11 on interface wan1
           grok:
             supportRules: ""
-            matchRules: rule_405001 Received ARP (request|response) collision from
+            matchRules: >-
+              rule_405001 Received ARP (request|response) collision from
               %{ip:network.client.ip}\s*/\s*%{mac:source_mac_address} on
               interface %{regex(".*(?= with existing ARP)"):interface} with
               existing ARP entry
               %{ip:existing_arp_ip}\s*/\s*%{mac:existing_arp_ip_mac_address}
+
+              rule_322002_322003 ARP inspection check failed for arp (request|response) received from host %{mac:host_mac_address} on interface %{regex(".*(?=. This)")}. This host is advertising MAC Address %{mac:client_mac_address} for IP Address %{ip:network.client.ip}, (which is (statically|dynamically) bound to MAC Address %{mac:bound_mac_address}|which is not bound to any MAC Address)
+
+              rule_106016 Deny IP spoof from (\()?%{ip:network.client.ip}(\))? to %{ip:network.destination.ip} on interface %{data:interface}
     - type: pipeline
       name: Connection insights
       enabled: true
       filter:
-        query: "@message_id:(106001 OR 106002 OR 106006)"
+        query: "@message_id:(106001 OR 106002 OR 106006 OR 106022)"
       processors:
         - type: grok-parser
           name: Parse connection Logs
@@ -446,8 +462,8 @@ pipeline:
               interface inside
             - protocol Connection denied by outbound list acl_ID src 192.0.2.3
               dest 192.0.2.4
-            - Deny inbound UDP from 192.0.2.10/1194 to 192.0.2.12/1195 on
-              interface Ethernet0
+            - Deny TCP connection spoof from 10.10.10.10 to 11.11.11.11 on
+              interface wan1
           grok:
             supportRules: ""
             matchRules: >-
@@ -459,6 +475,8 @@ pipeline:
               rule_106002 %{notSpace:protocol} Connection denied by outbound list %{notSpace:outbound_list} src %{ip:network.client.ip} dest %{ip:network.destination.ip}
 
               rule_106006 Deny inbound %{regex("UDP"):protocol} from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} on interface %{data:interface}
+
+              rule_106022 Deny %{notSpace:protocol} connection spoof from %{ip:network.client.ip} to %{ip:network.destination.ip} on interface %{data:interface}
     - type: pipeline
       name: Dynamic traffic insights
       enabled: true

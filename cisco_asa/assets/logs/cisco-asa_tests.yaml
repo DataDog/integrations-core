@@ -482,7 +482,7 @@ tests:
       service: "network-activity"
       status: "critical"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1764055163000
   - sample: "<190>2025-11-25T07:17:09Z: %ASA-4-338001: Dynamic Filter monitored blacklisted protocol traffic from br0:192.0.2.4/443 (192.0.2.1/443) to ens33:192.0.2.1/1194 (192.0.2.1/80) source malware-test-example1.badsite resolved from local list: mycoolapp-preview.mock, threat-level: 0, category: category_name"
     result:
@@ -518,5 +518,35 @@ tests:
       service: "network-activity"
       status: "warn"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1764055029000
+  - sample: "<190>2025-12-05T10:53:28Z: %ASA-3-322002: ARP inspection check failed for arp request received from host 0E:7D:FA:13:B9:09 on interface br1. This host is advertising MAC Address 0E:7D:FA:13:B9:09 for IP Address 1.0.0.1, which is statically bound to MAC Address 22:9B:4E:57:03:D1"
+    result:
+      custom: {}
+      message: "<190>2025-12-05T10:53:28Z: %ASA-3-322002: ARP inspection check failed for arp request received from host 0E:7D:FA:13:B9:09 on interface br1. This host is advertising MAC Address 0E:7D:FA:13:B9:09 for IP Address 1.0.0.1, which is statically bound to MAC Address 22:9B:4E:57:03:D1"
+      tags:
+        - "source:LOGS_SOURCE"
+  - sample: "<190>2025-12-05T10:53:36Z: %ASA-3-322003: ARP inspection check failed for arp request received from host EA:7B:BE:11:56:8D on interface wlan1. This host is advertising MAC Address EA:7B:BE:11:56:8D for IP Address 8.8.4.4, which is not bound to any MAC Address"
+    result:
+      custom: {}
+      message: "<190>2025-12-05T10:53:36Z: %ASA-3-322003: ARP inspection check failed for arp request received from host EA:7B:BE:11:56:8D on interface wlan1. This host is advertising MAC Address EA:7B:BE:11:56:8D for IP Address 8.8.4.4, which is not bound to any MAC Address"
+      tags:
+        - "source:LOGS_SOURCE"
+  - sample: "<190>2025-12-05T10:51:16Z: %ASA-2-106016: Deny IP spoof from 1.1.1.1 to 1.1.1.1 on interface wlan1"
+    result:
+      custom: {}
+      message: "<190>2025-12-05T10:51:16Z: %ASA-2-106016: Deny IP spoof from 1.1.1.1 to 1.1.1.1 on interface wlan1"
+      tags:
+        - "source:LOGS_SOURCE"
+  - sample: "<190>2025-12-05T10:52:52Z: %ASA-4-733100: Host 8.8.4.4 is attacking. Current burst rate is 15 per second, max configured rate is 42; Current average rate is 46 per second, max configured rate is 50; Cumulative total count is 34"
+    result:
+      custom: {}
+      message: "<190>2025-12-05T10:52:52Z: %ASA-4-733100: Host 8.8.4.4 is attacking. Current burst rate is 15 per second, max configured rate is 42; Current average rate is 46 per second, max configured rate is 50; Cumulative total count is 34"
+      tags:
+        - "source:LOGS_SOURCE"
+  - sample: "<190>2025-12-05T10:51:25Z: %ASA-1-106022: Deny SCP connection spoof from 8.8.8.8 to 1.0.0.1 on interface tun0"
+    result:
+      custom: {}
+      message: "<190>2025-12-05T10:51:25Z: %ASA-1-106022: Deny SCP connection spoof from 8.8.8.8 to 1.0.0.1 on interface tun0"
+      tags:
+        - "source:LOGS_SOURCE"
