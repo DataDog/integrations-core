@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import collections
 import glob
+import hashlib
 import logging
 import logging.config
 import os
@@ -14,6 +15,8 @@ import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
+
+import yaml
 
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
@@ -83,6 +86,9 @@ class TUFDownloader:
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
 
         self.__disable_verification = disable_verification
+        self.__use_poc = use_poc
+        self.__current_version = None
+        self.__current_wheel_href = None
 
         if self.__disable_verification:
             logger.warning(
@@ -311,12 +317,94 @@ class TUFDownloader:
         else:
             return target_abspath
 
+    def __download_wheel_from_pointer(self, pointer_abspath, standard_distribution_name):
+        """Download wheel using pointer file.
+
+        Args:
+            pointer_abspath: Local path to downloaded pointer file
+            standard_distribution_name: Package name
+
+        Returns:
+            Absolute path to downloaded wheel file
+        """
+        # Parse pointer file
+        with open(pointer_abspath, 'rb') as f:
+            pointer_bytes = f.read()
+
+        pointer_content = yaml.safe_load(pointer_bytes)
+        pointer = pointer_content.get('pointer', {})
+
+        wheel_uri = pointer.get('uri', '')
+        wheel_digest = pointer.get('digest', '')
+        wheel_name = pointer.get('name', standard_distribution_name)
+        wheel_version = pointer.get('version', self.__current_version)
+
+        if not wheel_uri or not wheel_digest:
+            raise ValueError(f"Invalid pointer file: missing uri or digest")
+
+        # Extract wheel filename from URI
+        wheel_filename = wheel_uri.split('/')[-1]
+
+        # Download wheel directly from URI
+        logger.info(f'Downloading wheel from: {wheel_uri}')
+        wheel_abspath = os.path.join(self.__targets_dir, 'simple', standard_distribution_name, wheel_filename)
+        os.makedirs(os.path.dirname(wheel_abspath), exist_ok=True)
+
+        try:
+            with urllib.request.urlopen(wheel_uri) as resp:
+                wheel_bytes = resp.read()
+
+            # Verify digest
+            actual_digest = hashlib.sha256(wheel_bytes).hexdigest()
+            if actual_digest != wheel_digest:
+                raise ValueError(
+                    f"Wheel digest mismatch: expected {wheel_digest}, got {actual_digest}"
+                )
+
+            # Save wheel
+            with open(wheel_abspath, 'wb') as f:
+                f.write(wheel_bytes)
+
+            logger.info(f'Wheel verified and saved: {wheel_abspath}')
+            return wheel_abspath
+
+        except urllib.error.HTTPError as err:
+            logger.error('GET %s: %s', wheel_uri, err)
+            raise
+
     def download(self, target_relpath):
         """
         Returns:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         """
+        # For POC mode with pointers, use pointer-based download
+        if self.__use_poc and 'simple/' in target_relpath:
+            # Extract package name from path like 'simple/datadog-postgres/...'
+            path_parts = target_relpath.split('/')
+            if len(path_parts) >= 2:
+                standard_distribution_name = path_parts[1]
+
+                # Construct pointer file path
+                # Format: pointers/{package}/{package}-{version}.pointer
+                pointer_filename = f"{standard_distribution_name}-{self.__current_version}.pointer"
+                pointer_relpath = f"pointers/{standard_distribution_name}/{pointer_filename}"
+
+                logger.info(f'POC mode: downloading pointer file: {pointer_relpath}')
+
+                # Download pointer via TUF
+                if self.__disable_verification:
+                    pointer_abspath = self._download_without_tuf_in_toto(pointer_relpath)
+                else:
+                    pointer_abspath = self._download_with_tuf_in_toto(pointer_relpath)
+
+                # Download wheel using pointer
+                wheel_abspath = self.__download_wheel_from_pointer(pointer_abspath, standard_distribution_name)
+
+                # Always return the posix version of the path for consistency across platforms
+                return pathlib.Path(wheel_abspath).as_posix()
+
+        # Original behavior for non-POC mode
         if self.__disable_verification:
             target_abspath = self._download_without_tuf_in_toto(target_relpath)
         else:
@@ -392,5 +480,9 @@ class TUFDownloader:
                 href = list(python_tags.values())[0]
             else:
                 raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
+
+        # Store version for use in pointer-based download
+        self.__current_version = version
+        self.__current_wheel_href = href
 
         return 'simple/{}/{}'.format(standard_distribution_name, href)
