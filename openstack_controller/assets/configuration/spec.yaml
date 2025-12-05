@@ -31,6 +31,7 @@ files:
         - name: password
           description: |
            The Password used to connect to Openstack.
+          secret: true
           value:
             example: <PASSWORD>
             type: string

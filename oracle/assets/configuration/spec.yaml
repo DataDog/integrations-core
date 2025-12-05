@@ -48,6 +48,7 @@ files:
     - name: password
       description: The password for the Datadog user account.
       required: true
+      secret: true
       value:
         type: string
     - name: jdbc_driver_path

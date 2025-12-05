@@ -57,6 +57,7 @@ files:
     - name: password
       required: false
       description: If authentication is needed, specify a `password` here.
+      secret: true
       value:
         type: string
     - name: namespace

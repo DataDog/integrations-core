@@ -34,6 +34,7 @@ files:
           display_priority: 1
           description: |
             The ESXi host password
+          secret: true
           value:
             type: string
             example: <PASSWORD>
