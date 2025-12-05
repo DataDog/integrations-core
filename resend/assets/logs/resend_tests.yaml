@@ -1,0 +1,330 @@
+id: resend
+tests:
+ -
+  sample: |-
+    {
+      "data": {
+        "email_id": "50cd6bf1-577e-4001-9cef-5f55484111f0",
+        "headers": [
+          {
+            "name": "X-Example-ID",
+            "value": "12312312-1234-1234-1234-123412341234"
+          }
+        ],
+        "subject": "Subscription Renewal Notice",
+        "created_at": "2025-11-11T14:38:43.814135+00:00",
+        "from": "do-not-reply@future.example.com",
+        "template_id": "f6g7h8i9-j0k1-52l3-m4n5-o6p7q8r9s0t1",
+        "to": [
+          "gyvonne.hough@example.com"
+        ],
+        "click": {
+          "ipAddress": "2620:1ec:bdf::40",
+          "link": "https://example.com/products",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0",
+          "timestamp": "2025-11-11T14:38:43.814112+00:00"
+        },
+        "tags": {
+          "priority": "high",
+          "type": "renewal"
+        }
+      },
+      "service": "events",
+      "created_at": "2025-11-11T14:38:44.303203+00:00",
+      "type": "email.clicked"
+    }
+  result:
+    custom:
+      created_at: "2025-11-11T14:38:44.303203+00:00"
+      data:
+        click:
+          ipAddress: "2620:1ec:bdf::40"
+          link: "https://example.com/products"
+          timestamp: "2025-11-11T14:38:43.814112+00:00"
+          userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0"
+        created_at: "2025-11-11T14:38:43.814135+00:00"
+        email_id: "50cd6bf1-577e-4001-9cef-5f55484111f0"
+        from: "do-not-reply@future.example.com"
+        headers:
+         -
+          name: "X-Example-ID"
+          value: "12312312-1234-1234-1234-123412341234"
+        subject: "Subscription Renewal Notice"
+        tags:
+          priority: "high"
+          type: "renewal"
+        template_id: "f6g7h8i9-j0k1-52l3-m4n5-o6p7q8r9s0t1"
+        to:
+         - "gyvonne.hough@example.com"
+      network:
+        client:
+          geoip: {}
+      resend:
+        domain: "future.example.com"
+        recipient_count: 1
+        recipients: "gyvonne.hough@example.com"
+      service: "events"
+      type: "email.clicked"
+    message: |-
+      {
+        "data" : {
+          "email_id" : "50cd6bf1-577e-4001-9cef-5f55484111f0",
+          "headers" : [ {
+            "name" : "X-Example-ID",
+            "value" : "12312312-1234-1234-1234-123412341234"
+          } ],
+          "subject" : "Subscription Renewal Notice",
+          "created_at" : "2025-11-11T14:38:43.814135+00:00",
+          "from" : "do-not-reply@future.example.com",
+          "template_id" : "f6g7h8i9-j0k1-52l3-m4n5-o6p7q8r9s0t1",
+          "to" : [ "gyvonne.hough@example.com" ],
+          "click" : {
+            "ipAddress" : "2620:1ec:bdf::40",
+            "link" : "https://example.com/products",
+            "userAgent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0",
+            "timestamp" : "2025-11-11T14:38:43.814112+00:00"
+          },
+          "tags" : {
+            "priority" : "high",
+            "type" : "renewal"
+          }
+        },
+        "service" : "events",
+        "created_at" : "2025-11-11T14:38:44.303203+00:00",
+        "type" : "email.clicked"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1762871924303
+ -
+  sample: |-
+    {
+      "data" : {
+        "unsubscribed" : 0,
+        "updated_at" : "2025-09-18T17:56:37.669Z",
+        "created_at" : "2025-09-18T17:56:37.657Z",
+        "audience_id" : "2f54e077-a7c4-47b1-9577-b9bceb103c8b",
+        "id" : "90d9ad0d-2c47-4715-b208-53ddd8b2e485",
+        "email" : "brian+lawrence@mayalane.com"
+      },
+      "created_at" : "2025-09-18T17:56:37.693Z",
+      "type" : "contact.created"
+    }
+  result:
+    custom:
+      created_at: "2025-09-18T17:56:37.693Z"
+      data:
+        audience_id: "2f54e077-a7c4-47b1-9577-b9bceb103c8b"
+        created_at: "2025-09-18T17:56:37.657Z"
+        email: "brian+lawrence@mayalane.com"
+        id: "90d9ad0d-2c47-4715-b208-53ddd8b2e485"
+        unsubscribed: 0
+        updated_at: "2025-09-18T17:56:37.669Z"
+      type: "contact.created"
+    message: |-
+      {
+        "data" : {
+          "unsubscribed" : 0,
+          "updated_at" : "2025-09-18T17:56:37.669Z",
+          "created_at" : "2025-09-18T17:56:37.657Z",
+          "audience_id" : "2f54e077-a7c4-47b1-9577-b9bceb103c8b",
+          "id" : "90d9ad0d-2c47-4715-b208-53ddd8b2e485",
+          "email" : "brian+lawrence@mayalane.com"
+        },
+        "created_at" : "2025-09-18T17:56:37.693Z",
+        "type" : "contact.created"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1758218197693
+ -
+  sample: |-
+    {
+      "data" : {
+        "records" : [ {
+          "record" : "SPF",
+          "name" : "send.updates",
+          "type" : "MX",
+          "ttl" : "Auto",
+          "value" : "10 feedback-smtp.us-east-1.amazonses.com",
+          "status" : "verified"
+        }, {
+          "record" : "SPF",
+          "name" : "send.updates",
+          "type" : "TXT",
+          "ttl" : "Auto",
+          "value" : "v=spf1 include:amazonses.com ~all",
+          "status" : "verified"
+        }, {
+          "record" : "DKIM",
+          "name" : "resend._domainkey.updates",
+          "type" : "TXT",
+          "ttl" : "Auto",
+          "value" : "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsc3nkSAQP+cvX+J3rCJc8Xt3wZI36a2JYFI1/dTErAKm/t8HbdvLjr40sIVLGDe4BvNp63Uv6qbKw8IT3Ix80BPPTF3m/3hylHgB5EM3cgsH4fnjZQlqCsTFV/CRfAuwAWC1V8Xz522+7T2zkTYHiv9aGvTLMkWiV+afr0QKzfwIDAQAB",
+          "status" : "verified"
+        } ],
+        "name" : "updates.helodali.com",
+        "created_at" : "2025-09-18T17:16:34.071Z",
+        "id" : "a551dcad-81f1-4dcc-bf0c-351227eaea58",
+        "region" : "us-east-1",
+        "status" : "verified"
+      },
+      "created_at" : "2025-09-18T17:48:30.788Z",
+      "type" : "domain.deleted"
+    }
+  result:
+    custom:
+      created_at: "2025-09-18T17:48:30.788Z"
+      data:
+        created_at: "2025-09-18T17:16:34.071Z"
+        id: "a551dcad-81f1-4dcc-bf0c-351227eaea58"
+        name: "updates.helodali.com"
+        records:
+         -
+          record: "SPF"
+          name: "send.updates"
+          type: "MX"
+          ttl: "Auto"
+          value: "10 feedback-smtp.us-east-1.amazonses.com"
+          status: "verified"
+         -
+          record: "SPF"
+          name: "send.updates"
+          type: "TXT"
+          ttl: "Auto"
+          value: "v=spf1 include:amazonses.com ~all"
+          status: "verified"
+         -
+          record: "DKIM"
+          name: "resend._domainkey.updates"
+          type: "TXT"
+          ttl: "Auto"
+          value: "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsc3nkSAQP+cvX+J3rCJc8Xt3wZI36a2JYFI1/dTErAKm/t8HbdvLjr40sIVLGDe4BvNp63Uv6qbKw8IT3Ix80BPPTF3m/3hylHgB5EM3cgsH4fnjZQlqCsTFV/CRfAuwAWC1V8Xz522+7T2zkTYHiv9aGvTLMkWiV+afr0QKzfwIDAQAB"
+          status: "verified"
+        region: "us-east-1"
+        status: "verified"
+      resend:
+        domain: "updates.helodali.com"
+      type: "domain.deleted"
+    message: |-
+      {
+        "data" : {
+          "records" : [ {
+            "record" : "SPF",
+            "name" : "send.updates",
+            "type" : "MX",
+            "ttl" : "Auto",
+            "value" : "10 feedback-smtp.us-east-1.amazonses.com",
+            "status" : "verified"
+          }, {
+            "record" : "SPF",
+            "name" : "send.updates",
+            "type" : "TXT",
+            "ttl" : "Auto",
+            "value" : "v=spf1 include:amazonses.com ~all",
+            "status" : "verified"
+          }, {
+            "record" : "DKIM",
+            "name" : "resend._domainkey.updates",
+            "type" : "TXT",
+            "ttl" : "Auto",
+            "value" : "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsc3nkSAQP+cvX+J3rCJc8Xt3wZI36a2JYFI1/dTErAKm/t8HbdvLjr40sIVLGDe4BvNp63Uv6qbKw8IT3Ix80BPPTF3m/3hylHgB5EM3cgsH4fnjZQlqCsTFV/CRfAuwAWC1V8Xz522+7T2zkTYHiv9aGvTLMkWiV+afr0QKzfwIDAQAB",
+            "status" : "verified"
+          } ],
+          "name" : "updates.helodali.com",
+          "created_at" : "2025-09-18T17:16:34.071Z",
+          "id" : "a551dcad-81f1-4dcc-bf0c-351227eaea58",
+          "region" : "us-east-1",
+          "status" : "verified"
+        },
+        "created_at" : "2025-09-18T17:48:30.788Z",
+        "type" : "domain.deleted"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1758217710788
+ -
+  sample: |-
+    {
+      "data" : {
+        "email_id" : "d2c6c8bd-6391-4510-be05-06361007ff0a",
+        "headers" : [ {
+          "name" : "Precedence",
+          "value" : "bulk"
+        }, {
+          "name" : "X-Entity-Ref-ID",
+          "value" : "a654fa0b-b6b7-4d9a-a95c-ff58d9086ec1"
+        }, {
+          "name" : "List-Unsubscribe",
+          "value" : "<https://unsubscribe.resend.com/?token=sometoken>"
+        }, {
+          "name" : "List-Unsubscribe-Post",
+          "value" : "List-Unsubscribe=One-Click"
+        } ],
+        "subject" : "Time to join the fun",
+        "broadcast_id" : "2c30ac8d-262b-4785-84ac-4c498f747aaa",
+        "created_at" : "2025-09-11 21:58:53.475066+00",
+        "from" : "Helodali <helodali@resend.helodali.com>",
+        "to" : [ "brian+clarkson@mayalane.com" ]
+      },
+      "created_at" : "2025-09-11T21:58:59.303Z",
+      "type" : "email.delivered"
+    }
+  result:
+    custom:
+      created_at: "2025-09-11T21:58:59.303Z"
+      data:
+        broadcast_id: "2c30ac8d-262b-4785-84ac-4c498f747aaa"
+        created_at: "2025-09-11 21:58:53.475066+00"
+        email_id: "d2c6c8bd-6391-4510-be05-06361007ff0a"
+        from: "Helodali <helodali@resend.helodali.com>"
+        headers:
+         -
+          name: "Precedence"
+          value: "bulk"
+         -
+          name: "X-Entity-Ref-ID"
+          value: "a654fa0b-b6b7-4d9a-a95c-ff58d9086ec1"
+         -
+          name: "List-Unsubscribe"
+          value: "<https://unsubscribe.resend.com/?token=sometoken>"
+         -
+          name: "List-Unsubscribe-Post"
+          value: "List-Unsubscribe=One-Click"
+        subject: "Time to join the fun"
+        to:
+         - "brian+clarkson@mayalane.com"
+      resend:
+        domain: "resend.helodali.com"
+        recipient_count: 1
+        recipients: "brian+clarkson@mayalane.com"
+      type: "email.delivered"
+    message: |-
+      {
+        "data" : {
+          "email_id" : "d2c6c8bd-6391-4510-be05-06361007ff0a",
+          "headers" : [ {
+            "name" : "Precedence",
+            "value" : "bulk"
+          }, {
+            "name" : "X-Entity-Ref-ID",
+            "value" : "a654fa0b-b6b7-4d9a-a95c-ff58d9086ec1"
+          }, {
+            "name" : "List-Unsubscribe",
+            "value" : "<https://unsubscribe.resend.com/?token=sometoken>"
+          }, {
+            "name" : "List-Unsubscribe-Post",
+            "value" : "List-Unsubscribe=One-Click"
+          } ],
+          "subject" : "Time to join the fun",
+          "broadcast_id" : "2c30ac8d-262b-4785-84ac-4c498f747aaa",
+          "created_at" : "2025-09-11 21:58:53.475066+00",
+          "from" : "Helodali <helodali@resend.helodali.com>",
+          "to" : [ "brian+clarkson@mayalane.com" ]
+        },
+        "created_at" : "2025-09-11T21:58:59.303Z",
+        "type" : "email.delivered"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757627939303
