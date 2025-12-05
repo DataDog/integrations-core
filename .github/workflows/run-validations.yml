@@ -248,7 +248,7 @@ jobs:
       run: ddev validate codeowners
 
     - name: Comment PR on failure
-      if: ${{ failure() && github.event.pull_request.merged != true }}
+      if: ${{ failure() && github.event_name == 'pull_request' && github.event.pull_request.merged != true }}
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       continue-on-error: true
       with:
