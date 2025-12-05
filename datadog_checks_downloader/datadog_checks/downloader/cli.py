@@ -7,7 +7,6 @@
 import argparse
 import os
 import re
-import subprocess
 import sys
 
 # 2nd party.
@@ -22,44 +21,12 @@ from .exceptions import NonCanonicalVersion, NonDatadogPackage
 # Private module functions.
 
 
-def __check_aws_credentials():
-    """Check if AWS credentials are available."""
-    import boto3
-    try:
-        sts = boto3.client('sts')
-        sts.get_caller_identity()
-        return True
-    except Exception:
-        return False
-
-
-def __exec_with_aws_vault(profile, command_args):
-    """Execute command with aws-vault profile."""
-    aws_vault_cmd = ['aws-vault', 'exec', profile, '--'] + command_args
-    sys.stderr.write(f"Re-executing with aws-vault profile: {profile}\n")
-    sys.stderr.flush()
-    os.execvp('aws-vault', aws_vault_cmd)
-
-
-def __ensure_aws_credentials(profile=None):
-    """Ensure AWS credentials are available, re-exec with aws-vault if needed."""
-    if profile:
-        # User explicitly specified a profile, re-exec with aws-vault
-        __exec_with_aws_vault(profile, sys.argv)
-    elif not __check_aws_credentials():
-        # No credentials available, try to find default profile
-        default_profile = os.environ.get('AWS_VAULT_PROFILE') or 'sso-agent-integrations-dev-account-admin'
-        sys.stderr.write(f"No AWS credentials found. Using aws-vault profile: {default_profile}\n")
-        sys.stderr.flush()
-        __exec_with_aws_vault(default_profile, sys.argv)
-
-
 def __is_canonical(version):
     """
     https://www.python.org/dev/peps/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions
     """
 
-    P = r'^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$'
+    P = r"^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$"
     return re.match(P, version) is not None
 
 
@@ -67,7 +34,7 @@ def __find_shipped_integrations():
     # Recurse up from site-packages until we find the Agent root directory.
     # The relative path differs between operating systems.
     root = os.path.dirname(os.path.abspath(__file__))
-    filename = 'requirements-agent-release.txt'
+    filename = "requirements-agent-release.txt"
 
     integrations = set()
 
@@ -82,11 +49,11 @@ def __find_shipped_integrations():
 
         root = new_root
 
-    with open(file_path, 'rb') as f:
-        contents = f.read().decode('utf-8')
+    with open(file_path, "rb") as f:
+        contents = f.read().decode("utf-8")
 
     for line in contents.splitlines():
-        integration, separator, _ = line.strip().partition('==')
+        integration, separator, _ = line.strip().partition("==")
         if separator:
             integrations.add(integration)
 
@@ -97,53 +64,63 @@ def instantiate_downloader():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        'standard_distribution_name', type=str, help='Standard distribution name of the desired Datadog check.'
+        "standard_distribution_name",
+        type=str,
+        help="Standard distribution name of the desired Datadog check.",
     )
 
     parser.add_argument(
-        '--repository', type=str, default=REPOSITORY_URL_PREFIX, help='The complete URL prefix for the TUF repository.'
+        "--repository",
+        type=str,
+        default=REPOSITORY_URL_PREFIX,
+        help="The complete URL prefix for the TUF repository.",
     )
 
-    parser.add_argument('--version', type=str, default=None, help='The version number of the desired Datadog check.')
+    parser.add_argument(
+        "--version",
+        type=str,
+        default=None,
+        help="The version number of the desired Datadog check.",
+    )
 
     parser.add_argument(
-        '--type',
+        "--type",
         type=str,
         default=DEFAULT_ROOT_LAYOUT_TYPE,
         choices=list(ROOT_LAYOUTS),
-        help='The type of integration.',
+        help="The type of integration.",
     )
 
     parser.add_argument(
-        '--force', action='store_true', help='Force download even if the type of integration may be incorrect.'
+        "--force",
+        action="store_true",
+        help="Force download even if the type of integration may be incorrect.",
     )
 
     parser.add_argument(
-        '--unsafe-disable-verification',
-        action='store_true',
+        "--unsafe-disable-verification",
+        action="store_true",
         help=(
-            'Disable TUF integrity verification. '
-            'To use only if TUF verification fails due to a bug and not an attack.'
+            "Disable TUF integrity verification. "
+            "To use only if TUF verification fails due to a bug and not an attack."
         ),
     )
 
-    parser.add_argument('--ignore-python-version', action='store_true', help='Ignore Python version requirements.')
-
     parser.add_argument(
-        '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF.'
+        "--ignore-python-version",
+        action="store_true",
+        help="Ignore Python version requirements.",
     )
 
     parser.add_argument(
-        '--aws-vault-profile',
-        type=str,
-        default=None,
-        help='AWS Vault profile to use for authentication. If not specified, will auto-detect or re-exec with aws-vault if needed.',
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Show verbose information about TUF.",
     )
 
     args = parser.parse_args()
-
-    # Ensure AWS credentials are available (will re-exec with aws-vault if needed)
-    __ensure_aws_credentials(profile=args.aws_vault_profile)
 
     repository_url_prefix = args.repository
     standard_distribution_name = args.standard_distribution_name
@@ -153,17 +130,19 @@ def instantiate_downloader():
     ignore_python_version = args.ignore_python_version
     verbose = args.verbose
 
-    if not standard_distribution_name.startswith('datadog-'):
+    if not standard_distribution_name.startswith("datadog-"):
         raise NonDatadogPackage(standard_distribution_name)
 
     if version and not __is_canonical(version):
         raise NonCanonicalVersion(version)
 
-    if root_layout_type != 'core':
+    if root_layout_type != "core":
         shipped_integrations = __find_shipped_integrations()
         if standard_distribution_name in shipped_integrations:
             sys.stderr.write(
-                '{}: {} is a known core integration'.format('WARNING' if force else 'ERROR', standard_distribution_name)
+                "{}: {} is a known core integration".format(
+                    "WARNING" if force else "ERROR", standard_distribution_name
+                )
             )
             sys.stderr.flush()
 
@@ -180,9 +159,13 @@ def instantiate_downloader():
     return tuf_downloader, standard_distribution_name, version, ignore_python_version
 
 
-def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version):
+def run_downloader(
+    tuf_downloader, standard_distribution_name, version, ignore_python_version
+):
     wheel_relpath = tuf_downloader.get_wheel_relpath(
-        standard_distribution_name, version=version, ignore_python_version=ignore_python_version
+        standard_distribution_name,
+        version=version,
+        ignore_python_version=ignore_python_version,
     )
     wheel_abspath = tuf_downloader.download(wheel_relpath)
     print(wheel_abspath)  # pylint: disable=print-statement
@@ -192,5 +175,12 @@ def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_p
 
 
 def download():
-    tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
-    run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
+    (
+        tuf_downloader,
+        standard_distribution_name,
+        version,
+        ignore_python_version,
+    ) = instantiate_downloader()
+    run_downloader(
+        tuf_downloader, standard_distribution_name, version, ignore_python_version
+    )
