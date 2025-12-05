@@ -11,6 +11,9 @@ on:
         description: 'Commit SHA to check out. Use PR head SHA to report as PR check.'
         required: true
         type: string
+      name:
+        required: true
+        type: string
 
 jobs:
   create-check-run:
@@ -37,13 +40,13 @@ jobs:
             const response = await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: 'Test Worker POC',
+              name: 'Test Worker POC - ${{ inputs.name }}',
               head_sha: '${{ inputs.ref }}',
               status: 'in_progress',
               details_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
               output: {
-                title: 'Test Worker POC Running',
-                summary: 'The test worker POC workflow is currently running.'
+                title: 'Test Worker POC Running - ${{ inputs.name }}',
+                summary: 'The test worker POC workflow is currently running for ${{ inputs.name }}.'
               }
             });
             return response.data.id;
@@ -144,8 +147,9 @@ jobs:
               check_run_id: check_run_id,
               status: 'completed',
               conclusion: checkConclusion,
+              details_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
               output: {
-                title: 'Test Worker POC Completed',
-                summary: `The workflow completed with status: ${conclusion}`
+                title: 'Test Worker POC Completed - ${{ inputs.name }}',
+                summary: `The workflow completed with status: ${conclusion} for ${{ inputs.name }}.`
               }
             });
