@@ -90,6 +90,7 @@ def trigger_workflow(target: str, jobs: list[dict], ref: str, dry_run: bool = Fa
         '-f', 'ref=master',
         '-f', f'inputs[matrix_json]={matrix_json}',
         '-f', f'inputs[ref]={ref}'
+        '-f', f'inputs[name]={target}'
     ]
 
     try:
