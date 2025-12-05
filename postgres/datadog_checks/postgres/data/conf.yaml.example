@@ -399,7 +399,7 @@ instances:
         #   - master$
         #   - AdventureWorks.*
 
-        ## @param exclude - list of strings - optional - default: ['cloudsqladmin']
+        ## @param exclude - list of strings - optional - default: ['cloudsqladmin', 'rdsadmin', 'alloydbadmin', 'alloydbmetadata']
         ## Regular expression for database names to exclude as part of `database_autodiscovery`.
         ## Character casing is ignored. The regular expressions start matching from the beginning,
         ## so to match anywhere, prepend `.*`. For exact matches append `$`.
@@ -566,6 +566,11 @@ instances:
         ## Maximum amount of tables the Agent collects from the instance.
         #
         # max_tables: 300
+
+        ## @param max_query_duration - number - optional - default: 60
+        ## Maximum duration of the query to collect schema information in seconds.
+        #
+        # max_query_duration: <MAX_QUERY_DURATION>
 
         ## @param max_columns - number - optional - default: 50
         ## Maximum amount of columns the Agent collects per table.

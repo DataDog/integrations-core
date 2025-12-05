@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 14.0.2 / 2025-11-21
+
+***Fixed***:
+
+* Bump `datadog-checks-dev` to 35.3.1. ([#21944](https://github.com/DataDog/integrations-core/pull/21944))
+
 ## 14.0.1 / 2025-11-19
 
 ***Fixed***:
