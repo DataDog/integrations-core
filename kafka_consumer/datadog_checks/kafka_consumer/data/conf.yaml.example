@@ -185,17 +185,6 @@ instances:
     # sasl_kerberos_domain_name: localhost
 
     ## Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
-    ##
-    ## For AWS MSK IAM authentication:
-    ##   sasl_oauth_token_provider:
-    ##     method: aws_msk_iam
-    ##
-    ## For OIDC authentication (or omit 'method' for backwards compatibility):
-    ##   sasl_oauth_token_provider:
-    ##     method: oidc
-    ##     url: <TOKEN_ENDPOINT_URL>
-    ##     client_id: <CLIENT_ID>
-    ##     client_secret: <CLIENT_SECRET>
     #
     # sasl_oauth_token_provider:
 
