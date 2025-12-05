@@ -1,0 +1,1 @@
+Improve logging and UX for Docker Agent lifecycle commands (start-up, local packages, post-install, stop) in E2E testing
