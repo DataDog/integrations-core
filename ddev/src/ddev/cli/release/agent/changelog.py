@@ -75,22 +75,22 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
 
-            new_integration = any(not ver[1] for ver in version_changes.values())
+            new_integration = any(ver[1] for ver in version_changes.values())
             if new_integration:
                 changelog_contents.write('### New Integrations\n')
                 for name, ver in version_changes.items():
-                    if not ver[1]:
+                    if ver[1]:
                         display_name = get_display_name(app, name)
                         changelog_url = check_changelog_url.format(name)
                         changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url})\n')
 
-            new_change = any(ver[1] for ver in version_changes.values())
+            new_change = any(not ver[1] for ver in version_changes.values())
             if new_change:
                 changelog_contents.write("### New Changes\n")
                 for name, ver in version_changes.items():
-                    if ver[1]:
+                    if not ver[1]:
                         display_name = get_display_name(app, name)
-                        breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
+                        breaking_notice = " **BREAKING CHANGE**" if ver[2] else ""
                         changelog_url = check_changelog_url.format(name)
                         changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url}){breaking_notice}\n')
             # add an extra line to separate the release block
