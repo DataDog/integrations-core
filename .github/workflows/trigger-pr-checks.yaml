@@ -39,7 +39,7 @@ jobs:
 
           python gh_workflow.py \
             --ref refs/pull/${{ github.event.pull_request.number }}/merge \
-            --multiply 1
+            --multiply 1 \
             --limit 5
 
       - name: Summary
