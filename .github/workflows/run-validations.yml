@@ -242,7 +242,7 @@ jobs:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: ddev validate licenses
-      
+
     - name: Validate the CODEOWNERS file
       if: inputs.codeowners
       run: ddev validate codeowners
