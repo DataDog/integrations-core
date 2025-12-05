@@ -33,10 +33,12 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
+    "boto3>=1.40.0",
     "in-toto==2.0.0",
     "packaging==25.0",
     "securesystemslib[crypto,pynacl]==0.28.0",
     "tuf==4.0.0",
+    "pyyaml==6.0.2",
 ]
 
 [project.urls]

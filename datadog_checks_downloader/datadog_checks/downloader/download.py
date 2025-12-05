@@ -16,6 +16,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+import boto3
 import yaml
 
 from in_toto import verifylib
@@ -345,14 +346,34 @@ class TUFDownloader:
         # Extract wheel filename from URI
         wheel_filename = wheel_uri.split('/')[-1]
 
-        # Download wheel directly from URI
+        # Download wheel directly from S3 using boto3 (with authentication)
         logger.info(f'Downloading wheel from: {wheel_uri}')
         wheel_abspath = os.path.join(self.__targets_dir, 'simple', standard_distribution_name, wheel_filename)
         os.makedirs(os.path.dirname(wheel_abspath), exist_ok=True)
 
         try:
-            with urllib.request.urlopen(wheel_uri) as resp:
-                wheel_bytes = resp.read()
+            # Parse S3 URI to extract bucket and key
+            # Example: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/datadog-postgres/wheel.whl
+            parsed = urlparse(wheel_uri)
+
+            # Extract bucket name from hostname (format: bucket.s3.region.amazonaws.com)
+            bucket_name = parsed.hostname.split('.')[0]
+
+            # Extract S3 key (path without leading /)
+            s3_key = parsed.path.lstrip('/')
+
+            # Extract region from hostname if present
+            if '.s3.' in parsed.hostname and '.amazonaws.com' in parsed.hostname:
+                region = parsed.hostname.split('.s3.')[1].split('.amazonaws.com')[0]
+            else:
+                region = None
+
+            logger.debug(f'Parsed S3 URI: bucket={bucket_name}, key={s3_key}, region={region}')
+
+            # Use boto3 to download with AWS credentials
+            s3_client = boto3.client('s3', region_name=region)
+            response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+            wheel_bytes = response['Body'].read()
 
             # Verify digest
             actual_digest = hashlib.sha256(wheel_bytes).hexdigest()
@@ -368,8 +389,8 @@ class TUFDownloader:
             logger.info(f'Wheel verified and saved: {wheel_abspath}')
             return wheel_abspath
 
-        except urllib.error.HTTPError as err:
-            logger.error('GET %s: %s', wheel_uri, err)
+        except Exception as err:
+            logger.error('Failed to download wheel from %s: %s', wheel_uri, err)
             raise
 
     def download(self, target_relpath):
