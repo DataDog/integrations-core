@@ -72,7 +72,7 @@ Send Prometheus Alertmanager alerts in the event stream. Natively, Alertmanager 
 
 1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
 
-{{< highlight yaml "hl_lines=3-5" >}}
+```yaml
 receivers:
 - name: datadog
   webhook_configs: 
@@ -84,7 +84,7 @@ route:
   group_interval: 5m
   receiver: datadog
   repeat_interval: 3h
-{{< /highlight >}}
+```
 
 <div class="alert alert-info">
 The <code>group_by</code> parameter determines how alerts are grouped together when sent to Datadog. Alerts sharing the same values for the specified labels will be grouped into a single notification. For more details on routing configuration, see the <a href="https://prometheus.io/docs/alerting/latest/configuration/">Prometheus Alertmanager documentation</a>.
@@ -96,7 +96,7 @@ The <code>group_by</code> parameter determines how alerts are grouped together w
 
 The V2 webhook supports additional query parameters. For example, use the `oncall_team` parameter to integrate with the [Datadog On-Call][11] product and redirect pages to different teams:
 
-{{< highlight yaml "hl_lines=5 9 18-19" >}}
+```yaml
 receivers:
 - name: datadog-ops
   webhook_configs: 
@@ -117,7 +117,7 @@ route:
   - matchers:
     - team="database"
     receiver: datadog-db
-{{< /highlight >}}
+```
 
 <div class="alert alert-tip">
 Setting <code>send_resolved: true</code> (the default value) enables Alertmanager to send notifications when alerts are resolved in Prometheus. This is particularly important when using the <code>oncall_team</code> parameter to ensure pages are marked as resolved. Note that resolved notifications may take up to the next <code>group_interval</code> to be sent.
@@ -134,7 +134,7 @@ sudo systemctl restart prometheus.service alertmanager.service
 
 1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
 
-{{< highlight yaml "hl_lines=3-5" >}}
+```yaml
 receivers:
 - name: datadog
   webhook_configs: 
@@ -146,7 +146,7 @@ route:
   group_interval: 5m
   receiver: datadog
   repeat_interval: 3h
-{{< /highlight >}}
+```
 
 **Note**: This endpoint accepts only one event in the payload at a time.
 
