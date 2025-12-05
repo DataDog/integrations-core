@@ -140,7 +140,6 @@ def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: s
             invalid_file_patterns=external_invalid_file_patterns,
         )
         shutil.move(wheel, external_dir)
-        continue
 
     for wheel in iter_wheels(source_built_dir):
         print(f'--> {wheel.name}')
@@ -217,7 +216,6 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
         print(f'--> {wheel.name}')
         print('Using existing wheel')
         shutil.move(wheel, external_dir)
-        continue
 
     for wheel in iter_wheels(source_built_dir):
         print(f'--> {wheel.name}')
