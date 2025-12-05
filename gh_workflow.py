@@ -68,7 +68,7 @@ def group_jobs_by_target(jobs: list[dict]) -> dict[str, list[dict]]:
     return dict(grouped)
 
 
-def trigger_workflow(target: str, jobs: list[dict], ref: str, dry_run: bool = False) -> bool:
+def trigger_workflow(target: str, jobs: list[dict], checkout_ref: str, source_sha: str, dry_run: bool = False) -> bool:
     """Trigger the GitHub workflow for a specific target with its jobs."""
     matrix_json = json.dumps(jobs)
 
@@ -76,7 +76,8 @@ def trigger_workflow(target: str, jobs: list[dict], ref: str, dry_run: bool = Fa
         print(f"\n[DRY RUN] Would trigger workflow for target: {target}")
         print(f"  Number of jobs: {len(jobs)}")
         print(f"  Matrix size: {len(matrix_json)} bytes")
-        print(f"  Ref: {ref}")
+        print(f"  Checkout ref: {checkout_ref}")
+        print(f"  Source SHA: {source_sha}")
         print(f"  Jobs: {', '.join(job['name'] for job in jobs)}")
         return True
 
@@ -89,7 +90,8 @@ def trigger_workflow(target: str, jobs: list[dict], ref: str, dry_run: bool = Fa
         '/repos/DataDog/integrations-core/actions/workflows/zz-test-worker-poc.yaml/dispatches',
         '-f', 'ref=master',
         '-f', f'inputs[matrix_json]={matrix_json}',
-        '-f', f'inputs[ref]={ref}'
+        '-f', f'inputs[checkout_ref]={checkout_ref}',
+        '-f', f'inputs[source_sha]={source_sha}',
         '-f', f'inputs[name]={target}'
     ]
 
@@ -136,9 +138,15 @@ def main():
         help='Print what would be done without actually triggering workflows'
     )
     parser.add_argument(
-        '--ref',
+        '--checkout_ref',
         default='master',
         help='Git ref to run workflows on. Use "HEAD" for current commit. Use "PR_MERGE" for the PR merge commit. Default: master'
+    )
+    parser.add_argument(
+        '--source_sha',
+        default=None,
+        required=True,
+        help='Git SHA to use for the check run.'
     )
     parser.add_argument(
         '--multiply',
@@ -150,8 +158,8 @@ def main():
     args = parser.parse_args()
 
     # Resolve ref if it's HEAD
-    if args.ref == 'HEAD':
-        args.ref = get_current_sha()
+    if args.checkout_ref == 'HEAD':
+        args.checkout_ref = get_current_sha()
         print(f"Resolved HEAD to: {args.ref}")
 
     # Get all matrix jobs
@@ -168,7 +176,8 @@ def main():
         print("DRY RUN MODE - No workflows will be triggered")
         print("="*60)
 
-    print(f"Using ref: {args.ref}")
+    print(f"Using checkout ref: {args.checkout_ref}")
+    print(f"Using source SHA: {args.source_sha}")
 
     # Trigger workflow for each target
     success_count = 0
@@ -180,7 +189,7 @@ def main():
             if args.multiply > 1:
                 display_target = f"{target} [{i + 1}/{args.multiply}]"
 
-            if trigger_workflow(display_target, target_jobs, args.ref, dry_run=args.dry_run):
+            if trigger_workflow(display_target, target_jobs, args.checkout_ref, args.source_sha, dry_run=args.dry_run):
                 success_count += 1
 
     print(f"\n{'Would trigger' if args.dry_run else 'Triggered'} {success_count}/{total_expected} workflows")
