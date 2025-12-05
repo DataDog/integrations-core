@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-ibm_spectrum_lsf.can_connect,gauge,,,,`Whether or not the integration can run LSF commands [Always reported]`,0,ibm_spectrum_lsf,lsf can conn,,
+ibm_spectrum_lsf.can_connect,gauge,,,,Whether or not the integration can run LSF commands [Always reported],0,ibm_spectrum_lsf,lsf can conn,,
 ibm_spectrum_lsf.cluster.hosts,gauge,,,,The number of hosts in the cluster. [Reported by lsclusters],0,ibm_spectrum_lsf,lsf hosts,,
 ibm_spectrum_lsf.cluster.servers,gauge,,,,The number of servers in the cluster. [Reported by lsclusters],0,ibm_spectrum_lsf,lsf servers,,
 ibm_spectrum_lsf.cluster.status,gauge,,,,The status of the cluster. [Reported by lsclusters],0,ibm_spectrum_lsf,lsf cluster status,,
