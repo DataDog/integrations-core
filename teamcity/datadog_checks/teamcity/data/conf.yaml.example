@@ -728,7 +728,7 @@ instances:
     # global_build_configs_exclude:
     #   - <BUILD_CONFIG_REGEX>
 
-    ## @param projects_refresh_interval - integer - optional
+    ## @param projects_refresh_interval - integer - optional - default: 3600
     ## Configure projects refresh interval (seconds) in which the check discovers updated projects and build 
     ## configurations based on the `projects` configuration. Set a lower interval if projects and build 
     ## configurations are subject to frequent changes on the TeamCity server. Set a higher interval if projects 
