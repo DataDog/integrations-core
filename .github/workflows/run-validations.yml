@@ -114,6 +114,7 @@ defaults:
 jobs:
   run:
     name: Validate
+    # Avoid blocking merge queues by validations that can break with false positives
     if: github.event_name != 'merge_group'
     runs-on: ubuntu-22.04
 
