@@ -1,0 +1,1 @@
+Add support for AWS MSK IAM authentication using SASL/OAUTHBEARER mechanism.
