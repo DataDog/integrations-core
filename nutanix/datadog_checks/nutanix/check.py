@@ -1,95 +1,14 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import random
-import time
 from datetime import datetime, timedelta, timezone
-from functools import wraps
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
-
-
-def retry_on_rate_limit(method):
-    """Decorator to retry API requests when rate limited with exponential backoff."""
-
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        max_retries = self.instance.get('pc_max_retries', 3)
-        base_backoff = self.instance.get('pc_base_backoff_seconds', 1)
-        max_backoff = self.instance.get('pc_max_backoff_seconds', 30)
-
-        last_exception = None
-        # Use max(1, max_retries) to ensure at least one attempt even when max_retries is 0
-        for attempt in range(max(1, max_retries)):
-            try:
-                response = method(self, *args, **kwargs)
-
-                # Check if it's an HTTP response with status code
-                if hasattr(response, 'status_code'):
-                    if response.status_code == 429:
-                        if max_retries > 0 and attempt < max_retries - 1:
-                            # Calculate backoff with exponential increase and jitter
-                            backoff = min(base_backoff * (2**attempt) + random.random(), max_backoff)
-                            self.log.warning(
-                                "Rate limited by Nutanix API (attempt %d/%d), backing off for %.2f seconds",
-                                attempt + 1,
-                                max_retries,
-                                backoff,
-                            )
-                            # Report retry metrics
-                            self.gauge("api.retry.count", 1, tags=self.base_tags)
-                            self.gauge("api.retry.backoff_seconds", backoff, tags=self.base_tags)
-                            time.sleep(backoff)
-                            continue
-                        else:
-                            self.log.error("Max retries exceeded for Nutanix API request after rate limiting")
-                            self.gauge("api.retry.exhausted", 1, tags=self.base_tags)
-                            response.raise_for_status()  # This will raise HTTPError for 429
-
-                    # For successful responses or non-429 errors, return/raise immediately
-                    response.raise_for_status()
-
-                # Reset retry count metric on success
-                if attempt > 0:
-                    self.gauge("api.retry.count", 0, tags=self.base_tags)
-
-                return response
-
-            except HTTPError as e:
-                last_exception = e
-                # Only retry on 429, re-raise other HTTP errors immediately
-                if hasattr(e, 'response') and e.response is not None and e.response.status_code == 429:
-                    if max_retries > 0 and attempt < max_retries - 1:
-                        # Calculate backoff with exponential increase and jitter
-                        backoff = min(base_backoff * (2**attempt) + random.random(), max_backoff)
-                        self.log.warning(
-                            "Rate limited by Nutanix API (attempt %d/%d), backing off for %.2f seconds",
-                            attempt + 1,
-                            max_retries,
-                            backoff,
-                        )
-                        # Report retry metrics
-                        self.gauge("api.retry.count", 1, tags=self.base_tags)
-                        self.gauge("api.retry.backoff_seconds", backoff, tags=self.base_tags)
-                        time.sleep(backoff)
-                        continue
-                    else:
-                        self.log.error("Max retries exceeded for Nutanix API request after rate limiting")
-                        self.gauge("api.retry.exhausted", 1, tags=self.base_tags)
-                raise
-            except Exception:
-                # For non-HTTP errors, raise immediately without retry
-                raise
-
-        # This should not be reached, but just in case
-        if last_exception:
-            raise last_exception
-        raise Exception(f"Failed to complete request after {max_retries} retries")
-
-    return wrapper
+from datadog_checks.nutanix.utils import retry_on_rate_limit
 
 
 class NutanixCheck(AgentCheck):
@@ -124,6 +43,7 @@ class NutanixCheck(AgentCheck):
         self.external_tags = []
         self.cluster_names = {}  # Mapping of cluster_id -> cluster_name
         self.host_names = {}  # Mapping of host_id -> host_name
+        self.last_event_collection_time = None  # Track last event collection timestamp
 
     def _set_external_tags_for_host(self, hostname: str, tags: list[str]):
         for i, entry in enumerate(self.external_tags):
@@ -144,6 +64,7 @@ class NutanixCheck(AgentCheck):
 
         self._collect_cluster_metrics()
         self._collect_vm_metrics()
+        self._collect_events()
 
         if self.external_tags:
             self.set_external_tags(self.external_tags)
@@ -563,3 +484,132 @@ class NutanixCheck(AgentCheck):
         start_time = end_time - timedelta(seconds=self.sampling_interval)
 
         return start_time.isoformat(), end_time.isoformat()
+
+    def _collect_events(self):
+        """Collect events from Nutanix Prism Central."""
+        try:
+            events = self._list_events()
+            if not events:
+                self.log.debug("No events found")
+                return
+
+            for event in events:
+                if self._should_skip_event(event):
+                    continue
+                self._process_event(event)
+
+        except Exception as e:
+            self.log.exception("Error collecting events: %s", e)
+
+    def _should_skip_event(self, event):
+        """Check if an event should be skipped based on its timestamp.
+
+        Returns True if the event's creationTime is before or equal to last_event_collection_time.
+        """
+        if not self.last_event_collection_time:
+            return False
+
+        event_time_str = event.get("creationTime")
+        if not event_time_str:
+            return False
+
+        event_time = int(get_timestamp(datetime.fromisoformat(event_time_str.replace("Z", "+00:00"))))
+        if event_time < self.last_event_collection_time:
+            self.log.debug(
+                "Skipping event %s with timestamp %s (before last collection time %s)",
+                event.get("extId"),
+                event_time,
+                self.last_event_collection_time,
+            )
+            return True
+
+        return False
+
+    def _process_event(self, event):
+        """Process and send a single event to Datadog."""
+        event_id = event.get("extId", "unknown")
+        event_title = event.get("eventType", "Nutanix Event")
+        event_message = event.get("message", "")
+        created_time = event.get("creationTime")
+        classifications = event.get("classifications", [])
+        alert_type = "info"
+
+        # Extract entity information for tagging
+        event_tags = self.base_tags.copy()
+
+        event_tags.append(f"ntnx_event_id:{event_id}")
+
+        cluster_id = event.get("sourceClusterUUID", event.get("clusterUUID"))
+
+        if cluster_id:
+            event_tags.append(f"ntnx_cluster_id:{cluster_id}")
+            if cluster_id in self.cluster_names:
+                event_tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
+
+        for classification in classifications:
+            event_tags.append(f"ntnx_event_classification:{classification}")
+
+        if source_entity := event.get("sourceEntity"):
+            if entity_type := source_entity.get("type"):
+                entity_id = source_entity.get("extId")
+                if entity_id:
+                    event_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
+
+                entity_name = source_entity.get("name")
+                if entity_name:
+                    event_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
+
+        self.event(
+            {
+                "timestamp": self._parse_timestamp(created_time)
+                if created_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.__NAMESPACE__,
+                "msg_title": event_title,
+                "msg_text": event_message,
+                "alert_type": alert_type,
+                "source_type_name": self.__NAMESPACE__,
+                "tags": event_tags,
+            }
+        )
+
+    def _parse_timestamp(self, timestamp_str: str) -> int | None:
+        """Parse ISO 8601 timestamp string to Unix timestamp.
+
+        Args:
+            timestamp_str: ISO 8601 formatted timestamp string
+
+        Returns:
+            Unix timestamp in seconds, or None if parsing fails
+        """
+        try:
+            dt = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+            return int(dt.timestamp())
+        except (ValueError, AttributeError):
+            self.log.warning("Failed to parse timestamp: %s", timestamp_str)
+            return None
+
+    def _list_events(self):
+        """Fetch events from Prism Central.
+
+        Returns a list of events since the last collection.
+        On the first run, collects events from the last collection interval.
+        """
+        now = get_current_datetime()
+
+        start_time = now - timedelta(seconds=self.sampling_interval)
+
+        # Format time for API (ISO 8601 with Z suffix)
+        start_time_str = start_time.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+        params = {}
+        params["$filter"] = f"creationTime gt {start_time_str}"
+        params["$orderBy"] = "creationTime asc"
+
+        events = self._get_paginated_request_data("api/monitoring/v4.0/serviceability/events", params=params)
+
+        self.last_event_collection_time = int(
+            get_timestamp(datetime.fromisoformat(start_time_str.replace("Z", "+00:00")))
+        )
+
+        return events

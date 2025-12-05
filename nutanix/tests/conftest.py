@@ -57,13 +57,13 @@ def mock_instance():
 def mock_http_get(mocker):
     def mock_response(url, params=None, *args, **kwargs):
         # Print request details for debugging
-        print("\n" + "=" * 60)
-        print(f"[MOCK REQUEST] URL: {url}")
-        if params:
-            print(f"[MOCK REQUEST] Params: {params}")
-        else:
-            print("[MOCK REQUEST] Params: None")
-        print("=" * 60)
+        # print("\n" + "=" * 60)
+        # print(f"[MOCK REQUEST] URL: {url}")
+        # if params:
+        #     print(f"[MOCK REQUEST] Params: {params}")
+        # else:
+        #     print("[MOCK REQUEST] Params: None")
+        # print("=" * 60)
 
         mock_resp = mocker.Mock()
         mock_resp.status_code = 200
@@ -90,11 +90,11 @@ def mock_http_get(mocker):
                 limit = int(query_params['$limit'][0])
 
         # Print what was extracted
-        print(f"[MOCK EXTRACTED] Page: {page}, Limit: {limit}")
+        # print(f"[MOCK EXTRACTED] Page: {page}, Limit: {limit}")
 
         # Health check endpoint
         if '/console' in url:
-            print("[MOCK RESPONSE] Health check endpoint")
+            # print("[MOCK RESPONSE] Health check endpoint")
             return mock_resp
 
         # Host stats endpoint - always non-paginated
@@ -103,7 +103,7 @@ def mock_http_get(mocker):
             in url
         ):
             fixture_name = "host_stats_0006411c-0286-bc71-9f02-191e334d457b_71877eae-8fc1-4aae-8d20-70196dfb2f8d.json"
-            print(f"[MOCK LOADING] Fixture: {fixture_name}")
+            # print(f"[MOCK LOADING] Fixture: {fixture_name}")
             response_data = load_fixture(fixture_name)
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
@@ -111,7 +111,7 @@ def mock_http_get(mocker):
         # Cluster stats endpoint - always non-paginated
         if "/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b" in url:
             fixture_name = "cluster_stats_0006411c-0286-bc71-9f02-191e334d457b.json"
-            print(f"[MOCK LOADING] Fixture: {fixture_name}")
+            # print(f"[MOCK LOADING] Fixture: {fixture_name}")
             response_data = load_fixture(fixture_name)
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
@@ -125,7 +125,7 @@ def mock_http_get(mocker):
                 limit = 2
 
             paginated_fixture = f"hosts_b6d83094-9404-48de-9c74-ca6bddc3a01d_limit{limit}_page{page}.json"
-            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
             response_data = load_fixture(paginated_fixture)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
@@ -141,7 +141,7 @@ def mock_http_get(mocker):
                 limit = 2
 
             paginated_fixture = f"hosts_0006411c-0286-bc71-9f02-191e334d457b_limit{limit}_page{page}.json"
-            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
             response_data = load_fixture(paginated_fixture)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
@@ -156,7 +156,7 @@ def mock_http_get(mocker):
                 limit = 2
 
             paginated_fixture = f"clusters_limit{limit}_page{page}.json"
-            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
             response_data = load_fixture(paginated_fixture)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
@@ -171,7 +171,7 @@ def mock_http_get(mocker):
                 limit = 2
 
             paginated_fixture = f"vms_stats_limit{limit}_page{page}.json"
-            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
             response_data = load_fixture(paginated_fixture)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
@@ -186,14 +186,46 @@ def mock_http_get(mocker):
                 limit = 2
 
             paginated_fixture = f"vms_limit{limit}_page{page}.json"
-            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
             response_data = load_fixture(paginated_fixture)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        # Events endpoint - always paginated
+        if 'api/monitoring/v4.0/serviceability/events' in url:
+            # Default to page 0, limit 2 if not specified
+            if page is None:
+                page = 0
+            if limit is None:
+                limit = 2
+
+            paginated_fixture = f"events_limit{limit}_page{page}.json"
+            # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            try:
+                response_data = load_fixture(paginated_fixture)
+                mock_resp.json = mocker.Mock(return_value=response_data)
+                return mock_resp
+            except FileNotFoundError:
+                # If fixture doesn't exist, return empty response (end of pagination)
+                print("[MOCK] Fixture not found, returning empty response")
+                empty_response = {
+                    "data": [],
+                    "$reserved": {"$fv": "v4.r1"},
+                    "$objectType": "monitoring.v4.serviceability.ListEventsApiResponse",
+                    "metadata": {
+                        "flags": [],
+                        "$reserved": {"$fv": "v1.r0"},
+                        "$objectType": "common.v1.response.ApiResponseMetadata",
+                        "links": [],
+                        "totalAvailableResults": 0,
+                    },
+                }
+                mock_resp.json = mocker.Mock(return_value=empty_response)
+                return mock_resp
+
         # Default response for unmapped URLs - return HTTP error
-        print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
+        # print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
         mock_resp.status_code = 404
         mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
         return mock_resp
