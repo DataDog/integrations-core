@@ -44,11 +44,16 @@ def repo_with_history(tmp_path_factory):
     write_agent_requirements(repo.path, ["datadog-checks-downloader==4.0.0"])
     commit('fifth')
     repo.git.run('tag', '7.41.0')
+    # Mixed release: a new integration AND a breaking change
+    write_agent_requirements(repo.path, ["datadog-baz==1.0.0", "datadog-checks-downloader==5.0.0"])
+    commit('sixth')
+    repo.git.run('tag', '7.42.0')
 
     # Satisfy manifest requirements
     write_dummy_manifest(repo.path, 'foo')
     write_dummy_manifest(repo.path, 'bar')
     write_dummy_manifest(repo.path, 'onlywin')
+    write_dummy_manifest(repo.path, 'baz')
     write_dummy_pyproject(repo.path, 'datadog_checks_downloader')
     write_dummy_pyproject(repo.path, 'datadog_checks_base')
 

@@ -43,7 +43,7 @@ def integrations_changelog(app: Application, integrations: tuple[str], since: st
 
     integrations_versions: dict[str, dict[str, str]] = defaultdict(dict)
     for agent_version, version_changes in changes_per_agent.items():
-        for name, (ver, _) in version_changes.items():
+        for name, (ver, _, _) in version_changes.items():
             if name not in integrations:
                 continue
             integrations_versions[name][ver] = agent_version
