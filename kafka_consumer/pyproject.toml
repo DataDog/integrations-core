@@ -39,6 +39,8 @@ deps = [
     "confluent-kafka==2.11.1",
     "fastavro==1.12.0",
     "protobuf==6.32.0",
+    "aws-msk-iam-sasl-signer-python>=1.0.0",
+    "boto3>=1.28.0",
 ]
 
 [project.urls]
