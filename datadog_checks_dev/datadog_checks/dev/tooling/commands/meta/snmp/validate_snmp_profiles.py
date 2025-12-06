@@ -19,11 +19,12 @@ from .validators.utils import (
 MESSAGE_METHODS = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
 
 
-@click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
+@click.command("validate-profile", context_settings=CONTEXT_SETTINGS)
 @click.option('-f', '--file', help="Path to a profile file to validate")
 @click.option('-d', '--directory', 'directories', multiple=True, help="Path to a directory of profiles to validate")
 @click.option('-v', '--verbose', help="Increase verbosity of error messages", is_flag=True)
 def validate_profile(file, directories, verbose):
+    """Validate SNMP profiles."""
     path = initialize_path(directories)
 
     if file:

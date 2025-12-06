@@ -11,8 +11,9 @@ from .remove_labels import remove_labels
 ALL_COMMANDS = (email2ghuser, metrics2md, remove_labels)
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='Miscellaneous scripts that may be useful')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def scripts():
+    """Run utility scripts."""
     pass
 
 
