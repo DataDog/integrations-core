@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_badmin_perfmon_auto():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 
