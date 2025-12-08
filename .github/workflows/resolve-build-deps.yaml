@@ -206,12 +206,21 @@ jobs:
         brew install coreutils
 
     - name: Set up Python
+      # Use PBS as suggested by: https://github.com/DataDog/integrations-core/pull/21692#pullrequestreview-3358660684
+      # PBS stands for "Python Build Standalone": https://astral.sh/blog/python-build-standalone
       env:
-        # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
-        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.13.9/python-3.13.9-macos11.pkg"
+        PYTHON_PATCH: 10
+        PBS_RELEASE: 20251202
+        PBS_SHA256__aarch64: 799a3b76240496e4472dd60ed0cd5197e04637bea7fa16af68caeb989fadcb3a
+        PBS_SHA256__x86_64: 705b39dd74490c3e9b4beb1c4f40bf802b50ba40fe085bdca635506a944d5e74
       run: |
-        curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
-        sudo installer -pkg python3.pkg -target /
+        set -u
+        curl -fsSL -o pbs.tgz "https://github.com/astral-sh/python-build-standalone/releases/download/$PBS_RELEASE/cpython-$PYTHON_VERSION.$PYTHON_PATCH+$PBS_RELEASE-${{ matrix.job.arch }}-apple-darwin-install_only_stripped.tar.gz"
+        echo "$PBS_SHA256__${{ matrix.job.arch }} *pbs.tgz" | shasum -a 256 -c -
+        prefix=$(dirname "$(dirname "$DD_PYTHON3")")
+        sudo mkdir -p "$prefix"
+        sudo tar -xzf pbs.tgz -C "$prefix" --strip-components=1
+        rm pbs.tgz
 
     - name: Checkout code
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
