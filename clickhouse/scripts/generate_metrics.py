@@ -24,6 +24,7 @@ INTEGRATION_DIR = os.path.join(HERE, '..')
 QUERIES_DIR = os.path.join(INTEGRATION_DIR, 'datadog_checks', 'clickhouse', 'advanced_queries')
 TESTS_DIR = os.path.join(INTEGRATION_DIR, 'tests')
 METADATAFILE_PATH = os.path.join(INTEGRATION_DIR, 'metadata.csv')
+METADATAFILE_LEGACY_PATH = os.path.join(INTEGRATION_DIR, 'metadata-legacy.csv')
 
 PREFIX_ASYNC_METRICS = 'asynchronous_metrics'
 PREFIX_ERRORS = 'errors'
@@ -107,8 +108,8 @@ class Templates(Enum):
         target_path=os.path.join(QUERIES_DIR, 'system_errors.py'),
     )
     TESTS_METRICS = Template(
-        source_path='metrics.tpl',
-        target_path=os.path.join(TESTS_DIR, 'metrics.py'),
+        source_path='tests_metrics.tpl',
+        target_path=os.path.join(TESTS_DIR, 'advanced_metrics.py'),
     )
 
 
@@ -328,6 +329,17 @@ def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
         meta['integration'] = INTEGRATION_NAME
         meta['unit_name'] = metric.unit_name()
         metadata.append(meta)
+
+    def check_legacy_metadata():
+        with open(METADATAFILE_LEGACY_PATH, newline='') as file:
+            reader = csv.DictReader(file)
+            if set(FILE_HEADERS) != set(reader.fieldnames):
+                print('Legacy metadata fieldnames mismatch:', reader.fieldnames)
+                exit(1)
+            for row in reader:
+                metadata.append(row)
+
+    check_legacy_metadata()
 
     for metric in metrics:
         match metric.type():

@@ -6,8 +6,7 @@ import clickhouse_connect
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
-from . import advanced_queries
-from .utils import ErrorSanitizer
+from . import advanced_queries, queries, utils
 
 
 class ClickhouseCheck(AgentCheck):
@@ -29,41 +28,75 @@ class ClickhouseCheck(AgentCheck):
         self._tls_ca_cert = self.instance.get('tls_ca_cert', None)
         self._verify = self.instance.get('verify', True)
         self._tags = self.instance.get('tags', [])
+        self._use_legacy_queries = self.instance.get('use_legacy_queries', True)
+        self._use_advanced_queries = self.instance.get('use_advanced_queries', True)
+        self._server_version = ''
 
         # Add global tags
         self._tags.append('server:{}'.format(self._server))
         self._tags.append('port:{}'.format(self._port))
         self._tags.append('db:{}'.format(self._db))
 
-        self._error_sanitizer = ErrorSanitizer(self._password)
+        self._error_sanitizer = utils.ErrorSanitizer(self._password)
         self.check_initializations.append(self.validate_config)
 
         # We'll connect on the first check run
         self._client = None
 
-        self._query_manager = QueryManager(
-            self,
-            self.execute_query_raw,
-            queries=[
-                advanced_queries.SystemMetrics,
-                advanced_queries.SystemEvents,
-                advanced_queries.SystemAsynchronousMetrics,
-                advanced_queries.SystemErrors,
-            ],
-            tags=self._tags,
-            error_handler=self._error_sanitizer.clean,
-        )
-        self.check_initializations.append(self._query_manager.compile_queries)
+        self._query_manager = None
 
     def check(self, _):
         self.connect()
-        self._query_manager.execute()
-        self.collect_version()
+        self._server_version = self.select_version()
+        self._build_query_manager().execute()
+        self.set_version_metadata(self._server_version)
+
+    def get_queries(self) -> list[dict]:
+        query_list = []
+
+        if self._use_legacy_queries:
+            query_list.extend(
+                [
+                    queries.SystemMetrics,
+                    queries.SystemEventsToDeprecate,
+                    queries.SystemEvents,
+                    queries.SystemAsynchronousMetrics,
+                    queries.SystemParts,
+                    queries.SystemReplicas,
+                    queries.SystemDictionaries,
+                ]
+            )
+
+        if self._use_advanced_queries:
+            query_list.extend(
+                [
+                    advanced_queries.SystemMetrics,
+                    advanced_queries.SystemEvents,
+                    advanced_queries.SystemAsynchronousMetrics,
+                ]
+            )
+            if self.version_ge('20.11'):
+                query_list.append(advanced_queries.SystemErrors)
+
+        return query_list
+
+    def _build_query_manager(self) -> QueryManager:
+        query_manager = QueryManager(
+            self,
+            self.execute_query_raw,
+            queries=self.get_queries(),
+            tags=self._tags,
+            error_handler=self._error_sanitizer.clean,
+        )
+        query_manager.compile_queries()
+
+        return query_manager
+
+    def select_version(self) -> str:
+        return self._client.command('SELECT version()', use_database=False)
 
     @AgentCheck.metadata_entrypoint
-    def collect_version(self):
-        version = list(self.execute_query_raw('SELECT version()'))[0][0]
-
+    def set_version_metadata(self, version: str):
         # The version comes in like `19.15.2.2` though sometimes there is no patch part
         version_parts = dict(zip(('year', 'major', 'minor', 'patch'), version.split('.')))
 
@@ -129,3 +162,23 @@ class ClickhouseCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._client = client
+
+    def version_lt(self, version: str) -> bool:
+        """
+        Returns True if the current ClickHouse server version is less than the compared version, otherwise False.
+        """
+        # The `latest` version should always be greater than any other
+        if version == 'latest':
+            return True
+
+        return utils.parse_version(self._server_version) < utils.parse_version(version)
+
+    def version_ge(self, version: str) -> bool:
+        """
+        Returns True if the current ClickHouse server version is greater than the compared version, otherwise False.
+        """
+        # The `latest` version should always be less than any other
+        if version == 'latest':
+            return False
+
+        return utils.parse_version(self._server_version) >= utils.parse_version(version)

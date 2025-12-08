@@ -24,9 +24,7 @@ def dd_environment():
         ),
         CheckEndpoints(endpoints=['http://{}:{}'.format(config['server'], config['port'])], wait=5),
         WaitFor(
-            func=ping_clickhouse(
-                config['server'], config['port'], config['username'], config['password']
-            ),
+            func=ping_clickhouse(config['server'], config['port'], config['username'], config['password']),
             wait=5,
         ),
     ]
@@ -38,7 +36,13 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return get_instance_config()
+    config = get_instance_config()
+    if common.is_legacy(common.CLICKHOUSE_VERSION):
+        config['use_advanced_queries'] = False
+    else:
+        config['use_legacy_queries'] = False
+
+    return config
 
 
 def ping_clickhouse(host, port, username, password):

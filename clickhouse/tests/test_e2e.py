@@ -5,8 +5,8 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
+from . import common
 from .common import CLICKHOUSE_VERSION
-from .metrics import get_metrics, get_optional_metrics
 
 
 @pytest.mark.e2e
@@ -14,12 +14,11 @@ def test_check(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
-    metrics = get_metrics(CLICKHOUSE_VERSION)
 
-    for metric in metrics:
+    for metric in common.get_metrics(CLICKHOUSE_VERSION):
         aggregator.assert_metric_has_tags(metric, [port_tag, server_tag, 'db:default', 'foo:bar'], at_least=1)
 
-    for metric in get_optional_metrics(CLICKHOUSE_VERSION):
+    for metric in common.get_optional_metrics(CLICKHOUSE_VERSION):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()

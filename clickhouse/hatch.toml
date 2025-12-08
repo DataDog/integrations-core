@@ -6,14 +6,18 @@
 python = ["3.13"]
 version = ["18", "19", "20", "21.8", "22.7", "24.8", "25.3", "25.8"]
 
+[envs.default.env-vars]
+CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
+
 [envs.default.overrides]
 matrix.version.env-vars = [
     { key = "CLICKHOUSE_VERSION" },
-    { key = "LEGACY_IMAGE", value = "true", if = ["18", "19", "20", "21.8"] },
+    { key = "CLICKHOUSE_REPOSITORY", value = "yandex/clickhouse-server", if = ["18", "19", "20", "21.8"] },
 ]
 
 [envs.latest.env-vars]
 CLICKHOUSE_VERSION = "latest"
+CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
 
 [envs.metrics]
 dependencies = [

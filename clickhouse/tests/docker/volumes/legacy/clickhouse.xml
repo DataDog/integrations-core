@@ -1,4 +1,4 @@
-<clickhouse replace="true">
+<yandex replace="true">
     <logger>
         <level>information</level>
         <log>/var/log/clickhouse-server/clickhouse-server.log</log>
@@ -22,12 +22,12 @@
         <path>/clickhouse/task_queue/ddl</path>
     </distributed_ddl>
     <zookeeper>
-        <node>
-            <host>clickhouse-keeper</host>
-            <port>9181</port>
+        <node index="1">
+            <host>clickhouse-zookeeper</host>
+            <port>2181</port>
         </node>
     </zookeeper>
     <macros>
         <replica>clickhouse</replica>
     </macros>
-</clickhouse>
+</yandex>

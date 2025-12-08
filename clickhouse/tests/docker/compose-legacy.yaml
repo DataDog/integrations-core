@@ -2,11 +2,11 @@
 
 services:
   clickhouse:
-    extends:
-      file: compose.yaml
-      service: clickhouse
-    image: yandex/clickhouse-server:${CLICKHOUSE_VERSION}
-    user: root
+    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
+    container_name: clickhouse
+    hostname: clickhouse
+    networks:
+      - clickhouse-network
     cap_add:
       - IPC_LOCK
       - NET_ADMIN
@@ -15,11 +15,46 @@ services:
       nofile:
         soft: 262144
         hard: 262144
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+    volumes:
+      - ./volumes/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./volumes/legacy/clickhouse.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./volumes/legacy/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ./volumes/legacy/dictionary.xml:/etc/clickhouse-server/test_dictionary.xml
+      - ./volumes/legacy/dictionary.csv:/opt/dictionaries/test.csv
+    depends_on:
+      clickhouse-zookeeper:
+        condition: service_healthy
 
-  clickhouse-keeper:
-    extends:
-      file: compose.yaml
-      service: clickhouse-keeper
+  clickhouse-zookeeper:
+    # Using zookeeper `3.6.0` is raising this error:
+    #   Connection request from old client /172.30.0.7:51646; will be dropped if server is in r-o mode
+    # For now, we use zookeeper `3.5.8` instead
+    # Similar case: https://stackoverflow.com/a/22884698
+    image: zookeeper:3.5.8
+    hostname: clickhouse-zookeeper
+    container_name: clickhouse-zookeeper
+    ports:
+      - "2181:2181"
+      - "2182:2182"
+    networks:
+      - clickhouse-network
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # "You need to set advertised.listeners (or KAFKA_ADVERTISED_LISTENERS if you’re using Docker images) to
+      # the external address (host/IP) so that clients can correctly connect to it. Otherwise they’ll try to
+      # connect to the internal host address–and if that’s not reachable then problems ensue."
+      # Source: https://rmoff.net/2018/08/02/kafka-listeners-explained/
+      KAFKA_ADVERTISED_LISTENERS: CLICKHOUSE01://127.0.0.1:8124
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    healthcheck:
+      test: nc -vz localhost 2181 || exit -1
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 networks:
   clickhouse-network: {}
