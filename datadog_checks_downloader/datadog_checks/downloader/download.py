@@ -2,40 +2,32 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import collections
-import glob
+import hashlib
 import logging
 import logging.config
 import os
 import pathlib
 import re
-import shutil
 import sys
-import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
 
-from in_toto import verifylib
-from in_toto.exceptions import LinkNotFoundError
-from in_toto.models.metadata import Metablock
+import boto3
+import yaml
+
 from packaging.version import parse as parse_version
-from securesystemslib import interface
 from tuf.ngclient import Updater
 
 from .exceptions import (
     DuplicatePackage,
     InconsistentSimpleIndex,
-    IncorrectRootLayoutType,
     MissingVersions,
-    NoInTotoLinkMetadataFound,
-    NoInTotoRootLayoutPublicKeysFound,
     NoSuchDatadogPackage,
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
-    RevokedDeveloperOrMachine,
     TargetNotFoundError,
 )
-from .parameters import substitute
 
 # After we import everything we need, shut off all existing loggers.
 logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})
@@ -44,11 +36,8 @@ logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})
 # CONSTANTS.
 here = os.path.abspath(os.path.dirname(__file__))
 REPOSITORIES_DIR = os.path.join(here, 'data')
-# abspath = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
 REPOSITORY_DIR = 'repo'
-REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
-# Where to find our in-toto root layout.
-IN_TOTO_METADATA_DIR = 'in-toto-metadata'
+REPOSITORY_URL_PREFIX = 'https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com'
 ROOT_LAYOUTS = {'core': '7.core.root.layout', 'extras': '1.extras.root.layout'}
 DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 
@@ -80,10 +69,13 @@ class TUFDownloader:
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
 
         self.__disable_verification = disable_verification
+        self.__current_version = None
+        self.__current_wheel_href = None
+        self.__current_pointer_path = None
 
         if self.__disable_verification:
             logger.warning(
-                'Running with TUF and in-toto verification disabled. Integrity is only protected with TLS (HTTPS).'
+                'Running with TUF verification disabled. Integrity is only protected with TLS (HTTPS).'
             )
 
         # NOTE: The directory where the targets for *this* repository is
@@ -98,8 +90,8 @@ class TUFDownloader:
         # os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
         self.__updater = Updater(
             metadata_dir=os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata'),
-            metadata_base_url=f'{repository_url_prefix}/metadata.staged/',
-            target_base_url=f'{repository_url_prefix}/targets/',
+            metadata_base_url=f'{repository_url_prefix}/metadata/',
+            target_base_url=f'{repository_url_prefix}/',
             target_dir=self.__targets_dir,
         )
 
@@ -166,158 +158,194 @@ class TUFDownloader:
 
         return target_abspath, target
 
-    def __download_in_toto_root_layout(self):
-        # NOTE: We expect the root layout to be signed with *offline* keys.
-        # NOTE: We effectively tie every version of this downloader to its
-        # expected version of the root layout. This is so that, for example, we
-        # can introduce new parameters w/o breaking old downloaders that don't
-        # know how to substitute them.
-        target_relpath = f'{IN_TOTO_METADATA_DIR}/{self.__root_layout}'
-        return self._download_with_tuf(target_relpath)
 
-    def __download_custom(self, target, extension):
-        # A set to collect where in-toto pubkeys / links live.
-        target_abspaths = set()
+    def __download_wheel_from_pointer(self, pointer_abspath, standard_distribution_name):
+        """Download wheel using pointer file.
 
-        custom = target.custom
+        Args:
+            pointer_abspath: Local path to downloaded pointer file
+            standard_distribution_name: Package name
 
-        root_layout_type = custom.get('root-layout-type', DEFAULT_ROOT_LAYOUT_TYPE)
-        if root_layout_type != self.__root_layout_type:
-            raise IncorrectRootLayoutType(root_layout_type, self.__root_layout_type)
-
-        in_toto_metadata = custom.get('in-toto', [])
-
-        for target_relpath in in_toto_metadata:
-            # Download in-toto *link* metadata files using TUF,
-            # which, among other things, prevents mix-and-match
-            # attacks by MitM attackers, and rollback attacks even
-            # by attackers who control the repository:
-            # https://www.usenix.org/conference/atc17/technical-sessions/presentation/kuppusamy
-            # NOTE: Avoid recursively downloading in-toto metadata
-            # for in-toto metadata themselves, and so on ad
-            # infinitum.
-            if target_relpath.endswith(extension):
-                target_abspath, _ = self._download_with_tuf(target_relpath)
-
-                # Add this file to the growing collection of where
-                # in-toto pubkeys / links live.
-                target_abspaths.add(target_abspath)
-
-        # Return list of where in-toto metadata files live.
-        return target_abspaths
-
-    def __download_in_toto_layout_pubkeys(self, target, target_relpath):
+        Returns:
+            Absolute path to downloaded wheel file
         """
-        NOTE: We assume that all the public keys needed to verify any in-toto
-        root layout, or sublayout, metadata file has been directly signed by
-        the top-level TUF targets role using *OFFLINE* keys. This is a
-        reasonable assumption, as TUF does not offer meaningful security
-        guarantees if _ALL_ targets were signed using _online_ keys.
-        """
+        from urllib.parse import urlparse
 
-        pubkey_abspaths = self.__download_custom(target, '.pub')
-        if not len(pubkey_abspaths):
-            raise NoInTotoRootLayoutPublicKeysFound(target_relpath)
-        else:
-            return pubkey_abspaths
+        # Parse pointer file
+        with open(pointer_abspath, 'rb') as f:
+            pointer_bytes = f.read()
 
-    def __download_in_toto_links(self, target, target_relpath):
-        link_abspaths = self.__download_custom(target, '.link')
-        if not len(link_abspaths):
-            raise NoInTotoLinkMetadataFound(target_relpath)
-        else:
-            return link_abspaths
+        pointer_content = yaml.safe_load(pointer_bytes)
+        pointer = pointer_content.get('pointer', {})
 
-    def __load_root_layout(self, target_relpath):
-        root_layout = Metablock.load(self.__root_layout)
-        root_layout_pubkeys = glob.glob('*.pub')
-        root_layout_pubkeys = interface.import_publickeys_from_file(root_layout_pubkeys)
-        # Parameter substitution.
-        root_layout_params = substitute(target_relpath)
-        return root_layout, root_layout_pubkeys, root_layout_params
+        wheel_uri = pointer.get('uri', '')
+        wheel_digest = pointer.get('digest', '')
+        wheel_name = pointer.get('name', standard_distribution_name)
+        wheel_version = pointer.get('version', self.__current_version)
 
-    def __handle_in_toto_verification_exception(self, target_relpath, e):
-        logger.exception('in-toto failed to verify %s', target_relpath)
+        if not wheel_uri or not wheel_digest:
+            raise ValueError(f"Invalid pointer file: missing uri or digest")
 
-        if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloperOrMachine.MSG:
-            raise RevokedDeveloperOrMachine(target_relpath, self.__root_layout)
-        else:
-            raise e
+        # Extract wheel filename from URI
+        wheel_filename = wheel_uri.split('/')[-1]
 
-    def __in_toto_verify(self, inspection_packet, target_relpath):
-        # Make a temporary directory in a parent directory we control.
-        tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
+        # Download wheel from S3 with authentication
+        logger.info(f'Downloading wheel from: {wheel_uri}')
+        wheel_abspath = os.path.join(self.__targets_dir, 'simple', standard_distribution_name, wheel_filename)
+        os.makedirs(os.path.dirname(wheel_abspath), exist_ok=True)
 
         try:
-            # Copy files over into temp dir.
-            for abs_path in inspection_packet:
-                shutil.copy(abs_path, tempdir)
+            # Parse S3 URI to extract bucket and key
+            # Example: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/datadog-postgres/wheel.whl
+            parsed = urlparse(wheel_uri)
 
-            # Switch to the temp dir.
-            os.chdir(tempdir)
+            # Extract bucket name from hostname (format: bucket.s3.region.amazonaws.com)
+            bucket_name = parsed.hostname.split('.')[0]
 
-            # Load the root layout and public keys in this temp dir.
-            root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
+            # Extract S3 key (path without leading /)
+            s3_key = parsed.path.lstrip('/')
 
-            verifylib.in_toto_verify(root_layout, root_layout_pubkeys, substitution_parameters=root_layout_params)
-        except Exception as e:
-            self.__handle_in_toto_verification_exception(target_relpath, e)
-        else:
-            logger.info('in-toto verified %s', target_relpath)
-        finally:
-            # Switch back to a parent directory we control, so that we can
-            # safely delete temp dir.
-            os.chdir(REPOSITORIES_DIR)
-            # Delete temp dir.
-            shutil.rmtree(tempdir)
+            # Extract region from hostname if present
+            if '.s3.' in parsed.hostname and '.amazonaws.com' in parsed.hostname:
+                region = parsed.hostname.split('.s3.')[1].split('.amazonaws.com')[0]
+            else:
+                region = None
 
-    def __download_and_verify_in_toto_metadata(self, target_relpath, target_abspath, target):
-        # First, get our in-toto root layout.
-        root_layout_abspath, root_layout_target = self.__download_in_toto_root_layout()
-        inspection_packet = {target_abspath, root_layout_abspath}
+            logger.debug(f'Parsed S3 URI: bucket={bucket_name}, key={s3_key}, region={region}')
 
-        # Second, get the public keys for the root layout.
-        pubkey_abspaths = self.__download_in_toto_layout_pubkeys(root_layout_target, target_relpath)
+            # Use boto3 to download with AWS credentials
+            s3_client = boto3.client('s3', region_name=region)
+            response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+            wheel_bytes = response['Body'].read()
 
-        # Third, get the in-toto links for the target of interest.
-        link_abspaths = self.__download_in_toto_links(target, target_relpath)
+            # Verify digest
+            actual_digest = hashlib.sha256(wheel_bytes).hexdigest()
+            if actual_digest != wheel_digest:
+                raise ValueError(
+                    f"Wheel digest mismatch: expected {wheel_digest}, got {actual_digest}"
+                )
 
-        # Everything we need for in-toto inspection to work: the wheel,
-        # the in-toto root layout, in-toto links, and public keys to
-        # verify the in-toto layout.
-        inspection_packet |= pubkey_abspaths | link_abspaths
-        self.__in_toto_verify(inspection_packet, target_relpath)
+            # Save wheel
+            with open(wheel_abspath, 'wb') as f:
+                f.write(wheel_bytes)
 
-    def _download_with_tuf_in_toto(self, target_relpath):
-        target_abspath, target = self._download_with_tuf(target_relpath)
+            logger.info(f'Wheel verified and saved: {wheel_abspath}')
+            return wheel_abspath
 
-        # Next, we use in-toto to verify the supply chain of the target.
-        # NOTE: We use a flag to avoid recursively downloading in-toto
-        # metadata for in-toto metadata themselves, and so on ad infinitum.
-        # All other files, presumably packages, should also be
-        # inspected.
-        try:
-            self.__download_and_verify_in_toto_metadata(target_relpath, target_abspath, target)
-        except Exception:
-            os.remove(target_abspath)
+        except Exception as err:
+            logger.error('Failed to download wheel from %s: %s', wheel_uri, err)
             raise
-        else:
-            return target_abspath
 
     def download(self, target_relpath):
         """
         Returns:
-            If download over TUF and in-toto is successful, this function will
-            return the complete filepath to the desired target.
+            If download over TUF is successful, this function will
+            return the complete filepath to the desired wheel.
         """
+        # Extract package name from path like 'simple/datadog-postgres/...'
+        path_parts = target_relpath.split('/')
+        if len(path_parts) >= 2 and path_parts[0] == 'simple':
+            standard_distribution_name = path_parts[1]
+
+            # Use stored pointer path if available (from pointer-based discovery)
+            if self.__current_pointer_path:
+                pointer_relpath = self.__current_pointer_path
+            else:
+                # Fall back to constructing pointer path (backward compatibility)
+                # Format: pointers/{package}/{package}-{version}.pointer
+                pointer_filename = f"{standard_distribution_name}-{self.__current_version}.pointer"
+                pointer_relpath = f"pointers/{standard_distribution_name}/{pointer_filename}"
+
+            logger.info(f'Downloading pointer file: {pointer_relpath}')
+
+            # Download pointer via TUF
+            if self.__disable_verification:
+                pointer_abspath = self._download_without_tuf_in_toto(pointer_relpath)
+            else:
+                pointer_abspath, _ = self._download_with_tuf(pointer_relpath)
+
+            # Download wheel using pointer
+            wheel_abspath = self.__download_wheel_from_pointer(pointer_abspath, standard_distribution_name)
+
+            # Always return the posix version of the path for consistency across platforms
+            return pathlib.Path(wheel_abspath).as_posix()
+
+        # Fallback for non-wheel targets (shouldn't happen in normal operation)
+        logger.warning(f'Unexpected target path format: {target_relpath}')
         if self.__disable_verification:
             target_abspath = self._download_without_tuf_in_toto(target_relpath)
         else:
-            target_abspath = self._download_with_tuf_in_toto(target_relpath)
-        # Always return the posix version of the path for consistency across platforms
+            target_abspath, _ = self._download_with_tuf(target_relpath)
         return pathlib.Path(target_abspath).as_posix()
 
+    def __get_versions_from_pointers(self, standard_distribution_name):
+        """Get available versions from pointer files in TUF targets.
+
+        Args:
+            standard_distribution_name: Normalized package name (e.g., 'datadog-postgres')
+
+        Returns:
+            Dict mapping version strings to pointer file paths
+            Example: {'23.2.0': 'pointers/datadog-postgres/datadog-postgres-23.2.0.pointer'}
+        """
+        versions = {}
+
+        # Access the trusted targets metadata from the updater
+        # The _trusted_set contains the verified metadata after refresh()
+        logger.debug(f"Checking for pointer files for package: {standard_distribution_name}")
+        logger.debug(f"Updater has _trusted_set: {hasattr(self.__updater, '_trusted_set')}")
+
+        if hasattr(self.__updater, '_trusted_set'):
+            logger.debug(f"_trusted_set has targets: {hasattr(self.__updater._trusted_set, 'targets')}")
+
+            if hasattr(self.__updater._trusted_set, 'targets'):
+                targets_metadata = self.__updater._trusted_set.targets
+                logger.debug(f"targets_metadata type: {type(targets_metadata)}")
+                logger.debug(f"targets_metadata.targets type: {type(targets_metadata.targets)}")
+                logger.debug(f"Number of targets: {len(targets_metadata.targets)}")
+
+                # Filter pointer files for this package
+                # Pattern: pointers/{package}/{package}-{version}.pointer
+                pointer_prefix = f'pointers/{standard_distribution_name}/'
+                expected_filename_prefix = f'{standard_distribution_name}-'
+                logger.debug(f"Looking for pointer prefix: {pointer_prefix}")
+
+                for target_path in targets_metadata.targets:
+                    logger.debug(f"Checking target: {target_path}")
+                    if target_path.startswith(pointer_prefix) and target_path.endswith('.pointer'):
+                        # Extract version from pointer file path
+                        filename = target_path.split('/')[-1]  # Get last part
+                        logger.debug(f"Found pointer file: {target_path}, filename: {filename}")
+
+                        # Remove standard distribution name prefix and .pointer suffix
+                        # Example: "datadog-postgres-23.2.0.pointer" → "23.2.0"
+                        if filename.startswith(expected_filename_prefix):
+                            version = filename[len(expected_filename_prefix):-len('.pointer')]
+                            versions[version] = target_path
+                            logger.debug(f"Extracted version: {version}")
+
+        if not versions:
+            logger.error(f"No versions found for {standard_distribution_name}")
+            raise NoSuchDatadogPackage(standard_distribution_name)
+
+        logger.info(f"Found versions: {versions}")
+        return versions
+
     def __get_versions(self, standard_distribution_name):
+        """Get available versions for a package.
+
+        If TUF is enabled, fetches versions from pointer files in TUF targets.
+        Otherwise, falls back to simple index HTML for backward compatibility.
+
+        Returns:
+            When TUF is enabled: {version: pointer_path}
+            When TUF is disabled: {version: {python_tag: wheel_filename}}
+        """
+        # TUF enabled: Use pointer files from TUF targets
+        if not self.__disable_verification:
+            return self.__get_versions_from_pointers(standard_distribution_name)
+
+        # TUF disabled: Fall back to simple index HTML (backward compatibility)
         index_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
         # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
         wheel_distribution_name = re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)  # noqa: B034
@@ -325,14 +353,7 @@ class TUFDownloader:
         # version: {python_tag: href}
         wheels = collections.defaultdict(dict)
 
-        if self.__disable_verification:
-            index_abspath = self._download_without_tuf_in_toto(index_relpath)
-        else:
-            try:
-                # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
-                index_abspath, _ = self._download_with_tuf(index_relpath)
-            except TargetNotFoundError:
-                raise NoSuchDatadogPackage(standard_distribution_name)
+        index_abspath = self._download_without_tuf_in_toto(index_relpath)
 
         with open(index_abspath) as simple_index:
             for line in simple_index:
@@ -367,23 +388,49 @@ class TUFDownloader:
             # https://packaging.pypa.io/en/latest/version.html
             version = str(max(parse_version(v) for v in wheels.keys() if not parse_version(v).is_prerelease))
 
-        python_tags = wheels[version]
-        if not python_tags:
+        # Check if using pointer-based discovery (TUF enabled) or simple index (TUF disabled)
+        # When TUF enabled: wheels[version] is a pointer path string
+        # When TUF disabled: wheels[version] is a dict {python_tag: href}
+        version_data = wheels.get(version)
+        if not version_data:
             raise NoSuchDatadogPackageVersion(standard_distribution_name, version)
 
-        # First, try finding the pure Python wheel for this version.
-        this_python = 'py{}'.format(sys.version_info[0])
-        href = python_tags.get(this_python)
+        # Handle pointer-based discovery (TUF enabled)
+        if isinstance(version_data, str):
+            # version_data is a pointer path
+            self.__current_pointer_path = version_data
+            self.__current_version = version
 
-        # Otherwise, try finding the universal Python wheel for this version.
-        if not href:
-            href = python_tags.get('py2.py3')
+            # Construct wheel filename assuming py3
+            # Pattern: {package_underscore}-{version}-py3-none-any.whl
+            package_underscore = standard_distribution_name.replace('-', '_')
+            wheel_filename = f'{package_underscore}-{version}-py3-none-any.whl'
+            self.__current_wheel_href = wheel_filename
 
-        # Otherwise, fuhgedaboutit.
-        if not href:
-            if ignore_python_version:
-                href = list(python_tags.values())[0]
-            else:
-                raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
+            return 'simple/{}/{}'.format(standard_distribution_name, wheel_filename)
 
-        return 'simple/{}/{}'.format(standard_distribution_name, href)
+        # Handle simple index-based discovery (TUF disabled)
+        else:
+            python_tags = version_data
+            self.__current_pointer_path = None
+
+            # First, try finding the pure Python wheel for this version.
+            this_python = 'py{}'.format(sys.version_info[0])
+            href = python_tags.get(this_python)
+
+            # Otherwise, try finding the universal Python wheel for this version.
+            if not href:
+                href = python_tags.get('py2.py3')
+
+            # Otherwise, fuhgedaboutit.
+            if not href:
+                if ignore_python_version:
+                    href = list(python_tags.values())[0]
+                else:
+                    raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
+
+            # Store version for use in pointer-based download
+            self.__current_version = version
+            self.__current_wheel_href = href
+
+            return 'simple/{}/{}'.format(standard_distribution_name, href)

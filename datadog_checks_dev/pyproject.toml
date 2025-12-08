@@ -29,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "boto3==1.40.21",
     "coverage>=5.0.3",
     "flaky>=3.8.0",
     "mock",
@@ -71,6 +72,7 @@ cli = [
     "pysmi==0.3.4",
     "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
+    "tuf==4.0.0",
     "tabulate>=0.8.9",
     "toml>=0.9.4, <1.0.0",
     "tomli>=1.1.0",
