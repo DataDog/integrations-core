@@ -335,6 +335,50 @@ class KafkaActionsCheck(AgentCheck):
             self.log.warning("Filter evaluation failed for '%s': %s", filter_expression, e)
             return False
 
+    def _split_logical_operator(self, expression: str, operator: str) -> list[str] | None:
+        """Split expression on logical operator, respecting quoted strings.
+        
+        Args:
+            expression: The expression to split
+            operator: The operator to split on (' and ' or ' or ')
+            
+        Returns:
+            List of parts if operator found outside quotes, None otherwise
+        """
+        parts = []
+        current = []
+        i = 0
+        in_quotes = False
+        quote_char = None
+        
+        while i < len(expression):
+            char = expression[i]
+            
+            # Track quote state
+            if char in ('"', "'") and (i == 0 or expression[i - 1] != '\\'):
+                if not in_quotes:
+                    in_quotes = True
+                    quote_char = char
+                elif char == quote_char:
+                    in_quotes = False
+                    quote_char = None
+            
+            # Check for operator outside quotes
+            if not in_quotes and expression[i:i + len(operator)] == operator:
+                parts.append(''.join(current))
+                current = []
+                i += len(operator)
+                continue
+            
+            current.append(char)
+            i += 1
+        
+        # Add the last part
+        parts.append(''.join(current))
+        
+        # Return None if we didn't actually split (only one part)
+        return parts if len(parts) > 1 else None
+
     def _evaluate_jq_expression(self, expression: str, context: dict) -> bool:
         """Evaluate a jq-style expression.
 
@@ -346,11 +390,12 @@ class KafkaActionsCheck(AgentCheck):
             Boolean result of the expression
         """
         # Check 'or' first (lower precedence) before 'and' (higher precedence)
-        if ' or ' in expression:
-            parts = expression.split(' or ')
+        parts = self._split_logical_operator(expression, ' or ')
+        if parts:
             return any(self._evaluate_jq_expression(part.strip(), context) for part in parts)
-        if ' and ' in expression:
-            parts = expression.split(' and ')
+        
+        parts = self._split_logical_operator(expression, ' and ')
+        if parts:
             return all(self._evaluate_jq_expression(part.strip(), context) for part in parts)
 
         operators = ['==', '!=', '>=', '<=', '>', '<', ' contains ']

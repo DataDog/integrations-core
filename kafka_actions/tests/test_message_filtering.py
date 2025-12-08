@@ -275,6 +275,42 @@ class TestLogicalOperators:
         msg = self.create_message({'foo': True, 'baz': False, 'bar': False})
         assert check._evaluate_filter('.value.foo == true or .value.baz == false and .value.bar == false', msg) is True
 
+    def test_quoted_strings_with_logical_operators(self):
+        """Test that 'and'/'or' inside quoted strings don't cause incorrect splitting."""
+        instance = {
+            'remote_config_id': 'test',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test'},
+        }
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+
+        # Test 'and' inside quoted string with actual AND operator
+        # Should NOT split on the 'and' inside "foo and bar"
+        msg = self.create_message({'message': 'foo and bar', 'status': 'active'})
+        assert check._evaluate_filter('.value.message == "foo and bar" and .value.status == "active"', msg) is True
+
+        # Same message but status doesn't match
+        msg = self.create_message({'message': 'foo and bar', 'status': 'inactive'})
+        assert check._evaluate_filter('.value.message == "foo and bar" and .value.status == "active"', msg) is False
+
+        # Test 'or' inside quoted string with actual OR operator
+        # Should NOT split on the 'or' inside "foo or bar"
+        msg = self.create_message({'topic': 'foo or bar', 'region': 'US'})
+        assert check._evaluate_filter('.value.topic == "foo or bar" or .value.region == "EU"', msg) is True
+
+        # Neither condition matches
+        msg = self.create_message({'topic': 'other', 'region': 'ASIA'})
+        assert check._evaluate_filter('.value.topic == "foo or bar" or .value.region == "EU"', msg) is False
+
+        # Complex case: both 'and' and 'or' in quotes with logical operators
+        msg = self.create_message({'message': 'foo and bar', 'topic': 'test or prod', 'status': 'ok'})
+        filter_expr = '.value.message == "foo and bar" and .value.topic == "test or prod" and .value.status == "ok"'
+        assert check._evaluate_filter(filter_expr, msg) is True
+
+        # Test with single quotes
+        msg = self.create_message({'message': 'foo and bar'})
+        assert check._evaluate_filter(".value.message == 'foo and bar'", msg) is True
+
 
 class TestNestedFieldAccess:
     """Test nested field access in filters."""
