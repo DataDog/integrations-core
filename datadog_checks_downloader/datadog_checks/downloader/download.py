@@ -71,6 +71,7 @@ class TUFDownloader:
         self.__disable_verification = disable_verification
         self.__current_version = None
         self.__current_wheel_href = None
+        self.__current_pointer_path = None
 
         if self.__disable_verification:
             logger.warning(
@@ -246,10 +247,14 @@ class TUFDownloader:
         if len(path_parts) >= 2 and path_parts[0] == 'simple':
             standard_distribution_name = path_parts[1]
 
-            # Construct pointer file path
-            # Format: pointers/{package}/{package}-{version}.pointer
-            pointer_filename = f"{standard_distribution_name}-{self.__current_version}.pointer"
-            pointer_relpath = f"pointers/{standard_distribution_name}/{pointer_filename}"
+            # Use stored pointer path if available (from pointer-based discovery)
+            if self.__current_pointer_path:
+                pointer_relpath = self.__current_pointer_path
+            else:
+                # Fall back to constructing pointer path (backward compatibility)
+                # Format: pointers/{package}/{package}-{version}.pointer
+                pointer_filename = f"{standard_distribution_name}-{self.__current_version}.pointer"
+                pointer_relpath = f"pointers/{standard_distribution_name}/{pointer_filename}"
 
             logger.info(f'Downloading pointer file: {pointer_relpath}')
 
@@ -273,7 +278,74 @@ class TUFDownloader:
             target_abspath, _ = self._download_with_tuf(target_relpath)
         return pathlib.Path(target_abspath).as_posix()
 
+    def __get_versions_from_pointers(self, standard_distribution_name):
+        """Get available versions from pointer files in TUF targets.
+
+        Args:
+            standard_distribution_name: Normalized package name (e.g., 'datadog-postgres')
+
+        Returns:
+            Dict mapping version strings to pointer file paths
+            Example: {'23.2.0': 'pointers/datadog-postgres/datadog-postgres-23.2.0.pointer'}
+        """
+        versions = {}
+
+        # Access the trusted targets metadata from the updater
+        # The _trusted_set contains the verified metadata after refresh()
+        logger.debug(f"Checking for pointer files for package: {standard_distribution_name}")
+        logger.debug(f"Updater has _trusted_set: {hasattr(self.__updater, '_trusted_set')}")
+
+        if hasattr(self.__updater, '_trusted_set'):
+            logger.debug(f"_trusted_set has targets: {hasattr(self.__updater._trusted_set, 'targets')}")
+
+            if hasattr(self.__updater._trusted_set, 'targets'):
+                targets_metadata = self.__updater._trusted_set.targets
+                logger.debug(f"targets_metadata type: {type(targets_metadata)}")
+                logger.debug(f"targets_metadata.targets type: {type(targets_metadata.targets)}")
+                logger.debug(f"Number of targets: {len(targets_metadata.targets)}")
+
+                # Filter pointer files for this package
+                # Pattern: pointers/{package}/{package}-{version}.pointer
+                pointer_prefix = f'pointers/{standard_distribution_name}/'
+                expected_filename_prefix = f'{standard_distribution_name}-'
+                logger.debug(f"Looking for pointer prefix: {pointer_prefix}")
+
+                for target_path in targets_metadata.targets:
+                    logger.debug(f"Checking target: {target_path}")
+                    if target_path.startswith(pointer_prefix) and target_path.endswith('.pointer'):
+                        # Extract version from pointer file path
+                        filename = target_path.split('/')[-1]  # Get last part
+                        logger.debug(f"Found pointer file: {target_path}, filename: {filename}")
+
+                        # Remove standard distribution name prefix and .pointer suffix
+                        # Example: "datadog-postgres-23.2.0.pointer" → "23.2.0"
+                        if filename.startswith(expected_filename_prefix):
+                            version = filename[len(expected_filename_prefix):-len('.pointer')]
+                            versions[version] = target_path
+                            logger.debug(f"Extracted version: {version}")
+
+        if not versions:
+            logger.error(f"No versions found for {standard_distribution_name}")
+            raise NoSuchDatadogPackage(standard_distribution_name)
+
+        logger.info(f"Found versions: {versions}")
+        return versions
+
     def __get_versions(self, standard_distribution_name):
+        """Get available versions for a package.
+
+        If TUF is enabled, fetches versions from pointer files in TUF targets.
+        Otherwise, falls back to simple index HTML for backward compatibility.
+
+        Returns:
+            When TUF is enabled: {version: pointer_path}
+            When TUF is disabled: {version: {python_tag: wheel_filename}}
+        """
+        # TUF enabled: Use pointer files from TUF targets
+        if not self.__disable_verification:
+            return self.__get_versions_from_pointers(standard_distribution_name)
+
+        # TUF disabled: Fall back to simple index HTML (backward compatibility)
         index_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
         # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
         wheel_distribution_name = re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)  # noqa: B034
@@ -281,14 +353,7 @@ class TUFDownloader:
         # version: {python_tag: href}
         wheels = collections.defaultdict(dict)
 
-        if self.__disable_verification:
-            index_abspath = self._download_without_tuf_in_toto(index_relpath)
-        else:
-            try:
-                # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
-                index_abspath, _ = self._download_with_tuf(index_relpath)
-            except TargetNotFoundError:
-                raise NoSuchDatadogPackage(standard_distribution_name)
+        index_abspath = self._download_without_tuf_in_toto(index_relpath)
 
         with open(index_abspath) as simple_index:
             for line in simple_index:
@@ -323,27 +388,49 @@ class TUFDownloader:
             # https://packaging.pypa.io/en/latest/version.html
             version = str(max(parse_version(v) for v in wheels.keys() if not parse_version(v).is_prerelease))
 
-        python_tags = wheels[version]
-        if not python_tags:
+        # Check if using pointer-based discovery (TUF enabled) or simple index (TUF disabled)
+        # When TUF enabled: wheels[version] is a pointer path string
+        # When TUF disabled: wheels[version] is a dict {python_tag: href}
+        version_data = wheels.get(version)
+        if not version_data:
             raise NoSuchDatadogPackageVersion(standard_distribution_name, version)
 
-        # First, try finding the pure Python wheel for this version.
-        this_python = 'py{}'.format(sys.version_info[0])
-        href = python_tags.get(this_python)
+        # Handle pointer-based discovery (TUF enabled)
+        if isinstance(version_data, str):
+            # version_data is a pointer path
+            self.__current_pointer_path = version_data
+            self.__current_version = version
 
-        # Otherwise, try finding the universal Python wheel for this version.
-        if not href:
-            href = python_tags.get('py2.py3')
+            # Construct wheel filename assuming py3
+            # Pattern: {package_underscore}-{version}-py3-none-any.whl
+            package_underscore = standard_distribution_name.replace('-', '_')
+            wheel_filename = f'{package_underscore}-{version}-py3-none-any.whl'
+            self.__current_wheel_href = wheel_filename
 
-        # Otherwise, fuhgedaboutit.
-        if not href:
-            if ignore_python_version:
-                href = list(python_tags.values())[0]
-            else:
-                raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
+            return 'simple/{}/{}'.format(standard_distribution_name, wheel_filename)
 
-        # Store version for use in pointer-based download
-        self.__current_version = version
-        self.__current_wheel_href = href
+        # Handle simple index-based discovery (TUF disabled)
+        else:
+            python_tags = version_data
+            self.__current_pointer_path = None
 
-        return 'simple/{}/{}'.format(standard_distribution_name, href)
+            # First, try finding the pure Python wheel for this version.
+            this_python = 'py{}'.format(sys.version_info[0])
+            href = python_tags.get(this_python)
+
+            # Otherwise, try finding the universal Python wheel for this version.
+            if not href:
+                href = python_tags.get('py2.py3')
+
+            # Otherwise, fuhgedaboutit.
+            if not href:
+                if ignore_python_version:
+                    href = list(python_tags.values())[0]
+                else:
+                    raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
+
+            # Store version for use in pointer-based download
+            self.__current_version = version
+            self.__current_wheel_href = href
+
+            return 'simple/{}/{}'.format(standard_distribution_name, href)

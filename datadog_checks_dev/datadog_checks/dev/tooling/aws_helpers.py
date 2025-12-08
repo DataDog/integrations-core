@@ -113,3 +113,29 @@ def get_default_aws_vault_profile() -> str:
         Default profile name from environment or hardcoded default
     """
     return os.environ.get('AWS_VAULT_DEFAULT_PROFILE', 'sso-agent-integrations-dev-account-admin')
+
+
+def get_s3_client(local: bool = False, region: str = 'eu-north-1'):
+    """Get boto3 S3 client configured for local or remote S3.
+
+    Args:
+        local: If True, use local MinIO endpoint
+        region: AWS region (ignored for local mode)
+
+    Returns:
+        Configured boto3 S3 client
+    """
+    import boto3
+
+    if local:
+        # Local MinIO configuration
+        return boto3.client(
+            's3',
+            endpoint_url='http://localhost:9000',
+            aws_access_key_id='minioadmin',
+            aws_secret_access_key='minioadmin',
+            region_name=region,
+        )
+    else:
+        # Standard AWS S3
+        return boto3.client('s3', region_name=region)

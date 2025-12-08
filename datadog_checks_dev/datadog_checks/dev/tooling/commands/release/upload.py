@@ -24,8 +24,9 @@ from datadog_checks.dev.tooling.utils import complete_valid_checks, get_valid_ch
     default=None,
     help='AWS Vault profile to use for S3 authentication (default: sso-agent-integrations-dev-account-admin)',
 )
+@click.option('--local', is_flag=True, help='Use local MinIO instead of AWS S3 (for development/testing)')
 @click.pass_context
-def upload(ctx, check, sdist, dry_run, pypi, public, aws_vault_profile):
+def upload(ctx, check, sdist, dry_run, pypi, public, aws_vault_profile, local):
     """Release a specific check to S3 (default) or PyPI (with --pypi flag) as it is on the repo HEAD.
 
     For S3 uploads, AWS credentials are required. If not available, the command will
@@ -76,10 +77,16 @@ def upload(ctx, check, sdist, dry_run, pypi, public, aws_vault_profile):
         from datadog_checks.dev.tooling.aws_helpers import ensure_aws_credentials
         from datadog_checks.dev.tooling.utils import get_version_string
 
-        # Ensure AWS credentials are available (may re-exec with aws-vault)
-        ensure_aws_credentials(profile=aws_vault_profile)
+        # Ensure MinIO is running for local mode, or AWS credentials for remote
+        if local:
+            from datadog_checks.dev.tooling.minio_manager import ensure_minio_running
 
-        echo_waiting(f'Building and uploading `{check}` to S3...')
+            ensure_minio_running()
+        else:
+            ensure_aws_credentials(profile=aws_vault_profile)
+
+        target = "local MinIO" if local else "S3"
+        echo_waiting(f'Building and uploading `{check}` to {target}...')
 
         result = build_package(check_dir, sdist)
         if result.code != 0:
@@ -91,8 +98,8 @@ def upload(ctx, check, sdist, dry_run, pypi, public, aws_vault_profile):
 
         if not dry_run:
             try:
-                upload_package(check_dir, version, public=public)
+                upload_package(check_dir, version, public=public, local=local)
             except Exception as e:
-                abort(f'Failed to upload to S3: {e}')
+                abort(f'Failed to upload to {target}: {e}')
 
     echo_success('Success!')

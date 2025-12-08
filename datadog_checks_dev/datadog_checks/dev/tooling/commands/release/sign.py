@@ -45,7 +45,14 @@ from datadog_checks.dev.tooling.commands.console import (
     default=None,
     help='AWS Vault profile to use for S3 authentication (default: sso-agent-integrations-dev-account-admin)',
 )
-def sign(keys_dir: str | None, generate_keys: bool, output_dir: str | None, aws_vault_profile: str | None) -> None:
+@click.option('--local', is_flag=True, help='Use local MinIO instead of AWS S3 (for development/testing)')
+def sign(
+    keys_dir: str | None,
+    generate_keys: bool,
+    output_dir: str | None,
+    aws_vault_profile: str | None,
+    local: bool,
+) -> None:
     """
     Sign and update TUF metadata for uploaded integration pointer files.
 
@@ -85,13 +92,16 @@ def sign(keys_dir: str | None, generate_keys: bool, output_dir: str | None, aws_
     Note: This is a POC implementation using dummy keys. Production use
     requires proper key management (HSM, KMS) and key ceremony procedures.
     """
-    import boto3
-
-    from datadog_checks.dev.tooling.aws_helpers import ensure_aws_credentials
+    from datadog_checks.dev.tooling.aws_helpers import ensure_aws_credentials, get_s3_client
     from datadog_checks.dev.tooling.tuf_signing import generate_dummy_keys, generate_tuf_metadata, load_keys
 
-    # Ensure AWS credentials are available (may re-exec with aws-vault)
-    ensure_aws_credentials(profile=aws_vault_profile)
+    # Ensure MinIO is running for local mode, or AWS credentials for remote
+    if local:
+        from datadog_checks.dev.tooling.minio_manager import ensure_minio_running
+
+        ensure_minio_running()
+    else:
+        ensure_aws_credentials(profile=aws_vault_profile)
 
     S3_BUCKET = "test-public-integration-wheels"
     S3_REGION = "eu-north-1"
@@ -132,15 +142,16 @@ def sign(keys_dir: str | None, generate_keys: bool, output_dir: str | None, aws_
         except Exception as e:
             abort(f'Failed to load keys: {e}')
 
-    # Initialize S3 client
-    echo_waiting('Connecting to S3...')
+    # Initialize S3 client (local MinIO or AWS S3)
+    target = "local MinIO" if local else "S3"
+    echo_waiting(f'Connecting to {target}...')
     try:
-        s3 = boto3.client('s3', region_name=S3_REGION)
+        s3 = get_s3_client(local=local, region=S3_REGION)
         # Test connection by checking bucket exists
         s3.head_bucket(Bucket=S3_BUCKET)
-        echo_success(f'Connected to S3 bucket: {S3_BUCKET}')
+        echo_success(f'Connected to {target} bucket: {S3_BUCKET}')
     except Exception as e:
-        abort(f'Failed to connect to S3: {e}\n\nMake sure you have AWS credentials configured.')
+        abort(f'Failed to connect to {target}: {e}\n\nMake sure {"MinIO container is running (check: docker ps | grep ddev-minio-local)" if local else "you have AWS credentials configured"}.')
 
     # Generate TUF metadata
     echo_waiting('Generating TUF metadata from S3 pointer files...')

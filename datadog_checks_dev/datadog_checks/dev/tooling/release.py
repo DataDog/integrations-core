@@ -198,7 +198,7 @@ def build_package(package_path, sdist):
         }
         print("Using digest: ", digest)
         with open(
-            os.path.join(package_path, "dist", f"{folder_name}-{version}.pointer"), "w"
+            os.path.join(package_path, "dist", f"{package_name}-{version}.pointer"), "w"
         ) as pointer_file:
             yaml.safe_dump(pointer, pointer_file)
             print("Created ", pointer_file.name, " with contents ", pointer)
@@ -206,30 +206,35 @@ def build_package(package_path, sdist):
     return result
 
 
-def upload_package(package_path, version, public=False):
-    """Upload package wheel and/or pointer file to the S3 bucket.
+def upload_package(package_path, version, public=False, local=False):
+    """Upload package wheel and/or pointer file to the S3 bucket or local MinIO.
 
-    Note: This requires AWS credentials to be available. Use aws-vault to run:
-    aws-vault exec sso-agent-integrations-dev-account-admin -- ddev release upload <check>
+    Args:
+        package_path: Path to the package directory
+        version: Package version string
+        public: If True, upload both wheel and pointer (for public packages)
+        local: If True, use local MinIO instead of AWS S3
+
+    Note: This requires AWS credentials to be available (unless using local mode).
+    Use aws-vault to run: aws-vault exec profile -- ddev release upload <check>
     """
     import glob
     import hashlib
     import os
 
-    import boto3
     from botocore.exceptions import ClientError
+    from datadog_checks.dev.tooling.aws_helpers import get_s3_client
 
     S3_BUCKET = "test-public-integration-wheels"
     S3_REGION = "eu-north-1"
 
-    # Initialize S3 client (uses default credential chain: env vars, ~/.aws/credentials, IAM role, etc.)
-    # When using aws-vault, credentials are injected via environment variables
-    s3 = boto3.client("s3", region_name=S3_REGION)
+    # Initialize S3 client (local MinIO or AWS S3)
+    s3 = get_s3_client(local=local, region=S3_REGION)
 
     folder_name = os.path.basename(package_path)
     package_name = get_package_name(folder_name)
     dist_dir = os.path.join(package_path, "dist")
-    pointer_file_name = f"{folder_name}-{version}.pointer"
+    pointer_file_name = f"{package_name}-{version}.pointer"
     pointer_file_path = os.path.join(dist_dir, pointer_file_name)
 
     # Find the actual wheel file (e.g., package_name-version-py3-none-any.whl)
