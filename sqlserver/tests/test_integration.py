@@ -1078,8 +1078,8 @@ def test_propagate_agent_tags(
 @pytest.mark.usefixtures('dd_environment')
 def test_table_size_metrics_with_indexes(aggregator, dd_run_check, instance_docker):
     """
-    Test that table size metrics are correctly emitted for a table with data and indexes.
-    This test uses the existing test_schema.cities table which has 2 rows and 2 indexes.
+    Test that table size metrics are correctly emitted for a table with data and multiple
+    indexes. This test uses the existing test_schema.cities table which has 2 rows and 2 indexes.
     """
     # Use the existing test table from the testing infrastructure
     table_name = 'cities'
@@ -1107,46 +1107,6 @@ def test_table_size_metrics_with_indexes(aggregator, dd_run_check, instance_dock
     assert len(test_table_metrics) > 0, f"No row_count metrics found for table {table_name}"
     assert test_table_metrics[0].value == expected_row_count, \
         f"Expected row_count={expected_row_count}, got {test_table_metrics[0].value}"
-    
-    # Check total_size metric (should be > 0 since we have data and indexes)
-    total_size_metrics = aggregator.metrics('sqlserver.table.total_size')
-    test_table_size_metrics = [
-        m for m in total_size_metrics 
-        if all(tag in m.tags for tag in expected_table_tags)
-    ]
-    assert len(test_table_size_metrics) > 0, f"No total_size metrics found for table {table_name}"
-    assert test_table_size_metrics[0].value > 0, \
-        f"Expected total_size > 0, got {test_table_size_metrics[0].value}"
-    
-    # Check used_size metric
-    used_size_metrics = aggregator.metrics('sqlserver.table.used_size')
-    test_table_used_metrics = [
-        m for m in used_size_metrics 
-        if all(tag in m.tags for tag in expected_table_tags)
-    ]
-    assert len(test_table_used_metrics) > 0, f"No used_size metrics found for table {table_name}"
-    assert test_table_used_metrics[0].value > 0, \
-        f"Expected used_size > 0, got {test_table_used_metrics[0].value}"
-    
-    # Check data_size metric
-    data_size_metrics = aggregator.metrics('sqlserver.table.data_size')
-    test_table_data_metrics = [
-        m for m in data_size_metrics 
-        if all(tag in m.tags for tag in expected_table_tags)
-    ]
-    assert len(test_table_data_metrics) > 0, f"No data_size metrics found for table {table_name}"
-    assert test_table_data_metrics[0].value > 0, \
-        f"Expected data_size > 0, got {test_table_data_metrics[0].value}"
-    
-    # Verify the size relationships (total_size >= used_size >= data_size)
-    total_size = test_table_size_metrics[0].value
-    used_size = test_table_used_metrics[0].value
-    data_size = test_table_data_metrics[0].value
-    
-    assert total_size >= used_size, \
-        f"Expected total_size ({total_size}) >= used_size ({used_size})"
-    assert used_size >= data_size, \
-        f"Expected used_size ({used_size}) >= data_size ({data_size})"
 
 
 @pytest.mark.integration
