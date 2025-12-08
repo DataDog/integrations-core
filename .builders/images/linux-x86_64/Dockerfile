@@ -35,11 +35,11 @@ RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.13.9
+ENV PYTHON3_VERSION=3.13.10
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="c4c066af19c98fb7835d473bebd7e23be84f6e9874d47db9e39a68ee5d0ce35c" \
+ SHA256="de5930852e95ba8c17b56548e04648470356ac47f7506014664f8f510d7bd61b" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh --prefix=/opt/python/${PYTHON3_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON3_VERSION}/bin:${PATH}"
