@@ -32,7 +32,6 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, comput
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
-    default_json_event_encoding,
     obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json

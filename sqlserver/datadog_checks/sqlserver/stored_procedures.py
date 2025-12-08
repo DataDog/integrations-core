@@ -8,9 +8,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
-    default_json_event_encoding,
 )
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 

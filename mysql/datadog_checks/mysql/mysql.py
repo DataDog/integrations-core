@@ -21,13 +21,11 @@ from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     TagManager,
-    default_json_event_encoding,
     tracked_query,
 )
 from datadog_checks.base.utils.db.utils import (
     resolve_db_host as agent_host_resolver,
 )
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 from datadog_checks.mysql.health import MySqlHealth

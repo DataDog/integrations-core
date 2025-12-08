@@ -37,7 +37,7 @@ class DatabaseCheck(AgentCheck):
         raw_event["database_instance"] = self.database_identifier
         raw_event["dbms"] = self.dbms
         raw_event["dbms_version"] = self.dbms_version
-        
+
     @property
     @abstractmethod
     def reported_hostname(self) -> str | None:

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import json
 import re
 import time
 
@@ -22,7 +21,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
