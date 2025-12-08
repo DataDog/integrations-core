@@ -4,7 +4,7 @@ backend_only: false
 facets:
 pipeline:
   type: pipeline
-  name: BentoML
+  name: BentoM
   enabled: true
   filter:
     query: source:bentoml
