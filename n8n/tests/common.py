@@ -94,6 +94,7 @@ TEST_METRICS = [
     'n8n.queue.jobs.duration.seconds.count',
     'n8n.queue.jobs.duration.seconds.sum',
     'n8n.queue.jobs.count',
+    'n8n.readiness.check',
     'n8n.workflow.executions.active',
     'n8n.workflow.executions.duration.seconds.bucket',
     'n8n.workflow.executions.duration.seconds.count',
