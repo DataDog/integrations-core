@@ -47,6 +47,7 @@ files:
           example: <USER>
       - name: password
         description: Password for the user
+        secret: true
         value:
           type: string
           example: <PASSWORD>
@@ -112,6 +113,7 @@ files:
           display_default: snowflake
       - name: token
         description: Token used for OAuth connection to Snowflake. You cannot use this alongside `token_path`.
+        secret: true
         value:
           type: string
       - name: token_path

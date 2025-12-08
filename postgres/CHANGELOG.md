@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 23.3.0 / 2025-11-26
+
+***Added***:
+
+* Migrate PostgreSQL to a new schema collector, which provides improved performance in the Agent and allows the backend to handle larger schema collections ([#21727](https://github.com/DataDog/integrations-core/pull/21727))
+* PG: Add sent, write, flush, and replay metrics for pg_stat_replication ([#21844](https://github.com/DataDog/integrations-core/pull/21844))
+* Upgrade base version for Postgres, MySQL, and SQLServer ([#21906](https://github.com/DataDog/integrations-core/pull/21906))
+* Add support for Postgres 18 ([#21947](https://github.com/DataDog/integrations-core/pull/21947))
+
+***Fixed***:
+
+* Fix a bug where database_autodiscovery still tries to connect to the "postgres" DB if "postgres" is defined in the `exclude` field, but `dbname` isn't configured ([#21884](https://github.com/DataDog/integrations-core/pull/21884))
+* Fix token expiration handling in Azure connection pool ([#21896](https://github.com/DataDog/integrations-core/pull/21896))
+* Ensure database_autodiscovery `exclude` defaults are used ([#21927](https://github.com/DataDog/integrations-core/pull/21927))
+
 ## 23.2.0 / 2025-10-31
 
 ***Added***:
