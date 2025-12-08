@@ -345,12 +345,13 @@ class KafkaActionsCheck(AgentCheck):
         Returns:
             Boolean result of the expression
         """
-        if ' and ' in expression:
-            parts = expression.split(' and ')
-            return all(self._evaluate_jq_expression(part.strip(), context) for part in parts)
+        # Check 'or' first (lower precedence) before 'and' (higher precedence)
         if ' or ' in expression:
             parts = expression.split(' or ')
             return any(self._evaluate_jq_expression(part.strip(), context) for part in parts)
+        if ' and ' in expression:
+            parts = expression.split(' and ')
+            return all(self._evaluate_jq_expression(part.strip(), context) for part in parts)
 
         operators = ['==', '!=', '>=', '<=', '>', '<', ' contains ']
         for op in operators:

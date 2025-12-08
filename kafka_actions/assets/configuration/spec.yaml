@@ -77,6 +77,15 @@ files:
         required:
           - cluster
           - topic
+        example:
+          cluster: prod-kafka-1
+          topic: orders
+          partition: -1
+          start_offset: -1
+          n_messages_retrieved: 10
+          max_scanned_messages: 1000
+          filter: '.value.status == "failed"'
+          value_format: json
         properties:
         - name: cluster
           type: string
@@ -177,6 +186,14 @@ files:
           - topic
           - num_partitions
           - replication_factor
+        example:
+          cluster: prod-kafka-1
+          topic: orders-v2
+          num_partitions: 6
+          replication_factor: 3
+          configs:
+            retention.ms: "604800000"
+            compression.type: "snappy"
         properties:
         - name: cluster
           type: string
@@ -214,6 +231,16 @@ files:
         required:
           - cluster
           - topic
+        example:
+          cluster: prod-kafka-1
+          topic: orders
+          num_partitions: 12
+          configs:
+            retention.ms: "1209600000"
+            max.message.bytes: "2097152"
+          delete_configs:
+            - retention.bytes
+            - compression.type
         properties:
         - name: cluster
           type: string
@@ -254,6 +281,9 @@ files:
         required:
           - cluster
           - topic
+        example:
+          cluster: prod-kafka-1
+          topic: old-orders
         properties:
         - name: cluster
           type: string
@@ -276,6 +306,9 @@ files:
         required:
           - cluster
           - consumer_group
+        example:
+          cluster: prod-kafka-1
+          consumer_group: old-service-v1
         properties:
         - name: cluster
           type: string
@@ -300,6 +333,16 @@ files:
           - cluster
           - consumer_group
           - offsets
+        example:
+          cluster: prod-kafka-1
+          consumer_group: order-processor
+          offsets:
+            - topic: orders
+              partition: 0
+              offset: 1000
+            - topic: orders
+              partition: 1
+              offset: 1500
         properties:
         - name: cluster
           type: string
@@ -350,6 +393,14 @@ files:
           - cluster
           - topic
           - value
+        example:
+          cluster: prod-kafka-1
+          topic: test-topic
+          key: "MTIzNDU="
+          value: "eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9"
+          partition: -1
+          headers:
+            source: "ZGF0YWRvZy1hZ2VudA=="
         properties:
         - name: cluster
           type: string

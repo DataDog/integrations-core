@@ -62,43 +62,87 @@ instances:
     ## Supports JSON, BSON, Protobuf, and Avro with optional Schema Registry integration.
     ## Filtering is applied after deserialization using jq-style expressions.
     #
-    # read_messages: {}
+    # read_messages:
+    #   cluster: prod-kafka-1
+    #   topic: orders
+    #   partition: -1
+    #   start_offset: -1
+    #   n_messages_retrieved: 10
+    #   max_scanned_messages: 1000
+    #   filter: .value.status == "failed"
+    #   value_format: json
 
     ## @param create_topic - mapping - optional
     ## Configuration for creating a new Kafka topic.
     #
-    # create_topic: {}
+    # create_topic:
+    #   cluster: prod-kafka-1
+    #   topic: orders-v2
+    #   num_partitions: 6
+    #   replication_factor: 3
+    #   configs:
+    #     retention.ms: '604800000'
+    #     compression.type: snappy
 
     ## @param update_topic_config - mapping - optional
     ## Configuration for updating an existing topic's configuration.
     #
-    # update_topic_config: {}
+    # update_topic_config:
+    #   cluster: prod-kafka-1
+    #   topic: orders
+    #   num_partitions: 12
+    #   configs:
+    #     retention.ms: '1209600000'
+    #     max.message.bytes: '2097152'
+    #   delete_configs:
+    #   - retention.bytes
+    #   - compression.type
 
     ## @param delete_topic - mapping - optional
     ## Configuration for deleting a Kafka topic.
     ## WARNING: This operation is irreversible and will cause data loss.
     #
-    # delete_topic: {}
+    # delete_topic:
+    #   cluster: prod-kafka-1
+    #   topic: old-orders
 
     ## @param delete_consumer_group - mapping - optional
     ## Configuration for deleting a consumer group.
     ## The consumer group must have no active members.
     #
-    # delete_consumer_group: {}
+    # delete_consumer_group:
+    #   cluster: prod-kafka-1
+    #   consumer_group: old-service-v1
 
     ## @param update_consumer_group_offsets - mapping - optional
     ## Configuration for updating consumer group offsets.
     ## WARNING: Can cause duplicate processing or data loss.
     ## Consumer group should be stopped (no active members).
     #
-    # update_consumer_group_offsets: {}
+    # update_consumer_group_offsets:
+    #   cluster: prod-kafka-1
+    #   consumer_group: order-processor
+    #   offsets:
+    #   - topic: orders
+    #     partition: 0
+    #     offset: 1000
+    #   - topic: orders
+    #     partition: 1
+    #     offset: 1500
 
     ## @param produce_message - mapping - optional
     ## Configuration for producing a message to a Kafka topic.
     ## All values (key, value, headers) must be base64-encoded to ensure
     ## safe transmission via YAML and support for binary data.
     #
-    # produce_message: {}
+    # produce_message:
+    #   cluster: prod-kafka-1
+    #   topic: test-topic
+    #   key: MTIzNDU=
+    #   value: eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9
+    #   partition: -1
+    #   headers:
+    #     source: ZGF0YWRvZy1hZ2VudA==
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

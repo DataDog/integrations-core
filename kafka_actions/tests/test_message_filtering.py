@@ -268,6 +268,13 @@ class TestLogicalOperators:
         msg = self.create_message({'amount': 500, 'status': 'failed', 'tier': 'premium'})
         assert check._evaluate_filter(filter_expr, msg) is False
 
+        # Test operator precedence: AND has higher precedence than OR
+        # Expression: '.foo == true or .baz == false and .bar == false'
+        # Should evaluate as: 'true or (false and false)' = true
+        # NOT as: '(true or false) and false' = false
+        msg = self.create_message({'foo': True, 'baz': False, 'bar': False})
+        assert check._evaluate_filter('.value.foo == true or .value.baz == false and .value.bar == false', msg) is True
+
 
 class TestNestedFieldAccess:
     """Test nested field access in filters."""
