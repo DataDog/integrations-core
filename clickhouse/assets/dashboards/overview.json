@@ -55,7 +55,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseAsyncMetrics_NumberOfDatabases{$host}"
+                                            "query": "max:clickhouse.asynchronous_metrics.NumberOfDatabases{$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -96,7 +96,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_TotalBytesOfMergeTreeTables{$host}"
+                                            "query": "avg:clickhouse.asynchronous_metrics.TotalBytesOfMergeTreeTables{$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -144,7 +144,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_SelectedBytes.count{$host}.as_rate()"
+                                            "query": "sum:clickhouse.events.SelectedBytes.count{$host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -192,7 +192,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_MergeTreeDataWriterUncompressedBytes.count{$host}.as_rate()"
+                                            "query": "sum:clickhouse.events.MergeTreeDataWriterUncompressedBytes.count{$host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -233,13 +233,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseMetrics_HTTPConnection{$host}"
+                                            "query": "avg:clickhouse.metrics.HTTPConnection{$host}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:clickhouse.ClickHouseMetrics_TCPConnection{$host}"
+                                            "query": "avg:clickhouse.metrics.TCPConnection{$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -277,7 +277,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseAsyncMetrics_NumberOfTables{$host}"
+                                            "query": "max:clickhouse.asynchronous_metrics.NumberOfTables{$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -329,13 +329,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSUserTimeNormalized{$host}"
+                                            "query": "avg:clickhouse.asynchronous_metrics.OSUserTimeNormalized{$host}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSSystemTimeNormalized{$host}"
+                                            "query": "avg:clickhouse.asynchronous_metrics.OSSystemTimeNormalized{$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -396,13 +396,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseMetrics_MemoryTracking{$host}"
+                                            "query": "avg:clickhouse.metrics.MemoryTracking{$host}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSMemoryTotal{$host}"
+                                            "query": "avg:clickhouse.asynchronous_metrics.OSMemoryTotal{$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -457,7 +457,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseAsyncMetrics_MaxPartCountForPartition{$host}"
+                                            "query": "max:clickhouse.asynchronous_metrics.MaxPartCountForPartition{$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -518,13 +518,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_FailedSelectQuery.count{$host}.as_rate()"
+                                            "query": "avg:clickhouse.events.FailedSelectQuery.count{$host}.as_rate()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_SelectQuery.count{$host}.as_rate()"
+                                            "query": "avg:clickhouse.events.SelectQuery.count{$host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -585,25 +585,25 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_FailedInsertQuery.count{$host}.as_rate()"
+                                            "query": "avg:clickhouse.events.FailedInsertQuery.count{$host}.as_rate()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_ClickHouseProfileEvents_FailedAsyncInsertQuery.count{$host}.as_rate()"
+                                            "query": "avg:clickhouse.events.events.FailedAsyncInsertQuery.count{$host}.as_rate()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_InsertQuery.count{$host}.as_rate()"
+                                            "query": "avg:clickhouse.events.InsertQuery.count{$host}.as_rate()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_ClickHouseProfileEvents_AsyncInsertQuery.count{$host}.as_rate()"
+                                            "query": "avg:clickhouse.events.events.AsyncInsertQuery.count{$host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -653,7 +653,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_LogError.total{$host}"
+                                            "query": "avg:clickhouse.events.LogError.total{$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -721,7 +721,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_OSCPUVirtualTimeMicroseconds{$host} by {host}"
+                                            "query": "avg:clickhouse.events.OSCPUVirtualTimeMicroseconds{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -777,12 +777,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSUserTimeNormalized{$host}"
+                                            "query": "avg:clickhouse.asynchronous_metrics.OSUserTimeNormalized{$host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSSystemTimeNormalized{$host}"
+                                            "query": "avg:clickhouse.asynchronous_metrics.OSSystemTimeNormalized{$host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -837,7 +837,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseMetrics_MemoryTracking{$host} by {host}"
+                                            "query": "avg:clickhouse.metrics.MemoryTracking{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -886,7 +886,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseMetrics_TCPConnection{$host} by {host}"
+                                            "query": "max:clickhouse.metrics.TCPConnection{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -940,7 +940,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_NetworkReceiveBytes.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.NetworkReceiveBytes.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -965,7 +965,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query0",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_NetworkSendBytes.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.NetworkSendBytes.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1037,7 +1037,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_Query.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.Query.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1091,12 +1091,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_QueryTimeMicroseconds{$host} by {host}"
+                                            "query": "avg:clickhouse.events.QueryTimeMicroseconds{$host} by {host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_Query.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.Query.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1144,7 +1144,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_QueryMemoryLimitExceeded.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.QueryMemoryLimitExceeded.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1192,7 +1192,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_FailedQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.FailedQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1240,7 +1240,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_SelectQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.SelectQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1288,7 +1288,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_InsertQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.InsertQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1336,7 +1336,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_FailedSelectQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.FailedSelectQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1384,7 +1384,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_FailedInsertQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.FailedInsertQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1438,12 +1438,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_SelectQueryTimeMicroseconds{$host} by {host}"
+                                            "query": "avg:clickhouse.events.SelectQueryTimeMicroseconds{$host} by {host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_SelectQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.SelectQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1497,12 +1497,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseProfileEvents_InsertQueryTimeMicroseconds{$host} by {host}"
+                                            "query": "avg:clickhouse.events.InsertQueryTimeMicroseconds{$host} by {host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_InsertQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.InsertQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1550,7 +1550,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_AsyncInsertQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.AsyncInsertQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1598,7 +1598,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_FailedAsyncInsertQuery.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.FailedAsyncInsertQuery.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1664,7 +1664,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_Merge.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.Merge.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1712,7 +1712,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseMetrics_PartMutation{$host} by {host}"
+                                            "query": "sum:clickhouse.metrics.PartMutation{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1766,7 +1766,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseMetrics_MergesMutationsMemoryTracking{$host} by {host}"
+                                            "query": "avg:clickhouse.metrics.MergesMutationsMemoryTracking{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1814,7 +1814,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_MergedRows.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.MergedRows.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1869,7 +1869,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:clickhouse.ClickHouseProfileEvents_MergedUncompressedBytes.count{$host} by {host}.as_rate()"
+                                            "query": "sum:clickhouse.events.MergedUncompressedBytes.count{$host} by {host}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1935,7 +1935,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseAsyncMetrics_TotalPartsOfMergeTreeTables{$host} by {host}"
+                                            "query": "max:clickhouse.asynchronous_metrics.TotalPartsOfMergeTreeTables{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1983,7 +1983,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseMetrics_PartsPreActive{$host} by {host}"
+                                            "query": "max:clickhouse.metrics.PartsPreActive{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2031,7 +2031,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseMetrics_PartsTemporary{$host} by {host}"
+                                            "query": "max:clickhouse.metrics.PartsTemporary{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2079,7 +2079,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseMetrics_PartsOutdated{$host} by {host}"
+                                            "query": "max:clickhouse.metrics.PartsOutdated{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2127,7 +2127,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseMetrics_PartsActive{$host} by {host}"
+                                            "query": "max:clickhouse.metrics.PartsActive{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2175,7 +2175,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseMetrics_PartsDeleting{$host} by {host}"
+                                            "query": "max:clickhouse.metrics.PartsDeleting{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2223,7 +2223,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseMetrics_PartsCompact{$host} by {host}"
+                                            "query": "max:clickhouse.metrics.PartsCompact{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2271,7 +2271,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:clickhouse.ClickHouseMetrics_PartsWide{$host} by {host}"
+                                            "query": "max:clickhouse.metrics.PartsWide{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
