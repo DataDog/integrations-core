@@ -169,7 +169,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._check.cloud_metadata,
                 "metadata": self._extensions_cached,
             }
-            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            self._check.database_monitoring_metadata(event)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_extensions(self):
@@ -206,7 +206,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._check.cloud_metadata,
                 "metadata": self._pg_settings_cached,
             }
-            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            self._check.database_monitoring_metadata(event)
 
         if (
             self._collect_schemas_enabled

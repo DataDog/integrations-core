@@ -158,7 +158,7 @@ class SqlserverMetadata(DBMAsyncJob):
                     "cloud_metadata": self._check.cloud_metadata,
                     "metadata": settings_rows,
                 }
-                self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+                self._check.database_monitoring_metadata(event)
         self.collect_schemas()
 
     def collect_schemas(self):

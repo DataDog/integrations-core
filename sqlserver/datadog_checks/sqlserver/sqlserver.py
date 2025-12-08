@@ -1141,4 +1141,4 @@ class SQLServer(DatabaseCheck):
                 },
             }
             self._database_instance_emitted[self.database_identifier] = event
-            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            self.database_monitoring_metadata(event)

@@ -176,7 +176,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
                     self.log.debug("collect_procedure_metrics: no rows returned")
                     return
                 payload = self._to_metrics_payload(rows, self._max_procedure_metrics)
-                self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+                self._check.database_monitoring_query_metrics(payload)
 
     def run_job(self):
         self.collect_procedure_metrics()

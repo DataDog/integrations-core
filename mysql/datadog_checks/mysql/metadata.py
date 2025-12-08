@@ -180,4 +180,4 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             "cloud_metadata": self._config.cloud_metadata,
             "metadata": settings,
         }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+        self._check.database_monitoring_metadata(event)

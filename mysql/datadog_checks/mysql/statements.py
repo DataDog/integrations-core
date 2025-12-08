@@ -151,7 +151,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             # No rows to process, can skip the rest of the payload generation and avoid an empty payload
             return
         for event in self._rows_to_fqt_events(rows, tags):
-            self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+            self._check.database_monitoring_query_sample(event)
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -164,7 +164,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             'service': self._config.service,
             'mysql_rows': rows,
         }
-        self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+        self._check.database_monitoring_query_metrics(payload)
         self._check.gauge(
             "dd.mysql.collect_per_statement_metrics.rows",
             len(rows),

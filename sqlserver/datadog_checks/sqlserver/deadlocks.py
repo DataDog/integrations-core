@@ -260,9 +260,7 @@ class Deadlocks(DBMAsyncJob):
         # Send payload only if deadlocks found
         if rows:
             deadlocks_event = self._create_deadlock_event(rows)
-            payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
-            self._log.debug("Deadlocks payload: %s", str(payload))
-            self._check.database_monitoring_query_activity(payload)
+            self._check.database_monitoring_query_activity(deadlocks_event)
 
     def _create_deadlock_event(self, deadlock_rows):
         event = {
