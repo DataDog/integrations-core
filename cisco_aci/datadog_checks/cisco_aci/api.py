@@ -219,7 +219,7 @@ class Api:
         return self._parse_response(response)
 
     def get_tenant_stats(self, tenant):
-        path = "/api/mo/uni/tn-{}.json?rsp-subtree-include=stats,no-scoped".format(tenant)
+        path = "/api/mo/uni/tn-{}.json?rsp-subtree-include=stats,health,no-scoped".format(tenant)
         response = self.make_request(path)
         # return only the list of stats
         return self._parse_response(response)
