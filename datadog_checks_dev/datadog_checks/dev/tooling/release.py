@@ -19,21 +19,21 @@ from datadog_checks.dev.subprocess import run_command
 from .utils import get_version_file, load_manifest
 
 # Maps the Python platform strings to the ones we have in the manifest
-PLATFORMS_TO_PY = {'windows': 'win32', 'mac_os': 'darwin', 'linux': 'linux2'}
+PLATFORMS_TO_PY = {"windows": "win32", "mac_os": "darwin", "linux": "linux2"}
 ALL_PLATFORMS = sorted(PLATFORMS_TO_PY)
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
-DATADOG_PACKAGE_PREFIX = 'datadog-'
+DATADOG_PACKAGE_PREFIX = "datadog-"
 
 
 def get_release_tag_string(check_name, version_string):
     """
     Compose a string to use for release tags
     """
-    if check_name == 'ddev':
-        version_string = f'v{version_string}'
+    if check_name == "ddev":
+        version_string = f"v{version_string}"
 
     if check_name:
-        return f'{check_name}-{version_string}'
+        return f"{check_name}-{version_string}"
     else:
         return version_string
 
@@ -55,14 +55,14 @@ def get_package_name(folder_name):
     Given a folder name for a check, return the name of the
     corresponding Python package
     """
-    if folder_name == 'datadog_checks_base':
-        return 'datadog-checks-base'
-    elif folder_name == 'datadog_checks_downloader':
-        return 'datadog-checks-downloader'
-    elif folder_name == 'datadog_checks_dependency_provider':
-        return 'datadog-checks-dependency-provider'
-    elif folder_name == 'ddev':
-        return 'ddev'
+    if folder_name == "datadog_checks_base":
+        return "datadog-checks-base"
+    elif folder_name == "datadog_checks_downloader":
+        return "datadog-checks-downloader"
+    elif folder_name == "datadog_checks_dependency_provider":
+        return "datadog-checks-dependency-provider"
+    elif folder_name == "ddev":
+        return "ddev"
 
     return f"{DATADOG_PACKAGE_PREFIX}{folder_name.replace('_', '-')}"
 
@@ -72,16 +72,16 @@ def get_folder_name(package_name):
     Given a Python package name for a check, return the corresponding folder
     name in the git repo
     """
-    if package_name == 'datadog-checks-base':
-        return 'datadog_checks_base'
-    elif package_name == 'datadog-checks-downloader':
-        return 'datadog_checks_downloader'
-    elif package_name == 'datadog-checks-dependency-provider':
-        return 'datadog_checks_dependency_provider'
-    elif package_name == 'ddev':
-        return 'ddev'
+    if package_name == "datadog-checks-base":
+        return "datadog_checks_base"
+    elif package_name == "datadog-checks-downloader":
+        return "datadog_checks_downloader"
+    elif package_name == "datadog-checks-dependency-provider":
+        return "datadog_checks_dependency_provider"
+    elif package_name == "ddev":
+        return "ddev"
 
-    return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX) :]
+    return package_name.replace("-", "_")[len(DATADOG_PACKAGE_PREFIX) :]
 
 
 def get_agent_requirement_line(check, version):
@@ -92,38 +92,45 @@ def get_agent_requirement_line(check, version):
     package_name = get_package_name(check)
 
     # no manifest
-    if check in ('datadog_checks_base', 'datadog_checks_downloader', 'datadog_checks_dependency_provider', 'ddev'):
-        return f'{package_name}=={version}'
+    if check in (
+        "datadog_checks_base",
+        "datadog_checks_downloader",
+        "datadog_checks_dependency_provider",
+        "ddev",
+    ):
+        return f"{package_name}=={version}"
 
     m = load_manifest(check)
-    if 'tile' in m:
+    if "tile" in m:
         platforms = []
-        for classifier_tag in m['tile']['classifier_tags']:
-            key, value = classifier_tag.split('::', 1)
-            if key != 'Supported OS':
+        for classifier_tag in m["tile"]["classifier_tags"]:
+            key, value = classifier_tag.split("::", 1)
+            if key != "Supported OS":
                 continue
-            elif value == 'macOS':
-                value = 'mac_os'
+            elif value == "macOS":
+                value = "mac_os"
             platforms.append(value.lower())
         platforms.sort()
     else:
-        platforms = sorted(m.get('supported_os', []))
+        platforms = sorted(m.get("supported_os", []))
 
     # all platforms
     if platforms == ALL_PLATFORMS:
-        return f'{package_name}=={version}'
+        return f"{package_name}=={version}"
     # one specific platform
     elif len(platforms) == 1:
         return f"{package_name}=={version}; sys_platform == '{PLATFORMS_TO_PY.get(platforms[0])}'"
     elif platforms:
-        if 'windows' not in platforms:
+        if "windows" not in platforms:
             return f"{package_name}=={version}; sys_platform != 'win32'"
-        elif 'mac_os' not in platforms:
+        elif "mac_os" not in platforms:
             return f"{package_name}=={version}; sys_platform != 'darwin'"
-        elif 'linux' not in platforms:
+        elif "linux" not in platforms:
             return f"{package_name}=={version}; sys_platform != 'linux2'"
 
-    raise ManifestError(f"Can't parse the supported OS list for the check {check}: {platforms}")
+    raise ManifestError(
+        f"Can't parse the supported OS list for the check {check}: {platforms}"
+    )
 
 
 def update_agent_requirements(req_file, check, newline):
@@ -133,35 +140,42 @@ def update_agent_requirements(req_file, check, newline):
     package_name = get_package_name(check)
     lines = read_file_lines(req_file)
 
-    pkg_lines = {line.split('==')[0]: line for line in lines}
-    pkg_lines[package_name] = f'{newline}\n'
+    pkg_lines = {line.split("==")[0]: line for line in lines}
+    pkg_lines[package_name] = f"{newline}\n"
 
     write_file_lines(req_file, sorted(pkg_lines.values()))
 
 
 def build_package(package_path, sdist):
     with chdir(package_path):
-        if file_exists(path_join(package_path, 'pyproject.toml')):
-            command = [sys.executable, '-m', 'build']
+        if file_exists(path_join(package_path, "pyproject.toml")):
+            command = [sys.executable, "-m", "build"]
             if not sdist:
-                command.append('--wheel')
+                command.append("--wheel")
 
-            result = run_command(command, capture='out')
+            result = run_command(command, capture="out")
             if result.code != 0:
                 return result
         else:
             # Clean up: Files built previously and now deleted might still persist in build directory
             # and will be included in the final wheel. Cleaning up before avoids that.
-            result = run_command([sys.executable, 'setup.py', 'clean', '--all'], capture='out')
+            result = run_command(
+                [sys.executable, "setup.py", "clean", "--all"], capture="out"
+            )
             if result.code != 0:
                 return result
 
-            result = run_command([sys.executable, 'setup.py', 'bdist_wheel', '--universal'], capture='out')
+            result = run_command(
+                [sys.executable, "setup.py", "bdist_wheel", "--universal"],
+                capture="out",
+            )
             if result.code != 0:
                 return result
 
             if sdist:
-                result = run_command([sys.executable, 'setup.py', 'sdist'], capture='out')
+                result = run_command(
+                    [sys.executable, "setup.py", "sdist"], capture="out"
+                )
                 if result.code != 0:
                     return result
         # Create pointer artifact in JSON/yaml format for TUF
@@ -193,7 +207,6 @@ def build_package(package_path, sdist):
                 "uri": uri,
                 "digest": digest,
                 "length": wheel_size,
-                "custom": {},
             }
         }
         print("Using digest: ", digest)
@@ -223,6 +236,7 @@ def upload_package(package_path, version, public=False, local=False):
     import os
 
     from botocore.exceptions import ClientError
+
     from datadog_checks.dev.tooling.aws_helpers import get_s3_client
 
     S3_BUCKET = "test-public-integration-wheels"
@@ -238,18 +252,22 @@ def upload_package(package_path, version, public=False, local=False):
     pointer_file_path = os.path.join(dist_dir, pointer_file_name)
 
     # Find the actual wheel file (e.g., package_name-version-py3-none-any.whl)
-    wheel_pattern = os.path.join(dist_dir, f"{package_name.replace('-', '_')}-{version}-*.whl")
+    wheel_pattern = os.path.join(
+        dist_dir, f"{package_name.replace('-', '_')}-{version}-*.whl"
+    )
     wheel_files = glob.glob(wheel_pattern)
 
     if not wheel_files:
-        raise FileNotFoundError(f"No wheel file found matching pattern: {wheel_pattern}")
+        raise FileNotFoundError(
+            f"No wheel file found matching pattern: {wheel_pattern}"
+        )
 
     # Use the most recent wheel if multiple exist
     wheel_file_path = max(wheel_files, key=os.path.getctime)
     wheel_file_name = os.path.basename(wheel_file_path)
 
     # Calculate wheel hash
-    with open(wheel_file_path, 'rb') as f:
+    with open(wheel_file_path, "rb") as f:
         wheel_hash = hashlib.sha256(f.read()).hexdigest()
 
     if public:
@@ -261,13 +279,13 @@ def upload_package(package_path, version, public=False, local=False):
         pointer_s3_key = f"pointers/{package_name}/{pointer_file_name}"
         try:
             existing_pointer = s3.head_object(Bucket=S3_BUCKET, Key=pointer_s3_key)
-            existing_digest = existing_pointer.get('Metadata', {}).get('digest', '')
+            existing_digest = existing_pointer.get("Metadata", {}).get("digest", "")
             if existing_digest == wheel_hash:
                 print(f"Version {version} already uploaded with same hash, skipping")
                 return
             print(f"Warning: Version {version} exists with different hash, overwriting")
         except ClientError as e:
-            if e.response['Error']['Code'] != '404':
+            if e.response["Error"]["Code"] != "404":
                 raise
             # Doesn't exist, proceed with upload
 
@@ -276,7 +294,10 @@ def upload_package(package_path, version, public=False, local=False):
             pointer_file_path,
             S3_BUCKET,
             pointer_s3_key,
-            ExtraArgs={'Metadata': {'digest': wheel_hash, 'version': version}, 'ACL': 'public-read'},
+            ExtraArgs={
+                "Metadata": {"digest": wheel_hash, "version": version},
+                "ACL": "public-read",
+            },
         )
 
         # Upload wheel file with hash metadata (private, requires authentication)
@@ -285,13 +306,18 @@ def upload_package(package_path, version, public=False, local=False):
             wheel_file_path,
             S3_BUCKET,
             wheel_s3_key,
-            ExtraArgs={'Metadata': {'sha256': wheel_hash}},
+            ExtraArgs={"Metadata": {"sha256": wheel_hash}},
         )
 
-        print(f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}")
+        print(
+            f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}"
+        )
 
         # Generate indexes
-        from datadog_checks.dev.tooling.simple_index import generate_package_index, generate_root_index
+        from datadog_checks.dev.tooling.simple_index import (
+            generate_package_index,
+            generate_root_index,
+        )
 
         print(f"Generating simple indexes...")
         generate_package_index(s3, S3_BUCKET, package_name, use_pointers=True)
@@ -305,7 +331,7 @@ def upload_package(package_path, version, public=False, local=False):
             wheel_file_path,
             S3_BUCKET,
             wheel_s3_key,
-            ExtraArgs={'Metadata': {'sha256': wheel_hash}},
+            ExtraArgs={"Metadata": {"sha256": wheel_hash}},
         )
         print(f"Uploaded {wheel_file_name} to S3 bucket {S3_BUCKET}")
 

@@ -69,6 +69,12 @@ class TUFDownloader:
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
         self.__repository_url_prefix = repository_url_prefix
 
+        # In local development mode (localhost), clear metadata cache to ensure
+        # we pick up newly signed metadata from 'ddev release sign --local'
+        if 'localhost' in self.__repository_url_prefix:
+            logger.info('Local development mode detected, clearing metadata cache')
+            self._clear_metadata_cache()
+
         self.__disable_verification = disable_verification
         self.__current_version = None
         self.__current_wheel_href = None
@@ -106,6 +112,28 @@ class TUFDownloader:
         # NOTE: Update to the latest top-level role metadata only ONCE, so that
         # we use the same consistent snapshot to download targets.
         self.__updater.refresh()
+
+    def _clear_metadata_cache(self):
+        """Clear cached TUF metadata files (except root.json) to force refresh.
+
+        This is used in local development to ensure the downloader picks up
+        newly signed metadata after running 'ddev release sign --local'.
+
+        We preserve root.json because it contains the root of trust keys.
+        """
+        metadata_dir = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata')
+
+        # List of metadata files to clear (preserve root.json)
+        metadata_files = ['timestamp.json', 'snapshot.json', 'targets.json']
+
+        for filename in metadata_files:
+            filepath = os.path.join(metadata_dir, filename)
+            try:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                    logger.debug('Cleared cached metadata: %s', filename)
+            except OSError as e:
+                logger.warning('Failed to clear cached metadata %s: %s', filename, e)
 
     def __compute_target_paths(self, target_relpath):
         # The path used to query TUF needs to be a path-relative-URL string

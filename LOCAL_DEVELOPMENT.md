@@ -102,6 +102,7 @@ python -m datadog_checks.downloader datadog-postgres \
 - The downloader must use the exact root.json that matches the keys used to sign the metadata in MinIO
 - The committed root.json contains production keys; the local root.json contains dummy keys
 - Local MinIO bucket is configured for anonymous downloads (no AWS credentials needed)
+- **Metadata cache is automatically cleared** when using localhost URLs - no manual deletion required after running `ddev release sign --local`
 
 ## Managing MinIO
 
