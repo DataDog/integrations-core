@@ -2,7 +2,29 @@
 
 <!-- towncrier release notes start -->
 
-## 6.3.0 / 2025-09-05
+## 6.6.0 / 2025-11-26
+
+***Added***:
+
+* Add uptime metric to Windows services ([#21778](https://github.com/DataDog/integrations-core/pull/21778))
+* Add state metric to Windows services ([#21830](https://github.com/DataDog/integrations-core/pull/21830))
+* Add restarts metric to Windows services ([#21840](https://github.com/DataDog/integrations-core/pull/21840))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 6.5.0 / 2025-10-31
+
+***Added***:
+
+* Add state tag to windows services ([#21709](https://github.com/DataDog/integrations-core/pull/21709))
+
+## 6.4.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 6.3.0 / 2025-09-05 / Agent 7.71.0
 
 ***Added***:
 

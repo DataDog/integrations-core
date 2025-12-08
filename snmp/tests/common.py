@@ -350,3 +350,7 @@ def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
 
     aggregator._metrics = new_agg_metrics
     return aggregator
+
+
+def get_agent_hostname():
+    return socket.gethostname().lower()

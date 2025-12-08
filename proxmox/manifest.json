@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "39909ffc-71f0-4c0c-b75e-9951f1ff7d10",
   "app_id": "proxmox",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

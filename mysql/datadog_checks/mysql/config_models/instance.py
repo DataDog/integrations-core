@@ -56,6 +56,7 @@ class CollectSchemas(BaseModel):
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     max_execution_time: Optional[float] = None
+    max_tables: Optional[int] = None
 
 
 class CollectSettings(BaseModel):
@@ -168,6 +169,7 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_prepared_statements: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     only_query_recent_statements: Optional[bool] = None

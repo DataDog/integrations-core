@@ -16,26 +16,25 @@ files:
   - template: instances
     options:
     - name: host
-      required: true
       description: |
         The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
         e.g. `/var/run/postgresql/.s.PGSQL.5432`.
       value:
-        example: "localhost"
         type: string
+        display_default: "localhost"
     - name: port
       description: The port to use when connecting to PostgreSQL.
       value:
         type: integer
-        example: 5432
+        display_default: 5432
     - name: username
       description: The Datadog username created to connect to PostgreSQL.
-      required: true
       value:
         type: string
-        example: datadog
+        display_default: "datadog"
     - name: password
       description: The password associated with the Datadog user.
+      secret: true
       value:
         type: string
     - name: dbname
@@ -51,17 +50,19 @@ files:
         and can be useful to set a custom hostname when connecting to a remote database through a proxy.
       value:
         type: string
+        default: null
     - name: exclude_hostname
       description: |
         Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
       value:
         type: boolean
         example: false
-      default: false
     - name: database_identifier
       description: |
-        Controls how the database is identified. The default value is the resolved hostname for the instance, 
-        which respects the `reported_hostname` option.
+        Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+        billable instance.
+        
+        The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
 
         This value will be used as-is for the display name of the instance but will be normalized
         when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -79,7 +80,6 @@ files:
             - host: The provided host of the instance.
             - port: The port number of the instance.
             In addition, you can use any key from the `tags` section of the configuration.
-          default: "$resolved_hostname"
     - name: dbstrict
       description: |
         Whether to restrict the scope of the check to just the database in question.
@@ -117,7 +117,7 @@ files:
     - name: ignore_schemas_owned_by
       description: |
         A list of database users which own schemas to ignore.
-        No metrics or statement samples will be collected for these schemas.
+        No metrics will be collected for these schemas.
         Each value can be a plain string or a Postgres pattern.
       value:
         type: array
@@ -157,6 +157,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
+        default: null
     - name: ssl_cert
       description: |
         The path to the ssl certificate.
@@ -164,6 +165,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
+        default: null
     - name: ssl_key
       description: |
         The path to the ssl client key.
@@ -171,6 +173,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
+        default: null
     - name: ssl_password
       description: |
         The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
@@ -179,6 +182,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
+        default: null
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -258,6 +262,7 @@ files:
                 type: array
                 items:
                     type: string
+        default: []
         example:
           - relation_name: <TABLE_NAME>
             schemas:
@@ -282,12 +287,36 @@ files:
       value:
         type: boolean
         example: true
+    - name: locks_idle_in_transaction
+      description: Configure collection of idle in transaction lock age metrics
+      hidden: true
+      options:
+        - name: enabled
+          description: Enable collection of idle in transaction lock age metrics.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          hidden: true
+        - name: collection_interval
+          description: Set the collection interval (in seconds) for idle in transaction lock age metrics.
+          value:
+            type: number
+            example: 300
+            display_default: 300
+          hidden: true
+        - name: max_rows
+          description: Set the maximum number of rows to collect per check run.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
+          hidden: true
     - name: collect_checksum_metrics
       description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
         type: boolean
         example: false
-        display_default: false
     - name: collect_activity_metrics
       description: |
         Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
@@ -340,14 +369,15 @@ files:
         Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
       value:
         type: boolean
-        example: false
+        example: true
     - name: data_directory
       description: |
         The data directory of your postgres installation
-        Required when collecting WAL metrics.
+        Required when collecting WAL metrics on Postgres 9.6.
       value:
         type: string
         example: /usr/local/pgsql/data
+        display_default: /usr/local/pgsql/data
     - name: tag_replication_role
       hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
@@ -359,7 +389,6 @@ files:
       value:
         type: integer
         display_default: 200
-        example: 200
     - template: instances/db
       overrides:
         custom_queries.value.example:
@@ -372,6 +401,13 @@ files:
             tags:
               - test:postgresql
             metric_prefix: postgresql
+    - name: custom_metrics
+      description: This option is deprecated. Use `custom_queries` instead.
+      hidden: true
+      value:
+        type: array
+        items:
+          type: object
     - name: database_autodiscovery
       description: |
         Define the configuration for database autodiscovery.
@@ -432,6 +468,9 @@ files:
               - "rdsadmin"
             display_default:
               - "cloudsqladmin"
+              - "rdsadmin" 
+              - "alloydbadmin"
+              - "alloydbmetadata"
         - name: refresh
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
           value:
@@ -462,6 +501,15 @@ files:
         type: string
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
+    - name: pg_stat_activity_view
+      hidden: true
+      description: |
+        Set this value if you want to define a custom view or function to allow the datadog user to query the
+        `pg_stat_activity` table, which is useful for restricting the permissions given to the datadog agent.
+        Please note this is an ALPHA feature and is subject to change or deprecation without notice.
+      value:
+        type: string
+        display_default: pg_stat_activity
     - name: query_encodings
       description: |
         Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
@@ -477,6 +525,8 @@ files:
         example:
           - utf8
           - latin1
+        display_default:
+          - utf8
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -501,7 +551,21 @@ files:
             higher than this threshold, a warning is emitted to recommend lowering the setting value.
           value:
             type: number
-            example: 10000
+            default: 10000
+        - name: full_statement_text_cache_max_size
+          hidden: true
+          description: |
+            Set the max size of the cache used for the full statement text.
+          value:
+            type: number
+            default: 10000
+        - name: full_statement_text_samples_per_hour_per_query
+          hidden: true
+          description: |
+            Set the max number of full statement text samples to collect per hour per query.
+          value:
+            type: number
+            default: 10000
         - name: incremental_query_metrics
           hidden: true
           description: |
@@ -520,37 +584,53 @@ files:
             type: number
             display_default: 300
             example: 300
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the query metrics collection synchronously. This is useful for testing purposes, but should not be used
+            in production as it can block the main thread and cause performance issues.
+          value:
+            type: boolean
+            example: false
+        - name: batch_max_content_size
+          hidden: true
+          description: |
+            This is a stub option for type hints. This value is actually set in the datadog.yaml config using
+            database_monitoring.metrics.batch_max_content_size. For details on this parameter, see statements.py.
+          value:
+            type: integer
+            example: 20_000_000
     - name: query_samples
-      description: Configure collection of query samples
+      description: Configure collection of explain plan samples
       options:
         - name: enabled
           description: |
-            Enable collection of query samples. Requires `dbm: true`.
+            Enable collection of explain plans. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the query sample collection interval (in seconds). Each collection involves a single query to
+            Set the explain plan collection interval (in seconds). Each collection involves a single query to
             `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
           value:
             type: number
             example: 1
         - name: explain_function
           description: |
-            Override the default function used to collect execution plans for queries.
+            Override the default function used to collect explain plans for queries.
           value:
             type: string
             example: datadog.explain_statement
         - name: explained_queries_per_hour_per_query
           description: |
-            Set the rate limit for how many execution plans will be collected per hour per normalized query.
+            Set the rate limit for how many explain plans will be collected per hour per normalized query.
           value:
             type: integer
             example: 60
         - name: samples_per_hour_per_query
           description: |
-            Set the rate limit for how many query sample events will be ingested per hour per normalized execution
+            Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
             plan.
           value:
             type: integer
@@ -566,7 +646,7 @@ files:
         - name: seen_samples_cache_maxsize
           description: |
             Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
-            for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+            for databases with a very large number of unique normalized explain plans which exceed the cache's limit.
           value:
             type: integer
             example: 10000
@@ -577,26 +657,48 @@ files:
           value:
             type: boolean
             example: true
+        - name: explain_errors_cache_maxsize
+          hidden: true
+          description: |
+            Set the max size of the cache used for the explain errors.
+          value:
+            type: integer
+            default: 5000
+        - name: explain_errors_cache_ttl
+          hidden: true
+          description: |
+            Set the ttl in seconds of the cache used for the explain errors.
+          value:
+            type: integer
+            default: 86400
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the query metrics collection synchronously. This is useful for testing purposes, but should not be used
+            in production as it can block the main thread and cause performance issues.
+          value:
+            type: boolean
+            example: false
     - name: query_activity
-      description: Configure collection of query activity
+      description: Configure collection of in-flight query samples
       options:
         - name: enabled
           description: |
-            Enable collection of query activity. Requires `dbm: true`.
+            Enable collection of in-flight query samples. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the query activity collection interval (in seconds). This number cannot be smaller than
-            query_samples configured collection_interval.
+            Set the in-flight query sample collection interval (in seconds). This number cannot be smaller than
+            the `query_samples` configured collection_interval.
           value:
             type: number
             example: 10
           hidden: true
         - name: payload_row_limit
           description: |
-            Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+            Set the maximum number of pg_stat_activity rows you want to report. If the table is larger
             than the maximum rows set, then the top N longest running transactions will be reported.
           value:
             type: number
@@ -629,6 +731,14 @@ files:
                 - plpgsql%
               default:
                 - plpgsql%
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the metadata collection synchronously. This is useful for testing purposes, but should not be used
+            in production as it can block the main thread and cause performance issues.
+          value:
+            type: boolean
+            example: false
     - name: collect_schemas
       description: |
         Enable collection of database schemas. In order to collect schemas from all user databases,
@@ -648,6 +758,12 @@ files:
             type: number
             example: 300
             display_default: 300
+        - name: max_query_duration
+          description: |
+            Maximum duration of the query to collect schema information in seconds.
+          value:
+            type: number
+            display_default: 60
         - name: max_columns
           description: |
             Maximum amount of columns the Agent collects per table.
@@ -740,8 +856,10 @@ files:
       options:
         - name: instance_endpoint
           description: |
-            Equal to the Endpoint.Address of the instance the agent is connecting to.
-            This value is optional if the value of `host` is already configured to the instance endpoint.
+            Set to the Endpoint.Address of the instance the agent is connecting to.
+            Use this value to allow association of RDS metrics with the instance when 
+            connecting to the instance through a proxy or CNAME, or if you set `reported_hostname`
+            to a different value from the instance endpoint.
 
             For more information on instance endpoints,
             see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
@@ -872,35 +990,6 @@ files:
             - name: identity_scope
               type: string
               example: https://ossrdbms-aad.database.windows.net/.default
-
-    - name: managed_identity
-      description: |
-        DEPRECATED: Please use `azure.managed_authentication` instead.
-
-        Configuration section used for Azure AD Authentication.
-
-        This supports using System or User assigned managed identities.
-        If this section is set, then the `username` and `password` fields will be ignored.
-
-        For more information on Managed Identities, see the Azure docs
-        https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
-      options:
-        - name: client_id
-          description: |
-            Client ID of the Managed Identity.
-          value:
-            type: string
-        - name: identity_scope
-          description: |
-            The permission scope from where to access the identity token. This value is optional if using the default
-            identity scope for Azure managed databases.
-
-            For more information on scopes, see the Azure docs
-            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
-          value:
-            type: string
-            example: https://ossrdbms-aad.database.windows.net/.default
-
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
@@ -1024,11 +1113,11 @@ files:
             display_default: false
     - name: collect_raw_query_statement
       description: |
-        Configure the collection of raw query statements in query activity and execution plans.
-        Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+        Configure the collection of raw query statements in query samples and explain plans.
+        Raw query statements and explain plans may contain sensitive information (e.g., passwords)
         or personally identifiable information in query text.
         Enabling this option will allow the collection and ingestion of raw query statements and 
-        execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+        explain plans into Datadog, which can then become viewable in query samples or explain plans. 
         This option is disabled by default.
         Note: Collection of raw query statements is currently in preview.
         If you are interested in participating, please reach out to your Datadog Customer Success Manager.
@@ -1069,8 +1158,7 @@ files:
         This collection does not involve any additional queries to the database.
       value:
         type: number
-        example: 300
-        display_default: false
+        default: 300
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.

@@ -2,8 +2,9 @@ import io
 import json
 import os
 import zipfile
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, mock_open, patch
+from unittest.mock import MagicMock, mock_open, patch
+
+import pytest
 
 from ddev.cli.size.utils.common_funcs import (
     check_python_version,
@@ -11,19 +12,21 @@ from ddev.cli.size.utils.common_funcs import (
     convert_to_human_readable_size,
     extract_version_from_about_py,
     format_modules,
+    get_dependencies_from_json,
     get_dependencies_list,
     get_dependencies_sizes,
     get_files,
     get_gitignore_files,
-    get_org,
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration_file,
+    parse_sizes_json,
     save_csv,
     save_json,
     save_markdown,
 )
+from ddev.utils.fs import Path
 
 
 def to_native_path(path: str) -> str:
@@ -80,26 +83,44 @@ def test_get_valid_versions():
         assert versions == expected_versions
 
 
-def test_is_correct_dependency():
-    assert is_correct_dependency("windows-x86_64", "3.12", "windows-x86_64-3.12")
-    assert not is_correct_dependency("windows-x86_64", "3.12", "linux-x86_64-3.12")
-    assert not is_correct_dependency("windows-x86_64", "3.13", "windows-x86_64-3.12")
+@pytest.mark.parametrize(
+    "platform, version, dependency_file_name, expected",
+    [
+        pytest.param("windows-x86_64", "3.12", "windows-x86_64_3.12.txt", True, id="correct"),
+        pytest.param("windows-x86_64", "3.12", "linux-x86_64_3.12.txt", False, id="incorrect_platform"),
+        pytest.param("windows-x86_64", "3.13", "windows-x86_64_3.12.txt", False, id="incorrect_version"),
+    ],
+)
+def test_is_correct_dependency(platform, version, dependency_file_name, expected):
+    assert is_correct_dependency(platform, version, dependency_file_name) is expected
 
 
-def test_convert_to_human_readable_size():
-    assert convert_to_human_readable_size(500) == "500 B"
-    assert convert_to_human_readable_size(1024) == "1.0 KB"
-    assert convert_to_human_readable_size(1048576) == "1.0 MB"
-    assert convert_to_human_readable_size(1073741824) == "1.0 GB"
+@pytest.mark.parametrize(
+    "size_bytes, expected_string",
+    [
+        pytest.param(500, "500 B", id="Bytes"),
+        pytest.param(1024, "1.0 KiB", id="KiB"),
+        pytest.param(1048576, "1.0 MiB", id="MiB"),
+        pytest.param(1073741824, "1.0 GiB", id="GiB"),
+    ],
+)
+def test_convert_to_human_readable_size(size_bytes, expected_string):
+    assert convert_to_human_readable_size(size_bytes) == expected_string
 
 
-def test_is_valid_integration_file():
+@pytest.mark.parametrize(
+    "file_path, expected",
+    [
+        pytest.param("datadog_checks/example.py", True, id="valid"),
+        pytest.param("__pycache__/file.py", False, id="pycache"),
+        pytest.param("datadog_checks_dev/example.py", False, id="checks_dev"),
+        pytest.param(".git/config", False, id="git"),
+    ],
+)
+def test_is_valid_integration_file(file_path, expected):
     repo_path = "fake_repo"
     with patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()):
-        assert is_valid_integration_file(to_native_path("datadog_checks/example.py"), repo_path)
-        assert not is_valid_integration_file(to_native_path("__pycache__/file.py"), repo_path)
-        assert not is_valid_integration_file(to_native_path("datadog_checks_dev/example.py"), repo_path)
-        assert not is_valid_integration_file(to_native_path(".git/config"), repo_path)
+        assert is_valid_integration_file(to_native_path(file_path), repo_path) is expected
 
 
 def test_get_dependencies_list():
@@ -228,7 +249,14 @@ def test_get_files_grouped_and_with_versions():
     assert result == expected
 
 
-def test_check_version():
+@pytest.mark.parametrize(
+    "py_version, expected",
+    [
+        pytest.param("3", True, id="py3"),
+        pytest.param("2", False, id="py2"),
+    ],
+)
+def test_check_version(py_version, expected):
     with (
         patch(
             "ddev.cli.size.utils.common_funcs.load_toml_file",
@@ -236,8 +264,7 @@ def test_check_version():
         ),
         patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
     ):
-        assert check_python_version("fake_repo", "integration1", "3")
-        assert not check_python_version("fake_repo", "integration1", "2")
+        assert check_python_version("fake_repo", "integration1", py_version) is expected
 
 
 def test_get_gitignore_files():
@@ -334,49 +361,76 @@ def test_save_markdown():
     assert written_content == expected_writes
 
 
-def test_extract_version_from_about_py_pathlib():
+@pytest.mark.parametrize(
+    "file_content, expected_version",
+    [
+        pytest.param("__version__ = '1.2.3'", "1.2.3", id="version_present"),
+        pytest.param("not_version = 'not_defined'", "", id="version_not_present"),
+    ],
+)
+def test_extract_version_from_about_py(file_content, expected_version):
     fake_path = Path("some") / "module" / "__about__.py"
-    fake_content = "__version__ = '1.2.3'\n"
-
-    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=fake_content)):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=file_content)):
         version = extract_version_from_about_py(str(fake_path))
-
-    assert version == "1.2.3"
-
-
-def test_extract_version_from_about_py_no_version_pathlib():
-    fake_path = Path("another") / "module" / "__about__.py"
-    fake_content = "version = 'not_defined'\n"
-
-    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=fake_content)):
-        version = extract_version_from_about_py(str(fake_path))
-
-    assert version == ""
+    assert version == expected_version
 
 
-def test_get_org():
-    mock_app = Mock()
-    mock_path = Mock()
+def test_parse_sizes_json(tmp_path):
+    compressed_data = json.dumps(
+        [
+            {
+                "Name": "dep1",
+                "Size_Bytes": 123,
+                "Size": "2 B",
+                "Type": "Dependency",
+                "Platform": "linux-x86_64",
+                "Python_Version": "3.12",
+            },
+            {
+                "Name": "dep2",
+                "Size_Bytes": 123,
+                "Size": "2 B",
+                "Type": "Dependency",
+                "Platform": "macos-x86_64",
+                "Python_Version": "3.12",
+            },
+            {
+                "Name": "module1",
+                "Size_Bytes": 123,
+                "Size": "2 B",
+                "Type": "Integration",
+                "Platform": "linux-x86_64",
+                "Python_Version": "3.12",
+            },
+        ]
+    )
 
-    toml_data = """
-        [orgs.default]
-        api_key = "test_api_key"
-        app_key = "test_app_key"
-        site = "datadoghq.com"
-        """
-
-    mock_app.config_file.path = mock_path
-
-    with (
-        patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=toml_data)),
-        patch.object(mock_path, "open", mock_open(read_data=toml_data)),
-    ):
-        result = get_org(mock_app, "default")
-
-    expected = {
-        "api_key": "test_api_key",
-        "app_key": "test_app_key",
-        "site": "datadoghq.com",
+    expected_output = {
+        "dep1": {
+            "compressed": 123,
+            "compression": True,
+            "version": None,
+        }
     }
+    compressed_json_path = tmp_path / "compressed.json"
+    compressed_json_path.write_text(compressed_data)
 
+    result = parse_sizes_json(compressed_json_path, "linux-x86_64", "3.12", True)
+
+    assert result == expected_output
+
+
+def test_get_dependencies_from_json():
+    dep_size_dict = (
+        '{"dep1": {"compressed": 1, "uncompressed": 2, "version": "1.1.1"},\n'
+        '"dep2": {"compressed": 10, "uncompressed": 20, "version": "1.1.1"}}'
+    )
+    expected = [
+        {"Name": "dep1", "Version": "1.1.1", "Size_Bytes": 1, "Size": "1 B", "Type": "Dependency"},
+        {"Name": "dep2", "Version": "1.1.1", "Size_Bytes": 10, "Size": "10 B", "Type": "Dependency"},
+    ]
+
+    with patch('ddev.utils.fs.Path') as mock_path:
+        mock_path.read_text.return_value = dep_size_dict
+        result = get_dependencies_from_json(mock_path, "linux-x86_64", "3.12", True)
     assert result == expected

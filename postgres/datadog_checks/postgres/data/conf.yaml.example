@@ -31,21 +31,22 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional - default: localhost
     ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
     ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
     #
-  - host: localhost
+    # host: <HOST>
 
     ## @param port - integer - optional - default: 5432
     ## The port to use when connecting to PostgreSQL.
     #
-    # port: 5432
+    # port: <PORT>
 
-    ## @param username - string - required
+    ## @param username - string - optional - default: datadog
     ## The Datadog username created to connect to PostgreSQL.
     #
-    username: datadog
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.
@@ -69,8 +70,10 @@ instances:
     #
     # exclude_hostname: false
 
-    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
-    ## which respects the `reported_hostname` option.
+    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
     ##
     ## This value will be used as-is for the display name of the instance but will be normalized
     ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -111,7 +114,7 @@ instances:
 
     ## @param ignore_schemas_owned_by - list of strings - optional
     ## A list of database users which own schemas to ignore.
-    ## No metrics or statement samples will be collected for these schemas.
+    ## No metrics will be collected for these schemas.
     ## Each value can be a plain string or a Postgres pattern.
     #
     # ignore_schemas_owned_by:
@@ -268,24 +271,24 @@ instances:
     #
     collect_bloat_metrics: false
 
-    ## @param collect_wal_metrics - boolean - optional - default: false
+    ## @param collect_wal_metrics - boolean - optional - default: true
     ## Collect metrics about WAL file age.
     ## NOTE:
     ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
     ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
     #
-    # collect_wal_metrics: false
+    # collect_wal_metrics: true
 
     ## @param data_directory - string - optional - default: /usr/local/pgsql/data
     ## The data directory of your postgres installation
-    ## Required when collecting WAL metrics.
+    ## Required when collecting WAL metrics on Postgres 9.6.
     #
     # data_directory: /usr/local/pgsql/data
 
     ## @param table_count_limit - integer - optional - default: 200
     ## The maximum number of tables to collect metrics from.
     #
-    # table_count_limit: 200
+    # table_count_limit: <TABLE_COUNT_LIMIT>
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
@@ -396,7 +399,7 @@ instances:
         #   - master$
         #   - AdventureWorks.*
 
-        ## @param exclude - list of strings - optional - default: ['cloudsqladmin']
+        ## @param exclude - list of strings - optional - default: ['cloudsqladmin', 'rdsadmin', 'alloydbadmin', 'alloydbmetadata']
         ## Regular expression for database names to exclude as part of `database_autodiscovery`.
         ## Character casing is ignored. The regular expressions start matching from the beginning,
         ## so to match anywhere, prepend `.*`. For exact matches append `$`.
@@ -433,7 +436,7 @@ instances:
     #
     # pg_stat_statements_view: show_pg_stat_statements()
 
-    ## @param query_encodings - list of strings - optional
+    ## @param query_encodings - list of strings - optional - default: ['utf8']
     ## Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
     ## When attempting to decode stored query text for query metrics, samples and activity, the agent will use these
     ## values in order and return the first successful decoding. Only supported for Postgres 10 and above.
@@ -461,33 +464,33 @@ instances:
         #
         # collection_interval: 10
 
-    ## Configure collection of query samples
+    ## Configure collection of explain plan samples
     #
     # query_samples:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query samples. Requires `dbm: true`.
+        ## Enable collection of explain plans. Requires `dbm: true`.
         #
         # enabled: true
 
         ## @param collection_interval - number - optional - default: 1
-        ## Set the query sample collection interval (in seconds). Each collection involves a single query to
+        ## Set the explain plan collection interval (in seconds). Each collection involves a single query to
         ## `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
         #
         # collection_interval: 1
 
         ## @param explain_function - string - optional - default: datadog.explain_statement
-        ## Override the default function used to collect execution plans for queries.
+        ## Override the default function used to collect explain plans for queries.
         #
         # explain_function: datadog.explain_statement
 
         ## @param explained_queries_per_hour_per_query - integer - optional - default: 60
-        ## Set the rate limit for how many execution plans will be collected per hour per normalized query.
+        ## Set the rate limit for how many explain plans will be collected per hour per normalized query.
         #
         # explained_queries_per_hour_per_query: 60
 
         ## @param samples_per_hour_per_query - integer - optional - default: 15
-        ## Set the rate limit for how many query sample events will be ingested per hour per normalized execution
+        ## Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
         ## plan.
         #
         # samples_per_hour_per_query: 15
@@ -501,7 +504,7 @@ instances:
 
         ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
         ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
-        ## for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+        ## for databases with a very large number of unique normalized explain plans which exceed the cache's limit.
         #
         # seen_samples_cache_maxsize: 10000
 
@@ -511,17 +514,17 @@ instances:
         #
         # explain_parameterized_queries: true
 
-    ## Configure collection of query activity
+    ## Configure collection of in-flight query samples
     #
     # query_activity:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query activity. Requires `dbm: true`.
+        ## Enable collection of in-flight query samples. Requires `dbm: true`.
         #
         # enabled: true
 
         ## @param payload_row_limit - number - optional - default: 3500
-        ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+        ## Set the maximum number of pg_stat_activity rows you want to report. If the table is larger
         ## than the maximum rows set, then the top N longest running transactions will be reported.
         #
         # payload_row_limit: 3500
@@ -563,6 +566,11 @@ instances:
         ## Maximum amount of tables the Agent collects from the instance.
         #
         # max_tables: 300
+
+        ## @param max_query_duration - number - optional - default: 60
+        ## Maximum duration of the query to collect schema information in seconds.
+        #
+        # max_query_duration: <MAX_QUERY_DURATION>
 
         ## @param max_columns - number - optional - default: 50
         ## Maximum amount of columns the Agent collects per table.
@@ -633,8 +641,10 @@ instances:
     # aws:
 
         ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-        ## Equal to the Endpoint.Address of the instance the agent is connecting to.
-        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ## Set to the Endpoint.Address of the instance the agent is connecting to.
+        ## Use this value to allow association of RDS metrics with the instance when 
+        ## connecting to the instance through a proxy or CNAME, or if you set `reported_hostname`
+        ## to a different value from the instance endpoint.
         ##
         ## For more information on instance endpoints,
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
@@ -742,32 +752,6 @@ instances:
         #
         # managed_authentication: {}
 
-    ## DEPRECATED: Please use `azure.managed_authentication` instead.
-    ##
-    ## Configuration section used for Azure AD Authentication.
-    ##
-    ## This supports using System or User assigned managed identities.
-    ## If this section is set, then the `username` and `password` fields will be ignored.
-    ##
-    ## For more information on Managed Identities, see the Azure docs
-    ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
-    #
-    # managed_identity:
-
-        ## @param client_id - string - optional
-        ## Client ID of the Managed Identity.
-        #
-        # client_id: <CLIENT_ID>
-
-        ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net/.default
-        ## The permission scope from where to access the identity token. This value is optional if using the default
-        ## identity scope for Azure managed databases.
-        ##
-        ## For more information on scopes, see the Azure docs
-        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
-        #
-        # identity_scope: https://ossrdbms-aad.database.windows.net/.default
-
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
@@ -864,11 +848,11 @@ instances:
         #
         # keep_json_path: false
 
-    ## Configure the collection of raw query statements in query activity and execution plans.
-    ## Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+    ## Configure the collection of raw query statements in query samples and explain plans.
+    ## Raw query statements and explain plans may contain sensitive information (e.g., passwords)
     ## or personally identifiable information in query text.
     ## Enabling this option will allow the collection and ingestion of raw query statements and 
-    ## execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+    ## explain plans into Datadog, which can then become viewable in query samples or explain plans. 
     ## This option is disabled by default.
     ## Note: Collection of raw query statements is currently in preview.
     ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.

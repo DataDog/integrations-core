@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "30d84795-b413-411b-a64f-8baf1a8a7418",
   "app_id": "datadog-csi-driver",
+  "owner": "container-platform",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

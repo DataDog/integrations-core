@@ -52,7 +52,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 26100804,
       "source_type_name": "Intercom",
       "events": {

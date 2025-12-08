@@ -17,6 +17,8 @@ Add [Data Streams Monitoring][24] to your producers and consumers to visualize t
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -160,7 +162,7 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
-[3]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
+[3]: https://docs.datadoghq.com/integrations/kafka-consumer/
 [4]: /account/settings/agent/latest
 [5]: https://github.com/DataDog/jmxfetch
 [6]: https://docs.datadoghq.com/integrations/amazon_msk/#pagetitle

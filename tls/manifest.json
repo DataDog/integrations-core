@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "347d6721-fe59-4215-a4f6-415feb4dda0c",
   "app_id": "tls",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

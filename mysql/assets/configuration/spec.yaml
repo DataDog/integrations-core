@@ -45,6 +45,7 @@ files:
             description: |
               Password associated to the MySQL user.
             enabled: true
+            secret: true
             value:
               type: string
 
@@ -79,8 +80,10 @@ files:
             default: false
           - name: database_identifier
             description: |
-              Controls how the database is identified. The default value is the resolved hostname for the instance,
-              which respects the `reported_hostname` option.
+              Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+              billable instance.
+              
+              The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
 
               This value will be used as-is for the display name of the instance but will be normalized
               when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -426,7 +429,13 @@ files:
                   Capped by `collect_schemas.collection_interval`
                 value:
                   type: number
-                  example: 60
+                  display_default: 60
+              - name: max_tables
+                description: |
+                  Set the maximum number of tables to collect. Defaults to 300.
+                value:
+                  type: integer
+                  display_default: 300
           - name: schemas_collection
             deprecation:
               Agent version: 7.69.0
@@ -481,6 +490,15 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+              - name: collect_prepared_statements
+                hidden: true
+                description: |
+                  Enable collection of prepared statements metrics. Prerequisites: `only_query_recent_statements: false`.
+                  Defaults to true.
+                value:
+                  type: boolean
+                  example: true
+                  display_default: true
 
           - name: query_samples
             description: Configure collection of query samples

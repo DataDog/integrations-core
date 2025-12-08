@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d4448c22-3410-41ae-93c7-ecb662237caf",
   "app_id": "hugging-face-tgi",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -10,12 +11,19 @@
     "changelog": "CHANGELOG.md",
     "description": "Monitor the model serving performance and system health of your Hugging Face TGI servers.",
     "title": "Hugging Face TGI",
-    "media": [],
+    "media": [
+      {
+        "caption": "Hugging Face TGI - Overview",
+        "image_url": "images/hugging_face_tgi_overview.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::AI/ML",
+      "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics"
     ]
@@ -37,12 +45,25 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-	    "text-generation-launcher",
-	    "text-generation-router"
+        "text-generation-launcher",
+        "text-generation-router"
       ]
     },
-    "monitors": {},
-    "saved_views": {}
+    "monitors": {
+      "High request latency": "assets/monitors/request_latency_high.json",
+      "High queue size": "assets/monitors/queue_size_high.json",
+      "Slow token generation": "assets/monitors/token_generation_slow.json"
+    },
+    "dashboards": {
+      "Hugging Face TGI Overview": "assets/dashboards/hugging_face_tgi_overview.json"
+    },
+    "saved_views": {
+      "Hugging Face TGI Logs Overview": "assets/saved_views/logs_overview.json",
+      "Hugging Face TGI Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    },
+    "logs": {
+      "source": "hugging_face_tgi"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

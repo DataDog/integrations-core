@@ -1,0 +1,58 @@
+id: have-i-been-pwned
+metric_id: have-i-been-pwned
+backend_only: false
+facets:
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+pipeline:
+  type: pipeline
+  name: Have I Been Pwned
+  enabled: true
+  filter:
+    query: source:have-i-been-pwned
+  processors:
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: attribute-remapper
+      name: Remapping user_details.user_name value to usr.name attribute
+      enabled: true
+      sources:
+        - user_details.user_name
+      sourceType: attribute
+      target: usr.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: string-builder-processor
+      name: "`usr.name` + `@` + `domain` - in attribute `usr.email`"
+      enabled: true
+      template: "%{usr.name}@%{user_details.email_domain}"
+      target: usr.email
+      replaceMissing: true
+    - type: message-remapper
+      name: Define `Description` as the official message of the log
+      enabled: true
+      sources:
+        - Description
+    - type: pipeline
+      name: Processing of Latest Breach
+      enabled: true
+      filter:
+        query: service:latest-breach
+      processors:
+        - type: date-remapper
+          name: Defining AddedDate as the official timestamp of log
+          enabled: true
+          sources:
+            - AddedDate

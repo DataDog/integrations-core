@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b98a5a97-1d65-4f74-9d1a-b2c1be85a470",
   "app_id": "nginx",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

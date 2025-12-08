@@ -5,6 +5,8 @@
 This integration provides enrichment and visualization for all log types shared by SonicWall Firewall over syslog. Detailed insights into the logs received by syslog are visualized in out-of-the-box dashboards and detection rules.
 
 
+**Minimum Agent version:** 7.61.0
+
 ## Setup
 
 ### Installation

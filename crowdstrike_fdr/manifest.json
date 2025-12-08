@@ -1,0 +1,82 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "34c50cbf-c717-48ba-9eab-32c0b8049f1c",
+  "app_id": "crowdstrike-fdr",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into your CrowdStrike FDR logs.",
+    "title": "CrowdStrike FDR",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "CrowdStrike FDR - Overview",
+        "image_url": "images/crowdstrike_fdr_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "CrowdStrike FDR - Network Activity",
+        "image_url": "images/crowdstrike_fdr_network_activity.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "CrowdStrike FDR - Account & Privilege Changes",
+        "image_url": "images/crowdstrike_fdr_account_and_privilege_changes.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "CrowdStrike FDR - Authentication & Identity",
+        "image_url": "images/crowdstrike_fdr_authentication_and_identity.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "CrowdStrike FDR - Execution Monitoring & Threat Detection",
+        "image_url": "images/crowdstrike_fdr_execution_monitoring_and_threat_detection.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "CrowdStrike FDR - File & Malware Activity",
+        "image_url": "images/crowdstrike_fdr_file_and_malware_activity.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::AWS",
+      "Category::Cloud",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 56275072,
+      "source_type_name": "CrowdStrike FDR",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "CrowdStrike FDR - Overview": "assets/dashboards/crowdstrike_fdr_overview.json",
+      "CrowdStrike FDR - Authentication & Identity": "assets/dashboards/crowdstrike_fdr_authentication_and_identity.json",
+      "CrowdStrike FDR - Network Activity": "assets/dashboards/crowdstrike_fdr_network_activity.json",
+      "CrowdStrike FDR - File & Malware Activity": "assets/dashboards/crowdstrike_fdr_file_and_malware_activity.json",
+      "CrowdStrike FDR - Execution Monitoring & Threat Detection": "assets/dashboards/crowdstrike_fdr_execution_monitoring_and_threat_detection.json",
+      "CrowdStrike FDR - Account & Privilege Changes": "assets/dashboards/crowdstrike_fdr_account_and_privilege_changes.json"
+    },
+    "logs": {
+      "source": "crowdstrike-fdr"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "3bd4335c-19ec-46dc-8c15-0192d6206ebf",
   "app_id": "versa",
-  "display_on_public_website": false,
+  "owner": "network-device-monitoring-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

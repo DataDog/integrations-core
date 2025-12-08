@@ -74,6 +74,7 @@ class CollectSchemas(BaseModel):
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     max_execution_time: Optional[float] = None
+    max_tables: Optional[int] = None
 
 
 class CollectSettings(BaseModel):
@@ -359,6 +360,7 @@ class ObfuscatorOptions(BaseModel):
     keep_trailing_semicolon: Optional[bool] = None
     obfuscation_mode: Optional[str] = None
     remove_space_between_parentheses: Optional[bool] = None
+    replace_bind_parameter: Optional[bool] = None
     replace_digits: Optional[bool] = None
 
 

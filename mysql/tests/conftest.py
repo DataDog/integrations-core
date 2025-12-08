@@ -282,7 +282,8 @@ def version_metadata():
         'version.raw': mock.ANY,
         'version.build': mock.ANY,
         'flavor': flavor,
-        'resolved_hostname': 'forced_hostname',
+        # This is weirdly different on CI (forced_hostname) vs local (stubbed.hostname)
+        'resolved_hostname': mock.ANY,
     }
 
 
@@ -622,9 +623,9 @@ def _mysql_docker_repo():
         if MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
         elif MYSQL_VERSION.startswith('8') or MYSQL_VERSION == 'latest':
-            return 'bitnami/mysql'
+            return 'bitnamilegacy/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
-        return 'bitnami/mariadb'
+        return 'bitnamilegacy/mariadb'
     elif MYSQL_FLAVOR == 'percona':
         return 'percona/percona-server'
     else:
