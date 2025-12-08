@@ -30,7 +30,7 @@ class TestErrorSanitizer:
         ('25.1', [25, 1]),
         ('25.1.2', [25, 1, 2]),
         ('25.1.2.3', [25, 1, 2, 3]),
-    ]
+    ],
 )
 def test_parse_version(version: str, expected: list[int]):
     expected == utils.parse_version(version)

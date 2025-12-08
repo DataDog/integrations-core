@@ -151,7 +151,7 @@ def test_validate_config(instance):
         ('25.1.2.3', '25.1.2.10', True),
         ('25.1', '25.3', True),
         ('23.1', '25.1', True),
-    ]
+    ],
 )
 def test_version_lt(instance, ch_version, comparable, expected):
     check = ClickhouseCheck('clickhouse', {}, [instance])
@@ -168,7 +168,7 @@ def test_version_lt(instance, ch_version, comparable, expected):
         ('25.1.2.3', '25.1.2.3', True),
         ('25.1', '25.3', False),
         ('23.1', '25.1', False),
-    ]
+    ],
 )
 def test_version_ge(instance, ch_version, comparable, expected):
     check = ClickhouseCheck('clickhouse', {}, [instance])
