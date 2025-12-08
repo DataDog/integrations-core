@@ -37,6 +37,7 @@ except ImportError:
 from base64 import standard_b64decode, standard_b64encode
 from collections import namedtuple
 from hashlib import md5, sha1
+from bcrypt import gensalt, hashpw
 from random import SystemRandom
 
 from datadog_checks.tokumx.vendor.bson.binary import Binary
@@ -263,10 +264,10 @@ def _password_digest(username, password):
         raise TypeError("password must be an "
                         "instance of  %s" % (string_type.__name__,))
 
-    md5hash = md5()
-    data = "%s:mongo:%s" % (username, password)
-    md5hash.update(data.encode('utf-8'))
-    return _unicode(md5hash.hexdigest())
+    data = f"{username}:mongo:{password}".encode('utf-8')
+    salt = gensalt()
+    hashed_data = hashpw(data, salt)
+    return hashed_data.decode('utf-8')
 
 
 def _auth_key(nonce, username, password):
