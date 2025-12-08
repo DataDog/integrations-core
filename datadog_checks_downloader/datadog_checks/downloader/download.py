@@ -67,6 +67,7 @@ class TUFDownloader:
 
         self.__root_layout_type = root_layout_type
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
+        self.__repository_url_prefix = repository_url_prefix
 
         self.__disable_verification = disable_verification
         self.__current_version = None
@@ -186,6 +187,19 @@ class TUFDownloader:
         if not wheel_uri or not wheel_digest:
             raise ValueError(f"Invalid pointer file: missing uri or digest")
 
+        # Rewrite wheel URI for local development if using local MinIO
+        # Check if repository URL is localhost (local MinIO)
+        if 'localhost' in self.__repository_url_prefix:
+            # Extract the path from the production URI
+            # Example: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/... → simple/...
+            from urllib.parse import urlparse
+            production_parsed = urlparse(wheel_uri)
+            wheel_path = production_parsed.path.lstrip('/')
+
+            # Reconstruct using local MinIO endpoint
+            wheel_uri = f'{self.__repository_url_prefix}/{wheel_path}'
+            logger.debug(f'Rewrote wheel URI for local development: {wheel_uri}')
+
         # Extract wheel filename from URI
         wheel_filename = wheel_uri.split('/')[-1]
 
@@ -196,25 +210,50 @@ class TUFDownloader:
 
         try:
             # Parse S3 URI to extract bucket and key
-            # Example: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/datadog-postgres/wheel.whl
             parsed = urlparse(wheel_uri)
 
-            # Extract bucket name from hostname (format: bucket.s3.region.amazonaws.com)
-            bucket_name = parsed.hostname.split('.')[0]
+            # Check if this is a local MinIO URL (localhost)
+            if parsed.hostname and 'localhost' in parsed.hostname:
+                # Local MinIO format: http://localhost:9000/bucket-name/path/to/file
+                # Extract bucket and key from path
+                path_parts = parsed.path.lstrip('/').split('/', 1)
+                if len(path_parts) < 2:
+                    raise ValueError(f"Invalid local MinIO URI format: {wheel_uri}")
 
-            # Extract S3 key (path without leading /)
-            s3_key = parsed.path.lstrip('/')
+                bucket_name = path_parts[0]
+                s3_key = path_parts[1]
+                endpoint_url = f"{parsed.scheme}://{parsed.netloc}"
 
-            # Extract region from hostname if present
-            if '.s3.' in parsed.hostname and '.amazonaws.com' in parsed.hostname:
-                region = parsed.hostname.split('.s3.')[1].split('.amazonaws.com')[0]
+                logger.debug(f'Parsed local MinIO URI: bucket={bucket_name}, key={s3_key}, endpoint={endpoint_url}')
+
+                # Use boto3 with MinIO credentials
+                s3_client = boto3.client(
+                    's3',
+                    endpoint_url=endpoint_url,
+                    aws_access_key_id='minioadmin',
+                    aws_secret_access_key='minioadmin',
+                    region_name='us-east-1'  # MinIO doesn't care about region
+                )
             else:
-                region = None
+                # Production AWS S3
+                # Example: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/datadog-postgres/wheel.whl
+                # Extract bucket name from hostname (format: bucket.s3.region.amazonaws.com)
+                bucket_name = parsed.hostname.split('.')[0]
 
-            logger.debug(f'Parsed S3 URI: bucket={bucket_name}, key={s3_key}, region={region}')
+                # Extract S3 key (path without leading /)
+                s3_key = parsed.path.lstrip('/')
 
-            # Use boto3 to download with AWS credentials
-            s3_client = boto3.client('s3', region_name=region)
+                # Extract region from hostname if present
+                if '.s3.' in parsed.hostname and '.amazonaws.com' in parsed.hostname:
+                    region = parsed.hostname.split('.s3.')[1].split('.amazonaws.com')[0]
+                else:
+                    region = None
+
+                logger.debug(f'Parsed S3 URI: bucket={bucket_name}, key={s3_key}, region={region}')
+
+                # Use boto3 to download with AWS credentials
+                s3_client = boto3.client('s3', region_name=region)
+
             response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
             wheel_bytes = response['Body'].read()
 
