@@ -75,7 +75,7 @@
         "postgres -D",
         "pg_ctl start -l logfile",
         "postgres -c 'pg_ctl start -D -l",
-        "postgres.exe"
+        "postgres"
       ],
       "source_type_id": 28,
       "auto_install": true

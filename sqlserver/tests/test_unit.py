@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 import os
 import re
 from collections import namedtuple
@@ -785,3 +786,137 @@ def test_database_identifier(instance_docker, template, expected, tags):
     check._database_identifier = None
 
     assert check.database_identifier == expected
+
+
+def test_only_custom_queries_validation_warnings(caplog):
+    """Test that appropriate warning logs are emitted when only_custom_queries conflicts with other configurations."""
+    from datadog_checks.sqlserver.config import SQLServerConfig
+
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+
+    # Use a real logger that will be captured by caplog
+    real_logger = logging.getLogger('test_sqlserver_config')
+
+    # Test case 1: only_custom_queries with DBM enabled
+    instance_with_dbm = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'dbm': True,
+        'custom_queries': [
+            {
+                'query': "SELECT 1 as test_value",
+                'columns': [{'name': 'test_value', 'type': 'gauge'}],
+                'tags': ['test:dbm_warning'],
+            }
+        ],
+    }
+
+    config = SQLServerConfig({}, instance_with_dbm, real_logger)
+    config._validate_only_custom_queries(instance_with_dbm)
+
+    # Check for DBM warning
+    dbm_warning_found = any("only_custom_queries is enabled with DBM" in record.message for record in caplog.records)
+    assert dbm_warning_found, "Expected warning about only_custom_queries with DBM not found"
+
+    # Test case 2: only_custom_queries with stored procedure
+    caplog.clear()
+    instance_with_proc = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'stored_procedure': 'pyStoredProc',
+        'custom_queries': [
+            {
+                'query': "SELECT 1 as test_value",
+                'columns': [{'name': 'test_value', 'type': 'gauge'}],
+                'tags': ['test:proc_warning'],
+            }
+        ],
+    }
+
+    config = SQLServerConfig({}, instance_with_proc, real_logger)
+    config._validate_only_custom_queries(instance_with_proc)
+
+    # Check for stored procedure warning
+    proc_warning_found = any("`stored_procedure` is deprecated" in record.message for record in caplog.records)
+    assert proc_warning_found, "Expected warning about only_custom_queries with stored_procedure not found"
+
+    # Test case 3: only_custom_queries with no custom queries defined
+    caplog.clear()
+    instance_no_queries = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'custom_queries': [],
+    }
+
+    config = SQLServerConfig({}, instance_no_queries, real_logger)
+    config._validate_only_custom_queries(instance_no_queries)
+
+    # Check for no custom queries warning
+    no_queries_warning_found = any(
+        "only_custom_queries is enabled but no custom queries are defined" in record.message
+        for record in caplog.records
+    )
+    assert no_queries_warning_found, "Expected warning about only_custom_queries with no custom queries not found"
+
+    # Test case 4: only_custom_queries with all conflicts (should emit all warnings)
+    caplog.clear()
+    instance_all_conflicts = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'dbm': True,
+        'stored_procedure': 'pyStoredProc',
+        'custom_queries': [],
+    }
+
+    config = SQLServerConfig({}, instance_all_conflicts, real_logger)
+    config._validate_only_custom_queries(instance_all_conflicts)
+
+    # Check that all three warnings are emitted
+    dbm_warning_found = any("only_custom_queries is enabled with DBM" in record.message for record in caplog.records)
+    proc_warning_found = any("`stored_procedure` is deprecated" in record.message for record in caplog.records)
+    no_queries_warning_found = any(
+        "only_custom_queries is enabled but no custom queries are defined" in record.message
+        for record in caplog.records
+    )
+
+    assert dbm_warning_found, "Expected warning about only_custom_queries with DBM not found in all-conflicts test"
+    assert proc_warning_found, (
+        "Expected warning about only_custom_queries with stored_procedure not found in all-conflicts test"
+    )
+    assert no_queries_warning_found, (
+        "Expected warning about only_custom_queries with no custom queries not found in all-conflicts test"
+    )
+
+    # Test case 5: only_custom_queries with no conflicts (should emit no warnings)
+    caplog.clear()
+    instance_no_conflicts = {
+        'host': 'localhost',
+        'username': 'test',
+        'password': 'test',
+        'only_custom_queries': True,
+        'dbm': False,
+        'custom_queries': [
+            {
+                'query': "SELECT 1 as test_value",
+                'columns': [{'name': 'test_value', 'type': 'gauge'}],
+                'tags': ['test:no_conflicts'],
+            }
+        ],
+    }
+
+    config = SQLServerConfig({}, instance_no_conflicts, real_logger)
+    config._validate_only_custom_queries(instance_no_conflicts)
+
+    # Check that no warnings are emitted
+    warning_count = len([record for record in caplog.records if record.levelno >= logging.WARNING])
+    warning_messages = [record.message for record in caplog.records if record.levelno >= logging.WARNING]
+    assert warning_count == 0, f"Expected no warnings but found {warning_count} warnings: {warning_messages}"

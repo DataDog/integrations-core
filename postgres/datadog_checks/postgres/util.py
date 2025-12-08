@@ -803,7 +803,7 @@ EXTRACT (EPOCH FROM now() - min(modification))
     ],
 }
 
-STAT_WAL_METRICS = {
+STAT_WAL_METRICS_LT_18 = {
     'name': 'stat_wal_metrics',
     'query': """
 SELECT wal_records, wal_fpi,
@@ -821,6 +821,22 @@ SELECT wal_records, wal_fpi,
         {'name': 'wal.sync', 'type': 'monotonic_count'},
         {'name': 'wal.write_time', 'type': 'monotonic_count'},
         {'name': 'wal.sync_time', 'type': 'monotonic_count'},
+    ],
+}
+
+# TODO: Handle missing wal IO metrics for PG18
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'wal.records', 'type': 'monotonic_count'},
+        {'name': 'wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'wal.buffers_full', 'type': 'monotonic_count'},
     ],
 }
 
