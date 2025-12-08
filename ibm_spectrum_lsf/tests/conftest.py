@@ -28,6 +28,10 @@ def mock_client():
     client.bjobs.return_value = get_mock_output('bjobs')
     client.gpuload.return_value = get_mock_output('lsload_gpuload')
     client.bhosts_gpu.return_value = get_mock_output('bhosts_gpu')
+    client.badmin_perfmon.return_value = get_mock_output('badmin_perfmon_view')
+    client.badmin_perfmon_start = mock.Mock()
+    client.badmin_perfmon_stop = mock.Mock()
+    client.bhist.return_value = get_mock_output('bhist')
 
     yield client
 
