@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/barracuda_secure_edge:
+- barracuda_secure_edge/**/*
 integration/bentoml:
 - bentoml/**/*
 integration/beyondtrust_identity_security_insights:
@@ -157,6 +159,8 @@ integration/cloud_foundry_api:
 - cloud_foundry_api/**/*
 integration/cloudera:
 - cloudera/**/*
+integration/cloudgen_firewall:
+- cloudgen_firewall/**/*
 integration/cockroachdb:
 - cockroachdb/**/*
 integration/cofense_triage:
@@ -285,6 +289,8 @@ integration/gpu:
 - gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
+integration/guarddog:
+- guarddog/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:
@@ -325,6 +331,8 @@ integration/ibm_i:
 - ibm_i/**/*
 integration/ibm_mq:
 - ibm_mq/**/*
+integration/ibm_spectrum_lsf:
+- ibm_spectrum_lsf/**/*
 integration/ibm_was:
 - ibm_was/**/*
 integration/iboss:
@@ -359,12 +367,14 @@ integration/juniper_srx_firewall:
 - juniper_srx_firewall/**/*
 integration/kafka:
 - kafka/**/*
+integration/kafka_actions:
+- kafka_actions/**/*
 integration/kafka_consumer:
 - kafka_consumer/**/*
-integration/karpenter:
-- karpenter/**/*
 integration/kandji:
 - kandji/**/*
+integration/karpenter:
+- karpenter/**/*
 integration/keda:
 - keda/**/*
 integration/keeper:
@@ -785,10 +795,6 @@ integration/zerofox_cloud_platform:
 - zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
-integration/barracuda_secure_edge:
-- barracuda_secure_edge/**/*
-integration/cloudgen_firewall:
-- cloudgen_firewall/**/*
 integration/zscaler_private_access:
 - zscaler_private_access/**/*
 qa/skip-qa:

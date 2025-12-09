@@ -171,6 +171,11 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /mongo/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mongo/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
+# Data Streams Monitoring
+/kafka_actions/                                     @DataDog/data-streams-monitoring @DataDog/agent-integrations
+/kafka_actions/*.md                                 @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
+/kafka_actions/manifest.json                        @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
+
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
 /openai/            @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
@@ -711,6 +716,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /obsidian_security/*.md                                              @DataDog/saas-integrations @DataDog/documentation
 /obsidian_security/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
 /obsidian_security/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/guarddog/                                                           @DataDog/agent-integrations
+/guarddog/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/guarddog/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/guarddog/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
