@@ -4,7 +4,7 @@ files:
   options:
   - template: logs
     example:
-    - type: tcp/udp
+    - type: tcp # or 'udp'
       port: <PORT>
       service: arctic-wolf-aurora-endpoint-security
       source: arctic-wolf-aurora-endpoint-security

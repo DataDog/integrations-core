@@ -14,7 +14,7 @@
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
-#   - type: tcp/udp
+#   - type: tcp
 #     port: <PORT>
 #     service: arctic-wolf-aurora-endpoint-security
 #     source: arctic-wolf-aurora-endpoint-security
