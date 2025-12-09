@@ -148,4 +148,4 @@ Need help? Contact [Datadog support][1].
 [3]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://www.cisco.com/c/en_in/products/security/adaptive-security-appliance-asa-software/index.html
 [5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
-[6]: https://github.com/DataDog/integrations-core/blob/master/watchguard_firebox/datadog_checks/watchguard_firebox/data/conf.yaml.example
+[6]: https://github.com/DataDog/integrations-core/blob/master/cisco_asa/datadog_checks/cisco_asa/data/conf.yaml.example

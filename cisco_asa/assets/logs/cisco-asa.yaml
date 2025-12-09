@@ -440,7 +440,7 @@ pipeline:
               existing ARP entry
               %{ip:existing_arp_ip}\s*/\s*%{mac:existing_arp_ip_mac_address}
 
-              rule_322002_322003 ARP inspection check failed for arp (request|response) received from host %{mac:host_mac_address} on interface %{regex(".*(?=. This)")}. This host is advertising MAC Address %{mac:client_mac_address} for IP Address %{ip:network.client.ip}, (which is (statically|dynamically) bound to MAC Address %{mac:bound_mac_address}|which is not bound to any MAC Address)
+              rule_322002_322003 ARP inspection check failed for arp (request|response) received from host %{mac:host_mac_address} on interface %{regex(".*(?=. This)"):interface}. This host is advertising MAC Address %{mac:client_mac_address} for IP Address %{ip:network.client.ip}, (which is (statically|dynamically) bound to MAC Address %{mac:bound_mac_address}|which is not bound to any MAC Address)
 
               rule_106016 Deny IP spoof from (\()?%{ip:network.client.ip}(\))? to %{ip:network.destination.ip} on interface %{data:interface}
     - type: pipeline

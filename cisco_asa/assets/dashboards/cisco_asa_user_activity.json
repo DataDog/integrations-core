@@ -1672,7 +1672,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cisco-asa @message_id:(109008 OR 109025 OR 109024) $client_ip $destination_ip $message_id $user_name"
+                                                "query": "source:cisco-asa @message_id:(109007 OR 109008 OR 109025 OR 109024) $client_ip $destination_ip $message_id $user_name"
                                             },
                                             "indexes": [
                                                 "*"
