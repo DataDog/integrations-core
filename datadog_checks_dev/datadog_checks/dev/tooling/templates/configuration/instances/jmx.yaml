@@ -32,6 +32,7 @@
 
 - name: password
   description: Password to use when connecting to JMX.
+  secret: true
   value:
     type: string
 
@@ -83,6 +84,7 @@
   description: |
     The password for your TrustStore.jks file.
     `trust_store_password` should be set if SSL is enabled.
+  secret: true
   value:
     type: string
 
@@ -97,6 +99,7 @@
   description: |
     The password to your key store.
     `key_store_password` should be set if client authentication is enabled on the target JVM.
+  secret: true
   value:
     type: string
 

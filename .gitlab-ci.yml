@@ -4,7 +4,6 @@ include:
 
 variables:
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
-  VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
   VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
   NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
   TAGGER_EMAIL: packages@datadoghq.com
@@ -24,52 +23,6 @@ cache: &slack-cache
     - .slack-cache
   policy: pull-push
 
-validate-log-integrations:
-  stage: validate
-  needs: []
-  image: $VALIDATE_LOG_INTGS
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-  variables:
-    INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
-  script:
-    - cd /app
-    - export WEBUI_INTGS_FILE=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.webui_intgs_file --with-decryption --query "Parameter.Value" --out text)
-    - export LOGS_BACKEND_INTGS_ROOT=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.logs_backend_intgs_root --with-decryption --query "Parameter.Value" --out text)
-    - git clone -b prod https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
-    - ts-node parse_ts.ts > logs_integrations.json
-    - git clone -b prod https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
-    - python3 validate_log_intgs.py logs_integrations.json 2> $CI_PROJECT_DIR/errors.txt
-  artifacts:
-    paths:
-    - $CI_PROJECT_DIR/errors.txt
-    expire_in: 1 day
-    when: always
-  tags: [ "arch:amd64" ]
-
-notify-slack:
-  needs:
-    - validate-log-integrations
-  stage: notify
-  image: $NOTIFIER_IMAGE
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-  cache:
-    <<: *slack-cache
-  script:
-    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
-    - |
-      if [[ -s $CI_PROJECT_DIR/errors.txt ]]; then
-          cat $CI_PROJECT_DIR/errors.txt
-          MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
-          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
-      else
-          MESSAGE="Logs pipelines passed validation steps, good job :+1:"
-          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
-      fi
-  tags: [ "runner:main" ]
-
-
 notify-failed-pipeline:
   stage: notify
   image: $NOTIFIER_IMAGE
@@ -84,7 +37,6 @@ notify-failed-pipeline:
       MESSAGE="The pipeline encountered an unexpected error in job $CI_JOB_NAME. Please investigate $CI_JOB_URL for errors."
       postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
   tags: [ "arch:amd64" ]
-
 
 release-auto:
   stage: release
@@ -149,21 +101,4 @@ tagger-image-builder:
       allow_failure: true
   script:
     - docker buildx build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile . --push
-  tags: [ "arch:amd64" ]
-
-validate-log-intgs-builder:
-  stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'schedule'
-      when: never
-    - if: $CI_COMMIT_TAG
-      when: never
-    - if: $CI_COMMIT_BRANCH == 'master'
-      changes:
-        - .gitlab/validate-logs-intgs/**/*
-        - .gitlab-ci.yml
-  script:
-    - cd .gitlab/validate-logs-intgs/
-    - docker buildx build --tag $VALIDATE_LOG_INTGS . --push
   tags: [ "arch:amd64" ]
