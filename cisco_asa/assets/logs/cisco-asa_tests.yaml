@@ -526,6 +526,7 @@ tests:
         bound_mac_address: "22:9B:4E:57:03:D1"
         client_mac_address: "0E:7D:FA:13:B9:09"
         host_mac_address: "0E:7D:FA:13:B9:09"
+        interface: "br1"
         message_id: "322002"
         network:
           client:
@@ -545,6 +546,7 @@ tests:
       custom:
         client_mac_address: "EA:7B:BE:11:56:8D"
         host_mac_address: "EA:7B:BE:11:56:8D"
+        interface: "wlan1"
         message_id: "322003"
         network:
           client:
