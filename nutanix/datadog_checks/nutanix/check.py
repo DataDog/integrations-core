@@ -126,7 +126,7 @@ class NutanixCheck(AgentCheck):
                 self._process_vm(vm, all_vm_stats_dict)
 
         except Exception as e:
-            self.log.exception("Error collecting cluster metrics: %s", e)
+            self.log.exception("Error collecting vm metrics: %s", e)
 
     def _is_prism_central_cluster(self, cluster):
         """Check if cluster is a Prism Central cluster (should be skipped)."""
