@@ -1,0 +1,50 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "07b3b75f-f0b2-4e13-8ece-8db043f7b0e5",
+  "app_id": "kafka-actions",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Perform one-time administrative and operational actions on Kafka clusters via Remote Configuration",
+    "title": "Kafka Actions",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Message Queues",
+      "Offering::Integration",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Events"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 62455613,
+      "source_type_name": "Kafka Actions",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "kafka_actions.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

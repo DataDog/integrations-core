@@ -48,18 +48,19 @@ instances:
     ## @param use_openmetrics - boolean - optional - default: false
     ## Use the OpenMetrics V2 implementation for more features and better performance.
     ## This implementation is only available for Istio >= 1.5, and should be used with 
-    ## `istiod_endpoint` and/or `istio_mesh_endpoint`.
+    ## `istiod_endpoint` or `istio_mesh_endpoint`.
     #
   - use_openmetrics: true
 
     ## @param istiod_endpoint - string - optional
     ## Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
-    ## Only available for Istio >= v1.5.
+    ## Only available for Istio >= v1.5. Cannot be used in combination with `istio_mesh_endpoint` in the same instance.
     #
     # istiod_endpoint: http://istiod.istio-system:15014/metrics
 
     ## @param istio_mesh_endpoint - string - optional
     ## To enable Istio metrics you must specify the url exposing the API.
+    ## Cannot be used in combination with `istiod_endpoint` in the same instance.
     ## Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
     ## the CPP extension to process Protocol buffer messages coming from the api. Depending
     ## on the metrics volume, the check may run very slowly.

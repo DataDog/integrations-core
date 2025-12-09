@@ -17,6 +17,7 @@ files:
           - name: password
             required: true
             description: "The password of your Sonatype Nexus account."
+            secret: true
             value:
               type: string
               example: test_password
