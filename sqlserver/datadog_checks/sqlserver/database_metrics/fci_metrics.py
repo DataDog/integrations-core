@@ -43,9 +43,9 @@ class SqlserverFciMetrics(SqlserverDatabaseMetricsBase):
     def enabled(self):
         if not self.include_fci_metrics:
             return False
-        if not self.major_version and not is_azure_database(self.engine_edition):
+        if not self.year and not is_azure_database(self.engine_edition):
             return False
-        if self.major_version > 2012 or self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
+        if self.year > 2012 or self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
             return True
         return False
 
@@ -57,7 +57,7 @@ class SqlserverFciMetrics(SqlserverDatabaseMetricsBase):
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
-            f"major_version={self.major_version}, "
+            f"year={self.year}, "
             f"engine_edition={self.engine_edition}, "
             f"include_fci_metrics={self.include_fci_metrics})"
         )
