@@ -13,6 +13,7 @@ def initialize_instance(values, **kwargs):
             'bqueues',
             'bslots',
             'bjobs',
+            'bhist',
             'lsload_gpu',
             'bhosts_gpu',
             'badmin_perfmon',
