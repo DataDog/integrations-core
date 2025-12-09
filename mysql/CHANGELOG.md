@@ -10,7 +10,7 @@
 * Add DBM Agent health events to MySQL, including basic initialization checks, unhandled errors, and missed collections ([#21867](https://github.com/DataDog/integrations-core/pull/21867))
 * Upgrade base version for Postgres, MySQL, and SQLServer ([#21906](https://github.com/DataDog/integrations-core/pull/21906))
 
-## 15.10.0 / 2025-10-31
+## 15.10.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 
