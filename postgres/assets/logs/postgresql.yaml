@@ -45,7 +45,6 @@ pipeline:
       source: message
       samples:
         - '2017-11-07 17:30:39 UTC LOG:  incomplete startup packet'
-        - '2017-11-07 17:37:22 UTC FATAL:  role "myrole" does not exist'
         - '2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;'
         - '2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter'
         - '2025-09-15 19:05:58.892 UTC:10.0.216.218(36378):shopper_1@dbmorders_1:[20337]:395:00000:2025-09-15 19:02:57 UTC:384/39221:0:68c862e1.4f71:[unknown]:LOCATION:  exec_simple_query, postgres.c:1075'
