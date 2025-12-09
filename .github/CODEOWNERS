@@ -171,6 +171,11 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /mongo/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mongo/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
+# Data Streams Monitoring
+/kafka_actions/                                     @DataDog/data-streams-monitoring @DataDog/agent-integrations
+/kafka_actions/*.md                                 @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
+/kafka_actions/manifest.json                        @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
+
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
 /openai/            @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
