@@ -121,10 +121,14 @@ METRIC_PATTERN = re.compile(r'^``([^`]+)``\s+(.*)', re.MULTILINE)
 @pytest.mark.latest_metrics
 def test_check_metrics_up_to_date():
     airflow_version = os.getenv('AIRFLOW_VERSION', '2.11.0')
-    
-    # Airflow 2.x uses tag-based URLs with path: docs/apache-airflow/administration-and-deployment/logging-monitoring/metrics.rst
-    url = f'https://raw.githubusercontent.com/apache/airflow/refs/tags/{airflow_version}/docs/apache-airflow/administration-and-deployment/logging-monitoring/metrics.rst'
-    
+
+    # Airflow 2.x uses tag-based URLs with path:
+    # docs/apache-airflow/administration-and-deployment/logging-monitoring/metrics.rst
+    url = (
+        f'https://raw.githubusercontent.com/apache/airflow/refs/tags/{airflow_version}/'
+        'docs/apache-airflow/administration-and-deployment/logging-monitoring/metrics.rst'
+    )
+
     resp = requests.get(url)
     content = resp.content.decode('utf-8')
     matches = METRIC_PATTERN.findall(content)
@@ -136,6 +140,6 @@ def test_check_metrics_up_to_date():
         print("{:50} {}".format(metric, desc))
 
     # Use set() to handle any duplicates in the docs (e.g., task_restored_to_dag.<dag_id> appears twice)
-    metrics = sorted(set([m for m, desc in matches]))
+    metrics = sorted({m for m, desc in matches})
     expected_metrics_sorted = sorted(set(EXPECTED_METRICS))
     assert expected_metrics_sorted == metrics
