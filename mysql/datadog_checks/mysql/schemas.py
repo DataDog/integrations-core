@@ -83,7 +83,7 @@ class MySqlSchemaCollector(SchemaCollector):
             if self._check.is_mariadb:
                 # MariaDB is in seconds
                 cursor.execute(f"SET SESSION MAX_STATEMENT_TIME={max_execution_time};")
-            elif self._check.version.version_compatible((5, 7, 8)):
+            elif self._check.version.version_compatible((5, 7)):
                 # Versions prior to 5.7.8 don't support MAX_EXECUTION_TIME
                 # MySQL is in milliseconds
                 cursor.execute(f"SET SESSION MAX_EXECUTION_TIME={max_execution_time * 1000};")
