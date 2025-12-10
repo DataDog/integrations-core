@@ -293,16 +293,13 @@ def strip_lines_from_wheel(wheel_path: Path) -> bool:
                     continue
 
                 lines = original_content.splitlines(keepends=True)
+                # Keep lines that don't match regex patterns
                 kept_lines = []
-                file_modified = False
-
                 for line in lines:
-                    if any(pattern.search(line) for pattern in compiled_patterns):
-                        file_modified = True
-                    else:
+                    if not any(pattern.search(line) for pattern in compiled_patterns):
                         kept_lines.append(line)
 
-                if file_modified:
+                if len(kept_lines) != len(lines):
                     py_file.write_text(''.join(kept_lines), encoding='utf-8')
                     modified = True
 
