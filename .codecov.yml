@@ -490,6 +490,10 @@ coverage:
         target: 75
         flags:
         - network
+      Nutanix:
+        target: 75
+        flags:
+        - nutanix
       Nvidia_Triton:
         target: 75
         flags:
@@ -1456,6 +1460,11 @@ flags:
     paths:
     - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
+  nutanix:
+    carryforward: true
+    paths:
+    - nutanix/datadog_checks/nutanix
+    - nutanix/tests
   nvidia_nim:
     carryforward: true
     paths:
