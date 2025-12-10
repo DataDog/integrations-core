@@ -12,7 +12,7 @@
 
 * Grammar fixes in the config files ([#21756](https://github.com/DataDog/integrations-core/pull/21756))
 
-## 5.1.1 / 2025-10-31
+## 5.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

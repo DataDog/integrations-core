@@ -17,7 +17,7 @@
 * Fix token expiration handling in Azure connection pool ([#21896](https://github.com/DataDog/integrations-core/pull/21896))
 * Ensure database_autodiscovery `exclude` defaults are used ([#21927](https://github.com/DataDog/integrations-core/pull/21927))
 
-## 23.2.0 / 2025-10-31
+## 23.2.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

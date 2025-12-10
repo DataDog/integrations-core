@@ -12,7 +12,7 @@
 
 * Update the envoy and istio specs to more descriptive of restrictions ([#21866](https://github.com/DataDog/integrations-core/pull/21866))
 
-## 9.1.1 / 2025-10-31
+## 9.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 
