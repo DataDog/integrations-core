@@ -119,7 +119,10 @@ METRIC_PATTERN = re.compile(r'^``([^`]+)``\s+(.*)', re.MULTILINE)
 
 
 @pytest.mark.latest_metrics
-def test_check_metrics_up_to_date():
+def test_check_metrics_up_to_date():  # pragma: no cover
+    # Note: This test is marked with @pytest.mark.latest_metrics and is skipped in normal test runs.
+    # It makes external HTTP requests to GitHub, so it's intentionally run separately.
+    # Excluded from coverage as it's only run with --run-latest-metrics flag.
     airflow_version = os.getenv('AIRFLOW_VERSION', '2.11.0')
 
     # Airflow 2.x uses tag-based URLs with path:
