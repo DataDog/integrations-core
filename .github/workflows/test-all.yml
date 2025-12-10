@@ -1723,6 +1723,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j203c004:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IBM Spectrum LSF
+      target: ibm_spectrum_lsf
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   j440815a:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1848,6 +1868,26 @@ jobs:
     with:
       job-name: Kafka
       target: kafka
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  jf06de9b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kafka Actions
+      target: kafka_actions
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -2957,6 +2997,7 @@ jobs:
         - py3.13-15.0-UTF8
         - py3.13-16.0-UTF8
         - py3.13-17.0-UTF8
+        - py3.13-18.0-UTF8
         - py3.13-10.0-C
         - py3.13-11.0-C
         - py3.13-12.17-C
@@ -2965,6 +3006,7 @@ jobs:
         - py3.13-15.0-C
         - py3.13-16.0-C
         - py3.13-17.0-C
+        - py3.13-18.0-C
       fail-fast: false
   j8e38a40:
     uses: ./.github/workflows/test-target.yml
