@@ -70,7 +70,7 @@ Send Prometheus Alertmanager alerts in the event stream. Natively, Alertmanager 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "V2 (preferred)" xxx -->
 
-1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
+1. Edit the `alertmanager.yml` configuration file to include the following:
 
 ```yaml
 receivers:
@@ -87,14 +87,15 @@ route:
 ```
 
 <div class="alert alert-info">
-The <code>group_by</code> parameter determines how alerts are grouped together when sent to Datadog. Alerts sharing the same values for the specified labels will be grouped into a single notification. For more details on routing configuration, see the <a href="https://prometheus.io/docs/alerting/latest/configuration/">Prometheus Alertmanager documentation</a>.
+<ul>
+  <li> The <code>group_by</code> parameter determines how alerts are grouped together when sent to Datadog. Alerts with matching values for the specified labels are combined into a single notification. For details on routing configuration, see the <a href="https://prometheus.io/docs/alerting/latest/configuration/">Prometheus Alertmanager documentation</a>.</li>
+  <li>This endpoint accepts only one event in the payload at a time.</li>
+</ul>
 </div>
 
-**Note**: This endpoint accepts only one event in the payload at a time.
+2. (Optional) Use matchers to redirect specific alerts to different receivers. Matchers allow routing based on any alert label. For syntax details, see the [Alertmanager matcher documentation][12].
 
-2. (Optional) Use matchers to redirect specific alerts to different receivers. Alertmanager supports matchers to route notifications based on any label. For more information on matcher syntax, see the [Alertmanager matcher documentation][12].
-
-The V2 webhook supports additional query parameters. For example, use the `oncall_team` parameter to integrate with the [Datadog On-Call][11] product and redirect pages to different teams:
+The V2 webhook supports additional query parameters. For example, use the `oncall_team` parameter to integrate with [Datadog On-Call][11] and redirect pages to different teams:
 
 ```yaml
 receivers:
@@ -120,7 +121,7 @@ route:
 ```
 
 <div class="alert alert-tip">
-Setting <code>send_resolved: true</code> (the default value) enables Alertmanager to send notifications when alerts are resolved in Prometheus. This is particularly important when using the <code>oncall_team</code> parameter to ensure pages are marked as resolved. Note that resolved notifications may take up to the next <code>group_interval</code> to be sent.
+Setting <code>send_resolved: true</code> (the default value) enables Alertmanager to send notifications when alerts are resolved in Prometheus. This is particularly important when using the <code>oncall_team</code> parameter to ensure that pages are marked as resolved. Note that resolved notifications may be delayed until the next <code>group_interval</code>.
 </div>
 
 3. Restart the Prometheus and Alertmanager services.
@@ -132,7 +133,7 @@ sudo systemctl restart prometheus.service alertmanager.service
 <!-- xxz tab xxx -->
 <!-- xxx tab "V1" xxx -->
 
-1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
+1. Edit the `alertmanager.yml` configuration file to include the following:
 
 ```yaml
 receivers:
@@ -148,7 +149,9 @@ route:
   repeat_interval: 3h
 ```
 
-**Note**: This endpoint accepts only one event in the payload at a time.
+<div class="alert alert-info">
+This endpoint accepts only one event in the payload at a time.
+</div>
 
 2. Restart the Prometheus and Alertmanager services.
 
