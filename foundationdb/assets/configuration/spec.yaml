@@ -30,6 +30,7 @@ files:
         type: string
     - name: tls_password
       description: The byte-string representing the passcode for unencrypting the private key
+      secret: true
       value:
         type: string
     - name: tls_ca_file

@@ -26,6 +26,8 @@ STATIC_INFO_SERVERNAME = 'servername'
 STATIC_INFO_INSTANCENAME = 'instancename'
 STATIC_INFO_FULL_SERVERNAME = 'full_servername'
 STATIC_INFO_VERSION = 'version'
+STATIC_INFO_YEAR = 'year'
+# Major version is the engine version, eg 16 for 2022
 STATIC_INFO_MAJOR_VERSION = 'major_version'
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'
 STATIC_INFO_RDS = 'is_rds'

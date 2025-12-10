@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "{app_uuid}",
   "app_id": "{integration_id}",
-  "display_on_public_website": true,
+  "display_on_public_website": false,
   "tile": {{
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -17,8 +17,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Category::Event Collection",
+      "Category::Event Management",
       "Offering::Integration",
       "Submitted Data Type::<FILL IN>"
     ]
@@ -31,9 +30,6 @@
         "events": {{
           "creates_events": true
         }},
-        "service_checks": {{
-        "metadata_path": "assets/service_checks.json"
-      }}
     }},
     "monitors": {{}},
     "saved_views": {{}}

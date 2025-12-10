@@ -79,7 +79,7 @@ class SqlserverAvailabilityReplicasMetrics(SqlserverDatabaseMetricsBase):
             if self.ao_database:
                 where_clauses.append(f"database_name = '{self.ao_database}'")
             query['query'] += f" where {' and '.join(where_clauses)}"
-        if self.major_version >= 2014:
+        if self.year >= 2014:
             # This column only supported in SQL Server 2014 and later
             is_primary_replica = "is_primary_replica"
         else:
