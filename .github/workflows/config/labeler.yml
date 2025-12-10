@@ -589,6 +589,8 @@ integration/ray:
 - ray/**/*
 integration/redisdb:
 - redisdb/**/*
+integration/resend:
+- resend/**/*
 integration/rethinkdb:
 - rethinkdb/**/*
 integration/riak:
