@@ -26,7 +26,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
 )
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_YEAR
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -273,7 +273,7 @@ def test_collect_load_activity(
 
 
 @pytest.mark.flaky
-@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_YEAR == 2019, reason='Test flakes on this set up')
 @pytest.mark.skipif(running_on_windows_ci(), reason="Test disabled due to failure impacting master pipeline")
 def test_activity_nested_blocking_transactions(
     aggregator,

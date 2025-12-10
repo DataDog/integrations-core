@@ -1,0 +1,5 @@
+  0 UP mgc MGC172.31.16.218@tcp 7d3988a7-145f-444e-9953-58e3e6d97385 5
+  1 UP lov lustre-clilov-ffff8b904341d000 ac8e54e3-1334-4865-a3f5-4f61ce87bdd1 4
+  2 UP lmv lustre-clilmv-ffff8b904341d000 ac8e54e3-1334-4865-a3f5-4f61ce87bdd1 5
+  3 UP mdc lustre-MDT0000-mdc-ffff8b904341d000 ac8e54e3-1334-4865-a3f5-4f61ce87bdd1 5
+  4 UP osc lustre-OST0001-osc-ffff8b904341d000 ac8e54e3-1334-4865-a3f5-4f61ce87bdd1 5
