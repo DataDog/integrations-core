@@ -15,7 +15,7 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
@@ -151,7 +151,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             # No rows to process, can skip the rest of the payload generation and avoid an empty payload
             return
         for event in self._rows_to_fqt_events(rows, tags):
-            self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+            self._check.database_monitoring_query_sample(event)
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -164,7 +164,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             'service': self._config.service,
             'mysql_rows': rows,
         }
-        self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+        self._check.database_monitoring_query_metrics(payload)
         self._check.gauge(
             "dd.mysql.collect_per_statement_metrics.rows",
             len(rows),
