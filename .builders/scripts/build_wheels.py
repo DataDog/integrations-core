@@ -226,6 +226,10 @@ def is_excluded_from_wheel(path: str | Path) -> bool:
 
 @cache
 def _load_line_removal_rules() -> list[dict]:
+    '''
+    Load the line removal rules from the toml file and compile the regex patterns.
+    '''
+
     config_p = Path(__file__).parent / "lines_to_remove.toml"
     with open(config_p, "rb") as f:
         config = tomllib.load(f)
@@ -237,6 +241,10 @@ def _load_line_removal_rules() -> list[dict]:
 
 
 def _match_rule_to_wheel(rule: dict, wheel: Path) -> list[dict]:
+    '''
+    Match the rule in the toml to the wheel name.
+    '''
+
     rules = _load_line_removal_rules()
     matching = []
     wheel_name = wheel.name
@@ -246,6 +254,78 @@ def _match_rule_to_wheel(rule: dict, wheel: Path) -> list[dict]:
         if fnmatch.fnmatch(wheel_name, pattern):
             matching.append(rule)
     return matching
+
+
+def strip_lines_from_wheel(wheel_path: Path) -> bool:
+    '''
+    Create a temp dir and then unpack the wheel. Iterate over the contents of the wheel. 
+    Find the files matching the file pattern and iterate over the contents of each file.
+    Use regex to find all lines of the matching lines and filter them out.
+    Rewrite the unfiltered lines back to the file.
+    Repack the wheel to the original directory.
+    '''
+
+    rules = _get_matching_rules(wheel_path.name)
+    if not rules:
+        return False
+
+    modified = False
+
+    with TemporaryDirectory() as temp_dir:
+        temp_dir_path = Path(temp_dir)
+
+        # Unpack the wheel into temp dir
+        unpack(wheel_path, dest=temp_dir_path)
+        unpacked_dir = next(temp_dir_path.iterdir())
+
+        # Process files according to rules
+        for rule in rules:
+            file_pattern = rule.get('file_pattern', '*.py')
+            compiled_patterns = rule['_compiled_patterns']
+
+            for py_file in unpacked_dir.rglob(file_pattern):
+                if not py_file.is_file():
+                    continue
+
+                try:
+                    original_content = py_file.read_text(encoding='utf-8')
+                except UnicodeDecodeError:
+                    continue
+
+                lines = original_content.splitlines(keepends=True)
+                kept_lines = []
+                file_modified = False
+
+                for line in lines:
+                    if any(pattern.search(line) for pattern in compiled_patterns):
+                        file_modified = True
+                    else:
+                        kept_lines.append(line)
+
+                if file_modified:
+                    py_file.write_text(''.join(kept_lines), encoding='utf-8')
+                    modified = True
+
+        if not modified:
+            return False
+
+        print(f'Stripped lines from {wheel_path.name}')
+
+        dest_dir = wheel_path.parent
+        before = set()
+        for p in dest_dir.glob("*.whl"):
+            before.add(p.resolve())
+        pack(unpacked_dir, dest_dir=dest_dir, build_number=None)
+
+        after = set()
+        for p in wheel_path.parent.glob("*.whl"):
+            after.add(p.resolve())
+        new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
+
+        if new_files:
+            shutil.move(str(new_files[0]), str(wheel_path))
+
+    return True
 
 def add_dependency(dependencies: dict[str, str], sizes: dict[str, WheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
