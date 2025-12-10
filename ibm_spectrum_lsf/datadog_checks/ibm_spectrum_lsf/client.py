@@ -52,7 +52,7 @@ class LSFClient:
         return self._run_command(
             'bjobs',
             '-o',
-            "jobid stat queue from_host:80 exec_host:80 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
+            "jobid stat queue user:80 from_host:80 exec_host:80 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
             "-u",
             "all",
         )
@@ -65,4 +65,37 @@ class LSFClient:
             "bhosts",
             "-o",
             "HOST_NAME ngpus ngpus_alloc ngpus_excl_alloc ngpus_shared_alloc ngpus_shared_jexcl_alloc ngpus_excl_avail ngpus_shared_avail delimiter='|'",  # noqa: E501
+        )
+
+    def badmin_perfmon(self) -> tuple[str, str, int]:
+        return self._run_command(
+            "badmin",
+            "perfmon",
+            "view",
+            "-json",
+        )
+
+    def badmin_perfmon_start(self, min_collection_interval: float) -> tuple[str, str, int]:
+        return self._run_command(
+            "badmin",
+            "perfmon",
+            "start",
+            str(min_collection_interval),
+        )
+
+    def badmin_perfmon_stop(self) -> tuple[str, str, int]:
+        return self._run_command(
+            "badmin",
+            "perfmon",
+            "stop",
+        )
+
+    def bhist(self, start_time: str, end_time: str) -> tuple[str, str, int]:
+        return self._run_command(
+            "bhist",
+            "-C",
+            f"{start_time},{end_time}",
+            "-w",
+            "-u",
+            "all",
         )

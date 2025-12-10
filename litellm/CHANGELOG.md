@@ -12,7 +12,7 @@
 
 * Add a renamed metric that was missed from the [1.75 release of LiteLLM](https://github.com/BerriAI/litellm/pull/13271) ([#21877](https://github.com/DataDog/integrations-core/pull/21877))
 
-## 2.1.1 / 2025-10-31
+## 2.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

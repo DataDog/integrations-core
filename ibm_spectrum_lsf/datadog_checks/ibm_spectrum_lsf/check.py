@@ -7,6 +7,8 @@ from datadog_checks.base import AgentCheck
 from .client import LSFClient
 from .config_models import ConfigMixin
 from .processors import (
+    BadminPerfmonProcessor,
+    BHistProcessor,
     BHostsProcessor,
     BJobsProcessor,
     BQueuesProcessor,
@@ -34,7 +36,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
     def parse_config(self):
         self.tags = list[str](self.config.tags or []) + [f"lsf_cluster_name:{self.config.cluster_name}"]
 
-    def initialize_processors(self):
+    def initialize_processors(self) -> None:
         self.processors = [
             LsClustersProcessor(self.client, self.config, self.log, self.tags),
             LSHostsProcessor(self.client, self.config, self.log, self.tags),
@@ -43,8 +45,10 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
             BJobsProcessor(self.client, self.config, self.log, self.tags),
             BQueuesProcessor(self.client, self.config, self.log, self.tags),
             BSlotsProcessor(self.client, self.config, self.log, self.tags),
+            BHistProcessor(self.client, self.config, self.log, self.tags),
             GPULoadProcessor(self.client, self.config, self.log, self.tags),
             GPUHostsProcessor(self.client, self.config, self.log, self.tags),
+            BadminPerfmonProcessor(self.client, self.config, self.log, self.tags),
         ]
 
     def check(self, instance):
@@ -63,3 +67,11 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
                     self.gauge(metric.name, metric.value, tags=metric.tags)
             else:
                 self.log.trace("Skipping %s metrics; excluded in configuration.", processor.name)
+
+    def cancel(self):
+        if (
+            self.config.metric_sources
+            and 'badmin_perfmon' in self.config.metric_sources
+            and self.config.badmin_perfmon_auto
+        ):
+            self.client.badmin_perfmon_stop()
