@@ -22,7 +22,7 @@ from datadog_checks.dev.tooling.utils import complete_valid_checks
 IGNORES = {
     "all": ["tests/compose", "tests/docker"],
     "datadog_checks_dev": ["datadog_checks/dev/tooling/templates"],
-    "mysql": ["datadog_checks/mysql/databases_data.py"], # deleted in master but still in release branches
+    "mysql": ["datadog_checks/mysql/databases_data.py"],  # deleted in master but still in release branches
     "php_fpm": ["datadog_checks/php_fpm/vendor"],
     "snmp": ["tests/mibs"],
     "tokumx": ["datadog_checks/tokumx/vendor"],
