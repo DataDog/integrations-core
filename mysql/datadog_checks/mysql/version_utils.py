@@ -48,7 +48,7 @@ class MySQLVersion(namedtuple('MySQLVersion', ['version', 'flavor', 'build'])):
             log.warning("Cannot compute MySQL version, assuming it's older: %s", e)
             return False
 
-        patchlevel = int(PATCHLEVEL_REGEX.match(mysql_version[2]).group(1))
+        patchlevel = int(PATCHLEVEL_REGEX.match(mysql_version[2] if len(mysql_version) > 2 else '0').group(1))
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
 
         return version >= compat_version
