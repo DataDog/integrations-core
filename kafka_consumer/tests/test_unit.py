@@ -17,6 +17,7 @@ from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.kafka_consumer import (
     DATA_STREAMS_MESSAGES_CACHE_KEY,
     _get_interpolated_timestamp,
+    _get_protobuf_message_class,
     build_avro_schema,
     build_protobuf_schema,
     build_schema,
@@ -902,8 +903,12 @@ def test_schema_registry_explicit_configuration():
     assert result == (None, None, None, None), "Protobuf should fail when uses_schema_registry=True but no SR format"
 
     # Valid Protobuf message WITH schema registry format
+    # Confluent Protobuf wire format:
+    # [magic_byte][schema_id:4bytes][array_length:varint][index:varint][protobuf_payload]
     protobuf_message_with_sr = (
-        b'\x00\x00\x00\x01\x5e'
+        b'\x00\x00\x00\x01\x5e'  # magic byte (0x00) + schema ID 350 (0x0000015e)
+        b'\x01'  # message indices array length = 1
+        b'\x00'  # message index = 0
         b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
         b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
     )
@@ -932,6 +937,40 @@ def test_schema_registry_explicit_configuration():
     assert result[0] is not None, "Value should succeed"
     assert result[2] is None, "Key should fail when key_uses_schema_registry=True but no SR format"
     assert result[3] is None, "Key schema ID should be None when key fails"
+
+
+def test_protobuf_message_indices_with_schema_registry():
+    """Test Confluent Protobuf wire format with different message indices."""
+    key = b'{"test": "key"}'
+
+    # Schema with multiple message types and nested type
+    # message Book { int64 isbn = 1; string title = 2; }
+    # message Author { string name = 1; int32 age = 2; }
+    # message Library { message Section { string name = 1; } string name = 1; }
+    protobuf_schema = (
+        'CpMBCgxzY2hlbWEucHJvdG8SC2NvbS5leGFtcGxlIh8KBEJvb2sSCgoEaXNibhgBKAMSCwoFdGl0bGUY'
+        'AigJIh8KBkF1dGhvchIKCgRuYW1lGAEoCRIJCgNhZ2UYAigFIiwKB0xpYnJhcnkSCgoEbmFtZRgBKAka'
+        'FQoHU2VjdGlvbhIKCgRuYW1lGAEoCWIGcHJvdG8z'
+    )
+    parsed_schema = build_schema('protobuf', protobuf_schema)
+
+    # Test index [0] - Book message
+    book_payload = bytes.fromhex('08e80712095465737420426f6f6b')
+    book_msg = b'\x00\x00\x00\x01\x5e\x01\x00' + book_payload
+    result = deserialize_message(MockedMessage(book_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
+    assert result[0] and 'Test Book' in result[0]
+
+    # Test index [1] - Author message
+    author_payload = bytes.fromhex('0a0a4a616e6520536d697468101e')
+    author_msg = b'\x00\x00\x00\x01\x5e\x01\x01' + author_payload
+    result = deserialize_message(MockedMessage(author_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
+    assert result[0] and 'Jane Smith' in result[0] and '30' in result[0]
+
+    # Test nested [2, 0] - Library.Section message
+    section_payload = bytes.fromhex('0a0746696374696f6e')
+    section_msg = b'\x00\x00\x00\x01\x5e\x02\x02\x00' + section_payload
+    result = deserialize_message(MockedMessage(section_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
+    assert result[0] and 'Fiction' in result[0]
 
 
 def mocked_time():
@@ -1200,11 +1239,11 @@ def test_build_schema():
         'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
     )
     protobuf_result = build_schema('protobuf', valid_protobuf_schema)
-    assert protobuf_result is not None
-    # The result should be a protobuf message class instance
-    assert hasattr(protobuf_result, 'isbn')
-    assert hasattr(protobuf_result, 'title')
-    assert hasattr(protobuf_result, 'author')
+    message_class = _get_protobuf_message_class(protobuf_result, [0])
+    message_instance = message_class()
+    assert hasattr(message_instance, 'isbn')
+    assert hasattr(message_instance, 'title')
+    assert hasattr(message_instance, 'author')
 
     # Test unknown format
     assert build_schema('unknown_format', 'some_schema') is None
@@ -1232,14 +1271,15 @@ def test_build_schema_error_cases():
     with pytest.raises(DecodeError):  # Will be a protobuf DecodeError
         build_schema('protobuf', 'SGVsbG8gV29ybGQ=')  # "Hello World" in base64
 
-    # Valid base64 but empty schema (should cause IndexError)
+    # Valid base64 but empty schema - should fail when trying to access message types
     # Create a minimal but empty FileDescriptorSet
     empty_descriptor = descriptor_pb2.FileDescriptorSet()
     empty_descriptor_bytes = empty_descriptor.SerializeToString()
     empty_descriptor_b64 = base64.b64encode(empty_descriptor_bytes).decode('utf-8')
 
+    result = build_schema('protobuf', empty_descriptor_b64)
     with pytest.raises(IndexError):  # Should fail when trying to access file[0]
-        build_schema('protobuf', empty_descriptor_b64)
+        _get_protobuf_message_class(result, [0])
 
 
 def test_build_schema_none_handling():

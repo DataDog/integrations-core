@@ -23,12 +23,13 @@ instances:
     ## By default, all commands except GPU commands are enabled.
     ##
     ## Possible values: lsclusters, lshosts, bhosts, lsload, bqueues,
-    ## bslots, bjobs, lsload_gpu, bhosts_gpu, badmin_perfmon.
+    ## bhist, bslots, bjobs, lsload_gpu, bhosts_gpu, badmin_perfmon.
     ##
     ## Note: Enabling `badmin_perfmon` will run the command `badmin perfmon start <YOUR_MIN_COLLECTION_INTERVAL>`.
     ## By default, this is set to 15 seconds. It is recommended to set this to a higher value such as 60 seconds
     ## to decrease load on the cluster. We recommend creating a separate instance to collect `badmin_perfmon` metrics
-    ## with a higher min_collection_interval.
+    ## with a higher `min_collection_interval` like 60. Similarly, the `bhist` command can be query intensive, so we 
+    ## recommend monitoring it with a higher `min_collection_interval` like 60.
     #
     # metric_sources:
     #   - lsclusters
@@ -38,6 +39,7 @@ instances:
     #   - bqueues
     #   - bslots
     #   - bjobs
+    #   - bhist
     #   - lsload_gpu
     #   - bhosts_gpu
 
