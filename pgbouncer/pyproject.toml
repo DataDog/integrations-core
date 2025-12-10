@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "psycopg[c,pool]==3.2.10",
+    "psycopg[c,pool]==3.2.13",
 ]
 
 [project.urls]
