@@ -240,14 +240,11 @@ def _load_line_removal_rules() -> list[dict]:
     return rules
 
 
-def _match_rule_to_wheel(rule: dict, wheel: Path) -> list[dict]:
+def _get_matching_rules(wheel_name: str) -> list[dict]:
     '''
-    Match the rule in the toml to the wheel name.
+    Match the rules in the toml to the wheel name.
     '''
-
     rules = _load_line_removal_rules()
-    matching = []
-    wheel_name = wheel.name
     matching = []
     for rule in rules:
         pattern = rule.get('package_pattern', '*')
@@ -444,6 +441,7 @@ def main():
     # Handle wheels currently in the external directory and move them to the built directory if they were modified
     for wheel in iter_wheels(external_wheels_dir):
         was_modified = remove_test_files(wheel)
+        was_modified = strip_lines_from_wheel(wheel) or was_modified
         if was_modified:
             # A modified wheel is no longer external → move it to built directory
             new_path = built_wheels_dir / wheel.name
@@ -456,6 +454,7 @@ def main():
     # Handle wheels already in the built directory
     for wheel in iter_wheels(built_wheels_dir):
         remove_test_files(wheel)
+        strip_lines_from_wheel(wheel)
         add_dependency(dependencies, sizes, wheel)
 
     output_path = MOUNT_DIR / 'sizes.json'
