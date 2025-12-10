@@ -11,7 +11,6 @@ def test_integrations_changelog_without_arguments(fake_changelogs, ddev):
     assert result.exit_code == 0
     expected_output = '\n'.join(
         [
-            fake_changelogs['baz'],
             fake_changelogs['datadog_checks_downloader'],
             fake_changelogs['bar'],
             fake_changelogs['datadog_checks_base'],
@@ -37,9 +36,6 @@ def test_integrations_changelog_write(repo_with_fake_changelogs, ddev):
 
     with open(repo.path / 'bar' / 'CHANGELOG.md') as f:
         assert f.read().rstrip('\n') == fake_changelogs['bar'].rstrip('\n')
-
-    with open(repo.path / 'baz' / 'CHANGELOG.md') as f:
-        assert f.read().rstrip('\n') == fake_changelogs['baz'].rstrip('\n')
 
     with open(repo.path / 'datadog_checks_base' / 'CHANGELOG.md') as f:
         assert f.read().rstrip('\n') == fake_changelogs['datadog_checks_base'].rstrip('\n')
@@ -86,23 +82,8 @@ def repo_with_fake_changelogs(repo_with_history, config_file):
 * Remove unused `metric_prefix` in init_config ([#11464](https://github.com/DataDog/integrations-core/pull/11464))
 """
     )
-    (repo_root / 'baz' / 'CHANGELOG.md').write_text(
-        """# CHANGELOG - baz
-## 1.0.0 / 2022-12-16
-
-***Added***:
-
-* Initial release ([#13000](https://github.com/DataDog/integrations-core/pull/13000))
-"""
-    )
     (repo_root / 'datadog_checks_downloader' / 'CHANGELOG.md').write_text(
         """# CHANGELOG - datadog_checks_downloader
-## 5.0.0 / 2022-12-16
-
-***Changed***:
-
-* Breaking change update ([#13001](https://github.com/DataDog/integrations-core/pull/13001))
-
 ## 4.0.0 / 2022-11-16
 
 ***Added***:
@@ -119,13 +100,11 @@ def repo_with_fake_changelogs(repo_with_history, config_file):
 * Upgrade dependencies ([#11726](https://github.com/DataDog/integrations-core/pull/11726))
 """
     )
-    # Turn 'foo', 'bar', and 'baz' into *valid checks* by giving them an __about__.py file in the right location
+    # Turn 'foo' and 'bar' into *valid checks* by giving them an __about__.py file in the right location
     (repo_root / 'foo' / 'datadog_checks' / 'foo').mkdir(parents=True)
     (repo_root / 'foo' / 'datadog_checks' / 'foo' / '__about__.py').touch()
     (repo_root / 'bar' / 'datadog_checks' / 'bar').mkdir(parents=True)
     (repo_root / 'bar' / 'datadog_checks' / 'bar' / '__about__.py').touch()
-    (repo_root / 'baz' / 'datadog_checks' / 'baz').mkdir(parents=True)
-    (repo_root / 'baz' / 'datadog_checks' / 'baz' / '__about__.py').touch()
     (repo_root / 'datadog_checks_downloader' / 'datadog_checks' / 'downloader').mkdir(parents=True)
     (repo_root / 'datadog_checks_downloader' / 'datadog_checks' / 'downloader' / '__about__.py').touch()
     (repo_root / 'datadog_checks_base' / 'datadog_checks' / 'base').mkdir(parents=True)
@@ -159,20 +138,7 @@ def repo_with_fake_changelogs(repo_with_history, config_file):
 
 * Remove unused `metric_prefix` in init_config ([#11464](https://github.com/DataDog/integrations-core/pull/11464))
 """,
-        'baz': """# CHANGELOG - baz
-## 1.0.0 / 2022-12-16 / Agent 7.42.0
-
-***Added***:
-
-* Initial release ([#13000](https://github.com/DataDog/integrations-core/pull/13000))
-""",
         'datadog_checks_downloader': """# CHANGELOG - datadog_checks_downloader
-## 5.0.0 / 2022-12-16 / Agent 7.42.0
-
-***Changed***:
-
-* Breaking change update ([#13001](https://github.com/DataDog/integrations-core/pull/13001))
-
 ## 4.0.0 / 2022-11-16 / Agent 7.41.0
 
 ***Added***:

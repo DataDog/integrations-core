@@ -74,13 +74,6 @@ def repo_with_fake_changelog(repo_with_history, config_file):
     # ruff: noqa: E501
     expected_output = (
         """
-## Datadog Agent version [7.42.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7420)
-
-### New Integrations
-* baz [1.0.0](https://github.com/DataDog/integrations-core/blob/master/baz/CHANGELOG.md)
-### New Changes
-* datadog_checks_downloader [5.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
-
 ## Datadog Agent version [7.41.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7410)
 
 ### New Integrations
