@@ -347,38 +347,39 @@ class NutanixCheck(AgentCheck):
 
         url = f"{self.base_url}/{endpoint}"
 
+        # Initialize pagination parameters
         page = 0
         limit = self.page_limit
 
-        if not params:
-            params = {}
+        # Create a copy of params to avoid mutating the caller's dictionary
+        req_params = {} if params is None else params.copy()
 
-        if not params.get("$page"):
-            params["$page"] = page
-
-        if not params.get("$limit"):
-            params["$limit"] = limit
+        req_params["$page"] = page
+        req_params["$limit"] = limit
 
         while True:
-            response = self._make_request_with_retry(url, method='get', params=params)
+            response = self._make_request_with_retry(url, method='get', params=req_params)
+            response.raise_for_status()
             payload = response.json()
 
-            data = payload.get("data", {})
-            if data:
-                all_items.extend(data)
+            data = payload.get("data", [])
+            if not data:
+                self.log.debug("Stopping pagination for %s: no data returned on page %d", endpoint, page)
+                break
 
+            all_items.extend(data)
+
+            # Check metadata for next link to determine if more pages exist
             links = payload.get("metadata", {}).get("links", [])
             next_link = next((l.get("href") for l in links if l.get("rel") == "next"), None)
 
             if not next_link:
                 break
 
-            url = next_link
+            page += 1
+            req_params["$page"] = page
 
-            # we delete pagination params as they already exist in the return next_link
-            params.pop("$page", None)
-            params.pop("$limit", None)
-
+        self.log.debug("Fetched %d items from %s (%d pages)", len(all_items), endpoint, page + 1)
         return all_items
 
     def _get_request_data(self, endpoint, params=None):
