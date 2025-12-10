@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import email
+import fnmatch
 import json
 import os
 import re
@@ -222,6 +223,29 @@ def is_excluded_from_wheel(path: str | Path) -> bool:
 
     return False
 
+
+@cache
+def _load_line_removal_rules() -> list[dict]:
+    config_p = Path(__file__).parent / "lines_to_remove.toml"
+    with open(config_p, "rb") as f:
+        config = tomllib.load(f)
+
+    rules = config.get("rules", [])
+    for rule in rules:
+        rule['_compiled_patterns'] = [re.compile(p) for p in rule.get('line_patterns', [])]
+    return rules
+
+
+def _match_rule_to_wheel(rule: dict, wheel: Path) -> list[dict]:
+    rules = _load_line_removal_rules()
+    matching = []
+    wheel_name = wheel.name
+    matching = []
+    for rule in rules:
+        pattern = rule.get('package_pattern', '*')
+        if fnmatch.fnmatch(wheel_name, pattern):
+            matching.append(rule)
+    return matching
 
 def add_dependency(dependencies: dict[str, str], sizes: dict[str, WheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
