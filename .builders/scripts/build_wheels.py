@@ -156,6 +156,8 @@ def remove_test_files(wheel_path: Path) -> bool:
     with ZipFile(wheel_path, 'r') as zf:
         excluded_members = [name for name in zf.namelist() if is_excluded_from_wheel(name)]
 
+    print(f"Excluded members in {wheel_path.name}: {excluded_members}")
+
     if not excluded_members:
         # Nothing to strip, so skip rewriting the wheel
         return False
