@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 22.11.0 / 2025-10-31
+## 22.12.0 / 2025-11-26
+
+***Added***:
+
+* Migrate SQL Server to new schema collector, which provides improved performance in the Agent and allows the backend to handle larger schema collections ([#21734](https://github.com/DataDog/integrations-core/pull/21734))
+* Add DBM Agent health events to SQLServer, including basic initialization checks, unhandled errors, and missed collections ([#21868](https://github.com/DataDog/integrations-core/pull/21868))
+* Upgrade base version for Postgres, MySQL, and SQLServer ([#21906](https://github.com/DataDog/integrations-core/pull/21906))
+
+***Fixed***:
+
+* Support `only_custom_queries` configuration option in the SQL Server integration ([#21304](https://github.com/DataDog/integrations-core/pull/21304))
+
+## 22.11.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

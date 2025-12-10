@@ -29,7 +29,7 @@ def dd_environment(mock_local_http_dns):
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yml'),
         build=True,
-        log_patterns=["starting server on port"],
+        log_patterns=["start worker process"],
         conditions=[WaitFor(call_endpoint, args=("https://127.0.0.1",))],
     ):
         yield CONFIG_E2E, e2e_metadata
