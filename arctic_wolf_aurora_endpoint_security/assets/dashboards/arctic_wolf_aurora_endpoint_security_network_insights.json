@@ -1054,7 +1054,7 @@
                         "id": 7371106877106017,
                         "definition": {
                             "type": "note",
-                            "content": "Tracks DNS-based detection events on devices, including the instigating process, target domain, resolved IP addresses, severity, device and user information, and detection rule details. Helps identify suspicious or malicious DNS activity, understand which processes triggered the events.",
+                            "content": "Tracks DNS-based detection events on devices, including the instigating process, target domain, resolved addresses, severity, device and user information, and detection rule details. Helps identify suspicious or malicious DNS activity, understand which processes triggered the events.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "left",

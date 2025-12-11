@@ -7,7 +7,7 @@ This integration enriches and ingests the following events:
 - **Aurora Protect Desktop Events**: Represents log messages generated for Application Control, Audit log, Devices, Device Control, Memory Protection, Script Control, Threats and Threat Classification.
 - **Aurora Focus Detection Events**: Represent malicious or suspicious events detected by the Aurora Focus. The events includes Security Process & System Events, Network Events and System Tool Events.
 
-This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into firewall, networking, management, vpn and proxy policy events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into desktop and detection events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 **Minimum Agent version**: 7.74.0
 
