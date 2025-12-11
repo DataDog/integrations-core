@@ -129,14 +129,31 @@ class KafkaConfig:
             if self._sasl_oauth_token_provider is None:
                 raise ConfigurationError("sasl_oauth_token_provider required for OAUTHBEARER sasl")
 
-            if self._sasl_oauth_token_provider.get("url") is None:
-                raise ConfigurationError("The `url` setting of `auth_token` reader is required")
+            if not isinstance(self._sasl_oauth_token_provider, dict):
+                raise ConfigurationError(
+                    f"sasl_oauth_token_provider must be a dictionary. Got: {type(self._sasl_oauth_token_provider)}"
+                )
 
-            elif self._sasl_oauth_token_provider.get("client_id") is None:
-                raise ConfigurationError("The `client_id` setting of `auth_token` reader is required")
+            # Default to 'oidc' for backwards compatibility with existing configs
+            method = self._sasl_oauth_token_provider.get("method", "oidc")
 
-            elif self._sasl_oauth_token_provider.get("client_secret") is None:
-                raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
+            if method == "aws_msk_iam":
+                # AWS MSK IAM doesn't require additional fields
+                pass
+            elif method == "oidc":
+                # OIDC requires url, client_id, and client_secret
+                if self._sasl_oauth_token_provider.get("url") is None:
+                    raise ConfigurationError("The `url` setting of `auth_token` reader is required")
+
+                if self._sasl_oauth_token_provider.get("client_id") is None:
+                    raise ConfigurationError("The `client_id` setting of `auth_token` reader is required")
+
+                if self._sasl_oauth_token_provider.get("client_secret") is None:
+                    raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
+            else:
+                raise ConfigurationError(
+                    f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
+                )
 
         # If `monitor_unlisted_consumer_groups` is set to true and
         # using `consumer_groups`, we prioritize `monitor_unlisted_consumer_groups`
