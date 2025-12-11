@@ -282,8 +282,7 @@ def version_metadata():
         'version.raw': mock.ANY,
         'version.build': mock.ANY,
         'flavor': flavor,
-        # This is weirdly different on CI (forced_hostname) vs local (stubbed.hostname)
-        'resolved_hostname': mock.ANY,
+        'resolved_hostname': 'forced_hostname',
     }
 
 

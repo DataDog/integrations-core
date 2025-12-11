@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
 import pytest
 from packaging.version import parse as parse_version
 
@@ -21,7 +23,7 @@ def dbm_instance(instance_complex):
     return instance_complex
 
 
-def sort_names_split_by_comma(names):
+def sort_names_split_by_coma(names):
     names_arr = names.split(',')
     sorted_columns = sorted(names_arr)
     return ','.join(sorted_columns)
@@ -37,20 +39,9 @@ def normalize_values(actual_payload):
             table['columns'].sort(key=lambda x: x['name'])
         if 'indexes' in table:
             table['indexes'].sort(key=lambda x: x['name'])
-            for index in table['indexes']:
-                index['columns'].sort(key=lambda x: x['name'])
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
-                f_key["referenced_column_names"] = (
-                    sort_names_split_by_comma(f_key["referenced_column_names"])
-                    if "referenced_column_names" in f_key and f_key["referenced_column_names"] is not None
-                    else None
-                )
-        if 'partitions' in table:
-            table['partitions'].sort(key=lambda x: x['name'])
-            for partition in table['partitions']:
-                if 'subpartitions' in partition:
-                    partition['subpartitions'].sort(key=lambda x: x['name'])
+                f_key["referenced_column_names"] = sort_names_split_by_coma(f_key["referenced_column_names"])
         if 'columns' in table:
             for column in table['columns']:
                 if column['column_type'] == 'int':
@@ -139,6 +130,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "MUL",
+                        "extra": "",
                     },
                     {
                         "name": "District",
@@ -147,6 +139,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
+                        "extra": "",
                     },
                     {
                         "name": "Review",
@@ -155,6 +148,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 3,
                         "column_key": "",
+                        "extra": "",
                     },
                 ],
                 "foreign_keys": [
@@ -190,7 +184,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "non_unique": True,
                     }
                 ],
-                "partitions": [],
             },
             {
                 "name": "Restaurants",
@@ -205,6 +198,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "MUL",
+                        "extra": "",
                     },
                     {
                         "name": "District",
@@ -213,6 +207,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
+                        "extra": "",
                     },
                     {
                         "name": "Cuisine",
@@ -221,6 +216,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 3,
                         "column_key": "",
+                        "extra": "",
                     },
                 ],
                 "indexes": [
@@ -243,8 +239,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "non_unique": False,
                     }
                 ],
-                "foreign_keys": [],
-                "partitions": [],
             },
             {
                 "name": "cities",
@@ -259,6 +253,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": False,
                         "ordinal_position": 1,
                         "column_key": "PRI",
+                        "extra": "",
                     },
                     {
                         "name": "name",
@@ -267,6 +262,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
+                        "extra": "",
                     },
                     {
                         "name": "population",
@@ -275,6 +271,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": False,
                         "ordinal_position": 3,
                         "column_key": "MUL",
+                        "extra": "",
                     },
                 ],
                 "indexes": [
@@ -339,14 +336,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "cardinality": 0,
                             "non_unique": True,
                             "expression": "(`population` + 1)",
-                            "columns": [],
                         }
                     ]
                     if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db and not is_percona
                     else []
                 ),
-                "foreign_keys": [],
-                "partitions": [],
             },
             {
                 "name": "cities_partitioned",
@@ -361,6 +355,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": False,
                         "ordinal_position": 1,
                         "column_key": "PRI",
+                        "extra": "",
                     },
                     {
                         "name": "name",
@@ -369,6 +364,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
+                        "extra": "",
                     },
                     {
                         "name": "population",
@@ -377,6 +373,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": False,
                         "ordinal_position": 3,
                         "column_key": "",
+                        "extra": "",
                     },
                 ],
                 "partitions": [
@@ -388,7 +385,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "partition_description": "100",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "subpartitions": [],
                     },
                     {
                         "name": "p1",
@@ -398,7 +394,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "partition_description": "200",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "subpartitions": [],
                     },
                     {
                         "name": "p2",
@@ -408,7 +403,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "partition_description": "300",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "subpartitions": [],
                     },
                     {
                         "name": "p3",
@@ -418,7 +412,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "partition_description": "MAXVALUE",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "subpartitions": [],
                     },
                 ],
                 "indexes": [
@@ -436,7 +429,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "non_unique": False,
                     }
                 ],
-                "foreign_keys": [],
             },
             {
                 "name": "landmarks",
@@ -451,6 +443,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "",
+                        "extra": "",
                     },
                     {
                         "name": "city_id",
@@ -459,6 +452,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "MUL",
+                        "extra": "",
                     },
                 ],
                 "foreign_keys": [
@@ -489,7 +483,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "non_unique": True,
                     }
                 ],
-                "partitions": [],
             },
         ],
     }
@@ -511,6 +504,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "",
+                        "extra": "",
                     },
                     {
                         "name": "name",
@@ -519,6 +513,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "UNI",
+                        "extra": "",
                     },
                 ],
                 "indexes": [
@@ -536,8 +531,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "non_unique": False,
                     }
                 ],
-                "foreign_keys": [],
-                "partitions": [],
             },
             {
                 "name": "ts",
@@ -552,6 +545,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "",
+                        "extra": "",
                     },
                     {
                         "name": "purchased",
@@ -560,10 +554,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
+                        "extra": "",
                     },
                 ],
-                "foreign_keys": [],
-                "indexes": [],
                 "partitions": [
                     {
                         "name": "p0",
@@ -669,6 +662,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
         'dd.internal.resource:database_instance:stubbed.hostname',
+        'port:13306',
         'tag1:value1',
         'tag2:value2',
     )
@@ -687,16 +681,15 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("flavor") in ("MariaDB", "MySQL", "Percona")
         assert sorted(schema_event["tags"]) == sorted(expected_tags)
         database_metadata = schema_event['metadata']
+        assert len(database_metadata) == 1
+        db_name = database_metadata[0]['name']
+        if db_name not in databases_to_find:
+            continue
 
-        for db_metadata in database_metadata:
-            db_name = db_metadata['name']
-            if db_name not in databases_to_find:
-                continue
-
-            if db_name in actual_payloads:
-                actual_payloads[db_name]['tables'] = actual_payloads[db_name]['tables'] + db_metadata['tables']
-            else:
-                actual_payloads[db_name] = db_metadata
+        if db_name in actual_payloads:
+            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
+        else:
+            actual_payloads[db_name] = database_metadata[0]
 
     assert len(actual_payloads) == len(expected_data_for_db)
 
@@ -705,6 +698,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_values(expected_data_for_db[db_name])
         assert db_name in databases_to_find
         assert expected_data_for_db[db_name] == actual_payload
+
+
+@pytest.mark.integration
+def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
+    dbm_instance['dbm'] = True
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    dd_run_check(check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    found = False
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
+        if "collection_errors" in schema_event:
+            if schema_event["collection_errors"][0]["error_type"] == "truncated" and re.fullmatch(
+                expected_pattern, schema_event["collection_errors"][0]["message"]
+            ):
+                found = True
+    assert found
 
 
 @pytest.mark.unit

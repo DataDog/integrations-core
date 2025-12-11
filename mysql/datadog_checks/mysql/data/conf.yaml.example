@@ -417,12 +417,7 @@ instances:
         ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
         ## Capped by `collect_schemas.collection_interval`
         #
-        # max_execution_time: <MAX_EXECUTION_TIME>
-
-        ## @param max_tables - integer - optional - default: 300
-        ## Set the maximum number of tables to collect. Defaults to 300.
-        #
-        # max_tables: <MAX_TABLES>
+        # max_execution_time: 60
 
     ## DEPRECATED: Use `collect_schemas` instead.
     ## Configure collection of schemas (databases).

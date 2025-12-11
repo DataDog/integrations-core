@@ -56,7 +56,6 @@ class CollectSchemas(BaseModel):
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     max_execution_time: Optional[float] = None
-    max_tables: Optional[int] = None
 
 
 class CollectSettings(BaseModel):
