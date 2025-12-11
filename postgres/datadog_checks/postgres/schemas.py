@@ -69,8 +69,8 @@ WHERE  c.relkind IN ( 'r', 'f' )
 
 SCHEMA_QUERY = """
 SELECT nsp.oid                 AS schema_id,
-       nspname             AS schema_name,
-       nspowner :: regrole AS schema_owner
+       nspname                 AS schema_name,
+       nspowner::regrole::text AS schema_owner
 FROM   pg_namespace nsp
        LEFT JOIN pg_roles r on nsp.nspowner = r.oid
 WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
