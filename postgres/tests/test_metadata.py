@@ -147,7 +147,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
             # there should only two schemas, 'public' and 'datadog'. datadog is empty
             schema = database_metadata[mi]['schemas'][0]
             schema_name = schema['name']
-            assert schema['owner'] == 'pg_database_owner' if schema_name == 'postgres' else 'postgres'
+            assert schema['owner'] == 'pg_database_owner' if schema_name == 'public' else 'postgres'
             assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test', 'hstore']
             schemas_got.add(schema_name)
             if schema_name in ['public', 'rdsadmin_test']:
