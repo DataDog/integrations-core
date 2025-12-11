@@ -484,8 +484,8 @@ files:
           interface_configs:
             - match_field: "name"  # (required) the field to match, can be `name` (interface name) or `index` (ifIndex)
               match_value: "eth0"  # (required, case sensitive) the value to match
-              in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
-              out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
+              in_speed: 50         # (optional) inbound speed value in bytes per sec, no value or 0 means no override
+              out_speed: 25        # (optional) outbound speed value in bytes per sec, no value or 0 means no override
               tags:                # (optional) interface level tags
                 - "testTagKey:testTagValue"
                 - "tagKey2:tagValue2"

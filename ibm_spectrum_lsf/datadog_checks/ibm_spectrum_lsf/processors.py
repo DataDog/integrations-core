@@ -2,11 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import timedelta
 
 from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.utils.time import get_current_datetime
 
 from .client import LSFClient
 from .common import (
@@ -15,12 +18,16 @@ from .common import (
     transform_error,
     transform_float,
     transform_job_id,
+    transform_job_name,
+    transform_job_with_task,
     transform_open,
     transform_runtime,
     transform_status,
     transform_tag,
+    transform_task_id,
     transform_time_left,
 )
+from .config_models import InstanceConfig
 
 
 @dataclass
@@ -41,6 +48,13 @@ class LSFTagMapping:
 class LSFMetricMapping:
     name: str
     position: int
+    transform: Callable[[str], float]
+
+
+@dataclass
+class BadminMetricMapping:
+    name: str
+    key: str
     transform: Callable[[str], float]
 
 
@@ -72,9 +86,10 @@ class LSFMetricsProcessor(ABC):
         self,
         name: str,
         prefix: str,
-        expected_columns: int,
+        expected_columns: int | None,
         delimiter: str | None,
         client: LSFClient,
+        config: InstanceConfig,
         logger: CheckLoggingAdapter,
         base_tags: list[str],
     ):
@@ -83,6 +98,7 @@ class LSFMetricsProcessor(ABC):
         self.expected_columns = expected_columns
         self.delimiter = delimiter
         self.client = client
+        self.config = config
         self.log = logger
         self.base_tags = base_tags
 
@@ -91,7 +107,7 @@ class LSFMetricsProcessor(ABC):
         pass
 
     def parse_table_command(
-        self, metric_mapping: list[LSFMetricMapping], tag_mapping: list[LSFTagMapping]
+        self, metric_mapping: list[LSFMetricMapping], tag_mapping: list[LSFTagMapping], remove_first_line: bool = False
     ) -> list[LSFMetric]:
         output, err, exit_code = self.run_lsf_command()
         if exit_code != 0:
@@ -99,6 +115,13 @@ class LSFMetricsProcessor(ABC):
             return []
 
         output_lines = output.strip().splitlines()
+        if len(output_lines) == 0 or (remove_first_line and len(output_lines) == 1):
+            self.log.warning("No output from command %s", self.name)
+            return []
+
+        if remove_first_line:
+            output_lines.pop(0)
+
         headers = output_lines.pop(0)
         if len(headers.split(self.delimiter)) != self.expected_columns:
             self.log.warning(
@@ -132,15 +155,19 @@ class LSFMetricsProcessor(ABC):
     def process_metrics(self) -> list[LSFMetric]:
         pass
 
+    def should_run(self) -> bool:
+        return self.config.metric_sources is None or self.name in self.config.metric_sources
+
 
 class LsClustersProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name="lsclusters",
             prefix="cluster",
             expected_columns=6,
             delimiter=None,
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -163,13 +190,14 @@ class LsClustersProcessor(LSFMetricsProcessor):
 
 
 class BHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='bhosts',
             prefix='server',
             expected_columns=9,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -194,13 +222,14 @@ class BHostsProcessor(LSFMetricsProcessor):
 
 
 class LSHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='lshosts',
             prefix='host',
             expected_columns=12,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -230,13 +259,14 @@ class LSHostsProcessor(LSFMetricsProcessor):
 
 
 class LsLoadProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='lsload',
             prefix='load',
             expected_columns=13,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -265,13 +295,14 @@ class LsLoadProcessor(LSFMetricsProcessor):
 
 
 class BSlotsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='bslots',
             prefix='slots',
             expected_columns=2,
             delimiter=None,
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -290,13 +321,14 @@ class BSlotsProcessor(LSFMetricsProcessor):
 
 
 class BQueuesProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='bqueues',
             prefix='queue',
             expected_columns=11,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -324,13 +356,14 @@ class BQueuesProcessor(LSFMetricsProcessor):
 
 
 class BJobsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
             name='bjobs',
             prefix='job',
-            expected_columns=12,
+            expected_columns=13,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -344,30 +377,32 @@ class BJobsProcessor(LSFMetricsProcessor):
             LSFTagMapping('full_job_id', 0, transform_tag),
             LSFTagMapping('status', 1, transform_tag),
             LSFTagMapping('queue', 2, transform_tag),
-            LSFTagMapping('from_host', 3, transform_tag),
-            LSFTagMapping('exec_host', 4, transform_tag),
+            LSFTagMapping('user', 3, transform_tag),
+            LSFTagMapping('from_host', 4, transform_tag),
+            LSFTagMapping('exec_host', 5, transform_tag),
         ]
         metrics = [
-            LSFMetricMapping('run_time', 5, transform_float),
-            LSFMetricMapping('cpu_used', 6, transform_float),
-            LSFMetricMapping('mem', 7, transform_float),
-            LSFMetricMapping('time_left', 8, transform_time_left),
-            LSFMetricMapping('swap', 9, transform_float),
-            LSFMetricMapping('idle_factor', 10, transform_float),
-            LSFMetricMapping('percent_complete', 11, transform_float),
+            LSFMetricMapping('run_time', 6, transform_float),
+            LSFMetricMapping('cpu_used', 7, transform_float),
+            LSFMetricMapping('mem', 8, transform_float),
+            LSFMetricMapping('time_left', 9, transform_time_left),
+            LSFMetricMapping('swap', 10, transform_float),
+            LSFMetricMapping('idle_factor', 11, transform_float),
+            LSFMetricMapping('percent_complete', 12, transform_float),
         ]
 
         return self.parse_table_command(metrics, tags)
 
 
 class GPULoadProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
-            name='lsload gpu',
+            name='lsload_gpu',
             prefix='gpu',
             expected_columns=14,
             delimiter=None,
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -398,13 +433,14 @@ class GPULoadProcessor(LSFMetricsProcessor):
 
 
 class GPUHostsProcessor(LSFMetricsProcessor):
-    def __init__(self, client: LSFClient, logger: CheckLoggingAdapter, base_tags: list[str]):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
         super().__init__(
-            name='bhosts gpu',
+            name='bhosts_gpu',
             prefix='server.gpu',
             expected_columns=8,
             delimiter='|',
             client=client,
+            config=config,
             logger=logger,
             base_tags=base_tags,
         )
@@ -413,10 +449,6 @@ class GPUHostsProcessor(LSFMetricsProcessor):
         return self.client.bhosts_gpu()
 
     def process_metrics(self) -> list[LSFMetric]:
-        """
-        HOST_NAME|NGPUS|NGPUS_ALLOC|NGPUS_EXCL_ALLOC|NGPUS_SHARED_ALLOC|NGPUS_SHARED_JEXCL_ALLOC|NGPUS_EXCL_AVAIL|NGPUS_SHARED_AVAIL
-        ip-10-11-220-181.ec2.internal|1|0|0|0|0|1|1
-        """
         tags = [
             LSFTagMapping('lsf_host', 0, transform_tag),
         ]
@@ -430,3 +462,133 @@ class GPUHostsProcessor(LSFMetricsProcessor):
             LSFMetricMapping('num_gpus_shared_available', 7, transform_float),
         ]
         return self.parse_table_command(metrics, tags)
+
+
+class BadminPerfmonProcessor(LSFMetricsProcessor):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
+        super().__init__(
+            name='badmin_perfmon',
+            prefix='perfmon',
+            expected_columns=None,
+            delimiter=None,
+            client=client,
+            config=config,
+            logger=logger,
+            base_tags=base_tags,
+        )
+        self.collection_started = False
+
+    def run_lsf_command(self) -> tuple[str, str, int]:
+        if self.config.badmin_perfmon_auto:
+            collection_interval = (
+                self.config.min_collection_interval if self.config.min_collection_interval is not None else 60
+            )
+            if not self.collection_started:
+                self.client.badmin_perfmon_start(collection_interval)
+                self.collection_started = True
+            perfmon_output = self.client.badmin_perfmon()
+            if (
+                "Performance metric sampling has not been started" in perfmon_output[0]
+                or "No performance metric data available." in perfmon_output[0]
+            ):
+                # Collection was stopped manually, restart it
+                self.client.badmin_perfmon_start(collection_interval)
+                self.collection_started = True
+        else:
+            perfmon_output = self.client.badmin_perfmon()
+        return perfmon_output
+
+    def process_metrics(self) -> list[LSFMetric]:
+        output, err, exit_code = self.run_lsf_command()
+        if exit_code != 0 or output is None:
+            self.log.error("Failed to get %s output: %s", self.name, err)
+            return []
+
+        try:
+            output_json = json.loads(output.strip())
+        except json.JSONDecodeError:
+            self.log.warning("Invalid JSON output from %s: %s", self.name, output)
+            return []
+
+        metric_name_mapping = {
+            "Processed requests: mbatchd": "mbatchd.processed_requests",
+            "Job information queries": "jobs.queries",
+            "Host information queries": "host.queries",
+            "Queue information queries": "queue.queries",
+            "Job submission requests": "jobs.submission_requests",
+            "Jobs submitted": "jobs.submitted",
+            "Jobs dispatched": "jobs.dispatched",
+            "Jobs completed": "jobs.completed",
+            "Jobs sent to remote cluster": "jobs.sent_remote",
+            "Jobs accepted from remote cluster": "jobs.accepted_remote",
+            "Scheduling interval in second(s)": "jobs.scheduling_interval",
+            "Matching host criteria": "scheduler.host_matches",
+            "Job buckets": "jobs.buckets",
+            "Jobs reordered": "jobs.reordered",
+            "Slot utilization": "slots.utilization",
+            "Memory utilization": "memory.utilization",
+        }
+
+        metrics = []
+        records = output_json.get("record", [])
+        for record in records:
+            name = record.get("name")
+            metric_name = metric_name_mapping.get(name)
+            if metric_name is None or name is None:
+                self.log.debug("Skipping metric record with missing name %s: %s", name, record)
+                continue
+
+            aggregations = ["current", "max", "min", "avg", "total"]
+            for aggr in aggregations:
+                val = record.get(aggr)
+                if val is None:
+                    self.log.debug("Skipping metric aggregation with missing value %s: %s", aggr, record)
+                    continue
+                metric_value = transform_float(str(val))
+                metrics.append(LSFMetric(f"{self.prefix}.{metric_name}.{aggr}", metric_value, self.base_tags))
+
+        return metrics
+
+
+class BHistProcessor(LSFMetricsProcessor):
+    def __init__(self, client: LSFClient, config: InstanceConfig, logger: CheckLoggingAdapter, base_tags: list[str]):
+        super().__init__(
+            name='bhist',
+            prefix='job.completed',
+            expected_columns=10,
+            delimiter=None,
+            client=client,
+            config=config,
+            logger=logger,
+            base_tags=base_tags,
+        )
+        self.last_check_time = get_current_datetime().strftime('%Y/%m/%d/%H:%M')
+
+    def run_lsf_command(self) -> tuple[str, str, int]:
+        start_time = self.last_check_time
+        end_time = get_current_datetime().strftime('%Y/%m/%d/%H:%M')
+        self.log.trace("Last check time: %s, end time: %s", start_time, end_time)
+        if start_time == end_time:
+            self.log.trace("Start time %s is equal to end time %s, going back 1 minute", start_time, end_time)
+            # the highest granularity is 1 minute, so we need to go back 1 minute if collection interval < 60
+            start_time = (get_current_datetime() - timedelta(minutes=1)).strftime('%Y/%m/%d/%H:%M')
+        self.last_check_time = end_time
+        return self.client.bhist(start_time, end_time)
+
+    def process_metrics(self) -> list[LSFMetric]:
+        tags = [
+            LSFTagMapping('job_id', 0, transform_job_with_task),
+            LSFTagMapping('task_id', 0, transform_task_id),
+            LSFTagMapping('user', 1, transform_tag),
+            LSFTagMapping('job_name', 2, transform_job_name),
+        ]
+        metrics = [
+            LSFMetricMapping('pending', 3, transform_float),
+            LSFMetricMapping('pending_user_suspended', 4, transform_float),
+            LSFMetricMapping('running', 5, transform_float),
+            LSFMetricMapping('user_suspended', 6, transform_float),
+            LSFMetricMapping('system_suspended', 7, transform_float),
+            LSFMetricMapping('unknown', 8, transform_float),
+            LSFMetricMapping('total', 9, transform_float),
+        ]
+        return self.parse_table_command(metrics, tags, remove_first_line=True)
