@@ -399,7 +399,7 @@ class PostgresSchemaCollector(SchemaCollector):
                                 "num_partitions": cursor_row.get("num_partitions"),
                                 "partition_key": cursor_row.get("partition_key"),
                             }.items()
-                            if v is not None and v['name'] is not None
+                            if v is not None
                         }
                     ],
                 }.items()
