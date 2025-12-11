@@ -15,7 +15,8 @@
             "id": 4124810358470391,
             "definition": {
               "type": "image",
-              "url": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Nutanix_Logo.svg",
+              "url": "/api/v2/images/c5b5c45b-4f40-4cf1-8878-0d311ffa837f",
+              "url_dark_theme": "/api/v2/images/b1494644-3884-4a6e-9436-7c2919dfda1b",
               "sizing": "contain",
               "margin": "md",
               "has_background": false,
@@ -724,7 +725,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -782,7 +782,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -839,7 +838,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -925,7 +923,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -982,7 +979,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1096,7 +1092,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1209,7 +1204,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1323,7 +1317,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1597,7 +1590,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1654,7 +1646,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1711,7 +1702,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1796,7 +1786,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1891,7 +1880,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1981,7 +1969,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2264,7 +2251,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2325,7 +2311,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2384,7 +2369,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2498,7 +2482,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2613,7 +2596,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2672,7 +2654,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2730,7 +2711,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2844,7 +2824,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2930,7 +2909,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -3017,7 +2995,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -3103,7 +3080,6 @@
                 "max",
                 "value"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -3242,5 +3218,6 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
-  "reflow_type": "fixed"
+  "reflow_type": "fixed",
+  "pause_auto_refresh": false
 }
