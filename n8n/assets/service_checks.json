@@ -1,0 +1,29 @@
+[
+    {
+        "agent_version": "7.75.0",
+        "integration": "n8n",
+        "check": "n8n.openmetrics.health",
+        "statuses": ["ok", "critical"],
+        "groups": [],
+        "name": "n8n OpenMetrics Health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+      },
+      {
+        "agent_version": "7.75.0",
+        "integration": "n8n",
+        "check": "n8n.health.status",
+        "statuses": ["ok", "critical"],
+        "groups": [],
+        "name": "n8n Health Status",
+        "description": "Returns `CRITICAL` if the health check endpoint returns an unhealthy status. Returns `OK` otherwise."
+      },
+      {
+        "agent_version": "7.75.0",
+        "integration": "n8n",
+        "check": "n8n.readiness.status",
+        "statuses": ["ok", "critical"],
+        "groups": [],
+        "name": "n8n Readiness Status",
+        "description": "Returns `CRITICAL` if the readiness check endpoint returns an unready status. Returns `OK` otherwise."
+      }
+]
