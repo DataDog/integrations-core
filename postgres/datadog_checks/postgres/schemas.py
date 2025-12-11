@@ -327,7 +327,7 @@ class PostgresSchemaCollector(SchemaCollector):
                 {tables_query}
             ),
             schema_tables AS (
-                SELECT schemas.schema_id, schemas.schema_name,
+                SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
                 tables.table_id, tables.table_name
                 FROM schemas
                 LEFT JOIN tables ON schemas.schema_id = tables.schema_id
