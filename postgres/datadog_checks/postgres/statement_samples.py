@@ -921,7 +921,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                         "signature": plan_signature,
                         "collection_errors": collection_errors,
                         "source": "datadog_agent",
-                        "type": plan_type
+                        "type": plan_type,
                     },
                     "query_signature": row['query_signature'],
                     "resource_hash": row['query_signature'],
