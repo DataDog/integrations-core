@@ -438,6 +438,12 @@ def main():
     dependencies: dict[str, tuple[str, str]] = {}
     sizes: dict[str, WheelSizes] = {}
 
+    # Handle wheels already in the built directory
+    for wheel in iter_wheels(built_wheels_dir):
+        remove_test_files(wheel)
+        strip_lines_from_wheel(wheel)
+        add_dependency(dependencies, sizes, wheel)
+
     # Handle wheels currently in the external directory and move them to the built directory if they were modified
     for wheel in iter_wheels(external_wheels_dir):
         was_modified = remove_test_files(wheel)
@@ -449,12 +455,6 @@ def main():
             wheel = new_path
             print(f'Moved {wheel.name} to built directory')
 
-        add_dependency(dependencies, sizes, wheel)
-
-    # Handle wheels already in the built directory
-    for wheel in iter_wheels(built_wheels_dir):
-        remove_test_files(wheel)
-        strip_lines_from_wheel(wheel)
         add_dependency(dependencies, sizes, wheel)
 
     output_path = MOUNT_DIR / 'sizes.json'
