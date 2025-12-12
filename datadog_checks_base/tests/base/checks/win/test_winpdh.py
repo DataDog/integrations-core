@@ -15,7 +15,7 @@ try:
         pdh_mocks_fixture_bad_perf_strings,
     )
 
-    from datadog_checks.checks.win.winpdh import SINGLE_INSTANCE_KEY, WinPDHCounter
+    from datadog_checks.base.checks.win.winpdh import SINGLE_INSTANCE_KEY, WinPDHCounter
 except ImportError:
     import platform
 
