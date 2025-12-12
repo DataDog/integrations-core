@@ -1,0 +1,1 @@
+Fixes a regression introduced in ([#21347](https://github.com/DataDog/integrations-core/pull/21347)) that caused us to cache recently seen FQT events for 0.36 seconds instead of 3600 seconds

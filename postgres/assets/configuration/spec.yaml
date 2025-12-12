@@ -565,7 +565,7 @@ files:
             Set the max number of full statement text samples to collect per hour per query.
           value:
             type: number
-            default: 10000
+            default: 1
         - name: incremental_query_metrics
           hidden: true
           description: |
