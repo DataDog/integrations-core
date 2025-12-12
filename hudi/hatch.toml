@@ -3,6 +3,8 @@
 [[envs.default.matrix]]
 python = ["3.13"]
 
+
+# Update .github-cache.yml when changing these values
 [envs.default.env-vars]
 SPARK_VERSION = "3.2.0"
 HADOOP_VERSION = "3.2"
