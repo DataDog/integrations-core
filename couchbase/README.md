@@ -35,11 +35,31 @@ To configure this check for an Agent running on a host:
 
 1. Edit the `couchbase.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Couchbase data. See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
 
+   The Couchbase integration supports two collection methods:
+
+   **Prometheus-based collection (Couchbase 7.0+)**
+
+   For Couchbase 7.0 and later, configure the `prometheus_url` to use the Prometheus exporter:
+
    ```yaml
    init_config:
 
    instances:
-     ## @param server - string - required
+     ## @param prometheus_url - string - optional
+     ## The Prometheus/OpenMetrics endpoint URL for the Prometheus-based check.
+     #
+     - prometheus_url: http://localhost:8091/metrics
+   ```
+
+   **Legacy REST API collection**
+
+   For older versions or to use the legacy REST API:
+
+   ```yaml
+   init_config:
+
+   instances:
+     ## @param server - string - optional
      ## The server's url.
      #
      - server: http://localhost:8091
@@ -78,6 +98,16 @@ _Available for Agent versions >6.0_
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 ##### Metric collection
+
+For Prometheus-based collection (Couchbase 7.0+):
+
+| Parameter            | Value                                            |
+| -------------------- | ------------------------------------------------ |
+| `<INTEGRATION_NAME>` | `couchbase`                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                    |
+| `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:8091/metrics"}` |
+
+For legacy REST API collection:
 
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
