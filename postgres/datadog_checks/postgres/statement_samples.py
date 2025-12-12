@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import copy
+import math
 import re
 import time
+from collections import deque
 from enum import Enum
 from typing import Dict, Optional, Tuple  # noqa: F401
 
@@ -136,6 +138,33 @@ class StatementTruncationState(Enum):
     unknown = 'unknown'
 
 
+class RollingDurationStats:
+    def __init__(self, window_seconds):
+        self.window_seconds = window_seconds
+        self.samples = deque()
+
+    def _trim(self, now_ts):
+        cutoff = now_ts - self.window_seconds
+        while self.samples and self.samples[0][0] < cutoff:
+            self.samples.popleft()
+
+    def is_outlier(self, now_ts, value):
+        self._trim(now_ts)
+        count = len(self.samples)
+        if count < 2:
+            return False
+        mean = sum(v for _, v in self.samples) / float(count)
+        variance = sum((v - mean) ** 2 for _, v in self.samples) / float(count)
+        stddev = math.sqrt(variance)
+        if stddev == 0:
+            return False
+        return value > mean + 2 * stddev
+
+    def add_sample(self, now_ts, value):
+        self.samples.append((now_ts, value))
+        self._trim(now_ts)
+
+
 def agent_check_getter(self):
     return self._check
 
@@ -205,6 +234,9 @@ class PostgresStatementSamples(DBMAsyncJob):
             # total size: 10k * 100 = 1 Mb
             maxsize=int(config.query_samples.seen_samples_cache_maxsize),
             ttl=60 * 60 / config.query_samples.samples_per_hour_per_query,
+        )
+        self._query_duration_stats = TTLCache(
+            maxsize=int(config.query_samples.explained_queries_cache_maxsize), ttl=300
         )
 
         self._raw_statement_text_cache = RateLimitingTTLCache(
@@ -860,7 +892,24 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _collect_plan_for_statement(self, row):
         # limit the rate of explains done to the database
         cache_key = (row['datname'], row['query_signature'])
-        if not self._explained_statements_ratelimiter.acquire(cache_key):
+        duration_seconds = None
+        try:
+            if row.get('now') and row.get('query_start'):
+                duration_seconds = (row['now'] - row['query_start']).total_seconds()
+        except Exception:
+            duration_seconds = None
+
+        should_bypass_rate_limit = False
+        if duration_seconds is not None:
+            duration_stats = self._query_duration_stats.get(cache_key)
+            if duration_stats is None:
+                duration_stats = RollingDurationStats(window_seconds=300)
+            now_ts = row['now'].timestamp() if hasattr(row['now'], 'timestamp') else time.time()
+            should_bypass_rate_limit = duration_stats.is_outlier(now_ts, duration_seconds)
+            duration_stats.add_sample(now_ts, duration_seconds)
+            self._query_duration_stats[cache_key] = duration_stats
+
+        if not should_bypass_rate_limit and not self._explained_statements_ratelimiter.acquire(cache_key):
             return
 
         # Plans have several important signatures to tag events with. Note that for postgres, the
