@@ -4,6 +4,7 @@ import argparse
 import email
 import json
 import os
+import platform
 import re
 import shutil
 import subprocess
@@ -29,6 +30,8 @@ CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
 
+
+# testing
 
 class WheelSizes(TypedDict):
     compressed: int
@@ -153,6 +156,8 @@ def remove_test_files(wheel_path: Path) -> bool:
     with ZipFile(wheel_path, 'r') as zf:
         excluded_members = [name for name in zf.namelist() if is_excluded_from_wheel(name)]
 
+    print(f"Excluded members in {wheel_path.name}: {excluded_members}")
+
     if not excluded_members:
         # Nothing to strip, so skip rewriting the wheel
         return False
@@ -259,6 +264,15 @@ def main():
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
 
+    print("--------------------------------")
+    print("[DEBUGGING INFO]")
+    print("running on: ", sys.platform)
+    print("architecture: ", platform.machine())
+    print("sys.version: ", sys.version)
+    print("python_path: ", python_path)
+    subprocess.run([python_path, "--version"])
+    print("Platform:", sys.platform)
+    print("--------------------------------")
     with TemporaryDirectory() as d:
         staged_wheel_dir = Path(d).resolve()
         staged_built_wheels_dir = staged_wheel_dir / 'built'
