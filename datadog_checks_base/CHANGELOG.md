@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 37.25.0 / 2025-12-12
+
+***Security***:
+
+* Bump urllib3 version to 2.6.0 ([#22076](https://github.com/DataDog/integrations-core/pull/22076))
+
+***Fixed***:
+
+* Pin krb5 version until 0.9.0 is fixed ([#21987](https://github.com/DataDog/integrations-core/pull/21987))
+* Unpin krb5 after having updated cython in our build system ([#21991](https://github.com/DataDog/integrations-core/pull/21991))
+
 ## 37.24.0 / 2025-11-18
 
 ***Added***:
