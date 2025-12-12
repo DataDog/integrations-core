@@ -722,6 +722,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /guarddog/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /guarddog/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/arctic_wolf_aurora_endpoint_security/                               @DataDog/agent-integrations
+/arctic_wolf_aurora_endpoint_security/*.md                           @DataDog/agent-integrations @DataDog/documentation
+/arctic_wolf_aurora_endpoint_security/manifest.json                  @DataDog/agent-integrations @DataDog/documentation
+/arctic_wolf_aurora_endpoint_security/assets/logs/                   @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
