@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 35.5.0 / 2025-12-12
+
+***Added***:
+
+* Add an exclusion for the mysql file that was deleted ([#22095](https://github.com/DataDog/integrations-core/pull/22095))
+
 ## 35.4.0 / 2025-12-10
 
 ***Added***:
