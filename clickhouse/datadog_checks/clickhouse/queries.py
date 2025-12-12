@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .utils import compact_query
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-metrics
+# https://clickhouse.com/docs/operations/system-tables/metrics
 SystemMetrics = {
     'name': 'system.metrics',
     'query': 'SELECT value, metric FROM system.metrics',
@@ -435,7 +435,7 @@ SystemMetrics = {
 }
 
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-events
+# https://clickhouse.com/docs/operations/system-tables/events
 SystemEvents = {
     'name': 'system.events',
     'query': 'SELECT value, event FROM system.events',
@@ -1914,7 +1914,7 @@ SystemEventsToDeprecate = {
     ],
 }
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-asynchronous_metrics
+# https://clickhouse.com/docs/operations/system-tables/asynchronous_metrics
 SystemAsynchronousMetrics = {
     'name': 'system.asynchronous_metrics',
     'query': 'SELECT value, metric FROM system.asynchronous_metrics',
@@ -1967,7 +1967,7 @@ SystemAsynchronousMetrics = {
 }
 
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-parts
+# https://clickhouse.com/docs/operations/system-tables/parts
 SystemParts = {
     'name': 'system.parts',
     'query': compact_query(
@@ -1995,7 +1995,7 @@ SystemParts = {
 }
 
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-replicas
+# https://clickhouse.com/docs/operations/system-tables/replicas
 SystemReplicas = {
     'name': 'system.replicas',
     'query': compact_query(
@@ -2039,7 +2039,7 @@ SystemReplicas = {
 }
 
 
-# https://clickhouse.yandex/docs/en/operations/system_tables/#system-dictionaries
+# https://clickhouse.com/docs/operations/system-tables/dictionaries
 SystemDictionaries = {
     'name': 'system.dictionaries',
     'query': compact_query(

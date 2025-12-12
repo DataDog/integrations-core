@@ -1,0 +1,41 @@
+# https://github.com/ClickHouse/examples/tree/main/docker-compose-recipes
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
+    user: '101:101'
+    container_name: clickhouse
+    hostname: clickhouse
+    networks:
+      - clickhouse-network
+    volumes:
+      - ./volumes/clickhouse.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./volumes/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ./volumes/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+    depends_on:
+      clickhouse-keeper:
+        condition: service_healthy
+
+  clickhouse-keeper:
+    image: clickhouse/clickhouse-keeper:${KEEPER_VERSION:-25.8}
+    user: '101:101'
+    container_name: clickhouse-keeper
+    hostname: clickhouse-keeper
+    networks:
+      - clickhouse-network
+    volumes:
+      - ./volumes/keeper.xml:/etc/clickhouse-keeper/keeper_config.xml
+    ports:
+      - '9181:9181'
+    healthcheck:
+      test: echo ruok | nc 0.0.0.0 9181 || exit -1
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
+  clickhouse-network: {}
