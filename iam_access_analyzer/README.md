@@ -4,6 +4,8 @@
 
 Use AWS Identity and Access Management (IAM) Access Analyzer across your Amazon account to continuously analyze IAM permissions granted with any of your account policies. Datadog integrates with Amazon IAM Access Analyzer using a Lambda function that ships its findings as logs to Datadog.
 
+Additionally, if you use Cloud Security, Datadog sends Amazon IAM Access Analyzer findings to [Cloud Security Identity Risks][4], so you can Access Analyzer's unused-access findings to recommend downsized policies and enrich permissions-gap detections. Additionally, you can use it to extend the time frame beyond Datadog's usual permissions-gap detections, which cover 90 days, by configuring Access Analyzer to analyze more (for example, 180 or 360 days).
+
 ## Setup
 
 ### Log collection
@@ -51,3 +53,4 @@ Need help? Contact [Datadog support][3].
 [1]: https://docs.datadoghq.com/logs/guide/forwarder/
 [2]: /logs?query=source%3Aaccess-analyzer
 [3]: https://docs.datadoghq.com/help
+[4]: https://docs.datadoghq.com/security/cloud_security_management/identity_risks/
