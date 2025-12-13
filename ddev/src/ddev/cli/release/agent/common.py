@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ddev.repo.core import Repository
 
-    AgentChangelog = dict[str, dict[str, tuple[str, bool]]]
+    AgentChangelog = dict[str, dict[str, tuple[str, bool, bool]]]
 
 DATADOG_PACKAGE_PREFIX = 'datadog-'
 
@@ -36,14 +36,15 @@ def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
 def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangelog:
     """
     Return integration versions groups by Agent versions.
-    For each version, we also get a boolean indicating if the version has breaking changes.
+    For each version, we also get booleans indicating if the integration is new
+    and if the version has breaking changes.
 
     Structure:
 
     ```
     {
         '<AGENT_VERSION>': {
-            '<INTEGRATION_NAME>': ('<INTEGRATION_VERSION>', <IS_BREAKING_CHANGE>)
+            '<INTEGRATION_NAME>': ('<INTEGRATION_VERSION>', <IS_NEW>, <IS_BREAKING_CHANGE>)
         }
     }
     ```
@@ -53,13 +54,13 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
     ```python
     {
         '7.20.0': {
-            'snmp': ('1.9.1', False)
+            'snmp': ('1.9.1', False, False)
         }
     }
     ```
     """
     agent_tags = get_agent_tags(repo, since, to)
-    # store the changes in a mapping {agent_version --> {check_name --> (current_version, is_breaking_change)}}
+    # store the changes in a mapping {agent_version --> {check_name --> (current_version, is_new, is_breaking_change)}}
     changes_per_agent: AgentChangelog = {}
     # to keep indexing easy, we run the loop off-by-one
     for i in range(1, len(agent_tags)):
@@ -86,10 +87,10 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
             if old_ver and old_ver != ver:
                 # determine whether major version changed
                 breaking = old_ver.split('.')[0] < ver.split('.')[0]
-                changes_per_agent[current_tag][name] = (ver, breaking)
+                changes_per_agent[current_tag][name] = (ver, False, breaking)
             elif not old_ver:
                 # New integration
-                changes_per_agent[current_tag][name] = (ver, False)
+                changes_per_agent[current_tag][name] = (ver, True, False)
     return changes_per_agent
 
 
