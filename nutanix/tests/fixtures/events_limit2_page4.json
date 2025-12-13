@@ -1,0 +1,151 @@
+{
+  "data": [
+    {
+      "$reserved": {
+        "$fv": "v4.r1"
+      },
+      "$objectType": "monitoring.v4.serviceability.Event",
+      "extId": "48c8d441-040e-480c-a36f-a05c5f276d35",
+      "eventType": "PulseAudit",
+      "classifications": ["UserAction"],
+      "sourceClusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
+      "creationTime": "2025-10-16T14:25:54.368175Z",
+      "message": "Pulse configuration updated",
+      "clusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
+      "parameters": [
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "{\"enable\":true,\"isPulsePromptNeeded\":false,\"enableDefaultNutanixEmail\":true,\"enablePulseForPELinkedtoPC\":true}"
+          },
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.Parameter",
+          "paramName": "pulse_config_dto_before"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "{\"enable\":true,\"isPulsePromptNeeded\":false,\"remindLater\":false,\"enableDefaultNutanixEmail\":false,\"defaultNutanixEmail\":\"no-email@nutanix.com\",\"emailContactList\":[],\"verbosityType\":\"BASIC_COREDUMP\",\"tunnelDetails\":{\"connectionStatus\":{\"lastCheckedTimeStampUsecs\":0,\"status\":\"DISABLED\",\"message\":{\"message\":\"\"}},\"transportStatus\":{\"status\":\"UNKNOWN\"}},\"identificationInfoScrubbingLevel\":\"AUTO\",\"enablePulseForPELinkedtoPC\":true}"
+          },
+          "paramName": "pulse_config_dto_after"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "com.nutanix.prism.dto.appliance.configuration.PulseConfigDTO"
+          },
+          "paramName": "dto_class_name"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "admin"
+          },
+          "paramName": "audit_user"
+        }
+      ]
+    },
+    {
+      "$reserved": {
+        "$fv": "v4.r1"
+      },
+      "$objectType": "monitoring.v4.serviceability.Event",
+      "extId": "f1e41e4e-3a4b-4e22-970d-6df49f008e4c",
+      "eventType": "MulticlusterAudit",
+      "classifications": ["UserAction"],
+      "sourceClusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
+      "creationTime": "2025-10-16T14:26:43.962603Z",
+      "message": "External state added for cluster datadoghq.com-Default-Org-dkhrzg",
+      "clusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
+      "parameters": [
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "admin"
+          },
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.Parameter",
+          "paramName": "audit_user"
+        }
+      ]
+    }
+  ],
+  "$reserved": {
+    "$fv": "v4.r1"
+  },
+  "$objectType": "monitoring.v4.serviceability.ListEventsApiResponse",
+  "metadata": {
+    "flags": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "hasError",
+        "value": false
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isPaginated",
+        "value": true
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isTruncated",
+        "value": false
+      }
+    ],
+    "$reserved": {
+      "$fv": "v1.r0"
+    },
+    "$objectType": "common.v1.response.ApiResponseMetadata",
+    "links": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.response.ApiLink",
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=4",
+        "rel": "self"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=8378",
+        "rel": "last"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=3",
+        "rel": "prev"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=0",
+        "rel": "first"
+      }
+    ],
+    "totalAvailableResults": 10
+  }
+}

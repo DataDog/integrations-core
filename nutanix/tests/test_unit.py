@@ -1,0 +1,404 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from datetime import datetime, timedelta, timezone
+from unittest import mock
+
+import pytest
+
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.nutanix import NutanixCheck
+from tests.metrics import (
+    ALL_METRICS,
+    CLUSTER_STATS_METRICS_REQUIRED,
+    HOST_STATS_METRICS_REQUIRED,
+    VM_STATS_METRICS_REQUIRED,
+)
+
+pytestmark = [pytest.mark.unit]
+
+
+def test_health_check_success(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.health.up", value=1, count=1, tags=['prism_central:10.0.0.197'])
+
+
+def test_health_check_failure(dd_run_check, aggregator, mock_instance, mocker):
+    def mock_exception(*args, **kwargs):
+        from requests.exceptions import ConnectionError
+
+        raise ConnectionError("Connection failed")
+
+    mocker.patch('requests.Session.get', side_effect=mock_exception)
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.health.up", value=0, count=1, tags=['prism_central:10.0.0.197'])
+
+
+def test_cluster_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    expected_tags = [
+        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'prism_central:10.0.0.197',
+    ]
+
+    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.nbr_nodes", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.vm.count", value=4, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.vm.inefficient_count", value=0, tags=expected_tags)
+
+
+def test_cluster_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    expected_tags = [
+        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'prism_central:10.0.0.197',
+    ]
+
+    for metric in CLUSTER_STATS_METRICS_REQUIRED:
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+
+
+def test_host_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    expected_tags = [
+        'ntnx_type:host',
+        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+        'ntnx_host_type:HYPER_CONVERGED',
+        'ntnx_hypervisor_name:AHV 10.0.1.4',
+        'ntnx_hypervisor_type:AHV',
+        'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+        'prism_central:10.0.0.197',
+    ]
+
+    aggregator.assert_metric("nutanix.host.count", value=1, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a")
+
+
+def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    expected_tags = [
+        'ntnx_type:host',
+        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+        'ntnx_host_type:HYPER_CONVERGED',
+        'ntnx_hypervisor_name:AHV 10.0.1.4',
+        'ntnx_hypervisor_type:AHV',
+        'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+        'prism_central:10.0.0.197',
+    ]
+
+    for metric in HOST_STATS_METRICS_REQUIRED:
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a")
+
+
+def test_vm_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    expected_tags = [
+        'ntnx_type:vm',
+        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
+        'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+        'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+        'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
+        'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
+        'ntnx_vm_name:PC-OptionName-1',
+        'prism_central:10.0.0.197',
+    ]
+
+    aggregator.assert_metric("nutanix.vm.count", value=1, tags=expected_tags, hostname="PC-OptionName-1")
+
+
+def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    expected_tags = [
+        'ntnx_type:vm',
+        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
+        'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+        'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+        'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
+        'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
+        'ntnx_vm_name:PC-OptionName-1',
+        'prism_central:10.0.0.197',
+    ]
+
+    for metric in VM_STATS_METRICS_REQUIRED:
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags, hostname="PC-OptionName-1")
+
+
+def test_all_metrics_in_metadata_csv(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    for metric in ALL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
+
+
+def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    # Assert external tags for the host
+    datadog_agent.assert_external_tags(
+        '10-0-0-9-aws-us-east-1a',
+        {
+            'nutanix': [
+                'ntnx_type:host',
+                'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+                'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+                'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+                'ntnx_host_type:HYPER_CONVERGED',
+                'ntnx_hypervisor_name:AHV 10.0.1.4',
+                'ntnx_hypervisor_type:AHV',
+                'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+                'prism_central:10.0.0.197',
+            ]
+        },
+    )
+
+
+def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    # Assert external tags for the VM
+    datadog_agent.assert_external_tags(
+        'PC-OptionName-1',
+        {
+            'nutanix': [
+                'ntnx_type:vm',
+                'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+                'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+                'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
+                'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+                'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+                'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
+                'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
+                'ntnx_vm_name:PC-OptionName-1',
+                'prism_central:10.0.0.197',
+            ]
+        },
+    )
+
+
+# Mock datetime to match events fixture creation times
+MOCK_DATETIME = datetime(2025, 10, 14, 11, 15, 00, tzinfo=timezone.utc)
+LAST_EVENT_TIMESTAMP = datetime(2025, 12, 4, 15, 53, tzinfo=timezone.utc)
+
+
+@mock.patch("datadog_checks.nutanix.check.get_current_datetime")
+def test_events_collection(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that events are collected and have proper structure."""
+    get_current_datetime.return_value = MOCK_DATETIME
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    events = aggregator.events
+    assert len(events) > 0, "Expected events to be collected"
+
+    # Verify event structure
+
+    assert events[0]['event_type'] == 'nutanix'
+    assert events[0]['source_type_name'] == 'nutanix'
+    assert events[0]['alert_type'] in ['error', 'warning', 'info']
+    assert events[0]['msg_text'] == "Ultimate license applied to cluster"
+
+
+EXPECTED_EVENTS = [
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Ultimate license applied to cluster',
+        'msg_title': 'LicenseAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:9dba574f-90c0-473f-b91b-9be33f1d4732',
+            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760440548,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Password changed for user {username}',
+        'msg_title': 'PasswordAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:1f4d5f21-8bdd-4b15-8886-d232b5d030d8',
+            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760442479,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Pulse configuration updated',
+        'msg_title': 'PulseAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:4b7625c6-8a8d-4816-8ef1-019e8636f498',
+            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760442526,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Password reset for user admin',
+        'msg_title': 'PasswordAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:14f94d80-4404-4f1e-869d-fe22cbb4d00a',
+            'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
+            'ntnx_cluster_name:Unnamed',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760605372,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Password reset for user admin',
+        'msg_title': 'PasswordAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:0e7621b9-db61-4344-8978-3001cf386c3d',
+            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760607684,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Password reset for user admin',
+        'msg_title': 'PasswordAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:3c3da430-7670-406e-8f03-d29bdbc173f5',
+            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760622603,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'User admin enabled',
+        'msg_title': 'EnableDisableUserAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:348a9873-f3c4-47f7-95bb-5ff52ad069cc',
+            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760622668,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Pulse configuration updated',
+        'msg_title': 'PulseAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:57d23178-e257-497d-9db4-9aa2ccbcd89e',
+            'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
+            'ntnx_cluster_name:Unnamed',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760624754,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Pulse configuration updated',
+        'msg_title': 'PulseAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:48c8d441-040e-480c-a36f-a05c5f276d35',
+            'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
+            'ntnx_cluster_name:Unnamed',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760624754,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'External state added for cluster datadoghq.com-Default-Org-dkhrzg',
+        'msg_title': 'MulticlusterAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'prism_central:10.0.0.197',
+            'ntnx_event_id:f1e41e4e-3a4b-4e22-970d-6df49f008e4c',
+            'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
+            'ntnx_cluster_name:Unnamed',
+            'ntnx_event_classification:UserAction',
+        ],
+        'timestamp': 1760624803,
+    },
+]
+
+
+@mock.patch("datadog_checks.nutanix.check.get_current_datetime")
+def test_events_no_duplicates_on_subsequent_runs(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Test that no events are collected when there are no new events since last collection."""
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    get_current_datetime.return_value = MOCK_DATETIME
+    dd_run_check(check)
+    assert len(aggregator.events) == 10, "Expected events to be collected on first run"
+    assert aggregator.events == EXPECTED_EVENTS
+
+    aggregator.reset()
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    last_event_time = datetime.fromisoformat("2025-10-16T14:26:43.962603Z".replace("Z", "+00:00"))
+    get_current_datetime.return_value = last_event_time + timedelta(seconds=check.sampling_interval + 1)
+    dd_run_check(check)
+
+    assert len(aggregator.events) == 0, "Expected no events when there are no new events since last collection"

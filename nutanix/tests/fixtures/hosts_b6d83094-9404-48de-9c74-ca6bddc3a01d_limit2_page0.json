@@ -1,0 +1,30 @@
+{
+  "data": [],
+  "metadata": {
+    "flags": [
+      {
+        "name": "hasError",
+        "value": false
+      },
+      {
+        "name": "isPaginated",
+        "value": true
+      }
+    ],
+    "links": [
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/b6d83094-9404-48de-9c74-ca6bddc3a01d/hosts?$limit=2&$page=0",
+        "rel": "first"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/b6d83094-9404-48de-9c74-ca6bddc3a01d/hosts?$limit=2&$page=0",
+        "rel": "self"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/b6d83094-9404-48de-9c74-ca6bddc3a01d/hosts?$limit=2&$page=0",
+        "rel": "last"
+      }
+    ],
+    "totalAvailableResults": 0
+  }
+}
