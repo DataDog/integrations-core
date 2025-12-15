@@ -26,19 +26,39 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 # Query to fetch aggregated metrics from system.query_log
 # This is the ClickHouse equivalent of Postgres pg_stat_statements
+#
+# Key design decisions:
+# - Queries the LOCAL system.query_log table on this node only
+# - Uses event_date predicate for partition pruning optimization
+# - Uses is_initial_query=1 to only count queries once (not sub-queries)
+# - Uses type != 'QueryStart' to get one record per completed query
+# - Uses normalizeQuery() to get query text with wildcards representing the entire set
+# - Uses quantiles() to calculate p50, p90, p95, p99 simultaneously
+# - Removed ORDER BY and LIMIT to avoid losing data at high QPS
+#
 # Note: We collect count() and sum() metrics which are treated as cumulative counters
-# and then compute derivatives. We no longer collect avg/min/max/percentile as they
-# don't make sense after derivative calculation (mean_time is computed from total_time/count).
+# and then compute derivatives. Quantile metrics (p50, p90, p95, p99) are point-in-time
+# aggregates and are NOT included in derivative calculation.
+# mean_time is computed from total_time/count after derivatives.
+
+# List of internal Cloud users to exclude from query metrics
+# These are Datadog Cloud internal service accounts
+INTERNAL_CLOUD_USERS = frozenset({
+    # Add internal Cloud user names here as needed
+    # 'internal_service_user',
+})
+
 STATEMENTS_QUERY = """
 SELECT
     normalized_query_hash,
-    any(query) as query_text,
+    normalizeQuery(any(query)) as query_text,
     any(user) as user,
     any(type) as query_type,
     any(databases) as databases,
     any(tables) as tables,
     count() as execution_count,
     sum(query_duration_ms) as total_duration_ms,
+    quantiles(0.5, 0.9, 0.95, 0.99)(query_duration_ms) as duration_quantiles,
     sum(read_rows) as total_read_rows,
     sum(read_bytes) as total_read_bytes,
     sum(written_rows) as total_written_rows,
@@ -48,16 +68,17 @@ SELECT
     sum(memory_usage) as total_memory_usage,
     max(memory_usage) as peak_memory_usage
 FROM system.query_log
-WHERE event_time >= now() - INTERVAL {collection_interval} SECOND
-  AND type IN ('QueryFinish', 'ExceptionWhileProcessing')
+WHERE event_date >= toDate(now() - INTERVAL {collection_interval} SECOND)
+  AND event_time >= now() - INTERVAL {collection_interval} SECOND
+  AND type != 'QueryStart'
+  AND is_initial_query = 1
   AND query NOT LIKE '%system.query_log%'
   AND query NOT LIKE '%system.processes%'
   AND query NOT LIKE '/* DDIGNORE */%'
   AND query != ''
   AND normalized_query_hash != 0
+  {internal_user_filter}
 GROUP BY normalized_query_hash
-ORDER BY total_duration_ms DESC
-LIMIT 10000
 """
 
 
@@ -223,17 +244,34 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
 
         return payloads
 
+    def _get_internal_user_filter(self) -> str:
+        """
+        Build the SQL filter to exclude internal Cloud users.
+        Returns empty string if no users are configured for exclusion.
+        """
+        if not INTERNAL_CLOUD_USERS:
+            return ""
+        # Build a NOT IN clause for the internal users
+        users_list = ", ".join(f"'{user}'" for user in INTERNAL_CLOUD_USERS)
+        return f"AND user NOT IN ({users_list})"
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_query_log_statements(self):
         """
-        Load aggregated query metrics from system.query_log
-        This is analogous to Postgres loading from pg_stat_statements
+        Load aggregated query metrics from the local system.query_log table.
+        This is analogous to Postgres loading from pg_stat_statements.
+
+        Queries only the local node's query_log - each ClickHouse node maintains
+        its own query_log table with queries executed on that specific node.
         """
         try:
-            query = STATEMENTS_QUERY.format(collection_interval=int(self._metrics_collection_interval))
+            query = STATEMENTS_QUERY.format(
+                collection_interval=int(self._metrics_collection_interval),
+                internal_user_filter=self._get_internal_user_filter(),
+            )
             rows = self._execute_query(query)
 
-            self._log.debug("Loaded %s rows from system.query_log", len(rows))
+            self._log.debug("Loaded %s rows from local system.query_log", len(rows))
 
             # Convert to list of dicts
             result_rows = []
@@ -247,6 +285,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                     tables,
                     execution_count,
                     total_duration_ms,
+                    duration_quantiles,  # Array of [p50, p90, p95, p99]
                     total_read_rows,
                     total_read_bytes,
                     total_written_rows,
@@ -256,6 +295,12 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                     total_memory_usage,
                     peak_memory_usage,
                 ) = row
+
+                # Parse quantiles array: [p50, p90, p95, p99]
+                p50_time = float(duration_quantiles[0]) if duration_quantiles and len(duration_quantiles) > 0 else 0.0
+                p90_time = float(duration_quantiles[1]) if duration_quantiles and len(duration_quantiles) > 1 else 0.0
+                p95_time = float(duration_quantiles[2]) if duration_quantiles and len(duration_quantiles) > 2 else 0.0
+                p99_time = float(duration_quantiles[3]) if duration_quantiles and len(duration_quantiles) > 3 else 0.0
 
                 result_rows.append(
                     {
@@ -267,9 +312,13 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                         'tables': tables if tables else [],
                         'count': int(execution_count) if execution_count else 0,
                         'total_time': float(total_duration_ms) if total_duration_ms else 0.0,
+                        # Quantile metrics (p50, p90, p95, p99) - these are point-in-time aggregates
+                        # and are NOT included in derivative calculation
+                        'p50_time': p50_time,
+                        'p90_time': p90_time,
+                        'p95_time': p95_time,
+                        'p99_time': p99_time,
                         # Note: mean_time will be calculated after derivative calculation as total_time / count
-                        # min_time, max_time, p95_time are not included because they are aggregates that
-                        # don't make sense after taking derivatives
                         'rows': int(total_result_rows) if total_result_rows else 0,
                         'read_rows': int(total_read_rows) if total_read_rows else 0,
                         'read_bytes': int(total_read_bytes) if total_read_bytes else 0,
