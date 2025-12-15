@@ -251,7 +251,7 @@ For Zscaler Private Access integration, specific custom log formats must be conf
 
 
       destination d_forward {
-         network("127.0.0.1" port(<destination_port>) transport("tcp"));
+         network("<destination_ip>" port(<destination_port>) transport("tcp"));
       };
 
       log {
@@ -263,6 +263,7 @@ For Zscaler Private Access integration, specific custom log formats must be conf
    > Note:
    >- *source_port* should be similar to the port provided in **Configure log receiver from Zscaler Private Access**.
    >- *destination_port* should be similar to the port provided in **Log collection**.
+   >- In the *destination_ip*, specify the `IP address` or `hostname` of the host where Datadog Agent is installed.
 
 11. Restart syslog-ng:
       ```
