@@ -21,8 +21,6 @@ from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent
 
 # Query to fetch individual completed queries from system.query_log
 # Unlike statements.py which aggregates, this query returns individual query executions
-# Note: peak_memory_usage may not exist in all ClickHouse versions (e.g., ClickHouse Cloud)
-# We use a subquery with hasColumnInTable() to conditionally include it
 #
 # Uses {query_log_table} placeholder for ClickHouse Cloud clusterAllReplicas() support:
 # - For ClickHouse Cloud: clusterAllReplicas('default', system.query_log)
@@ -43,7 +41,6 @@ SELECT
     result_rows,
     result_bytes,
     memory_usage,
-    memory_usage as peak_memory_usage,
     query_start_time_microseconds,
     event_time_microseconds,
     query_id,
@@ -197,7 +194,6 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                     result_rows_count,
                     result_bytes,
                     memory_usage,
-                    peak_memory_usage,
                     query_start_time_microseconds,
                     event_time_microseconds,
                     query_id,
@@ -226,7 +222,6 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                     'result_rows': int(result_rows_count) if result_rows_count else 0,
                     'result_bytes': int(result_bytes) if result_bytes else 0,
                     'memory_usage': int(memory_usage) if memory_usage else 0,
-                    'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
                     'query_start_time_microseconds': self.to_microseconds(query_start_time_microseconds),
                     'event_time_microseconds': event_time_int,
                     'query_id': str(query_id) if query_id else '',
@@ -312,7 +307,6 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 'result_rows': row.get('result_rows', 0),
                 'result_bytes': row.get('result_bytes', 0),
                 'memory_usage': row.get('memory_usage', 0),
-                'peak_memory_usage': row.get('peak_memory_usage', 0),
                 'query_start_time_microseconds': row.get('query_start_time_microseconds', 0),
                 'event_time_microseconds': row.get('event_time_microseconds', 0),
                 'initial_query_id': row.get('initial_query_id', ''),

@@ -136,7 +136,6 @@ def test_create_batched_payload_query_details(check_with_dbm):
             'result_rows': 100,
             'result_bytes': 10240,
             'memory_usage': 5242880,
-            'peak_memory_usage': 6291456,
             'event_time_microseconds': 1746205423150500,
             'query_start_time_microseconds': 1746205423000000,
             'initial_query_id': 'test-query-id-123',
@@ -248,7 +247,6 @@ def test_completed_queries_query_format():
     assert 'written_rows' in COMPLETED_QUERIES_QUERY
     assert 'written_bytes' in COMPLETED_QUERIES_QUERY
     assert 'memory_usage' in COMPLETED_QUERIES_QUERY
-    assert 'peak_memory_usage' in COMPLETED_QUERIES_QUERY
     assert 'event_time_microseconds' in COMPLETED_QUERIES_QUERY
     assert 'query_start_time_microseconds' in COMPLETED_QUERIES_QUERY
 
