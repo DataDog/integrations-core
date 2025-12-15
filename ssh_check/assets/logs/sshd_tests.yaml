@@ -15,6 +15,7 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
+          version: "1.5.0"
         severity: "Informational"
         severity_id: 1
         type_name: "Authentication: Logoff"
@@ -46,6 +47,7 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
+          version: "1.5.0"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -97,6 +99,7 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
+          version: "1.5.0"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
