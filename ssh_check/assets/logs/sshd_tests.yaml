@@ -5,6 +5,10 @@ tests:
   result:
     custom:
       ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication Activity"
+        class_uid: 3002
         activity_id: 2
         activity_name: "Logoff"
         metadata:
@@ -32,6 +36,10 @@ tests:
           ip: "172.22.179.72"
           port: "58599"
       ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication Activity"
+        class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
         metadata:
@@ -61,11 +69,6 @@ tests:
   sample: "Received disconnect from 172.22.179.72: 11: disconnected by user"
   result:
     custom:
-      ocsf:
-        src_endpoint:
-          ip: "172.22.179.72"
-        type_name: "Authentication: Logoff"
-        type_uid: 300202
       network:
         client:
           ip: "172.22.179.72"
@@ -84,6 +87,10 @@ tests:
           ip: "192.168.1.100"
           port: "22334"
       ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication Activity"
+        class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
         metadata:
