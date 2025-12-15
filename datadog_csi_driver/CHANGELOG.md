@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.2.0 / 2025-10-31
+## 1.3.0 / 2025-11-26
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 1.2.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 
@@ -12,7 +18,7 @@
 
 * Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
 
-## 1.1.0 / 2025-10-31
+## 1.1.0 / 2025-10-31 / Agent 7.71.0
 
 ***Added***:
 

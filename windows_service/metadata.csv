@@ -1,4 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-windows_service.restarts,count,,event,,The number of restarts of the host process of the Windows service,0,windows_service,restarts,,
-windows_service.state,gauge,,service,,Sum by state to count the number of services in each state,0,windows_service,state,,
-windows_service.uptime,gauge,,second,,The uptime (in seconds) of the host process of the Windows service,0,windows_service,uptime,,
