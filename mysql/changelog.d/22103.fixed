@@ -1,1 +1,0 @@
-Revert "Migrate MySQL to new schema collector" to avoid breaking schema collection on older versions of Mysql/MariaDB

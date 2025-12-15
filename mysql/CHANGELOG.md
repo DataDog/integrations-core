@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Migrate Mysql to a new schema collector, which provides improved performance in the Agent and allows the backend to handle larger schema collections ([#21729](https://github.com/DataDog/integrations-core/pull/21729))
+* Migrate SQL Server to a new schema collector, which provides improved performance in the Agent and allows the backend to handle larger schema collections ([#21729](https://github.com/DataDog/integrations-core/pull/21729))
 * Add DBM Agent health events to MySQL, including basic initialization checks, unhandled errors, and missed collections ([#21867](https://github.com/DataDog/integrations-core/pull/21867))
 * Upgrade base version for Postgres, MySQL, and SQLServer ([#21906](https://github.com/DataDog/integrations-core/pull/21906))
 
