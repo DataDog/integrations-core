@@ -189,6 +189,8 @@ integration/cri:
 - cri/**/*
 integration/crio:
 - crio/**/*
+integration/cyberark_endpoint_privilege_manager:
+- cyberark_endpoint_privilege_manager/**/*
 integration/crowdstrike_fdr:
 - crowdstrike_fdr/**/*
 integration/databricks:

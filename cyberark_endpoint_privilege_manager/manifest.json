@@ -1,0 +1,40 @@
+{
+    "manifest_version": "2.0.0",
+    "app_uuid": "96a55a72-deb6-4afe-9f96-e5816d56f755",
+    "app_id": "cyberark-endpoint-privilege-manager",
+    "display_on_public_website": false,
+    "tile": {
+        "overview": "README.md#Overview",
+        "configuration": "README.md#Setup",
+        "support": "README.md#Support",
+        "changelog": "CHANGELOG.md",
+        "description": "Gain insights into CyberArk Endpoint Privilege Manager logs",
+        "title": "CyberArk Endpoint Privilege Manager",
+        "media": [],
+        "classifier_tags": [
+            "Supported OS::Linux",
+            "Supported OS::Windows",
+            "Supported OS::macOS",
+            "Category::Log Collection",
+            "Category::Security",
+            "Offering::Integration",
+            "Submitted Data Type::Logs"
+        ]
+    },
+    "assets": {
+        "integration": {
+            "auto_install": false,
+            "source_type_id": 65358459,
+            "source_type_name": "CyberArk Endpoint Privilege Manager",
+            "events": {
+                "creates_events": false
+            }
+        }
+    },
+    "author": {
+        "support_email": "help@datadoghq.com",
+        "name": "Datadog",
+        "homepage": "https://www.datadoghq.com",
+        "sales_email": "info@datadoghq.com"
+    }
+}
