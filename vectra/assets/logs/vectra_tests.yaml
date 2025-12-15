@@ -1,4 +1,4 @@
-id: vectra
+id: "vectra"
 tests:
  -
   sample: |-
@@ -35,17 +35,25 @@ tests:
       event_object: "user"
       event_timestamp: 1765437514796
       id: 34567
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       result_status: "success"
       service: "audit-events"
-      source_ip: "10.10.10.10"
-      user_id: "12345"
+      status: "Ok"
       user_role: "Security Analyst"
       user_type: "JWT"
-      username: "test@example.com"
+      usr:
+        id: "12345"
+        name: "test@example.com"
       version: "202512.3.0"
     message: "Failed login/logout attempt"
+    service: "audit-events"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1765437514796
  -
   sample: |-
     {
@@ -93,6 +101,7 @@ tests:
       name: "AWS:test@example.com"
       service: "entity-scoring-events"
       severity: "Low"
+      status: "Notice"
       type: "account"
       urgency_score: 74
       url: "https://xyz.portal.vectra.ai/accounts/1013"
@@ -121,8 +130,11 @@ tests:
         "id" : 32738,
         "category" : "ACCOUNT SCORING"
       }
+    service: "entity-scoring-events"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1765437284025
  -
   sample: |-
     {
@@ -170,27 +182,30 @@ tests:
   service: "detections"
   result:
     custom:
-      assigned_to: "test@example.com"
       certainty: 60
       created_timestamp: "2025-12-10T10:42:20Z"
       data_source:
         connection_id: "s9z9x5sj"
         connection_name: "M365-Demo"
         type: "o365"
-      detection: "M365 Suspicious Power Automate Flow Creation"
       detection_category: "command_and_control"
+      detection_id: 36224
+      detection_name: "M365 Suspicious Power Automate Flow Creation"
       detection_type: "M365 Suspicious Power Automate Flow Creation"
       detection_url: "https://xyz.portal.vectra.ai/api/v3.4/detections/36224"
       filtered_by_ai: false
       filtered_by_rule: false
       filtered_by_user: false
       first_timestamp: "2025-12-10T09:29:14Z"
-      id: 36224
       is_custom_model: false
       is_marked_custom: false
       is_targeting_key_asset: false
       is_triaged: false
       last_timestamp: 1765437592585
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       sensor: "s9z9x5sj"
       sensor_name: "Vectra X"
       service: "detections"
@@ -200,13 +215,15 @@ tests:
         name: "O365:test1@example.com"
         threat: 100
         url: "https://xyz.portal.vectra.ai/api/v3.4/accounts/1083"
-      src_ip: "10.10.10.10"
       state: "active"
+      status: "Critical"
       summary:
         description: "This account was seen creating a Power Automate flow, a native Microsoft automation framework, which is unusual for the account."
       threat: 70
       type: "account"
       url: "https://xyz.portal.vectra.ai/api/v3.4/detections/36224"
+      usr:
+        name: "test@example.com"
     message: |-
       {
         "last_timestamp" : 1765437592585,
@@ -250,8 +267,11 @@ tests:
         "threat" : 70,
         "sensor_name" : "Vectra X"
       }
+    service: "detections"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1765437592585
  -
   sample: |-
     {
@@ -290,9 +310,7 @@ tests:
   service: "detection-events"
   result:
     custom:
-      category: "command_and_control"
       certainty: 60
-      d_type_vname: "M365 Suspicious Power Automate Flow Creation"
       detail:
         account_name: "O365:test1@example.com"
         flow_connector_count: 3
@@ -307,8 +325,10 @@ tests:
           importance: "Medium"
           name: "O365:test1@example.com"
           urgency_score: 100
+      detection_category: "command_and_control"
       detection_href: "https://308714519558.cc1.portal.vectra.ai/detections/36224?detail_id=148200"
       detection_id: 36224
+      detection_name: "M365 Suspicious Power Automate Flow Creation"
       detection_type: "M365 Suspicious Power Automate Flow Creation"
       entity_id: 1083
       entity_name: "O365:test1@example.com"
@@ -323,6 +343,7 @@ tests:
        - "T1064"
       service: "detection-events"
       severity: 7
+      status: "Critical"
       threat: 70
       triaged: false
       type: "account"
@@ -361,5 +382,8 @@ tests:
         "detection_id" : 36224,
         "d_type_vname" : "M365 Suspicious Power Automate Flow Creation"
       }
+    service: "detection-events"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1765395052267

@@ -5,7 +5,7 @@
 This integration ingests the following logs:
 
 - **Detections**: Detections provide detailed information on security events detected within the Vectra platform, with events generated upon the initial detection and each subsequent update.
-- **Entity Scoring Events**: Entity Scoring Events provide detailed information on changes to an entity’s score, which occur upon initial threat detection, the discovery of additional detections, and updates to any previously discovered detections.
+- **Entity Scoring Events**: Entity Scoring Events provide detailed information on changes to an entity's score, which occur upon initial threat detection, the discovery of additional detections, and updates to any previously discovered detections.
 - **Audit Events**: Audit Events provide detailed information on user actions performed within the system.
 
 Integrate Vectra with Datadog to gain insights into detections, entity scoring events and audit events using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.

@@ -27,6 +27,15 @@
       "events": {
         "creates_events": false
       }
+    },
+    "dashboards": {
+      "Vectra Overview": "assets/dashboards/vectra_overview.json",
+      "Vectra Detection Insights": "assets/dashboards/vectra_detection_insights.json",
+      "Vectra Entity Score Change Insights": "assets/dashboards/vectra_entity_score_change_insights.json",
+      "Vectra Audit Insights": "assets/dashboards/vectra_audit_insights.json"
+    },
+    "logs": {
+      "source": "vectra"
     }
   },
   "author": {
