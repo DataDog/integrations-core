@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.23.1 / 2025-12-15
+
+***Security***:
+
+* Bump urllib3 version to 2.6.0 ([#22076](https://github.com/DataDog/integrations-core/pull/22076))
+
 ## 37.23.0 / 2025-10-31
 
 ***Added***:
