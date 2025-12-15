@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 23.3.1 / 2025-12-15
+
+***Fixed***:
+
+* Fixed collection of Postgres schema owners. ([#22101](https://github.com/DataDog/integrations-core/pull/22101))
+
 ## 23.3.0 / 2025-11-26
 
 ***Added***:
