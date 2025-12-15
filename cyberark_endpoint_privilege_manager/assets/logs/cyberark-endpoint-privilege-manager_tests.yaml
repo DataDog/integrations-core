@@ -41,7 +41,7 @@ tests:
       "sourceName" : "Microsoft Windows",
       "hash" : "237859BAE41E8DD34F54F2E42DC3A788059D1E00"
     }
-  service: raw-events
+  service: "raw-events"
   result:
     custom:
       accessAction: "false"
@@ -51,9 +51,11 @@ tests:
       arrivalTime: "2025-11-26T08:41:26.791Z"
       computerName: "Test"
       deceptionType: 0
+      deception_policy: "NULL"
       displayName: "Windows Web Experience Pack"
       eventCount: 1
-      eventType: "Launch"
+      evt:
+        name: "Launch"
       fileName: "MicrosoftWindows.Client.WebExperience"
       filePath: "C:\\Program Files\\WindowsApps\\MicrosoftWindows.Client.WebExperience"
       filePathWithoutFilename: "C:\\Program Files\\WindowsApps\\"
@@ -66,6 +68,7 @@ tests:
       lastEventDate: "2025-11-26T08:41:25.753Z"
       logonAttemptTypeId: 0
       logonStatusId: 0
+      logon_status: "Ok"
       modificationTime: "2025-10-27T08:41:26.729Z"
       operatingSystemType: "Windows"
       originalFileName: ""
@@ -78,7 +81,8 @@ tests:
       threatProtectionAction: "ALL"
       threatProtectionActionId: 0
       userIsAdmin: true
-      userName: "Test\\Administrator"
+      usr:
+        name: "Test\\Administrator"
       winEventRecordId: 0
       winEventType: 0
     message: |-
@@ -121,8 +125,10 @@ tests:
         "sourceName" : "Microsoft Windows",
         "hash" : "237859BAE41E8DD34F54F2E42DC3A788059D1E00"
       }
+    service: "raw-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764146485753
  -
   sample: |-
     {
@@ -172,7 +178,7 @@ tests:
       "sourceName" : "Old Application",
       "hash" : "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B"
     }
-  service: policy-audit-events
+  service: "policy-audit-events"
   result:
     custom:
       accessTargetName: ""
@@ -187,7 +193,8 @@ tests:
       company: "Google LLC"
       computerName: "Test"
       displayName: "Google Updater (x64) (updater.exe)"
-      eventType: "Block"
+      evt:
+        name: "Block"
       fileAccessPermission: ""
       fileDescription: "Google Updater (x64)"
       fileName: "updater.exe"
@@ -219,7 +226,8 @@ tests:
       sourceType: "OldApplication"
       upgradeCode: ""
       userIsAdmin: true
-      userName: "Test\\Administrator"
+      usr:
+        name: "Test\\Administrator"
     message: |-
       {
         "fileDescription" : "Google Updater (x64)",
@@ -268,8 +276,10 @@ tests:
         "sourceName" : "Old Application",
         "hash" : "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B"
       }
+    service: "policy-audit-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764327427844
  -
   sample: |-
     {
@@ -284,19 +294,23 @@ tests:
       "LoggedAt" : "2025-12-09T08:14:21.78Z",
       "PermissionDescription" : "None"
     }
-  service: set-admin-audit-events
+  service: "set-admin-audit-events"
   result:
     custom:
-      Administrator: "user.name@example.com"
       Description: "API Get Admin audit data /API/Sets/1e97a613-w243-4f53-9a8d-d36081212de6/AdminAudit?DateFrom=2025-12-08T08:10:06.5Z&limit=500 GET DateFrom: 2025-12-08T08:10:06.5Z, DateTo: , offset: 0, limit: 500"
       EventTime: "2025-12-09T11:51:54.56Z"
       Feature: "Public API"
       InternalSessionId: 3023922
       LoggedAt: "2025-12-09T08:14:21.78Z"
-      LoggedFrom: "10.10.10.10"
       PermissionDescription: "None"
       Role: "SetAdmin"
       SetName: "Test - 1"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      usr:
+        name: "user.name@example.com"
     message: |-
       {
         "Role" : "SetAdmin",
@@ -310,8 +324,10 @@ tests:
         "LoggedAt" : "2025-12-09T08:14:21.78Z",
         "PermissionDescription" : "None"
       }
+    service: "set-admin-audit-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1765281114560
  -
   sample: |-
     {
@@ -326,19 +342,23 @@ tests:
       "AccountName" : "Test Account",
       "PermissionDescription" : "Create Administrator"
     }
-  service: account-admin-audit-events
+  service: "account-admin-audit-events"
   result:
     custom:
       AccountName: "Test Account"
-      Administrator: "test.user@example.com"
       Description: "Create Admin \"test.user@example.com\" started"
       EventTime: "2025-11-25T10:36:24.82Z"
       Feature: "Account Mgmt"
       InternalSessionId: 2982762
       LoggedAt: "2025-11-25T10:15:51.207Z"
-      LoggedFrom: "163.116.205.114"
       PermissionDescription: "Create Administrator"
       Role: "AccountAdmin"
+      network:
+        client:
+          geoip: {}
+          ip: "163.116.205.114"
+      usr:
+        name: "test.user@example.com"
     message: |-
       {
         "Role" : "AccountAdmin",
@@ -352,5 +372,7 @@ tests:
         "AccountName" : "Test Account",
         "PermissionDescription" : "Create Administrator"
       }
+    service: "account-admin-audit-events"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764066984820
