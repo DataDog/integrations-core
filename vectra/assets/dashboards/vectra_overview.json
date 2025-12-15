@@ -352,7 +352,7 @@
                                                 "fields": [
                                                     "@network.client.geoip.country.iso_code"
                                                 ],
-                                                "limit": 250,
+                                                "limit": 1000,
                                                 "sort": {
                                                     "aggregation": "count",
                                                     "metric": "count",
@@ -372,7 +372,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 1,
+                                        "count": 1000,
                                         "order_by": [
                                             {
                                                 "type": "formula",

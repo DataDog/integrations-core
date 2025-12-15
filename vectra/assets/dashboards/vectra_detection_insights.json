@@ -1506,7 +1506,7 @@
                                                 "fields": [
                                                     "@network.client.geoip.country.iso_code"
                                                 ],
-                                                "limit": 250,
+                                                "limit": 1000,
                                                 "should_exclude_missing": true,
                                                 "sort": {
                                                     "aggregation": "cardinality",
@@ -1527,7 +1527,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 1000,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1634,7 +1634,7 @@
                     {
                         "id": 932459105597701,
                         "definition": {
-                            "title": "Analyst assignment load",
+                            "title": "Data sources summary",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",

@@ -10,7 +10,48 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Vectra detections, entity scoring events and audit events",
     "title": "Vectra",
-    "media": [],
+    "media": [
+      {
+        "caption": "Vectra Overview",
+        "image_url": "images/vectra_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Vectra Overview",
+        "image_url": "images/vectra_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Vectra Detection Insights",
+        "image_url": "images/vectra_detection_insights_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Vectra Detection Insights",
+        "image_url": "images/vectra_detection_insights_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Vectra Entity Score Change Insights",
+        "image_url": "images/vectra_entity_score_change_insights_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Vectra Entity Score Change Insights",
+        "image_url": "images/vectra_entity_score_change_insights_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Vectra Audit Insights",
+        "image_url": "images/vectra_audit_insights_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Vectra Audit Insights",
+        "image_url": "images/vectra_audit_insights_dark.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
         "Category::Log Collection",
         "Category::Security",
