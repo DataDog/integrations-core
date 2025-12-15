@@ -110,7 +110,6 @@ pipeline:
                 id: ocsf.activity_id
             - type: schema-category-mapper
               name: ocsf.type_name
-              id: ocsf.type_uid
               categories:
                 - filter:
                     query: "@system.action:Accepted"
@@ -121,7 +120,8 @@ pipeline:
                   name: "Authentication: Logoff"
                   id: 300202
               targets:
-                name: ocsf.type_uid
+                name: ocsf.type_name
+                id: ocsf.type_uid
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
