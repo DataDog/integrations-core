@@ -1,0 +1,212 @@
+id: vectra
+metric_id: vectra
+backend_only: false
+facets:
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+pipeline:
+  type: pipeline
+  name: Vectra
+  enabled: true
+  filter:
+    query: source:vectra
+  processors:
+    - type: date-remapper
+      name: Define `last_timestamp` and `event_timestamp` as the official date of the
+        log
+      enabled: true
+      sources:
+        - last_timestamp
+        - event_timestamp
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: pipeline
+      name: Audit events
+      enabled: true
+      filter:
+        query: service:audit-events
+      processors:
+        - type: attribute-remapper
+          name: Map `user_id` to `usr.id`
+          enabled: true
+          sources:
+            - user_id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `username` to `usr.name`
+          enabled: true
+          sources:
+            - username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `source_ip` to `network.client.ip`
+          enabled: true
+          sources:
+            - source_ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Lookup for `result_status` to `status`
+          enabled: true
+          source: result_status
+          target: status
+          lookupTable: |-
+            success,Ok
+            failure,Warning
+          type: lookup-processor
+        - type: message-remapper
+          name: Define `message` as the official status of the log
+          enabled: true
+          sources:
+            - message
+    - type: pipeline
+      name: Entity scoring events
+      enabled: true
+      filter:
+        query: service:entity-scoring-events
+      processors:
+        - name: Lookup for `severity` to `status`
+          enabled: true
+          source: severity
+          target: status
+          lookupTable: |-
+            High,Critical
+            Medium,Warning
+            Low,Notice
+          type: lookup-processor
+    - type: pipeline
+      name: Detections
+      enabled: true
+      filter:
+        query: service:detections
+      processors:
+        - type: attribute-remapper
+          name: Map `assigned_to` to `usr.name`
+          enabled: true
+          sources:
+            - assigned_to
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `src_ip` to `network.client.ip`
+          enabled: true
+          sources:
+            - src_ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `id` to `detection_id`
+          enabled: true
+          sources:
+            - id
+          sourceType: attribute
+          target: detection_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `detection` to `detection_name`
+          enabled: true
+          sources:
+            - detection
+          sourceType: attribute
+          target: detection_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Detections events
+      enabled: true
+      filter:
+        query: service:detection-events
+      processors:
+        - type: attribute-remapper
+          name: Map `d_type_vname` to `detection_name`
+          enabled: true
+          sources:
+            - d_type_vname
+          sourceType: attribute
+          target: detection_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `category` to `detection_category`
+          enabled: true
+          sources:
+            - category
+          sourceType: attribute
+          target: detection_category
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Detection and Detection events
+      enabled: true
+      filter:
+        query: service:(detections OR detection-events)
+      processors:
+        - type: category-processor
+          name: Category processor for defining `status` from log
+          enabled: true
+          categories:
+            - filter:
+                query: "@threat:[81 TO 100]"
+              name: Alert
+            - filter:
+                query: "@threat:[61 TO 80]"
+              name: Critical
+            - filter:
+                query: "@threat:[41 TO 60]"
+              name: Warning
+            - filter:
+                query: "@threat:[21 TO 40]"
+              name: Notice
+            - filter:
+                query: "@threat:[0 TO 20]"
+              name: Info
+          target: status
+    - type: geo-ip-parser
+      name: Extract Geolocation information from Client IP
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status

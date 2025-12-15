@@ -1,0 +1,365 @@
+id: vectra
+tests:
+ -
+  sample: |-
+    {
+      "event_data" : {
+        "country" : "India",
+        "device_name" : "Chrome 142, Windows 10",
+        "city" : "Ahmedabad",
+        "user" : "test@example.com"
+      },
+      "event_timestamp" : 1765437514796,
+      "message" : "Failed login/logout attempt",
+      "version" : "202512.3.0",
+      "source_ip" : "10.10.10.10",
+      "user_role" : "Security Analyst",
+      "event_action" : "login",
+      "user_type" : "JWT",
+      "user_id" : "12345",
+      "result_status" : "success",
+      "service" : "audit-events",
+      "id" : 34567,
+      "event_object" : "user",
+      "username" : "test@example.com"
+    }
+  service: "audit-events"
+  result:
+    custom:
+      event_action: "login"
+      event_data:
+        city: "Ahmedabad"
+        country: "India"
+        device_name: "Chrome 142, Windows 10"
+        user: "test@example.com"
+      event_object: "user"
+      event_timestamp: 1765437514796
+      id: 34567
+      result_status: "success"
+      service: "audit-events"
+      source_ip: "10.10.10.10"
+      user_id: "12345"
+      user_role: "Security Analyst"
+      user_type: "JWT"
+      username: "test@example.com"
+      version: "202512.3.0"
+    message: "Failed login/logout attempt"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "severity" : "Low",
+      "velocity_contrib" : 2,
+      "importance" : 1,
+      "attack_rating" : 7,
+      "entity_id" : 1013,
+      "type" : "account",
+      "active_detection_types" : [ "AWS Suspect Privilege Escalation", "AWS User Hijacking", "AWS User Permissions Enumeration" ],
+      "event_timestamp" : 1765437284025,
+      "is_prioritized" : true,
+      "url" : "https://xyz.portal.vectra.ai/accounts/1013",
+      "last_detection" : {
+        "id" : 35431,
+        "type" : "AWS User Hijacking",
+        "url" : "https://xyz.portal.vectra.ai/detections/35431"
+      },
+      "breadth_contrib" : 1,
+      "urgency_score" : 74,
+      "service" : "entity-scoring-events",
+      "name" : "AWS:test@example.com",
+      "id" : 32738,
+      "category" : "ACCOUNT SCORING"
+    }
+  service: "entity-scoring-events"
+  result:
+    custom:
+      active_detection_types:
+       - "AWS Suspect Privilege Escalation"
+       - "AWS User Hijacking"
+       - "AWS User Permissions Enumeration"
+      attack_rating: 7
+      breadth_contrib: 1
+      category: "ACCOUNT SCORING"
+      entity_id: 1013
+      event_timestamp: 1765437284025
+      id: 32738
+      importance: 1
+      is_prioritized: true
+      last_detection:
+        id: 35431
+        type: "AWS User Hijacking"
+        url: "https://xyz.portal.vectra.ai/detections/35431"
+      name: "AWS:test@example.com"
+      service: "entity-scoring-events"
+      severity: "Low"
+      type: "account"
+      urgency_score: 74
+      url: "https://xyz.portal.vectra.ai/accounts/1013"
+      velocity_contrib: 2
+    message: |-
+      {
+        "severity" : "Low",
+        "velocity_contrib" : 2,
+        "importance" : 1,
+        "attack_rating" : 7,
+        "entity_id" : 1013,
+        "type" : "account",
+        "active_detection_types" : [ "AWS Suspect Privilege Escalation", "AWS User Hijacking", "AWS User Permissions Enumeration" ],
+        "event_timestamp" : 1765437284025,
+        "is_prioritized" : true,
+        "url" : "https://xyz.portal.vectra.ai/accounts/1013",
+        "last_detection" : {
+          "id" : 35431,
+          "type" : "AWS User Hijacking",
+          "url" : "https://xyz.portal.vectra.ai/detections/35431"
+        },
+        "breadth_contrib" : 1,
+        "urgency_score" : 74,
+        "service" : "entity-scoring-events",
+        "name" : "AWS:test@example.com",
+        "id" : 32738,
+        "category" : "ACCOUNT SCORING"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "last_timestamp" : 1765437592585,
+      "detection_url" : "https://xyz.portal.vectra.ai/api/v3.4/detections/36224",
+      "filtered_by_user" : false,
+      "filtered_by_ai" : false,
+      "type" : "account",
+      "src_ip" : "10.10.10.10",
+      "src_account" : {
+        "name" : "O365:test1@example.com",
+        "certainty" : 87,
+        "id" : 1083,
+        "threat" : 100,
+        "url" : "https://xyz.portal.vectra.ai/api/v3.4/accounts/1083"
+      },
+      "state" : "active",
+      "id" : 36224,
+      "is_marked_custom" : false,
+      "assigned_to" : "test@example.com",
+      "summary" : {
+        "description" : "This account was seen creating a Power Automate flow, a native Microsoft automation framework, which is unusual for the account."
+      },
+      "detection" : "M365 Suspicious Power Automate Flow Creation",
+      "is_custom_model" : false,
+      "is_triaged" : false,
+      "certainty" : 60,
+      "created_timestamp" : "2025-12-10T10:42:20Z",
+      "url" : "https://xyz.portal.vectra.ai/api/v3.4/detections/36224",
+      "data_source" : {
+        "connection_name" : "M365-Demo",
+        "connection_id" : "s9z9x5sj",
+        "type" : "o365"
+      },
+      "is_targeting_key_asset" : false,
+      "filtered_by_rule" : false,
+      "first_timestamp" : "2025-12-10T09:29:14Z",
+      "detection_category" : "command_and_control",
+      "service" : "detections",
+      "detection_type" : "M365 Suspicious Power Automate Flow Creation",
+      "sensor" : "s9z9x5sj",
+      "threat" : 70,
+      "sensor_name" : "Vectra X"
+    }
+  service: "detections"
+  result:
+    custom:
+      assigned_to: "test@example.com"
+      certainty: 60
+      created_timestamp: "2025-12-10T10:42:20Z"
+      data_source:
+        connection_id: "s9z9x5sj"
+        connection_name: "M365-Demo"
+        type: "o365"
+      detection: "M365 Suspicious Power Automate Flow Creation"
+      detection_category: "command_and_control"
+      detection_type: "M365 Suspicious Power Automate Flow Creation"
+      detection_url: "https://xyz.portal.vectra.ai/api/v3.4/detections/36224"
+      filtered_by_ai: false
+      filtered_by_rule: false
+      filtered_by_user: false
+      first_timestamp: "2025-12-10T09:29:14Z"
+      id: 36224
+      is_custom_model: false
+      is_marked_custom: false
+      is_targeting_key_asset: false
+      is_triaged: false
+      last_timestamp: 1765437592585
+      sensor: "s9z9x5sj"
+      sensor_name: "Vectra X"
+      service: "detections"
+      src_account:
+        certainty: 87
+        id: 1083
+        name: "O365:test1@example.com"
+        threat: 100
+        url: "https://xyz.portal.vectra.ai/api/v3.4/accounts/1083"
+      src_ip: "10.10.10.10"
+      state: "active"
+      summary:
+        description: "This account was seen creating a Power Automate flow, a native Microsoft automation framework, which is unusual for the account."
+      threat: 70
+      type: "account"
+      url: "https://xyz.portal.vectra.ai/api/v3.4/detections/36224"
+    message: |-
+      {
+        "last_timestamp" : 1765437592585,
+        "detection_url" : "https://xyz.portal.vectra.ai/api/v3.4/detections/36224",
+        "filtered_by_user" : false,
+        "filtered_by_ai" : false,
+        "type" : "account",
+        "src_ip" : "10.10.10.10",
+        "src_account" : {
+          "name" : "O365:test1@example.com",
+          "certainty" : 87,
+          "id" : 1083,
+          "threat" : 100,
+          "url" : "https://xyz.portal.vectra.ai/api/v3.4/accounts/1083"
+        },
+        "state" : "active",
+        "id" : 36224,
+        "is_marked_custom" : false,
+        "assigned_to" : "test@example.com",
+        "summary" : {
+          "description" : "This account was seen creating a Power Automate flow, a native Microsoft automation framework, which is unusual for the account."
+        },
+        "detection" : "M365 Suspicious Power Automate Flow Creation",
+        "is_custom_model" : false,
+        "is_triaged" : false,
+        "certainty" : 60,
+        "created_timestamp" : "2025-12-10T10:42:20Z",
+        "url" : "https://xyz.portal.vectra.ai/api/v3.4/detections/36224",
+        "data_source" : {
+          "connection_name" : "M365-Demo",
+          "connection_id" : "s9z9x5sj",
+          "type" : "o365"
+        },
+        "is_targeting_key_asset" : false,
+        "filtered_by_rule" : false,
+        "first_timestamp" : "2025-12-10T09:29:14Z",
+        "detection_category" : "command_and_control",
+        "service" : "detections",
+        "detection_type" : "M365 Suspicious Power Automate Flow Creation",
+        "sensor" : "s9z9x5sj",
+        "threat" : 70,
+        "sensor_name" : "Vectra X"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "triaged" : false,
+      "severity" : 7,
+      "detection_href" : "https://308714519558.cc1.portal.vectra.ai/detections/36224?detail_id=148200",
+      "entity_name" : "O365:test1@example.com",
+      "certainty" : 60,
+      "type" : "account",
+      "event_timestamp" : 1765395052267,
+      "entity_id" : 1083,
+      "url" : "https://308714519558.cc1.portal.vectra.ai/accounts/1083",
+      "entity_uid" : "O365:test1@example.com",
+      "service" : "detection-events",
+      "detection_type" : "M365 Suspicious Power Automate Flow Creation",
+      "mitre" : [ "T1041", "T1020", "T1008", "T1105", "T1064" ],
+      "threat" : 70,
+      "id" : 146678,
+      "detail" : {
+        "flow_connectors" : [ "Recurrence", "SharePoint", "Office 365 Outlook" ],
+        "last_timestamp" : "2025-12-10T09:29:14Z",
+        "flow_connector_count" : 3,
+        "account_name" : "O365:test1@example.com",
+        "src_account" : {
+          "urgency_score" : 100,
+          "importance" : "Medium",
+          "name" : "O365:test1@example.com",
+          "id" : 1083
+        },
+        "operation" : "CreateFlow"
+      },
+      "category" : "command_and_control",
+      "detection_id" : 36224,
+      "d_type_vname" : "M365 Suspicious Power Automate Flow Creation"
+    }
+  service: "detection-events"
+  result:
+    custom:
+      category: "command_and_control"
+      certainty: 60
+      d_type_vname: "M365 Suspicious Power Automate Flow Creation"
+      detail:
+        account_name: "O365:test1@example.com"
+        flow_connector_count: 3
+        flow_connectors:
+         - "Recurrence"
+         - "SharePoint"
+         - "Office 365 Outlook"
+        last_timestamp: "2025-12-10T09:29:14Z"
+        operation: "CreateFlow"
+        src_account:
+          id: 1083
+          importance: "Medium"
+          name: "O365:test1@example.com"
+          urgency_score: 100
+      detection_href: "https://308714519558.cc1.portal.vectra.ai/detections/36224?detail_id=148200"
+      detection_id: 36224
+      detection_type: "M365 Suspicious Power Automate Flow Creation"
+      entity_id: 1083
+      entity_name: "O365:test1@example.com"
+      entity_uid: "O365:test1@example.com"
+      event_timestamp: 1765395052267
+      id: 146678
+      mitre:
+       - "T1041"
+       - "T1020"
+       - "T1008"
+       - "T1105"
+       - "T1064"
+      service: "detection-events"
+      severity: 7
+      threat: 70
+      triaged: false
+      type: "account"
+      url: "https://308714519558.cc1.portal.vectra.ai/accounts/1083"
+    message: |-
+      {
+        "triaged" : false,
+        "severity" : 7,
+        "detection_href" : "https://308714519558.cc1.portal.vectra.ai/detections/36224?detail_id=148200",
+        "entity_name" : "O365:test1@example.com",
+        "certainty" : 60,
+        "type" : "account",
+        "event_timestamp" : 1765395052267,
+        "entity_id" : 1083,
+        "url" : "https://308714519558.cc1.portal.vectra.ai/accounts/1083",
+        "entity_uid" : "O365:test1@example.com",
+        "service" : "detection-events",
+        "detection_type" : "M365 Suspicious Power Automate Flow Creation",
+        "mitre" : [ "T1041", "T1020", "T1008", "T1105", "T1064" ],
+        "threat" : 70,
+        "id" : 146678,
+        "detail" : {
+          "flow_connectors" : [ "Recurrence", "SharePoint", "Office 365 Outlook" ],
+          "last_timestamp" : "2025-12-10T09:29:14Z",
+          "flow_connector_count" : 3,
+          "account_name" : "O365:test1@example.com",
+          "src_account" : {
+            "urgency_score" : 100,
+            "importance" : "Medium",
+            "name" : "O365:test1@example.com",
+            "id" : 1083
+          },
+          "operation" : "CreateFlow"
+        },
+        "category" : "command_and_control",
+        "detection_id" : 36224,
+        "d_type_vname" : "M365 Suspicious Power Automate Flow Creation"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
