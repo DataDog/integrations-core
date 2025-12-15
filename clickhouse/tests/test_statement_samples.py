@@ -370,3 +370,5 @@ def test_normalize_active_query_row_with_all_fields(check_with_dbm):
     # Verify obfuscation happened (statement should be set)
     assert 'statement' in normalized_row
     assert 'query_signature' in normalized_row
+
+
