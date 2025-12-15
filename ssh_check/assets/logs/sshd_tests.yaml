@@ -4,6 +4,19 @@ tests:
   sample: "pam_unix(sshd:session): session closed for user marc.szalkiewicz"
   result:
     custom:
+      ocsf:
+        activity_id: 2
+        activity_name: "Logoff"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+        severity: "Informational"
+        severity_id: 1
+        type_name: "Authentication: Logoff"
+        type_uid: 300202
+        user:
+          name: "marc.szalkiewicz"
       system:
         action: "session closed"
         user: "marc.szalkiewicz"
@@ -18,6 +31,23 @@ tests:
         client:
           ip: "172.22.179.72"
           port: "58599"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "172.22.179.72"
+        status: "Success"
+        status_id: 1
+        type_name: "Authentication: Logon"
+        type_uid: 300201
+        user:
+          name: "topdog"
       system:
         action: "Accepted"
         algorithm: "RSA"
@@ -31,6 +61,11 @@ tests:
   sample: "Received disconnect from 172.22.179.72: 11: disconnected by user"
   result:
     custom:
+      ocsf:
+        src_endpoint:
+          ip: "172.22.179.72"
+        type_name: "Authentication: Logoff"
+        type_uid: 300202
       network:
         client:
           ip: "172.22.179.72"
@@ -49,6 +84,8 @@ tests:
           ip: "192.168.1.100"
           port: "22334"
       ocsf:
+        activity_id: 1
+        activity_name: "Logon"
         metadata:
           product:
             name: "OpenSSH"
@@ -59,6 +96,8 @@ tests:
           ip: "192.168.1.100"
         status: "Failure"
         status_id: 2
+        type_name: "Authentication: Logon"
+        type_uid: 300201
         user:
           name: "admin"
       system:
