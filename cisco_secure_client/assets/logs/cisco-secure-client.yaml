@@ -1,5 +1,5 @@
-id: REPLACE_WITH_APP_ID
-metric_id: REPLACE_WITH_APP_ID
+id: cisco-secure-client
+metric_id: cisco-secure-client
 backend_only: false
 facets:
   - groups:
@@ -111,8 +111,7 @@ pipeline:
           Client info: user-agent string. Reason: reason"
         - "DAP: User sophia.lee, Addr 9.9.9.9, Connection connection: The
           following DAP records were selected for this connection: string"
-        - Local:1.0.0.1:1194 Remote:1.1.1.1:1194 Username:logan.scott
-          Group:Corp-VPN IPv4 Address=1.0.0.1 IPv6 address=1.0.0.1 assigned to
+        - Group:Corp-VPN IPv4 Address=1.0.0.1 IPv6 address=1.0.0.1 assigned to
           session.
       grok:
         supportRules: ""
@@ -128,17 +127,19 @@ pipeline:
 
           rule_734001 DAP: User %{regex(".*(?=, Addr )"):user}, Addr %{ip:network.client.ip}, Connection %{regex(".*(?=: The following)"):connection}: The following DAP records were selected for this connection: %{data:dap_records:array(", ")}
 
-          rule_751005 Local:\s*%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username\s*:\s*%{regex("[^\\/]*"):usr.name}/\s*%{regex(".*(?= AnyConnect client)")} AnyConnect client reconnect authentication failed. Session ID:\s*%{regex("[^,]*"):session_id}, Error:\s*%{data:error}
+          rule_751005 AnyConnect client reconnect authentication failed. Session ID:\s*%{regex("[^,]*"):session_id}, Error:\s*%{data:error}
 
           rule_751020 Local:\s*%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username:\s*%{regex(".*?(?=\\sAn\\s)"):usr.name} %{data}
 
           rule_751021 %{data:usr.name} %{notSpace:protocol} with %{regex(".*(?= encryption )"):encryption_type} encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client.
 
-          rule_751025 Local:%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username:%{regex(".*(?= Group:)"):usr.name} Group:%{regex(".*(?= IPv4 Address=)")} IPv4 Address=%{ip:assigned_ipv4_address} IPv6 address=%{ip:assigned_ipv6_address} assigned to session.
+          rule_751025 Group:%{regex(".*(?= IPv4 Address=)")} IPv4 Address=%{ip:assigned_ipv4_address} IPv6 address=%{ip:assigned_ipv6_address} assigned to session.
 
-          rule_722054 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} SVC terminating connection: Failed to install Redirect URL: %{regex(".*(?= Redirect ACL: )"):redirect_url} Redirect ACL: non_exist for %{ip:assigned_ip}.
+          rule_722054 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} SVC terminating connection: Failed to install Redirect URL: %{notSpace:redirect_url} Redirect ACL: non_exist for %{ip:assigned_ip}.
 
-          rule_716061 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} IPv6 User Filter %{regex(".*(?= configured )"):ipv6_user_filter} configured for AnyConnect. This setting has been deprecated, terminating connection
+          rule_716061 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} IPv6 User Filter %{notSpace:ipv6_user_filter} configured for AnyConnect. This setting has been deprecated, terminating connection
+
+          rule_722053 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} Unknown client %{regex("^[^\\r\\n]*(?=\\sconnection)"):http.useragent} connection
 
           rule_722053_113038_113039_716058_716060 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip}%{data}
     - type: category-processor
@@ -186,7 +187,7 @@ pipeline:
       target: action
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
-      enabled: false
+      enabled: true
       sources:
         - timestamp
     - type: status-remapper
@@ -195,7 +196,7 @@ pipeline:
       sources:
         - severity
     - type: user-agent-parser
-      name: Extracting user-agent information from the `user-agent`
+      name: Extracting user-agent information from the `http.useragent`
       enabled: true
       sources:
         - http.useragent

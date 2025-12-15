@@ -30,9 +30,9 @@
         "creates_events": false
       }
     },
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {}
+    "logs": {
+      "source": "cisco-secure-client"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

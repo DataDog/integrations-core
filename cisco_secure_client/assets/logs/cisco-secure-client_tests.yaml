@@ -1,4 +1,4 @@
-id: "REPLACE_WITH_APP_ID"
+id: "cisco-secure-client"
 tests:
  -
   sample: "<190>2025-12-05T10:51:16Z: %ASA-4-113035: Group Employee-Access User evelyn.baker IP 4.2.2.1 Session terminated: AnyConnect not enabled or invalid AnyConnect image on the device_123"
@@ -64,10 +64,10 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: "<190>2025-12-05T10:50:08Z: %ASA-3-751005: Local: 149.112.112.112:1194 Remote:8.8.8.8:1194 Username: sebastian.ross/RemoteUsers AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
+  sample: "<190>2025-12-05T10:50:08Z: %ASA-3-751005: AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
   result:
     custom: {}
-    message: "<190>2025-12-05T10:50:08Z: %ASA-3-751005: Local: 149.112.112.112:1194 Remote:8.8.8.8:1194 Username: sebastian.ross/RemoteUsers AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
+    message: "<190>2025-12-05T10:50:08Z: %ASA-3-751005: AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
     tags:
      - "source:LOGS_SOURCE"
  -
@@ -85,10 +85,10 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: "<190>2025-12-05T10:49:59Z: %ASA-5-751025: Local:208.67.222.222:80 Remote:8.8.4.4:53 Username:aria.evans Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
+  sample: "<190>2025-12-05T10:49:59Z: %ASA-5-751025: Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
   result:
     custom: {}
-    message: "<190>2025-12-05T10:49:59Z: %ASA-5-751025: Local:208.67.222.222:80 Remote:8.8.4.4:53 Username:aria.evans Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
+    message: "<190>2025-12-05T10:49:59Z: %ASA-5-751025: Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
     tags:
      - "source:LOGS_SOURCE"
  -
