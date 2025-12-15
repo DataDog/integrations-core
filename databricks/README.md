@@ -91,6 +91,12 @@ First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspa
 
 5. Click **Save**.
 
+#### Data Observability
+
+1. Connect a workspace in Datadog's Databricks integration tile.
+2. In the **Select products to set up integration** section, set **Data Observability** to **Enabled** to monitor data quality, freshness, and volume anomalies.
+3. See [the docs for Data Observability][36] for more details on configuration and features.
+
 #### Permissions
 For Datadog to access your Databricks cost data in Data Jobs Monitoring or [Cloud Cost Management][34], the user or service principal used to query [system tables][35] must have the following permissions:
    - `CAN USE` permission on the SQL Warehouse.
