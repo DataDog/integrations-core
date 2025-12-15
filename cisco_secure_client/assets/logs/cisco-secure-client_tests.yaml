@@ -1,0 +1,107 @@
+id: "REPLACE_WITH_APP_ID"
+tests:
+ -
+  sample: "<190>2025-12-05T10:51:16Z: %ASA-4-113035: Group Employee-Access User evelyn.baker IP 4.2.2.1 Session terminated: AnyConnect not enabled or invalid AnyConnect image on the device_123"
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:51:16Z: %ASA-4-113035: Group Employee-Access User evelyn.baker IP 4.2.2.1 Session terminated: AnyConnect not enabled or invalid AnyConnect image on the device_123"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:53:52Z: %ASA-4-113038: Group Mobility-Users User ava.clark IP 8.8.8.8 Unable to create AnyConnect_parent session."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:53:52Z: %ASA-4-113038: Group Mobility-Users User ava.clark IP 8.8.8.8 Unable to create AnyConnect_parent session."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:51:21Z: %ASA-6-113039: Group RemoteUsers User harper.green IP 8.8.4.4 AnyConnect_parent session started."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:51:21Z: %ASA-6-113039: Group RemoteUsers User harper.green IP 8.8.4.4 AnyConnect_parent session started."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:52:26Z: %ASA-6-716058: Group Branch01-VPN User daniel.thomas IP 8.8.8.8 AnyConnect session lost connection. Waiting to resume."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:52:26Z: %ASA-6-716058: Group Branch01-VPN User daniel.thomas IP 8.8.8.8 AnyConnect session lost connection. Waiting to resume."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:54:13Z: %ASA-6-716059: Group Staging-VPN User olivia.martin IP 208.67.222.222 AnyConnect session resumed connection from IP ip2."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:54:13Z: %ASA-6-716059: Group Staging-VPN User olivia.martin IP 208.67.222.222 AnyConnect session resumed connection from IP ip2."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:53:48Z: %ASA-6-716060: Group RemoteUsers User aiden.gonzalez IP 1.0.0.1 Terminated AnyConnect session in inactive state to accept a new connection: License limit reached."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:53:48Z: %ASA-6-716060: Group RemoteUsers User aiden.gonzalez IP 1.0.0.1 Terminated AnyConnect session in inactive state to accept a new connection: License limit reached."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:50:55Z: %ASA-3-716061: Group Exec-Full User sophia.lee IP 4.2.2.2 IPv6 User Filter temp_filter configured for AnyConnect. This setting has been deprecated, terminating connection"
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:50:55Z: %ASA-3-716061: Group Exec-Full User sophia.lee IP 4.2.2.2 IPv6 User Filter temp_filter configured for AnyConnect. This setting has been deprecated, terminating connection"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:51:15Z: %ASA-4-722056: Unsupported AnyConnect client connection rejected from 8.8.4.4. Client info: user-agent string. Reason: reason"
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:51:15Z: %ASA-4-722056: Unsupported AnyConnect client connection rejected from 8.8.4.4. Client info: user-agent string. Reason: reason"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:50:26Z: %ASA-6-734001: DAP: User alexander.parker, Addr 1.0.0.1, Connection connection: The following DAP records were selected for this connection: string"
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:50:26Z: %ASA-6-734001: DAP: User alexander.parker, Addr 1.0.0.1, Connection connection: The following DAP records were selected for this connection: string"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:50:08Z: %ASA-3-751005: Local: 149.112.112.112:1194 Remote:8.8.8.8:1194 Username: sebastian.ross/RemoteUsers AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:50:08Z: %ASA-3-751005: Local: 149.112.112.112:1194 Remote:8.8.8.8:1194 Username: sebastian.ross/RemoteUsers AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:53:01Z: %ASA-3-751020: Local:8.8.4.4:443 Remote:4.2.2.2:1194 Username:noah.white An test remote access connection failed. Attempting to use an NSA Suite B crypto algorithm (CYF) without an AnyConnect Premium license."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:53:01Z: %ASA-3-751020: Local:8.8.4.4:443 Remote:4.2.2.2:1194 Username:noah.white An test remote access connection failed. Attempting to use an NSA Suite B crypto algorithm (CYF) without an AnyConnect Premium license."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:52:36Z: %ASA-4-751021: noah.white UDP with AES-GCM encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:52:36Z: %ASA-4-751021: noah.white UDP with AES-GCM encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:49:59Z: %ASA-5-751025: Local:208.67.222.222:80 Remote:8.8.4.4:53 Username:aria.evans Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:49:59Z: %ASA-5-751025: Local:208.67.222.222:80 Remote:8.8.4.4:53 Username:aria.evans Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:53:49Z: %ASA-4-722054: Group Corp-VPN User chloe.campbell IP 4.2.2.1 SVC terminating connection: Failed to install Redirect URL: redirect_URL Redirect ACL: non_exist for 4.2.2.1."
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:53:49Z: %ASA-4-722054: Group Corp-VPN User chloe.campbell IP 4.2.2.1 SVC terminating connection: Failed to install Redirect URL: redirect_URL Redirect ACL: non_exist for 4.2.2.1."
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "<190>2025-12-05T10:51:52Z: %ASA-6-722053: Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client user-agent connection"
+  result:
+    custom: {}
+    message: "<190>2025-12-05T10:51:52Z: %ASA-6-722053: Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client user-agent connection"
+    tags:
+     - "source:LOGS_SOURCE"

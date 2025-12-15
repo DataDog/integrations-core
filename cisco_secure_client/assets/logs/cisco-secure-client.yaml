@@ -1,0 +1,211 @@
+id: REPLACE_WITH_APP_ID
+metric_id: REPLACE_WITH_APP_ID
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Cisco Secure Client
+  enabled: true
+  filter:
+    query: source:cisco-secure-client
+  processors:
+    - type: grok-parser
+      name: Parse Cisco Secure Client logs
+      enabled: true
+      source: message
+      samples:
+        - "<190>2025-11-20T07:37:58Z: %ASA-6-113039: Group group User test-user
+          IP 10.10.10.10 AnyConnect_parent session started."
+        - "<190>2025-11-20T07:37:58Z: %FTD-6-113039: Group group User test-user
+          IP 10.10.10.10 AnyConnect_parent session started."
+      grok:
+        supportRules: ""
+        matchRules: parse_header
+          (\<%{integer}\>)?%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}:\s*%{notSpace}-%{integer:severity}-%{word:message_id}:\s*%{data:message}
+    - type: message-remapper
+      name: Define `message` as official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: grok-parser
+      name: Parsing message of the logs
+      enabled: true
+      source: message
+      samples:
+        - Group HQ-FullTunnel User olivia.martin IP 8.8.4.4 AnyConnect_parent
+          session started.
+        - Group Corp-VPN-Split User mason.young IP 8.8.8.8 IPv6 User Filter
+          temp_filter configured for AnyConnect. This setting has been
+          deprecated, terminating connection
+        - "Unsupported AnyConnect client connection rejected from 8.8.8.8.
+          Client info: user-agent string. Reason: reason"
+        - "DAP: User sophia.lee, Addr 9.9.9.9, Connection connection: The
+          following DAP records were selected for this connection: string"
+        - Local:1.0.0.1:1194 Remote:1.1.1.1:1194 Username:logan.scott
+          Group:Corp-VPN IPv4 Address=1.0.0.1 IPv6 address=1.0.0.1 assigned to
+          session.
+      grok:
+        supportRules: ""
+        matchRules: >-
+          rule_113035  Group %{regex(".*(?= User )"):group} User %{regex(".*(?=
+          IP )"):usr.name} IP %{ip:network.client.ip} Session terminated:
+          AnyConnect not enabled or invalid AnyConnect image on the
+          %{data:device_name}
+
+          rule_716059 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:source_ip} AnyConnect session resumed connection from IP %{ip:network.client.ip}.
+
+          rule_722056 Unsupported AnyConnect client connection rejected from %{ip:network.client.ip}. Client info: %{regex(".*(?=. Reason: )"):http.useragent}. Reason: %{data:reason}
+
+          rule_734001 DAP: User %{regex(".*(?=, Addr )"):user}, Addr %{ip:network.client.ip}, Connection %{regex(".*(?=: The following)"):connection}: The following DAP records were selected for this connection: %{data:dap_records:array(", ")}
+
+          rule_751005 Local:\s*%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username\s*:\s*%{regex("[^\\/]*"):usr.name}/\s*%{regex(".*(?= AnyConnect client)")} AnyConnect client reconnect authentication failed. Session ID:\s*%{regex("[^,]*"):session_id}, Error:\s*%{data:error}
+
+          rule_751020 Local:\s*%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username:\s*%{regex(".*?(?=\\sAn\\s)"):usr.name} %{data}
+
+          rule_751021 %{data:usr.name} %{notSpace:protocol} with %{regex(".*(?= encryption )"):encryption_type} encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client.
+
+          rule_751025 Local:%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username:%{regex(".*(?= Group:)"):usr.name} Group:%{regex(".*(?= IPv4 Address=)")} IPv4 Address=%{ip:assigned_ipv4_address} IPv6 address=%{ip:assigned_ipv6_address} assigned to session.
+
+          rule_722054 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} SVC terminating connection: Failed to install Redirect URL: %{regex(".*(?= Redirect ACL: )"):redirect_url} Redirect ACL: non_exist for %{ip:assigned_ip}.
+
+          rule_716061 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} IPv6 User Filter %{regex(".*(?= configured )"):ipv6_user_filter} configured for AnyConnect. This setting has been deprecated, terminating connection
+
+          rule_722053_113038_113039_716058_716060 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip}%{data}
+    - type: category-processor
+      name: Define `reason` based on `message_id`
+      enabled: true
+      categories:
+        - filter:
+            query: "@message_id:113035"
+          name: Invalid or disabled AnyConnect image
+        - filter:
+            query: "@message_id:716060"
+          name: AnyConnect license limit reached
+        - filter:
+            query: "@message_id:716061"
+          name: IPv6 user filter is deprecated
+        - filter:
+            query: "@message_id:751005"
+          name: AnyConnect client reconnect authentication failure
+        - filter:
+            query: "@message_id:751020"
+          name: AnyConnect premium license disabled
+        - filter:
+            query: "@message_id:751021"
+          name: Unsupported AnyConnect client version
+        - filter:
+            query: "@message_id:113038"
+          name: Unable to create session
+      target: reason
+    - type: category-processor
+      name: Define `action` based on the `message_id`
+      enabled: true
+      categories:
+        - filter:
+            query: "@message_id:113038"
+          name: Parent session creation failed
+        - filter:
+            query: "@message_id:113039"
+          name: Session started
+        - filter:
+            query: "@message_id:716058"
+          name: Session connection lost
+        - filter:
+            query: "@message_id:716059"
+          name: Session resumed
+      target: action
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: false
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Define `severity` as the official status of the log
+      enabled: true
+      sources:
+        - severity
+    - type: user-agent-parser
+      name: Extracting user-agent information from the `user-agent`
+      enabled: true
+      sources:
+        - http.useragent
+      target: http.useragent_details
+      encoded: false
+      combineVersionDetails: false
+    - type: geo-ip-parser
+      name: Extract geolocation information for Client IP
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
