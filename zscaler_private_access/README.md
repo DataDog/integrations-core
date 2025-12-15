@@ -49,7 +49,7 @@ The Zscaler Private Access check is included in the [Datadog Agent][1] package. 
 
    **Note**:
 
-   - `PORT`: Port should be similar to the port provided in **Configure log receiver from Zscaler Private Access** section.
+   - `PORT`: If TLS encryption is enabled, `port` should be similar to the `destination_port` provided in **Certificate Setup Guide** section; otherwise, it should be similar to the `port` provided in **Configure log receiver from Zscaler Private Access** section.
    - It is recommended not to change the source value, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][2].
@@ -61,9 +61,9 @@ The Zscaler Private Access check is included in the [Datadog Agent][1] package. 
 3. Click **Add**.
 4. In the **Log Receiver** tab, configure the following:
     - **Name**: Provide a name for the log receiver.
-    - **Domain or IP Address**: Enter the public IP or hostname of the Datadog Agent that will receive the logs.
-    - **TCP Port**: Specify an open port on the Datadog Agent for receiving ZPA logs.
-    - **TLS Encryption**: Keep it disabled.
+    - **Domain or IP Address**: If TLS encryption is enabled, provide the `public IP` or `hostname` of the `syslog-ng` server; otherwise, provide the `public IP` or `hostname` of the Datadog agent.
+    - **TCP Port**: If TLS encryption is enabled, specify an open port on the `syslog-ng` server; otherwise, specify an open port on the Datadog agent.
+    - **TLS Encryption**: Disabled by default. If you choose to enable it, make sure to follow the steps in the **Certificate Setup Guide**.
     - **App Connector Groups**: Choose the App Connector groups that can forward logs to the receiver.
 5. Click **Next**.
 6. In the **Log Stream** tab:
@@ -149,6 +149,125 @@ For Zscaler Private Access integration, specific custom log formats must be conf
    {"LogTimestamp": %j{LogTimestamp:time},"Customer": %j{Customer},"AgentID": %j{AgentID},"AgentName": %j{AgentName},"ResourceID": %j{ResourceID},"ResourceName": %j{ResourceName},"AppZoneID": %j{AppZoneID},"AppName": %j{AppName},"AppZoneName": %j{AppZoneName},"ConnectionStartTime": %j{ConnectionStartTime},"SourceIP": %j{SourceIP},"DestinationIP": %j{DestinationIP},"SourcePorts": %j{SourcePorts},"DestinationPort": %j{DestinationPort},"Protocol": %j{Protocol},"AppExecutablePath": %j{AppExecutablePath},"Direction": %j{Direction},"PolicyID": %j{PolicyID},"PolicyName": %j{PolicyName},"EnforcementReason": %j{EnforcementReason},"EnforcementAction": %j{EnforcementAction},"EnforcementDisposition": %j{EnforcementDisposition},"EventType": "microsegmentation"}\n
    ```
 
+#### Certificate Setup Guide
+> Note:
+>- The steps below are performed on the RHEL 8.
+>- Follow the steps if the **TLS Encryption** option is enabled in **Configure log receiver from Zscaler Private Access**.
+
+1. Create Custom Root CA with its corresponding private key.
+   ```
+   openssl genrsa -out rootCA.key 4096
+   ```
+2. In the ZPA Admin Portal, **Configuration & Control > Certificate Management > Enrollment Certificates > Upload Certificate Chain**, upload **rootCA.crt**.
+3. Go to **Configuration & Control > Certificate Management > Enrollment Certificates > Actions > Create CSR**.
+   - Provide a name & description
+   - Download the CSR (e.g., zpa_enrollment.csr)
+4. Sign ZPA CSR Using Root CA generated in Step 1.
+   - Create ext.cnf:
+      ```
+      basicConstraints = CA:TRUE
+      keyUsage = critical, digitalSignature, keyCertSign, cRLSign
+      extendedKeyUsage = serverAuth, clientAuth
+      subjectKeyIdentifier = hash
+      authorityKeyIdentifier = keyid:always
+      ```
+   - Sign the CSR
+      ```
+      openssl x509 -req -in zpa_enrollment.csr \
+      -CA rootCA.crt -CAkey rootCA.key -CAcreateserial \
+      -out zpa_enrollment_signed.crt \
+      -days 365 -sha256 \
+      -extfile ext.cnf
+      ```
+5. Navigate to **Configuration & Control > Certificate Management > Enrollment Certificates > Upload Certificate Chain**, and upload `zpa_enrollment_signed.crt` and `rootCA.crt`.
+6. Deploy your app connector with the signed certificate imported in the previous step. See [here][7] for more information based on your platform.
+   - Download the App Connector package
+   - Install `zpa_enrollment_signed.crt` and select Enrollment Key if applicable.
+7. Install `syslog-ng` log shipper
+   - On RHEL 8: Enable the `supplementary` repository
+      ```
+      subscription-manager repos --enable rhel-8-for-x86_64-supplementary-rpms
+      ```
+   -  The Extra Packages for Enterprise Linux (EPEL) repository contains many useful packages, which are not included in RHEL. A few dependencies of syslog-ng are available this repo. You can enable it by downloading and installing an RPM package (replace 8 with 7 for EPEL 7):
+      ```
+      wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+      rpm -Uvh epel-release-latest-8.noarch.rpm
+      ```
+   - Add the repo containing the latest unofficial build of syslog-ng. By the time of writing it is syslog-ng 4.10 and it is available on the Copr build service. Download the repo file to /etc/yum.repos.d/, so you can install and enable syslog-ng (replace 8 with 7 for EPEL 7):
+      ```
+      cd /etc/yum.repos.d/
+      wget https://copr.fedorainfracloud.org/coprs/czanik/syslog-ng410/repo/epel-8/czanik-syslog-ng410-epel-8.repo
+      yum install syslog-ng
+      systemctl enable syslog-ng
+      systemctl start syslog-ng
+      ```
+8. Create Server TLS Certificate for syslog-ng
+   - Generate Private Key using openssl
+   - Generate CSR
+   - Create server_ext.cnf:
+      ```
+      basicConstraints = CA:FALSE
+      keyUsage = digitalSignature, keyEncipherment
+      extendedKeyUsage = serverAuth
+      subjectAltName = DNS:your-syslog-server.domain, IP:YOUR_SERVER_IP
+      ```
+   - Sign server certificate
+      ```
+      openssl x509 -req -in server.csr \
+      -CA rootCA.crt -CAkey rootCA.key -CAcreateserial \
+      -out server.crt \
+      -days 3650 -sha256 \
+      -extfile server_ext.cnf
+      ```
+9. Install Certificates in syslog-ng
+   ```
+   sudo mkdir -p /etc/syslog-ng/cert.d
+   sudo cp server.crt server.key rootCA.crt /etc/syslog-ng/cert.d/
+   sudo chmod 600 /etc/syslog-ng/cert.d/server.key
+   sudo chmod 644 /etc/syslog-ng/cert.d/server.crt
+   sudo chmod 644 /etc/syslog-ng/cert.d/rootCA.crt
+   ```
+10. Configure TLS Listener in Syslog-NG
+   - Create **zpa-tls.conf** under **/etc/syslog-ng/conf.d**.
+      ```
+      # TLS listener for ZPA LSS
+      source s_zpa_tls {
+         network(
+            ip("0.0.0.0")
+            port(<source_port>)
+            transport("tls")
+            tls(
+                  key-file("/etc/syslog-ng/cert.d/server.key")
+                  cert-file("/etc/syslog-ng/cert.d/server.crt")
+                  ca-file("/etc/syslog-ng/cert.d/rootCA.crt")
+                  peer-verify(optional-untrusted)
+            )
+         );
+      };
+
+      destination d_local {
+         file("/var/log/zpa.log");
+      };
+
+
+      destination d_forward {
+         network("127.0.0.1" port(<destination_port>) transport("tcp"));
+      };
+
+      log {
+         source(s_zpa_tls);
+         destination(d_forward);
+         destination(d_local);
+      };
+      ```
+   > Note:
+   >- *source_port* should be similar to the port provided in **Configure log receiver from Zscaler Private Access**.
+   >- *destination_port* should be similar to the port provided in **Log collection**.
+
+11. Restart syslog-ng:
+      ```
+      sudo systemctl restart syslog-ng
+      ```
 
 #### Validation
 
@@ -222,3 +341,4 @@ For further assistance, contact [Datadog support][4].
 [4]: https://docs.datadoghq.com/help/
 [5]: https://www.zscaler.com/products-and-solutions/zscaler-private-access
 [6]: https://github.com/DataDog/integrations-core/blob/master/zscaler_private_access/datadog_checks/zscaler_private_access/data/conf.yaml.example
+[7]: https://help.zscaler.com/zpa/app-connector-management/app-connector-deployment-guides-supported-platforms
