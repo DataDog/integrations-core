@@ -1,0 +1,198 @@
+id: cyberark-endpoint-privilege-manager
+metric_id: cyberark-endpoint-privilege-manager
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+pipeline:
+  type: pipeline
+  name: CyberArk Endpoint Privilege Manager
+  enabled: true
+  filter:
+    query: source:cyberark-endpoint-privilege-manager
+  processors:
+    - type: date-remapper
+      name: Define `lastEventDate` and `EventTime` as the official date of the log
+      enabled: true
+      sources:
+        - lastEventDate
+        - EventTime
+    - type: pipeline
+      name: Processing Raw Events
+      enabled: true
+      filter:
+        query: service:raw-events
+      processors:
+        - type: attribute-remapper
+          name: Map `eventType` to `evt.name`
+          enabled: true
+          sources:
+            - eventType
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `userName` to `usr.name`
+          enabled: true
+          sources:
+            - userName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `sourceWSIp` to `network.client.ip`
+          enabled: true
+          sources:
+            - sourceWSIp
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Lookup for `logonStatusId` to `logon_status`
+          enabled: true
+          source: logonStatusId
+          target: logon_status
+          lookupTable: >-
+            0,Ok
+
+            3221225566,There are currently no logon servers available to service the logon request
+
+            3221225572,User logon with misspelled or bad user account
+
+            3221225578,User logon with misspelled or bad password
+
+            3221225581,Either a bad username or authentication information
+
+            3221225582,A referenced user name and authentication information are valid but some user account restriction has prevented successful authentication
+
+            3221225583,User logon outside authorized hours
+
+            3221225584,User logon from unauthorized workstation
+
+            3221225585,User logon with expired password
+
+            3221225586,User logon to account disabled by administrator
+
+            3221225692,Sam Server was in the wrong state to perform the desired operation.
+
+            3221225779,Clocks between DC and other computer too far out of sync
+
+            3221225819,The user has not been granted the requested logon type at this machine
+
+            3221225868,Trust relationship between the primary domain and the trusted domain failed
+
+            3221225874,An attempt was made to logon but the Netlogon service was not started
+
+            3221225875,User logon with expired account
+
+            3221226020,User is required to change password at next logon
+
+            3221226021,Evidently a bug in Windows and not a risk
+
+            3221226036,User logon with account locked
+
+            3221226222,An Error occurred during Logon
+
+            3221226515,The specified account is not allowed by authentication firewall to authenticate to the machine
+          type: lookup-processor
+        - name: Lookup for `logonAttemptTypeId` to `logon_attempt_type`
+          enabled: true
+          source: logonAttemptTypeId
+          target: logon_attempt_type
+          lookupTable: |-
+            2,Interactive
+            3,Network 
+            4,Batch
+            5,Service
+            7,Unlock
+            8,NetworkCleartext
+            9,NewCredentials
+            10,RemoteInteractive
+            11,CachedInteractive
+          type: lookup-processor
+        - name: Lookup for `deceptionType` to `deception_policy`
+          enabled: true
+          source: deceptionType
+          target: deception_policy
+          lookupTable: |-
+            1,Lsass lure
+            2,Browser lure
+          defaultLookup: "NULL"
+          type: lookup-processor
+    - type: pipeline
+      name: Processing Policy Audit Events
+      enabled: true
+      filter:
+        query: service:policy-audit-events
+      processors:
+        - type: attribute-remapper
+          name: Map `eventType` to `evt.name`
+          enabled: true
+          sources:
+            - eventType
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `userName` to `usr.name`
+          enabled: true
+          sources:
+            - userName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processing Set Admin and Account Admin Audit Events
+      enabled: true
+      filter:
+        query: service:(set-admin-audit-events OR account-admin-audit-events)
+      processors:
+        - type: attribute-remapper
+          name: Map `Administrator` to `usr.name`
+          enabled: true
+          sources:
+            - Administrator
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `LoggedFrom` to `network.client.ip`
+          enabled: true
+          sources:
+            - LoggedFrom
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: geo-ip-parser
+      name: Extract geolocation information from source
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
