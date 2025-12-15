@@ -1,356 +1,198 @@
-id: "cyberark-endpoint-privilege-manager"
-tests:
- -
-  sample: |-
-    {
-      "fileName" : "MicrosoftWindows.Client.WebExperience",
-      "agentEventCount" : 1,
-      "justificationType" : 0,
-      "agentId" : "9dbcb1f8-5ad9-4294-9724-3842a7cbc0cf",
-      "winEventRecordId" : 0,
-      "displayName" : "Windows Web Experience Pack",
-      "userIsAdmin" : true,
-      "eventCount" : 1,
-      "jitRequestInterval" : 0,
-      "computerName" : "Test",
-      "lastEventDate" : "2025-11-26T08:41:25.753Z",
-      "modificationTime" : "2025-10-27T08:41:26.729Z",
-      "arrivalTime" : "2025-11-26T08:41:26.791Z",
-      "fileQualifier" : "-3678878233479348326",
-      "packageName" : "MicrosoftWindows.Client.WebExperience",
-      "firstEventDate" : "2025-11-26T08:41:25.753Z",
-      "accessTargetType" : "Internet",
-      "originalFileName" : "",
-      "owner" : "NT AUTHORITY\\SYSTEM",
-      "logonAttemptTypeId" : 0,
-      "operatingSystemType" : "Windows",
-      "filePath" : "C:\\Program Files\\WindowsApps\\MicrosoftWindows.Client.WebExperience",
-      "skippedCount" : 0,
-      "eventType" : "Launch",
-      "userName" : "Test\\Administrator",
-      "threatProtectionActionId" : 0,
-      "deceptionType" : 0,
-      "sourceType" : "Windows",
-      "fileSize" : 50605,
-      "filePathWithoutFilename" : "C:\\Program Files\\WindowsApps\\",
-      "accessAction" : "false",
-      "logonStatusId" : 0,
-      "threatProtectionAction" : "ALL",
-      "publisher" : "Microsoft Windows",
-      "winEventType" : 0,
-      "sourceName" : "Microsoft Windows",
-      "hash" : "237859BAE41E8DD34F54F2E42DC3A788059D1E00"
-    }
-  service: raw-events
-  result:
-    custom:
-      accessAction: "false"
-      accessTargetType: "Internet"
-      agentEventCount: 1
-      agentId: "9dbcb1f8-5ad9-4294-9724-3842a7cbc0cf"
-      arrivalTime: "2025-11-26T08:41:26.791Z"
-      computerName: "Test"
-      deceptionType: 0
-      displayName: "Windows Web Experience Pack"
-      eventCount: 1
-      eventType: "Launch"
-      fileName: "MicrosoftWindows.Client.WebExperience"
-      filePath: "C:\\Program Files\\WindowsApps\\MicrosoftWindows.Client.WebExperience"
-      filePathWithoutFilename: "C:\\Program Files\\WindowsApps\\"
-      fileQualifier: "-3678878233479348326"
-      fileSize: 50605
-      firstEventDate: "2025-11-26T08:41:25.753Z"
-      hash: "237859BAE41E8DD34F54F2E42DC3A788059D1E00"
-      jitRequestInterval: 0
-      justificationType: 0
-      lastEventDate: "2025-11-26T08:41:25.753Z"
-      logonAttemptTypeId: 0
-      logonStatusId: 0
-      modificationTime: "2025-10-27T08:41:26.729Z"
-      operatingSystemType: "Windows"
-      originalFileName: ""
-      owner: "NT AUTHORITY\\SYSTEM"
-      packageName: "MicrosoftWindows.Client.WebExperience"
-      publisher: "Microsoft Windows"
-      skippedCount: 0
-      sourceName: "Microsoft Windows"
-      sourceType: "Windows"
-      threatProtectionAction: "ALL"
-      threatProtectionActionId: 0
-      userIsAdmin: true
-      userName: "Test\\Administrator"
-      winEventRecordId: 0
-      winEventType: 0
-    message: |-
-      {
-        "fileName" : "MicrosoftWindows.Client.WebExperience",
-        "agentEventCount" : 1,
-        "justificationType" : 0,
-        "agentId" : "9dbcb1f8-5ad9-4294-9724-3842a7cbc0cf",
-        "winEventRecordId" : 0,
-        "displayName" : "Windows Web Experience Pack",
-        "userIsAdmin" : true,
-        "eventCount" : 1,
-        "jitRequestInterval" : 0,
-        "computerName" : "Test",
-        "lastEventDate" : "2025-11-26T08:41:25.753Z",
-        "modificationTime" : "2025-10-27T08:41:26.729Z",
-        "arrivalTime" : "2025-11-26T08:41:26.791Z",
-        "fileQualifier" : "-3678878233479348326",
-        "packageName" : "MicrosoftWindows.Client.WebExperience",
-        "firstEventDate" : "2025-11-26T08:41:25.753Z",
-        "accessTargetType" : "Internet",
-        "originalFileName" : "",
-        "owner" : "NT AUTHORITY\\SYSTEM",
-        "logonAttemptTypeId" : 0,
-        "operatingSystemType" : "Windows",
-        "filePath" : "C:\\Program Files\\WindowsApps\\MicrosoftWindows.Client.WebExperience",
-        "skippedCount" : 0,
-        "eventType" : "Launch",
-        "userName" : "Test\\Administrator",
-        "threatProtectionActionId" : 0,
-        "deceptionType" : 0,
-        "sourceType" : "Windows",
-        "fileSize" : 50605,
-        "filePathWithoutFilename" : "C:\\Program Files\\WindowsApps\\",
-        "accessAction" : "false",
-        "logonStatusId" : 0,
-        "threatProtectionAction" : "ALL",
-        "publisher" : "Microsoft Windows",
-        "winEventType" : 0,
-        "sourceName" : "Microsoft Windows",
-        "hash" : "237859BAE41E8DD34F54F2E42DC3A788059D1E00"
-      }
-    tags:
-     - "source:LOGS_SOURCE"
- -
-  sample: |-
-    {
-      "fileDescription" : "Google Updater (x64)",
-      "fileName" : "updater.exe",
-      "agentEventCount" : 1,
-      "agentId" : "9dbcb1f8-5ad9-4294-9724-3842a7cbc0cf",
-      "displayName" : "Google Updater (x64) (updater.exe)",
-      "bundleVersion" : "",
-      "userIsAdmin" : true,
-      "mimeType" : "",
-      "parentProcess" : "",
-      "productName" : "Google Updater (x64)",
-      "productVersion" : "143.0.7482.0",
-      "computerName" : "Test",
-      "lastEventDate" : "2025-11-28T10:57:07.844Z",
-      "modificationTime" : "2025-10-29T10:59:39.411Z",
-      "arrivalTime" : "2025-11-28T10:59:39.425Z",
-      "fileQualifier" : "-8416518788975661649",
-      "company" : "Google LLC",
-      "packageName" : "Google Updater (x64) (updater.exe)",
-      "justification" : "",
-      "firstEventDate" : "2025-11-28T10:57:07.844Z",
-      "fileVersion" : "143.0.7482.0",
-      "accessTargetType" : "Internet",
-      "originalFileName" : "updater.exe",
-      "owner" : "BUILTIN\\Administrators",
-      "policyAction" : "Block",
-      "codeURL" : "",
-      "operatingSystemType" : "Windows",
-      "policyName" : "Test-2",
-      "filePath" : "C:\\Program Files (x86)\\Google\\GoogleUpdater\\143.0.7482.0\\updater.exe",
-      "fileAccessPermission" : "",
-      "skippedCount" : 0,
-      "interpreter" : "",
-      "eventType" : "Block",
-      "userName" : "Test\\Administrator",
-      "accessTargetName" : "",
-      "upgradeCode" : "",
-      "productCode" : "",
-      "sourceType" : "OldApplication",
-      "fileSize" : 6933656,
-      "publisher" : "Google LLC",
-      "bundleName" : "",
-      "arguments" : "--wake-all --system",
-      "justificationEmail" : "",
-      "sourceName" : "Old Application",
-      "hash" : "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B"
-    }
-  service: policy-audit-events
-  result:
-    custom:
-      accessTargetName: ""
-      accessTargetType: "Internet"
-      agentEventCount: 1
-      agentId: "9dbcb1f8-5ad9-4294-9724-3842a7cbc0cf"
-      arguments: "--wake-all --system"
-      arrivalTime: "2025-11-28T10:59:39.425Z"
-      bundleName: ""
-      bundleVersion: ""
-      codeURL: ""
-      company: "Google LLC"
-      computerName: "Test"
-      displayName: "Google Updater (x64) (updater.exe)"
-      eventType: "Block"
-      fileAccessPermission: ""
-      fileDescription: "Google Updater (x64)"
-      fileName: "updater.exe"
-      filePath: "C:\\Program Files (x86)\\Google\\GoogleUpdater\\143.0.7482.0\\updater.exe"
-      fileQualifier: "-8416518788975661649"
-      fileSize: 6933656
-      fileVersion: "143.0.7482.0"
-      firstEventDate: "2025-11-28T10:57:07.844Z"
-      hash: "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B"
-      interpreter: ""
-      justification: ""
-      justificationEmail: ""
-      lastEventDate: "2025-11-28T10:57:07.844Z"
-      mimeType: ""
-      modificationTime: "2025-10-29T10:59:39.411Z"
-      operatingSystemType: "Windows"
-      originalFileName: "updater.exe"
-      owner: "BUILTIN\\Administrators"
-      packageName: "Google Updater (x64) (updater.exe)"
-      parentProcess: ""
-      policyAction: "Block"
-      policyName: "Test-2"
-      productCode: ""
-      productName: "Google Updater (x64)"
-      productVersion: "143.0.7482.0"
-      publisher: "Google LLC"
-      skippedCount: 0
-      sourceName: "Old Application"
-      sourceType: "OldApplication"
-      upgradeCode: ""
-      userIsAdmin: true
-      userName: "Test\\Administrator"
-    message: |-
-      {
-        "fileDescription" : "Google Updater (x64)",
-        "fileName" : "updater.exe",
-        "agentEventCount" : 1,
-        "agentId" : "9dbcb1f8-5ad9-4294-9724-3842a7cbc0cf",
-        "displayName" : "Google Updater (x64) (updater.exe)",
-        "bundleVersion" : "",
-        "userIsAdmin" : true,
-        "mimeType" : "",
-        "parentProcess" : "",
-        "productName" : "Google Updater (x64)",
-        "productVersion" : "143.0.7482.0",
-        "computerName" : "Test",
-        "lastEventDate" : "2025-11-28T10:57:07.844Z",
-        "modificationTime" : "2025-10-29T10:59:39.411Z",
-        "arrivalTime" : "2025-11-28T10:59:39.425Z",
-        "fileQualifier" : "-8416518788975661649",
-        "company" : "Google LLC",
-        "packageName" : "Google Updater (x64) (updater.exe)",
-        "justification" : "",
-        "firstEventDate" : "2025-11-28T10:57:07.844Z",
-        "fileVersion" : "143.0.7482.0",
-        "accessTargetType" : "Internet",
-        "originalFileName" : "updater.exe",
-        "owner" : "BUILTIN\\Administrators",
-        "policyAction" : "Block",
-        "codeURL" : "",
-        "operatingSystemType" : "Windows",
-        "policyName" : "Test-2",
-        "filePath" : "C:\\Program Files (x86)\\Google\\GoogleUpdater\\143.0.7482.0\\updater.exe",
-        "fileAccessPermission" : "",
-        "skippedCount" : 0,
-        "interpreter" : "",
-        "eventType" : "Block",
-        "userName" : "Test\\Administrator",
-        "accessTargetName" : "",
-        "upgradeCode" : "",
-        "productCode" : "",
-        "sourceType" : "OldApplication",
-        "fileSize" : 6933656,
-        "publisher" : "Google LLC",
-        "bundleName" : "",
-        "arguments" : "--wake-all --system",
-        "justificationEmail" : "",
-        "sourceName" : "Old Application",
-        "hash" : "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B"
-      }
-    tags:
-     - "source:LOGS_SOURCE"
- -
-  sample: |-
-    {
-      "Role" : "SetAdmin",
-      "Description" : "API Get Admin audit data /API/Sets/1e97a613-w243-4f53-9a8d-d36081212de6/AdminAudit?DateFrom=2025-12-08T08:10:06.5Z&limit=500 GET DateFrom: 2025-12-08T08:10:06.5Z, DateTo: , offset: 0, limit: 500",
-      "Administrator" : "user.name@example.com",
-      "EventTime" : "2025-12-09T11:51:54.56Z",
-      "SetName" : "Test - 1",
-      "LoggedFrom" : "10.10.10.10",
-      "InternalSessionId" : 3023922,
-      "Feature" : "Public API",
-      "LoggedAt" : "2025-12-09T08:14:21.78Z",
-      "PermissionDescription" : "None"
-    }
-  service: set-admin-audit-events
-  result:
-    custom:
-      Administrator: "user.name@example.com"
-      Description: "API Get Admin audit data /API/Sets/1e97a613-w243-4f53-9a8d-d36081212de6/AdminAudit?DateFrom=2025-12-08T08:10:06.5Z&limit=500 GET DateFrom: 2025-12-08T08:10:06.5Z, DateTo: , offset: 0, limit: 500"
-      EventTime: "2025-12-09T11:51:54.56Z"
-      Feature: "Public API"
-      InternalSessionId: 3023922
-      LoggedAt: "2025-12-09T08:14:21.78Z"
-      LoggedFrom: "10.10.10.10"
-      PermissionDescription: "None"
-      Role: "SetAdmin"
-      SetName: "Test - 1"
-    message: |-
-      {
-        "Role" : "SetAdmin",
-        "Description" : "API Get Admin audit data /API/Sets/1e97a613-w243-4f53-9a8d-d36081212de6/AdminAudit?DateFrom=2025-12-08T08:10:06.5Z&limit=500 GET DateFrom: 2025-12-08T08:10:06.5Z, DateTo: , offset: 0, limit: 500",
-        "Administrator" : "user.name@example.com",
-        "EventTime" : "2025-12-09T11:51:54.56Z",
-        "SetName" : "Test - 1",
-        "LoggedFrom" : "10.10.10.10",
-        "InternalSessionId" : 3023922,
-        "Feature" : "Public API",
-        "LoggedAt" : "2025-12-09T08:14:21.78Z",
-        "PermissionDescription" : "None"
-      }
-    tags:
-     - "source:LOGS_SOURCE"
- -
-  sample: |-
-    {
-      "Role" : "AccountAdmin",
-      "Description" : "Create Admin \"test.user@example.com\" started",
-      "Administrator" : "test.user@example.com",
-      "EventTime" : "2025-11-25T10:36:24.82Z",
-      "LoggedFrom" : "163.116.205.114",
-      "InternalSessionId" : 2982762,
-      "Feature" : "Account Mgmt",
-      "LoggedAt" : "2025-11-25T10:15:51.207Z",
-      "AccountName" : "Test Account",
-      "PermissionDescription" : "Create Administrator"
-    }
-  service: account-admin-audit-events
-  result:
-    custom:
-      AccountName: "Test Account"
-      Administrator: "test.user@example.com"
-      Description: "Create Admin \"test.user@example.com\" started"
-      EventTime: "2025-11-25T10:36:24.82Z"
-      Feature: "Account Mgmt"
-      InternalSessionId: 2982762
-      LoggedAt: "2025-11-25T10:15:51.207Z"
-      LoggedFrom: "163.116.205.114"
-      PermissionDescription: "Create Administrator"
-      Role: "AccountAdmin"
-    message: |-
-      {
-        "Role" : "AccountAdmin",
-        "Description" : "Create Admin \"test.user@example.com\" started",
-        "Administrator" : "test.user@example.com",
-        "EventTime" : "2025-11-25T10:36:24.82Z",
-        "LoggedFrom" : "163.116.205.114",
-        "InternalSessionId" : 2982762,
-        "Feature" : "Account Mgmt",
-        "LoggedAt" : "2025-11-25T10:15:51.207Z",
-        "AccountName" : "Test Account",
-        "PermissionDescription" : "Create Administrator"
-      }
-    tags:
-     - "source:LOGS_SOURCE"
+id: cyberark-endpoint-privilege-manager
+metric_id: cyberark-endpoint-privilege-manager
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+pipeline:
+  type: pipeline
+  name: CyberArk Endpoint Privilege Manager
+  enabled: true
+  filter:
+    query: source:cyberark-endpoint-privilege-manager
+  processors:
+    - type: date-remapper
+      name: Define `lastEventDate` and `EventTime` as the official date of the log
+      enabled: true
+      sources:
+        - lastEventDate
+        - EventTime
+    - type: pipeline
+      name: Processing Raw Events
+      enabled: true
+      filter:
+        query: service:raw-events
+      processors:
+        - type: attribute-remapper
+          name: Map `eventType` to `evt.name`
+          enabled: true
+          sources:
+            - eventType
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `userName` to `usr.name`
+          enabled: true
+          sources:
+            - userName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `sourceWSIp` to `network.client.ip`
+          enabled: true
+          sources:
+            - sourceWSIp
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Lookup for `logonStatusId` to `logon_status`
+          enabled: true
+          source: logonStatusId
+          target: logon_status
+          lookupTable: >-
+            0,Ok
+
+            3221225566,There are currently no logon servers available to service the logon request
+
+            3221225572,User logon with misspelled or bad user account
+
+            3221225578,User logon with misspelled or bad password
+
+            3221225581,Either a bad username or authentication information
+
+            3221225582,A referenced user name and authentication information are valid but some user account restriction has prevented successful authentication
+
+            3221225583,User logon outside authorized hours
+
+            3221225584,User logon from unauthorized workstation
+
+            3221225585,User logon with expired password
+
+            3221225586,User logon to account disabled by administrator
+
+            3221225692,Sam Server was in the wrong state to perform the desired operation.
+
+            3221225779,Clocks between DC and other computer too far out of sync
+
+            3221225819,The user has not been granted the requested logon type at this machine
+
+            3221225868,Trust relationship between the primary domain and the trusted domain failed
+
+            3221225874,An attempt was made to logon but the Netlogon service was not started
+
+            3221225875,User logon with expired account
+
+            3221226020,User is required to change password at next logon
+
+            3221226021,Evidently a bug in Windows and not a risk
+
+            3221226036,User logon with account locked
+
+            3221226222,An Error occurred during Logon
+
+            3221226515,The specified account is not allowed by authentication firewall to authenticate to the machine
+          type: lookup-processor
+        - name: Lookup for `logonAttemptTypeId` to `logon_attempt_type`
+          enabled: true
+          source: logonAttemptTypeId
+          target: logon_attempt_type
+          lookupTable: |-
+            2,Interactive
+            3,Network 
+            4,Batch
+            5,Service
+            7,Unlock
+            8,NetworkCleartext
+            9,NewCredentials
+            10,RemoteInteractive
+            11,CachedInteractive
+          type: lookup-processor
+        - name: Lookup for `deceptionType` to `deception_policy`
+          enabled: true
+          source: deceptionType
+          target: deception_policy
+          lookupTable: |-
+            1,Lsass lure
+            2,Browser lure
+          defaultLookup: "NULL"
+          type: lookup-processor
+    - type: pipeline
+      name: Processing Policy Audit Events
+      enabled: true
+      filter:
+        query: service:policy-audit-events
+      processors:
+        - type: attribute-remapper
+          name: Map `eventType` to `evt.name`
+          enabled: true
+          sources:
+            - eventType
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `userName` to `usr.name`
+          enabled: true
+          sources:
+            - userName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processing Set Admin and Account Admin Audit Events
+      enabled: true
+      filter:
+        query: service:(set-admin-audit-events OR account-admin-audit-events)
+      processors:
+        - type: attribute-remapper
+          name: Map `Administrator` to `usr.name`
+          enabled: true
+          sources:
+            - Administrator
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `LoggedFrom` to `network.client.ip`
+          enabled: true
+          sources:
+            - LoggedFrom
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: geo-ip-parser
+      name: Extract geolocation information from source
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
