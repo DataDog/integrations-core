@@ -13,7 +13,7 @@
 
 * Fix YAML configuration parsing to properly handle Unicode characters on Windows systems where the UTF-8 locale is not enabled by default. ([#21852](https://github.com/DataDog/integrations-core/pull/21852))
 
-## 37.23.0 / 2025-10-31
+## 37.23.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

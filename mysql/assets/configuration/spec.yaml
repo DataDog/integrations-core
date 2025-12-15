@@ -45,6 +45,7 @@ files:
             description: |
               Password associated to the MySQL user.
             enabled: true
+            secret: true
             value:
               type: string
 
@@ -428,13 +429,7 @@ files:
                   Capped by `collect_schemas.collection_interval`
                 value:
                   type: number
-                  display_default: 60
-              - name: max_tables
-                description: |
-                  Set the maximum number of tables to collect. Defaults to 300.
-                value:
-                  type: integer
-                  display_default: 300
+                  example: 60
           - name: schemas_collection
             deprecation:
               Agent version: 7.69.0

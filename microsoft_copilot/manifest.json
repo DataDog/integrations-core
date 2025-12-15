@@ -24,6 +24,8 @@
       }
     ],
     "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Collaboration",
       "Category::Metrics",
       "Category::Log Collection",
       "Submitted Data Type::Logs",
@@ -72,6 +74,9 @@
     },
     "dashboards": {
       "Microsoft Copilot Usage": "assets/dashboards/microsoft_copilot_usage.json"
+    },
+    "logs": {
+        "source": "microsoft-copilot"
     },
     "monitors": {
       "Low Percentage of Active Microsoft 365 Copilot Users" : "assets/monitors/low_percentage_of_microsoft_copilot_usage.json"

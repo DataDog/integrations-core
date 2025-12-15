@@ -12,7 +12,7 @@
 
 * Fix styling and grammatical errors in the config template ([#21879](https://github.com/DataDog/integrations-core/pull/21879))
 
-## 9.1.1 / 2025-10-31
+## 9.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 
