@@ -92,12 +92,13 @@ tests:
       network:
         client:
           geoip: {}
-          ip: "208.67.222.222"
+          ip: "10.10.10.10"
       severity: 6
+      source_ip: "208.67.222.222"
       timestamp: 1764932053000
       usr:
         name: "olivia.martin"
-    message: "Group Staging-VPN User olivia.martin IP 208.67.222.222 AnyConnect session resumed connection from IP ip2."
+    message: "Group Staging-VPN User olivia.martin IP 208.67.222.222 AnyConnect session resumed connection from IP 10.10.10.10."
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -144,11 +145,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1764931855000
  -
-  sample: "<190>2025-12-05T10:51:15Z: %ASA-4-722056: Unsupported AnyConnect client connection rejected from 8.8.4.4. Client info: user-agent string. Reason: reason"
+  sample: "<190>2025-12-05T10:51:15Z: %ASA-4-722056: Unsupported AnyConnect client connection rejected from 8.8.4.4. Client info: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36. Reason: reason"
   result:
     custom:
       http:
-        useragent: "user-agent string"
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36"
         useragent_details:
           browser:
             family: "Other"
@@ -275,13 +276,13 @@ tests:
       timestamp: 1764932029000
       usr:
         name: "chloe.campbell"
-    message: "Group Corp-VPN User chloe.campbell IP 4.2.2.1 SVC terminating connection: Failed to install Redirect URL: redirect_URL Redirect ACL: non_exist for 4.2.2.1."
+    message: "Group Corp-VPN User chloe.campbell IP 4.2.2.1 SVC terminating connection: Failed to install Redirect URL: https://www.google.com/ Redirect ACL: non_exist for 4.2.2.1."
     status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1764932029000
  -
-  sample: "<190>2025-12-05T10:51:52Z: %ASA-6-722053: Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client user-agent connection"
+  sample: "<190>2025-12-05T10:51:52Z: %ASA-6-722053: Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36 connection"
   result:
     custom:
       group: "RemoteUsers"
@@ -294,7 +295,7 @@ tests:
       timestamp: 1764931912000
       usr:
         name: "harper.green"
-    message: "Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client user-agent connection"
+    message: "Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36 connection"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"

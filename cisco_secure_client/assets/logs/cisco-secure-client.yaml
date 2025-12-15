@@ -139,7 +139,7 @@ pipeline:
 
           rule_716061 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} IPv6 User Filter %{notSpace:ipv6_user_filter} configured for AnyConnect. This setting has been deprecated, terminating connection
 
-          rule_722053 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} Unknown client %{regex("^[^\\r\\n]*(?=\\sconnection)"):http.useragent} connection
+          rule_722053 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} Unknown client %{regex("(.+?)(?= connection)"):http.useragent} connection
 
           rule_722053_113038_113039_716058_716060 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip}%{data}
     - type: category-processor
