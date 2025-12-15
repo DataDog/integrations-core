@@ -133,7 +133,7 @@ pipeline:
 
           rule_751021 %{data:usr.name} %{notSpace:protocol} with %{regex(".*(?= encryption )"):encryption_type} encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client.
 
-          rule_751025 Group:%{regex(".*(?= IPv4 Address=)")} IPv4 Address=%{ip:assigned_ipv4_address} IPv6 address=%{ip:assigned_ipv6_address} assigned to session.
+          rule_751025 Group:%{regex(".*(?= IPv4 Address=)"):group} IPv4 Address=%{ip:assigned_ipv4_address} IPv6 address=%{ip:assigned_ipv6_address} assigned to session.
 
           rule_722054 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} SVC terminating connection: Failed to install Redirect URL: %{notSpace:redirect_url} Redirect ACL: non_exist for %{ip:assigned_ip}.
 
