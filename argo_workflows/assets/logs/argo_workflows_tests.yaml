@@ -162,3 +162,17 @@ tests:
  -
    sample: time="2025-12-16T20:23:31.258Z" level=info duration="144.502µs"
       method=GET path=index.html size=487 status=0
+   result:
+    custom:
+      duration: "144.502µs"
+      level: "info"
+      method: "GET"
+      path: "index.html"
+      size: 487
+      status: 0
+      timestamp: 1765916611258
+    message: "time=\"2025-12-16T20:23:31.258Z\" level=info duration=\"144.502µs\" method=GET path=index.html size=487 status=0"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1765916611258
