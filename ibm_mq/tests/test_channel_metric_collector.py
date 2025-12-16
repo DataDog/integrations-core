@@ -247,14 +247,17 @@ def test_channel_description_tags(
 
     collector.get_pcf_channel_metrics(queue_manager)
 
+    # Find gauge calls with channel-specific tags (skip the first call which is for total channel count)
     gauge_calls = collector.gauge.call_args_list
-    assert len(gauge_calls) > 0
-    first_call_tags = gauge_calls[0][1]['tags']
+    channel_metric_calls = [call for call in gauge_calls if 'channel:TEST.CHANNEL' in call[1]['tags']]
+    assert len(channel_metric_calls) > 0, "Expected at least one channel-specific metric call"
+
+    channel_tags = channel_metric_calls[0][1]['tags']
 
     if expected_desc_tag:
-        assert expected_desc_tag in first_call_tags
+        assert expected_desc_tag in channel_tags
     else:
-        desc_tags = [t for t in first_call_tags if t.startswith('channel_desc:')]
+        desc_tags = [t for t in channel_tags if t.startswith('channel_desc:')]
         assert len(desc_tags) == 0
 
 
