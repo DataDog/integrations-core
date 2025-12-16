@@ -1590,3 +1590,63 @@ def test_debounce_connection_recovery(aggregator, dd_run_check, caplog):
         # Verify no CRITICAL check sent
         service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
         assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "pod_phase",
+    ["Failed", "Succeeded", "Unknown"],
+)
+def test_debounce_connection_failure_all_terminal_phases(aggregator, dd_run_check, caplog, pod_phase):
+    """Test that all terminal pod phases suppress connection errors."""
+
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:{}'.format(pod_phase)]
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        with caplog.at_level(logging.DEBUG):
+            dd_run_check(c)
+
+        assert "Pod phase is terminal, suppressing request error" in caplog.text
+
+    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog):
+    """Test that 'No route to host' errors are also debounced."""
+
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("No route to host")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        # First run: expect warning, no CRITICAL check
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_get_pod_phase():
+    """Test _get_pod_phase static method."""
+    assert SparkCheck._get_pod_phase(['pod_phase:Running']) == 'running'
+    assert SparkCheck._get_pod_phase(['pod_phase:Failed']) == 'failed'
+    assert SparkCheck._get_pod_phase(['other:tag', 'pod_phase:Succeeded']) == 'succeeded'
+    assert SparkCheck._get_pod_phase(['other:tag']) is None
+    assert SparkCheck._get_pod_phase(None) is None
+    assert SparkCheck._get_pod_phase([]) is None
