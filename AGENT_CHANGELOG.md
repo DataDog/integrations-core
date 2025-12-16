@@ -1,3 +1,7 @@
+## Datadog Agent version [7.73.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7731)
+
+* Datadog Checks Base [37.23.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+
 ## Datadog Agent version [7.73.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7730)
 
 * ActiveMQ XML [5.2.1](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
@@ -387,6 +391,7 @@
 * TorchServe [4.1.0](https://github.com/DataDog/integrations-core/blob/master/torchserve/CHANGELOG.md)
 * Traefik Mesh [3.1.0](https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/CHANGELOG.md)
 * Traffic Server [3.3.0](https://github.com/DataDog/integrations-core/blob/master/traffic_server/CHANGELOG.md)
+* Trend Micro Cloud One [1.0.0](https://github.com/DataDog/integrations-core/blob/master/trend_micro_cloud_one/CHANGELOG.md)
 * Twemproxy [3.1.0](https://github.com/DataDog/integrations-core/blob/master/twemproxy/CHANGELOG.md)
 * Twistlock [6.1.0](https://github.com/DataDog/integrations-core/blob/master/twistlock/CHANGELOG.md)
 * Varnish [4.1.0](https://github.com/DataDog/integrations-core/blob/master/varnish/CHANGELOG.md)
