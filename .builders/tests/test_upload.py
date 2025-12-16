@@ -373,3 +373,19 @@ def test_lockfile_generation(tmp_path, setup_targets_dir):
         linux_aarch64_lockfile = lockfile_map["linux-aarch64_3.12.txt"]
         assert linux_aarch64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash'
         assert len(lock_files) == 2
+
+
+def test_generate_lockfiles_accepts_string_path(tmp_path):
+
+    lockfile = {'linux-x86_64': ['dep @ https://example.com/dep.whl#sha256=abc', '']}
+
+    fake_deps_dir = tmp_path / ".deps"
+    fake_resolved_dir = fake_deps_dir / "resolved"
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+    (tmp_path / "targets").mkdir()
+
+    with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
+        # Should not raise TypeError: unsupported operand type(s) for /: 'str' and 'str'
+        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile)

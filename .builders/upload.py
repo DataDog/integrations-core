@@ -84,6 +84,7 @@ def _build_number_of_wheel_blob(wheel_path: Blob) -> int:
 
 
 def generate_lockfiles(targets_dir, lockfiles):
+    targets_dir = Path(targets_dir)
     LOCK_FILE_DIR.mkdir(parents=True, exist_ok=True)
     with RESOLUTION_DIR.joinpath('metadata.json').open('w', encoding='utf-8') as f:
         contents = json.dumps(
