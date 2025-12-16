@@ -1,1 +1,5 @@
 Fixed collection of Postgres schema owners.
+Fix missing table owner and toast table fields in Postgres schema collection.
+Omit empty tables from collection.
+Fix the missing description in Postgres schema databases.
+Add snapshot tests for Postgres schema collection.
