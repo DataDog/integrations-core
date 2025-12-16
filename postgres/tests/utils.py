@@ -154,7 +154,8 @@ def normalize_object(obj):
     if isinstance(obj, dict):
         return {k: normalize_object(v) for k, v in obj.items()}
     if isinstance(obj, list):
-        return sorted([normalize_object(item) for item in obj], key=lambda x: json.dumps(normalize_object(x)))
+        normalized = [normalize_object(item) for item in obj]
+        return sorted(normalized, key=lambda x: json.dumps(x, sort_keys=True))
     if isinstance(obj, tuple):
         return tuple(normalize_object(item) for item in obj)
     return obj
