@@ -19,11 +19,6 @@ pipeline:
   filter:
     query: source:have-i-been-pwned
   processors:
-    - type: service-remapper
-      name: Define `service` as the official service of the log
-      enabled: true
-      sources:
-        - service
     - type: attribute-remapper
       name: Remapping user_details.user_name value to usr.name attribute
       enabled: true
@@ -45,14 +40,3 @@ pipeline:
       enabled: true
       sources:
         - Description
-    - type: pipeline
-      name: Processing of Latest Breach
-      enabled: true
-      filter:
-        query: service:latest-breach
-      processors:
-        - type: date-remapper
-          name: Defining AddedDate as the official timestamp of log
-          enabled: true
-          sources:
-            - AddedDate

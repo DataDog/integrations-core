@@ -58,7 +58,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -119,7 +119,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -169,7 +169,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -231,7 +231,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -292,7 +292,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -344,7 +344,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -420,7 +420,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -491,7 +491,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -570,7 +570,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -622,7 +622,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -693,7 +693,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -783,7 +783,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsMalware:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsMalware:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -840,7 +840,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsMalware:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsMalware:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -900,7 +900,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -971,7 +971,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsMalware:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsMalware:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1041,7 +1041,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsMalware:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsMalware:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1110,7 +1110,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsSensitive:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsSensitive:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1181,7 +1181,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsSensitive:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsSensitive:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1245,7 +1245,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsSensitive:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsSensitive:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1304,7 +1304,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1375,7 +1375,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsSensitive:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsSensitive:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1444,7 +1444,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1514,7 +1514,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1589,7 +1589,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsSpamList:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsSpamList:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1642,7 +1642,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsStealerLog:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsStealerLog:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1695,7 +1695,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsRetired:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsRetired:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1747,7 +1747,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach @IsSubscriptionFree:true $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned @IsSubscriptionFree:true $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
@@ -1794,7 +1794,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:have-i-been-pwned service:breach $user_name $breached_platform $org_domain"
+                                    "query": "source:have-i-been-pwned $user_name $breached_platform $org_domain"
                                 },
                                 "indexes": [
                                     "*"
