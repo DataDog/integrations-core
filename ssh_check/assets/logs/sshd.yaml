@@ -98,7 +98,7 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: '@system.action:Accepted'
+                    query: '@system.action:(Accepted OR Failed)'
                   name: Logon
                   id: 1
                 - filter:
@@ -106,7 +106,7 @@ pipeline:
                   name: Logoff
                   id: 2
                 - filter:
-                    query: '-@system.action:(Accepted OR "session closed")'
+                    query: '@system.action:*'
                   name: Other
                   id: 99
               targets:
@@ -116,7 +116,7 @@ pipeline:
               name: ocsf.type_name
               categories:
                 - filter:
-                    query: "@system.action:Accepted"
+                    query: "@system.action:(Accepted OR Failed)"
                   name: "Authentication: Logon"
                   id: 300201
                 - filter:
@@ -124,7 +124,7 @@ pipeline:
                   name: "Authentication: Logoff"
                   id: 300202
                 - filter:
-                    query: '-@system.action:(Accepted OR "session closed")'
+                    query: '@system.action:*'
                   name: "Authentication: Other"
                   id: 300299
               targets:
