@@ -135,7 +135,7 @@ pipeline:
             - type: schema-remapper
               name: Map `@system.user` to `ocsf.user.name`
               sources:
-                - '@system.user'
+                - system.user
               target: ocsf.user.name
               preserveSource: true
               overrideOnConflict: true
