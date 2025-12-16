@@ -556,7 +556,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 1
+                "height": 13
             }
         },
         {
@@ -1191,9 +1191,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 4,
+                "y": 16,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -1983,9 +1983,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 5,
+                "y": 0,
                 "width": 12,
-                "height": 1,
+                "height": 25,
                 "is_column_break": true
             }
         }
