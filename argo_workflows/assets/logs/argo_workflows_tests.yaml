@@ -1,4 +1,3 @@
----
 id: argo_workflows
 tests:
   - sample: >-
