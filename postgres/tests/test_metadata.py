@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 from .common import POSTGRES_LOCALE, POSTGRES_VERSION
-from .utils import run_one_check
+from .utils import normalize_object, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -87,7 +87,8 @@ def test_collect_schema_snapshot(integration_check, dbm_instance, aggregator):
 
     with open(file_path, 'r') as f:
         snapshot = json.load(f)
-    assert snapshot == schema_events[0]['metadata']
+    # Use a deep equal function that is stable across list sorting
+    assert normalize_object(snapshot) == normalize_object(schema_events[0]['metadata'])
 
 
 @pytest.mark.parametrize(
