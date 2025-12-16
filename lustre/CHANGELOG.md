@@ -8,7 +8,7 @@
 
 * Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
 
-## 1.2.1 / 2025-11-19
+## 1.2.1 / 2025-11-19 / Agent 7.73.0
 
 ***Fixed***:
 

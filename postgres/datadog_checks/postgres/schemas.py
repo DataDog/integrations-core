@@ -69,8 +69,8 @@ WHERE  c.relkind IN ( 'r', 'f' )
 
 SCHEMA_QUERY = """
 SELECT nsp.oid                 AS schema_id,
-       nspname             AS schema_name,
-       nspowner :: regrole AS schema_owner
+       nspname                 AS schema_name,
+       nspowner::regrole::text AS schema_owner
 FROM   pg_namespace nsp
        LEFT JOIN pg_roles r on nsp.nspowner = r.oid
 WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
@@ -327,7 +327,7 @@ class PostgresSchemaCollector(SchemaCollector):
                 {tables_query}
             ),
             schema_tables AS (
-                SELECT schemas.schema_id, schemas.schema_name,
+                SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
                 tables.table_id, tables.table_name
                 FROM schemas
                 LEFT JOIN tables ON schemas.schema_id = tables.schema_id
@@ -345,7 +345,7 @@ class PostgresSchemaCollector(SchemaCollector):
             )
             {partitions_ctes}
 
-            SELECT schema_tables.schema_id, schema_tables.schema_name,
+            SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
             schema_tables.table_id, schema_tables.table_name,
                 array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                 array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
@@ -357,7 +357,7 @@ class PostgresSchemaCollector(SchemaCollector):
                 LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
                 LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
                 {partition_joins}
-            GROUP BY schema_tables.schema_id, schema_tables.schema_name,
+            GROUP BY schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
                 schema_tables.table_id, schema_tables.table_name
             ;
         """

@@ -14,7 +14,7 @@
 
 * Support `only_custom_queries` configuration option in the SQL Server integration ([#21304](https://github.com/DataDog/integrations-core/pull/21304))
 
-## 22.11.0 / 2025-10-31
+## 22.11.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 
