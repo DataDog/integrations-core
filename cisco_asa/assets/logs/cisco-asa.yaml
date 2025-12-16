@@ -121,7 +121,7 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: parse_header
-          (\<%{integer}\>)?%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}:\s*%{notSpace}-%{integer:severity}-%{word:message_id}:\s*%{data:message}
+          (\<%{integer}\>)?%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}:\s*%{notSpace}-%{integer:severity}-%{word:message_id}:\s*%{greedyData:message}
     - type: message-remapper
       name: Define `message` as official message of the log
       enabled: true
@@ -234,19 +234,20 @@ pipeline:
             - Authentication failed for admin user admin1 from 10.10.10.10.
               Interactive challenge processing is not supported for ssh
           grok:
-            supportRules: ""
+            supportRules: parse_client_and_destination_ip_port
+              %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
             matchRules: >-
               rule_109005_109006 Authentication %{notSpace:evt.outcome} for user
               '%{regex("[^']*"):usr.name}' from
-              %{ip:network.client.ip}/%{integer:network.client.port} to
-              %{ip:network.destination.ip}/%{integer:network.destination.port}
-              on interface %{data:interface}
+              %{parse_client_and_destination_ip_port} on interface
+              %{greedyData:interface}
 
-              rule_109010 Auth from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} %{notSpace:evt.outcome} \(%{regex("[^\\)]*"):reason}\) on interface %{data:interface}
+              rule_109010 Auth from %{parse_client_and_destination_ip_port} %{notSpace:evt.outcome} \(%{regex("[^\\)]*"):reason}\) on interface %{greedyData:interface}
 
-              rule_109023 User from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} on interface %{regex(".*(?= using )"):interface} using %{regex(".*(?= must authenticate)"):service_name} must authenticate before using this service
+              rule_109023 User from %{parse_client_and_destination_ip_port} on interface %{regex(".*(?= using )"):interface} using %{regex(".*(?= must authenticate)"):service_name} must authenticate before using this service
 
-              rule_109033_109034 Authentication %{notSpace:evt.outcome} for %{notSpace:user_type} user %{regex(".*(?= from )"):usr.name} from (%{ip:network.client.ip}|%{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port}). Interactive challenge processing is not supported for %{notSpace:protocol}( connections)?
+              rule_109033_109034 Authentication %{notSpace:evt.outcome} for %{notSpace:user_type} user %{regex(".*(?= from )"):usr.name} from (%{ip:network.client.ip}|%{parse_client_and_destination_ip_port}). Interactive challenge processing is not supported for %{notSpace:protocol}( connections)?
     - type: pipeline
       name: User Authorization
       enabled: true
@@ -270,15 +271,16 @@ pipeline:
             - Authorization denied from 10.10.10.10/10 to 11.11.11.11/11 (not
               authenticated) on interface test using protocol to
           grok:
-            supportRules: ""
+            supportRules: parse_client_and_destination_ip_port
+              %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
             matchRules: >-
               rule_109007_109008 Authorization %{word:evt.outcome} for user
               '%{regex("[^']*"):usr.name}' from
-              %{ip:network.client.ip}/%{integer:network.client.port} to
-              %{ip:network.destination.ip}/%{integer:network.destination.port}
-              on interface %{data:interface}
+              %{parse_client_and_destination_ip_port} on interface
+              %{greedyData:interface}
 
-              rule_109024_109025 Authorization %{word:evt.outcome} (\(acl=%{regex("[^\\)]*"):acl_id}\))?( for user '%{regex("[^']*"):usr.name}' )?from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} (\(not authenticated\) )?on interface %{regex(".*(?= using )"):interface} using %{notSpace:protocol}( to)?
+              rule_109024_109025 Authorization %{word:evt.outcome} (\(acl=%{regex("[^\\)]*"):acl_id}\))?( for user '%{regex("[^']*"):usr.name}' )?from %{parse_client_and_destination_ip_port} (\(not authenticated\) )?on interface %{regex(".*(?= using )"):interface} using %{notSpace:protocol}( to)?
     - type: pipeline
       name: User Management
       enabled: true
@@ -298,9 +300,9 @@ pipeline:
               privilege_level"
           grok:
             supportRules: ""
-            matchRules: 'rule_502101_502102_502103 %{regex(".*(?=: Uname)"):action}: Uname:
+            matchRules: 'rule_502101_502102_502103 %{regex("[^:]*"):action}: Uname:
               %{regex(".*(?= (Priv:|From:))"):usr.name} (Priv:
-              %{notSpace:privilege_level}%{data}|From:
+              %{notSpace:privilege_level}%{greedyData}|From:
               %{notSpace:previous_privilege_level} To:
               %{notSpace:new_privilege_level})'
     - type: pipeline
@@ -398,13 +400,13 @@ pipeline:
             matchRules: >-
               rule_746005 user-identity: The AD Agent %{ip:network.client.ip}
               cannot be reached -
-              (%{regex("[^\\[]*"):reason}(\[\s*%{regex("[^\\]]*"):action}\s*\])?|%{data:reason})
+              (%{regex("[^\\[]*"):reason}(\[\s*%{regex("[^\\]]*"):action}\s*\])?|%{greedyData:reason})
 
               rule_746007 user-identity: NetBIOS response failed from User %{regex(".*(?= at )"):usr.name} at %{ip:network.client.ip}
 
-              rule_746016 user-identity: DNS lookup for %{ip:network.client.ip} failed, reason:\s*%{data:reason}
+              rule_746016 user-identity: DNS lookup for %{ip:network.client.ip} failed, reason:\s*%{greedyData:reason}
 
-              rule_746001_746002_746003 user-identity: %{data:database} %{notSpace:download_status}(\s+-\s+%{data:reason})?
+              rule_746001_746002_746003 user-identity: %{data:database} %{notSpace:download_status}(\s+-\s+%{greedyData:reason})?
     - type: pipeline
       name: ARP Collision/IP Spoof Insights
       enabled: true
@@ -442,7 +444,7 @@ pipeline:
 
               rule_322002_322003 ARP inspection check failed for arp (request|response) received from host %{mac:host_mac_address} on interface %{regex(".*(?=. This)"):interface}. This host is advertising MAC Address %{mac:client_mac_address} for IP Address %{ip:network.client.ip}, (which is (statically|dynamically) bound to MAC Address %{mac:bound_mac_address}|which is not bound to any MAC Address)
 
-              rule_106016 Deny IP spoof from (\()?%{ip:network.client.ip}(\))? to %{ip:network.destination.ip} on interface %{data:interface}
+              rule_106016 Deny IP spoof from (\()?%{ip:network.client.ip}(\))? to %{ip:network.destination.ip} on interface %{greedyData:interface}
     - type: pipeline
       name: Connection insights
       enabled: true
@@ -465,18 +467,19 @@ pipeline:
             - Deny TCP connection spoof from 10.10.10.10 to 11.11.11.11 on
               interface wan1
           grok:
-            supportRules: ""
+            supportRules: parse_client_and_destination_ip_port
+              %{ip:network.client.ip}/%{integer:network.client.port} to
+              %{ip:network.destination.ip}/%{integer:network.destination.port}
             matchRules: >-
               rule_106001 Inbound %{regex("TCP"):protocol} connection denied
-              from %{ip:network.client.ip}/%{integer:network.client.port} to
-              %{ip:network.destination.ip}/%{integer:network.destination.port}
-              flags %{notSpace:tcp_flag}\s+on\s+interface %{data:interface}
+              from %{parse_client_and_destination_ip_port} flags
+              %{notSpace:tcp_flag}\s+on\s+interface %{greedyData:interface}
 
               rule_106002 %{notSpace:protocol} Connection denied by outbound list %{notSpace:outbound_list} src %{ip:network.client.ip} dest %{ip:network.destination.ip}
 
-              rule_106006 Deny inbound %{regex("UDP"):protocol} from %{ip:network.client.ip}/%{integer:network.client.port} to %{ip:network.destination.ip}/%{integer:network.destination.port} on interface %{data:interface}
+              rule_106006 Deny inbound %{regex("UDP"):protocol} from %{parse_client_and_destination_ip_port} on interface %{greedyData:interface}
 
-              rule_106022 Deny %{notSpace:protocol} connection spoof from %{ip:network.client.ip} to %{ip:network.destination.ip} on interface %{data:interface}
+              rule_106022 Deny %{notSpace:protocol} connection spoof from %{ip:network.client.ip} to %{ip:network.destination.ip} on interface %{greedyData:interface}
     - type: pipeline
       name: Dynamic traffic insights
       enabled: true
@@ -529,7 +532,7 @@ pipeline:
               resolved from %{notSpace:list_type} list:
               (%{ip:dynamic_list_ip_address}\s*/\s*%{notSpace:dynamic_list_netmask}|%{notSpace:domain_name})(,
               threat-level: %{notSpace:threat_level}, category:
-              %{data:category})?'
+              %{greedyData:category})?'
     - type: geo-ip-parser
       name: Extract geolocation information from the Client IP
       enabled: true

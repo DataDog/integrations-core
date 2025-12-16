@@ -4,8 +4,6 @@
 
 Integrate Cisco ASA with Datadog to gain insights into Threat Detection, User Authentication, User Authorization, User Management, Dynamic Traffic Insights, Connection Insights, ARP Collision Insights, Application Firewall, Transparent Firewall and Identity Firewall using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. The integration can also be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
-**Minimum Agent version:** 7.74.0
-
 **Disclaimer**: Your use of this integration, which may collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security or integrity of any end-user information, including personal data, transmitted through your use of the integration.
 
 ## Setup
