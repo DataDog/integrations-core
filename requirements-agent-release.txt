@@ -153,7 +153,7 @@ datadog-microsoft-dns==1.2.0; sys_platform == 'win32'
 datadog-microsoft-sysmon==1.2.0; sys_platform == 'win32'
 datadog-milvus==2.3.0
 datadog-mongo==10.6.0
-datadog-mysql==15.11.0
+datadog-mysql==15.11.1
 datadog-nagios==3.2.0
 datadog-network==5.5.0
 datadog-nfsstat==3.3.0; sys_platform == 'linux2'
