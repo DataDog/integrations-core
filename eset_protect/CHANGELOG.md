@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.3.0 / 2025-12-16
+
+***Fixed***:
+
+* Use `@event_type` on dashboards and monitors instead of the service field.
+
 ## 1.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

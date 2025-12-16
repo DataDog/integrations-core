@@ -133,7 +133,7 @@ pipeline:
       name: Processing for target attribute
       enabled: true
       filter:
-        query: service:Audit_Event @domain:"Native user" @action:"Login attempt"
+        query: @event_type:Audit_Event @domain:"Native user" @action:"Login attempt"
           -@target:""
       processors:
         - type: attribute-remapper
@@ -206,7 +206,7 @@ pipeline:
       name: Processing for license logs
       enabled: true
       filter:
-        query: service:Audit_Event @domain:License @action:Deactivate
+        query: @event_type:Audit_Event @domain:License @action:Deactivate
       processors:
         - type: grok-parser
           name: Extract license and computer names
@@ -223,7 +223,7 @@ pipeline:
       name: Processing for create and delete actions
       enabled: true
       filter:
-        query: service:Audit_Event @action:(Create OR Delete)
+        query: @event_type:Audit_Event @action:(Create OR Delete)
       processors:
         - type: grok-parser
           name: Extract name from detail
@@ -247,7 +247,7 @@ pipeline:
       name: Processing for source attributes
       enabled: true
       filter:
-        query: service:FirewallAggregated_Event @source_address_type:IPv4
+        query: @event_type:FirewallAggregated_Event @source_address_type:IPv4
       processors:
         - type: attribute-remapper
           name: Map `source_address` to `network.client.ip`
@@ -280,7 +280,7 @@ pipeline:
       name: Processing for target attributes
       enabled: true
       filter:
-        query: service:(FirewallAggregated_Event OR FilteredWebsites_Event)
+        query: @event_type:(FirewallAggregated_Event OR FilteredWebsites_Event)
           @target_address_type:IPv4
       processors:
         - type: attribute-remapper
