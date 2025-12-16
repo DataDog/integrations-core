@@ -98,13 +98,13 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@system.action:Accepted"
-                    name: Logon
-                    id: 1
+                    query: '@system.action:Accepted'
+                  name: Logon
+                  id: 1
                 - filter:
-                    query: "@system.action:\"session closed\""
-                    name: Logoff
-                    id: 2
+                    query: '@system.action:"session closed"'
+                  name: Logoff
+                  id: 2                  
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
@@ -116,7 +116,7 @@ pipeline:
                   name: "Authentication: Logon"
                   id: 300201
                 - filter:
-                    query: "@system.action:\"session closed\""
+                    query: '@system.action:"session closed"'
                   name: "Authentication: Logoff"
                   id: 300202
               targets:
