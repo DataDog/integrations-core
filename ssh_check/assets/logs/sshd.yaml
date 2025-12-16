@@ -38,7 +38,7 @@ pipeline:
         matchRules: |
           sshd.logins.pwd %{regex("Accepted|Failed"):system.action} %{regex("password"):system.type} for %{_auth} from %{_client_ip} port %{_client_port} ssh2
 
-          sshd.logins.invaliduser %{regex("Accepted|Failed"):system.action} %{regex("password"):system.type} for invalid user %{_auth} from %{_client_ip} port %{_client_port} ssh2 
+          sshd.logins.invaliduser %{regex("Accepted|Failed"):system.action} %{regex("password"):system.type} for invalid user %{_auth} from %{_client_ip} port %{_client_port} ssh2
 
           sshd.logins.key.success %{regex("Accepted"):system.action} %{regex("publickey"):system.type} for %{_auth} from %{_client_ip} port %{_client_port} ssh2(: %{notSpace:system.algorithm} %{notSpace:system.key})?
 
