@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 23.3.2 / 2025-12-16
+
+***Fixed***:
+
+* Fixes a regression introduced in ([#21347](https://github.com/DataDog/integrations-core/pull/21347)) that caused us to cache recently seen FQT events for 0.36 seconds instead of 3600 seconds ([#22113](https://github.com/DataDog/integrations-core/pull/22113))
+
 ## 23.3.1 / 2025-12-15
 
 ***Fixed***:

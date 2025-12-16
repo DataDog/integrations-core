@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.11.1 / 2025-12-16
+
+***Fixed***:
+
+* Revert "Migrate MySQL to new schema collector" to avoid breaking schema collection on older versions of Mysql/MariaDB ([#22103](https://github.com/DataDog/integrations-core/pull/22103))
+
 ## 15.11.0 / 2025-11-26
 
 ***Added***:
