@@ -217,6 +217,47 @@ def test_collect_connection_metrics_config_option(instance, collect_connection_m
                 )
 
 
+@pytest.mark.parametrize(
+    'add_description_tags,normalize_description_tags,channel_desc,expected_desc_tag',
+    [
+        (False, True, b'Test Description', None),  # Disabled
+        (True, True, b'Test Description', 'channel_desc:test_description'),  # Enabled + normalized
+        (True, False, b'Test Description', 'channel_desc:Test Description'),  # Enabled + raw
+        (True, True, b'', None),  # Empty description
+    ],
+)
+def test_channel_description_tags(
+    instance, add_description_tags, normalize_description_tags, channel_desc, expected_desc_tag
+):
+    """Test channel description tags with different config options."""
+    instance['add_description_tags'] = add_description_tags
+    instance['normalize_description_tags'] = normalize_description_tags
+
+    channel_info = {
+        pymqi.CMQCFC.MQCACH_CHANNEL_NAME: b'TEST.CHANNEL',
+        pymqi.CMQCFC.MQIACH_BATCH_SIZE: 100,
+    }
+    if channel_desc:
+        channel_info[pymqi.CMQCFC.MQCACH_DESC] = channel_desc
+
+    collector = _get_mocked_instance(instance)
+    collector._discover_channels = Mock(return_value=[channel_info])
+    collector.gauge = Mock()
+    queue_manager = Mock()
+
+    collector.get_pcf_channel_metrics(queue_manager)
+
+    gauge_calls = collector.gauge.call_args_list
+    assert len(gauge_calls) > 0
+    first_call_tags = gauge_calls[0][1]['tags']
+
+    if expected_desc_tag:
+        assert expected_desc_tag in first_call_tags
+    else:
+        desc_tags = [t for t in first_call_tags if t.startswith('channel_desc:')]
+        assert len(desc_tags) == 0
+
+
 def _get_mocked_instance(instance):
     config = IBMMQConfig(instance, {})
     collector = ChannelMetricCollector(config, service_check=Mock(), gauge=Mock(), log=Mock())
