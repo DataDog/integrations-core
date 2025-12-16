@@ -401,7 +401,9 @@ class PostgresSchemaCollector(SchemaCollector):
                             }.items()
                             if v is not None
                         }
-                    ] if cursor_row.get("table_name") else [],
+                    ]
+                    if cursor_row.get("table_name")
+                    else [],
                 }.items()
                 if v is not None
             }
