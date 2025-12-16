@@ -38,7 +38,7 @@ pipeline:
         matchRules: |
           sshd.logins.pwd %{regex("Accepted|Failed"):system.action} %{regex("password"):system.type} for %{_auth} from %{_client_ip} port %{_client_port} ssh2
 
-          sshd.logins.invalid.pwd %{regex("Accepted|Failed"):system.action} %{regex("password"):system.type} for invalid user %{_auth} from %{_client_ip} port %{_client_port} ssh2 
+          sshd.logins.invaliduser %{regex("Accepted|Failed"):system.action} %{regex("password"):system.type} for invalid user %{_auth} from %{_client_ip} port %{_client_port} ssh2 
 
           sshd.logins.key.success %{regex("Accepted"):system.action} %{regex("publickey"):system.type} for %{_auth} from %{_client_ip} port %{_client_port} ssh2(: %{notSpace:system.algorithm} %{notSpace:system.key})?
 
@@ -133,7 +133,7 @@ pipeline:
                 name: ocsf.severity
                 id: ocsf.severity_id
             - type: schema-remapper
-              name: Map `@system.user` to `ocsf.user.name`
+              name: Map `system.user` to `ocsf.user.name`
               sources:
                 - system.user
               target: ocsf.user.name
