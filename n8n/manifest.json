@@ -39,7 +39,11 @@
         "prefix": "n8n.",
         "check": "n8n.active.workflow.count",
         "metadata_path": "metadata.csv"
-      }
+      },
+      "process_signatures": [
+        "/bin/n8n",
+        "node pm2"
+      ]
     },
     "dashboards": {
         "N8N overview": "assets/dashboards/n8n_overview.json"
