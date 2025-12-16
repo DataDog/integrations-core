@@ -22,7 +22,7 @@ pipeline:
         matchRules: |
           argo_common time="%{date("yyyy-MM-dd'T'HH:mm:ss.SSS"):timestamp}Z" level=%{word:level} msg="%{data:message}"
           k8s %{regex("\\w"):level}\d+ %{date("HH:mm:ss.SSSSSS"):timestamp} \s+%{number:logger.thread_id} %{regex("[^\\:]+"):logger.name}:%{integer:logger.lineno}] %{data:message}
-          argo_fallback %{data::keyvalue}
+          argo_fallback time="%{date("yyyy-MM-dd'T'HH:mm:ss.SSS"):timestamp}Z" %{data::keyvalue}
         supportRules: ""
     - type: message-remapper
       name: Define `message` as the official message of the log
