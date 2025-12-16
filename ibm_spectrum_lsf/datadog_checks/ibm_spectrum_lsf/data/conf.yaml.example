@@ -21,6 +21,15 @@ instances:
     ## @param metric_sources - list of strings - optional
     ## Enable metrics from different IBM Spectrum LSF commands.
     ## By default, all commands except GPU commands are enabled.
+    ##
+    ## Possible values: lsclusters, lshosts, bhosts, lsload, bqueues,
+    ## bhist, bslots, bjobs, lsload_gpu, bhosts_gpu, badmin_perfmon.
+    ##
+    ## Note: Enabling `badmin_perfmon` will run the command `badmin perfmon start <YOUR_MIN_COLLECTION_INTERVAL>`.
+    ## By default, this is set to 15 seconds. It is recommended to set this to a higher value such as 60 seconds
+    ## to decrease load on the cluster. We recommend creating a separate instance to collect `badmin_perfmon` metrics
+    ## with a higher `min_collection_interval` like 60. Similarly, the `bhist` command can be query intensive, so we 
+    ## recommend monitoring it with a higher `min_collection_interval` like 60.
     #
     # metric_sources:
     #   - lsclusters
@@ -30,8 +39,17 @@ instances:
     #   - bqueues
     #   - bslots
     #   - bjobs
+    #   - bhist
     #   - lsload_gpu
     #   - bhosts_gpu
+
+    ## @param badmin_perfmon_auto - boolean - optional - default: true
+    ## Whether or not to call `badmin perfmon start` when starting badmin perfmon metrics collection and
+    ## `badmin perfmon stop` when the check is unscheduled by the Datadog Agent.
+    ## By default, this is set to true to reduce load on the cluster. However, if you would prefer configuring
+    ## it manually, set this to false.
+    #
+    # badmin_perfmon_auto: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

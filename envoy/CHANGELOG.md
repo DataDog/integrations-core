@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 6.2.1 / 2025-10-31
+## 6.3.0 / 2025-11-26
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+***Fixed***:
+
+* Update the envoy and istio specs to more descriptive of restrictions ([#21866](https://github.com/DataDog/integrations-core/pull/21866))
+
+## 6.2.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

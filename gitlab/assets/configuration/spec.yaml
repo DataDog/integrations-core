@@ -20,6 +20,7 @@ files:
       description: |
         The GitLab API token for this instance
         used to collect the GitLab version.
+      secret: true
       value:
         type: string
     - name: prometheus_endpoint

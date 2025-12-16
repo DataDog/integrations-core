@@ -853,10 +853,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `properties.userPrincipalName`, `properties.servicePrincipalId` to `ocsf.actor.user.uid`
+          name: Map `properties.userId`, `properties.servicePrincipalId` to `ocsf.actor.user.uid`
           enabled: true
           sources:
-            - properties.userPrincipalName
+            - properties.userId
             - properties.servicePrincipalId
           sourceType: attribute
           target: ocsf.actor.user.uid
@@ -920,10 +920,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `properties.userPrincipalName`, `properties.servicePrincipalId` to `ocsf.user.uid`
+          name: Map `properties.userId`, `properties.servicePrincipalId` to `ocsf.user.uid`
           enabled: true
           sources:
-            - properties.userPrincipalName
+            - properties.userId
             - properties.servicePrincipalId
           sourceType: attribute
           target: ocsf.user.uid
@@ -1369,6 +1369,74 @@ pipeline:
           template: User Access Management
           target: ocsf.class_name
           replaceMissing: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.userPrincipalName`, `properties.initiatedBy.app.displayName`, `identity` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.userPrincipalName
+            - properties.initiatedBy.app.displayName
+            - identity
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.id`, `properties.initiatedBy.app.servicePrincipalId` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.id
+            - properties.initiatedBy.app.servicePrincipalId
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.userPrincipalName` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.userPrincipalName
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.initiatedBy.user.id:* OR @properties.initiatedBy.user.userPrincipalName:*"
+              name: User
+            - filter:
+                query: "@properties.initiatedBy.app.servicePrincipalId:*"
+              name: System
+          target: ocsf.actor.user.type
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.initiatedBy.user.id:* OR @properties.initiatedBy.user.userPrincipalName:*"
+              name: "1"
+            - filter:
+                query: "@properties.initiatedBy.app.servicePrincipalId:*"
+              name: "3"
+            - filter:
+                query: "@ocsf.metadata.log_name:*"
+              name: "99"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `properties.correlationId` to `ocsf.actor.session.uid`
+          enabled: true
+          sources:
+            - properties.correlationId
+          sourceType: attribute
+          target: ocsf.actor.session.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
         - type: array-processor
           name: Extract `userPrincipalName` from `properties.targetResources` array
           enabled: true
@@ -1509,6 +1577,74 @@ pipeline:
           template: Group Management
           target: ocsf.class_name
           replaceMissing: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.userPrincipalName`, `properties.initiatedBy.app.displayName`, `identity` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.userPrincipalName
+            - properties.initiatedBy.app.displayName
+            - identity
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.id`, `properties.initiatedBy.app.servicePrincipalId` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.id
+            - properties.initiatedBy.app.servicePrincipalId
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.userPrincipalName` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.userPrincipalName
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.initiatedBy.user.id:* OR @properties.initiatedBy.user.userPrincipalName:*"
+              name: User
+            - filter:
+                query: "@properties.initiatedBy.app.servicePrincipalId:*"
+              name: System
+          target: ocsf.actor.user.type
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.initiatedBy.user.id:* OR @properties.initiatedBy.user.userPrincipalName:*"
+              name: "1"
+            - filter:
+                query: "@properties.initiatedBy.app.servicePrincipalId:*"
+              name: "3"
+            - filter:
+                query: "@ocsf.metadata.log_name:*"
+              name: "99"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `properties.correlationId` to `ocsf.actor.session.uid`
+          enabled: true
+          sources:
+            - properties.correlationId
+          sourceType: attribute
+          target: ocsf.actor.session.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
         - type: array-processor
           name: Extract User or ServicePrincipal Id from `properties.targetResources` array
           enabled: true
