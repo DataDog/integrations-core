@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
-from .common import POSTGRES_VERSION
+from .common import POSTGRES_LOCALE, POSTGRES_VERSION
 from .utils import run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -166,8 +166,8 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                         keys = list(table.keys())
                         assert_fields(keys, ["foreign_keys", "columns", "id", "name"])
                         # The toast table doesn't seem to be created in the C locale
-                        # if POSTGRES_LOCALE != 'C':
-                        #     assert_fields(keys, ["toast_table"])
+                        if POSTGRES_LOCALE != 'C':
+                            assert_fields(keys, ["toast_table"])
                         assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
                         assert_fields(
                             list(table['columns'][0].keys()),
@@ -181,8 +181,8 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                     if table['name'] == "cities":
                         keys = list(table.keys())
                         assert_fields(keys, ["indexes", "columns", "id", "name"])
-                        # if POSTGRES_LOCALE != 'C':
-                        #     assert_fields(keys, ["toast_table"])
+                        if POSTGRES_LOCALE != 'C':
+                            assert_fields(keys, ["toast_table"])
                         assert len(table['indexes']) == 1
                         assert_fields(
                             list(table['indexes'][0].keys()),
