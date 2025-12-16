@@ -49,7 +49,7 @@ The Zscaler Private Access check is included in the [Datadog Agent][1] package. 
 
    **Note**:
 
-   - `PORT`: If TLS encryption is enabled, `port` should be similar to the `destination_port` provided in **Certificate Setup Guide** section; otherwise, it should be similar to the `port` provided in **Configure log receiver from Zscaler Private Access** section.
+   - `PORT`: If TLS encryption is enabled, use the `destination_port` from the **Certificate Setup Guide**; otherwise, use the port from the **Configure log receiver from Zscaler Private Access** section.
    - It is recommended not to change the source value, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][2].
@@ -61,9 +61,9 @@ The Zscaler Private Access check is included in the [Datadog Agent][1] package. 
 3. Click **Add**.
 4. In the **Log Receiver** tab, configure the following:
     - **Name**: Provide a name for the log receiver.
-    - **Domain or IP Address**: If TLS encryption is enabled, provide the `public IP` or `hostname` of the `syslog-ng` server; otherwise, provide the `public IP` or `hostname` of the Datadog agent.
-    - **TCP Port**: If TLS encryption is enabled, specify an open port on the `syslog-ng` server; otherwise, specify an open port on the Datadog agent.
-    - **TLS Encryption**: Disabled by default. If you choose to enable it, make sure to follow the steps in the **Certificate Setup Guide**.
+    - **Domain or IP Address**: If TLS encryption is enabled, provide the `public IP` or `hostname` of the `syslog-ng` server; otherwise, provide the `public IP` or `hostname` of the Datadog Agent.
+    - **TCP Port**: If TLS encryption is enabled, specify an open port on the `syslog-ng` server; otherwise, specify an open port on the Datadog Agent.
+    - **TLS Encryption**: Disabled by default. To enable it, follow the steps in the **Certificate Setup Guide**.
     - **App Connector Groups**: Choose the App Connector groups that can forward logs to the receiver.
 5. Click **Next**.
 6. In the **Log Stream** tab:
@@ -151,18 +151,18 @@ For Zscaler Private Access integration, specific custom log formats must be conf
 
 #### Certificate Setup Guide
 > Note:
->- The steps below are performed on the RHEL 8.
->- Follow the steps if the **TLS Encryption** option is enabled in **Configure log receiver from Zscaler Private Access**.
+>- The steps below are performed on RHEL 8.
+>- Complete these steps only if **TLS Encryption** is enabled in **Configure log receiver from Zscaler Private Access**.
 
-1. Create Custom Root CA with its corresponding private key.
+1. Generate a custom root CA and its private key:
    ```
    openssl genrsa -out rootCA.key 4096
    ```
-2. In the ZPA Admin Portal, **Configuration & Control > Certificate Management > Enrollment Certificates > Upload Certificate Chain**, upload **rootCA.crt**.
+2. In the ZPA Admin Portal, go to **Configuration & Control > Certificate Management > Enrollment Certificates > Upload Certificate Chain**, and upload `rootCA.crt`.
 3. Go to **Configuration & Control > Certificate Management > Enrollment Certificates > Actions > Create CSR**.
-   - Provide a name & description
-   - Download the CSR (e.g., zpa_enrollment.csr)
-4. Sign ZPA CSR Using Root CA generated in Step 1.
+   - Provide a name and description
+   - Download the CSR (for example, `zpa_enrollment.csr`)
+4. Sign the ZPA CSR using the root CA generated in Step 1.
    - Create ext.cnf:
       ```
       basicConstraints = CA:TRUE
@@ -179,21 +179,21 @@ For Zscaler Private Access integration, specific custom log formats must be conf
       -days 365 -sha256 \
       -extfile ext.cnf
       ```
-5. Navigate to **Configuration & Control > Certificate Management > Enrollment Certificates > Upload Certificate Chain**, and upload `zpa_enrollment_signed.crt` and `rootCA.crt`.
-6. Deploy your app connector with the signed certificate imported in the previous step. See [here][7] for more information based on your platform.
+5. Go to **Configuration & Control > Certificate Management > Enrollment Certificates > Upload Certificate Chain**, and upload `zpa_enrollment_signed.crt` and `rootCA.crt`.
+6. Deploy your App Connector using the signed certificate from the previous step. See [here][7] for platform-specific instructions.
    - Download the App Connector package
-   - Install `zpa_enrollment_signed.crt` and select Enrollment Key if applicable.
+   - Install `zpa_enrollment_signed.crt` and select the Enrollment Key if applicable.
 7. Install `syslog-ng` log shipper
    - On RHEL 8: Enable the `supplementary` repository
       ```
       subscription-manager repos --enable rhel-8-for-x86_64-supplementary-rpms
       ```
-   -  The Extra Packages for Enterprise Linux (EPEL) repository contains many useful packages, which are not included in RHEL. A few dependencies of syslog-ng are available this repo. You can enable it by downloading and installing an RPM package (replace 8 with 7 for EPEL 7):
+   -  The Extra Packages for Enterprise Linux (EPEL) repository provides many useful packages not included in RHEL. Some syslog-ng dependencies are available from this repo. You can enable it by installing the EPEL RPM (replace 8 with 7 for EPEL 7):
       ```
       wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
       rpm -Uvh epel-release-latest-8.noarch.rpm
       ```
-   - Add the repo containing the latest unofficial build of syslog-ng. By the time of writing it is syslog-ng 4.10 and it is available on the Copr build service. Download the repo file to /etc/yum.repos.d/, so you can install and enable syslog-ng (replace 8 with 7 for EPEL 7):
+   - Add the repository containing the latest unofficial syslog-ng build (version 4.10 at the time of writing), available via the Copr build service. Download the repo file to `/etc/yum.repos.d/` to install and enable syslog-ng (replace 8 with 7 for EPEL 7):
       ```
       cd /etc/yum.repos.d/
       wget https://copr.fedorainfracloud.org/coprs/czanik/syslog-ng410/repo/epel-8/czanik-syslog-ng410-epel-8.repo
@@ -201,8 +201,8 @@ For Zscaler Private Access integration, specific custom log formats must be conf
       systemctl enable syslog-ng
       systemctl start syslog-ng
       ```
-8. Create Server TLS Certificate for syslog-ng
-   - Generate Private Key using openssl
+8. Create a server TLS Certificate for syslog-ng
+   - Generate private key using openssl
    - Generate CSR
    - Create server_ext.cnf:
       ```
@@ -219,7 +219,7 @@ For Zscaler Private Access integration, specific custom log formats must be conf
       -days 3650 -sha256 \
       -extfile server_ext.cnf
       ```
-9. Install Certificates in syslog-ng
+9. Install certificates in syslog-ng
    ```
    sudo mkdir -p /etc/syslog-ng/cert.d
    sudo cp server.crt server.key rootCA.crt /etc/syslog-ng/cert.d/
@@ -227,8 +227,8 @@ For Zscaler Private Access integration, specific custom log formats must be conf
    sudo chmod 644 /etc/syslog-ng/cert.d/server.crt
    sudo chmod 644 /etc/syslog-ng/cert.d/rootCA.crt
    ```
-10. Configure TLS Listener in Syslog-NG
-   - Create **zpa-tls.conf** under **/etc/syslog-ng/conf.d**.
+10. Configure the TLS listener in syslog-ng
+   - Create **zpa-tls.conf** in **/etc/syslog-ng/conf.d**.
       ```
       # TLS listener for ZPA LSS
       source s_zpa_tls {
@@ -260,10 +260,10 @@ For Zscaler Private Access integration, specific custom log formats must be conf
          destination(d_local);
       };
       ```
-   > Note:
-   >- *source_port* should be similar to the port provided in **Configure log receiver from Zscaler Private Access**.
-   >- *destination_port* should be similar to the port provided in **Log collection**.
-   >- In the *destination_ip*, specify the `IP address` or `hostname` of the host where Datadog Agent is installed.
+   > Notes:
+   >- `source_port` should match the port specified in **Configure log receiver from Zscaler Private Access**.
+   >- `destination_port` should match the port specified in **Log collection**.
+   >- In the `destination_ip`, specify the `IP address` or `hostname` of the host where Datadog Agent is installed.
 
 11. Restart syslog-ng:
       ```
