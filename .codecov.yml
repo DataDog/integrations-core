@@ -334,6 +334,10 @@ coverage:
         target: 75
         flags:
         - istio
+      Kafka_Actions:
+        target: 75
+        flags:
+        - kafka_actions
       Kafka_Consumer:
         target: 75
         flags:
@@ -1268,6 +1272,11 @@ flags:
     paths:
     - istio/datadog_checks/istio
     - istio/tests
+  kafka_actions:
+    carryforward: true
+    paths:
+    - kafka_actions/datadog_checks/kafka_actions
+    - kafka_actions/tests
   kafka_consumer:
     carryforward: true
     paths:

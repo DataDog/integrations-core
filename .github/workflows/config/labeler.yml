@@ -367,6 +367,8 @@ integration/juniper_srx_firewall:
 - juniper_srx_firewall/**/*
 integration/kafka:
 - kafka/**/*
+integration/kafka_actions:
+- kafka_actions/**/*
 integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/kandji:
@@ -589,6 +591,8 @@ integration/ray:
 - ray/**/*
 integration/redisdb:
 - redisdb/**/*
+integration/resend:
+- resend/**/*
 integration/rethinkdb:
 - rethinkdb/**/*
 integration/riak:

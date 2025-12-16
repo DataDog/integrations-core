@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 23.3.2 / 2025-12-16
+
+***Fixed***:
+
+* Fixes a regression introduced in ([#21347](https://github.com/DataDog/integrations-core/pull/21347)) that caused us to cache recently seen FQT events for 0.36 seconds instead of 3600 seconds ([#22113](https://github.com/DataDog/integrations-core/pull/22113))
+
+## 23.3.1 / 2025-12-15
+
+***Fixed***:
+
+* Fixed collection of Postgres schema owners. ([#22101](https://github.com/DataDog/integrations-core/pull/22101))
+
 ## 23.3.0 / 2025-11-26
 
 ***Added***:
@@ -17,7 +29,7 @@
 * Fix token expiration handling in Azure connection pool ([#21896](https://github.com/DataDog/integrations-core/pull/21896))
 * Ensure database_autodiscovery `exclude` defaults are used ([#21927](https://github.com/DataDog/integrations-core/pull/21927))
 
-## 23.2.0 / 2025-10-31
+## 23.2.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

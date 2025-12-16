@@ -127,7 +127,6 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
 
     collection_started_at = None
     schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
-    print(schema_events)
     for i, schema_event in enumerate(schema_events):
         for mi, _ in enumerate(schema_event['metadata']):
             assert schema_event.get("timestamp") is not None
@@ -147,6 +146,11 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
             # there should only two schemas, 'public' and 'datadog'. datadog is empty
             schema = database_metadata[mi]['schemas'][0]
             schema_name = schema['name']
+            # We should always have an owner
+            assert schema['owner']
+            # The owner of the datadog_test schema should be postgres
+            if schema_name == 'datadog_test':
+                assert schema['owner'] == 'postgres'
             assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test', 'hstore']
             schemas_got.add(schema_name)
             if schema_name in ['public', 'rdsadmin_test']:

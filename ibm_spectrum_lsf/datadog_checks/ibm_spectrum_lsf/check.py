@@ -8,6 +8,7 @@ from .client import LSFClient
 from .config_models import ConfigMixin
 from .processors import (
     BadminPerfmonProcessor,
+    BHistProcessor,
     BHostsProcessor,
     BJobsProcessor,
     BQueuesProcessor,
@@ -44,6 +45,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
             BJobsProcessor(self.client, self.config, self.log, self.tags),
             BQueuesProcessor(self.client, self.config, self.log, self.tags),
             BSlotsProcessor(self.client, self.config, self.log, self.tags),
+            BHistProcessor(self.client, self.config, self.log, self.tags),
             GPULoadProcessor(self.client, self.config, self.log, self.tags),
             GPUHostsProcessor(self.client, self.config, self.log, self.tags),
             BadminPerfmonProcessor(self.client, self.config, self.log, self.tags),
