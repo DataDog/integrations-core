@@ -77,6 +77,24 @@ tests:
       system:
         action: "disconnect"
         type: "11: disconnected by user"
+      ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication Activity"
+        class_uid: 3002
+        activity_id: 99
+        activity_name: "Other"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "172.22.179.72"
+        type_name: "Authentication: Other"
+        type_uid: 300299
     message: "Received disconnect from 172.22.179.72: 11: disconnected by user"
     tags:
      - "source:LOGS_SOURCE"
