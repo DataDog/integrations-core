@@ -69,7 +69,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@system.user:*"
+        query: "source:sshd"
       processors:
         - type: string-builder-processor
           name: Add ocsf.metadata.product.name
@@ -104,7 +104,11 @@ pipeline:
                 - filter:
                     query: '@system.action:"session closed"'
                   name: Logoff
-                  id: 2                  
+                  id: 2
+                - filter:
+                    query: '-@system.action:(Accepted OR "session closed")'
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
@@ -119,6 +123,10 @@ pipeline:
                     query: '@system.action:"session closed"'
                   name: "Authentication: Logoff"
                   id: 300202
+                - filter:
+                    query: '-@system.action:(Accepted OR "session closed")'
+                  name: "Authentication: Other"
+                  id: 300299
               targets:
                 name: ocsf.type_name
                 id: ocsf.type_uid
