@@ -439,8 +439,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 17,
-                "is_column_break": true
+                "height": 1
             }
         },
         {
@@ -958,9 +957,10 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 4,
                 "width": 12,
-                "height": 10
+                "height": 1,
+                "is_column_break": true
             }
         }
     ],

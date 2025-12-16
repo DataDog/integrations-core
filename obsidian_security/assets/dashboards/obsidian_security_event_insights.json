@@ -556,15 +556,651 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 13,
-                "is_column_break": true
+                "height": 1
+            }
+        },
+        {
+            "id": 5482928426171621,
+            "definition": {
+                "title": "Actors & Targets Details",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4466895820216471,
+                        "definition": {
+                            "title": "Total Actors Involved in Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@obsidian_security_event.actors.id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_fg_color": "#3949AB"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4236460281248980,
+                        "definition": {
+                            "title": "Top Actors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_event.actors.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3601946098565056,
+                        "definition": {
+                            "title": "Top Actor by Entity Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_event.actors.__typename",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#0097a7"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6984847558040500,
+                        "definition": {
+                            "title": "Top Actor Entity Subtypes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_event.actors.entitySubType",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7759475598601318,
+                        "definition": {
+                            "title": "Top Actor-Associated Tenant IDs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_event.actors.tenantId",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5410239672354826,
+                        "definition": {
+                            "title": "Total Targets Involved in Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@obsidian_security_event.targets.id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow",
+                                            "custom_fg_color": "#739eee"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4911689936414913,
+                        "definition": {
+                            "title": "Top Targets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_event.targets.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 9,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7006668480892968,
+                        "definition": {
+                            "title": "Targets by Entity Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_event.targets.__typename",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#3949ab"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4407460900242509,
+                        "definition": {
+                            "title": "Top Target Entity Subtypes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_event.targets.entitySubType",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 12,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 1
             }
         },
         {
             "id": 189906012626460,
             "definition": {
                 "title": "Event Details",
-                "background_color": "vivid_blue",
+                "background_color": "blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1347,646 +1983,10 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 5,
                 "width": 12,
-                "height": 25
-            }
-        },
-        {
-            "id": 5482928426171621,
-            "definition": {
-                "title": "Actors & Targets Details",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 4466895820216471,
-                        "definition": {
-                            "title": "Total Actors Involved in Events",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@obsidian_security_event.actors.id"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_green",
-                                            "custom_fg_color": "#3949AB"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 3,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 4236460281248980,
-                        "definition": {
-                            "title": "Top Actors",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_event.actors.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 0,
-                            "width": 9,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 3601946098565056,
-                        "definition": {
-                            "title": "Top Actor by Entity Types",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "bar_chart",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_event.actors.__typename",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_bg",
-                                            "custom_bg_color": "#0097a7"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 12,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 6984847558040500,
-                        "definition": {
-                            "title": "Top Actor Entity Subtypes",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_event.actors.entitySubType",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "white_on_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7759475598601318,
-                        "definition": {
-                            "title": "Top Actor-Associated Tenant IDs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_event.actors.tenantId",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "white_on_yellow"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 6,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 5410239672354826,
-                        "definition": {
-                            "title": "Total Targets Involved in Events",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@obsidian_security_event.targets.id"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_yellow",
-                                            "custom_fg_color": "#739eee"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 9,
-                            "width": 3,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 4911689936414913,
-                        "definition": {
-                            "title": "Top Targets",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_event.targets.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 9,
-                            "width": 9,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7006668480892968,
-                        "definition": {
-                            "title": "Targets by Entity Types",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "bar_chart",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_event.targets.__typename",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_bg",
-                                            "custom_bg_color": "#3949ab"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 12,
-                            "width": 8,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 4407460900242509,
-                        "definition": {
-                            "title": "Top Target Entity Subtypes",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:events $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_event.targets.entitySubType",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "white_on_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 12,
-                            "width": 4,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 41,
-                "width": 12,
-                "height": 16
+                "height": 1,
+                "is_column_break": true
             }
         }
     ],

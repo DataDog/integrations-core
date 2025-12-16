@@ -433,14 +433,849 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 10
+                "height": 1
+            }
+        },
+        {
+            "id": 185660767389957,
+            "definition": {
+                "title": "Actors & Targets Details",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3968050143205053,
+                        "definition": {
+                            "title": "Total Actors Involved in Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@obsidian_security_alert.actors.id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_fg_color": "#7887e6"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3220096397858861,
+                        "definition": {
+                            "title": "Actors Involved in Alerts Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Actors",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@obsidian_security_alert.actors.id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 499385277802108,
+                        "definition": {
+                            "title": "Top Actors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_alert.actors.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4655834790334311,
+                        "definition": {
+                            "title": "Top Actor-Associated Tenant IDs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_alert.actors.tenantId",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7885404620643938,
+                        "definition": {
+                            "title": "Actors by Entity Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_alert.actors.__typename",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#0097A7"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7124032919250600,
+                        "definition": {
+                            "title": "Actor Subtype Breakdown",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_alert.actors.entitySubType",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 6,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 862044069834369,
+                        "definition": {
+                            "title": "Total Targets Involved in Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@obsidian_security_alert.targets.id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow",
+                                            "custom_fg_color": "#7887eb"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3645226065489328,
+                        "definition": {
+                            "title": "Targets Involved in Alerts Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Targets",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@obsidian_security_alert.targets.id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 9,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2209411000316511,
+                        "definition": {
+                            "title": "Top Targets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_alert.targets.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8520890547360656,
+                        "definition": {
+                            "title": "Alerts by Actor vs Target",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_alert.actors.name",
+                                                    "limit": 100,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@obsidian_security_alert.targets.name",
+                                                    "limit": 100,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 12,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 576677724464099,
+                        "definition": {
+                            "title": "Targets by Entity Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_alert.targets.__typename",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#3949AB"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 15,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8754262764164866,
+                        "definition": {
+                            "title": "Target Subtype Breakdown",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@obsidian_security_alert.targets.entitySubType",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 15,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 1
             }
         },
         {
             "id": 2026239957418441,
             "definition": {
                 "title": "Alert Details",
-                "background_color": "vivid_blue",
+                "background_color": "blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -2471,7 +3306,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "network.client.ip",
+                                            "field": "@network.client.ip",
                                             "width": "auto"
                                         },
                                         {
@@ -3014,845 +3849,10 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 5,
                 "width": 12,
-                "height": 70,
+                "height": 1,
                 "is_column_break": true
-            }
-        },
-        {
-            "id": 185660767389957,
-            "definition": {
-                "title": "Actors & Targets Details",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 3968050143205053,
-                        "definition": {
-                            "title": "Total Actors Involved in Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@obsidian_security_alert.actors.id"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_green",
-                                            "custom_fg_color": "#7887e6"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 3,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 3220096397858861,
-                        "definition": {
-                            "title": "Actors Involved in Alerts Over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Actors",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@obsidian_security_alert.actors.id"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 0,
-                            "width": 9,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 499385277802108,
-                        "definition": {
-                            "title": "Top Actors",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_alert.actors.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 4655834790334311,
-                        "definition": {
-                            "title": "Top Actor-Associated Tenant IDs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_alert.actors.tenantId",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "white_on_yellow"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 3,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7885404620643938,
-                        "definition": {
-                            "title": "Actors by Entity Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "bar_chart",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_alert.actors.__typename",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_bg",
-                                            "custom_bg_color": "#0097A7"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 7,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7124032919250600,
-                        "definition": {
-                            "title": "Actor Subtype Breakdown",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_alert.actors.entitySubType",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "white_on_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 7,
-                            "y": 6,
-                            "width": 5,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 862044069834369,
-                        "definition": {
-                            "title": "Total Targets Involved in Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@obsidian_security_alert.targets.id"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_yellow",
-                                            "custom_fg_color": "#7887eb"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 9,
-                            "width": 3,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 3645226065489328,
-                        "definition": {
-                            "title": "Targets Involved in Alerts Over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Targets",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@obsidian_security_alert.targets.id"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 9,
-                            "width": 9,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 2209411000316511,
-                        "definition": {
-                            "title": "Top Targets",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_alert.targets.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 12,
-                            "width": 5,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8520890547360656,
-                        "definition": {
-                            "title": "Alerts by Actor vs Target",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_alert.actors.name",
-                                                    "limit": 100,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@obsidian_security_alert.targets.name",
-                                                    "limit": 100,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 10000,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "cell_display_mode": "number",
-                                            "alias": "Count",
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 5,
-                            "y": 12,
-                            "width": 7,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 576677724464099,
-                        "definition": {
-                            "title": "Targets by Entity Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "bar_chart",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_alert.targets.__typename",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_bg",
-                                            "custom_bg_color": "#3949AB"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 15,
-                            "width": 8,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8754262764164866,
-                        "definition": {
-                            "title": "Target Subtype Breakdown",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:obsidian-security service:alerts $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@obsidian_security_alert.targets.entitySubType",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "white_on_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 15,
-                            "width": 4,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 83,
-                "width": 12,
-                "height": 19
             }
         }
     ],
