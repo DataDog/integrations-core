@@ -25,7 +25,7 @@
             "id": 56619641188267,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides comprehensive visibility into Vectra audit activity, enabling monitoring of system and user actions, analysis of event outcomes, user roles, and source locations, and detailed audit logs for investigation and compliance.\n\nFor more information, see the [Vectra Integration Documentation](https://docs.datadoghq.com/integrations/vectra/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides comprehensive visibility into Vectra audit activity, enabling monitoring of system and user actions, analysis of event outcomes, user roles, and source locations, and detailed audit logs for investigation and compliance.\n\nFor more information, see the [Vectra Integration Documentation](https://docs.datadoghq.com/integrations/vectra/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
