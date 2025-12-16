@@ -40,7 +40,7 @@ SELECT c.oid                 AS table_id,
        c.relnamespace        AS schema_id,
        c.relname             AS table_name,
        c.relhasindex         AS has_indexes,
-       c.relowner :: regrole AS owner,
+       c.relowner :: regrole :: text AS table_owner,
        ( CASE
            WHEN c.relkind = 'p' THEN TRUE
            ELSE FALSE
@@ -58,7 +58,7 @@ SELECT c.oid                 AS table_id,
        c.relnamespace        AS schema_id,
        c.relname             AS table_name,
        c.relhasindex         AS has_indexes,
-       c.relowner :: regrole AS owner,
+       c.relowner :: regrole :: text AS table_owner,
        t.relname             AS toast_table
 FROM   pg_class c
        left join pg_class t
@@ -328,7 +328,7 @@ class PostgresSchemaCollector(SchemaCollector):
             ),
             schema_tables AS (
                 SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
-                tables.table_id, tables.table_name
+                tables.table_id, tables.table_name, tables.table_owner
                 FROM schemas
                 LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                 ORDER BY schemas.schema_name, tables.table_name
@@ -346,7 +346,7 @@ class PostgresSchemaCollector(SchemaCollector):
             {partitions_ctes}
 
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
-            schema_tables.table_id, schema_tables.table_name,
+            schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner,
                 array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                 array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
                 array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
@@ -358,7 +358,7 @@ class PostgresSchemaCollector(SchemaCollector):
                 LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
                 {partition_joins}
             GROUP BY schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
-                schema_tables.table_id, schema_tables.table_name
+                schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner
             ;
         """
 
@@ -386,7 +386,7 @@ class PostgresSchemaCollector(SchemaCollector):
                             for k, v in {
                                 "id": str(cursor_row.get("table_id")),
                                 "name": cursor_row.get("table_name"),
-                                "owner": cursor_row.get("owner"),
+                                "owner": cursor_row.get("table_owner"),
                                 # The query can create duplicates of the joined tables
                                 "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values())[
                                     : self._config.max_columns
@@ -401,7 +401,7 @@ class PostgresSchemaCollector(SchemaCollector):
                             }.items()
                             if v is not None
                         }
-                    ],
+                    ] if cursor_row.get("table_name") else [],
                 }.items()
                 if v is not None
             }

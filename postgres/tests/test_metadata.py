@@ -157,6 +157,9 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                 for table in schema['tables']:
                     tables_got.append(table['name'])
 
+                    assert table['name']
+                    assert table['owner']
+
                     # make some assertions on fields
                     if table['name'] == "persons":
                         # check that foreign keys, indexes get reported
