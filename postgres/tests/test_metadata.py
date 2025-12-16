@@ -87,7 +87,7 @@ def test_collect_schema_snapshot(integration_check, dbm_instance, aggregator):
 
     with open(file_path, 'r') as f:
         snapshot = json.load(f)
-    # Use a deep equal function that is stable across list sorting
+    # Normalize the objects to avoid differences in list sorting
     assert normalize_object(snapshot) == normalize_object(schema_events[0]['metadata'])
 
 
