@@ -160,11 +160,11 @@ def extract_sql_comments_and_procedure_name(text):
     return result, is_proc, name
 
 
-def parse_sqlserver_major_version(version):
+def parse_sqlserver_year(version):
     """
-    Parses the SQL Server major version out of the full version
+    Parses the SQL Server year out of the full version
     :param version: String representation of full SQL Server version (from @@version)
-    :return: integer representation of SQL Server major version (i.e. 2012, 2019)
+    :return: integer representation of SQL Server year (i.e. 2012, 2019)
     """
     match = re.search(r"Microsoft SQL Server (\d+)", version)
     if not match:

@@ -3,7 +3,7 @@
   "app_uuid": "5be301d0-072e-42c2-a579-0c8d24755a85",
   "app_id": "zero-networks",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

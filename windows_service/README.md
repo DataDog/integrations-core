@@ -75,7 +75,7 @@ services:
     trigger_start: true
 ```
 
-Beginning with Agent version 7.74, the check automatically collects metrics for Windows services.
+<!-- Beginning with Agent version 7.74, the check automatically collects metrics for Windows services. -->
 
 #### Tags
 
@@ -97,9 +97,7 @@ Beginning with Agent version 7.73, the check automatically adds a `windows_servi
 
 ### Metrics
 
-See [metadata.csv][19] for a list of metrics provided by this integration.
-
-**Note:** Metrics are tagged with the same tags as the service check.
+The Windows Service check does not include any metrics.
 
 ### Events
 
@@ -145,4 +143,3 @@ If the service is present in the output, permissions are the issue. To give the 
 [16]: https://learn.microsoft.com/en-US/troubleshoot/windows-server/group-policy/configure-group-policies-set-security
 [17]: https://learn.microsoft.com/en-us/windows/win32/services/service-trigger-events
 [18]: /integrations/windows-service?search=windows%20service
-[19]: https://github.com/DataDog/integrations-core/blob/master/windows_service/metadata.csv

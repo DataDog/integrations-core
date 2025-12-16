@@ -1,0 +1,1 @@
+Updates perf counters to ignore case. Fixes an error with double counting in exchange.activemanager.database_mounted metric.

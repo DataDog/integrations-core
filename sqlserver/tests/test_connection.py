@@ -23,7 +23,7 @@ from datadog_checks.sqlserver.connection_errors import (
     obfuscate_error_msg,
 )
 
-from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
+from .common import CHECK_NAME, SQLSERVER_YEAR
 
 
 @pytest.mark.unit
@@ -287,7 +287,7 @@ def test_config_with_and_without_port(instance_minimal_defaults, host, port, exp
 @pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_YEAR == 2019, reason='Test flakes on this set up')
 def test_query_timeout(instance_docker):
     instance_docker['command_timeout'] = 1
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -361,7 +361,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
 
     try:
         # Break the connection
-        check.connection = Connection({}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check)
+        check._connection = Connection({}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check)
         dd_run_check(check)
     except Exception:
         aggregator.assert_service_check(
