@@ -39,12 +39,6 @@ PG_TABLES_QUERY_V10_PLUS = """
 SELECT c.oid                 AS table_id,
        c.relnamespace        AS schema_id,
        c.relname             AS table_name,
-       c.relhasindex         AS has_indexes,
-       c.relowner :: regrole AS owner,
-       ( CASE
-           WHEN c.relkind = 'p' THEN TRUE
-           ELSE FALSE
-         END )               AS has_partitions,
        t.relname             AS toast_table
 FROM   pg_class c
        left join pg_class t
