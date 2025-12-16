@@ -18,7 +18,7 @@ Integrate Obsidian Security with Datadog to gain insights into audit, alerts, an
 2. Click **Create token** and provide the following details:
    - Token name: A name that can help you identify the token.
    - Expiry date: Choose **Forever**.
-   - **Token access** > **Role**: Choose **API Role-Level Permissions**.
+   - **Token access** > **Role**: Choose **API**.
    - Service access: Enable **Full data access to all services and tenants**.
 3. Click **Submit**. 
 4. Copy the Token.

@@ -736,10 +736,6 @@ class SparkCheck(AgentCheck):
 
         return False
 
-    def _is_pod_in_terminal_state(self, tags):
-        pod_phase = self._get_pod_phase(tags)
-        return pod_phase in ('failed', 'succeeded', 'unknown') if pod_phase is not None else False
-
     @staticmethod
     def _get_pod_phase(tags):
         for tag in tags or []:
