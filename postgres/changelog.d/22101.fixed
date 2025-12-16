@@ -1,0 +1,1 @@
+Fixes a regression introduced in that caused us to cache recently seen FQT events for 0.36 seconds instead of 3600 seconds
