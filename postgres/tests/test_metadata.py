@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
 
@@ -65,6 +66,28 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert statement_timeout_setting is not None
     # statement_timeout should be server level setting not session level
     assert statement_timeout_setting['setting'] == '10000'
+
+
+def test_collect_schema_snapshot(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_schemas"] = {'enabled': True, 'run_sync': True, 'include_databases': ['datadog_test']}
+    dbm_instance['dbname'] = 'datadog_test'
+    check = integration_check(dbm_instance)
+    run_one_check(check, dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
+    # This tests should fit within one payload
+    assert len(schema_events) == 1
+
+    file_path = f'tests/fixtures/schema_snapshot_v{POSTGRES_VERSION}_{POSTGRES_LOCALE}.json'
+    # If you need to update the snapshot, uncomment the following lines and run
+    # ddev test postgres -- -x -k test_collect_schema_snapshot
+    # then go grab a cup of coffee, tea, or your beverage of choice
+    # with open(file_path, 'w') as f:
+    #     json.dump(schema_events[0]['metadata'], f, indent=4)
+
+    with open(file_path, 'r') as f:
+        snapshot = json.load(f)
+    assert snapshot == schema_events[0]['metadata']
 
 
 @pytest.mark.parametrize(

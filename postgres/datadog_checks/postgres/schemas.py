@@ -170,10 +170,8 @@ SELECT db.oid::text                  AS id,
        datname                       AS NAME,
        pg_encoding_to_char(encoding) AS encoding,
        rolname                       AS owner,
-       description
+       shobj_description(db.oid, 'pg_database') AS description
 FROM   pg_catalog.pg_database db
-       LEFT JOIN pg_catalog.pg_description dc
-              ON dc.objoid = db.oid
        JOIN pg_roles a
          ON datdba = a.oid
         WHERE datname NOT LIKE 'template%'
