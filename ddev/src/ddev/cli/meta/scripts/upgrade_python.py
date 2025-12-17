@@ -373,7 +373,7 @@ def get_pbs_release_info(app: Application, python_version: str) -> dict[str, str
             return None
 
         # Fetch SHA256SUMS file and extract hashes for our target files
-        sha_response = httpx.get(PBS_SHA256SUMS_URL_TEMPLATE.format(release=release), timeout=30)
+        sha_response = httpx.get(PBS_SHA256SUMS_URL_TEMPLATE.format(release=release), timeout=30, follow_redirects=True)
         if sha_response.status_code != 200:
             return None
 
