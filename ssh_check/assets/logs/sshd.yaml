@@ -50,6 +50,10 @@ pipeline:
 
           sshd.session pam_unix\(sshd\:session\)\: %{regex("(session opened)|(session closed)"):system.action} for user %{_auth}.*
 
+          sshd.session.starting %{regex("Starting session"):system.action}: %{notSpace:system.type} on %{notSpace:system.tty} for %{_auth} from %{_client_ip} port %{_client_port} id %{integer:system.session_id}
+
+          sshd.session.close %{regex("Close session"):system.action}: user %{_auth} from %{_client_ip} port %{_client_port} id %{integer:system.session_id}
+
           sshd.auth pam_unix\(sshd\:auth\)\: %{regex("authentication failure"):system.action}; %{_sshd_details}
 
           sshd.auth_2 PAM %{integer} more %{regex("(authentication failure|authentication failures)"):system.action}; %{_sshd_details}
@@ -98,11 +102,11 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: '@system.action:(Accepted OR Failed)'
+                    query: '@system.action:(Accepted OR Failed OR "Starting session" OR "session opened")'
                   name: Logon
                   id: 1
                 - filter:
-                    query: '@system.action:"session closed"'
+                    query: '@system.action:("session closed" OR "Close session")'
                   name: Logoff
                   id: 2
                 - filter:
@@ -116,11 +120,11 @@ pipeline:
               name: ocsf.type_name
               categories:
                 - filter:
-                    query: "@system.action:(Accepted OR Failed)"
+                    query: '@system.action:(Accepted OR Failed OR "Starting session" OR "session opened")'
                   name: "Authentication: Logon"
                   id: 300201
                 - filter:
-                    query: '@system.action:"session closed"'
+                    query: '@system.action:("session closed" OR "Close session")'
                   name: "Authentication: Logoff"
                   id: 300202
                 - filter:
@@ -165,7 +169,7 @@ pipeline:
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@system.action:Accepted"
+                    query: '@system.action:(Accepted OR "Starting session" OR "Close session" OR "session opened")'
                   name: Success
                   id: 1
                 - filter:
