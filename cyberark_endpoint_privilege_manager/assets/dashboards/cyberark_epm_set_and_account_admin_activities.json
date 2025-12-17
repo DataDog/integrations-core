@@ -25,7 +25,7 @@
             "id": 1428496417300083,
             "definition": {
                 "type": "note",
-                "content": "This dashboard highlights Set and Account Administrator activities, showing key events, trends, and source activity to support oversight and investigation of privileged actions.\n\nFor more information, see the [CyberArk Endpoint Privilege Manager Integration Documentation](https://docs.datadoghq.com/integrations/cyberark_endpoint_privilege_manager/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard highlights Set and Account Administrator activities, showing key events, trends, and source activity to support oversight and investigation of privileged actions.\n\nFor more information, see the [CyberArk Endpoint Privilege Manager Integration Documentation](https://docs.datadoghq.com/integrations/cyberark_endpoint_privilege_manager/).\n\n**Note**\n- _set_name_ filter applies to widgets in Set Admin Audit Insights group\n- _account_name_ filter applies to widgets in Account Admin Audit Insights group\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -59,7 +59,7 @@
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
-                            "vertical_align": "center",
+                            "vertical_align": "top",
                             "show_tick": false,
                             "tick_pos": "50%",
                             "tick_edge": "left",
@@ -87,7 +87,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -157,7 +157,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -201,7 +201,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -271,7 +271,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events -@usr.name:\"\" $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events -@usr.name:\"\" $usr_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -341,7 +341,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -408,7 +408,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name $account_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -448,7 +448,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -514,7 +514,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name $account_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $usr_name $client_ip $set_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -613,7 +613,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $account_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -683,7 +683,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $account_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -727,7 +727,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $account_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -797,7 +797,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events -@usr.name:\"\" $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events -@usr.name:\"\" $usr_name $client_ip $account_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -867,7 +867,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $account_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -934,7 +934,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $set_name $account_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $account_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -974,7 +974,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $set_name $account_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $account_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1040,7 +1040,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $set_name $account_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $usr_name $client_ip $account_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1110,7 +1110,7 @@
         },
         {
             "name": "set_name",
-            "prefix": "@SetName",
+            "prefix": "set_name",
             "available_values": [],
             "default": "*"
         },
