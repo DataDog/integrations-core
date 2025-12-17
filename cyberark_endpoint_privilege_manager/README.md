@@ -16,7 +16,7 @@ Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into
 
 ### Create a User in CyberArk Endpoint Privilege Manager
 1. Log in to the CyberArk Endpoint Privilege Manager portal.
-2. Navigate to **Administrator**.
+2. Navigate to **Administration**.
 3. Open the **Account Management** section.
 4. Click **Create** and then click on **Create User** from the dropdown.
 5. Enter the following details:
@@ -27,7 +27,7 @@ Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into
 7. Select **Allow to manage Sets** checkbox.
 8. Click **Next**.
 9. Assign the **View Only Set Admin** role for all listed sets.
-10. Click on **Finish**.
+10. Click **Finish**.
 
 
 ### Connect your CyberArk Endpoint Privilege Manager Account to Datadog
@@ -38,18 +38,19 @@ Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into
    | EPM Account Region | The EPM Account Region of your CyberArk Endpoint Privilege Manager.|
    | Username | The Username of CyberArk Endpoint Privilege Manager account which has access to the available sets.|
    | Password | The CyberArk Endpoint Privilege Manager account password.|
-2. Click the Save button to save your settings.
+2. Click **Save**.
 
 ## Data Collected
-CyberArk Endpoint Privilege Manager collects and forwards raw events, policy audit events, set admin audit events, and account admin audit events to Datadog.
+
+The CyberArk Endpoint Privilege Manager integration collects and forwards raw events, policy audit events, set admin audit events, and account admin audit events to Datadog.
 
 ### Metrics
 
-CyberArk Endpoint Privilege Manager does not include any metrics.
+The CyberArk Endpoint Privilege Manager integration does not include any metrics.
 
 ### Events
 
-CyberArk Endpoint Privilege Manager does not include any events.
+The CyberArk Endpoint Privilege Manager integration does not include any events.
 
 ## Troubleshooting
 
