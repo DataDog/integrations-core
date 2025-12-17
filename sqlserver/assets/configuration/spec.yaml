@@ -48,6 +48,7 @@ files:
         type: string
     - name: password
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
+      secret: true
       value:
         type: string
     - name: server_version
@@ -1013,7 +1014,16 @@ files:
           value:
             type: number
             example: 600
+        - name: max_tables
+          description: |
+            Set the maximum number of tables to collect. Defaults to 300.
+          value:
+            type: integer
+            example: 300
         - name: max_execution_time
+          deprecation:
+            Agent version: 7.74.0
+            Migration: This option no longer has any effect.
           description: |
             Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
             Capped by `collect_schemas.collection_interval`

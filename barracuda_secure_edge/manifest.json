@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c0acbaef-4769-4ea9-aa77-b208440f9303",
   "app_id": "barracuda-secure-edge",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -35,7 +36,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 48860633,
       "source_type_name": "barracuda_secure_edge",
       "configuration": {

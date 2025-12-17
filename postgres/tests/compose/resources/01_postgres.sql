@@ -13,12 +13,19 @@ GRANT SELECT ON pg_stat_database TO datadog;
 GRANT SELECT ON pg_stat_database TO datadog_no_catalog;
 GRANT SELECT ON ALL tables IN SCHEMA pg_catalog to datadog;
 CREATE DATABASE datadog_test;
+COMMENT ON DATABASE datadog_test IS 'Datadog test database';
 GRANT ALL PRIVILEGES ON DATABASE datadog_test TO datadog;
 CREATE DATABASE dogs;
 GRANT USAGE on SCHEMA public to bob;
 GRANT USAGE on SCHEMA public to blocking_bob;
 CREATE DATABASE dogs_nofunc;
 CREATE DATABASE dogs_noschema;
+
+-- These databases should get excluded from database autodiscovery by default
+CREATE DATABASE rdsadmin;
+CREATE DATABASE cloudsqladmin;
+CREATE DATABASE alloydbadmin;
+CREATE DATABASE alloydbmetadata;
 
 -- These databases must be enumerated like so because postgres does
 -- not support the creation of databases in a transaction so functions

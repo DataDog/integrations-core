@@ -156,6 +156,15 @@ unsorted = [
     'otel',
 ]
 
+# Use this to validate the name of the integration that must appear in each row of the metadata.csv file
+# This integrations for historical reasons do not have a name in metadata that aligns with their
+# display name.
+[overrides.validate.metadata.integration]
+ecs_fargate = "amazon_fargate"
+kube_scheduler = "kube_scheduler"
+nginx_ingress_controller = "nginx-ingress-controller"
+
+
 [overrides.dep.updates]
 exclude = [
     'pyasn1',          # https://github.com/pyasn1/pyasn1/issues/52
@@ -188,3 +197,12 @@ ddev = false
 docs = false
 # This is a directory that exists only in CI but need to include it to avoid tests failing in CI
 trace-captures = false
+
+# Explicitely add the platforms supported by an integration for those where the manifest has been
+# removed.
+# This is a temporary fix while we implement a metadata.json file that we can add to each integration
+# that replaces the manifest.
+# Use manifest-like platforms
+[overrides.manifest.platforms]
+krakend = ["linux", "windows", "mac_os"]
+lustre = ["linux", "windows", "mac_os"]

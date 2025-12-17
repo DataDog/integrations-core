@@ -20,7 +20,7 @@ def instance_database_autodiscovery():
         global_view_db="postgres",
         max_databases=100,
         include=[".*"],
-        exclude=["cloudsqladmin"],
+        exclude=["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"],
         refresh=600,
     )
 
@@ -33,7 +33,7 @@ def instance_query_metrics():
         incremental_query_metrics=False,
         baseline_metrics_expiry=300,
         full_statement_text_cache_max_size=10000,
-        full_statement_text_samples_per_hour_per_query=10000,
+        full_statement_text_samples_per_hour_per_query=1,
         run_sync=False,
     )
 
@@ -83,6 +83,7 @@ def instance_collect_schemas():
         exclude_schemas=[],
         include_tables=[],
         exclude_tables=[],
+        max_query_duration=60,
     )
 
 

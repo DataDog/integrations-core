@@ -171,6 +171,11 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /mongo/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mongo/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
+# Data Streams Monitoring
+/kafka_actions/                                     @DataDog/data-streams-monitoring @DataDog/agent-integrations
+/kafka_actions/*.md                                 @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
+/kafka_actions/manifest.json                        @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
+
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
 /openai/            @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
@@ -355,6 +360,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /microsoft_dns/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
 /microsoft_dns/assets/logs/                                         @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/microsoft_copilot/                                                 @DataDog/saas-integrations
+/microsoft_copilot/*.md                                             @DataDog/saas-integrations @DataDog/documentation
+/microsoft_copilot/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
+/microsoft_copilot/assets/logs/                                     @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /microsoft_sysmon/                                                  @DataDog/agent-integrations
 /microsoft_sysmon/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /microsoft_sysmon/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
@@ -399,6 +409,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /proofpoint_on_demand/*.md                                          @DataDog/saas-integrations @DataDog/documentation
 /proofpoint_on_demand/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
 /proofpoint_on_demand/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/resend/                                                            @DataDog/saas-integrations
+/resend/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+/resend/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+/resend/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /sanity/                                                            @DataDog/saas-integrations
 /sanity/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
@@ -702,10 +717,20 @@ plaid/assets/logs/                                                  @DataDog/saa
 /push_security/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /push_security/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/forescout/                                                           @DataDog/agent-integrations
+/forescout/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/forescout/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/forescout/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+
 /obsidian_security/                                                  @DataDog/saas-integrations
 /obsidian_security/*.md                                              @DataDog/saas-integrations @DataDog/documentation
 /obsidian_security/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
 /obsidian_security/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/guarddog/                                                           @DataDog/agent-integrations
+/guarddog/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/guarddog/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/guarddog/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
