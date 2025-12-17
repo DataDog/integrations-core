@@ -21,7 +21,10 @@ METRIC_MAP = {
     'eventbus_queue_size': 'eventbus.queue.size',
     'http_request_duration_seconds': 'http.request.duration.seconds',
     'instance_role_leader': 'instance.role.leader',
-    'last_activity': 'last.activity',
+    'last_activity': {
+        'name': 'last.activity',
+        'type': 'time_elapsed',
+    },
     'nodejs_active_handles': 'nodejs.active.handles',
     'nodejs_active_handles_total': 'nodejs.active.handles.total',
     'nodejs_active_requests': 'nodejs.active.requests',
