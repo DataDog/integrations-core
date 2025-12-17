@@ -74,9 +74,6 @@ class SizeBlock(BaseModel):
     declared: SizePair | None
     locked: SizePair | None
 
-    def __init__(self, **data):
-        super().__init__(**data)
-
     @model_validator(mode="after")
     def validate_size_block(self) -> SizeBlock:
         if self.declared is None and self.locked is None:
