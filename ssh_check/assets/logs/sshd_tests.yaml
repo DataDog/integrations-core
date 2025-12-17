@@ -7,7 +7,7 @@ tests:
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
-        class_name: "Authentication Activity"
+        class_name: "Authentication"
         class_uid: 3002
         activity_id: 2
         activity_name: "Logoff"
@@ -39,7 +39,7 @@ tests:
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
-        class_name: "Authentication Activity"
+        class_name: "Authentication"
         class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
@@ -80,7 +80,7 @@ tests:
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
-        class_name: "Authentication Activity"
+        class_name: "Authentication"
         class_uid: 3002
         activity_id: 99
         activity_name: "Other"
@@ -109,7 +109,7 @@ tests:
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
-        class_name: "Authentication Activity"
+        class_name: "Authentication"
         class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
