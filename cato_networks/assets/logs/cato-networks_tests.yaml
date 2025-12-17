@@ -28,8 +28,6 @@ tests:
     custom:
       fieldsMap:
         account_id: "20123123"
-        admin: "CATO-IN1-APAC-PTNR-ITPL User #123"
-        admin_id: "400000123"
         change:
           After:
             blockNewDomains: "false"
@@ -42,6 +40,9 @@ tests:
         model_name: "IpsConfiguration"
         model_type: "IPS Configuration"
         module: "IPS Configuration"
+      usr:
+        id: "400000123"
+        name: "CATO-IN1-APAC-PTNR-ITPL User #123"
     message: |-
       {
         "fieldsMap" : {
@@ -64,8 +65,10 @@ tests:
           "insertion_date" : "1763455630734"
         }
       }
+    service: "audit-logs"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1763455630734
  -
   sample: |-
     {
@@ -95,8 +98,6 @@ tests:
     custom:
       fieldsMap:
         account_id: "20000232"
-        admin: "CATO-IN1-APAC-PTNR-ITPL User #123"
-        admin_id: "400000123"
         change:
           After:
             action: "BLOCK"
@@ -110,6 +111,9 @@ tests:
         model_name: "WAN Traffic"
         model_type: "Antivirus Rule"
         module: "Threat Protection Rule"
+      usr:
+        id: "400000123"
+        name: "CATO-IN1-APAC-PTNR-ITPL User #123"
     message: |-
       {
         "fieldsMap" : {
@@ -133,8 +137,10 @@ tests:
           "insertion_date" : "1763455630734"
         }
       }
+    service: "audit-logs"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1763455630734
  -
   sample: |-
     {
@@ -172,15 +178,20 @@ tests:
       event_count: 1
       event_id: "c8d2456ef8b48123"
       event_message: "ApiKey login successfully"
+      event_status: "info"
       event_sub_type: "ApiKey"
-      event_type: "Connectivity"
+      evt:
+        name: "Connectivity"
       internalId: "c8d2456ef8b48123"
       internal_id: "c8d2456ef8b48123"
       key_name: "demo-key"
       login_type: "API"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       src_country: "India"
       src_country_code: "IN"
-      src_ip: "10.10.10.10"
       src_is_site_or_vpn: "API"
       time: 1763478148991
       time_str: "2025-11-18T15:02:28Z"
@@ -208,8 +219,11 @@ tests:
         "time" : 1763478148991,
         "event_message" : "ApiKey login successfully"
       }
+    service: "events"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1763478148991
  -
   sample: |-
     {
@@ -254,16 +268,21 @@ tests:
       device_name: "DESKTOP-ENI0ABC"
       event_count: 1
       event_id: "c14b9006b130b123"
+      event_status: "info"
       event_sub_type: "XDR Threat"
-      event_type: "Detection and Response"
+      evt:
+        name: "Detection and Response"
       indication: "Cybersquatting Malicious Activity"
       internalId: "c14b9006b130bd27"
       internal_id: "c14b9006b130b123"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       producer: "Threat Prevention"
       raw_data: ""
       rule_id: "691d9f390a267b749814b123"
       rule_name: "Test"
-      src_ip: "10.10.10.10"
       src_is_site_or_vpn: "SDP User"
       src_site_id: 2
       src_site_name: "John Doe"
@@ -272,9 +291,10 @@ tests:
       time: 1763568228849
       time_str: "2025-11-19T16:03:48Z"
       trigger: "Story Created"
-      user_id: 2
+      usr:
+        email: "test@example.com"
+        id: 2
       vendor: "Cato"
-      vpn_user_email: "test@example.com"
     message: |-
       {
         "event_count" : 1,
@@ -307,8 +327,11 @@ tests:
         "indication" : "Cybersquatting Malicious Activity",
         "status" : "Open"
       }
+    service: "events"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1763568228849
  -
   sample: |-
     {
@@ -394,19 +417,30 @@ tests:
        - 400000307
       dest_country: "India"
       dest_country_code: "IN"
-      dest_ip: "10.10.10.10"
-      dest_port: 443
       device_name: "AssetTag-EID"
-      domain_name: "signaler-pa.clients6.google.com"
+      dns:
+        question:
+          name: "signaler-pa.clients6.google.com"
       event_count: 1
       event_id: "e278205a1f4c73"
+      event_status: "info"
       event_sub_type: "Internet Firewall"
-      event_type: "Security"
+      evt:
+        name: "Security"
       host_ip: "10.10.10.10"
       host_mac: "aa:aa:83:20:60:ab"
       internalId: "e278205a1f4c73"
       internal_id: "e278205a1f4c73"
       ip_protocol: "UDP"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 65222
+        destination:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 443
       network_rule: "Internet Traffic - Predefined"
       os_type: "OS_WINDOWS"
       os_version: "11"
@@ -416,21 +450,20 @@ tests:
       rule_name: "Block QUIC services"
       src_country: "India"
       src_country_code: "IN"
-      src_ip: "10.10.10.10"
       src_is_site_or_vpn: "SDP User"
       src_isp_ip: "10.10.10.10"
-      src_port: 65222
       src_site_id: 0
       src_site_name: "John Doe"
       static_host: false
       time: 1763473282069
       time_str: "2025-11-18T13:41:22Z"
       traffic_direction: "OUTBOUND"
-      user_id: 0
-      user_name: "John Doe"
       user_reference_id: "3248201907"
+      usr:
+        email: "test@example.com"
+        id: 0
+        name: "John Doe"
       visible_device_id: "ab-b1-83-20-65-de"
-      vpn_user_email: "test@example.com"
     message: |-
       {
         "ISP_name" : "Bharti Airtel Ltd.",
@@ -488,8 +521,11 @@ tests:
         "event_id" : "e278205a1f4c73",
         "time" : 1763473282069
       }
+    service: "events"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1763473282069
  -
   sample: |-
     {
@@ -515,8 +551,10 @@ tests:
       event_count: 1
       event_id: "a7cc4c4bb7feda4e"
       event_message: "License job applied 1 and revoked 0 licenses"
+      event_status: "info"
       event_sub_type: "Sdp license"
-      event_type: "System"
+      evt:
+        name: "System"
       internalId: "a7cc4c4bb7fe123a"
       internal_id: "a7cc4c4bb7feda4e"
       time: 1763531560065
@@ -536,5 +574,8 @@ tests:
         "event_message" : "License job applied 1 and revoked 0 licenses",
         "time_str" : "2025-11-19T05:52:40Z"
       }
+    service: "events"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1763531560065
