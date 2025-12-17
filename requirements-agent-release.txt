@@ -34,7 +34,7 @@ datadog-checkpoint-harmony-endpoint==1.1.0
 datadog-checkpoint-quantum-firewall==1.2.0
 datadog-checks-base==37.25.0
 datadog-checks-dependency-provider==3.2.0
-datadog-checks-downloader==8.1.0
+datadog-checks-downloader==9.0.0
 datadog-cilium==6.2.0
 datadog-cisco-aci==4.11.0
 datadog-cisco-secure-firewall==1.2.0
@@ -176,7 +176,7 @@ datadog-pgbouncer==8.7.0; sys_platform != 'win32'
 datadog-php-fpm==6.2.0
 datadog-ping-federate==2.2.0
 datadog-postfix==3.2.0; sys_platform != 'win32'
-datadog-postgres==23.3.2
+datadog-postgres==23.3.3
 datadog-powerdns-recursor==5.2.0
 datadog-presto==3.3.0
 datadog-process==5.3.0
