@@ -178,7 +178,7 @@ pipeline:
           schema:
             schemaType: ocsf
             version: 1.5.0
-            className: Authentication Activity
+            className: Authentication
             classUid: 3002
             extensions: []
             profiles: []
