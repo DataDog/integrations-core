@@ -10,7 +10,48 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Cato Networks audit logs and events.",
     "title": "Cato Networks",
-    "media": [],
+    "media": [
+      {
+        "caption": "Cato Networks Overview",
+        "image_url": "images/cato_networks_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Overview",
+        "image_url": "images/cato_networks_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Events",
+        "image_url": "images/cato_networks_events_light_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Events",
+        "image_url": "images/cato_networks_events_light_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Events",
+        "image_url": "images/cato_networks_events_dark_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Events",
+        "image_url": "images/cato_networks_events_dark_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Audit Logs",
+        "image_url": "images/cato_networks_audit_logs_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Audit Logs",
+        "image_url": "images/cato_networks_audit_logs_dark.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -30,8 +71,8 @@
     },
     "dashboards": {
       "Cato Networks Overview": "assets/dashboards/cato_networks_overview.json",
-      "Cato Networks Audit Logs": "assets/dashboards/cato_networks_audit_logs.json",
-      "Cato Networks Events": "assets/dashboards/cato_networks_events.json"
+      "Cato Networks Events": "assets/dashboards/cato_networks_events.json",
+      "Cato Networks Audit Logs": "assets/dashboards/cato_networks_audit_logs.json"
     },
     "logs": {
       "source": "cato-networks"
