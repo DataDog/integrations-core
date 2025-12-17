@@ -27,6 +27,14 @@
       "events": {
         "creates_events": false
       }
+    },
+    "dashboards": {
+      "Cato Networks Overview": "assets/dashboards/cato_networks_overview.json",
+      "Cato Networks Audit Logs": "assets/dashboards/cato_networks_audit_logs.json",
+      "Cato Networks Events": "assets/dashboards/cato_networks_events.json"
+    },
+    "logs": {
+      "source": "cato-networks"
     }
   },
   "author": {
