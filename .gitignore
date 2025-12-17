@@ -143,5 +143,6 @@ size-compressed.txt
 treemap*.png
 
 # Ignore any metadata file except root json in the downloader
-datadog_checks_downloader/datadog_checks/downloader/data
+datadog_checks_downloader/datadog_checks/downloader/data/repo/targets
+datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/*
 !datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/root.json
