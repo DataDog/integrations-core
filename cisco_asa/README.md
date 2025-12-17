@@ -13,7 +13,6 @@ Integrate Cisco ASA with Datadog to gain insights into Threat Detection, User Au
 #### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
-/root/Bitbucket/datadog-security-connectors
     ```yaml
     logs_enabled: true
     ```
