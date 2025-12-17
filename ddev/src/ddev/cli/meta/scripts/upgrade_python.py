@@ -18,9 +18,15 @@ if TYPE_CHECKING:
 
 # Python.org URLs
 PYTHON_FTP_URL = "https://www.python.org/ftp/python/"
-PYTHON_MACOS_PKG_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-macos11.pkg"
 PYTHON_SBOM_LINUX_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz.spdx.json"
 PYTHON_SBOM_WINDOWS_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe.spdx.json"
+
+# Python Build Standalone (PBS) - used for macOS
+# https://github.com/astral-sh/python-build-standalone
+PBS_LATEST_RELEASE_URL = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
+PBS_SHA256SUMS_URL_TEMPLATE = (
+    "https://github.com/astral-sh/python-build-standalone/releases/download/{release}/SHA256SUMS"
+)
 
 # Regex patterns for Dockerfile updates
 # Linux: ENV PYTHON3_VERSION=3.13.7 (no quotes, matches version at end of line)
@@ -248,28 +254,44 @@ def upgrade_dockerfiles_python_version(
 
 
 def upgrade_macos_python_version(app: Application, new_version: str, tracker: ValidationTracker):
-    macos_python_file = app.repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
+    """
+    Update macOS Python version in the workflow file.
 
-    macos_content = read_file_safely(macos_python_file, 'macOS workflow', tracker)
-    if macos_content is None:
+    The workflow uses Python Build Standalone (PBS) from Astral. Updates PYTHON_PATCH,
+    PBS_RELEASE, and the SHA256 hashes for both macOS architectures.
+    """
+    workflow_file = app.repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
+    content = read_file_safely(workflow_file, 'macOS workflow', tracker)
+    if content is None:
         return
 
-    target_line = next((line for line in macos_content.splitlines() if 'PYTHON3_DOWNLOAD_URL' in line), None)
+    new_patch = new_version.split('.')[-1]
 
-    if target_line is None:
-        tracker.error(('macOS workflow',), message='Could not find PYTHON3_DOWNLOAD_URL')
+    # Get the latest PBS release and SHA256 hashes
+    pbs_info = get_pbs_release_info(app, new_version)
+    if pbs_info is None:
+        tracker.error(
+            ('macOS workflow',),
+            message=f'Could not find PBS release with Python {new_version}. '
+            'A new PBS release may not be available yet.',
+        )
         return
 
-    new_url = PYTHON_MACOS_PKG_URL_TEMPLATE.format(version=new_version)
-    indent = target_line[: target_line.index('PYTHON3_DOWNLOAD_URL')]
-    new_line = f'{indent}PYTHON3_DOWNLOAD_URL: "{new_url}"'
+    # Define replacements: (pattern, new_value)
+    replacements = [
+        (r'^(\s*PYTHON_PATCH:\s*)\d+\s*$', rf'\g<1>{new_patch}'),
+        (r'^(\s*PBS_RELEASE:\s*)\d+\s*$', rf"\g<1>{pbs_info['release']}"),
+        (r'^(\s*PBS_SHA256__aarch64:\s*)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['aarch64']}"),
+        (r'^(\s*PBS_SHA256__x86_64:\s*)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['x86_64']}"),
+    ]
 
-    if target_line == new_line:
-        app.display_info(f"Python version in macOS workflow is already at {new_version}")
-        return
+    for pattern, replacement in replacements:
+        content, count = re.subn(pattern, replacement, content, count=1, flags=re.MULTILINE)
+        if count == 0:
+            tracker.error(('macOS workflow',), message=f'Could not find pattern: {pattern}')
+            return
 
-    updated_content = macos_content.replace(target_line, new_line, 1)
-    write_file_safely(macos_python_file, updated_content, 'macOS workflow', tracker)
+    write_file_safely(workflow_file, content, 'macOS workflow', tracker)
 
 
 def upgrade_python_version_full_constant(app: Application, new_version: str, tracker: ValidationTracker):
@@ -334,6 +356,46 @@ def get_latest_python_version(app: Application, major_minor: str) -> str | None:
     # Sort and return the latest version
     versions.sort()
     return str(versions[-1])
+
+
+def get_pbs_release_info(app: Application, python_version: str) -> dict[str, str] | None:
+    """
+    Get the latest PBS release info with SHA256 hashes for the specified Python version.
+
+    Returns dict with 'release', 'aarch64', 'x86_64' keys, or None if not found.
+    """
+    try:
+        # Get latest PBS release tag
+        response = httpx.get(PBS_LATEST_RELEASE_URL, timeout=30)
+        response.raise_for_status()
+        release = orjson.loads(response.text).get('tag_name')
+        if not release:
+            return None
+
+        # Fetch SHA256SUMS file and extract hashes for our target files
+        sha_response = httpx.get(PBS_SHA256SUMS_URL_TEMPLATE.format(release=release), timeout=30)
+        if sha_response.status_code != 200:
+            return None
+
+        hashes = {'release': release}
+        for arch in ('aarch64', 'x86_64'):
+            filename = f'cpython-{python_version}+{release}-{arch}-apple-darwin-install_only_stripped.tar.gz'
+            for line in sha_response.text.splitlines():
+                if filename in line:
+                    sha_hash = line.split()[0]
+                    if validate_sha256(sha_hash):
+                        hashes[arch] = sha_hash
+                    break
+
+        # Verify we found both architectures
+        if 'aarch64' not in hashes or 'x86_64' not in hashes:
+            return None
+
+        return hashes
+
+    except httpx.RequestException as e:
+        app.display_warning(f"Error fetching PBS release info: {e}")
+        return None
 
 
 def get_python_sha256_hashes(app: Application, version: str) -> dict[str, str]:
