@@ -4,7 +4,7 @@
 
 from datadog_checks.dev.utils import assert_service_checks
 
-
+@pytest.mark.e2e
 def test_check_n8n_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
