@@ -38,7 +38,8 @@
       "auto_install": true
     },
     "dashboards": {
-      "Network Path Agents": "assets/dashboards/network_path_agents.json"
+      "Network Path Agents": "assets/dashboards/network_path_agents.json",
+      "Network Path Overview": "assets/dashboards/network_path_overview.json"
     }
   },
   "author": {
