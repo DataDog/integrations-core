@@ -20,6 +20,12 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "url": "https://docs.datadoghq.com/integrations/anthropic/",
+        "resource_type": "documentation"
+      }
     ]
   },
   "assets": {
