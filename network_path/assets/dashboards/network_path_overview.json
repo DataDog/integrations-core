@@ -12,11 +12,33 @@
                 "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 4335670568735439,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard can be used to have an overview across all your Network Tests and triangulate network issues and evaluate impact scope.\n\nClick on the table rows above to pivot directly to Network Path: View related Network Path & View related Network Path Map",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
                         "id": 2956031520946208,
                         "definition": {
-                            "title": "Source & Destination & Test ID",
+                            "title": "Number of Tests",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -64,15 +86,15 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
-                            "width": 3,
-                            "height": 2
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
                         "id": 4137075614273560,
                         "definition": {
-                            "title": "Source & Destination & Test ID",
+                            "title": "Latency by Source, Destination, Test ID",
                             "title_size": "16",
                             "title_align": "left",
                             "time": {},
@@ -141,18 +163,19 @@
                             ]
                         },
                         "layout": {
-                            "x": 3,
-                            "y": 0,
-                            "width": 9,
-                            "height": 2
+                            "x": 4,
+                            "y": 2,
+                            "width": 8,
+                            "height": 3
                         }
                     },
                     {
                         "id": 5934251162965791,
                         "definition": {
-                            "title": "Source & Destination & Test ID",
+                            "title": "Latency by Source",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -213,7 +236,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 2,
+                            "y": 5,
                             "width": 6,
                             "height": 3
                         }
@@ -221,9 +244,10 @@
                     {
                         "id": 8898616976251311,
                         "definition": {
-                            "title": "Source & Destination & Test ID",
+                            "title": "Latency by Destination",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -284,30 +308,9 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 2,
+                            "y": 5,
                             "width": 6,
                             "height": 3
-                        }
-                    },
-                    {
-                        "id": 4335670568735439,
-                        "definition": {
-                            "type": "note",
-                            "content": "This dashboard can be used to have an overview across all your Network Tests. It can be also used to triangulate network issues and evaluate scope of network issues.\n\nClick on the table rows above to pivot directly to Network Path:\n- View related Network Path\n- View related Network Path Map",
-                            "background_color": "white",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "top",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 5,
-                            "width": 12,
-                            "height": 2
                         }
                     }
                 ]
@@ -316,7 +319,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 12,
-                "height": 8
+                "height": 9
             }
         },
         {
@@ -504,76 +507,66 @@
                         }
                     },
                     {
-                        "id": 8728661661885867,
+                        "id": 1240647078852206,
                         "definition": {
-                            "title": "Destination Hostname",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "network_path",
-                                            "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
-                                            },
-                                            "indexes": [
-                                                "netpath-path"
-                                            ],
-                                            "group_by": {
-                                                "fields": [
-                                                    "destination.hostname"
-                                                ],
-                                                "limit": 1000,
-                                                "sort": {
-                                                    "aggregation": "count",
-                                                    "metric": "count",
-                                                    "order": "desc"
-                                                }
-                                            },
-                                            "compute": {
-                                                "aggregation": "avg",
-                                                "metric": "e2e_probe.rtt.avg"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear"
-                            }
+                            "type": "note",
+                            "content": "Source",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
                         },
                         "layout": {
                             "x": 0,
                             "y": 2,
                             "width": 4,
-                            "height": 2
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6582482391991533,
+                        "definition": {
+                            "type": "note",
+                            "content": "Hop",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6139333668838360,
+                        "definition": {
+                            "type": "note",
+                            "content": "Destination",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 1
                         }
                     },
                     {
@@ -643,8 +636,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 2,
+                            "x": 0,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
@@ -716,16 +709,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 2,
+                            "x": 4,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 5106187849391244,
+                        "id": 8728661661885867,
                         "definition": {
-                            "title": "Destination Continent",
+                            "title": "Destination Hostname",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -757,7 +750,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.continent.name"
+                                                    "destination.hostname"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -789,8 +782,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 4,
+                            "x": 8,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
@@ -862,8 +855,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 4,
+                            "x": 0,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
@@ -935,16 +928,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 4,
+                            "x": 4,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 7777888768124809,
+                        "id": 5106187849391244,
                         "definition": {
-                            "title": "Destination Country",
+                            "title": "Destination Continent",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -976,7 +969,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.country.name"
+                                                    "destination.geoip.continent.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -1008,8 +1001,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 6,
+                            "x": 8,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
@@ -1081,8 +1074,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 6,
+                            "x": 0,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
@@ -1154,16 +1147,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 6,
+                            "x": 4,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 1022398373721715,
+                        "id": 7777888768124809,
                         "definition": {
-                            "title": "Destination City",
+                            "title": "Destination Country",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1195,13 +1188,12 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.country.name",
-                                                    "destination.geoip.city.name"
+                                                    "destination.geoip.country.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
-                                                    "aggregation": "avg",
-                                                    "metric": "e2e_probe.rtt.avg",
+                                                    "aggregation": "count",
+                                                    "metric": "count",
                                                     "order": "desc"
                                                 }
                                             },
@@ -1228,8 +1220,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 8,
+                            "x": 8,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
@@ -1302,8 +1294,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 8,
+                            "x": 0,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
@@ -1376,16 +1368,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 8,
+                            "x": 4,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 6270723744252591,
+                        "id": 1022398373721715,
                         "definition": {
-                            "title": "Destination IP",
+                            "title": "Destination City",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1417,7 +1409,8 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.ip_address"
+                                                    "destination.geoip.country.name",
+                                                    "destination.geoip.city.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -1449,8 +1442,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 10,
+                            "x": 8,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
@@ -1522,8 +1515,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 10,
+                            "x": 0,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
@@ -1595,16 +1588,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 10,
+                            "x": 4,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 7859282762258912,
+                        "id": 6270723744252591,
                         "definition": {
-                            "title": "Destination AS Number",
+                            "title": "Destination IP",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1636,7 +1629,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number"
+                                                    "traceroute.runs.destination.ip_address"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -1668,8 +1661,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 12,
+                            "x": 8,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
@@ -1741,8 +1734,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 12,
+                            "x": 0,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
@@ -1814,16 +1807,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 12,
+                            "x": 4,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 8015093315851005,
+                        "id": 7859282762258912,
                         "definition": {
-                            "title": "Destination AS Number and Name",
+                            "title": "Destination AS Number",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1855,8 +1848,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number",
-                                                    "traceroute.runs.destination.geoip.as.name"
+                                                    "traceroute.runs.destination.geoip.as.number"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -1888,8 +1880,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 14,
+                            "x": 8,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
@@ -1962,8 +1954,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 14,
+                            "x": 0,
+                            "y": 15,
                             "width": 4,
                             "height": 2
                         }
@@ -2036,8 +2028,82 @@
                             }
                         },
                         "layout": {
+                            "x": 4,
+                            "y": 15,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8015093315851005,
+                        "definition": {
+                            "title": "Destination AS Number and Name",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "network_path",
+                                            "search": {
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                            },
+                                            "indexes": [
+                                                "netpath-path"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "traceroute.runs.destination.geoip.as.number",
+                                                    "traceroute.runs.destination.geoip.as.name"
+                                                ],
+                                                "limit": 1000,
+                                                "sort": {
+                                                    "aggregation": "avg",
+                                                    "metric": "e2e_probe.rtt.avg",
+                                                    "order": "desc"
+                                                }
+                                            },
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "e2e_probe.rtt.avg"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear"
+                            }
+                        },
+                        "layout": {
                             "x": 8,
-                            "y": 14,
+                            "y": 15,
                             "width": 4,
                             "height": 2
                         }
@@ -2046,9 +2112,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 8,
+                "y": 9,
                 "width": 12,
-                "height": 17
+                "height": 18
             }
         },
         {
@@ -2232,75 +2298,66 @@
                         }
                     },
                     {
-                        "id": 1148799878076353,
+                        "id": 2456508766415827,
                         "definition": {
-                            "title": "Destination Hostname",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "network_path",
-                                            "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
-                                            },
-                                            "indexes": [
-                                                "netpath-path"
-                                            ],
-                                            "group_by": {
-                                                "fields": [
-                                                    "destination.hostname"
-                                                ],
-                                                "limit": 1000,
-                                                "sort": {
-                                                    "aggregation": "count",
-                                                    "metric": "count",
-                                                    "order": "desc"
-                                                }
-                                            },
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear"
-                            }
+                            "type": "note",
+                            "content": "Source",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
                         },
                         "layout": {
                             "x": 0,
                             "y": 2,
                             "width": 4,
-                            "height": 2
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3257665091742624,
+                        "definition": {
+                            "type": "note",
+                            "content": "Hop",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8787116410428752,
+                        "definition": {
+                            "type": "note",
+                            "content": "Destination",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 1
                         }
                     },
                     {
@@ -2369,8 +2426,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 2,
+                            "x": 0,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
@@ -2441,16 +2498,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 2,
+                            "x": 4,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 7092511732719719,
+                        "id": 1148799878076353,
                         "definition": {
-                            "title": "Destination Continent",
+                            "title": "Destination Hostname",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -2482,7 +2539,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.continent.name"
+                                                    "destination.hostname"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -2513,8 +2570,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 4,
+                            "x": 8,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
@@ -2585,8 +2642,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 4,
+                            "x": 0,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
@@ -2657,16 +2714,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 4,
+                            "x": 4,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 5164351670198034,
+                        "id": 7092511732719719,
                         "definition": {
-                            "title": "Destination Country",
+                            "title": "Destination Continent",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -2698,7 +2755,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.country.name"
+                                                    "destination.geoip.continent.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -2729,8 +2786,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 6,
+                            "x": 8,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
@@ -2801,8 +2858,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 6,
+                            "x": 0,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
@@ -2873,16 +2930,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 6,
+                            "x": 4,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 4853189263428387,
+                        "id": 5164351670198034,
                         "definition": {
-                            "title": "Destination City",
+                            "title": "Destination Country",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -2914,13 +2971,12 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.country.name",
-                                                    "destination.geoip.city.name"
+                                                    "destination.geoip.country.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
-                                                    "aggregation": "avg",
-                                                    "metric": "e2e_probe.packet_loss_percentage",
+                                                    "aggregation": "count",
+                                                    "metric": "count",
                                                     "order": "desc"
                                                 }
                                             },
@@ -2946,8 +3002,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 8,
+                            "x": 8,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
@@ -3019,8 +3075,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 8,
+                            "x": 0,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
@@ -3092,16 +3148,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 8,
+                            "x": 4,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 2793930281150302,
+                        "id": 4853189263428387,
                         "definition": {
-                            "title": "Destination IP",
+                            "title": "Destination City",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -3133,7 +3189,8 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.ip_address"
+                                                    "destination.geoip.country.name",
+                                                    "destination.geoip.city.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -3164,8 +3221,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 10,
+                            "x": 8,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
@@ -3236,8 +3293,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 10,
+                            "x": 0,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
@@ -3308,16 +3365,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 10,
+                            "x": 4,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 65433199466568,
+                        "id": 2793930281150302,
                         "definition": {
-                            "title": "Destination AS Number",
+                            "title": "Destination IP",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -3349,7 +3406,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number"
+                                                    "traceroute.runs.destination.ip_address"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -3380,8 +3437,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 12,
+                            "x": 8,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
@@ -3452,8 +3509,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 12,
+                            "x": 0,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
@@ -3524,16 +3581,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 12,
+                            "x": 4,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 4862218959449537,
+                        "id": 65433199466568,
                         "definition": {
-                            "title": "Destination AS Number and Name",
+                            "title": "Destination AS Number",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -3565,8 +3622,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number",
-                                                    "traceroute.runs.destination.geoip.as.name"
+                                                    "traceroute.runs.destination.geoip.as.number"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -3597,8 +3653,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 14,
+                            "x": 8,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
@@ -3670,8 +3726,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 14,
+                            "x": 0,
+                            "y": 15,
                             "width": 4,
                             "height": 2
                         }
@@ -3742,8 +3798,81 @@
                             }
                         },
                         "layout": {
+                            "x": 4,
+                            "y": 15,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4862218959449537,
+                        "definition": {
+                            "title": "Destination AS Number and Name",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "network_path",
+                                            "search": {
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                            },
+                                            "indexes": [
+                                                "netpath-path"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "traceroute.runs.destination.geoip.as.number",
+                                                    "traceroute.runs.destination.geoip.as.name"
+                                                ],
+                                                "limit": 1000,
+                                                "sort": {
+                                                    "aggregation": "avg",
+                                                    "metric": "e2e_probe.packet_loss_percentage",
+                                                    "order": "desc"
+                                                }
+                                            },
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear"
+                            }
+                        },
+                        "layout": {
                             "x": 8,
-                            "y": 14,
+                            "y": 15,
                             "width": 4,
                             "height": 2
                         }
@@ -3752,9 +3881,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 25,
+                "y": 27,
                 "width": 12,
-                "height": 17
+                "height": 18
             }
         },
         {
@@ -3942,76 +4071,66 @@
                         }
                     },
                     {
-                        "id": 4046115579374856,
+                        "id": 560345049531360,
                         "definition": {
-                            "title": "Destination Hostname",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "network_path",
-                                            "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
-                                            },
-                                            "indexes": [
-                                                "netpath-path"
-                                            ],
-                                            "group_by": {
-                                                "fields": [
-                                                    "destination.hostname"
-                                                ],
-                                                "limit": 1000,
-                                                "sort": {
-                                                    "aggregation": "count",
-                                                    "metric": "count",
-                                                    "order": "desc"
-                                                }
-                                            },
-                                            "compute": {
-                                                "aggregation": "avg",
-                                                "metric": "e2e_probe.packet_loss_percentage"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear"
-                            }
+                            "type": "note",
+                            "content": "Source",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
                         },
                         "layout": {
                             "x": 0,
                             "y": 2,
                             "width": 4,
-                            "height": 2
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3394708027014437,
+                        "definition": {
+                            "type": "note",
+                            "content": "Hop",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 576784579728680,
+                        "definition": {
+                            "type": "note",
+                            "content": "Destination",
+                            "background_color": "gray",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 1
                         }
                     },
                     {
@@ -4081,8 +4200,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 2,
+                            "x": 0,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
@@ -4154,16 +4273,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 2,
+                            "x": 4,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 4313055639835993,
+                        "id": 4046115579374856,
                         "definition": {
-                            "title": "Destination Continent",
+                            "title": "Destination Hostname",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -4195,7 +4314,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.continent.name"
+                                                    "destination.hostname"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -4227,8 +4346,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 4,
+                            "x": 8,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
@@ -4300,8 +4419,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 4,
+                            "x": 0,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
@@ -4373,16 +4492,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 4,
+                            "x": 4,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 2491985564306090,
+                        "id": 4313055639835993,
                         "definition": {
-                            "title": "Destination Country",
+                            "title": "Destination Continent",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -4414,7 +4533,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.country.name"
+                                                    "destination.geoip.continent.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -4446,8 +4565,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 6,
+                            "x": 8,
+                            "y": 5,
                             "width": 4,
                             "height": 2
                         }
@@ -4519,8 +4638,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 6,
+                            "x": 0,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
@@ -4592,16 +4711,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 6,
+                            "x": 4,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 8751543782955301,
+                        "id": 2491985564306090,
                         "definition": {
-                            "title": "Destination City",
+                            "title": "Destination Country",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -4633,13 +4752,12 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "destination.geoip.country.name",
-                                                    "destination.geoip.city.name"
+                                                    "destination.geoip.country.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
-                                                    "aggregation": "avg",
-                                                    "metric": "e2e_probe.packet_loss_percentage",
+                                                    "aggregation": "count",
+                                                    "metric": "count",
                                                     "order": "desc"
                                                 }
                                             },
@@ -4666,8 +4784,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 8,
+                            "x": 8,
+                            "y": 7,
                             "width": 4,
                             "height": 2
                         }
@@ -4740,8 +4858,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 8,
+                            "x": 0,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
@@ -4814,16 +4932,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 8,
+                            "x": 4,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 4142798411592398,
+                        "id": 8751543782955301,
                         "definition": {
-                            "title": "Destination IP",
+                            "title": "Destination City",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -4855,7 +4973,8 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.ip_address"
+                                                    "destination.geoip.country.name",
+                                                    "destination.geoip.city.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -4887,8 +5006,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 10,
+                            "x": 8,
+                            "y": 9,
                             "width": 4,
                             "height": 2
                         }
@@ -4960,8 +5079,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 10,
+                            "x": 0,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
@@ -5033,16 +5152,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 10,
+                            "x": 4,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 6083667852222248,
+                        "id": 4142798411592398,
                         "definition": {
-                            "title": "Destination AS Number",
+                            "title": "Destination IP",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -5074,7 +5193,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number"
+                                                    "traceroute.runs.destination.ip_address"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -5106,8 +5225,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 12,
+                            "x": 8,
+                            "y": 11,
                             "width": 4,
                             "height": 2
                         }
@@ -5179,8 +5298,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 12,
+                            "x": 0,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
@@ -5252,16 +5371,16 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 12,
+                            "x": 4,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
                     },
                     {
-                        "id": 4631037139229508,
+                        "id": 6083667852222248,
                         "definition": {
-                            "title": "Destination AS Number and Name",
+                            "title": "Destination AS Number",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -5293,8 +5412,7 @@
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number",
-                                                    "traceroute.runs.destination.geoip.as.name"
+                                                    "traceroute.runs.destination.geoip.as.number"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
@@ -5326,8 +5444,8 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 14,
+                            "x": 8,
+                            "y": 13,
                             "width": 4,
                             "height": 2
                         }
@@ -5400,8 +5518,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 14,
+                            "x": 0,
+                            "y": 15,
                             "width": 4,
                             "height": 2
                         }
@@ -5474,8 +5592,82 @@
                             }
                         },
                         "layout": {
+                            "x": 4,
+                            "y": 15,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4631037139229508,
+                        "definition": {
+                            "title": "Destination AS Number and Name",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "network_path",
+                                            "search": {
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                            },
+                                            "indexes": [
+                                                "netpath-path"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "traceroute.runs.destination.geoip.as.number",
+                                                    "traceroute.runs.destination.geoip.as.name"
+                                                ],
+                                                "limit": 1000,
+                                                "sort": {
+                                                    "aggregation": "avg",
+                                                    "metric": "e2e_probe.packet_loss_percentage",
+                                                    "order": "desc"
+                                                }
+                                            },
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "e2e_probe.packet_loss_percentage"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear"
+                            }
+                        },
+                        "layout": {
                             "x": 8,
-                            "y": 14,
+                            "y": 15,
                             "width": 4,
                             "height": 2
                         }
@@ -5486,7 +5678,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 12,
-                "height": 17,
+                "height": 18,
                 "is_column_break": true
             }
         }
