@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
 from copy import deepcopy
 
 import pytest
@@ -52,11 +53,20 @@ def init_db():
     client.close()
 
 
+def wait_for_latency_metrics():
+    """Wait for Aerospike to calculate latency metrics."""
+    time.sleep(15)
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
         COMPOSE_FILE,
-        conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
+        conditions=[
+            CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']),
+            WaitFor(init_db),
+            WaitFor(wait_for_latency_metrics),
+        ],
         attempts=2,
     ):
         yield OPENMETRICS_V2_INSTANCE
