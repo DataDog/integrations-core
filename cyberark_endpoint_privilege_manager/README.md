@@ -9,7 +9,7 @@ This integration ingests the following logs:
 - **Set Admin Audit Events**: Actions carried out by EPM administrators within sets.
 - **Account Admin Audit Events**: Actions performed by account administrators.
 
-Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into raw events, policy audit events, set admin audit events, and account admin audit events  using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into raw events, policy audit events, set admin audit events, and account admin audit events using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
 
 ## Setup
