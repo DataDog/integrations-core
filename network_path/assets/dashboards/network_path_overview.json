@@ -5829,6 +5829,5 @@
             ]
         }
     ],
-    "reflow_type": "fixed",
-    "pause_auto_refresh": false
+    "reflow_type": "fixed"
 }
