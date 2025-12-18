@@ -15,7 +15,7 @@
                         "id": 4335670568735439,
                         "definition": {
                             "type": "note",
-                            "content": "This dashboard can be used to have an overview across all your Network Tests and triangulate network issues and evaluate impact scope.\n\nClick on the table rows above to pivot directly to Network Path: View related Network Path & View related Network Path Map",
+                            "content": "This dashboard provides an overview of all your Network Tests. Use it to triangulate network issues and assess their scope.\n\nClick on the table rows above to pivot directly to Network Path: View related Network Path & View related Network Path Map",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
