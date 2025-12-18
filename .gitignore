@@ -142,6 +142,9 @@ size-compressed.txt
 .env
 treemap*.png
 
+# Claude Code customizations
+.claude
+
 # Ignore any metadata file except root json in the downloader
 datadog_checks_downloader/datadog_checks/downloader/data/repo/targets
 datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/*
