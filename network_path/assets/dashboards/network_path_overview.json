@@ -75,6 +75,7 @@
                             "title": "Source & Destination & Test ID",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -89,7 +90,7 @@
                                                 "netpath-path"
                                             ],
                                             "group_by": {
-                                                "limit": 10000,
+                                                "limit": 1000,
                                                 "sort": {
                                                     "aggregation": "avg",
                                                     "metric": "e2e_probe.rtt.avg",
@@ -98,8 +99,7 @@
                                                 "fields": [
                                                     "source.display_name",
                                                     "destination.hostname",
-                                                    "test_id",
-                                                    "test_config_id"
+                                                    "test_id"
                                                 ]
                                             },
                                             "compute": {
@@ -111,7 +111,7 @@
                                     ],
                                     "response_format": "scalar",
                                     "sort": {
-                                        "count": 10000,
+                                        "count": 1000,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -153,7 +153,6 @@
                             "title": "Source & Destination & Test ID",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -225,7 +224,6 @@
                             "title": "Source & Destination & Test ID",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -3763,7 +3761,7 @@
             "id": 102646794596151,
             "definition": {
                 "title": "Packet Loss",
-                "background_color": "yellow",
+                "background_color": "pink",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -5486,7 +5484,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 42,
+                "y": 0,
                 "width": 12,
                 "height": 17,
                 "is_column_break": true
@@ -5503,12 +5501,6 @@
         {
             "name": "test_id",
             "prefix": "test_id",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "test_config_id",
-            "prefix": "test_config_id",
             "available_values": [],
             "default": "*"
         },
