@@ -28,7 +28,10 @@
       },
       "metrics": {
         "prefix": "datadog.network_path.",
-        "check": "datadog.network_path.path.monitored",
+        "check": [
+          "datadog.network_path.path.monitored",
+          "datadog.network_path.collector.workers"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
