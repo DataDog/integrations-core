@@ -1,5 +1,5 @@
 {
-    "title": "Network Path Oveview",
+    "title": "Network Path Overview",
     "description": "This dashboard can be used to have an overview across all your Network Tests. It can be also used to triangulate network issues and evaluate scope of network issues.",
     "widgets": [
         {
