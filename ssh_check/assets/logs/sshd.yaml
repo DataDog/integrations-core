@@ -152,6 +152,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `system.user` to `ocsf.actor.user.name`
+              sources:
+                - system.user
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
               sources:
                 - network.client.ip
