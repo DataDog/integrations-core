@@ -336,8 +336,16 @@ class NutanixCheck(AgentCheck):
         Returns:
             The response object from the request
         """
+        self.log.debug("HTTP request: %s %s, kwargs=%s", method.upper(), url, kwargs)
         http_method = getattr(self.http, method.lower())
         response = http_method(url, **kwargs)
+        self.log.debug(
+            "HTTP response: %s %s, status_code=%s, payload='%s'",
+            method.upper(),
+            url,
+            response.status_code,
+            response.text,
+        )
         return response
 
     def _get_paginated_request_data(self, endpoint, params=None):
