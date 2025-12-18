@@ -60,7 +60,6 @@ class ChannelMetricCollector(object):
             if channel_desc:
                 channel_tags.append("channel_desc:{}".format(channel_desc))
 
-
     def get_pcf_channel_metrics(self, queue_manager):
         discovered_channels = self._discover_channels(queue_manager)
         if discovered_channels:
