@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "anthropic>=0.18.0",
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
@@ -34,6 +35,7 @@ dependencies = [
     "httpx",
     "jsonpointer",
     "pluggy",
+    "pyyaml",
     "rich>=12.5.1",
     "stamina==23.2.0",
     "tomli; python_version < '3.11'",
