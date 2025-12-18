@@ -32,16 +32,6 @@ class SizeValues(BaseModel):
         bytes = self.bytes - other.bytes
         return SizeValues(bytes=bytes, human_readable=self.calculate_human_readable(bytes))
 
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SizeValues):
-            return False
-        return self.bytes == other.bytes
-
-    def __ne__(self, other: object) -> bool:
-        if not isinstance(other, SizeValues):
-            return True
-        return not self == other
-
 
 class SizePair(BaseModel):
     compressed: SizeValues
@@ -58,16 +48,6 @@ class SizePair(BaseModel):
             compressed=self.compressed - other.compressed,
             uncompressed=self.uncompressed - other.uncompressed,
         )
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SizePair):
-            return False
-        return self.compressed == other.compressed and self.uncompressed == other.uncompressed
-
-    def __ne__(self, other: object) -> bool:
-        if not isinstance(other, SizePair):
-            return True
-        return not self == other
 
 
 class SizeBlock(BaseModel):
@@ -113,16 +93,6 @@ class SizeBlock(BaseModel):
             raise ValueError("Both SizeBlock objects must have `locked` set or both must be None.")
 
         return SizeBlock(declared=new_declared, locked=new_locked)
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SizeBlock):
-            return False
-        return self.declared == other.declared and self.locked == other.locked
-
-    def __ne__(self, other: object) -> bool:
-        if not isinstance(other, SizeBlock):
-            return True
-        return not self == other
 
 
 class ModuleSize(BaseModel):
