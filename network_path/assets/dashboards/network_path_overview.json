@@ -15,7 +15,7 @@
                         "id": 4335670568735439,
                         "definition": {
                             "type": "note",
-                            "content": "This dashboard provides an overview of all your Network Tests. Use it to triangulate network issues and assess their scope.\n\nClick on the table rows above to pivot directly to Network Path: View related Network Path & View related Network Path Map",
+                            "content": "This dashboard provides an overview of all your Network Tests. Use it to triangulate network issues and assess their scope.\n\nClick on the table rows above to pivot directly to Network Path: View network path & View network path Map",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
@@ -153,11 +153,11 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View related Network Path",
+                                    "label": "View network path",
                                     "link": "/network/path?query={{test_id}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 },
                                 {
-                                    "label": "View related Network Path Map",
+                                    "label": "View network path Map",
                                     "link": "/network/path?query={{test_id}}&aggr=false&groups=destination.hostname&inspected-paths=0%3A{{test_id.value}}&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
@@ -229,7 +229,7 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View related Network Path",
+                                    "label": "View network path",
                                     "link": "/network/path?query={{source.display_name}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
@@ -301,7 +301,7 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View related Network Path",
+                                    "label": "View network path",
                                     "link": "/network/path?query={{destination.hostname}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
