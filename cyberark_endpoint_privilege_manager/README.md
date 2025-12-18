@@ -4,12 +4,12 @@
 
 This integration ingests the following logs:
 
-- **Raw Events**: Provides detailed records of endpoint activities captured by EPM agents, including threat detection events.
-- **Policy Audit Events**: Provides detailed audit records which gives immediate picture of policy usage on endpoints.
-- **Set Admin Audit Events**: Provides detailed audit records for actions carried out by EPM administrators within sets.
-- **Account Admin Audit Events**: Provides detailed audit records for actions performed by account administrators.
+- **Raw Events**: Endpoint activities captured by EPM agents, including threat detection events.
+- **Policy Audit Events**: Audit records of policy usage on endpoints.
+- **Set Admin Audit Events**: Actions carried out by EPM administrators within sets.
+- **Account Admin Audit Events**: Actions performed by account administrators.
 
-Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into raw events, policy adit events, set admin audit events, and account admin audit events  using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into raw events, policy audit events, set admin audit events, and account admin audit events  using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
 
 ## Setup
@@ -24,7 +24,7 @@ Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into
    - Password
    - Confirm Password
 6. Select the **Account Administrator** checkbox and choose the **View Only** option.
-7. Select **Allow to manage Sets** checkbox.
+7. Select the **Allow to Manage Sets** checkbox.
 8. Click **Next**.
 9. Assign the **View Only Set Admin** role for all listed sets.
 10. Click **Finish**.
