@@ -1,9 +1,1826 @@
 {
-    "title": "N8N Overview Dashboard",
-    "description": "N8N Overview Dashboard",
-    "widgets": [],
-    "template_variables": [],
+    "title": "n8n Overview",
+    "description": "Monitor n8n workflow automation performance, health, and resource utilization.",
+    "widgets": [
+        {
+            "id": 1001,
+            "definition": {
+                "title": "About n8n",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1002,
+                        "definition": {
+                            "type": "image",
+                            "url": "/static/images/logos/n8n_large.svg",
+                            "sizing": "contain",
+                            "has_background": true,
+                            "has_border": true,
+                            "vertical_align": "center",
+                            "horizontal_align": "center"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1003,
+                        "definition": {
+                            "type": "note",
+                            "content": "# n8n Workflow Automation\n\nThis dashboard provides comprehensive observability for your n8n instance, including:\n- Workflow execution metrics\n- Queue job performance\n- Cache efficiency\n- Node.js runtime health\n- System resource utilization",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 6
+            }
+        },
+        {
+            "id": 2001,
+            "definition": {
+                "title": "Workflow Performance",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2002,
+                        "definition": {
+                            "type": "note",
+                            "content": "Monitor workflow execution health, success rates, and performance.",
+                            "background_color": "blue",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2003,
+                        "definition": {
+                            "title": "Active Workflows",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.active.workflow.count{*}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "workflows",
+                            "precision": 0,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2004,
+                        "definition": {
+                            "title": "Active Executions",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.workflow.executions.active{*}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "running",
+                            "precision": 0,
+                            "timeseries_background": {
+                                "type": "bars"
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2005,
+                        "definition": {
+                            "title": "Workflow Execution Rate",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Total Started"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Successful"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Failed"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.workflow.started.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.workflow.success.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:n8n.workflow.failed.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2006,
+                        "definition": {
+                            "title": "Workflow Success Rate (%)",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "(query1 / (query1 + query2)) * 100",
+                                            "alias": "Success Rate"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.workflow.success.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.workflow.failed.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "green",
+                                        "line_type": "solid",
+                                        "line_width": "thick"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "min": "0",
+                                "max": "100"
+                            },
+                            "markers": [
+                                {
+                                    "value": "y = 95",
+                                    "display_type": "ok dashed"
+                                },
+                                {
+                                    "value": "y = 90",
+                                    "display_type": "warning dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2007,
+                        "definition": {
+                            "title": "Workflow Execution Duration (p50, p90, p99)",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "p50"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "p90"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "p99"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.workflow.executions.duration.seconds.bucket{upper_bound:0.5}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:n8n.workflow.executions.duration.seconds.bucket{upper_bound:5.0}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:n8n.workflow.executions.duration.seconds.bucket{upper_bound:10.0}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 6
+            }
+        },
+        {
+            "id": 3001,
+            "definition": {
+                "title": "Queue & Job Management",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3002,
+                        "definition": {
+                            "type": "note",
+                            "content": "Track job queue health, throughput, and latency.",
+                            "background_color": "red",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3003,
+                        "definition": {
+                            "title": "Queue Job States",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.queue.job.waiting.total{*} by {host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 100,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 50,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 50,
+                                            "palette": "white_on_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3004,
+                        "definition": {
+                            "title": "Active Jobs",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.queue.job.active.total{*}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "jobs",
+                            "precision": 0,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 1,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3005,
+                        "definition": {
+                            "title": "Waiting Jobs",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.queue.job.waiting.total{*}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 100,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 50,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 50,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "jobs",
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 1,
+                            "width": 1,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3006,
+                        "definition": {
+                            "title": "Job Throughput (Rate)",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Enqueued"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Dequeued"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Completed"
+                                        },
+                                        {
+                                            "formula": "query4",
+                                            "alias": "Failed"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.queue.job.enqueued.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.queue.job.dequeued.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:n8n.queue.job.completed.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:n8n.queue.job.failed.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3007,
+                        "definition": {
+                            "title": "Job Wait Time Distribution",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "alias": "Avg Wait Time (s)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.queue.job.waiting.duration.seconds.sum{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.queue.job.waiting.duration.seconds.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "thick"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3008,
+                        "definition": {
+                            "title": "Job Duration (Avg)",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "alias": "Avg Duration (s)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.queue.jobs.duration.seconds.sum{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.queue.jobs.duration.seconds.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "orange",
+                                        "line_type": "solid",
+                                        "line_width": "thick"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 6
+            }
+        },
+        {
+            "id": 4001,
+            "definition": {
+                "title": "Cache Performance",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4002,
+                        "definition": {
+                            "type": "note",
+                            "content": "Monitor cache hit rates and performance.",
+                            "background_color": "orange",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4003,
+                        "definition": {
+                            "title": "Cache Hit Rate (%)",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "(query1 / (query1 + query2)) * 100",
+                                            "alias": "Hit Rate"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.cache.hits.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.cache.misses.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "green",
+                                        "line_type": "solid",
+                                        "line_width": "thick"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "min": "0",
+                                "max": "100"
+                            },
+                            "markers": [
+                                {
+                                    "value": "y = 80",
+                                    "display_type": "ok dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4004,
+                        "definition": {
+                            "title": "Cache Operations",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Hits"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Misses"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Errors"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.cache.hits.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.cache.misses.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:n8n.cache.errors.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4005,
+                        "definition": {
+                            "title": "Cache Latency (Avg)",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "(query1 / query2) * 1000",
+                                            "alias": "Latency (ms)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.cache.latency.seconds.sum{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.cache.latency.seconds.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 6
+            }
+        },
+        {
+            "id": 5001,
+            "definition": {
+                "title": "API & HTTP Performance",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5002,
+                        "definition": {
+                            "type": "note",
+                            "content": "Track API request rates and HTTP response times.",
+                            "background_color": "blue",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5003,
+                        "definition": {
+                            "title": "API Request Rate",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.api.requests.count{*}.as_rate()",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "req/s",
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5005,
+                        "definition": {
+                            "title": "HTTP Response Duration (Avg)",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "(query1 / query2) * 1000",
+                                            "alias": "Duration (ms)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.http.request.duration.seconds.sum{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.http.request.duration.seconds.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "thick"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 1,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5004,
+                        "definition": {
+                            "title": "API Request Duration (Avg)",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "(query1 / query2) * 1000",
+                                            "alias": "Duration (ms)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.api.request.duration.seconds.sum{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.api.request.duration.seconds.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "thick"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 6
+            }
+        },
+        {
+            "id": 6001,
+            "definition": {
+                "title": "Node.js Runtime Health",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6002,
+                        "definition": {
+                            "type": "note",
+                            "content": "Monitor Node.js event loop, memory, and garbage collection.",
+                            "background_color": "orange",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6003,
+                        "definition": {
+                            "title": "Event Loop Lag (ms)",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 1000",
+                                            "alias": "Current Lag"
+                                        },
+                                        {
+                                            "formula": "query2 * 1000",
+                                            "alias": "p50"
+                                        },
+                                        {
+                                            "formula": "query3 * 1000",
+                                            "alias": "p90"
+                                        },
+                                        {
+                                            "formula": "query4 * 1000",
+                                            "alias": "p99"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.nodejs.event.loop.lag.seconds{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:n8n.nodejs.eventloop.lag.p50.seconds{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:n8n.nodejs.eventloop.lag.p90.seconds{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:n8n.nodejs.eventloop.lag.p99.seconds{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 50",
+                                    "display_type": "warning dashed"
+                                },
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6004,
+                        "definition": {
+                            "title": "Heap Memory Usage",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / 1024 / 1024",
+                                            "alias": "Used (MB)"
+                                        },
+                                        {
+                                            "formula": "query2 / 1024 / 1024",
+                                            "alias": "Total (MB)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.nodejs.heap.used.bytes{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:n8n.nodejs.heap.total.bytes{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 1,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6005,
+                        "definition": {
+                            "title": "GC Duration (Avg ms)",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "(query1 / query2) * 1000",
+                                            "alias": "GC Duration"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.nodejs.gc.duration.seconds.sum{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.nodejs.gc.duration.seconds.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6006,
+                        "definition": {
+                            "title": "Active Handles & Requests",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Handles"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Requests"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Resources"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.nodejs.active.handles.total{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.nodejs.active.requests.total{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:n8n.nodejs.active.resources.total{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 6
+            }
+        },
+        {
+            "id": 7001,
+            "definition": {
+                "title": "System Resources & Health",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7002,
+                        "definition": {
+                            "type": "note",
+                            "content": "Monitor process resources, uptime, and instance health.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7003,
+                        "definition": {
+                            "title": "Process Uptime",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / 3600"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.process.uptime.seconds{*}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "hours",
+                            "precision": 1
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 1,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7004,
+                        "definition": {
+                            "title": "Last Activity",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.last.activity{*}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "s ago",
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 1,
+                            "y": 1,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7006,
+                        "definition": {
+                            "title": "Readiness Check",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.readiness.check{*}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 1,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 1,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 1,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7005,
+                        "definition": {
+                            "title": "Instance Role (Leader)",
+                            "type": "check_status",
+                            "check": "n8n.openmetrics.health",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": [
+                                "*"
+                            ]
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 1,
+                            "width": 1,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7007,
+                        "definition": {
+                            "title": "CPU Usage",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "User CPU"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "System CPU"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.process.cpu.user.seconds.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.process.cpu.system.seconds.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7008,
+                        "definition": {
+                            "title": "Memory Usage",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / 1024 / 1024",
+                                            "alias": "Resident (MB)"
+                                        },
+                                        {
+                                            "formula": "query2 / 1024 / 1024",
+                                            "alias": "Virtual (MB)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.process.resident.memory.bytes{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:n8n.process.virtual.memory.bytes{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7009,
+                        "definition": {
+                            "title": "File Descriptors",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Open FDs"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Max FDs"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.process.open.fds{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:n8n.process.max.fds{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 7
+            }
+        },
+        {
+            "id": 8001,
+            "definition": {
+                "title": "Event Bus",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8002,
+                        "definition": {
+                            "type": "note",
+                            "content": "Track event bus health and throughput.",
+                            "background_color": "blue",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8003,
+                        "definition": {
+                            "title": "Queue Size",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.eventbus.queue.size{*}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1000,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 500,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 500,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8004,
+                        "definition": {
+                            "title": "Event Processing",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Published"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Processed"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Failed"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:n8n.eventbus.events.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:n8n.eventbus.events.processed.count{*}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:n8n.eventbus.events.failed.count{*}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 1,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8005,
+                        "definition": {
+                            "title": "Event Bus Connections",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Connections"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:n8n.eventbus.connections.total{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "thick"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "env",
+            "prefix": "env",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed"
+    "reflow_type": "fixed",
+    "pause_auto_refresh": false
 }
