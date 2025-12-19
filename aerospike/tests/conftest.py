@@ -63,10 +63,7 @@ def _get_conditions():
     aerospike_version = os.environ.get('AEROSPIKE_VERSION', '')
     if aerospike_version:
         parts = aerospike_version.split('.')[:2]
-        major_minor_list = []
-        for x in parts:
-            major_minor_list.append(int(x))
-        major_minor = (major_minor_list)
+        major_minor = (int(parts[0]), int(parts[1]))
     else:
         major_minor = (0, 0)
     if major_minor <= (5, 0):
