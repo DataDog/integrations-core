@@ -368,9 +368,9 @@ def test_lockfile_generation(tmp_path, setup_targets_dir):
         lock_files = list(fake_resolved_dir.glob("*.txt"))
         assert lock_files, "No lock files generated"
         lockfile_map = {lock_file.name: lock_file.read_text().strip() for lock_file in lock_files}
-        linux_x86_64_lockfile = lockfile_map["linux-x86_64_3.12.txt"]
+        linux_x86_64_lockfile = lockfile_map[f"linux-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"]
         assert linux_x86_64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash'
-        linux_aarch64_lockfile = lockfile_map["linux-aarch64_3.12.txt"]
+        linux_aarch64_lockfile = lockfile_map[f"linux-aarch64_{upload.CURRENT_PYTHON_VERSION}.txt"]
         assert linux_aarch64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash'
         assert len(lock_files) == 2
 
