@@ -25,7 +25,7 @@ DIRECT_DEP_FILE = REPO_DIR / 'agent_requirements.in'
 CACHE_CONTROL = 'public, max-age=15'
 VALID_PROJECT_NAME = re.compile(r'^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', re.IGNORECASE)
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
-CURRENT_PYTHON_VERSION = "3.12"
+CURRENT_PYTHON_VERSION = "3.13"
 
 def is_valid_project_name(project_name: str) -> bool:
     # https://peps.python.org/pep-0508/#names
