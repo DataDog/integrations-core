@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "aerospike==7.1.1; sys_platform != 'win32' and sys_platform != 'darwin'",
+    "aerospike==18.1.0",
 ]
 
 [project.urls]

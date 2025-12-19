@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
+import aerospike
 import pytest
 
 from datadog_checks.base.utils.platform import Platform
@@ -13,13 +14,6 @@ from .common import COMPOSE_FILE, HOST, INSTANCE, OPENMETRICS_V2_INSTANCE, PORT
 
 
 def init_db():
-    # exit if we are not on linux
-    # that's the only platform where the client successfully installs for version 3.10
-    if not Platform.is_linux():
-        return
-
-    import aerospike
-
     # sample Aerospike Python Client code
     # https://www.aerospike.com/docs/client/python/usage/kvs/write.html
     client = aerospike.client({'hosts': [(HOST, PORT)]}).connect()
@@ -47,7 +41,7 @@ def init_db():
         client.get(key)
         batch_key = ('test', 'demo', 'key' + str(i))
         batch_keys.append(batch_key)
-    client.get_many(batch_keys)
+    client.batch_read(batch_keys)
 
     client.close()
 
