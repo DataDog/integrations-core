@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 37.24.0 / 2025-12-19
+## 37.23.2 / 2025-12-19
 
 ***Security***:
 
