@@ -34,7 +34,7 @@ instances:
   -
     ## @param host - string - optional - default: localhost
     ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
-    ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
+    ## e.g. `/var/run/postgresql`.
     #
     # host: <HOST>
 
