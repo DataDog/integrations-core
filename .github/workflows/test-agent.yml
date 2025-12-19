@@ -16,7 +16,7 @@ on:
       agent-image-windows:
         required: false
         description: Agent 7 image on Windows
-        default: "datadog/agent:7-rc-servercore" #todo: support registry.datadoghq.com
+        default: "datadog/agent:7-rc-servercore" # todo: support registry.datadoghq.com
         type: string
       test-py2:
         required: false
@@ -31,7 +31,7 @@ on:
       agent-image-windows-py2:
         required: false
         description: Agent 6 image on Windows
-        default: "datadog/agent-dev:master-py2-win-servercore" #todo: support registry.datadoghq.com
+        default: "datadog/agent-dev:master-py2-win-servercore" # todo: support registry.datadoghq.com
         type: string
 
 jobs:

@@ -54,7 +54,7 @@ def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_
 
         if org != 'datadog':
             # Some non datadog image has been selected
-            return agent_build #todo: support registry.datadoghq.com
+            return agent_build # todo: support registry.datadoghq.com
 
         version_match = re.match(AGENT_VERSION_REGEX, tag)
 
