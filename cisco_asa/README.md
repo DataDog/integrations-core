@@ -33,7 +33,7 @@ Integrate Cisco ASA with Datadog to gain insights into threat detection, user au
 
 3. [Restart the Agent][3].
 
-#### Syslog Configuration from Cisco ASA CLI: 
+#### Set syslog configuration from Cisco ASA CLI
 
 1. Connect to the Cisco ASA CLI.
 2. Enter privileged EXEC mode by running:
