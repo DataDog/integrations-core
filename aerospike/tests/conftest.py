@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
 
 import pytest
@@ -52,21 +53,40 @@ def init_db():
     client.close()
 
 
-@pytest.fixture(scope='session')
-def dd_environment():
-    with docker_run(
-        COMPOSE_FILE,
-        conditions=[
-            CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']),
-            WaitFor(init_db),
-            # Wait for Aerospike to calculate latency/throughput metrics
+def _get_conditions():
+    conditions = [
+        CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']),
+        WaitFor(init_db),
+    ]
+
+    # Wait for Aerospike to calculate latency/throughput metrics (only needed for versions <= 5.0)
+    aerospike_version = os.environ.get('AEROSPIKE_VERSION', '')
+    if aerospike_version:
+        parts = aerospike_version.split('.')[:2]
+        major_minor_list = []
+        for x in parts:
+            major_minor_list.append(int(x))
+        major_minor = (major_minor_list)
+    else:
+        major_minor = (0, 0)
+    if major_minor <= (5, 0):
+        conditions.append(
             CheckCommandOutput(
                 ['docker', 'exec', 'aerospike', 'asinfo', '-v', 'throughput:'],
                 patterns=[r'\{.+\}'],  # Match namespace throughput data like ...{test}-write:21:08:55-GMT...
                 attempts=30,
                 wait=1,
-            ),
-        ],
+            )
+        )
+
+    return conditions
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    with docker_run(
+        COMPOSE_FILE,
+        conditions=_get_conditions(),
         attempts=2,
     ):
         yield OPENMETRICS_V2_INSTANCE
