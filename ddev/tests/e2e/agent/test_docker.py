@@ -33,9 +33,24 @@ class TestStart:
         [
             pytest.param('', 'registry.datadoghq.com/agent-dev:master-py3', False, id='default'),
             pytest.param('registry.datadoghq.com/agent:7', 'registry.datadoghq.com/agent:7', False, id='release'),
-            pytest.param('registry.datadoghq.com/agent-dev:master-py3', 'registry.datadoghq.com/agent-dev:master-py3', False, id='exact'),
-            pytest.param('registry.datadoghq.com/agent-dev:master', 'registry.datadoghq.com/agent-dev:master-py3-jmx', True, id='jmx'),
-            pytest.param('registry.datadoghq.com/agent-dev:master-py3-jmx', 'registry.datadoghq.com/agent-dev:master-py3-jmx', True, id='jmx exact'),
+            pytest.param(
+                'registry.datadoghq.com/agent-dev:master-py3',
+                'registry.datadoghq.com/agent-dev:master-py3',
+                False,
+                id='exact',
+            ),
+            pytest.param(
+                'registry.datadoghq.com/agent-dev:master',
+                'registry.datadoghq.com/agent-dev:master-py3-jmx',
+                True,
+                id='jmx',
+            ),
+            pytest.param(
+                'registry.datadoghq.com/agent-dev:master-py3-jmx',
+                'registry.datadoghq.com/agent-dev:master-py3-jmx',
+                True,
+                id='jmx exact',
+            ),
             pytest.param(
                 'my-custom-build-that-I-have-locally', 'my-custom-build-that-I-have-locally', False, id='custom build'
             ),
