@@ -31,11 +31,11 @@ class TestStart:
     @pytest.mark.parametrize(
         'agent_build, agent_image, use_jmx',
         [
-            pytest.param('', 'datadog/agent-dev:master-py3', False, id='default'),
-            pytest.param('datadog/agent:7', 'datadog/agent:7', False, id='release'),
-            pytest.param('datadog/agent-dev:master-py3', 'datadog/agent-dev:master-py3', False, id='exact'),
-            pytest.param('datadog/agent-dev:master', 'datadog/agent-dev:master-py3-jmx', True, id='jmx'),
-            pytest.param('datadog/agent-dev:master-py3-jmx', 'datadog/agent-dev:master-py3-jmx', True, id='jmx exact'),
+            pytest.param('', 'registry.datadoghq.com/agent-dev:master-py3', False, id='default'),
+            pytest.param('registry.datadoghq.com/agent:7', 'registry.datadoghq.com/agent:7', False, id='release'),
+            pytest.param('registry.datadoghq.com/agent-dev:master-py3', 'registry.datadoghq.com/agent-dev:master-py3', False, id='exact'),
+            pytest.param('registry.datadoghq.com/agent-dev:master', 'registry.datadoghq.com/agent-dev:master-py3-jmx', True, id='jmx'),
+            pytest.param('registry.datadoghq.com/agent-dev:master-py3-jmx', 'registry.datadoghq.com/agent-dev:master-py3-jmx', True, id='jmx exact'),
             pytest.param(
                 'my-custom-build-that-I-have-locally', 'my-custom-build-that-I-have-locally', False, id='custom build'
             ),
@@ -46,26 +46,26 @@ class TestStart:
                 id='custom build with jmx',
             ),
             pytest.param(
-                'datadog/agent:7.46.0',
-                'datadog/agent:7.46.0',
+                'registry.datadoghq.com/datadog/agent:7.46.0',
+                'registry.datadoghq.com/agent:7.46.0',
                 False,
                 id='Specific stable release',
             ),
             pytest.param(
-                'datadog/agent:7.45.0',
-                'datadog/agent:7.45.0-jmx',
+                'registry.datadoghq.com/agent:7.45.0',
+                'registry.datadoghq.com/agent:7.45.0-jmx',
                 True,
                 id='Specific stable release with jmx',
             ),
             pytest.param(
-                'datadog/agent:6.44.0-jmx',
-                'datadog/agent:6.44.0-jmx',
+                'registry.datadoghq.com/agent:6.44.0-jmx',
+                'registry.datadoghq.com/agent:6.44.0-jmx',
                 True,
                 id='Specific stable release with jmx exact',
             ),
             pytest.param(
-                'datadog/agent:latest',
-                'datadog/agent:latest',
+                'registry.datadoghq.com/agent:latest',
+                'registry.datadoghq.com/agent:latest',
                 False,
                 id='Latest stable release',
             ),
@@ -166,7 +166,7 @@ class TestStart:
         )
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -194,7 +194,7 @@ class TestStart:
                     'DD_LOGS_ENABLED=true',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -222,7 +222,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -246,7 +246,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -278,7 +278,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -300,7 +300,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -333,7 +333,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -361,7 +361,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -394,7 +394,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -424,7 +424,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -457,7 +457,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -481,7 +481,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -517,9 +517,9 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -543,7 +543,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -575,7 +575,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -605,7 +605,7 @@ class TestStart:
                     'host2:127.0.0.1',
                     '--add-host',
                     'host1:127.0.0.1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -637,7 +637,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={'DD_DOGSTATSD_PORT': '9000'})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -667,7 +667,7 @@ class TestStart:
                     'DD_TELEMETRY_ENABLED=1',
                     '-p',
                     '9000:9000/udp',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -699,7 +699,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -729,7 +729,7 @@ class TestStart:
                     'DD_PROXY_HTTPS=https://localhost:4443',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -761,7 +761,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -787,7 +787,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -826,7 +826,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -852,7 +852,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -891,7 +891,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={temp_dir / 'foo': '[deps]'}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -919,7 +919,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -972,7 +972,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={temp_dir / 'foo': '[deps]'}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -996,7 +996,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -1049,7 +1049,7 @@ class TestStart:
         agent.start(agent_build='', local_packages={temp_dir / 'foo': '[deps]'}, env_vars={})
 
         assert run.call_args_list == [
-            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
                 [
                     docker_path,
@@ -1077,7 +1077,7 @@ class TestStart:
                     f'DD_HOSTNAME={default_hostname}',
                     '-e',
                     'DD_TELEMETRY_ENABLED=1',
-                    'datadog/agent-dev:master-py3',
+                    'registry.datadoghq.com/agent-dev:master-py3',
                 ],
                 shell=False,
                 stdout=subprocess.PIPE,
