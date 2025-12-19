@@ -4,6 +4,28 @@ tests:
   sample: "pam_unix(sshd:session): session closed for user marc.szalkiewicz"
   result:
     custom:
+      ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        activity_id: 2
+        activity_name: "Logoff"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+            event_code: "session closed"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        type_name: "Authentication: Logoff"
+        type_uid: 300202
+        user:
+          name: "marc.szalkiewicz"
+        actor:
+          user:
+            name: "marc.szalkiewicz"
       system:
         action: "session closed"
         user: "marc.szalkiewicz"
@@ -18,6 +40,33 @@ tests:
         client:
           ip: "172.22.179.72"
           port: "58599"
+      ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        activity_id: 1
+        activity_name: "Logon"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+            event_code: "Accepted"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "172.22.179.72"
+          port: "58599"
+        status: "Success"
+        status_id: 1
+        type_name: "Authentication: Logon"
+        type_uid: 300201
+        user:
+          name: "topdog"
+        actor:
+          user:
+            name: "topdog"
       system:
         action: "Accepted"
         algorithm: "RSA"
@@ -37,7 +86,154 @@ tests:
       system:
         action: "disconnect"
         type: "11: disconnected by user"
+      ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        activity_id: 99
+        activity_name: "Other"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+            event_code: "disconnect"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "172.22.179.72"
+        type_name: "Authentication: Other"
+        type_uid: 300299
     message: "Received disconnect from 172.22.179.72: 11: disconnected by user"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "Failed password for invalid user admin from 192.168.1.100 port 22334 ssh2"
+  result:
+    custom:
+      network:
+        client:
+          ip: "192.168.1.100"
+          port: "22334"
+      ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        activity_id: 1
+        activity_name: "Logon"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+            event_code: "Failed"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.168.1.100"
+          port: "22334"
+        status: "Failure"
+        status_id: 2
+        type_name: "Authentication: Logon"
+        type_uid: 300201
+        user:
+          name: "admin"
+        actor:
+          user:
+            name: "admin"
+      system:
+        action: "Failed"
+        type: "password"
+        user: "admin"
+    message: "Failed password for invalid user admin from 192.168.1.100 port 22334 ssh2"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "Starting session: shell on pts/0 for ubuntu from 192.168.1.100 port 49630 id 0"
+  result:
+    custom:
+      network:
+        client:
+          ip: "192.168.1.100"
+          port: "49630"
+      ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        activity_id: 1
+        activity_name: "Logon"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+            event_code: "Starting session"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.168.1.100"
+          port: "49630"
+        status: "Success"
+        status_id: 1
+        type_name: "Authentication: Logon"
+        type_uid: 300201
+        user:
+          name: "ubuntu"
+        actor:
+          user:
+            name: "ubuntu"
+      system:
+        action: "Starting session"
+        session_id: 0
+        tty: "pts/0"
+        type: "shell"
+        user: "ubuntu"
+    message: "Starting session: shell on pts/0 for ubuntu from 192.168.1.100 port 49630 id 0"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "Close session: user ubuntu from 192.168.1.100 port 49630 id 0"
+  result:
+    custom:
+      network:
+        client:
+          ip: "192.168.1.100"
+          port: "49630"
+      ocsf:
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        activity_id: 2
+        activity_name: "Logoff"
+        metadata:
+          product:
+            name: "OpenSSH"
+            vendor_name: "OpenBSD"
+            event_code: "Close session"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.168.1.100"
+          port: "49630"
+        status: "Success"
+        status_id: 1
+        type_name: "Authentication: Logoff"
+        type_uid: 300202
+        user:
+          name: "ubuntu"
+        actor:
+          user:
+            name: "ubuntu"
+      system:
+        action: "Close session"
+        session_id: 0
+        user: "ubuntu"
+    message: "Close session: user ubuntu from 192.168.1.100 port 49630 id 0"
     tags:
      - "source:LOGS_SOURCE"
 

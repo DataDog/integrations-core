@@ -38,6 +38,8 @@ pipeline:
         matchRules: |
           sshd.logins.pwd %{regex("Accepted|Failed"):system.action} %{regex("password"):system.type} for %{_auth} from %{_client_ip} port %{_client_port} ssh2
 
+          sshd.logins.invaliduser %{regex("Accepted|Failed"):system.action} %{regex("password"):system.type} for invalid user %{_auth} from %{_client_ip} port %{_client_port} ssh2
+
           sshd.logins.key.success %{regex("Accepted"):system.action} %{regex("publickey"):system.type} for %{_auth} from %{_client_ip} port %{_client_port} ssh2(: %{notSpace:system.algorithm} %{notSpace:system.key})?
 
           sshd.disconnect (error: )?Received %{regex("disconnect"):system.action} from %{_client_ip}: %{greedyData:system.type}
@@ -47,6 +49,10 @@ pipeline:
           sshd.cnx.closed.preauth %{regex("Connection closed"):system.action} by %{_client_ip}%{greedyData}
 
           sshd.session pam_unix\(sshd\:session\)\: %{regex("(session opened)|(session closed)"):system.action} for user %{_auth}.*
+
+          sshd.session.starting %{regex("Starting session"):system.action}: %{notSpace:system.type} on %{notSpace:system.tty} for %{_auth} from %{_client_ip} port %{_client_port} id %{integer:system.session_id}
+
+          sshd.session.close %{regex("Close session"):system.action}: user %{_auth} from %{_client_ip} port %{_client_port} id %{integer:system.session_id}
 
           sshd.auth pam_unix\(sshd\:auth\)\: %{regex("authentication failure"):system.action}; %{_sshd_details}
 
@@ -61,3 +67,147 @@ pipeline:
         - 'pam_unix(sshd:session): session closed for user marc.szalkiewicz'
         - 'Accepted publickey for toptop from 172.22.179.72 port 58599 ssh2: RSA 01:fa:c1:75:ee:fbxxxx:xxxxx'
         - 'Received disconnect from 172.22.179.72: 11: disconnected by user'
+    - type: pipeline
+      name: OCSF pipeline for SSH Authentication [3002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "source:sshd @system.action:*"
+      processors:
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.name
+          enabled: true
+          template: "OpenSSH"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.vendor_name
+          enabled: true
+          template: "OpenBSD"
+          replaceMissing: false
+          target: ocsf.metadata.product.vendor_name
+        - type: schema-processor
+          name: Apply OCSF schema for 3002
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata` to `ocsf.metadata`
+              sources:
+                - ocsf.metadata
+              target: ocsf.metadata
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `system.action` to `ocsf.metadata.event_code`
+              sources:
+                - system.action
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@system.action:(Accepted OR Failed OR "Starting session" OR "session opened")'
+                  name: Logon
+                  id: 1
+                - filter:
+                    query: '@system.action:("session closed" OR "Close session")'
+                  name: Logoff
+                  id: 2
+                - filter:
+                    query: '@system.action:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.type_name
+              categories:
+                - filter:
+                    query: '@system.action:(Accepted OR Failed OR "Starting session" OR "session opened")'
+                  name: "Authentication: Logon"
+                  id: 300201
+                - filter:
+                    query: '@system.action:("session closed" OR "Close session")'
+                  name: "Authentication: Logoff"
+                  id: 300202
+                - filter:
+                    query: '@system.action:*'
+                  name: "Authentication: Other"
+                  id: 300299
+              targets:
+                name: ocsf.type_name
+                id: ocsf.type_uid
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@system.action:*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `system.user` to `ocsf.user.name`
+              sources:
+                - system.user
+              target: ocsf.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `system.user` to `ocsf.actor.user.name`
+              sources:
+                - system.user
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
+              sources:
+                - network.client.ip
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.port` to `ocsf.src_endpoint.port`
+              sources:
+                - network.client.port
+              target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `@journald.SYSLOG_TIMESTAMP` to `ocsf.time`
+              sources:
+                - '@journald.SYSLOG_TIMESTAMP'
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: '@system.action:(Accepted OR "Starting session" OR "Close session" OR "session opened")'
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@system.action:Failed"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@system.action:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Authentication
+            classUid: 3002
+            extensions: []
+            profiles: []
