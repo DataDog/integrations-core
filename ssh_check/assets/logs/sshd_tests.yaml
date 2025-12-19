@@ -55,6 +55,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "172.22.179.72"
+          port: "58599"
         status: "Success"
         status_id: 1
         type_name: "Authentication: Logon"
@@ -128,6 +129,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "192.168.1.100"
+          port: "22334"
         status: "Failure"
         status_id: 2
         type_name: "Authentication: Logon"
@@ -168,6 +170,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "192.168.1.100"
+          port: "49630"
         status: "Success"
         status_id: 1
         type_name: "Authentication: Logon"
@@ -210,6 +213,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "192.168.1.100"
+          port: "49630"
         status: "Success"
         status_id: 1
         type_name: "Authentication: Logoff"
