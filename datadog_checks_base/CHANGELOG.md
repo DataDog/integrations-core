@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.23.0 / 2025-12-19
+
+***Added***:
+
+* Bump ddtrace to version 3.16.4 ([#21773](https://github.com/DataDog/integrations-core/pull/21773))
+
 ## 37.22.1 / 2025-10-29
 
 ***Fixed***:
