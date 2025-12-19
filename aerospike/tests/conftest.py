@@ -1,13 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
 from copy import deepcopy
 
 import pytest
 
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.dev.conditions import WaitFor
+from datadog_checks.dev.conditions import CheckCommandOutput, WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
 from .common import COMPOSE_FILE, HOST, INSTANCE, OPENMETRICS_V2_INSTANCE, PORT
@@ -53,11 +52,6 @@ def init_db():
     client.close()
 
 
-def wait_for_latency_metrics():
-    """Wait for Aerospike to calculate latency metrics."""
-    time.sleep(15)
-
-
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
@@ -65,7 +59,13 @@ def dd_environment():
         conditions=[
             CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']),
             WaitFor(init_db),
-            WaitFor(wait_for_latency_metrics),
+            # Wait for Aerospike to calculate latency/throughput metrics
+            CheckCommandOutput(
+                ['docker', 'exec', 'aerospike', 'asinfo', '-v', 'throughput:'],
+                patterns=[r'\{.+\}'],  # Match namespace throughput data like ...{test}-write:21:08:55-GMT...
+                attempts=30,
+                wait=1,
+            ),
         ],
         attempts=2,
     ):
