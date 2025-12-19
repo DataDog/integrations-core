@@ -36,7 +36,7 @@ This integration collects all the above listed logs, channeling them into Datado
 
       Note:
       - PORT: Port should be similar to the port provided in **Configuration needed on Arctic Wolf Aurora Endpoint Security**.
-      - We recommend you do not change the service and source values, as these parameters are integral to the pipeline's operation.
+      - Do not change the service and source values, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][1].
 
@@ -77,7 +77,7 @@ This integration collects all the above listed logs, channeling them into Datado
 
 ### Logs
 
-The Arctic Wolf Aurora Endpoint Security integration collects `Aurora Protect Desktop` and `Aurora Focus Detection` Events.
+The Arctic Wolf Aurora Endpoint Security integration collects `Aurora Protect Desktop` and `Aurora Focus Detection` event logs.
 
 ### Metrics
 
