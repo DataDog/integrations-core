@@ -37,14 +37,14 @@ def test_standard_deep(ddev, config_file, helpers):
 
 
 def test_standard_complex(ddev, config_file, helpers):
-    result = ddev('config', 'set', 'agents.latest', "{'docker': 'datadog/agent:latest', 'local': 'latest'}")
+    result = ddev('config', 'set', 'agents.latest', "{'docker': 'registry.datadoghq.com/agent:latest', 'local': 'latest'}")
 
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         """
         New setting:
         [agents.latest]
-        docker = "datadog/agent:latest"
+        docker = "registry.datadoghq.com/agent:latest"
         local = "latest"
         """
     )
