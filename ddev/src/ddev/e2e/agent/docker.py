@@ -47,14 +47,14 @@ def disable_integration_before_install(config_file):
 
 def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
     if not agent_build:
-        return 'datadog/agent-dev:master-py3'
+        return 'registry.datadoghq.com/agent-dev:master-py3'
 
     if match := re.match(AGENT_IMAGE_REGEX, agent_build):
         org, image, tag = match.groups()
 
         if org != 'datadog':
             # Some non datadog image has been selected
-            return agent_build
+            return agent_build #todo: support registry.datadoghq.com
 
         version_match = re.match(AGENT_VERSION_REGEX, tag)
 

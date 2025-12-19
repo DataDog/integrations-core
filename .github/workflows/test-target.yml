@@ -56,19 +56,19 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: "datadog/agent-dev:master-py3"
+        default: "registry.datadoghq.com/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
-        default: "datadog/agent-dev:master-py2"
+        default: "datadog/agent-dev:master-py2" #todo: support registry.datadoghq.com
         type: string
       agent-image-windows:
         required: false
-        default: "datadog/agent-dev:master-py3-win-servercore"
+        default: "datadog/agent-dev:master-py3-win-servercore" #todo: support registry.datadoghq.com
         type: string
       agent-image-windows-py2:
         required: false
-        default: "datadog/agent-dev:master-py2-win-servercore"
+        default: "datadog/agent-dev:master-py2-win-servercore" #todo: support registry.datadoghq.com
         type: string
       setup-env-vars:
         required: false

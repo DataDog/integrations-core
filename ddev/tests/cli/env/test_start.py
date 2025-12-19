@@ -91,7 +91,7 @@ def test_stop_on_error(ddev, helpers, data_dir, write_result_file, mocker):
     assert not env_data.exists()
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
     )
@@ -129,7 +129,7 @@ def test_basic(ddev, helpers, data_dir, write_result_file, mocker):
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
     )
@@ -169,7 +169,7 @@ def test_agent_build_config(ddev, config_file, helpers, data_dir, write_result_f
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent:7',
+        agent_build='registry.datadoghq.com/agent:7',
         local_packages={},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
     )
@@ -188,7 +188,7 @@ def test_agent_build_env_var(ddev, config_file, helpers, data_dir, write_result_
     environment = 'py3.12'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
-    with EnvVars({E2EEnvVars.AGENT_BUILD: 'datadog/agent:6'}):
+    with EnvVars({E2EEnvVars.AGENT_BUILD: 'registry.datadoghq.com/agent:6'}):
         result = ddev('env', 'start', integration, environment)
 
     assert result.exit_code == 0, result.output
@@ -210,7 +210,7 @@ def test_agent_build_env_var(ddev, config_file, helpers, data_dir, write_result_
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent:6',
+        agent_build='registry.datadoghq.com/agent:6',
         local_packages={},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
     )
@@ -229,8 +229,8 @@ def test_agent_build_flag(ddev, config_file, helpers, data_dir, write_result_fil
     environment = 'py3.12'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
-    with EnvVars({E2EEnvVars.AGENT_BUILD: 'datadog/agent:6'}):
-        result = ddev('env', 'start', integration, environment, '-a', 'datadog/agent:7-rc')
+    with EnvVars({E2EEnvVars.AGENT_BUILD: 'registry.datadoghq.com/agent:6'}):
+        result = ddev('env', 'start', integration, environment, '-a', 'registry.datadoghq.com/agent:7-rc')
 
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
@@ -251,7 +251,7 @@ def test_agent_build_flag(ddev, config_file, helpers, data_dir, write_result_fil
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent:7-rc',
+        agent_build='registry.datadoghq.com/agent:7-rc',
         local_packages={},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
     )
@@ -288,7 +288,7 @@ def test_local_dev(ddev, helpers, local_repo, data_dir, write_result_file, mocke
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={local_repo / integration: '[deps]'},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
     )
@@ -325,7 +325,7 @@ def test_local_base(ddev, helpers, local_repo, data_dir, write_result_file, mock
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={
             local_repo / 'datadog_checks_base': '[db,deps,http,json,kube]',
             local_repo / integration: '[deps]',
@@ -365,7 +365,7 @@ def test_env_vars(ddev, helpers, data_dir, write_result_file, mocker):
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com', 'FOO': 'BAR', 'BAZ': 'BAR'},
     )
@@ -402,7 +402,7 @@ def test_env_vars_apm_enabled_from_metadata(ddev, helpers, data_dir, write_resul
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={
             'DD_DD_URL': 'https://app.datadoghq.com',
@@ -459,7 +459,7 @@ def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mo
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={
             'DD_DD_URL': 'url',
@@ -503,7 +503,7 @@ def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker):
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com', 'DD_LOGS_ENABLED': 'true'},
     )
@@ -540,7 +540,7 @@ def test_dogstatsd(ddev, helpers, data_dir, write_result_file, mocker):
     assert env_data.read_metadata() == metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={
             'DD_DD_URL': 'https://app.datadoghq.com',
@@ -598,7 +598,7 @@ def test_mount_log(ddev, helpers, data_dir, write_result_file, mocker):
     assert env_data.read_metadata() == expected_metadata
 
     start.assert_called_once_with(
-        agent_build='datadog/agent-dev:master',
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={
             'DD_DD_URL': 'https://app.datadoghq.com',
