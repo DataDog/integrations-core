@@ -400,7 +400,17 @@ class PostgreSql(DatabaseCheck):
                     # collect wal metrics for pg >= 10 only if the user has not explicitly disabled it
                     queries.append(WAL_FILE_METRICS)
             if self._config.collect_buffercache_metrics:
-                queries.append(BUFFERCACHE_METRICS)
+                # Aurora PostgreSQL 17+ crashes with a Bus Error when querying pg_buffercache.
+                # Skip this metric collection to prevent instance crash.
+                # See: https://github.com/DataDog/integrations-core/issues/21633
+                if self.is_aurora and self.version >= V17:
+                    self.log.warning(
+                        "Skipping 'collect_buffercache_metrics' on Aurora PostgreSQL 17+ "
+                        "to prevent potential instance crash (Bus Error). "
+                        "See https://github.com/DataDog/integrations-core/issues/21633"
+                    )
+                else:
+                    queries.append(BUFFERCACHE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
             queries.append(QUERY_PG_REPLICATION_STATS_METRICS)
             queries.append(VACUUM_PROGRESS_METRICS if self.version >= V17 else VACUUM_PROGRESS_METRICS_LT_17)
