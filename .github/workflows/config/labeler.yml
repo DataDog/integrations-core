@@ -141,6 +141,8 @@ integration/cisco_duo:
 - cisco_duo/**/*
 integration/cisco_sdwan:
 - cisco_sdwan/**/*
+integration/cisco_secure_client:
+- cisco_secure_client/**/*
 integration/cisco_secure_email_threat_defense:
 - cisco_secure_email_threat_defense/**/*
 integration/cisco_secure_endpoint:

@@ -1,0 +1,9 @@
+name: Cisco Secure Client
+files:
+- name: cisco_secure_client.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/cisco_secure_client.log
+      source: cisco_secure_client
