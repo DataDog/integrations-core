@@ -1,0 +1,1427 @@
+[
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16646",
+                        "name": "cities",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": false,
+                                "default": null,
+                                "table_id": "16646"
+                            },
+                            {
+                                "name": "country",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16646"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "cities_pkey",
+                                "table_id": "16646",
+                                "definition": "CREATE UNIQUE INDEX cities_pkey ON public.cities USING btree (city)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16646"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16675",
+                        "name": "personsdup2",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16675"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16675"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16675"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16675"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16675"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16675"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16747",
+                        "name": "persons_indexed",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16747"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16747"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16747"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16747"
+                            },
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": null,
+                                "table_id": "16747"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "persons_indexed_pkey",
+                                "table_id": "16747",
+                                "definition": "CREATE UNIQUE INDEX persons_indexed_pkey ON public.persons_indexed USING btree (personid)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16747"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16711",
+                        "name": "personsdup8",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16711"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16711"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16711"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16711"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16711"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16711"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16812",
+                        "name": "test_part",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "filler",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16812"
+                            },
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('test_part_id_seq'::regclass)",
+                                "table_id": "16812"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "test_part_id",
+                                "table_id": "16812",
+                                "definition": "CREATE INDEX test_part_id ON ONLY public.test_part USING btree (id)",
+                                "is_unique": false,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            },
+                            {
+                                "name": "test_part_pkey",
+                                "table_id": "16812",
+                                "definition": "CREATE UNIQUE INDEX test_part_pkey ON ONLY public.test_part USING btree (id)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "num_partitions": 2,
+                        "partition_key": "RANGE (id)"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16705",
+                        "name": "personsdup7",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16705"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16705"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16705"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16705"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16705"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16705"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "16926",
+                "name": "datadog",
+                "owner": "postgres",
+                "tables": []
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16717",
+                        "name": "personsdup9",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16717"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16717"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16717"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16717"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16717"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16717"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16669",
+                        "name": "personsdup1",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16669"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16669"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16669"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16669"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16669"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16669"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16842",
+                        "name": "test_part_no_children",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "filler",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16842"
+                            },
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('test_part_no_children_id_seq'::regclass)",
+                                "table_id": "16842"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "test_part_no_children_pkey",
+                                "table_id": "16842",
+                                "definition": "CREATE UNIQUE INDEX test_part_no_children_pkey ON ONLY public.test_part_no_children USING btree (id)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "partition_key": "RANGE (id)"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16681",
+                        "name": "personsdup3",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16681"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16681"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16681"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16681"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16681"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16681"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16699",
+                        "name": "personsdup6",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16699"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16699"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16699"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16699"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16699"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16699"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16741",
+                        "name": "personsdup13",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16741"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16741"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16741"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16741"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16741"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16741"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16735",
+                        "name": "personsdup12",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16735"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16735"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16735"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16735"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16735"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16735"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16729",
+                        "name": "personsdup11",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16729"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16729"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16729"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16729"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16729"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16729"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16693",
+                        "name": "personsdup5",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16693"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16693"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16693"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16693"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16693"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16693"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16787",
+                        "name": "sample_foreign_d73a8c",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16787"
+                            },
+                            {
+                                "name": "name",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16787"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "16773",
+                "name": "public2",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16774",
+                        "name": "cities",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": false,
+                                "default": null,
+                                "table_id": "16774"
+                            },
+                            {
+                                "name": "country",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16774"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "cities_pkey",
+                                "table_id": "16774",
+                                "definition": "CREATE UNIQUE INDEX cities_pkey ON public2.cities USING btree (city)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16774"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16723",
+                        "name": "personsdup10",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16723"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16723"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16723"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16723"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16723"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16723"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16656",
+                        "name": "persons",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16656"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16656"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16656"
+                            },
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('persons_personid_seq'::regclass)",
+                                "table_id": "16656"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": "'New York'::character varying",
+                                "table_id": "16656"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [
+                            {
+                                "name": "fk_city",
+                                "definition": "FOREIGN KEY (city) REFERENCES cities(city)",
+                                "table_id": "16656"
+                            }
+                        ],
+                        "toast_table": "pg_toast_16656"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16757",
+                        "name": "pgtable",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16757"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16757"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16757"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16757"
+                            },
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('pgtable_personid_seq'::regclass)",
+                                "table_id": "16757"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16757"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16687",
+                        "name": "personsdup4",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16687"
+                            },
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16687"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16687"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16687"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16687"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16687"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "16485",
+                "name": "hstore",
+                "owner": "postgres",
+                "tables": []
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16850",
+                        "name": "test_part_no_activity",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "filler",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16850"
+                            },
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('test_part_no_activity_id_seq'::regclass)",
+                                "table_id": "16850"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "test_part_no_activity_pkey",
+                                "table_id": "16850",
+                                "definition": "CREATE UNIQUE INDEX test_part_no_activity_pkey ON ONLY public.test_part_no_activity USING btree (id)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "num_partitions": 2,
+                        "partition_key": "RANGE (id)"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "LATIN1",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16766",
+                        "name": "pg_newtable",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "lastname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16766"
+                            },
+                            {
+                                "name": "firstname",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16766"
+                            },
+                            {
+                                "name": "address",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16766"
+                            },
+                            {
+                                "name": "city",
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16766"
+                            },
+                            {
+                                "name": "personid",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('pg_newtable_personid_seq'::regclass)",
+                                "table_id": "16766"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "toast_table": "pg_toast_16766"
+                    }
+                ]
+            }
+        ]
+    }
+]

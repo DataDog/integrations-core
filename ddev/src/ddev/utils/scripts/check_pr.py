@@ -192,8 +192,15 @@ def extract_filenames(git_diff: str) -> Iterator[str]:
 
         # --- a/file
         # +++ /dev/null
-        before = before.split(maxsplit=1)[1]
-        after = after.split(maxsplit=1)[1]
+        before_parts = before.split(maxsplit=1)
+        after_parts = after.split(maxsplit=1)
+        
+        # Handle malformed diff lines
+        if len(before_parts) < 2 or len(after_parts) < 2:
+            continue
+            
+        before = before_parts[1]
+        after = after_parts[1]
         filename = before[2:] if after == '/dev/null' else after[2:]
         yield filename
 
