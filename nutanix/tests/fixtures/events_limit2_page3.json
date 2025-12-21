@@ -1,0 +1,185 @@
+{
+  "data": [
+    {
+      "$reserved": {
+        "$fv": "v4.r1"
+      },
+      "$objectType": "monitoring.v4.serviceability.Event",
+      "extId": "348a9873-f3c4-47f7-95bb-5ff52ad069cc",
+      "eventType": "EnableDisableUserAudit",
+      "classifications": ["UserAction"],
+      "sourceClusterUUID": "0006411c-0286-bc71-9f02-191e334d457b",
+      "creationTime": "2025-10-16T13:51:08.148191Z",
+      "message": "User admin enabled",
+      "clusterUUID": "0006411c-0286-bc71-9f02-191e334d457b",
+      "parameters": [
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "admin"
+          },
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.Parameter",
+          "paramName": "username"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.BoolValue",
+            "boolValue": false
+          },
+          "paramName": "status_before"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.BoolValue",
+            "boolValue": true
+          },
+          "paramName": "status_after"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "admin"
+          },
+          "paramName": "audit_user"
+        }
+      ]
+    },
+    {
+      "$reserved": {
+        "$fv": "v4.r1"
+      },
+      "$objectType": "monitoring.v4.serviceability.Event",
+      "extId": "57d23178-e257-497d-9db4-9aa2ccbcd89e",
+      "eventType": "PulseAudit",
+      "classifications": ["UserAction"],
+      "sourceClusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
+      "creationTime": "2025-10-16T14:25:54.057436Z",
+      "message": "Pulse configuration updated",
+      "clusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
+      "parameters": [
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "{\"enable\":true,\"isPulsePromptNeeded\":false,\"enableDefaultNutanixEmail\":true,\"enablePulseForPELinkedtoPC\":true}"
+          },
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.Parameter",
+          "paramName": "pulse_config_dto_before"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "{\"enable\":true,\"isPulsePromptNeeded\":false,\"remindLater\":false,\"enableDefaultNutanixEmail\":false,\"defaultNutanixEmail\":\"no-email@nutanix.com\",\"emailContactList\":[],\"verbosityType\":\"BASIC_COREDUMP\",\"tunnelDetails\":{\"connectionStatus\":{\"lastCheckedTimeStampUsecs\":0,\"status\":\"DISABLED\",\"message\":{\"message\":\"\"}},\"transportStatus\":{\"status\":\"UNKNOWN\"}},\"identificationInfoScrubbingLevel\":\"AUTO\",\"enablePulseForPELinkedtoPC\":true}"
+          },
+          "paramName": "pulse_config_dto_after"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "com.nutanix.prism.dto.appliance.configuration.PulseConfigDTO"
+          },
+          "paramName": "dto_class_name"
+        },
+        {
+          "paramValue": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.StringValue",
+            "stringValue": "admin"
+          },
+          "paramName": "audit_user"
+        }
+      ]
+    }
+  ],
+  "$reserved": {
+    "$fv": "v4.r1"
+  },
+  "$objectType": "monitoring.v4.serviceability.ListEventsApiResponse",
+  "metadata": {
+    "flags": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "hasError",
+        "value": false
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isPaginated",
+        "value": true
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isTruncated",
+        "value": false
+      }
+    ],
+    "$reserved": {
+      "$fv": "v1.r0"
+    },
+    "$objectType": "common.v1.response.ApiResponseMetadata",
+    "links": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.response.ApiLink",
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=4",
+        "rel": "next"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=8378",
+        "rel": "last"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=2",
+        "rel": "prev"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=3",
+        "rel": "self"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/events?$limit=2&$orderby=creationTime asc&$page=0",
+        "rel": "first"
+      }
+    ],
+    "totalAvailableResults": 10
+  }
+}
