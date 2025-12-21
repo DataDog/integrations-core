@@ -1,0 +1,38 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "ea75e670-67d1-4953-a6b8-63665fc27582",
+  "app_id": "vectra",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Vectra detections, entity scoring events and audit events",
+    "title": "Vectra",
+    "media": [],
+    "classifier_tags": [
+        "Category::Log Collection",
+        "Category::Security",
+        "Category::Cloud",
+        "Offering::Integration",
+        "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 64321278,
+      "source_type_name": "Vectra",
+      "events": {
+        "creates_events": false
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
