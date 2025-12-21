@@ -131,6 +131,11 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            tags:
              dag_id: "$1"
              task_id: "$2"
+         - match: "airflow.dag.*.*.queued_duration"
+           name: "airflow.dag.queued_duration"
+           tags:
+             dag_id: "$1"
+             task_id: "$2"
          - match: "airflow.dag.*.*.scheduled_duration"
            name: "airflow.dag.scheduled_duration"
            tags:
@@ -160,6 +165,14 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.pool.starving_tasks"
            tags:
              pool_name: "$1"
+         - match: "airflow.pool.deferred_slots.*"
+           name: "airflow.pool.deferred_slots"
+           tags:
+             pool_name: "$1"
+         - match: "airflow.pool.scheduled_slots.*"
+           name: "airflow.pool.scheduled_slots"
+           tags:
+             pool_name: "$1"
          - match: 'airflow\.dagrun\.dependency-check\.(.*)'
            match_type: "regex"
            name: "airflow.dagrun.dependency_check"
@@ -171,6 +184,24 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            tags:
              dag_id: "$1"
              task_id: "$2"
+         - match: 'airflow\.task\.cpu_usage\.(.*)\.(.*)'
+           match_type: "regex"
+           name: "airflow.task.cpu_usage"
+           tags:
+             dag_id: "$1"
+             task_id: "$2"
+         - match: 'airflow\.task\.mem_usage\.(.*)\.(.*)'
+           match_type: "regex"
+           name: "airflow.task.mem_usage"
+           tags:
+             dag_id: "$1"
+             task_id: "$2"
+         - match: "airflow.task.duration"
+           name: "airflow.task.duration"
+         - match: "airflow.task.queued_duration"
+           name: "airflow.task.queued_duration"
+         - match: "airflow.task.scheduled_duration"
+           name: "airflow.task.scheduled_duration"
          - match: 'airflow\.dag_processing\.last_duration\.(.*)'
            match_type: "regex"
            name: "airflow.dag_processing.last_duration"
@@ -191,12 +222,30 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.dagrun.schedule_delay"
            tags:
              dag_id: "$1"
+         - match: "airflow.dagrun.dependency-check"
+           name: "airflow.dagrun.dependency_check"
+         - match: "airflow.dagrun.duration.success"
+           name: "airflow.dagrun.duration.success"
+         - match: "airflow.dagrun.duration.failed"
+           name: "airflow.dagrun.duration.failed"
+         - match: "airflow.dagrun.schedule_delay"
+           name: "airflow.dagrun.schedule_delay"
+         - match: "airflow.dagrun.first_task_scheduling_delay"
+           name: "airflow.dagrun.first_task_scheduling_delay"
          - match: "airflow.scheduler.tasks.running"
            name: "airflow.scheduler.tasks.running"
          - match: "airflow.scheduler.tasks.starving"
            name: "airflow.scheduler.tasks.starving"
          - match: "airflow.sla_email_notification_failure"
            name: "airflow.sla_email_notification_failure"
+         - match: "airflow.sla_missed"
+           name: "airflow.sla_missed"
+         - match: "airflow.sla_callback_notification_failure"
+           name: "airflow.sla_callback_notification_failure"
+         - match: "airflow.scheduler.critical_section_query_duration"
+           name: "airflow.scheduler.critical_section_query_duration"
+         - match: "airflow.scheduler.scheduler_loop_duration"
+           name: "airflow.scheduler.scheduler_loop_duration"
          - match: 'airflow\.task_removed_from_dag\.(.*)'
            match_type: "regex"
            name: "airflow.dag.task_removed"
@@ -211,6 +260,14 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.task.instance_created"
            tags:
              task_class: "$1"
+         - match: "airflow.task_instance_created"
+           name: "airflow.task.instance_created"
+         - match: "airflow.task_instance_created_*"
+           name: "airflow.task.instance_created"
+           tags:
+             operator_name: "$1"
+         - match: "airflow.task_removed_from_dag"
+           name: "airflow.dag.task_removed"
          - match: 'airflow\.ti\.start\.(.+)\.(\w+)'
            match_type: regex
            name: airflow.ti.start
@@ -224,6 +281,73 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
              dag_id: "$1"
              task_id: "$2"
              state: "$3"
+         - match: "airflow.ti.start"
+           name: "airflow.ti.start"
+         - match: "airflow.ti.finish"
+           name: "airflow.ti.finish"
+         - match: "airflow.celery.execute_command.failure"
+           name: "airflow.celery.execute_command.failure"
+         - match: "airflow.triggerer_heartbeat"
+           name: "airflow.triggerer_heartbeat"
+         - match: "airflow.triggers.blocked_main_thread"
+           name: "airflow.triggers.blocked_main_thread"
+         - match: "airflow.triggers.failed"
+           name: "airflow.triggers.failed"
+         - match: "airflow.triggers.succeeded"
+           name: "airflow.triggers.succeeded"
+         - match: "airflow.triggers.running"
+           name: "airflow.triggers.running"
+         - match: 'airflow\.triggers\.running\.(.*)'
+           match_type: "regex"
+           name: "airflow.triggers.running"
+           tags:
+             hostname: "$1"
+         - match: "airflow.dataset.updates"
+           name: "airflow.dataset.updates"
+         - match: "airflow.dataset.orphaned"
+           name: "airflow.dataset.orphaned"
+         - match: "airflow.dataset.triggered_dagruns"
+           name: "airflow.dataset.triggered_dagruns"
+         - match: "airflow.executor.open_slots"
+           name: "airflow.executor.open_slots"
+         - match: 'airflow\.executor\.open_slots\.(.*)'
+           match_type: "regex"
+           name: "airflow.executor.open_slots"
+           tags:
+             executor_class_name: "$1"
+         - match: "airflow.executor.queued_tasks"
+           name: "airflow.executor.queued_tasks"
+         - match: 'airflow\.executor\.queued_tasks\.(.*)'
+           match_type: "regex"
+           name: "airflow.executor.queued_tasks"
+           tags:
+             executor_class_name: "$1"
+         - match: "airflow.executor.running_tasks"
+           name: "airflow.executor.running_tasks"
+         - match: 'airflow\.executor\.running_tasks\.(.*)'
+           match_type: "regex"
+           name: "airflow.executor.running_tasks"
+           tags:
+             executor_class_name: "$1"
+         - match: "airflow.kubernetes_executor.adopt_task_instances.duration"
+           name: "airflow.kubernetes_executor.adopt_task_instances.duration"
+         - match: "airflow.kubernetes_executor.clear_not_launched_queued_tasks.duration"
+           name: "airflow.kubernetes_executor.clear_not_launched_queued_tasks.duration"
+         - match: "airflow.dag_processing.file_path_queue_size"
+           name: "airflow.dag_processing.file_path_queue_size"
+         - match: "airflow.dag_processing.file_path_queue_update_count"
+           name: "airflow.dag_processing.file_path_queue_update_count"
+         - match: 'airflow\.dag_processing\.last_num_of_db_queries\.(.*)'
+           match_type: "regex"
+           name: "airflow.dag_processing.last_num_of_db_queries"
+           tags:
+             dag_file: "$1"
+         - match: "airflow.dag_processing.other_callback_count"
+           name: "airflow.dag_processing.other_callback_count"
+         - match: "airflow.dag_processing.sla_callback_count"
+           name: "airflow.dag_processing.sla_callback_count"
+         - match: "airflow.dag_file_processor_timeouts"
+           name: "airflow.dag_file_processor_timeouts"
    ```
 
 ##### Restart Datadog Agent and Airflow
@@ -368,13 +492,13 @@ extraEnv: |
 
 The environment variable for the metrics endpoint `AIRFLOW__METRICS__STATSD_HOST` is supplied with the node's host IP address to route the StatsD data to the Datadog Agent pod on the same node as the Airflow pod. This setup also requires the Agent to have a `hostPort` open for this port `8125` and accepting non-local StatsD traffic. For more information, see [DogStatsD on Kubernetes Setup][12]. This should direct the StatsD traffic from the Airflow container to a Datadog Agent ready to accept the incoming data.
 
-You must also update the Datadog Agent with the corresponding `dogstatsd_mapper_profiles`. To do this, copy the `dogstatsd_mapper_profiles` provided in the [Host installation][13] into your `datadog.yaml` file. Alternatively, you can also deploy your Datadog Agent with the equivalent JSON configuration in the environment variable `DD_DOGSTATSD_MAPPER_PROFILES`. For Kubernetes, the equivalent environment variable notation is:
+You must also update the Datadog Agent with the corresponding `dogstatsd_mapper_profiles`. To do this, copy the `dogstatsd_mapper_profiles` provided in the [Host installation][13] into your `datadog.yaml` file. Alternatively, you can also deploy your Datadog Agent with the equivalent JSON configuration in the environment variable `DD_DOGSTATSD_MAPPER_PROFILES`. For Kubernetes, use the complete configuration below:
 
 ```yaml
 env:
   - name: DD_DOGSTATSD_MAPPER_PROFILES
     value: >
-      [{"name":"airflow","prefix":"airflow.","mappings":[{"match":"airflow.*_start","name":"airflow.job.start","tags":{"job_name":"$1"}},{"match":"airflow.*_end","name":"airflow.job.end","tags":{"job_name":"$1"}},{"match":"airflow.*_heartbeat_failure","name":"airflow.job.heartbeat.failure","tags":{"job_name":"$1"}},{"match":"airflow.operator_failures_*","name":"airflow.operator_failures","tags":{"operator_name":"$1"}},{"match":"airflow.operator_successes_*","name":"airflow.operator_successes","tags":{"operator_name":"$1"}},{"match":"airflow\\.dag_processing\\.last_runtime\\.(.*)","match_type":"regex","name":"airflow.dag_processing.last_runtime","tags":{"dag_file":"$1"}},{"match":"airflow\\.dag_processing\\.last_run\\.seconds_ago\\.(.*)","match_type":"regex","name":"airflow.dag_processing.last_run.seconds_ago","tags":{"dag_file":"$1"}},{"match":"airflow\\.dag\\.loading-duration\\.(.*)","match_type":"regex","name":"airflow.dag.loading_duration","tags":{"dag_file":"$1"}},{"match":"airflow.dagrun.*.first_task_scheduling_delay","name":"airflow.dagrun.first_task_scheduling_delay","tags":{"dag_id":"$1"}},{"match":"airflow.pool.open_slots.*","name":"airflow.pool.open_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.queued_slots.*","name":"airflow.pool.queued_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.running_slots.*","name":"airflow.pool.running_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.used_slots.*","name":"airflow.pool.used_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.starving_tasks.*","name":"airflow.pool.starving_tasks","tags":{"pool_name":"$1"}},{"match":"airflow\\.dagrun\\.dependency-check\\.(.*)","match_type":"regex","name":"airflow.dagrun.dependency_check","tags":{"dag_id":"$1"}},{"match":"airflow\\.dag\\.(.*)\\.([^.]*)\\.duration","match_type":"regex","name":"airflow.dag.task.duration","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow\\.dag_processing\\.last_duration\\.(.*)","match_type":"regex","name":"airflow.dag_processing.last_duration","tags":{"dag_file":"$1"}},{"match":"airflow\\.dagrun\\.duration\\.success\\.(.*)","match_type":"regex","name":"airflow.dagrun.duration.success","tags":{"dag_id":"$1"}},{"match":"airflow\\.dagrun\\.duration\\.failed\\.(.*)","match_type":"regex","name":"airflow.dagrun.duration.failed","tags":{"dag_id":"$1"}},{"match":"airflow\\.dagrun\\.schedule_delay\\.(.*)","match_type":"regex","name":"airflow.dagrun.schedule_delay","tags":{"dag_id":"$1"}},{"match":"airflow.scheduler.tasks.running","name":"airflow.scheduler.tasks.running"},{"match":"airflow.scheduler.tasks.starving","name":"airflow.scheduler.tasks.starving"},{"match":"airflow.sla_email_notification_failure","name":"airflow.sla_email_notification_failure"},{"match":"airflow\\.task_removed_from_dag\\.(.*)","match_type":"regex","name":"airflow.dag.task_removed","tags":{"dag_id":"$1"}},{"match":"airflow\\.task_restored_to_dag\\.(.*)","match_type":"regex","name":"airflow.dag.task_restored","tags":{"dag_id":"$1"}},{"match":"airflow.task_instance_created-*","name":"airflow.task.instance_created","tags":{"task_class":"$1"}},{"match":"airflow\\.ti\\.start\\.(.+)\\.(\\w+)","match_type":"regex","name":"airflow.ti.start","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow\\.ti\\.finish\\.(\\w+)\\.(.+)\\.(\\w+)","name":"airflow.ti.finish","match_type":"regex","tags":{"dag_id":"$1","task_id":"$2","state":"$3"}}]}]
+      [{"name":"airflow","prefix":"airflow.","mappings":[{"match":"airflow.*_start","name":"airflow.job.start","tags":{"job_name":"$1"}},{"match":"airflow.*_end","name":"airflow.job.end","tags":{"job_name":"$1"}},{"match":"airflow.*_heartbeat_failure","name":"airflow.job.heartbeat.failure","tags":{"job_name":"$1"}},{"match":"airflow.operator_failures_*","name":"airflow.operator_failures","tags":{"operator_name":"$1"}},{"match":"airflow.operator_successes_*","name":"airflow.operator_successes","tags":{"operator_name":"$1"}},{"match":"airflow\\.dag_processing\\.last_runtime\\.(.*)","match_type":"regex","name":"airflow.dag_processing.last_runtime","tags":{"dag_file":"$1"}},{"match":"airflow\\.dag_processing\\.last_run\\.seconds_ago\\.(.*)","match_type":"regex","name":"airflow.dag_processing.last_run.seconds_ago","tags":{"dag_file":"$1"}},{"match":"airflow\\.dag\\.loading-duration\\.(.*)","match_type":"regex","name":"airflow.dag.loading_duration","tags":{"dag_file":"$1"}},{"match":"airflow.local_task_job.task_exit.*.*.*.*","name":"airflow.local_task_job.task_exit","tags":{"job_id":"$1","dag_id":"$2","task_id":"$3","return_code":"$4"}},{"match":"airflow.dag.*.*.queue_duration","name":"airflow.dag.queue_duration","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow.dag.*.*.queued_duration","name":"airflow.dag.queued_duration","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow.dag.*.*.scheduled_duration","name":"airflow.dag.scheduled_duration","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow.dagrun.*.first_task_scheduling_delay","name":"airflow.dagrun.first_task_scheduling_delay","tags":{"dag_id":"$1"}},{"match":"airflow.pool.open_slots.*","name":"airflow.pool.open_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.queued_slots.*","name":"airflow.pool.queued_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.running_slots.*","name":"airflow.pool.running_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.used_slots.*","name":"airflow.pool.used_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.starving_tasks.*","name":"airflow.pool.starving_tasks","tags":{"pool_name":"$1"}},{"match":"airflow.pool.deferred_slots.*","name":"airflow.pool.deferred_slots","tags":{"pool_name":"$1"}},{"match":"airflow.pool.scheduled_slots.*","name":"airflow.pool.scheduled_slots","tags":{"pool_name":"$1"}},{"match":"airflow\\.dagrun\\.dependency-check\\.(.*)","match_type":"regex","name":"airflow.dagrun.dependency_check","tags":{"dag_id":"$1"}},{"match":"airflow\\.dag\\.(.*)\\.([^.]*)\\.duration","match_type":"regex","name":"airflow.dag.task.duration","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow\\.task\\.cpu_usage\\.(.*)\\.(.*)","match_type":"regex","name":"airflow.task.cpu_usage","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow\\.task\\.mem_usage\\.(.*)\\.(.*)","match_type":"regex","name":"airflow.task.mem_usage","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow.task.duration","name":"airflow.task.duration"},{"match":"airflow.task.queued_duration","name":"airflow.task.queued_duration"},{"match":"airflow.task.scheduled_duration","name":"airflow.task.scheduled_duration"},{"match":"airflow\\.dag_processing\\.last_duration\\.(.*)","match_type":"regex","name":"airflow.dag_processing.last_duration","tags":{"dag_file":"$1"}},{"match":"airflow\\.dagrun\\.duration\\.success\\.(.*)","match_type":"regex","name":"airflow.dagrun.duration.success","tags":{"dag_id":"$1"}},{"match":"airflow\\.dagrun\\.duration\\.failed\\.(.*)","match_type":"regex","name":"airflow.dagrun.duration.failed","tags":{"dag_id":"$1"}},{"match":"airflow\\.dagrun\\.schedule_delay\\.(.*)","match_type":"regex","name":"airflow.dagrun.schedule_delay","tags":{"dag_id":"$1"}},{"match":"airflow.dagrun.dependency-check","name":"airflow.dagrun.dependency_check"},{"match":"airflow.dagrun.duration.success","name":"airflow.dagrun.duration.success"},{"match":"airflow.dagrun.duration.failed","name":"airflow.dagrun.duration.failed"},{"match":"airflow.dagrun.schedule_delay","name":"airflow.dagrun.schedule_delay"},{"match":"airflow.dagrun.first_task_scheduling_delay","name":"airflow.dagrun.first_task_scheduling_delay"},{"match":"airflow.scheduler.tasks.running","name":"airflow.scheduler.tasks.running"},{"match":"airflow.scheduler.tasks.starving","name":"airflow.scheduler.tasks.starving"},{"match":"airflow.sla_email_notification_failure","name":"airflow.sla_email_notification_failure"},{"match":"airflow.sla_missed","name":"airflow.sla_missed"},{"match":"airflow.sla_callback_notification_failure","name":"airflow.sla_callback_notification_failure"},{"match":"airflow.scheduler.critical_section_query_duration","name":"airflow.scheduler.critical_section_query_duration"},{"match":"airflow.scheduler.scheduler_loop_duration","name":"airflow.scheduler.scheduler_loop_duration"},{"match":"airflow\\.task_removed_from_dag\\.(.*)","match_type":"regex","name":"airflow.dag.task_removed","tags":{"dag_id":"$1"}},{"match":"airflow\\.task_restored_to_dag\\.(.*)","match_type":"regex","name":"airflow.dag.task_restored","tags":{"dag_id":"$1"}},{"match":"airflow.task_instance_created-*","name":"airflow.task.instance_created","tags":{"task_class":"$1"}},{"match":"airflow.task_instance_created","name":"airflow.task.instance_created"},{"match":"airflow.task_instance_created_*","name":"airflow.task.instance_created","tags":{"operator_name":"$1"}},{"match":"airflow.task_removed_from_dag","name":"airflow.dag.task_removed"},{"match":"airflow\\.ti\\.start\\.(.+)\\.(\\w+)","match_type":"regex","name":"airflow.ti.start","tags":{"dag_id":"$1","task_id":"$2"}},{"match":"airflow\\.ti\\.finish\\.(\\w+)\\.(.+)\\.(\\w+)","match_type":"regex","name":"airflow.ti.finish","tags":{"dag_id":"$1","task_id":"$2","state":"$3"}},{"match":"airflow.ti.start","name":"airflow.ti.start"},{"match":"airflow.ti.finish","name":"airflow.ti.finish"},{"match":"airflow.celery.execute_command.failure","name":"airflow.celery.execute_command.failure"},{"match":"airflow.triggerer_heartbeat","name":"airflow.triggerer_heartbeat"},{"match":"airflow.triggers.blocked_main_thread","name":"airflow.triggers.blocked_main_thread"},{"match":"airflow.triggers.failed","name":"airflow.triggers.failed"},{"match":"airflow.triggers.succeeded","name":"airflow.triggers.succeeded"},{"match":"airflow.triggers.running","name":"airflow.triggers.running"},{"match":"airflow\\.triggers\\.running\\.(.*)","match_type":"regex","name":"airflow.triggers.running","tags":{"hostname":"$1"}},{"match":"airflow.dataset.updates","name":"airflow.dataset.updates"},{"match":"airflow.dataset.orphaned","name":"airflow.dataset.orphaned"},{"match":"airflow.dataset.triggered_dagruns","name":"airflow.dataset.triggered_dagruns"},{"match":"airflow.executor.open_slots","name":"airflow.executor.open_slots"},{"match":"airflow\\.executor\\.open_slots\\.(.*)","match_type":"regex","name":"airflow.executor.open_slots","tags":{"executor_class_name":"$1"}},{"match":"airflow.executor.queued_tasks","name":"airflow.executor.queued_tasks"},{"match":"airflow\\.executor\\.queued_tasks\\.(.*)","match_type":"regex","name":"airflow.executor.queued_tasks","tags":{"executor_class_name":"$1"}},{"match":"airflow.executor.running_tasks","name":"airflow.executor.running_tasks"},{"match":"airflow\\.executor\\.running_tasks\\.(.*)","match_type":"regex","name":"airflow.executor.running_tasks","tags":{"executor_class_name":"$1"}},{"match":"airflow.kubernetes_executor.adopt_task_instances.duration","name":"airflow.kubernetes_executor.adopt_task_instances.duration"},{"match":"airflow.kubernetes_executor.clear_not_launched_queued_tasks.duration","name":"airflow.kubernetes_executor.clear_not_launched_queued_tasks.duration"},{"match":"airflow.dag_processing.file_path_queue_size","name":"airflow.dag_processing.file_path_queue_size"},{"match":"airflow.dag_processing.file_path_queue_update_count","name":"airflow.dag_processing.file_path_queue_update_count"},{"match":"airflow\\.dag_processing\\.last_num_of_db_queries\\.(.*)","match_type":"regex","name":"airflow.dag_processing.last_num_of_db_queries","tags":{"dag_file":"$1"}},{"match":"airflow.dag_processing.other_callback_count","name":"airflow.dag_processing.other_callback_count"},{"match":"airflow.dag_processing.sla_callback_count","name":"airflow.dag_processing.sla_callback_count"},{"match":"airflow.dag_file_processor_timeouts","name":"airflow.dag_file_processor_timeouts"}]}]
 ```
 
 To add non-static tags to the StatsD metrics, you must use DogStatsD mapper profiles. [See an example mapper profile][21] that adds `service` and `env` tags.
