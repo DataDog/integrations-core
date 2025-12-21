@@ -1,0 +1,1 @@
+Add support for sending database_instance metadata to populate the database_instance table in redapl. This enables enrichment of ClickHouse instances with integration telemetry.
