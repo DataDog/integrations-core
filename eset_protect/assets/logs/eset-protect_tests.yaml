@@ -46,7 +46,7 @@ tests:
           "user" : "",
           "target" : "Administrator"
         }
-      service: "Audit_Event"
+      service: "eset-protect"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
@@ -99,7 +99,7 @@ tests:
           "user" : "Administrator",
           "target" : "488b9f4c-b100-4cc8-88d0-5a291da69b72"
         }
-      service: "Audit_Event"
+      service: "eset-protect"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
@@ -151,7 +151,7 @@ tests:
           "user" : "Administrator",
           "target" : "24a76737-26e1-497d-beeb-e5d54668ac36"
         }
-      service: "Audit_Event"
+      service: "eset-protect"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
@@ -203,7 +203,7 @@ tests:
           "user" : "Administrator",
           "target" : "Datadog"
         }
-      service: "Audit_Event"
+      service: "eset-protect"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
@@ -284,7 +284,7 @@ tests:
           "action" : "Blocked",
           "event" : "ARP Cache Poisoning attack"
         }
-      service: "FirewallAggregated_Event"
+      service: "eset-protect"
       status: "warn"
       tags:
       - "source:LOGS_SOURCE"
@@ -364,7 +364,7 @@ tests:
           "hash" : "F3B15DBF7DABB37266B13CB67EC36EA819EBD0AD",
           "username" : "CLW-933-WIN\\Test"
         }
-      service: "FilteredWebsites_Event"
+      service: "eset-protect"
       status: "warn"
       tags:
       - "source:LOGS_SOURCE"
@@ -452,7 +452,7 @@ tests:
           "hash" : "E7DCD6C23C72209EE5AA0890372DE1CE52045815",
           "username" : "NT AUTHORITY\\SYSTEM"
         }
-      service: "Threat_Event"
+      service: "eset-protect"
       status: "critical"
       tags:
       - "source:LOGS_SOURCE"
@@ -499,7 +499,7 @@ tests:
           "detail" : "Authenticating native user 'test-user'.",
           "user" : ""
         }
-      service: "Audit_Event"
+      service: "eset-protect"
       status: "error"
       tags:
       - "source:LOGS_SOURCE"
