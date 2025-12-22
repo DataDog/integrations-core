@@ -8,11 +8,9 @@ import time
 import mock
 import psycopg
 import pytest
-
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import BUFFERCACHE_METRICS, DatabaseHealthCheckError, PartialFormatter, fmt
-from datadog_checks.postgres.version_utils import V17
 
 from .common import (
     COMMON_METRICS,
@@ -57,6 +55,7 @@ from .utils import (
     requires_over_10,
     requires_over_14,
     requires_over_16,
+    requires_over_17,
     run_one_check,
     run_vacuum_thread,
 )
@@ -394,7 +393,7 @@ def test_buffercache_metrics(aggregator, integration_check, pg_instance):
     aggregator.assert_metric(unused_metric, count=1, tags=unused_buffers_tags)
 
 
-@requires_over_10
+@requires_over_17
 def test_buffercache_metrics_skipped_on_aurora_17(aggregator, integration_check, pg_instance):
     """
     Aurora PostgreSQL 17+ crashes with Bus Error when querying pg_buffercache.
@@ -405,8 +404,8 @@ def test_buffercache_metrics_skipped_on_aurora_17(aggregator, integration_check,
     check = integration_check(pg_instance)
 
     # Simulate Aurora PostgreSQL 17+
+    # Note: is_aurora must be set before run() since initialize_is_aurora() only sets it if None
     check.is_aurora = True
-    check.version = V17
 
     check.run()
 
