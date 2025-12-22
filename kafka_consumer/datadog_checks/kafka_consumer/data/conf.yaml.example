@@ -188,18 +188,24 @@ instances:
     #
     # sasl_oauth_token_provider:
 
-        ## @param url - string - required
-        ## The token endpoint.
+        ## @param method - string - optional - default: oidc
+        ## The OAuth method to use. Either 'aws_msk_iam' for AWS MSK IAM authentication 
+        ## or 'oidc' for standard OIDC authentication. Defaults to 'oidc' for backwards compatibility.
+        #
+        # method: aws_msk_iam
+
+        ## @param url - string - optional
+        ## The token endpoint URL. Required when method is 'oidc'.
         #
         # url: <URL>
 
-        ## @param client_id - string - required
-        ## The client identifier.
+        ## @param client_id - string - optional
+        ## The client identifier. Required when method is 'oidc'.
         #
         # client_id: <CLIENT_ID>
 
-        ## @param client_secret - string - required
-        ## The client secret.
+        ## @param client_secret - string - optional
+        ## The client secret. Required when method is 'oidc'.
         #
         # client_secret: <CLIENT_SECRET>
 
