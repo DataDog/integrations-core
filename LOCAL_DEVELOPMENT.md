@@ -1,334 +1,349 @@
-# Local Development with MinIO
-
-This guide explains how to use the `--local` flag with `ddev release` commands for local development and testing without requiring AWS S3 access.
+# Local Development Guide
 
 ## Overview
 
-The `--local` flag allows you to test the entire wheel upload and TUF signing workflow locally using MinIO, an S3-compatible object storage server running in Docker. MinIO is **automatically started** when you use the `--local` flag for the first time.
+This guide covers local development and testing of the release pipeline. All releases are processed through GitHub Actions with TUF and SLSA 2 attestations.
+
+**Note:** Local MinIO development has been removed. All releases now use AWS S3 via GitHub Actions CI.
 
 ## Prerequisites
 
-- Docker installed and running
+- Python 3.11+
 - `ddev` command-line tool installed
+- AWS credentials configured (for testing S3 uploads)
+- Access to GitHub Actions (for triggering release workflows)
 
-## Quick Start
+## Local Development Workflow
 
-### 1. Build an Integration
+### 1. Install Dependencies
+
+```bash
+cd datadog_checks_dev
+pip install -e '.[deps]'
+```
+
+### 2. Build Integration Locally
+
+Build wheels locally to test the build process and verify artifacts:
 
 ```bash
 ddev release build postgres
 ```
 
-This creates the wheel and pointer file in the integration's `dist/` directory. The `--local` flag has no effect on the build command.
+This creates in the `postgres/dist/` directory:
+- `datadog_postgres-{version}-py3-none-any.whl` - The wheel file
+- `datadog-postgres-{version}.pointer` - Pointer file with wheel metadata
+- `datadog-postgres-{version}-attestation.json` - SLSA 2 provenance attestation
 
-### 2. Upload to Local MinIO
+### 3. Inspect Build Artifacts
 
+**View Pointer File:**
 ```bash
-ddev release upload --local --public postgres
+cat postgres/dist/datadog-postgres-*.pointer
 ```
 
-This will:
-
-- **Automatically start MinIO** if not already running (Docker container `ddev-minio-local`)
-- Upload the wheel to `simple/datadog-postgres/`
-- Upload the pointer file to `pointers/datadog-postgres/`
-- Generate PEP 503 simple indexes at `simple/index.html` and `simple/datadog-postgres/index.html`
-- Skip AWS authentication (uses hardcoded MinIO credentials)
-
-**MinIO Console:** http://localhost:9001 (login: `minioadmin`/`minioadmin`)
-
-### 3. Sign TUF Metadata
-
-```bash
-ddev release sign --local --generate-keys
+Example output:
+```yaml
+pointer:
+  name: datadog-postgres
+  version: 23.2.0
+  uri: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/datadog-postgres/datadog_postgres-23.2.0-py3-none-any.whl
+  digest: 094609f2d2f7583325e0d2493fcabc3715afeaa1a3414ea964d883e2f765fc56
+  length: 100905
+  attestation:
+    uri: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/attestations/datadog-postgres/datadog-postgres-23.2.0-attestation.json
+    digest: 7f8a9b2c...
+    length: 5432
 ```
 
-This will:
-
-- **Ensure MinIO is running** (starts automatically if needed)
-- Generate dummy Ed25519 keys (if `--generate-keys` is specified)
-- List all pointer files in MinIO
-- Generate TUF metadata (root.json, targets.json, snapshot.json, timestamp.json)
-- Sign metadata with the keys
-- Upload signed metadata to `metadata/` prefix
-- Save metadata files locally to `/tmp/tuf_metadata/`
-
-### 4. Verify Upload
-
-Check the MinIO console at http://localhost:9001 (login with `minioadmin`/`minioadmin`), or use the AWS CLI:
-
+**View SLSA 2 Attestation:**
 ```bash
-# Set MinIO credentials for AWS CLI
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
-
-# List wheels
-aws --endpoint-url http://localhost:9000 s3 ls s3://test-public-integration-wheels/simple/datadog-postgres/
-
-# List pointers
-aws --endpoint-url http://localhost:9000 s3 ls s3://test-public-integration-wheels/pointers/datadog-postgres/
-
-# List TUF metadata
-aws --endpoint-url http://localhost:9000 s3 ls s3://test-public-integration-wheels/metadata/
+cat postgres/dist/datadog-postgres-*-attestation.json | jq
 ```
 
-### 5. Test the Downloader
+Example output:
+```json
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "datadog_postgres-23.2.0-py3-none-any.whl",
+      "digest": {
+        "sha256": "094609f2..."
+      }
+    }
+  ],
+  "predicate": {
+    "builder": {
+      "id": "https://github.com/DataDog/integrations-core/.github/workflows/release.yml@main"
+    },
+    "buildType": "https://github.com/DataDog/integrations-core/build/wheel/v1",
+    "metadata": {
+      "buildInvocationId": "123456789",
+      "buildStartedOn": "2025-12-08T18:00:00Z"
+    }
+  }
+}
+```
 
-To test downloading wheels using the local TUF-enabled downloader:
+### 4. Run Tests Locally
 
 ```bash
-# IMPORTANT: Fetch root.json from MinIO (not /tmp/tuf_metadata/)
-# This ensures you have the exact root.json that matches the signed metadata
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
-aws --endpoint-url http://localhost:9000 s3 cp \
-  s3://test-public-integration-wheels/metadata/root.json \
-  datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/root.json
+# Run unit tests
+ddev test postgres
 
-# Set up the downloader venv (if not already done)
+# Run specific tests
+ddev test postgres -- -k test_function_name
+
+# Format code
+ddev test -fs postgres
+```
+
+## GitHub Actions Testing
+
+### Trigger Release Workflow
+
+The release pipeline runs on GitHub Actions and can be triggered manually:
+
+1. **Navigate to Actions tab** in the GitHub repository
+2. Select **"Release Integration Package"** workflow
+3. Click **"Run workflow"**
+4. Configure inputs:
+   - **Integration**: `postgres` (or any integration name)
+   - **Dry run**: Check for testing without S3 upload
+5. Click **"Run workflow"** to start
+
+### Workflow Steps
+
+The pipeline performs these steps automatically:
+
+1. ✅ **Build wheel** - Creates wheel with SLSA 2 attestation
+2. ✅ **Generate attestation** - SLSA 2 provenance in in-toto format
+3. ✅ **Sign pointer** - TUF signature (mocked in POC)
+4. ✅ **Sign attestation** - Sigstore signature (mocked in POC)
+5. ✅ **Upload to S3** - Wheels, pointers, attestations
+6. ✅ **Update TUF metadata** - Generate and upload signed metadata
+7. ✅ **Update PyPI index** - Generate PEP 503 simple index
+8. ✅ **Test downloader** - Verify end-to-end download with attestation
+
+### Monitor Workflow Execution
+
+View logs and artifacts in the GitHub Actions UI:
+
+- **Build logs** - See each step's output
+- **Artifacts** - Download built wheels and attestations
+- **Summary** - View S3 locations and verification status
+
+## Testing the Downloader
+
+### With Production S3 Repository
+
+After a successful GitHub Actions release, test the downloader:
+
+```bash
 cd datadog_checks_downloader
+
+# Create virtual environment
 python -m venv .venv
 source .venv/bin/activate
-pip install -e '.[deps]'
 
-# Download from local MinIO (no credentials needed - bucket is public for local testing)
+# Install downloader
+pip install -e .
+
+# Download package with attestation verification
 python -m datadog_checks.downloader datadog-postgres \
-  --repository http://localhost:9000/test-public-integration-wheels
+  --repository https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com
 ```
 
-**Important:**
-- **Always fetch root.json from MinIO** after signing, not from `/tmp/tuf_metadata/`
-- If you run `ddev release sign --local --generate-keys` multiple times, NEW keys are generated each time
-- The downloader must use the exact root.json that matches the keys used to sign the metadata in MinIO
-- The committed root.json contains production keys; the local root.json contains dummy keys
-- Local MinIO bucket is configured for anonymous downloads (no AWS credentials needed)
-- **Metadata cache is automatically cleared** when using localhost URLs - no manual deletion required after running `ddev release sign --local`
+### Expected Output
 
-## Managing MinIO
-
-MinIO is automatically managed by the `ddev release` commands when using `--local`. However, you can also manage it manually using Docker:
-
-### Check if MinIO is Running
-
-```bash
-docker ps | grep ddev-minio-local
+```
+INFO: Downloading attestation from: https://s3.../attestations/...
+INFO: ✅ Attestation hash verified
+INFO: ✅ [MOCK] Sigstore signature verified
+INFO: ✅ [MOCK] SLSA provenance verified
+INFO: ✅ Attestation verification passed
+/path/to/datadog_postgres-23.2.0-py3-none-any.whl
 ```
 
-### View MinIO Logs
+### What Gets Verified
 
-```bash
-docker logs ddev-minio-local
-```
+1. **TUF Metadata** - Cryptographic verification of pointer files
+2. **Wheel Hash** - SHA256 verification from pointer
+3. **Attestation Hash** - SHA256 verification of attestation file
+4. **Attestation Structure** - Validates in-toto format
+5. **Subject Matching** - Verifies wheel is in attestation subjects
+6. **Sigstore Signature** - Mocked verification (POC only)
 
-### Stop MinIO
+## S3 Bucket Structure
 
-```bash
-docker stop ddev-minio-local
-```
-
-### Start MinIO (if stopped)
-
-```bash
-docker start ddev-minio-local
-```
-
-### Remove MinIO Container and Data
-
-```bash
-docker rm -f ddev-minio-local
-```
-
-**Note:**
-
-- MinIO will automatically restart when you run `ddev release upload --local` or `ddev release sign --local`
-- Data is stored inside the container (ephemeral) - removing the container deletes all uploaded wheels and metadata
-- To clean up after testing, simply remove the container: `docker rm -f ddev-minio-local`
-
-## Complete Workflow Example
-
-```bash
-# 1. Build, upload, and sign multiple integrations
-# MinIO starts automatically on first --local command
-for integration in postgres mysql redis; do
-  ddev release build "$integration"
-  ddev release upload --local --public "$integration"
-done
-
-# 2. Sign all uploaded integrations
-ddev release sign --local --generate-keys
-
-# 3. Fetch root.json from MinIO to downloader
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
-aws --endpoint-url http://localhost:9000 s3 cp \
-  s3://test-public-integration-wheels/metadata/root.json \
-  datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/root.json
-
-# 4. Test downloading (no credentials needed for local MinIO)
-cd datadog_checks_downloader
-python -m datadog_checks.downloader datadog-postgres \
-  --repository http://localhost:9000/test-public-integration-wheels
-```
-
-## Data Lifecycle
-
-**Ephemeral Storage:**
-
-- All data is stored inside the MinIO container without persistent volumes
-- Data persists while the container exists (running or stopped)
-- Data is **deleted** when you remove the container
-
-**Typical workflow:**
-
-1. Container created automatically on first `--local` command
-2. Upload wheels/pointers, generate metadata across multiple test runs
-3. When done testing: `docker rm -f ddev-minio-local` cleans everything up
-4. Next `--local` command starts fresh with an empty bucket
-
-This is ideal for testing - you get a clean slate each time you restart testing.
-
-## Differences from Production
-
-### Local Mode
-
-- Uses MinIO on `http://localhost:9000`
-- Bucket configured for **anonymous downloads** (no authentication needed for reads)
-- Admin credentials (`minioadmin`/`minioadmin`) only needed for AWS CLI/management operations
-- Data stored in Docker container (ephemeral - deleted on container removal)
-
-### Production Mode
-
-- Uses AWS S3 in `eu-north-1` region
-- Requires AWS credentials via aws-vault or environment variables
-- Bucket: `test-public-integration-wheels`
-- Data persisted permanently in S3
-
-## Troubleshooting
-
-### Docker Not Available
-
-If you see "Docker is not available", ensure Docker Desktop is installed and running:
-
-```bash
-# Check Docker status
-docker ps
-```
-
-### MinIO Won't Start
-
-If MinIO fails to start automatically:
-
-```bash
-# Check if ports are already in use
-lsof -i :9000
-lsof -i :9001
-
-# Remove existing container and try again
-docker rm -f ddev-minio-local
-
-# Retry the command
-ddev release upload --local --public postgres
-```
-
-### Upload Fails with Connection Error
-
-```bash
-# Check if MinIO is running
-docker ps | grep ddev-minio-local
-
-# View MinIO logs
-docker logs ddev-minio-local
-
-# Restart MinIO
-docker restart ddev-minio-local
-```
-
-### TUF Metadata Generation Fails
-
-```bash
-# Ensure pointers were uploaded first
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
-aws --endpoint-url http://localhost:9000 s3 ls \
-  s3://test-public-integration-wheels/pointers/
-
-# Check local metadata directory
-ls -la /tmp/tuf_metadata/
-```
-
-### Downloader Shows "timestamp was signed by 0/1 keys"
-
-This means the downloader's root.json doesn't match the keys used to sign the metadata in MinIO.
-
-**Root Cause:**
-- Running `ddev release sign --local --generate-keys` generates NEW keys each time
-- If you run it multiple times, the latest metadata in MinIO is signed with the newest keys
-- But your downloader may have a root.json from an earlier run with different keys
-
-**Solution - Fetch root.json from MinIO:**
-
-```bash
-# ALWAYS fetch root.json from MinIO after signing (not /tmp/tuf_metadata/)
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
-aws --endpoint-url http://localhost:9000 s3 cp \
-  s3://test-public-integration-wheels/metadata/root.json \
-  datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/root.json
-```
-
-**Alternative - Reuse existing keys:**
-
-```bash
-# Don't generate new keys - reuse keys from ~/.ddev/tuf_keys/
-ddev release sign --local  # No --generate-keys flag
-```
-
-**Verify keyids match:**
-
-```bash
-# Check if keyids in root.json match the signed metadata
-python3 << 'EOF'
-import json
-root = json.load(open('datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/root.json'))
-timestamp = json.load(open('/tmp/timestamp_from_minio.json'))
-expected = root['signed']['roles']['timestamp']['keyids'][0]
-actual = timestamp['signatures'][0]['keyid']
-print(f"✅ Match!" if expected == actual else f"❌ Mismatch!\nExpected: {expected}\nActual: {actual}")
-EOF
-```
-
-## File Locations
-
-### Local
-
-- **MinIO Data**: Stored in Docker container volume
-- **TUF Keys**: `~/.ddev/tuf_keys/` (default)
-- **TUF Metadata**: `/tmp/tuf_metadata/` (default)
-- **Build Artifacts**: `{integration}/dist/`
-
-### MinIO Bucket Structure
+After upload, the S3 bucket contains:
 
 ```
 test-public-integration-wheels/
-├── simple/
-│   ├── index.html                    # Root package index
-│   └── datadog-{integration}/
-│       ├── index.html                # Package-specific index
-│       └── datadog_{integration}-{version}-py3-none-any.whl
-├── pointers/
-│   └── datadog-{integration}/
-│       └── datadog_{integration}-{version}.pointer
-└── metadata/                         # TUF metadata
+├── simple/                          # PyPI simple index
+│   ├── index.html
+│   └── datadog-postgres/
+│       ├── index.html
+│       └── datadog_postgres-23.2.0-py3-none-any.whl
+├── pointers/                        # TUF target files
+│   └── datadog-postgres/
+│       └── datadog-postgres-23.2.0.pointer
+├── attestations/                    # SLSA provenance
+│   └── datadog-postgres/
+│       └── datadog-postgres-23.2.0-attestation.json
+└── metadata/                        # TUF metadata
     ├── root.json
     ├── targets.json
     ├── snapshot.json
     └── timestamp.json
 ```
 
-## Notes
+## CI Pipeline Configuration
 
-- The `--local` flag only affects `upload` and `sign` commands
-- The `build` command works the same in local and production modes
-- TUF keys generated with `--generate-keys` are dummy keys for POC/testing only
-- MinIO data is ephemeral - removing the container deletes all data
-- For production use, always use the production S3 bucket with proper key management
+### GitHub Secrets Required
+
+Configure these secrets in your GitHub repository:
+
+- **`AWS_RELEASE_ROLE_ARN`** - IAM role ARN for S3 uploads
+  - Example: `arn:aws:iam::123456789:role/github-actions-release`
+  - Permissions needed: `s3:PutObject`, `s3:GetObject`, `s3:ListBucket`
+
+### Future: TUF Signing Keys
+
+For production (not in POC):
+- **`TUF_ROOT_KEY`** - Ed25519 private key (base64 encoded)
+- **`TUF_TARGETS_KEY`** - Ed25519 private key (base64 encoded)
+- **`TUF_SNAPSHOT_KEY`** - Ed25519 private key (base64 encoded)
+- **`TUF_TIMESTAMP_KEY`** - Ed25519 private key (base64 encoded)
+
+### Workflow Triggers
+
+The workflow can be triggered:
+
+1. **Manually** - From GitHub Actions UI (workflow_dispatch)
+2. **On PR merge** - Automatically when PR is merged (future)
+3. **On tag push** - Automatically on version tags (future)
+
+## Development Without S3
+
+For pure local testing without S3 access:
+
+```bash
+# Build only
+ddev release build postgres
+
+# Run unit tests
+ddev test postgres
+
+# Format code
+ddev test -fs postgres
+
+# Manual artifact verification
+python -c "
+import yaml
+import json
+
+# Check pointer format
+with open('postgres/dist/datadog-postgres-23.2.0.pointer') as f:
+    pointer = yaml.safe_load(f)
+    print('Pointer:', json.dumps(pointer, indent=2))
+
+# Check attestation format
+with open('postgres/dist/datadog-postgres-23.2.0-attestation.json') as f:
+    attestation = json.load(f)
+    print('Attestation type:', attestation['_type'])
+    print('Predicate type:', attestation['predicateType'])
+"
+```
+
+**Note:** Full integration testing (TUF verification, attestation download) requires S3 access via GitHub Actions.
+
+## Common Issues
+
+### Issue: "Failed to connect to S3"
+
+**Solution:** Ensure AWS credentials are configured:
+```bash
+# Configure AWS SSO
+aws configure sso
+
+# Or use aws-vault
+aws-vault exec your-profile -- ddev release upload postgres
+```
+
+### Issue: "Attestation verification failed"
+
+**Cause:** This is expected for local builds without real Sigstore signatures.
+
+**Solution:** The POC mocks Sigstore verification. In production, attestations would be signed with real Sigstore/cosign.
+
+### Issue: "TUF signature verification failed"
+
+**Cause:** The downloader's root.json doesn't match production metadata.
+
+**Solution:** Ensure you're using the correct root.json:
+```bash
+cd datadog_checks_downloader
+curl -o datadog_checks/downloader/data/repo/metadata/root.json \
+  https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/metadata/root.json
+```
+
+### Issue: GitHub Actions workflow fails at upload step
+
+**Cause:** AWS OIDC authentication not configured or IAM role lacks permissions.
+
+**Solution:**
+1. Verify `AWS_RELEASE_ROLE_ARN` secret is set
+2. Check IAM role trust policy allows GitHub OIDC
+3. Verify IAM role has S3 permissions
+
+## File Locations
+
+### Local Build Artifacts
+- **Build output**: `{integration}/dist/`
+- **Wheel**: `{integration}/dist/{package_name}-{version}-py3-none-any.whl`
+- **Pointer**: `{integration}/dist/{package_name}-{version}.pointer`
+- **Attestation**: `{integration}/dist/{package_name}-{version}-attestation.json`
+
+### GitHub Actions Artifacts
+- **Available in workflow run** under "Artifacts" tab
+- **Retention**: 90 days (GitHub default)
+
+### S3 Production Artifacts
+- **Region**: `eu-north-1`
+- **Bucket**: `test-public-integration-wheels`
+- **Wheels**: `s3://.../simple/{package}/`
+- **Pointers**: `s3://.../pointers/{package}/`
+- **Attestations**: `s3://.../attestations/{package}/`
+- **TUF Metadata**: `s3://.../metadata/`
+
+## POC Limitations
+
+⚠️ **This is a POC with mocked security features:**
+
+- **TUF signing** uses dummy Ed25519 keys (not HSM)
+- **Sigstore signatures** are mocked (no actual cosign)
+- **Key rotation** not implemented
+- **HSM/KMS integration** not implemented
+- **Attestation verification** is simplified
+
+**For production, implement:**
+- HSM-backed TUF keys with proper key ceremony
+- Real Sigstore/cosign integration
+- Key rotation procedures
+- Offline root keys with threshold signatures
+- Multi-party signing for release approval
+- Rekor transparency log verification
+- Integration with organizational PKI
+
+## Next Steps
+
+1. **Test builds locally** - Verify wheel and attestation generation
+2. **Trigger GitHub Actions** - Test full pipeline with dry-run
+3. **Download and verify** - Test downloader with attestation verification
+4. **Review artifacts** - Inspect S3 bucket structure and metadata
+5. **Iterate** - Make changes and re-run pipeline
+
+For questions or issues, consult the main README.md or GitHub Actions logs.

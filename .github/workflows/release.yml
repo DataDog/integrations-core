@@ -1,5 +1,19 @@
 name: Release Integration Package
 
+# This workflow builds, signs, and releases integration packages with TUF and SLSA 2 compliance.
+# It generates SLSA 2 provenance attestations, uploads to S3, and verifies the entire pipeline.
+#
+# Key Features:
+# - SLSA 2 provenance generation (in-toto format)
+# - TUF metadata signing (mocked for POC)
+# - Sigstore attestation signing (mocked for POC)
+# - S3 upload with PyPI simple index
+# - End-to-end downloader verification
+#
+# POC Limitations:
+# - TUF and Sigstore signatures are mocked (placeholder for real implementation)
+# - For production, integrate with HSM-backed keys and real Sigstore/cosign
+
 on:
   workflow_dispatch:
     inputs:
