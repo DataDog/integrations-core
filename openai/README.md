@@ -13,7 +13,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
-**IMPORTANT**: An **admin-scoped API key** is **required** to collect usage metrics and Cloud Cost Management (CCM) data. Without an admin-scoped API key, this integration cannot ingest `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics, and CCM cost data will not be available.
+**IMPORTANT**: An **admin-scoped API key** is **required** to collect usage metrics and Cloud Cost Management (CCM) data. Without an admin-scoped API key, this integration cannot ingest `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics, and CCM cost data are not available.
 
 **Note**: To collect all metrics provided by this integration, also follow the APM setup instructions in addition to the API key setup.
 
@@ -38,12 +38,12 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 
 **For Cloud Cost Management and usage metrics**, you must create an **admin-scoped API key**:
 
-1. Login to your [OpenAI Account][10].
-2. Navigate directly to the [Admin Keys page][20] or go to **API keys** under **Organization settings** and select the **Admin keys** tab.
+1. Log in to your [OpenAI Account][10].
+2. Navigate to the [Admin Keys page][20] or go to **API keys** under **Organization settings** and select the **Admin keys** tab.
 3. Click **Create a new secret key**.
 4. Copy the created admin API Key to your clipboard.
 
-**For LLM Observability only** (without CCM/usage metrics), you can use a standard API key:
+**For LLM Observability only** (without CCM and usage metrics), you can use a standard API key:
 
 1. Login to your [OpenAI Account][10].
 2. Navigate to **API keys** under **Organization settings**.
@@ -63,7 +63,7 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 ### Additional Notes
 
 - **Admin-scoped API key requirement**: An admin-scoped API key is **mandatory** for collecting usage metrics and Cloud Cost Management data. This integration only collects `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics when an admin-scoped API key is provided.
-- If you enable Cloud Cost Management for OpenAI without an admin-scoped API key, cost metrics will not be available.
+- If you enable Cloud Cost Management for OpenAI without an admin-scoped API key, cost metrics are not available.
 
 ## Additional Resources
 
@@ -491,7 +491,7 @@ To validate that the APM PHP library can communicate with your Agent, examine th
 - `moderations`
 - `vector_stores`
 
-Without an admin-scoped API key, these metrics and CCM cost data will not be ingested.
+Without an admin-scoped API key, these metrics and CCM cost data are not ingested.
 
 **Note**: The `openai.api.usage.*` metrics are collected when a project-scoped API key is provided. Project-scoped API key support will be deprecated in the near future and does not support CCM data collection.
 
