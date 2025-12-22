@@ -177,7 +177,7 @@ class KafkaActionsCheck(AgentCheck):
 
         tags = self._get_tags() + [f'kafka_cluster_id:{cluster}']
 
-        # Send as standard Datadog event
+        # Send as standard Datadog event (backwards compatibility; moving to Data Streams intake-only)
         event_payload = {
             'timestamp': int(time.time()),
             'event_type': f'kafka_action_{event_type}',
