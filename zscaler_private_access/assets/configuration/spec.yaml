@@ -1,9 +1,0 @@
-name: Zscaler Private Access
-files:
-- name: zscaler_private_access.yaml
-  options:
-  - template: logs
-    example:
-    - type: tcp
-      port: <PORT>
-      source: zscaler-private-access
