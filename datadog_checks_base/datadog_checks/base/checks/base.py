@@ -223,7 +223,6 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        self.log.debug(f"source: {kwargs.get('source', '')}")
         self.log.debug(f"provider: {kwargs.get('provider', '')}")
 
 
