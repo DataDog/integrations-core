@@ -87,7 +87,8 @@ ls -lh "$DIST_DIR"
 
 # Find the version from the wheel filename
 WHEEL_FILE=$(ls "$DIST_DIR"/*.whl | head -1)
-VERSION=$(basename "$WHEEL_FILE" | grep -oP '(?<=-)\d+\.\d+\.\d+(?=-)')
+# Extract version using sed (more portable than grep -P)
+VERSION=$(basename "$WHEEL_FILE" | sed -E 's/.*-([0-9]+\.[0-9]+\.[0-9]+)-.*/\1/')
 echo ""
 echo "Detected version: $VERSION"
 echo ""
@@ -194,8 +195,8 @@ else
     echo "⚠️  Attestation verification message not found in output"
 fi
 
-# Extract downloaded wheel path
-WHEEL_PATH=$(echo "$DOWNLOAD_OUTPUT" | grep -oP '/.*\.whl' | tail -1)
+# Extract downloaded wheel path (using grep -o instead of -P for portability)
+WHEEL_PATH=$(echo "$DOWNLOAD_OUTPUT" | grep -o '/[^[:space:]]*\.whl' | tail -1)
 
 if [ -n "$WHEEL_PATH" ] && [ -f "$WHEEL_PATH" ]; then
     echo "✅ Wheel downloaded successfully: $WHEEL_PATH"
