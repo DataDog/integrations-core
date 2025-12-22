@@ -32,9 +32,9 @@ datadog-ceph==4.3.0; sys_platform != 'win32'
 datadog-cert-manager==6.2.0
 datadog-checkpoint-harmony-endpoint==1.1.0
 datadog-checkpoint-quantum-firewall==1.2.0
-datadog-checks-base==37.24.0
+datadog-checks-base==37.26.0
 datadog-checks-dependency-provider==3.2.0
-datadog-checks-downloader==8.1.0
+datadog-checks-downloader==9.0.0
 datadog-cilium==6.2.0
 datadog-cisco-aci==4.11.0
 datadog-cisco-secure-firewall==1.2.0
@@ -112,7 +112,7 @@ datadog-ivanti-connect-secure==1.2.0
 datadog-jboss-wildfly==3.3.0
 datadog-journald==3.2.0
 datadog-juniper-srx-firewall==1.2.0
-datadog-kafka-consumer==6.10.0
+datadog-kafka-consumer==6.10.1
 datadog-kafka==4.3.0
 datadog-karpenter==3.2.0
 datadog-keda==2.2.0
@@ -153,7 +153,7 @@ datadog-microsoft-dns==1.2.0; sys_platform == 'win32'
 datadog-microsoft-sysmon==1.2.0; sys_platform == 'win32'
 datadog-milvus==2.3.0
 datadog-mongo==10.6.0
-datadog-mysql==15.11.0
+datadog-mysql==15.11.1
 datadog-nagios==3.2.0
 datadog-network==5.5.0
 datadog-nfsstat==3.3.0; sys_platform == 'linux2'
@@ -176,7 +176,7 @@ datadog-pgbouncer==8.7.0; sys_platform != 'win32'
 datadog-php-fpm==6.2.0
 datadog-ping-federate==2.2.0
 datadog-postfix==3.2.0; sys_platform != 'win32'
-datadog-postgres==23.3.0
+datadog-postgres==23.3.3
 datadog-powerdns-recursor==5.2.0
 datadog-presto==3.3.0
 datadog-process==5.3.0

@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 35.5.0 / 2025-12-12
+
+***Added***:
+
+* Add an exclusion for the mysql file that was deleted ([#22095](https://github.com/DataDog/integrations-core/pull/22095))
+
+## 35.4.0 / 2025-12-10
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+***Fixed***:
+
+* Mark TLS and JMX configuration template passwords as secrets. ([#21975](https://github.com/DataDog/integrations-core/pull/21975))
+* Fix release make all command when an integration does not have a manifest file ([#21977](https://github.com/DataDog/integrations-core/pull/21977))
+
 ## 35.3.1 / 2025-11-19
 
 ***Fixed***:
