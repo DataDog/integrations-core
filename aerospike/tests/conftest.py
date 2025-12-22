@@ -76,10 +76,14 @@ def _get_conditions():
             )
         )
     else:
+        # For version 5.1+, latencies use a different command
+        # Pattern requires ':msec' to ensure actual data exists (empty is '{test}-read:;')
+        # Not ready: batch-index:;{test}-read:;{test}-write:;{test}-udf:;{test}-query:
+        # Ready: ...;{test}-read:msec,...;{test}-write:msec,...;...
         conditions.append(
             CheckCommandOutput(
                 ['docker', 'exec', 'aerospike', 'asinfo', '-v', 'latencies:'],
-                patterns=[r'\{test\}-(read|write)'],
+                patterns=[r'\{test\}-(read|write):msec'],
                 attempts=30,
                 wait=1,
             )
