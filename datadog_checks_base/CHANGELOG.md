@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.26.0 / 2025-12-19
+
+***Security***:
+
+* Bump urllib3 to version 2.6.2 ([#22172](https://github.com/DataDog/integrations-core/pull/22172))
+
 ## 37.25.0 / 2025-12-12
 
 ***Security***:
@@ -23,6 +29,12 @@
 ***Fixed***:
 
 * Fix YAML configuration parsing to properly handle Unicode characters on Windows systems where the UTF-8 locale is not enabled by default. ([#21852](https://github.com/DataDog/integrations-core/pull/21852))
+
+## 37.23.2 / 2025-12-19
+
+***Security***:
+
+* Bump urllib3 to version 2.6.2 ([#22172](https://github.com/DataDog/integrations-core/pull/22172))
 
 ## 37.23.1 / 2025-12-15 / Agent 7.73.1
 
