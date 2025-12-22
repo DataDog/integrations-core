@@ -6,7 +6,7 @@
 
 ***Changed***:
 
-* kafka_actions: Send Kafka messages to backend as data streams events instead of regular Datadog events ([#22208](https://github.com/DataDog/integrations-core/pull/22208))
+* Send Kafka messages to backend as data streams events instead of regular Datadog events ([#22208](https://github.com/DataDog/integrations-core/pull/22208))
 
 ## 1.0.0 / 2025-12-22
 
