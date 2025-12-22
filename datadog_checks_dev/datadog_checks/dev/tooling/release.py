@@ -183,7 +183,9 @@ def build_package(package_path, sdist):
         # digest:
         import glob
         import hashlib
+        import json
         import os
+        from datetime import datetime, timezone
 
         import yaml
 
@@ -191,6 +193,7 @@ def build_package(package_path, sdist):
         list_of_wheels = glob.glob(os.path.join(package_path, "dist", "*"))
         wheel_path = max(list_of_wheels, key=os.path.getctime)
         URI_TEMPLATE = "https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/{}/{}"
+        ATTESTATION_URI_TEMPLATE = "https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/attestations/{}/{}"
         folder_name = os.path.basename(package_path)
         package_name = get_package_name(folder_name)
         wheel_name = os.path.basename(wheel_path)
@@ -200,6 +203,66 @@ def build_package(package_path, sdist):
         with open(wheel_path, "rb") as wheel:
             digest = hashlib.sha256(wheel.read()).hexdigest()
         wheel_size = os.path.getsize(wheel_path)
+        print("Using digest: ", digest)
+
+        # Generate SLSA 2 provenance attestation
+        attestation = {
+            "_type": "https://in-toto.io/Statement/v0.1",
+            "predicateType": "https://slsa.dev/provenance/v0.2",
+            "subject": [
+                {
+                    "name": wheel_name,
+                    "digest": {"sha256": digest}
+                }
+            ],
+            "predicate": {
+                "builder": {
+                    "id": "https://github.com/DataDog/integrations-core/.github/workflows/release.yml@refs/heads/main"
+                },
+                "buildType": "https://github.com/DataDog/integrations-core/build/wheel/v1",
+                "invocation": {
+                    "configSource": {
+                        "uri": f"git+https://github.com/DataDog/integrations-core@{os.getenv('GITHUB_SHA', 'unknown')}",
+                        "digest": {"sha1": os.getenv('GITHUB_SHA', 'unknown')},
+                        "entryPoint": ".github/workflows/release.yml"
+                    }
+                },
+                "metadata": {
+                    "buildInvocationId": os.getenv('GITHUB_RUN_ID', 'unknown'),
+                    "buildStartedOn": datetime.now(timezone.utc).isoformat(),
+                    "buildFinishedOn": datetime.now(timezone.utc).isoformat(),
+                    "completeness": {
+                        "parameters": True,
+                        "environment": False,
+                        "materials": False
+                    },
+                    "reproducible": False
+                },
+                "materials": [
+                    {
+                        "uri": f"git+https://github.com/DataDog/integrations-core@{os.getenv('GITHUB_SHA', 'unknown')}",
+                        "digest": {"sha1": os.getenv('GITHUB_SHA', 'unknown')}
+                    }
+                ]
+            }
+        }
+
+        # Save attestation
+        attestation_file_name = f"{package_name}-{version}-attestation.json"
+        attestation_path = os.path.join(package_path, "dist", attestation_file_name)
+        with open(attestation_path, 'w') as f:
+            json.dump(attestation, f, indent=2)
+        print(f"Created attestation: {attestation_file_name}")
+
+        # Calculate attestation hash
+        with open(attestation_path, 'rb') as f:
+            attestation_bytes = f.read()
+            attestation_digest = hashlib.sha256(attestation_bytes).hexdigest()
+
+        attestation_size = os.path.getsize(attestation_path)
+        attestation_uri = ATTESTATION_URI_TEMPLATE.format(package_name, attestation_file_name)
+
+        # Create pointer with attestation
         pointer = {
             "pointer": {
                 "name": package_name,
@@ -207,28 +270,31 @@ def build_package(package_path, sdist):
                 "uri": uri,
                 "digest": digest,
                 "length": wheel_size,
+                "attestation": {
+                    "uri": attestation_uri,
+                    "digest": attestation_digest,
+                    "length": attestation_size
+                }
             }
         }
-        print("Using digest: ", digest)
         with open(
             os.path.join(package_path, "dist", f"{package_name}-{version}.pointer"), "w"
         ) as pointer_file:
             yaml.safe_dump(pointer, pointer_file)
-            print("Created ", pointer_file.name, " with contents ", pointer)
+            print("Created ", pointer_file.name, " with attestation metadata")
 
     return result
 
 
-def upload_package(package_path, version, public=False, local=False):
-    """Upload package wheel and/or pointer file to the S3 bucket or local MinIO.
+def upload_package(package_path, version, public=False):
+    """Upload package wheel and/or pointer file to the S3 bucket.
 
     Args:
         package_path: Path to the package directory
         version: Package version string
         public: If True, upload both wheel and pointer (for public packages)
-        local: If True, use local MinIO instead of AWS S3
 
-    Note: This requires AWS credentials to be available (unless using local mode).
+    Note: This requires AWS credentials to be available.
     Use aws-vault to run: aws-vault exec profile -- ddev release upload <check>
     """
     import glob
@@ -242,8 +308,8 @@ def upload_package(package_path, version, public=False, local=False):
     S3_BUCKET = "test-public-integration-wheels"
     S3_REGION = "eu-north-1"
 
-    # Initialize S3 client (local MinIO or AWS S3)
-    s3 = get_s3_client(local=local, region=S3_REGION)
+    # Initialize S3 client
+    s3 = get_s3_client(region=S3_REGION)
 
     folder_name = os.path.basename(package_path)
     package_name = get_package_name(folder_name)
@@ -312,6 +378,22 @@ def upload_package(package_path, version, public=False, local=False):
         print(
             f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}"
         )
+
+        # Upload attestation file
+        attestation_file_name = f"{package_name}-{version}-attestation.json"
+        attestation_file_path = os.path.join(dist_dir, attestation_file_name)
+
+        if os.path.exists(attestation_file_path):
+            attestation_s3_key = f"attestations/{package_name}/{attestation_file_name}"
+            s3.upload_file(
+                attestation_file_path,
+                S3_BUCKET,
+                attestation_s3_key,
+                ExtraArgs={"ACL": "public-read", "ContentType": "application/json"}
+            )
+            print(f"Uploaded attestation: {attestation_file_name}")
+        else:
+            print(f"Warning: No attestation file found at {attestation_file_path}")
 
         # Generate indexes
         from datadog_checks.dev.tooling.simple_index import (
