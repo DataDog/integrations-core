@@ -1,0 +1,1 @@
+Skip buffercache metrics on Aurora PostgreSQL 17+ to prevent crash.
