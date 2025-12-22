@@ -1,0 +1,138 @@
+name: Release Integration Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      integration:
+        description: 'Integration name (e.g., postgres, mysql)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (do not upload to S3)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write  # For AWS OIDC
+  contents: read
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ./datadog_checks_dev[deps]
+
+      - name: Build wheel and generate attestation
+        id: build
+        run: |
+          cd datadog_checks_dev
+          ddev release build ${{ inputs.integration }}
+
+          # Find the built wheel and attestation
+          WHEEL_PATH=$(find ../${{ inputs.integration }}/dist -name "*.whl" | head -n 1)
+          ATTESTATION_PATH=$(find ../${{ inputs.integration }}/dist -name "*-attestation.json" | head -n 1)
+          POINTER_PATH=$(find ../${{ inputs.integration }}/dist -name "*.pointer" | head -n 1)
+
+          echo "wheel_path=$WHEEL_PATH" >> $GITHUB_OUTPUT
+          echo "attestation_path=$ATTESTATION_PATH" >> $GITHUB_OUTPUT
+          echo "pointer_path=$POINTER_PATH" >> $GITHUB_OUTPUT
+
+          # Extract version
+          VERSION=$(python -c "from datadog_checks.dev.tooling.utils import get_version_string; print(get_version_string('${{ inputs.integration }}'))")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Mock TUF signing of pointer
+        run: |
+          echo "🔐 [MOCK] Signing pointer file with TUF keys..."
+          echo "✅ [MOCK] Pointer signature: $(openssl rand -hex 32)"
+
+          # In real implementation:
+          # ddev release sign --keys-from-secrets --pointer-file ${{ steps.build.outputs.pointer_path }}
+
+      - name: Mock Sigstore signing of attestation
+        run: |
+          echo "🔐 [MOCK] Signing attestation with Sigstore..."
+          echo "✅ [MOCK] Sigstore signature: $(openssl rand -hex 64)"
+
+          # In real implementation:
+          # cosign sign-blob --bundle attestation-bundle.json ${{ steps.build.outputs.attestation_path }}
+
+      - name: Configure AWS credentials
+        if: ${{ !inputs.dry_run }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_RELEASE_ROLE_ARN }}
+          aws-region: eu-north-1
+
+      - name: Upload to S3
+        if: ${{ !inputs.dry_run }}
+        run: |
+          cd datadog_checks_dev
+          ddev release upload --public ${{ inputs.integration }}
+
+      - name: Generate and upload TUF metadata
+        if: ${{ !inputs.dry_run }}
+        run: |
+          cd datadog_checks_dev
+
+          # Collect all pointer files from dist/ directories
+          ddev release sign --local-pointers --pointers-root ..
+
+          echo "✅ TUF metadata signed and uploaded"
+
+      - name: Update PyPI Simple Index
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "📦 Updating PyPI simple index..."
+          # Index generation happens in upload_package()
+          echo "✅ PyPI index updated"
+
+      - name: Test downloader
+        run: |
+          cd datadog_checks_downloader
+          python -m venv test_venv
+          source test_venv/bin/activate
+          pip install -e .
+
+          echo "🧪 Testing downloader with attestation verification..."
+          python -m datadog_checks.downloader datadog-${{ inputs.integration }} \
+            --repository https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com \
+            --version ${{ steps.build.outputs.version }}
+
+          echo "✅ Downloader test passed"
+
+      - name: Summary
+        run: |
+          echo "## 🎉 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Integration:** ${{ inputs.integration }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.build.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Wheel: \`${{ steps.build.outputs.wheel_path }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Pointer: \`${{ steps.build.outputs.pointer_path }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Attestation: \`${{ steps.build.outputs.attestation_path }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔐 Security" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ TUF signature (mocked)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Sigstore attestation (mocked)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SLSA 2 provenance generated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📍 S3 Locations" >> $GITHUB_STEP_SUMMARY
+          echo "- Wheel: \`s3://bucket/simple/${{ inputs.integration }}/...\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Pointer: \`s3://bucket/pointers/${{ inputs.integration }}/...\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Attestation: \`s3://bucket/attestations/${{ inputs.integration }}/...\`" >> $GITHUB_STEP_SUMMARY
+          echo "- TUF Metadata: \`s3://bucket/metadata/\`" >> $GITHUB_STEP_SUMMARY
