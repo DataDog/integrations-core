@@ -146,5 +146,6 @@ files:
         enum:
         - postgres
         - mysql
+        - smtp
     - template: instances/default
     - template: instances/tls
