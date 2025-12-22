@@ -58,8 +58,12 @@ else
 fi
 
 echo "=== Step 1: Build wheel and generate attestation ==="
+# Store absolute paths
+REPO_ROOT="$(pwd)"
+INTEGRATION_PATH="$REPO_ROOT/$INTEGRATION"
+
 cd datadog_checks_dev
-ddev release build "../$INTEGRATION"
+ddev release build "$INTEGRATION_PATH"
 BUILD_EXIT=$?
 
 if [ $BUILD_EXIT -ne 0 ]; then
@@ -81,7 +85,7 @@ echo "✅ [MOCK] Sigstore signature: $(openssl rand -hex 64)"
 echo ""
 
 echo "=== Step 4: Verify artifacts created ==="
-DIST_DIR="../${INTEGRATION}/dist"
+DIST_DIR="$INTEGRATION_PATH/dist"
 echo "Artifacts in $DIST_DIR:"
 ls -lh "$DIST_DIR"
 
@@ -104,7 +108,7 @@ echo ""
 
 echo "=== Step 7: Upload to S3 ==="
 echo "Uploading wheel, pointer, and attestation to S3..."
-ddev release upload --public "../$INTEGRATION"
+ddev release upload --public "$INTEGRATION_PATH"
 UPLOAD_EXIT=$?
 
 if [ $UPLOAD_EXIT -ne 0 ]; then
@@ -146,7 +150,7 @@ echo ""
 
 echo "=== Step 10: Update downloader root.json ==="
 echo "Fetching latest root.json from S3..."
-cd ../datadog_checks_downloader
+cd "$REPO_ROOT/datadog_checks_downloader"
 mkdir -p datadog_checks/downloader/data/repo/metadata
 
 aws s3 cp \
