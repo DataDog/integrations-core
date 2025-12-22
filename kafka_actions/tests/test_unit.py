@@ -103,18 +103,21 @@ class TestReadMessagesAction:
             assert call_kwargs['start_offset'] == -1
             assert call_kwargs['max_messages'] == 100
 
-        events = [e for e in aggregator.events if e.get('event_type') == 'kafka_message']
-        assert len(events) == 2, f"Expected 2 message events (filtered), got {len(events)}"
+        all_events = aggregator.get_event_platform_events("data-streams-message")
+        # Filter for message events only (those with 'topic' field)
+        message_events = [e for e in all_events if 'topic' in e]
+        assert len(message_events) == 2, f"Expected 2 message events (filtered), got {len(message_events)}"
 
-        event1 = events[0]
-        assert 'test-topic' in event1['msg_title']
-        assert '"offset": 100' in event1['msg_text']
-        assert '"id": 1' in event1['msg_text']
-        assert '"status": "active"' in event1['msg_text']
+        event1 = message_events[0]
+        assert event1['topic'] == 'test-topic'
+        assert event1['offset'] == 100
+        assert event1['value']['id'] == 1
+        assert event1['value']['status'] == 'active'
+        assert event1['remote_config_id'] == 'test-read-messages-001'
 
-        event2 = events[1]
-        assert '"offset": 102' in event2['msg_text']
-        assert '"id": 3' in event2['msg_text']
+        event2 = message_events[1]
+        assert event2['offset'] == 102
+        assert event2['value']['id'] == 3
 
 
 class TestCreateTopicAction:
@@ -370,11 +373,14 @@ class TestReadMessagesAdvancedFiltering:
 
             mock_consume.assert_called_once()
 
-        events = [e for e in aggregator.events if e.get('event_type') == 'kafka_message']
-        assert len(events) == 1, f"Expected 1 message event (filtered), got {len(events)}"
-        assert '"order_id": 1' in events[0]['msg_text']
-        assert '"country": "US"' in events[0]['msg_text']
-        assert '"tier": "gold"' in events[0]['msg_text']
+        all_events = aggregator.get_event_platform_events("data-streams-message")
+        # Filter for message events only (those with 'topic' field)
+        message_events = [e for e in all_events if 'topic' in e]
+        assert len(message_events) == 1, f"Expected 1 message event (filtered), got {len(message_events)}"
+        assert message_events[0]['value']['order_id'] == 1
+        assert message_events[0]['value']['user']['country'] == 'US'
+        assert message_events[0]['value']['user']['tier'] == 'gold'
+        assert message_events[0]['remote_config_id'] == 'test-nested-filter-001'
 
 
 if __name__ == '__main__':
