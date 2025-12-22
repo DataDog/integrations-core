@@ -13,7 +13,6 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
-    default_json_event_encoding,
     obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json
@@ -490,13 +489,6 @@ class SqlserverActivity(DBMAsyncJob):
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
                 if self._collect_raw_query_statement:
                     for raw_statement_event in self._rows_to_raw_statement_events(normalized_rows):
-                        self._check.database_monitoring_query_sample(
-                            json.dumps(raw_statement_event, default=default_json_event_encoding)
-                        )
+                        self._check.database_monitoring_query_sample(raw_statement_event)
                 event = self._create_activity_event(normalized_rows, connections)
-                payload = json.dumps(event, default=default_json_event_encoding)
-                self._check.database_monitoring_query_activity(payload)
-
-        self._check.histogram(
-            "dd.sqlserver.activity.collect_activity.payload_size", len(payload), **self._check.debug_stats_kwargs()
-        )
+                self._check.database_monitoring_query_activity(event)

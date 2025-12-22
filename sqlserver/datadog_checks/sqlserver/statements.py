@@ -17,10 +17,8 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
-    default_json_event_encoding,
     obfuscate_sql_with_metadata,
 )
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.utils import is_azure_sql_database
@@ -537,11 +535,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 if not rows:
                     return
                 for event in self._rows_to_fqt_events(rows):
-                    self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                    self._check.database_monitoring_query_sample(event)
                 payload = self._to_metrics_payload(rows, self._max_query_metrics)
-                self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+                self._check.database_monitoring_query_metrics(payload)
                 for event in self._collect_plans(rows, cursor, deadline):
-                    self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                    self._check.database_monitoring_query_sample(event)
                     plans_submitted += 1
 
         self._check.count(

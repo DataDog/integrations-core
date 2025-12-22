@@ -6,8 +6,7 @@ import xml.etree.ElementTree as ET
 from time import time
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
-from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
@@ -260,9 +259,7 @@ class Deadlocks(DBMAsyncJob):
         # Send payload only if deadlocks found
         if rows:
             deadlocks_event = self._create_deadlock_event(rows)
-            payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
-            self._log.debug("Deadlocks payload: %s", str(payload))
-            self._check.database_monitoring_query_activity(payload)
+            self._check.database_monitoring_query_activity(deadlocks_event)
 
     def _create_deadlock_event(self, deadlock_rows):
         event = {

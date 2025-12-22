@@ -221,13 +221,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
             rows = self._get_activity(cursor)
             rows = self._normalize_rows(rows)
             event = self._create_activity_event(rows, tags)
-            payload = json.dumps(event, default=self._json_event_encoding)
-            self._check.database_monitoring_query_activity(payload)
-            self._check.histogram(
-                "dd.mysql.activity.collect_activity.payload_size",
-                len(payload),
-                tags=tags + self._check._get_debug_tags(),
-            )
+            self._check.database_monitoring_query_activity(event)
 
     def _should_collect_blocking_queries(self):
         # type: () -> bool

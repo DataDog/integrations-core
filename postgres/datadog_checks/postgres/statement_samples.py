@@ -32,7 +32,6 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, comput
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
-    default_json_event_encoding,
     obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json
@@ -488,15 +487,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         submitted_count = 0
         if self._explain_plan_coll_enabled:
             for e in self._collect_plans(rows):
-                self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
+                self._check.database_monitoring_query_sample(e)
                 submitted_count += 1
 
         if collect_activity:
             active_connections = self._get_active_connections()
             activity_event = self._create_activity_event(rows, active_connections)
-            self._check.database_monitoring_query_activity(
-                json.dumps(activity_event, default=default_json_event_encoding)
-            )
+            self._check.database_monitoring_query_activity(activity_event)
             self._check.histogram(
                 "dd.postgres.collect_activity_snapshot.time",
                 (time.time() - start_time) * 1000,
@@ -631,7 +628,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             },
         }
 
-        self._check.database_monitoring_query_sample(json.dumps(raw_query_event, default=default_json_event_encoding))
+        self._check.database_monitoring_query_sample(raw_query_event)
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):

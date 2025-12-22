@@ -629,10 +629,7 @@ class XESessionBase(DBMAsyncJob):
                     self._log.error(f"Error serializing batched payload for logging: {e}")
 
             # Send the batched payload
-            serialized_payload = json.dumps(batched_payload, default=default_json_event_encoding)
-            # Log payload size
-            self._log.debug(f"Batched {self.session_name} payload size: {len(serialized_payload)} bytes")
-            self._check.database_monitoring_query_activity(serialized_payload)
+            self._check.database_monitoring_query_activity(batched_payload)
 
         self._log.info(f"Found {len(events)} events from {self.session_name} session")
 
