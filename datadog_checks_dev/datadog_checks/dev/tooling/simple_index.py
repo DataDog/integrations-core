@@ -152,7 +152,7 @@ def generate_package_index(s3_client, bucket: str, package_name: str, use_pointe
     # Generate HTML index
     index_html = build_index_html(normalized_name, files)
 
-    # Upload to S3
+    # Upload to S3 (public access via bucket policy)
     index_key = f"{prefix}index.html"
     s3_client.put_object(
         Bucket=bucket,
@@ -160,7 +160,6 @@ def generate_package_index(s3_client, bucket: str, package_name: str, use_pointe
         Body=index_html.encode('utf-8'),
         ContentType='text/html',
         CacheControl='public, max-age=600',  # Cache for 10 minutes
-        ACL='public-read',
     )
 
     print(f"Updated index for {normalized_name} at s3://{bucket}/{index_key}")
@@ -193,7 +192,7 @@ def generate_root_index(s3_client, bucket: str) -> None:
     # Generate HTML index
     index_html = build_root_index_html(sorted(packages))
 
-    # Upload to S3
+    # Upload to S3 (public access via bucket policy)
     index_key = f"{prefix}index.html"
     s3_client.put_object(
         Bucket=bucket,
@@ -201,7 +200,6 @@ def generate_root_index(s3_client, bucket: str) -> None:
         Body=index_html.encode('utf-8'),
         ContentType='text/html',
         CacheControl='public, max-age=600',
-        ACL='public-read',
     )
 
     print(f"Updated root index at s3://{bucket}/{index_key}")

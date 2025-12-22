@@ -355,14 +355,13 @@ def upload_package(package_path, version, public=False):
                 raise
             # Doesn't exist, proceed with upload
 
-        # Upload pointer file with metadata (public for TUF access)
+        # Upload pointer file with metadata (public access via bucket policy)
         s3.upload_file(
             pointer_file_path,
             S3_BUCKET,
             pointer_s3_key,
             ExtraArgs={
                 "Metadata": {"digest": wheel_hash, "version": version},
-                "ACL": "public-read",
             },
         )
 
@@ -389,7 +388,7 @@ def upload_package(package_path, version, public=False):
                 attestation_file_path,
                 S3_BUCKET,
                 attestation_s3_key,
-                ExtraArgs={"ACL": "public-read", "ContentType": "application/json"}
+                ExtraArgs={"ContentType": "application/json"}
             )
             print(f"Uploaded attestation: {attestation_file_name}")
         else:

@@ -369,18 +369,17 @@ def generate_tuf_metadata(s3_client, bucket: str, keys: dict[str, dict], output_
     root_path = output_dir / 'root.json'
     root_path.write_bytes(root_metadata.to_bytes(serializer))
 
-    # Upload to S3 (both root.json and versioned)
+    # Upload to S3 (both root.json and versioned) - public access via bucket policy
     root_version = root_metadata.signed.version
     s3_client.upload_file(
-        str(root_path), bucket, 'metadata/root.json', ExtraArgs={'ACL': 'public-read'}
+        str(root_path), bucket, 'metadata/root.json'
     )
     s3_client.upload_file(
         str(root_path),
         bucket,
         f'metadata/{root_version}.root.json',
-        ExtraArgs={'ACL': 'public-read'},
     )
-    print(f"Uploaded root.json and {root_version}.root.json (public-read)")
+    print(f"Uploaded root.json and {root_version}.root.json")
 
     # 2. Generate and sign targets.json
     print("Generating targets.json...")
@@ -390,9 +389,9 @@ def generate_tuf_metadata(s3_client, bucket: str, keys: dict[str, dict], output_
     targets_path = output_dir / 'targets.json'
     targets_path.write_bytes(targets_metadata.to_bytes(serializer))
     s3_client.upload_file(
-        str(targets_path), bucket, 'metadata/targets.json', ExtraArgs={'ACL': 'public-read'}
+        str(targets_path), bucket, 'metadata/targets.json'
     )
-    print(f"Uploaded targets.json with {len(targets_metadata.signed.targets)} targets (public-read)")
+    print(f"Uploaded targets.json with {len(targets_metadata.signed.targets)} targets")
 
     # 3. Generate and sign snapshot.json
     print("Generating snapshot.json...")
@@ -402,9 +401,9 @@ def generate_tuf_metadata(s3_client, bucket: str, keys: dict[str, dict], output_
     snapshot_path = output_dir / 'snapshot.json'
     snapshot_path.write_bytes(snapshot_metadata.to_bytes(serializer))
     s3_client.upload_file(
-        str(snapshot_path), bucket, 'metadata/snapshot.json', ExtraArgs={'ACL': 'public-read'}
+        str(snapshot_path), bucket, 'metadata/snapshot.json'
     )
-    print("Uploaded snapshot.json (public-read)")
+    print("Uploaded snapshot.json")
 
     # 4. Generate and sign timestamp.json
     print("Generating timestamp.json...")
@@ -414,6 +413,6 @@ def generate_tuf_metadata(s3_client, bucket: str, keys: dict[str, dict], output_
     timestamp_path = output_dir / 'timestamp.json'
     timestamp_path.write_bytes(timestamp_metadata.to_bytes(serializer))
     s3_client.upload_file(
-        str(timestamp_path), bucket, 'metadata/timestamp.json', ExtraArgs={'ACL': 'public-read'}
+        str(timestamp_path), bucket, 'metadata/timestamp.json'
     )
-    print("Uploaded timestamp.json (public-read)")
+    print("Uploaded timestamp.json")
