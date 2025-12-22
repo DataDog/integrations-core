@@ -13,7 +13,7 @@
   stage: build
   trigger:
     project: DataDog/datadog-agent
-    branch: 7.75.x
+    branch: main
     # It's more convenient to directly show if downstream pipeline succeeded.
     strategy: depend
 
