@@ -45,7 +45,7 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 
 **For LLM Observability only** (without CCM and usage metrics), you can use a standard API key:
 
-1. Login to your [OpenAI Account][10].
+1. Log in to your [OpenAI Account][10].
 2. Navigate to **API keys** under **Organization settings**.
 3. Click **Create a new secret key**.
    - Ensure that the API key has **write** permission for **model capabilities** to invoke models in your LLM account.
