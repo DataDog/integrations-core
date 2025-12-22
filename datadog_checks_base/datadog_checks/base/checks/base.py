@@ -223,7 +223,9 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        self.log.debug("source: {kwargs.get('source', '')}")
+        self.log.debug(f"source: {kwargs.get('source', '')}")
+        self.log.debug(f"provider: {kwargs.get('provider', '')}")
+
 
         metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
         if not isinstance(metric_patterns, dict):
