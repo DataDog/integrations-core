@@ -58,12 +58,12 @@ else
 fi
 
 echo "=== Step 1: Build wheel and generate attestation ==="
-# Store absolute paths
+# Store repo root and integration path for later use
 REPO_ROOT="$(pwd)"
 INTEGRATION_PATH="$REPO_ROOT/$INTEGRATION"
 
-cd datadog_checks_dev
-ddev release build "$INTEGRATION_PATH"
+# Run ddev commands from repo root with relative integration name
+ddev release build "$INTEGRATION"
 BUILD_EXIT=$?
 
 if [ $BUILD_EXIT -ne 0 ]; then
@@ -108,7 +108,8 @@ echo ""
 
 echo "=== Step 7: Upload to S3 ==="
 echo "Uploading wheel, pointer, and attestation to S3..."
-ddev release upload --public "$INTEGRATION_PATH"
+# Run from repo root with relative integration name
+ddev release upload --public "$INTEGRATION"
 UPLOAD_EXIT=$?
 
 if [ $UPLOAD_EXIT -ne 0 ]; then
@@ -121,6 +122,7 @@ echo ""
 
 echo "=== Step 8: Generate and upload TUF metadata ==="
 echo "Generating TUF metadata from uploaded pointers..."
+# Run from repo root to generate TUF metadata
 ddev release sign --generate-keys
 SIGN_EXIT=$?
 
@@ -150,7 +152,7 @@ echo ""
 
 echo "=== Step 10: Update downloader root.json ==="
 echo "Fetching latest root.json from S3..."
-cd "$REPO_ROOT/datadog_checks_downloader"
+cd datadog_checks_downloader
 mkdir -p datadog_checks/downloader/data/repo/metadata
 
 aws s3 cp \
