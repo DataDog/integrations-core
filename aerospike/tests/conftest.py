@@ -62,13 +62,10 @@ def _get_conditions():
     # Wait for Aerospike to calculate latency/throughput metrics (only needed for versions <= 5.0)
     # We use the output of this docker exec command line for checking instead with the client,
     # because this is the command used to retrieve the metric and we know its output format.
-    aerospike_version = os.environ.get('AEROSPIKE_VERSION', '')
-    if aerospike_version:
-        parts = aerospike_version.split('.')[:2]
-        major_minor = (int(parts[0]), int(parts[1]))
-    else:
-        major_minor = (0, 0)
-    if major_minor <= (5, 0):
+    version = os.environ.get('AEROSPIKE_VERSION', '0.0')
+    major, minor = map(int, version.split('.')[:2])
+
+    if (major, minor) <= (5, 0):
         conditions.append(
             CheckCommandOutput(
                 ['docker', 'exec', 'aerospike', 'asinfo', '-v', 'throughput:'],
