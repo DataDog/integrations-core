@@ -69,12 +69,6 @@ class TUFDownloader:
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
         self.__repository_url_prefix = repository_url_prefix
 
-        # In local development mode (localhost), clear metadata cache to ensure
-        # we pick up newly signed metadata from 'ddev release sign --local'
-        if 'localhost' in self.__repository_url_prefix:
-            logger.info('Local development mode detected, clearing metadata cache')
-            self._clear_metadata_cache()
-
         self.__disable_verification = disable_verification
         self.__current_version = None
         self.__current_wheel_href = None
@@ -113,27 +107,137 @@ class TUFDownloader:
         # we use the same consistent snapshot to download targets.
         self.__updater.refresh()
 
-    def _clear_metadata_cache(self):
-        """Clear cached TUF metadata files (except root.json) to force refresh.
+    def _verify_attestation(self, pointer_data, wheel_path):
+        """Verify SLSA provenance attestation (mocked for POC).
 
-        This is used in local development to ensure the downloader picks up
-        newly signed metadata after running 'ddev release sign --local'.
+        Args:
+            pointer_data: Pointer file content (dict)
+            wheel_path: Path to downloaded wheel
 
-        We preserve root.json because it contains the root of trust keys.
+        Returns:
+            True if verification passes (always True in POC)
         """
-        metadata_dir = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata')
+        import json
+        import requests
 
-        # List of metadata files to clear (preserve root.json)
-        metadata_files = ['timestamp.json', 'snapshot.json', 'targets.json']
+        if 'attestation' not in pointer_data:
+            logger.warning('No attestation found in pointer file')
+            return True  # POC: allow downloads without attestation
 
-        for filename in metadata_files:
-            filepath = os.path.join(metadata_dir, filename)
-            try:
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-                    logger.debug('Cleared cached metadata: %s', filename)
-            except OSError as e:
-                logger.warning('Failed to clear cached metadata %s: %s', filename, e)
+        attestation_info = pointer_data['attestation']
+        attestation_uri = attestation_info['uri']
+        expected_digest = attestation_info['digest']
+
+        logger.info('Downloading attestation from: %s', attestation_uri)
+
+        try:
+            # Download attestation
+            if attestation_uri.startswith('s3://') or 's3.' in attestation_uri:
+                attestation_bytes = self._download_from_s3(attestation_uri)
+            else:
+                response = requests.get(attestation_uri, timeout=60)
+                response.raise_for_status()
+                attestation_bytes = response.content
+
+            # Verify attestation hash
+            actual_digest = hashlib.sha256(attestation_bytes).hexdigest()
+            if actual_digest != expected_digest:
+                logger.error('Attestation digest mismatch!')
+                logger.error('Expected: %s', expected_digest)
+                logger.error('Actual: %s', actual_digest)
+                return False
+
+            logger.info('✅ Attestation hash verified')
+
+            # Parse attestation
+            attestation = json.loads(attestation_bytes)
+
+            # Verify attestation structure
+            if attestation.get('_type') != 'https://in-toto.io/Statement/v0.1':
+                logger.warning('Invalid attestation type')
+                return False
+
+            if attestation.get('predicateType') != 'https://slsa.dev/provenance/v0.2':
+                logger.warning('Invalid predicate type')
+                return False
+
+            # Verify wheel is the subject
+            subjects = attestation.get('subject', [])
+            wheel_name = os.path.basename(wheel_path)
+
+            # Calculate wheel hash
+            with open(wheel_path, 'rb') as f:
+                wheel_digest = hashlib.sha256(f.read()).hexdigest()
+
+            wheel_in_subjects = False
+            for subject in subjects:
+                if subject.get('name') == wheel_name:
+                    subject_digest = subject.get('digest', {}).get('sha256')
+                    if subject_digest == wheel_digest:
+                        wheel_in_subjects = True
+                        break
+
+            if not wheel_in_subjects:
+                logger.error('Wheel not found in attestation subjects')
+                return False
+
+            logger.info('✅ [MOCK] Sigstore signature verified')
+            logger.info('✅ [MOCK] SLSA provenance verified')
+            logger.info('✅ Attestation verification passed')
+
+            # Save attestation alongside wheel
+            attestation_path = wheel_path.replace('.whl', '-attestation.json')
+            with open(attestation_path, 'wb') as f:
+                f.write(attestation_bytes)
+            logger.debug('Saved attestation to: %s', attestation_path)
+
+            return True
+
+        except Exception as e:
+            logger.error('Failed to verify attestation: %s', e)
+            return False  # POC: could be True to allow downloads without attestation
+
+    def _download_from_s3(self, s3_uri):
+        """Download file from S3 URI.
+
+        Args:
+            s3_uri: S3 URI (s3://bucket/key or https://...s3...amazonaws.com/key)
+
+        Returns:
+            bytes: Downloaded file content
+        """
+        from urllib.parse import urlparse
+
+        # Parse S3 URI
+        parsed = urlparse(s3_uri)
+
+        if parsed.scheme == 's3':
+            # s3://bucket/key format
+            bucket = parsed.netloc
+            key = parsed.path.lstrip('/')
+        else:
+            # https://bucket.s3.region.amazonaws.com/key or
+            # https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/key
+            # Extract bucket and key from URL
+            path_parts = parsed.path.lstrip('/').split('/', 1)
+            if len(path_parts) == 2:
+                key = path_parts[1]
+            else:
+                key = path_parts[0]
+
+            # Extract bucket from hostname
+            hostname_parts = parsed.hostname.split('.')
+            if 's3' in hostname_parts:
+                bucket = hostname_parts[0]
+            else:
+                bucket = parsed.hostname
+
+        logger.debug(f'Downloading from S3: bucket={bucket}, key={key}')
+
+        # Download from S3
+        s3_client = boto3.client('s3')
+        response = s3_client.get_object(Bucket=bucket, Key=key)
+        return response['Body'].read()
 
     def __compute_target_paths(self, target_relpath):
         # The path used to query TUF needs to be a path-relative-URL string
@@ -215,19 +319,6 @@ class TUFDownloader:
         if not wheel_uri or not wheel_digest:
             raise ValueError(f"Invalid pointer file: missing uri or digest")
 
-        # Rewrite wheel URI for local development if using local MinIO
-        # Check if repository URL is localhost (local MinIO)
-        if 'localhost' in self.__repository_url_prefix:
-            # Extract the path from the production URI
-            # Example: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/... → simple/...
-            from urllib.parse import urlparse
-            production_parsed = urlparse(wheel_uri)
-            wheel_path = production_parsed.path.lstrip('/')
-
-            # Reconstruct using local MinIO endpoint
-            wheel_uri = f'{self.__repository_url_prefix}/{wheel_path}'
-            logger.debug(f'Rewrote wheel URI for local development: {wheel_uri}')
-
         # Extract wheel filename from URI
         wheel_filename = wheel_uri.split('/')[-1]
 
@@ -240,47 +331,24 @@ class TUFDownloader:
             # Parse S3 URI to extract bucket and key
             parsed = urlparse(wheel_uri)
 
-            # Check if this is a local MinIO URL (localhost)
-            if parsed.hostname and 'localhost' in parsed.hostname:
-                # Local MinIO format: http://localhost:9000/bucket-name/path/to/file
-                # Extract bucket and key from path
-                path_parts = parsed.path.lstrip('/').split('/', 1)
-                if len(path_parts) < 2:
-                    raise ValueError(f"Invalid local MinIO URI format: {wheel_uri}")
+            # Production AWS S3
+            # Example: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/datadog-postgres/wheel.whl
+            # Extract bucket name from hostname (format: bucket.s3.region.amazonaws.com)
+            bucket_name = parsed.hostname.split('.')[0]
 
-                bucket_name = path_parts[0]
-                s3_key = path_parts[1]
-                endpoint_url = f"{parsed.scheme}://{parsed.netloc}"
+            # Extract S3 key (path without leading /)
+            s3_key = parsed.path.lstrip('/')
 
-                logger.debug(f'Parsed local MinIO URI: bucket={bucket_name}, key={s3_key}, endpoint={endpoint_url}')
-
-                # Use boto3 with MinIO credentials
-                s3_client = boto3.client(
-                    's3',
-                    endpoint_url=endpoint_url,
-                    aws_access_key_id='minioadmin',
-                    aws_secret_access_key='minioadmin',
-                    region_name='us-east-1'  # MinIO doesn't care about region
-                )
+            # Extract region from hostname if present
+            if '.s3.' in parsed.hostname and '.amazonaws.com' in parsed.hostname:
+                region = parsed.hostname.split('.s3.')[1].split('.amazonaws.com')[0]
             else:
-                # Production AWS S3
-                # Example: https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/simple/datadog-postgres/wheel.whl
-                # Extract bucket name from hostname (format: bucket.s3.region.amazonaws.com)
-                bucket_name = parsed.hostname.split('.')[0]
+                region = None
 
-                # Extract S3 key (path without leading /)
-                s3_key = parsed.path.lstrip('/')
+            logger.debug(f'Parsed S3 URI: bucket={bucket_name}, key={s3_key}, region={region}')
 
-                # Extract region from hostname if present
-                if '.s3.' in parsed.hostname and '.amazonaws.com' in parsed.hostname:
-                    region = parsed.hostname.split('.s3.')[1].split('.amazonaws.com')[0]
-                else:
-                    region = None
-
-                logger.debug(f'Parsed S3 URI: bucket={bucket_name}, key={s3_key}, region={region}')
-
-                # Use boto3 to download with AWS credentials
-                s3_client = boto3.client('s3', region_name=region)
+            # Use boto3 to download with AWS credentials
+            s3_client = boto3.client('s3', region_name=region)
 
             response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
             wheel_bytes = response['Body'].read()
@@ -297,6 +365,11 @@ class TUFDownloader:
                 f.write(wheel_bytes)
 
             logger.info(f'Wheel verified and saved: {wheel_abspath}')
+
+            # Verify attestation
+            if not self._verify_attestation(pointer, wheel_abspath):
+                raise ValueError(f'Attestation verification failed for {standard_distribution_name}')
+
             return wheel_abspath
 
         except Exception as err:
