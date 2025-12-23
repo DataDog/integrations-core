@@ -59,9 +59,10 @@ def _get_conditions():
         WaitFor(init_db),
     ]
 
-    # Wait for Aerospike to calculate latency/throughput metrics (only needed for versions <= 5.0)
+    # Wait for Aerospike to calculate latency/throughput metrics.
     # We use the output of this docker exec command line for checking instead with the client,
     # because this is the command used to retrieve the metric and we know its output format.
+    # Version 5.0 and earlier use the throughput command, while version 5.1 and later use the latencies command.
     version = os.environ.get('AEROSPIKE_VERSION', '0.0')
     major, minor = map(int, version.split('.')[:2])
 
@@ -70,6 +71,19 @@ def _get_conditions():
             CheckCommandOutput(
                 ['docker', 'exec', 'aerospike', 'asinfo', '-v', 'throughput:'],
                 patterns=[r'\{test\}-(read|write)'],
+                attempts=30,
+                wait=1,
+            )
+        )
+    else:
+        # For version 5.1+, latencies use a different command
+        # Pattern requires ':msec' to ensure actual data exists (empty is '{test}-read:;')
+        # Not ready: batch-index:;{test}-read:;{test}-write:;{test}-udf:;{test}-query:
+        # Ready: ...;{test}-read:msec,...;{test}-write:msec,...;...
+        conditions.append(
+            CheckCommandOutput(
+                ['docker', 'exec', 'aerospike', 'asinfo', '-v', 'latencies:'],
+                patterns=[r'\{test\}-(read|write):msec'],
                 attempts=30,
                 wait=1,
             )

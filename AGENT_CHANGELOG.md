@@ -1,3 +1,7 @@
+## Datadog Agent version [7.73.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7732)
+
+* Datadog Checks Base [37.23.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+
 ## Datadog Agent version [7.73.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7731)
 
 * Datadog Checks Base [37.23.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
