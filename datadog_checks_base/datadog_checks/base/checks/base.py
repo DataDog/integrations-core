@@ -195,6 +195,7 @@ class AgentCheck(object):
         instance = instances[0] if instances else None
 
         self.check_id = ''
+        self.provider = ''
         self.name = name  # type: str
         self.init_config = init_config  # type: InitConfigType
         self.agentConfig = agentConfig  # type: AgentConfigType
@@ -219,7 +220,7 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        self.log.debug(f"provider: {kwargs.get('provider', '')}")
+        self.log.debug(f"provider: {self.provider}")
 
 
         metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
