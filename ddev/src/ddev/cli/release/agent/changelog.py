@@ -85,10 +85,10 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
                         changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url})\n')
             else:
                 changelog_contents.write('* There are no new integrations for this version of the Agent\n')
-            
+
             new_changes = any(ver[0] != "1.0.0" for ver in version_changes.values())
-            changelog_contents.write("### New Changes\n") 
-            if new_changes:   
+            changelog_contents.write("### New Changes\n")
+            if new_changes:
                 for name, ver in version_changes.items():
                     display_name = get_display_name(app, name)
                     breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
@@ -111,6 +111,7 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
         dest.write_text(changelog_contents.getvalue())
     else:
         app.display(changelog_contents.getvalue())
+
 
 def get_display_name(app: Application, name: str) -> str:
     try:
