@@ -6,3 +6,4 @@ from ddev.utils.platform import Platform
 
 PLATFORM = Platform()
 APPLICATION = Application(lambda code: print(f"Applicatione exited with code: {code}"), 1, False, False)
+LOCAL_REPO_BRANCH = "ddev-testing"
