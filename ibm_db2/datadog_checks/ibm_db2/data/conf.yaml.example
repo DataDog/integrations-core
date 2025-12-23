@@ -42,6 +42,8 @@ instances:
 
     ## @param host - string - optional
     ## The hostname used to connect to a remote or uncataloged database.
+    ## Note: optional only if the Database DSN's defined in db2cli.ini or db2dsdriver.cfg is copied to
+    ## agents clidriver dirctory which is usually under `/opt/datadog-agent/embedded/lib/python3.9/site-packages/clidriver/cfg`
     #
     # host: <HOSTNAME>
 
