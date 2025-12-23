@@ -56,6 +56,8 @@ def test_changelog_since_to(fake_changelog, ddev, mocker):
     expected_output = (
         """## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
 
+### New Integrations
+* There are no new integrations for this version of the Agent
 ### New Changes
 * bar [2.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md) **BREAKING CHANGE**
 """
@@ -77,15 +79,21 @@ def repo_with_fake_changelog(repo_with_history, config_file):
 ## Datadog Agent version [7.41.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7410)
 
 ### New Integrations
+* There are no new integrations for this version of the Agent
+### New Changes
 * datadog_checks_downloader [4.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
 
 ## Datadog Agent version [7.40.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7400)
 
 ### New Integrations
 * onlywin [1.0.0](https://github.com/DataDog/integrations-core/blob/master/onlywin/CHANGELOG.md)
+### New Changes
+* There are no new changes for this version of the Agent
 
 ## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
 
+### New Integrations
+* There are no new integrations for this version of the Agent
 ### New Changes
 * bar [2.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md) **BREAKING CHANGE**
 """
@@ -98,9 +106,9 @@ def repo_with_fake_changelog(repo_with_history, config_file):
 
 ### New Integrations
 * bar [1.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md)
-* datadog_checks_base [2.1.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 ### New Changes
 * foo [1.5.0](https://github.com/DataDog/integrations-core/blob/master/foo/CHANGELOG.md)
+* datadog_checks_base [2.1.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 """
     )
     return (

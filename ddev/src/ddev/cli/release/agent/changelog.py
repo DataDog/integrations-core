@@ -75,25 +75,29 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
 
-            new_integration = any(ver[1] for ver in version_changes.values())
+            changelog_contents.write('### New Integrations\n')
+            new_integration = any(ver[0] == "1.0.0" for ver in version_changes.values())
             if new_integration:
-                changelog_contents.write('### New Integrations\n')
                 for name, ver in version_changes.items():
-                    if ver[1]:
+                    if ver[0] == "1.0.0":
                         display_name = get_display_name(app, name)
                         changelog_url = check_changelog_url.format(name)
                         changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url})\n')
-
-            new_change = any(not ver[1] for ver in version_changes.values())
-            if new_change:
-                changelog_contents.write("### New Changes\n")
+            else:
+                changelog_contents.write('* There are no new integrations for this version of the Agent\n')
+            
+            new_changes = any(ver[0] != "1.0.0" for ver in version_changes.values())
+            changelog_contents.write("### New Changes\n") 
+            if new_changes:   
                 for name, ver in version_changes.items():
-                    if not ver[1]:
-                        display_name = get_display_name(app, name)
-                        breaking_notice = " **BREAKING CHANGE**" if ver[2] else ""
-                        changelog_url = check_changelog_url.format(name)
+                    display_name = get_display_name(app, name)
+                    breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
+                    changelog_url = check_changelog_url.format(name)
+                    if ver[0] != "1.0.0":
                         changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url}){breaking_notice}\n')
-            # add an extra line to separate the release block
+            else:
+                changelog_contents.write('* There are no new changes for this version of the Agent\n')
+                # add an extra line to separate the release block
             changelog_contents.write('\n')
 
     # save the changelog on disk if --write was passed
@@ -107,7 +111,6 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
         dest.write_text(changelog_contents.getvalue())
     else:
         app.display(changelog_contents.getvalue())
-
 
 def get_display_name(app: Application, name: str) -> str:
     try:
