@@ -341,71 +341,86 @@ def upload_package(package_path, version, public=False):
         if not os.path.exists(pointer_file_path):
             raise FileNotFoundError(f"Pointer file not found: {pointer_file_path}")
 
-        # Check for idempotency: if pointer already exists with same hash, skip
+        # Check for idempotency: if pointer already exists with same hash, skip wheel/pointer upload
         pointer_s3_key = f"pointers/{package_name}/{pointer_file_name}"
+        skip_wheel_upload = False
         try:
             existing_pointer = s3.head_object(Bucket=S3_BUCKET, Key=pointer_s3_key)
             existing_digest = existing_pointer.get("Metadata", {}).get("digest", "")
             if existing_digest == wheel_hash:
-                print(f"Version {version} already uploaded with same hash, skipping")
-                return
-            print(f"Warning: Version {version} exists with different hash, overwriting")
+                print(f"Version {version} already uploaded with same hash, skipping wheel/pointer")
+                skip_wheel_upload = True
+            else:
+                print(f"Warning: Version {version} exists with different hash, overwriting")
         except ClientError as e:
             if e.response["Error"]["Code"] != "404":
                 raise
             # Doesn't exist, proceed with upload
 
-        # Upload pointer file with metadata (public access via bucket policy)
-        s3.upload_file(
-            pointer_file_path,
-            S3_BUCKET,
-            pointer_s3_key,
-            ExtraArgs={
-                "Metadata": {"digest": wheel_hash, "version": version},
-            },
-        )
+        if not skip_wheel_upload:
+            # Upload pointer file with metadata (public access via bucket policy)
+            s3.upload_file(
+                pointer_file_path,
+                S3_BUCKET,
+                pointer_s3_key,
+                ExtraArgs={
+                    "Metadata": {"digest": wheel_hash, "version": version},
+                },
+            )
 
-        # Upload wheel file with hash metadata (private, requires authentication)
-        wheel_s3_key = f"simple/{package_name}/{wheel_file_name}"
-        s3.upload_file(
-            wheel_file_path,
-            S3_BUCKET,
-            wheel_s3_key,
-            ExtraArgs={"Metadata": {"sha256": wheel_hash}},
-        )
+            # Upload wheel file with hash metadata (private, requires authentication)
+            wheel_s3_key = f"simple/{package_name}/{wheel_file_name}"
+            s3.upload_file(
+                wheel_file_path,
+                S3_BUCKET,
+                wheel_s3_key,
+                ExtraArgs={"Metadata": {"sha256": wheel_hash}},
+            )
 
-        print(
-            f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}"
-        )
+            print(
+                f"Uploaded {pointer_file_name} and {wheel_file_name} to S3 bucket {S3_BUCKET}"
+            )
 
-        # Upload attestation file
+        # Upload attestation file (always check, even if wheel/pointer skipped)
         attestation_file_name = f"{package_name}-{version}-attestation.json"
         attestation_file_path = os.path.join(dist_dir, attestation_file_name)
+        attestation_s3_key = f"attestations/{package_name}/{attestation_file_name}"
 
         print(f"Looking for attestation at: {attestation_file_path}")
         if os.path.exists(attestation_file_path):
-            attestation_s3_key = f"attestations/{package_name}/{attestation_file_name}"
-            print(f"Uploading attestation to: s3://{S3_BUCKET}/{attestation_s3_key}")
-            s3.upload_file(
-                attestation_file_path,
-                S3_BUCKET,
-                attestation_s3_key,
-                ExtraArgs={"ContentType": "application/json"}
-            )
-            print(f"✅ Uploaded attestation: {attestation_file_name}")
+            # Check if attestation already exists in S3
+            try:
+                s3.head_object(Bucket=S3_BUCKET, Key=attestation_s3_key)
+                print(f"Attestation already exists in S3, skipping")
+            except ClientError as e:
+                if e.response["Error"]["Code"] == "404":
+                    # Doesn't exist, upload it
+                    print(f"Uploading attestation to: s3://{S3_BUCKET}/{attestation_s3_key}")
+                    s3.upload_file(
+                        attestation_file_path,
+                        S3_BUCKET,
+                        attestation_s3_key,
+                        ExtraArgs={"ContentType": "application/json"}
+                    )
+                    print(f"✅ Uploaded attestation: {attestation_file_name}")
+                else:
+                    raise
         else:
             print(f"❌ Warning: No attestation file found at {attestation_file_path}")
 
-        # Generate indexes
-        from datadog_checks.dev.tooling.simple_index import (
-            generate_package_index,
-            generate_root_index,
-        )
+        # Generate indexes (only if wheel was uploaded or attestation was uploaded)
+        if not skip_wheel_upload:
+            from datadog_checks.dev.tooling.simple_index import (
+                generate_package_index,
+                generate_root_index,
+            )
 
-        print(f"Generating simple indexes...")
-        generate_package_index(s3, S3_BUCKET, package_name, use_pointers=True)
-        generate_root_index(s3, S3_BUCKET)
-        print(f"Updated simple indexes for {package_name}")
+            print(f"Generating simple indexes...")
+            generate_package_index(s3, S3_BUCKET, package_name, use_pointers=True)
+            generate_root_index(s3, S3_BUCKET)
+            print(f"Updated simple indexes for {package_name}")
+        else:
+            print(f"Skipping index generation (no new uploads)")
 
     else:
         # Upload only the wheel to organized path
