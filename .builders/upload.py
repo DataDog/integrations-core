@@ -167,7 +167,9 @@ def upload(targets_dir):
                         # PyPI artifacts never change, so we don't need to upload them again.
                         if artifact.exists():
                             print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists')
-                            lockfile_lines.append(f'{project_name} @ {artifact.name}')
+                            artifact.reload()
+                            existing_sha256 = artifact.metadata['sha256']
+                            lockfile_lines.append(f'{project_name} @ {index_url}/{artifact_name}#sha256={existing_sha256}')
                             continue
                         else:
                             lockfile_lines.append(f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}')
@@ -186,7 +188,8 @@ def upload(targets_dir):
                             if most_recent_wheel.metadata['sha256'] == sha256_digest:
                                 print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists '
                                     'with the same hash')
-                                lockfile_lines.append(f'{project_name} @ {most_recent_wheel.name}')
+                                existing_artifact_name = PurePosixPath(most_recent_wheel.name).name # GCS blob name use forward slashes
+                                lockfile_lines.append(f'{project_name} @ {index_url}/{existing_artifact_name}#sha256={sha256_digest}')
                                 continue
 
                         # If we get here, that means that this is a new dependency
