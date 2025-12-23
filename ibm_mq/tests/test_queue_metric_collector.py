@@ -259,3 +259,50 @@ def test_discover_queues_resilience_with_broken_queue(instance, aggregator, get_
             1,
             tags=['queue:BROKEN.QUEUE.1', 'ibm_error_code:2035', 'ibm_error:MQRC_NOT_AUTHORIZED'],
         )
+
+
+@pytest.mark.parametrize(
+    'add_description_tags,normalize_description_tags,queue_desc,expected_desc_tag',
+    [
+        (False, True, b'Test Description', None),  # Disabled
+        (True, True, b'Test Description', 'queue_desc:test_description'),  # Enabled + normalized
+        (True, False, b'Test Description', 'queue_desc:Test Description'),  # Enabled + raw
+        (True, True, b'', None),  # Empty description
+    ],
+)
+def test_queue_description_tags(
+    instance, add_description_tags, normalize_description_tags, queue_desc, expected_desc_tag, get_check
+):
+    """Test queue description tags with different config options."""
+    instance['add_description_tags'] = add_description_tags
+    instance['normalize_description_tags'] = normalize_description_tags
+
+    check = get_check(instance)
+    collector = check.queue_metric_collector
+
+    queue_manager = Mock()
+    queue_name = 'TEST.QUEUE'
+
+    with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute') as PCFExecute:
+        pcf_mock = PCFExecute.return_value
+
+        queue_info = {
+            pymqi.CMQC.MQCA_Q_NAME: queue_name.encode(),
+            pymqi.CMQC.MQIA_USAGE: pymqi.CMQC.MQUS_NORMAL,
+            pymqi.CMQC.MQIA_CURRENT_Q_DEPTH: 10,
+            pymqi.CMQC.MQIA_MAX_Q_DEPTH: 100,
+        }
+        if queue_desc:
+            queue_info[pymqi.CMQC.MQCA_Q_DESC] = queue_desc
+
+        pcf_mock.MQCMD_INQUIRE_Q.return_value = [queue_info]
+        collector.send_metric = Mock()
+
+        base_tags = collector.config.tags + [f'queue:{queue_name}']
+        enriched_tags = collector.queue_stats(queue_manager, queue_name, base_tags)
+
+        if expected_desc_tag:
+            assert expected_desc_tag in enriched_tags
+        else:
+            desc_tags = [t for t in enriched_tags if t.startswith('queue_desc:')]
+            assert len(desc_tags) == 0
