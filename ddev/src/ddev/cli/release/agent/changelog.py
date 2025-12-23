@@ -74,18 +74,30 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
         else:
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
-            for name, ver in version_changes.items():
-                try:
-                    display_name = app.repo.integrations.get(name).display_name
-                    display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
-                # OSError is raised if the integration path does not exist - likely a deleted or migrated integration
-                except OSError:
-                    display_name = REMOVED_INTEGRATIONS.get(name, name)
 
-                breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
-                changelog_url = check_changelog_url.format(name)
-                changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url}){breaking_notice}\n')
-            # add an extra line to separate the release block
+            changelog_contents.write('### New Integrations\n')
+            new_integration = any(ver[0] == "1.0.0" for ver in version_changes.values())
+            if new_integration:
+                for name, ver in version_changes.items():
+                    if ver[0] == "1.0.0":
+                        display_name = get_display_name(app, name)
+                        changelog_url = check_changelog_url.format(name)
+                        changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url})\n')
+            else:
+                changelog_contents.write('* There are no new integrations for this version of the Agent\n')
+
+            new_changes = any(ver[0] != "1.0.0" for ver in version_changes.values())
+            changelog_contents.write("### New Changes\n")
+            if new_changes:
+                for name, ver in version_changes.items():
+                    display_name = get_display_name(app, name)
+                    breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
+                    changelog_url = check_changelog_url.format(name)
+                    if ver[0] != "1.0.0":
+                        changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url}){breaking_notice}\n')
+            else:
+                changelog_contents.write('* There are no new changes for this version of the Agent\n')
+                # add an extra line to separate the release block
             changelog_contents.write('\n')
 
     # save the changelog on disk if --write was passed
@@ -99,3 +111,14 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
         dest.write_text(changelog_contents.getvalue())
     else:
         app.display(changelog_contents.getvalue())
+
+
+def get_display_name(app: Application, name: str) -> str:
+    try:
+        display_name = app.repo.integrations.get(name).display_name
+        display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
+    # OSError is raised if the integration path does not exist - likely a deleted or migrated integration
+    except OSError:
+        display_name = REMOVED_INTEGRATIONS.get(name, name)
+
+    return display_name
