@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.26.1 / 2025-12-22
+
+***Fixed***:
+
+* Updates perf counters to ignore case. Fixes an error with double counting in exchange.activemanager.database_mounted metric. ([#22028](https://github.com/DataDog/integrations-core/pull/22028))
+
 ## 37.26.0 / 2025-12-19
 
 ***Security***:
