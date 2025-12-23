@@ -97,13 +97,18 @@ echo ""
 echo "Detected version: $VERSION"
 echo ""
 
+# Convert folder name to package name (replace underscores with dashes)
+PACKAGE_NAME="datadog-${INTEGRATION//_/-}"
+echo "Package name: $PACKAGE_NAME"
+echo ""
+
 echo "=== Step 5: Show pointer content ==="
-cat "$DIST_DIR/datadog-${INTEGRATION}-${VERSION}.pointer"
+cat "$DIST_DIR/${PACKAGE_NAME}-${VERSION}.pointer"
 echo ""
 
 echo "=== Step 6: Show attestation structure ==="
 echo "Attestation file preview:"
-cat "$DIST_DIR/datadog-${INTEGRATION}-${VERSION}-attestation.json" | python3 -m json.tool | head -40
+cat "$DIST_DIR/${PACKAGE_NAME}-${VERSION}-attestation.json" | python3 -m json.tool | head -40
 echo ""
 
 echo "=== Step 7: Upload to S3 ==="
@@ -138,13 +143,13 @@ echo "=== Step 9: Verify S3 bucket contents ==="
 echo "Checking S3 bucket structure..."
 echo ""
 echo "Wheels:"
-aws s3 ls "s3://$S3_BUCKET/simple/datadog-${INTEGRATION}/" --region "$S3_REGION" || echo "  (none)"
+aws s3 ls "s3://$S3_BUCKET/simple/${PACKAGE_NAME}/" --region "$S3_REGION" || echo "  (none)"
 echo ""
 echo "Pointers:"
-aws s3 ls "s3://$S3_BUCKET/pointers/datadog-${INTEGRATION}/" --region "$S3_REGION" || echo "  (none)"
+aws s3 ls "s3://$S3_BUCKET/pointers/${PACKAGE_NAME}/" --region "$S3_REGION" || echo "  (none)"
 echo ""
 echo "Attestations:"
-aws s3 ls "s3://$S3_BUCKET/attestations/datadog-${INTEGRATION}/" --region "$S3_REGION" || echo "  (none)"
+aws s3 ls "s3://$S3_BUCKET/attestations/${PACKAGE_NAME}/" --region "$S3_REGION" || echo "  (none)"
 echo ""
 echo "TUF Metadata:"
 aws s3 ls "s3://$S3_BUCKET/metadata/" --region "$S3_REGION" || echo "  (none)"
@@ -177,10 +182,10 @@ echo "✅ Downloader environment ready"
 echo ""
 
 echo "=== Step 12: Test downloader with attestation verification ==="
-echo "Downloading datadog-${INTEGRATION} with TUF and attestation verification..."
+echo "Downloading ${PACKAGE_NAME} with TUF and attestation verification..."
 echo ""
 
-DOWNLOAD_OUTPUT=$(python -m datadog_checks.downloader "datadog-${INTEGRATION}" \
+DOWNLOAD_OUTPUT=$(python -m datadog_checks.downloader "${PACKAGE_NAME}" \
     --repository "https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com" \
     --verbose 4 2>&1)
 
@@ -226,6 +231,7 @@ echo "=============================================="
 echo ""
 echo "Summary:"
 echo "  Integration: $INTEGRATION"
+echo "  Package: $PACKAGE_NAME"
 echo "  Version: $VERSION"
 echo "  S3 Bucket: s3://$S3_BUCKET"
 echo "  Downloaded Wheel: $WHEEL_PATH"
@@ -238,9 +244,9 @@ echo "  ✅ Downloader TUF verification"
 echo "  ✅ Attestation verification"
 echo ""
 echo "S3 Structure:"
-echo "  - s3://$S3_BUCKET/simple/datadog-${INTEGRATION}/"
-echo "  - s3://$S3_BUCKET/pointers/datadog-${INTEGRATION}/"
-echo "  - s3://$S3_BUCKET/attestations/datadog-${INTEGRATION}/"
+echo "  - s3://$S3_BUCKET/simple/${PACKAGE_NAME}/"
+echo "  - s3://$S3_BUCKET/pointers/${PACKAGE_NAME}/"
+echo "  - s3://$S3_BUCKET/attestations/${PACKAGE_NAME}/"
 echo "  - s3://$S3_BUCKET/metadata/"
 echo ""
 echo "Next steps:"
