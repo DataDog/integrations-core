@@ -218,12 +218,8 @@ class TUFDownloader:
         else:
             # https://bucket.s3.region.amazonaws.com/key or
             # https://test-public-integration-wheels.s3.eu-north-1.amazonaws.com/key
-            # Extract bucket and key from URL
-            path_parts = parsed.path.lstrip('/').split('/', 1)
-            if len(path_parts) == 2:
-                key = path_parts[1]
-            else:
-                key = path_parts[0]
+            # For bucket-in-hostname format, the entire path is the S3 key
+            key = parsed.path.lstrip('/')
 
             # Extract bucket from hostname
             hostname_parts = parsed.hostname.split('.')
