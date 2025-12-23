@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b53ac38a-5ec9-4ad7-bc86-58be53f3c5ee",
   "app_id": "box",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

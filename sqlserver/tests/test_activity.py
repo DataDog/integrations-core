@@ -26,7 +26,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
 )
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_YEAR
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -190,7 +190,9 @@ def test_collect_load_activity(
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
+    expected_instance_tags.add(
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower())
+    )
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -271,7 +273,7 @@ def test_collect_load_activity(
 
 
 @pytest.mark.flaky
-@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_YEAR == 2019, reason='Test flakes on this set up')
 @pytest.mark.skipif(running_on_windows_ci(), reason="Test disabled due to failure impacting master pipeline")
 def test_activity_nested_blocking_transactions(
     aggregator,
@@ -832,7 +834,7 @@ def _expected_dbm_instance_tags(check):
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
 

@@ -114,9 +114,9 @@ instances:
     ##   ```
     #
     # extra_metrics:
-    #   - coredns_template_matches_total: template_matches_count
-    #   - coredns_template_template_failures_total: template_templating_failures_count
-    #   - coredns_template_rr_failures_total: template_resource_record_failures_count
+    #   - coredns_template_matches: template_matches
+    #   - coredns_template_template_failures: template_templating_failures
+    #   - coredns_template_rr_failures: template_resource_record_failures
 
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either

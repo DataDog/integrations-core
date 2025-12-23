@@ -48,6 +48,7 @@ files:
         type: string
     - name: password
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
+      secret: true
       value:
         type: string
     - name: server_version
@@ -80,8 +81,10 @@ files:
       default: false
     - name: database_identifier
       description: |
-        Controls how the database is identified. The default value is the resolved hostname for the instance,
-        which respects the `reported_hostname` option.
+        Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+        billable instance.
+
+        The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
 
         This value will be used as-is for the display name of the instance but will be normalized
         when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -534,7 +537,7 @@ files:
             Enable collection of sys.configurations. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -890,6 +893,13 @@ files:
             type: boolean
             example: false
             display_default: false
+        - name: replace_bind_parameter
+          description: |
+            Set to `true` to replace bind parameters (e.g. `@p1`) with `?` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
         - name: keep_trailing_semicolon
           description: |
             Set to `true` to keep trailing semicolons in your normalized SQL statements.
@@ -909,10 +919,10 @@ files:
         Configure the collection of raw query statements in query activity, and XE events.
         To collect raw query statements from XE events, set `collect_xe.query_completions.enabled` and
         `collect_xe.query_errors.enabled` to `true`.
-        Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+        Raw query statements may contain sensitive information (e.g., passwords)
         or personally identifiable information in query text.
-        Enabling this option will allow the collection and ingestion of raw query statements and
-        execution plans into Datadog, which can then become viewable in query samples or explain plans.
+        Enabling this option will allow the collection and ingestion of raw query statements 
+        into Datadog, which can then become viewable in query samples.
         This option is disabled by default.
         Note: Collection of raw query statements is currently in preview.
         If you are interested in participating, please reach out to your Datadog Customer Success Manager.
@@ -1004,7 +1014,16 @@ files:
           value:
             type: number
             example: 600
+        - name: max_tables
+          description: |
+            Set the maximum number of tables to collect. Defaults to 300.
+          value:
+            type: integer
+            example: 300
         - name: max_execution_time
+          deprecation:
+            Agent version: 7.74.0
+            Migration: This option no longer has any effect.
           description: |
             Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
             Capped by `collect_schemas.collection_interval`

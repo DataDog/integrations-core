@@ -2,6 +2,37 @@
 
 <!-- towncrier release notes start -->
 
+## 8.4.0 / 2025-11-26
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 8.3.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add new metrics collected from the INFO command ([#21555](https://github.com/DataDog/integrations-core/pull/21555))
+
+## 8.2.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.1.1 / 2025-09-17 / Agent 7.71.0
+
+***Fixed***:
+
+* Downgrade redis module ([#21366](https://github.com/DataDog/integrations-core/pull/21366))
+
+## 8.1.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
 ## 8.0.0 / 2025-06-12 / Agent 7.68.0
 
 ***Changed***:

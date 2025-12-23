@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "bfa2f276-da05-4153-b8d4-48d4e41f5e40",
   "app_id": "sql-server",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -69,6 +70,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
+      "process_signatures": [
+        "sqlservr"
+      ],
       "source_type_id": 45,
       "auto_install": true
     },

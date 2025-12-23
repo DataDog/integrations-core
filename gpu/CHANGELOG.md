@@ -1,5 +1,24 @@
 # CHANGELOG - GPU
 
+## 0.5.0
+
+***Added***:
+
+* Added Xid errors count metric: `gpu.errors.xid.total`.
+
+## 0.4.1
+
+***Added***:
+
+* Added GPU device level memory metrics: `gpu.memory.free`, `gpu.memory.reserved`.
+* Renamed gpu.core.usage to gpu.process.core.usage for naming consistency.
+* Renamed gpu.memory.usage to gpu.process.memory.usage for naming consistency.
+
+## 0.4.0
+
+***Added***:
+
+* Added BAR1 GPU memory metrics: `gpu.memory.bar1.free`, `gpu.memory.bar1.total`, `gpu.memory.bar1.used`.
 
 ## 0.3.0
 

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "0451c670-94dc-490e-86b7-b23b5a7cdceb",
   "app_id": "juniper-srx-firewall",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -23,7 +24,22 @@
       },
       {
         "caption": "Juniper SRX Firewall - Security Logs",
-        "image_url": "images/juniper_srx_firewall_security_logs.png",
+        "image_url": "images/juniper_srx_firewall_security_logs_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Security Logs",
+        "image_url": "images/juniper_srx_firewall_security_logs_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Security Logs",
+        "image_url": "images/juniper_srx_firewall_security_logs_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Juniper SRX Firewall - Security Logs",
+        "image_url": "images/juniper_srx_firewall_security_logs_4.png",
         "media_type": "image"
       },
       {

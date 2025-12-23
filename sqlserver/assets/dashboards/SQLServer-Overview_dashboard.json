@@ -927,7 +927,7 @@
                   "queries": [
                     {
                       "search": {
-                        "query": "dbm_type:activity $host dbms:sqlserver"
+                        "query": "dbm_type:activity $host source:sqlserver dbms:sqlserver"
                       },
                       "data_source": "database_queries",
                       "compute": {
@@ -984,7 +984,7 @@
                   "queries": [
                     {
                       "search": {
-                        "query": "dbm_type:activity $host dbms:sqlserver"
+                        "query": "dbm_type:activity $host source:sqlserver dbms:sqlserver"
                       },
                       "data_source": "database_queries",
                       "compute": {

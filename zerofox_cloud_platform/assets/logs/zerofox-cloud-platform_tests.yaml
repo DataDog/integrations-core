@@ -1,0 +1,424 @@
+id: zerofox-cloud-platform
+tests:
+ -
+  sample: |-
+    {
+      "severity" : 1,
+      "notes" : "",
+      "rule_name" : "Advanced Domain Analysis - Typosquat Match",
+      "perpetrator" : {
+        "name" : "Concealed",
+        "id" : 2031456789,
+        "display_name" : "Concealed",
+        "type" : "page",
+        "url" : "hxxp://example.com",
+        "content" : "Test content",
+        "timestamp" : "2017-01-10T11:00:00+00:00",
+        "network" : "domains"
+      },
+      "escalated" : false,
+      "content_created_at" : "2017-01-10T11:00:00+00:00",
+      "rule_group_id" : 132,
+      "alert_type" : "search query",
+      "network" : "domains",
+      "tags" : [ "irrelevant" ],
+      "rule_id" : 34521,
+      "offending_content_url" : "hxxp://example.com",
+      "reviewed" : false,
+      "assignee" : "test.user@email.com",
+      "id" : 1092345687,
+      "asset" : {
+        "image" : "https://example.com/media/",
+        "name" : "Web Domains",
+        "entity_group" : {
+          "name" : "Default",
+          "id" : 4321
+        },
+        "id" : 10419120
+      },
+      "logs" : [ {
+        "actor" : "ZeroFox Platform Specialist",
+        "subject" : "",
+        "action" : "modify tags",
+        "id" : 1234567890,
+        "detail" : "",
+        "timestamp" : "2023-01-25T00:40:24+00:00"
+      }, {
+        "actor" : "",
+        "subject" : "",
+        "action" : "open",
+        "id" : 1234567290,
+        "detail" : "",
+        "timestamp" : "2023-01-25T00:40:24+00:00"
+      } ],
+      "last_modified" : "2025-02-26T14:27:56Z",
+      "entity" : {
+        "image" : "https://example.com/media/",
+        "name" : "Web Domains",
+        "entity_group" : {
+          "name" : "Default",
+          "id" : 4321
+        },
+        "id" : 10419120
+      },
+      "status" : "Open",
+      "timestamp" : "2025-02-26T13:37:23+00:00"
+    }
+  result:
+    custom:
+      actor:
+       - "ZeroFox Platform Specialist"
+       - null
+      actors: "ZeroFox Platform Specialist,"
+      alert_link: "https://cloud.zerofox.com/alerts/1092345687"
+      alert_type: "search query"
+      asset:
+        entity_group:
+          id: 4321
+          name: "Default"
+        id: 10419120
+        image: "https://example.com/media/"
+        name: "Web Domains"
+      assignee: "test.user@email.com"
+      content_created_at: "2017-01-10T11:00:00+00:00"
+      entity:
+        entity_group:
+          id: 4321
+          name: "Default"
+        id: 10419120
+        image: "https://example.com/media/"
+        name: "Web Domains"
+      escalated: false
+      id: 1092345687
+      last_modified: "2025-02-26T14:27:56Z"
+      logs:
+       -
+        actor: "ZeroFox Platform Specialist"
+        subject: ""
+        action: "modify tags"
+        id: 1234567890
+        detail: ""
+        timestamp: "2023-01-25T00:40:24+00:00"
+       -
+        actor: ""
+        subject: ""
+        action: "open"
+        id: 1234567290
+        detail: ""
+        timestamp: "2023-01-25T00:40:24+00:00"
+      network: "domains"
+      notes: ""
+      offending_content_url: "hxxp://example.com"
+      perpetrator:
+        content: "Test content"
+        display_name: "Concealed"
+        id: 2031456789
+        name: "Concealed"
+        network: "domains"
+        timestamp: "2017-01-10T11:00:00+00:00"
+        type: "page"
+        url: "hxxp://example.com"
+      reviewed: false
+      risk_rating: "Info"
+      rule_group_id: 132
+      rule_id: 34521
+      rule_name: "Advanced Domain Analysis - Typosquat Match"
+      severity: 1
+      severity_to_status: "Info"
+      status: "Open"
+      tags:
+       - "irrelevant"
+      timestamp: "2025-02-26T13:37:23+00:00"
+    message: |-
+      {
+        "severity" : 1,
+        "notes" : "",
+        "rule_name" : "Advanced Domain Analysis - Typosquat Match",
+        "perpetrator" : {
+          "name" : "Concealed",
+          "id" : 2031456789,
+          "display_name" : "Concealed",
+          "type" : "page",
+          "url" : "hxxp://example.com",
+          "content" : "Test content",
+          "timestamp" : "2017-01-10T11:00:00+00:00",
+          "network" : "domains"
+        },
+        "escalated" : false,
+        "content_created_at" : "2017-01-10T11:00:00+00:00",
+        "rule_group_id" : 132,
+        "alert_type" : "search query",
+        "network" : "domains",
+        "tags" : [ "irrelevant" ],
+        "rule_id" : 34521,
+        "offending_content_url" : "hxxp://example.com",
+        "reviewed" : false,
+        "assignee" : "test.user@email.com",
+        "id" : 1092345687,
+        "asset" : {
+          "image" : "https://example.com/media/",
+          "name" : "Web Domains",
+          "entity_group" : {
+            "name" : "Default",
+            "id" : 4321
+          },
+          "id" : 10419120
+        },
+        "logs" : [ {
+          "actor" : "ZeroFox Platform Specialist",
+          "subject" : "",
+          "action" : "modify tags",
+          "id" : 1234567890,
+          "detail" : "",
+          "timestamp" : "2023-01-25T00:40:24+00:00"
+        }, {
+          "actor" : "",
+          "subject" : "",
+          "action" : "open",
+          "id" : 1234567290,
+          "detail" : "",
+          "timestamp" : "2023-01-25T00:40:24+00:00"
+        } ],
+        "last_modified" : "2025-02-26T14:27:56Z",
+        "entity" : {
+          "image" : "https://example.com/media/",
+          "name" : "Web Domains",
+          "entity_group" : {
+            "name" : "Default",
+            "id" : 4321
+          },
+          "id" : 10419120
+        },
+        "status" : "Open",
+        "timestamp" : "2025-02-26T13:37:23+00:00"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740580076000
+ -
+  sample: |-
+    {
+      "severity" : 5,
+      "notes" : "",
+      "rule_name" : "Impersonation - Name & Image",
+      "perpetrator" : {
+        "public_url" : "",
+        "account_number" : "2240375768",
+        "image" : "https://example.com/media/test.jpeg",
+        "secondary_url" : "",
+        "id" : 10419220,
+        "display_name" : "V test",
+        "type" : "account",
+        "url" : "https://twitter.com/Vtest",
+        "username" : "Vtest",
+        "network" : "twitter",
+        "timestamp" : "2013-12-11T07:44:05+00:00"
+      },
+      "escalated" : true,
+      "content_created_at" : "2017-01-10T11:00:00+00:00",
+      "rule_group_id" : 112,
+      "alert_type" : "impersonating account",
+      "network" : "twitter",
+      "tags" : [ "irrelevant" ],
+      "rule_id" : 34521,
+      "offending_content_url" : "hxxp://example.com",
+      "reviewed" : true,
+      "assignee" : "test.user@email.com",
+      "id" : 1092345687,
+      "asset" : {
+        "image" : "https://example.com/media/test.jpeg",
+        "name" : "V test",
+        "entity_group" : {
+          "name" : "Default",
+          "id" : 4321
+        },
+        "id" : 10419220
+      },
+      "logs" : [ {
+        "actor" : "",
+        "subject" : "",
+        "action" : "review",
+        "id" : 1234567390,
+        "detail" : "",
+        "timestamp" : "2023-01-25T00:40:24+00:00"
+      }, {
+        "actor" : "ZeroFox Platform Specialist",
+        "subject" : "",
+        "action" : "modify tags",
+        "id" : 1234567890,
+        "detail" : "",
+        "timestamp" : "2023-01-25T00:40:24+00:00"
+      }, {
+        "actor" : "",
+        "subject" : "",
+        "action" : "open",
+        "id" : 1234567490,
+        "detail" : "",
+        "timestamp" : "2023-01-25T00:40:24+00:00"
+      } ],
+      "last_modified" : "2025-02-26T14:27:56Z",
+      "entity" : {
+        "image" : "https://example.com/media/test.jpeg",
+        "name" : "V test",
+        "entity_group" : {
+          "name" : "Default",
+          "id" : 4321
+        },
+        "id" : 10419220
+      },
+      "status" : "Open",
+      "timestamp" : "2025-02-26T13:37:23+00:00"
+    }
+  result:
+    custom:
+      actor:
+       - "ZeroFox Platform Specialist"
+       - null
+      actors: ",ZeroFox Platform Specialist,"
+      alert_link: "https://cloud.zerofox.com/alerts/1092345687"
+      alert_type: "impersonating account"
+      asset:
+        entity_group:
+          id: 4321
+          name: "Default"
+        id: 10419220
+        image: "https://example.com/media/test.jpeg"
+        name: "V test"
+      assignee: "test.user@email.com"
+      content_created_at: "2017-01-10T11:00:00+00:00"
+      entity:
+        entity_group:
+          id: 4321
+          name: "Default"
+        id: 10419220
+        image: "https://example.com/media/test.jpeg"
+        name: "V test"
+      escalated: true
+      id: 1092345687
+      last_modified: "2025-02-26T14:27:56Z"
+      logs:
+       -
+        actor: ""
+        subject: ""
+        action: "review"
+        id: 1234567390
+        detail: ""
+        timestamp: "2023-01-25T00:40:24+00:00"
+       -
+        actor: "ZeroFox Platform Specialist"
+        subject: ""
+        action: "modify tags"
+        id: 1234567890
+        detail: ""
+        timestamp: "2023-01-25T00:40:24+00:00"
+       -
+        actor: ""
+        subject: ""
+        action: "open"
+        id: 1234567490
+        detail: ""
+        timestamp: "2023-01-25T00:40:24+00:00"
+      network: "twitter"
+      notes: ""
+      offending_content_url: "hxxp://example.com"
+      perpetrator:
+        account_number: "2240375768"
+        display_name: "V test"
+        id: 10419220
+        image: "https://example.com/media/test.jpeg"
+        network: "twitter"
+        public_url: ""
+        secondary_url: ""
+        timestamp: "2013-12-11T07:44:05+00:00"
+        type: "account"
+        url: "https://twitter.com/Vtest"
+        username: "Vtest"
+      reviewed: true
+      risk_rating: "Critical"
+      rule_group_id: 112
+      rule_id: 34521
+      rule_name: "Impersonation - Name & Image"
+      severity: 5
+      severity_to_status: "Alert"
+      status: "Open"
+      tags:
+       - "irrelevant"
+      timestamp: "2025-02-26T13:37:23+00:00"
+    message: |-
+      {
+        "severity" : 5,
+        "notes" : "",
+        "rule_name" : "Impersonation - Name & Image",
+        "perpetrator" : {
+          "public_url" : "",
+          "account_number" : "2240375768",
+          "image" : "https://example.com/media/test.jpeg",
+          "secondary_url" : "",
+          "id" : 10419220,
+          "display_name" : "V test",
+          "type" : "account",
+          "url" : "https://twitter.com/Vtest",
+          "username" : "Vtest",
+          "network" : "twitter",
+          "timestamp" : "2013-12-11T07:44:05+00:00"
+        },
+        "escalated" : true,
+        "content_created_at" : "2017-01-10T11:00:00+00:00",
+        "rule_group_id" : 112,
+        "alert_type" : "impersonating account",
+        "network" : "twitter",
+        "tags" : [ "irrelevant" ],
+        "rule_id" : 34521,
+        "offending_content_url" : "hxxp://example.com",
+        "reviewed" : true,
+        "assignee" : "test.user@email.com",
+        "id" : 1092345687,
+        "asset" : {
+          "image" : "https://example.com/media/test.jpeg",
+          "name" : "V test",
+          "entity_group" : {
+            "name" : "Default",
+            "id" : 4321
+          },
+          "id" : 10419220
+        },
+        "logs" : [ {
+          "actor" : "",
+          "subject" : "",
+          "action" : "review",
+          "id" : 1234567390,
+          "detail" : "",
+          "timestamp" : "2023-01-25T00:40:24+00:00"
+        }, {
+          "actor" : "ZeroFox Platform Specialist",
+          "subject" : "",
+          "action" : "modify tags",
+          "id" : 1234567890,
+          "detail" : "",
+          "timestamp" : "2023-01-25T00:40:24+00:00"
+        }, {
+          "actor" : "",
+          "subject" : "",
+          "action" : "open",
+          "id" : 1234567490,
+          "detail" : "",
+          "timestamp" : "2023-01-25T00:40:24+00:00"
+        } ],
+        "last_modified" : "2025-02-26T14:27:56Z",
+        "entity" : {
+          "image" : "https://example.com/media/test.jpeg",
+          "name" : "V test",
+          "entity_group" : {
+            "name" : "Default",
+            "id" : 4321
+          },
+          "id" : 10419220
+        },
+        "status" : "Open",
+        "timestamp" : "2025-02-26T13:37:23+00:00"
+      }
+    status: "alert"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740580076000

@@ -4,6 +4,8 @@
 
 This check monitors [Proxmox][1] through the Datadog Agent. Proxmox is an open-source server management platform. It supports running both VMs and containers. The Proxmox integration collects data about your Proxmox cluster including the status and performance of nodes, VMs, containers, and more.
 
+**Minimum Agent version:** 7.69.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -14,7 +16,7 @@ Install the [Datadog Agent][2] and configure the Proxmox integration on one Prox
 
 ### Configuration
 
-1. Create an [API Token][10] in your Proxmox Management Interface.
+1. Create an [API Token][10] in your Proxmox Management Interface. The [PVEAuditor][11] role can be associated with the token to provide access to the necessary API endpoints.
 2. Edit the `proxmox.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your proxmox performance data. See the [sample proxmox.d/conf.yaml][4] for all available configuration options. Ensure you have set the following parameters:
 
     ```
@@ -86,3 +88,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/proxmox/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://pve.proxmox.com/wiki/Proxmox_VE_API#API_Tokens
+[11]: https://pve.proxmox.com/wiki/User_Management#pveum_permission_management

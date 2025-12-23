@@ -18,6 +18,14 @@ services:
       - "443:443"
     depends_on:
       - cert-builder
+      - tinyproxy
+    networks:
+      default:
+        aliases:
+          - valid.mock
+          - expired.mock
+          - wronghost.mock
+          - selfsigned.mock
 
   redis:
     container_name: mockbin_redis
@@ -25,9 +33,18 @@ services:
 
   mockbin:
     container_name: mockbin
-    image: mashape/mockbin
+    image: kennethreitz/httpbin
     ports:
-      - "8080:8080"
+      - "8080:80"
+
+  tinyproxy:
+    container_name: tinyproxy
+    build: tinyproxy
+    ports:
+      - "8008:8008"
+
+networks:
+  default:
 
 volumes:
   certs:

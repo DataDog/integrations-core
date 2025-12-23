@@ -12,7 +12,7 @@ import tempfile
 import zipfile
 import zlib
 from datetime import date
-from pathlib import Path
+from functools import cache
 from types import TracebackType
 from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
 
@@ -21,8 +21,13 @@ import squarify
 from datadog import api, initialize
 
 from ddev.cli.application import Application
+from ddev.utils.fs import Path
+from ddev.utils.toml import load_toml_file
 
 METRIC_VERSION = 2
+
+RESOLVE_BUILD_DEPS_WORKFLOW = '.github/workflows/resolve-build-deps.yaml'
+MEASURE_DISK_USAGE_WORKFLOW = '.github/workflows/measure-disk-usage.yml'
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -94,7 +99,7 @@ def get_valid_platforms(repo_path: Path | str, versions: set[str]) -> set[str]:
     """
     Extracts the platforms we support from the .deps/resolved file names.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
     platforms = []
     for file in os.listdir(resolved_path):
         if any(version in file for version in versions):
@@ -106,20 +111,56 @@ def get_valid_versions(repo_path: Path | str) -> set[str]:
     """
     Extracts the Python versions we support from the .deps/resolved file names.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
     versions = []
+    pattern = re.compile(r"\d+\.\d+")
     for file in os.listdir(resolved_path):
-        match = re.search(r"\d+\.\d+", file)
+        match = pattern.search(file)
         if match:
             versions.append(match.group())
     return set(versions)
 
 
 def is_correct_dependency(platform: str, version: str, name: str) -> bool:
-    return platform in name and version in name
+    # The name of the dependency file is in the format of {platform}_{version}.txt e.g. linux-aarch64_3.12.txt
+    _platform, _version = name.rsplit(".", 1)[0].rsplit("_", 1)
+    return platform == _platform and version == _version
 
 
-def is_valid_integration(path: str, included_folder: str, ignored_files: set[str], git_ignore: list[str]) -> bool:
+def is_valid_integration_file(
+    path: str,
+    repo_path: str,
+    ignored_files: set[str] | None = None,
+    included_folder: str | None = None,
+    git_ignore: list[str] | None = None,
+) -> bool:
+    """
+    Check if a file would be packaged with an integration.
+
+    Used to estimate integration package size by excluding:
+    - Hidden files (starting with ".")
+    - Files outside "datadog_checks"
+    - Helper/test-only packages (e.g. datadog_checks_dev)
+    - Files ignored by .gitignore
+
+    Args:
+        path (str): File path to check.
+        repo_path (str): Repository root, for loading .gitignore rules.
+
+    Returns:
+        bool: True if the file would be packaged, False otherwise.
+    """
+    if ignored_files is None:
+        ignored_files = {
+            "datadog_checks_dev",
+            "datadog_checks_tests_helper",
+        }
+
+    if included_folder is None:
+        included_folder = "datadog_checks" + os.sep
+
+    if git_ignore is None:
+        git_ignore = get_gitignore_files(repo_path)
     # It is not an integration
     if path.startswith("."):
         return False
@@ -147,7 +188,7 @@ def get_gitignore_files(repo_path: str | Path) -> list[str]:
 
 
 def convert_to_human_readable_size(size_bytes: float) -> str:
-    for unit in [" B", " KB", " MB", " GB"]:
+    for unit in [" B", " KiB", " MiB", " GiB"]:
         if abs(size_bytes) < 1024:
             return str(round(size_bytes, 2)) + unit
         size_bytes /= 1024
@@ -166,28 +207,32 @@ def compress(file_path: str) -> int:
     return compressed_size
 
 
-def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
+def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[FileDataEntry]:
     """
     Calculates integration file sizes and versions from a repository.
+    Only takes into account integrations with a valid version looking at the pyproject.toml file
+    The pyproject.toml file should have a classifier with this format:
+        classifiers = [
+            ...
+            "Programming Language :: Python :: 3.13",
+            ...
+        ]
     """
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
-
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}
+    py_major_version = py_version.split(".")[0]
 
     for root, _, files in os.walk(repo_path):
+        integration_name = str(os.path.relpath(root, repo_path).split(os.sep)[0])
+
+        if not check_python_version(str(repo_path), integration_name, py_major_version):
+            continue
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
-
-            if not is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
+            if not is_valid_integration_file(relative_path, str(repo_path)):
                 continue
-            path = Path(relative_path)
-            parts = path.parts
-
-            integration_name = parts[0]
+            integration_name = Path(relative_path).parts[0]
 
             size = compress(file_path) if compressed else os.path.getsize(file_path)
             integration_sizes[integration_name] = integration_sizes.get(integration_name, 0) + size
@@ -206,6 +251,23 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
         }
         for name, size in integration_sizes.items()
     ]
+
+
+def check_python_version(repo_path: str, integration_name: str, py_major_version: str) -> bool:
+    pyproject_path = os.path.join(repo_path, integration_name, "pyproject.toml")
+    if os.path.exists(pyproject_path):
+        pyproject = load_toml_file(pyproject_path)
+        if "project" not in pyproject or "classifiers" not in pyproject["project"]:
+            return False
+        classifiers = pyproject["project"]["classifiers"]
+        integration_py_version = ""
+        pattern = re.compile(r"Programming Language :: Python :: (\d+)")
+        for classifier in classifiers:
+            match = pattern.match(classifier)
+            if match:
+                integration_py_version = match.group(1)
+                return integration_py_version == py_major_version
+    return False
 
 
 def extract_version_from_about_py(path: str) -> str:
@@ -228,7 +290,7 @@ def get_dependencies(repo_path: str | Path, platform: str, version: str, compres
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
     Name, Version, Size_Bytes, Size, and Type.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
 
     for filename in os.listdir(resolved_path):
         file_path = os.path.join(resolved_path, filename)
@@ -248,8 +310,9 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
     versions = []
     with open(file_path, "r", encoding="utf-8") as file:
         file_content = file.read()
+        pattern = re.compile(r"([\w\-\d\.]+) @ (https?://[^\s#]+)")
         for line in file_content.splitlines():
-            match = re.search(r"([\w\-\d\.]+) @ (https?://[^\s#]+)", line)
+            match = pattern.search(line)
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
@@ -326,44 +389,61 @@ def get_dependencies_sizes(
     return file_data
 
 
+def get_dependencies_from_json(
+    dependency_sizes: Path, platform: str, version: str, compressed: bool
+) -> list[FileDataEntry]:
+    data = json.loads(dependency_sizes.read_text())
+    size_key = "compressed" if compressed else "uncompressed"
+    return [
+        {
+            "Name": name,
+            "Version": sizes.get("version", ""),
+            "Size_Bytes": int(sizes.get(size_key, 0)),
+            "Size": convert_to_human_readable_size(sizes.get(size_key, 0)),
+            "Type": "Dependency",
+        }
+        for name, sizes in data.items()
+    ]
+
+
 def is_excluded_from_wheel(path: str) -> bool:
-    '''
+    """
     These files are excluded from the wheel in the agent build:
     https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
     In order to have more accurate results, this files are excluded when computing the size of the dependencies while
     the wheels still include them.
-    '''
+    """
     excluded_test_paths = [
         os.path.normpath(path)
         for path in [
-            'idlelib/idle_test',
-            'bs4/tests',
-            'Cryptodome/SelfTest',
-            'gssapi/tests',
-            'keystoneauth1/tests',
-            'openstack/tests',
-            'os_service_types/tests',
-            'pbr/tests',
-            'pkg_resources/tests',
-            'psutil/tests',
-            'securesystemslib/_vendor/ed25519/test_data',
-            'setuptools/_distutils/tests',
-            'setuptools/tests',
-            'simplejson/tests',
-            'stevedore/tests',
-            'supervisor/tests',
-            'test',  # cm-client
-            'vertica_python/tests',
-            'websocket/tests',
+            "idlelib/idle_test",
+            "bs4/tests",
+            "Cryptodome/SelfTest",
+            "gssapi/tests",
+            "keystoneauth1/tests",
+            "openstack/tests",
+            "os_service_types/tests",
+            "pbr/tests",
+            "pkg_resources/tests",
+            "psutil/tests",
+            "securesystemslib/_vendor/ed25519/test_data",
+            "setuptools/_distutils/tests",
+            "setuptools/tests",
+            "simplejson/tests",
+            "stevedore/tests",
+            "supervisor/tests",
+            "test",  # cm-client
+            "vertica_python/tests",
+            "websocket/tests",
         ]
     ]
 
     type_annot_libraries = [
-        'krb5',
-        'Cryptodome',
-        'ddtrace',
-        'pyVmomi',
-        'gssapi',
+        "krb5",
+        "Cryptodome",
+        "ddtrace",
+        "pyVmomi",
+        "gssapi",
     ]
     rel_path = Path(path).as_posix()
 
@@ -377,7 +457,7 @@ def is_excluded_from_wheel(path: str) -> bool:
     if path_parts:
         dependency_name = path_parts[0]
         if dependency_name in type_annot_libraries:
-            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
+            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
                 return True
 
     return False
@@ -518,47 +598,22 @@ def export_format(
     compressed: bool,
 ) -> None:
     size_type = "compressed" if compressed else "uncompressed"
+    name = f"{mode}_{size_type}"
+    if platform:
+        name += f"_{platform}"
+    if version:
+        name += f"_{version}"
     for output_format in format:
         if output_format == "csv":
-            csv_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.csv"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.csv"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.csv"
-                    if platform
-                    else f"{size_type}_{mode}.csv"
-                )
-            )
+            csv_filename = f"{name}.csv"
             save_csv(app, modules, csv_filename)
 
         elif output_format == "json":
-            json_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.json"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.json"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.json"
-                    if platform
-                    else f"{size_type}_{mode}.json"
-                )
-            )
+            json_filename = f"{name}.json"
             save_json(app, json_filename, modules)
 
         elif output_format == "markdown":
-            markdown_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.md"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.md"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.md"
-                    if platform
-                    else f"{size_type}_{mode}.md"
-                )
-            )
+            markdown_filename = f"{name}.md"
             save_markdown(app, "Status", modules, markdown_filename)
 
 
@@ -782,24 +837,23 @@ def draw_treemap_rects_with_labels(
 
 def send_metrics_to_dd(
     app: Application,
+    commit: str,
     modules: list[FileDataEntryPlatformVersion],
-    org: str,
-    key: str,
+    org: str | None,
+    key: str | None,
     compressed: bool,
 ) -> None:
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
-    config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
-    if not is_everything_committed():
-        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': 'datadoghq.com'}
+
     if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
     if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
-    message, tickets, prs = get_last_commit_data()
-    timestamp = get_last_commit_timestamp()
+    timestamp, message, tickets, prs = get_commit_data(commit)
 
     metrics = []
     n_integrations_metrics = []
@@ -807,6 +861,8 @@ def send_metrics_to_dd(
 
     n_integrations: dict[tuple[str, str], int] = {}
     n_dependencies: dict[tuple[str, str], int] = {}
+
+    sizes: dict[str, dict[str, int]] = {}
 
     for item in modules:
         metrics.append(
@@ -830,6 +886,15 @@ def send_metrics_to_dd(
                 ],
             }
         )
+
+        # Creating variables for debugging
+        if item['Platform'] not in sizes:
+            sizes[item['Platform']] = {}
+        if item['Python_Version'] not in sizes[item['Platform']]:
+            sizes[item['Platform']][item['Python_Version']] = 0
+
+        sizes[item['Platform']][item['Python_Version']] += item['Size_Bytes']
+
         key_count = (item['Platform'], item['Python_Version'])
         if key_count not in n_integrations:
             n_integrations[key_count] = 0
@@ -874,63 +939,254 @@ def send_metrics_to_dd(
         api_host=f"https://api.{config_file_info['site']}",
     )
 
+    # Format the sizes dictionary into a human-readable summary
+    summary_lines = []
+    for platform, py_versions in sizes.items():
+        for py_version, size_bytes in py_versions.items():
+            summary_lines.append(
+                f"Platform: {platform}, Python: {py_version}, Size: "
+                f"{convert_to_human_readable_size(size_bytes)} ({size_bytes} bytes)"
+            )
+    summary = "\n".join(summary_lines)
+
+    total_metrics = len(metrics) + len(n_integrations_metrics) + len(n_dependencies_metrics)
+    app.display(f"Sending {total_metrics} metrics to Datadog...")
+
+    app.display("\nMetric summary:")
+    app.display(summary)
+
+    app.display_debug(f"Sending Metrics: {metrics}")
     api.Metric.send(metrics=metrics)
+
+    app.display_debug(f"Sending N integrations metrics: {n_integrations_metrics}")
     api.Metric.send(metrics=n_integrations_metrics)
+
+    app.display_debug(f"Sending N dependencies metrics: {n_dependencies_metrics}")
     api.Metric.send(metrics=n_dependencies_metrics)
 
 
-def get_org(app: Application, org: str) -> dict[str, str]:
-    config_path: Path = app.config_file.path
+def get_commit_data(commit: str) -> tuple[int, str, list[str], list[str]]:
+    '''
+    Gets the timestamp, message, tickets and PRs of a given commit. If no commit is provided, it uses the last commit.
+    '''
+    result = subprocess.run(
+        ["git", "show", "-s", "--format=%ct,%s", commit],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
 
-    current_section = None
-    org_data = {}
-
-    with open(config_path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-
-            # Detect section header
-            if line.startswith("[") and line.endswith("]"):
-                current_section = line[1:-1]
-                continue
-
-            if current_section == f"orgs.{org}":
-                if "=" in line:
-                    key, value = line.split("=", 1)
-                    key = key.strip()
-                    value = value.strip().strip('"')
-                    org_data[key] = value
-    if not org_data:
-        raise ValueError(f"Organization '{org}' not found in config")
-    return org_data
-
-
-def is_everything_committed() -> bool:
-    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
-    return result.stdout.strip() == ""
-
-
-def get_last_commit_timestamp() -> int:
-    result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
-    return int(result.stdout.strip())
-
-
-def get_last_commit_data() -> tuple[str, list[str], list[str]]:
-    result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
+    timestamp, message = result.stdout.strip().split(',', 1)
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
 
-    message = result.stdout.strip()
     tickets = re.findall(ticket_pattern, message)
     prs = re.findall(pr_pattern, message)
-
     if not tickets:
         tickets = [""]
     if not prs:
         prs = [""]
-    return message, tickets, prs
+    return int(timestamp), message, tickets, prs
+
+
+@cache
+def get_last_dependency_sizes_artifact(
+    app: Application, commit: str, platform: str, py_version: str, compressed: bool
+) -> Path | None:
+    '''
+    Lockfiles of dependencies are not updated in the same commit as the dependencies are updated.
+    So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
+    size of that commit.
+    '''
+    size_type = 'compressed' if compressed else 'uncompressed'
+    app.display(f"\nRetrieving dependency sizes for {commit} ({platform}, py{py_version}, {size_type})")
+
+    dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
+    if not dep_sizes_json:
+        app.display_debug("No dependency sizes in current commit, searching ancestors")
+        base_commit = app.repo.git.merge_base(commit, "origin/master")
+        if base_commit != commit:
+            app.display_debug(f"Found base commit: {base_commit}")
+            previous_commit = base_commit
+        else:
+            app.display_debug("No base commit found, using previous commit")
+            previous_commit = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
+
+        app.display(f"\n -> Searching for dependency sizes in previous commit: {previous_commit}")
+
+        dep_sizes_json = get_previous_dep_sizes(app, previous_commit, platform, py_version, compressed)
+    return Path(dep_sizes_json) if dep_sizes_json else None
+
+
+@cache
+def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_version: str) -> Path | None:
+    '''
+    Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
+    '''
+    app.display(f"\n -> Checking if dependency sizes were resolved in commit: {current_commit}")
+
+    run_id = get_run_id(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
+    if run_id:
+        dep_sizes_json = get_current_sizes_json(app, run_id, platform, py_version)
+        return dep_sizes_json
+    else:
+        return None
+
+
+@cache
+def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
+    app.display_debug(f"Fetching workflow run ID for {commit} ({os.path.basename(workflow)})")
+
+    if workflow == MEASURE_DISK_USAGE_WORKFLOW:
+        jq = f'.[] | select(.name == "Measure Disk Usage [{commit}]") | .databaseId'
+    else:
+        jq = '.[-1].databaseId'
+
+    result = subprocess.run(
+        [
+            'gh',
+            'run',
+            'list',
+            '--workflow',
+            workflow,
+            '-c',
+            commit,
+            '--json',
+            'databaseId,name',
+            '--jq',
+            jq,
+        ],
+        capture_output=True,
+        text=True,
+    )
+    run_id = result.stdout.strip() if result.stdout else None
+    if run_id:
+        app.display_debug(f"Workflow run ID: {run_id}")
+    else:
+        app.display_warning(f"No workflow run found for {commit} ({os.path.basename(workflow)})")
+
+    return run_id
+
+
+@cache
+def get_current_sizes_json(app: Application, run_id: str, platform: str, py_version: str) -> Path | None:
+    '''
+    Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
+    '''
+    app.display(f"\nRetrieving dependency sizes artifact (run={run_id}, platform={platform})")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        app.display_debug(f"Downloading artifacts to {tmpdir}...")
+        try:
+            subprocess.run(
+                [
+                    'gh',
+                    'run',
+                    'download',
+                    run_id,
+                    '--name',
+                    f'target-{platform}',
+                    '--dir',
+                    tmpdir,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            if e.stderr and "no valid artifacts found" in e.stderr:
+                app.display_warning(f"No resolved dependencies found for platform {platform} (run {run_id})")
+            else:
+                app.display_error(f"Failed to download dependency sizes (run={run_id}, platform={platform}): {e}")
+                app.display_warning(e.stderr)
+
+            return None
+
+        app.display_debug("Artifact extraction complete")
+        sizes_file = Path(tmpdir) / platform / 'py3' / 'sizes.json'
+
+        if not sizes_file.is_file():
+            app.display_warning(f"Dependency sizes artifact missing: {sizes_file.name}")
+            return None
+
+        app.display_debug(f"Found dependency sizes: {sizes_file.name}")
+        dest_path = sizes_file.rename(f"{platform}_{py_version}.json")
+        return dest_path
+
+
+@cache
+def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: str | None = None) -> Path | None:
+    app.display(f"Downloading artifact '{artifact_name}' (run {run_id})...")
+    try:
+        cmd = [
+            'gh',
+            'run',
+            'download',
+            run_id,
+            '--name',
+            artifact_name,
+        ]
+        if target_dir:
+            cmd.extend(['--dir', target_dir])
+
+        subprocess.run(cmd, check=True, text=True, capture_output=True)
+    except subprocess.CalledProcessError as e:
+        app.display_warning(f"Failed to download artifact '{artifact_name}' (run {run_id}): {e}")
+        app.display_warning(e.stderr)
+        return None
+
+    artifact_path = Path(target_dir) / artifact_name if target_dir else Path(artifact_name)
+    app.display_debug(f"Saved to {artifact_path}")
+    return artifact_path
+
+
+@cache
+def get_previous_dep_sizes(
+    app: Application, base_commit: str, platform: str, py_version: str, compressed: bool
+) -> Path | None:
+    '''
+    Gets the dependency sizes for a given commit when dependencies were not resolved.
+    '''
+    with tempfile.TemporaryDirectory() as tmpdir:
+        if (run_id := get_run_id(app, base_commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
+            return None
+
+        artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
+        sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
+
+        if not sizes_json:
+            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {base_commit}\n")
+            return None
+
+        sizes = parse_sizes_json(sizes_json, platform, py_version, compressed)
+
+        sizes_path = Path(tmpdir) / f"{platform}_{py_version}.json"
+        with open(sizes_path, "w") as f:
+            json.dump(sizes, f, indent=2)
+
+        target_path = f"{platform}_{py_version}.json"
+        shutil.copy(sizes_path, target_path)
+        return Path(target_path)
+
+
+@cache
+def parse_sizes_json(
+    sizes_json_path: Path, platform: str, py_version: str, compressed: bool
+) -> dict[str, dict[str, int]]:
+    sizes_list = list(json.loads(sizes_json_path.read_text()))
+    size_key = "compressed" if compressed else "uncompressed"
+    sizes = {
+        dep["Name"]: {
+            size_key: int(dep["Size_Bytes"]),
+            "version": dep.get("Version"),
+            "compression": compressed,
+        }
+        for dep in sizes_list
+        if dep.get("Type") == "Dependency"
+        and dep.get("Platform") == platform
+        and dep.get("Python_Version") == py_version
+    }
+
+    return sizes
 
 
 class WrongDependencyFormat(Exception):

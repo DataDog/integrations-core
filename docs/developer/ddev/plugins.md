@@ -137,7 +137,7 @@ is desired. This fixture is responsible for starting and stopping environments a
 
 #### Metadata
 
-- `env_type` - This is the type of interface that will be used to interact with the Agent. Currently, we support `docker` (default) and `local`.
+- `env_type` - This is the type of interface that will be used to interact with the Agent. Currently, we support `docker` (default), `vagrant` and `local`.
 - `env_vars` - A `dict` of environment variables and their values that will be present when starting the Agent.
 - `docker_volumes` - A `list` of `str` representing [Docker volume mounts][docker-volume-docs] if `env_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
 - `docker_platform` - The container architecture to use if `env_type` is `docker`. Currently, we support `linux` (default) and `windows`.

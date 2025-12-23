@@ -180,6 +180,23 @@ rabbitmq.global.messages.routed.count,count,,message,,[OpenMetrics] Total number
 rabbitmq.global.messages.unroutable.dropped.count,count,,message,,[OpenMetrics] Total number of messages published as non-mandatory into an exchange and dropped as unroutable,0,rabbitmq,global messages unroutable dropped,,
 rabbitmq.global.messages.unroutable.returned.count,count,,message,,[OpenMetrics] Total number of messages published as mandatory into an exchange and returned to the publisher as unroutable,0,rabbitmq,global messages unroutable returned,,
 rabbitmq.global.publishers,gauge,,,,[OpenMetrics] Current number of publishers,0,rabbitmq,global publishers,,
+rabbitmq.global.stream.error.access_refused.count,count,,,,[OpenMetrics] Total number of stream commands failed with access refused,0,rabbitmq,stream error access refused,,protocol
+rabbitmq.global.stream.error.authentication_failure.count,count,,,,[OpenMetrics] Total number of stream commands failed with authentication failure,0,rabbitmq,stream error auth failure,,protocol
+rabbitmq.global.stream.error.frame_too_large.count,count,,,,[OpenMetrics] Total number of stream commands failed with frame too large,0,rabbitmq,stream error frame too large,,protocol
+rabbitmq.global.stream.error.internal_error.count,count,,,,[OpenMetrics] Total number of stream commands failed with internal error,0,rabbitmq,stream error internal,,protocol
+rabbitmq.global.stream.error.precondition_failed.count,count,,,,[OpenMetrics] Total number of stream commands failed with precondition failed,0,rabbitmq,stream error precondition,,protocol
+rabbitmq.global.stream.error.publisher_does_not_exist.count,count,,,,[OpenMetrics] Total number of stream commands failed with publisher does not exist,0,rabbitmq,stream error publisher,,protocol
+rabbitmq.global.stream.error.sasl_authentication_failure_loopback.count,count,,,,[OpenMetrics] Total number of stream commands failed with sasl authentication failure loopback,0,rabbitmq,stream error sasl loopback,,protocol
+rabbitmq.global.stream.error.sasl_challenge.count,count,,,,[OpenMetrics] Total number of stream commands failed with sasl challenge,0,rabbitmq,stream error sasl challenge,,protocol
+rabbitmq.global.stream.error.sasl_error.count,count,,,,[OpenMetrics] Total number of stream commands failed with sasl error,0,rabbitmq,stream error sasl,,protocol
+rabbitmq.global.stream.error.sasl_mechanism_not_supported.count,count,,,,[OpenMetrics] Total number of stream commands failed with sasl mechanism not supported,0,rabbitmq,stream error sasl mech,,protocol
+rabbitmq.global.stream.error.stream_already_exists.count,count,,,,[OpenMetrics] Total number of stream commands failed with stream already exists,0,rabbitmq,stream error exists,,protocol
+rabbitmq.global.stream.error.stream_does_not_exist.count,count,,,,[OpenMetrics] Total number of stream commands rejected with stream does not exist error,0,rabbitmq,stream error not exists,,protocol
+rabbitmq.global.stream.error.stream_not_available.count,count,,,,[OpenMetrics] Total number of stream commands failed with stream not available,0,rabbitmq,stream error not available,,protocol
+rabbitmq.global.stream.error.subscription_id_already_exists.count,count,,,,[OpenMetrics] Total number of stream commands failed with subscription id already exists,0,rabbitmq,stream error sub exists,,protocol
+rabbitmq.global.stream.error.subscription_id_does_not_exist.count,count,,,,[OpenMetrics] Total number of stream commands failed with subscription id does not exist,0,rabbitmq,stream error sub not exists,,protocol
+rabbitmq.global.stream.error.unknown_frame.count,count,,,,[OpenMetrics] Total number of stream commands failed with unknown frame,0,rabbitmq,stream error unknown frame,,protocol
+rabbitmq.global.stream.error.vhost_access_failure.count,count,,,,[OpenMetrics] Total number of stream commands failed with vhost access failure,0,rabbitmq,stream error vhost access,,protocol
 rabbitmq.identity_info,gauge,,,,[OpenMetrics] RabbitMQ node & cluster identity info,0,rabbitmq,identity info,,
 rabbitmq.io.read_bytes.count,count,,byte,,[OpenMetrics] Total number of I/O bytes read,0,rabbitmq,read bytes,,
 rabbitmq.io.read_ops.count,count,,operation,,[OpenMetrics] Total number of I/O read operations,0,rabbitmq,read ops,,
@@ -251,6 +268,7 @@ rabbitmq.queue.get.empty.count,count,,,,[OpenMetrics] Total number of times basi
 rabbitmq.queue.head_message_timestamp,gauge,,millisecond,,"[OpenMetrics, Management CLI] Timestamp of the head message of the queue Timestamp of the first message in the queue, if any",0,rabbitmq,head msg ts,,
 rabbitmq.queue.index.read_ops.count,count,,operation,,[OpenMetrics] Total number of Queue Index read operations,0,rabbitmq,read ops,,
 rabbitmq.queue.index.write_ops.count,count,,operation,,[OpenMetrics] Total number of Queue Index write operations,0,rabbitmq,write ops,,
+rabbitmq.queue.info,gauge,,,,[OpenMetrics] A metric with a constant '1' value and labels that provide queue details including membership status and queue type,0,rabbitmq,queue info,,"vhost,queue,queue_type,membership"
 rabbitmq.queue.memory,gauge,,byte,,"Bytes of memory consumed by the Erlang process associated with the queue, including stack, heap, and internal structures",0,rabbitmq,mem,,
 rabbitmq.queue.message_bytes,gauge,,message,,Number of bytes of messages ready to be delivered to clients,0,rabbitmq,msgs rdy,,
 rabbitmq.queue.messages,gauge,,message,,"[OpenMetrics, Management CLI] Count of the total messages in the queue, which is the sum of ready and unacknowledged messages (total queue depth)",0,rabbitmq,msgs,,
@@ -302,6 +320,8 @@ rabbitmq.raft.term.count,count,,,,[OpenMetrics] Current Raft term number,0,rabbi
 rabbitmq.resident_memory_limit_bytes,gauge,,byte,,[OpenMetrics] Memory high watermark in bytes,0,rabbitmq,resident memory limit bytes,,
 rabbitmq.schema.db.disk_tx.count,count,,transaction,,[OpenMetrics] Total number of Schema DB disk transactions,0,rabbitmq,disk tx,,
 rabbitmq.schema.db.ram_tx.count,count,,transaction,,[OpenMetrics] Total number of Schema DB memory transactions,0,rabbitmq,ram tx,,
+rabbitmq.stream.consumer_max_offset_lag,gauge,,,,[OpenMetrics] Highest consumer offset lag across all stream consumers,0,rabbitmq,stream consumer lag,,
+rabbitmq.stream.segments.count,count,,,,[OpenMetrics] Total number of stream segment files,0,rabbitmq,stream segments,,
 rabbitmq.telemetry.scrape.duration_seconds.count,count,,second,,[OpenMetrics] Scrape duration,0,rabbitmq,duration seconds,,
 rabbitmq.telemetry.scrape.duration_seconds.sum,count,,second,,[OpenMetrics] Scrape duration,0,rabbitmq,duration seconds,,
 rabbitmq.telemetry.scrape.encoded_size_bytes.count,count,,byte,,"[OpenMetrics] Scrape size, encoded",0,rabbitmq,encoded size bytes,,

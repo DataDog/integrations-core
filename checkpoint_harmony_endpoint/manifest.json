@@ -1,0 +1,64 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b7eb4f20-be93-4b66-9187-68175f823bba",
+  "app_id": "checkpoint-harmony-endpoint",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Checkpoint Harmony Endpoint is an endpoint security designed to prevent, detect, and respond to threats on user devices",
+    "title": "Checkpoint Harmony Endpoint",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Checkpoint Harmony Endpoint Overview (Light)",
+        "image_url": "images/checkpoint_harmony_endpoint_overview_light.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Checkpoint Harmony Endpoint Overview (Dark)",
+        "image_url": "images/checkpoint_harmony_endpoint_overview_dark.png"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 56121529,
+      "source_type_name": "checkpoint_harmony_endpoint",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "checkpoint_harmony_endpoint.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "dashboards": {
+        "Checkpoint Harmony Endpoint Overview": "assets/dashboards/checkpoint_harmony_endpoint_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

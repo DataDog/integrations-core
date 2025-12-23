@@ -2,7 +2,36 @@
 
 <!-- towncrier release notes start -->
 
-## 10.2.1 / 2025-07-21
+## 10.6.0 / 2025-11-26
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 10.5.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 10.4.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 10.3.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Collect index stats metric `mongodb.collection.indexes.accesses.opsps` on replica set secondary nodes. ([#20819](https://github.com/DataDog/integrations-core/pull/20819))
+
+***Fixed***:
+
+* Fix incorrect UTC timestamp parsing for system.profile slow queries when the agent runs in non-UTC timezones. ([#20834](https://github.com/DataDog/integrations-core/pull/20834))
+
+## 10.2.1 / 2025-07-21 / Agent 7.69.0
 
 ***Fixed***:
 

@@ -1,0 +1,9 @@
+# HELP litellm_total_tokens_metric_total Total number of input + output tokens from LLM requests
+# TYPE litellm_total_tokens_metric_total counter
+litellm_total_tokens_metric_total 0.0
+# HELP litellm_input_tokens_metric_total Total number of input tokens from LLM requests
+# TYPE litellm_input_tokens_metric_total counter
+litellm_input_tokens_metric_total 0.0
+# HELP litellm_output_tokens_metric_total Total number of output tokens from LLM requests
+# TYPE litellm_output_tokens_metric_total counter
+litellm_output_tokens_metric_total 0.0

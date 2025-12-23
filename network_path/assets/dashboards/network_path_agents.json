@@ -1059,7 +1059,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1320,7 +1319,7 @@
                     {
                         "id": 8457451440583306,
                         "definition": {
-                            "title": "Collector Store Size",
+                            "title": "Collector Store Size (avg)",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1332,7 +1331,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1380,7 +1378,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1412,6 +1409,53 @@
                             "width": 6,
                             "height": 2
                         }
+                    },
+                    {
+                        "id": 5882269414877899,
+                        "definition": {
+                            "title": "Collector Store Size (max)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:datadog.network_path.collector.pathtest_store_size{$host,$datacenter,$cluster_name} by {datacenter,cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
                     }
                 ]
             },
@@ -1419,7 +1463,7 @@
                 "x": 0,
                 "y": 7,
                 "width": 12,
-                "height": 3
+                "height": 5
             }
         },
         {
@@ -1627,7 +1671,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 12,
                 "width": 12,
                 "height": 9
             }
@@ -1785,9 +1829,9 @@
                         }
                     },
                     {
-                        "id": 8012025951638734,
+                        "id": 1219382882371769,
                         "definition": {
-                            "title": "Schedule Duration (avg)",
+                            "title": "Skipped Conns",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1811,7 +1855,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:datadog.network_path.collector.schedule.duration{$CUSTOM_TAG,$host,$datacenter,$cluster_name} by {host}"
+                                            "query": "avg:datadog.network_path.collector.schedule.conns_skipped{$host,$datacenter,$cluster_name} by {reason}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1835,7 +1879,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 21,
                 "width": 12,
                 "height": 5
             }
@@ -1994,7 +2038,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 24,
+                "y": 26,
                 "width": 12,
                 "height": 3
             }
@@ -2325,7 +2369,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2362,9 +2405,122 @@
             },
             "layout": {
                 "x": 0,
-                "y": 27,
+                "y": 29,
                 "width": 12,
                 "height": 7
+            }
+        },
+        {
+            "id": 4555113299741520,
+            "definition": {
+                "title": "Dynamic Path - Internals",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 168908205378734,
+                        "definition": {
+                            "title": "input_chan_size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "max",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.network_path.collector.input_chan_size{$host,$datacenter,$cluster_name} by {cluster_name,datacenter}.weighted()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1826232222563295,
+                        "definition": {
+                            "title": "processing_chan_size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "max",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.network_path.collector.processing_chan_size{$host,$datacenter,$cluster_name} by {cluster_name,datacenter}.weighted()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 36,
+                "width": 12,
+                "height": 3
             }
         }
     ],

@@ -1,0 +1,49 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "507d48b6-cfda-4f62-b95a-67de98a50cc6",
+  "app_id": "amazon-app-mesh",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Amazon App Mesh is an open source edge and service proxy.",
+    "title": "AWS App Mesh",
+    "media": [],
+    "classifier_tags": [
+      "Category::AWS",
+      "Category::Cloud",
+      "Category::Log Collection",
+      "Category::Network",
+      "Category::Tracing",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "url": "https://docs.datadoghq.com/integrations/envoy/",
+        "resource_type": "documentation"
+      }
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_name": "Amazon App Mesh",
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 221
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

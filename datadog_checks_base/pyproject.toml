@@ -21,7 +21,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
 ]
 dynamic = [
@@ -31,31 +31,31 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 db = [
-    "mmh3==5.1.0",
+    "mmh3==5.2.0",
 ]
 deps = [
     "binary==1.0.2",
-    "cachetools==6.1.0",
-    "cryptography==45.0.4",
-    "ddtrace==3.9.3",
+    "cachetools==6.2.0",
+    "cryptography==45.0.6",
+    "ddtrace==3.16.4",
     "jellyfish==1.2.0",
     "lazy-loader==0.4",
     "prometheus-client==0.22.1",
-    "protobuf==6.31.1",
+    "protobuf==6.32.0",
     "pydantic==2.11.7",
     "python-dateutil==2.9.0.post0",
-    "pywin32==310; sys_platform == 'win32'",
+    "pywin32==311; sys_platform == 'win32'",
     "pyyaml==6.0.2",
     "requests-toolbelt==1.0.0",
     "requests-unixsocket2==1.0.0",
-    "requests==2.32.4",
+    "requests==2.32.5",
     "simplejson==3.20.1",
-    "urllib3==2.5.0",
-    "wrapt==1.17.2",
+    "urllib3==2.6.2",
+    "wrapt==1.17.3",
 ]
 http = [
     "aws-requests-auth==0.4.3",
-    "botocore==1.38.41",
+    "botocore==1.40.21",
     "oauthlib==3.3.1",
     "pyjwt==2.10.1",
     "pyopenssl==25.1.0",
@@ -65,7 +65,7 @@ http = [
     "requests-oauthlib==2.0.0",
 ]
 json = [
-    "orjson==3.10.18",
+    "orjson==3.11.3",
 ]
 kube = [
     "kubernetes==33.1.0",

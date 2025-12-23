@@ -1,1 +1,0 @@
-Collect index stats metric `mongodb.collection.indexes.accesses.opsps` on replica set secondary nodes. 

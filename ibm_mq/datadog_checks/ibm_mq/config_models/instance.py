@@ -35,8 +35,10 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    add_description_tags: Optional[bool] = None
     auto_discover_channels: Optional[bool] = None
     auto_discover_queues: Optional[bool] = None
+    auto_discover_queues_via_names: Optional[bool] = None
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[MappingProxyType[str, Any]] = None
     channels: Optional[tuple[str, ...]] = None
@@ -51,6 +53,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     mqcd_version: Optional[float] = Field(None, ge=1.0)
+    normalize_description_tags: Optional[bool] = None
     override_hostname: Optional[bool] = None
     password: Optional[str] = Field(None, min_length=1)
     port: Optional[int] = None

@@ -10,6 +10,8 @@ Note: This integration is now deprecated and replaced by the new API-based integ
 <div class="alert alert-info"><bold>Note</bold>: Metrics are collected with queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</div>
 
 
+**Minimum Agent version:** 7.23.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.

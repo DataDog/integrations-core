@@ -4,8 +4,11 @@ on:
   pull_request:
     paths:
     - datadog_checks_base/datadog_checks/**
+    - datadog_checks_base/pyproject.toml
     - datadog_checks_dev/datadog_checks/dev/*.py
+    - datadog_checks_dev/pyproject.toml
     - ddev/src/**
+    - ddev/pyproject.toml
     - "!agent_requirements.in"
 
 concurrency:
@@ -25,6 +28,7 @@ jobs:
 
       # Options
       test-py2: true
+      context: "pr"
     secrets: inherit
 
   save-event:
