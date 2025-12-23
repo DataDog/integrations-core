@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import threading
 import time
 
@@ -147,6 +148,17 @@ def run_one_check(check: AgentCheck, cancel=True):
         check.statement_metrics._job_loop_future.result()
     if check.metadata_samples._job_loop_future is not None:
         check.metadata_samples._job_loop_future.result()
+
+
+def normalize_object(obj):
+    if isinstance(obj, dict):
+        return {k: normalize_object(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        normalized = [normalize_object(item) for item in obj]
+        return sorted(normalized, key=lambda x: json.dumps(x, sort_keys=True))
+    if isinstance(obj, tuple):
+        return tuple(normalize_object(item) for item in obj)
+    return obj
 
 
 # WaitGroup is used like go's sync.WaitGroup

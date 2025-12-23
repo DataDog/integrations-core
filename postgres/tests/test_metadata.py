@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
 
@@ -8,8 +9,8 @@ import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
-from .common import POSTGRES_VERSION
-from .utils import run_one_check
+from .common import POSTGRES_LOCALE, POSTGRES_VERSION
+from .utils import normalize_object, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -65,6 +66,29 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert statement_timeout_setting is not None
     # statement_timeout should be server level setting not session level
     assert statement_timeout_setting['setting'] == '10000'
+
+
+def test_collect_schema_snapshot(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_schemas"] = {'enabled': True, 'run_sync': True, 'include_databases': ['datadog_test']}
+    dbm_instance['dbname'] = 'datadog_test'
+    check = integration_check(dbm_instance)
+    run_one_check(check, dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
+    # This tests should fit within one payload
+    assert len(schema_events) == 1
+
+    file_path = f'tests/fixtures/schema_snapshot_v{POSTGRES_VERSION}_{POSTGRES_LOCALE}.json'
+    # If you need to update the snapshot, uncomment the following lines and run
+    # ddev test postgres -- -x -k test_collect_schema_snapshot
+    # then go grab a cup of coffee, tea, or your beverage of choice
+    # with open(file_path, 'w') as f:
+    #     json.dump(schema_events[0]['metadata'], f, indent=4)
+
+    with open(file_path, 'r') as f:
+        snapshot = json.load(f)
+    # Normalize the objects to avoid differences in list sorting
+    assert normalize_object(snapshot) == normalize_object(schema_events[0]['metadata'])
 
 
 @pytest.mark.parametrize(
@@ -157,14 +181,17 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                 for table in schema['tables']:
                     tables_got.append(table['name'])
 
+                    assert table['name']
+                    assert table['owner']
+
                     # make some assertions on fields
                     if table['name'] == "persons":
                         # check that foreign keys, indexes get reported
                         keys = list(table.keys())
                         assert_fields(keys, ["foreign_keys", "columns", "id", "name"])
                         # The toast table doesn't seem to be created in the C locale
-                        # if POSTGRES_LOCALE != 'C':
-                        #     assert_fields(keys, ["toast_table"])
+                        if POSTGRES_LOCALE != 'C':
+                            assert_fields(keys, ["toast_table"])
                         assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
                         assert_fields(
                             list(table['columns'][0].keys()),
@@ -178,8 +205,8 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                     if table['name'] == "cities":
                         keys = list(table.keys())
                         assert_fields(keys, ["indexes", "columns", "id", "name"])
-                        # if POSTGRES_LOCALE != 'C':
-                        #     assert_fields(keys, ["toast_table"])
+                        if POSTGRES_LOCALE != 'C':
+                            assert_fields(keys, ["toast_table"])
                         assert len(table['indexes']) == 1
                         assert_fields(
                             list(table['indexes'][0].keys()),

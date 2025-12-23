@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.1 / 2025-12-22
+
+***Fixed***:
+
+* Debounce false-positive connection errors ([#21922](https://github.com/DataDog/integrations-core/pull/21922))
+* Remove unused code and improve test coverage for connection error handling. ([#22128](https://github.com/DataDog/integrations-core/pull/22128))
+
 ## 7.3.0 / 2025-11-26
 
 ***Added***:

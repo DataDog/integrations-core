@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
 
 import pytest
 
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.dev.conditions import WaitFor
+from datadog_checks.dev.conditions import CheckCommandOutput, WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
 from .common import COMPOSE_FILE, HOST, INSTANCE, OPENMETRICS_V2_INSTANCE, PORT
@@ -52,11 +53,36 @@ def init_db():
     client.close()
 
 
+def _get_conditions():
+    conditions = [
+        CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']),
+        WaitFor(init_db),
+    ]
+
+    # Wait for Aerospike to calculate latency/throughput metrics (only needed for versions <= 5.0)
+    # We use the output of this docker exec command line for checking instead with the client,
+    # because this is the command used to retrieve the metric and we know its output format.
+    version = os.environ.get('AEROSPIKE_VERSION', '0.0')
+    major, minor = map(int, version.split('.')[:2])
+
+    if (major, minor) <= (5, 0):
+        conditions.append(
+            CheckCommandOutput(
+                ['docker', 'exec', 'aerospike', 'asinfo', '-v', 'throughput:'],
+                patterns=[r'\{test\}-(read|write)'],
+                attempts=30,
+                wait=1,
+            )
+        )
+
+    return conditions
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
         COMPOSE_FILE,
-        conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
+        conditions=_get_conditions(),
         attempts=2,
     ):
         yield OPENMETRICS_V2_INSTANCE

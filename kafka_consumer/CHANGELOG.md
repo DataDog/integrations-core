@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.10.1 / 2025-12-19
+
+***Fixed***:
+
+* Support Protobuf messages with schema registry ([#22020](https://github.com/DataDog/integrations-core/pull/22020))
+
 ## 6.10.0 / 2025-11-26
 
 ***Added***:
