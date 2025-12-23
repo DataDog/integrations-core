@@ -360,7 +360,7 @@ class BJobsProcessor(LSFMetricsProcessor):
         super().__init__(
             name='bjobs',
             prefix='job',
-            expected_columns=12,
+            expected_columns=13,
             delimiter='|',
             client=client,
             config=config,
@@ -377,17 +377,18 @@ class BJobsProcessor(LSFMetricsProcessor):
             LSFTagMapping('full_job_id', 0, transform_tag),
             LSFTagMapping('status', 1, transform_tag),
             LSFTagMapping('queue', 2, transform_tag),
-            LSFTagMapping('from_host', 3, transform_tag),
-            LSFTagMapping('exec_host', 4, transform_tag),
+            LSFTagMapping('user', 3, transform_tag),
+            LSFTagMapping('from_host', 4, transform_tag),
+            LSFTagMapping('exec_host', 5, transform_tag),
         ]
         metrics = [
-            LSFMetricMapping('run_time', 5, transform_float),
-            LSFMetricMapping('cpu_used', 6, transform_float),
-            LSFMetricMapping('mem', 7, transform_float),
-            LSFMetricMapping('time_left', 8, transform_time_left),
-            LSFMetricMapping('swap', 9, transform_float),
-            LSFMetricMapping('idle_factor', 10, transform_float),
-            LSFMetricMapping('percent_complete', 11, transform_float),
+            LSFMetricMapping('run_time', 6, transform_float),
+            LSFMetricMapping('cpu_used', 7, transform_float),
+            LSFMetricMapping('mem', 8, transform_float),
+            LSFMetricMapping('time_left', 9, transform_time_left),
+            LSFMetricMapping('swap', 10, transform_float),
+            LSFMetricMapping('idle_factor', 11, transform_float),
+            LSFMetricMapping('percent_complete', 12, transform_float),
         ]
 
         return self.parse_table_command(metrics, tags)

@@ -438,8 +438,6 @@ Datadog recommends using AWS FireLens for the following reasons:
 - You can configure Fluent Bit directly in your Fargate tasks.
 - The Datadog Fluent Bit output plugin provides additional tagging on logs. The [ECS Explorer][75] uses the tags to correlate logs with ECS resources.
 
-**Note**: Log collection with Fluent Bit and FireLens is not supported for AWS Batch on ECS Fargate.
-
 #### Fluent Bit and FireLens
 
 Configure the AWS FireLens integration built on Datadog's Fluent Bit output plugin to connect your FireLens monitored log data to Datadog Logs. You can find a full [sample task definition for this configuration here][19].

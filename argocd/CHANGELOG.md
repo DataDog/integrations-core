@@ -9,7 +9,7 @@
 * Add a new metric for [application sync duration time](https://github.com/argoproj/argo-cd/issues/11675). ([#21882](https://github.com/DataDog/integrations-core/pull/21882))
 * Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
 
-## 4.1.1 / 2025-10-31
+## 4.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 
