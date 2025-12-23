@@ -176,7 +176,17 @@ fi
 
 echo "Activating virtual environment and installing downloader with dependencies..."
 source .venv/bin/activate
-pip install -q -e '.[deps]' 2>/dev/null || pip install -e '.[deps]'
+
+# Install downloader with explicit error handling
+set +e
+pip install -q -e '.[deps]' 2>&1
+INSTALL_EXIT=$?
+set -e
+
+if [ $INSTALL_EXIT -ne 0 ]; then
+    echo "❌ Failed to install downloader"
+    exit 1
+fi
 
 echo "✅ Downloader environment ready"
 echo ""
@@ -185,10 +195,12 @@ echo "=== Step 12: Test downloader with attestation verification ==="
 echo "Downloading ${PACKAGE_NAME} with TUF and attestation verification..."
 echo ""
 
+# Temporarily disable exit-on-error to capture output even if download fails
+set +e
 DOWNLOAD_OUTPUT=$(python -m datadog_checks.downloader -vvvv "${PACKAGE_NAME}" \
     --repository "https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com" 2>&1)
-
 DOWNLOAD_EXIT=$?
+set -e
 
 echo "$DOWNLOAD_OUTPUT"
 echo ""
