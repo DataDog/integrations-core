@@ -174,9 +174,9 @@ if [ ! -d ".venv" ]; then
     python3 -m venv .venv
 fi
 
-echo "Activating virtual environment and installing downloader..."
+echo "Activating virtual environment and installing downloader with dependencies..."
 source .venv/bin/activate
-pip install -q -e . 2>/dev/null || pip install -e .
+pip install -q -e '.[deps]' 2>/dev/null || pip install -e '.[deps]'
 
 echo "✅ Downloader environment ready"
 echo ""
@@ -185,9 +185,8 @@ echo "=== Step 12: Test downloader with attestation verification ==="
 echo "Downloading ${PACKAGE_NAME} with TUF and attestation verification..."
 echo ""
 
-DOWNLOAD_OUTPUT=$(python -m datadog_checks.downloader "${PACKAGE_NAME}" \
-    --repository "https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com" \
-    --verbose 4 2>&1)
+DOWNLOAD_OUTPUT=$(python -m datadog_checks.downloader -vvvv "${PACKAGE_NAME}" \
+    --repository "https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com" 2>&1)
 
 DOWNLOAD_EXIT=$?
 
