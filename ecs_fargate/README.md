@@ -491,7 +491,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -513,7 +513,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -535,7 +535,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -557,7 +557,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -579,7 +579,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -601,7 +601,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -610,6 +610,8 @@ partial -->
   ```
 {{< /site-region >}}
 partial -->
+
+**Note**: Separate tags with commas in the `dd_tags` field.
 
 {{% collapse-content title="Example using secretOptions to avoid exposing the API Key in plain text" level="h4" %}}
 <!-- partial
@@ -624,7 +626,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -651,7 +653,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -678,7 +680,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -705,7 +707,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -732,7 +734,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -759,7 +761,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
