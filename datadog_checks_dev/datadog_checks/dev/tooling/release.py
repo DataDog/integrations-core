@@ -382,17 +382,19 @@ def upload_package(package_path, version, public=False):
         attestation_file_name = f"{package_name}-{version}-attestation.json"
         attestation_file_path = os.path.join(dist_dir, attestation_file_name)
 
+        print(f"Looking for attestation at: {attestation_file_path}")
         if os.path.exists(attestation_file_path):
             attestation_s3_key = f"attestations/{package_name}/{attestation_file_name}"
+            print(f"Uploading attestation to: s3://{S3_BUCKET}/{attestation_s3_key}")
             s3.upload_file(
                 attestation_file_path,
                 S3_BUCKET,
                 attestation_s3_key,
                 ExtraArgs={"ContentType": "application/json"}
             )
-            print(f"Uploaded attestation: {attestation_file_name}")
+            print(f"✅ Uploaded attestation: {attestation_file_name}")
         else:
-            print(f"Warning: No attestation file found at {attestation_file_path}")
+            print(f"❌ Warning: No attestation file found at {attestation_file_path}")
 
         # Generate indexes
         from datadog_checks.dev.tooling.simple_index import (
