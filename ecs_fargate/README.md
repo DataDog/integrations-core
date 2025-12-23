@@ -1131,22 +1131,23 @@ The Agent can autodiscover and attach tags to all data emitted by the entire tas
 
 **Note**: Set the `env` and `service` tags in your task definition to get the full benefits of Datadog's unified service tagging. See the [full configuration section][64] of the unified service tagging documentation for instructions.
 
-  | Tag                           | Cardinality  | Source               |
-  |-------------------------------|--------------|----------------------|
-  | `container_name`              | High         | ECS API              |
-  | `container_id`                | High         | ECS API              |
-  | `docker_image`                | Low          | ECS API              |
-  | `image_name`                  | Low          | ECS API              |
-  | `short_image`                 | Low          | ECS API              |
-  | `image_tag`                   | Low          | ECS API              |
-  | `ecs_cluster_name`            | Low          | ECS API              |
-  | `ecs_container_name`          | Low          | ECS API              |
-  | `task_arn`                    | Orchestrator | ECS API              |
-  | `task_family`                 | Low          | ECS API              |
-  | `task_name`                   | Low          | ECS API              |
-  | `task_version`                | Low          | ECS API              |
-  | `availability-zone`           | Low          | ECS API              |
-  | `region`                      | Low          | ECS API              |
+  | Tag                           | Cardinality  | Source               | Description          |
+  |-------------------------------|--------------|----------------------|----------------------|
+  | `container_name`              | High         | ECS API              |                      |
+  | `container_id`                | High         | ECS API              |                      |
+  | `docker_image`                | Low          | ECS API              |                      |
+  | `image_name`                  | Low          | ECS API              |                      |
+  | `short_image`                 | Low          | ECS API              |                      |
+  | `image_tag`                   | Low          | ECS API              |                      |
+  | `ecs_cluster_name`            | Low          | ECS API              |                      |
+  | `ecs_container_name`          | Low          | ECS API              |                      |
+  | `task_arn`                    | Orchestrator | ECS API              |                      |
+  | `task_family`                 | Low          | ECS API              |                      |
+  | `task_name`                   | Low          | ECS API              |                      |
+  | `task_version`                | Low          | ECS API              |                      |
+  | `availability_zone`           | Low          | ECS API              | **Deprecated**: Use `availability-zone` instead. |
+  | `availability-zone`           | Low          | ECS API              |                      |
+  | `region`                      | Low          | ECS API              |                      |
 
 ## Data Collected
 
