@@ -1,1 +1,0 @@
-kafka_actions: Send Kafka messages to backend as data streams events instead of regular Datadog events
