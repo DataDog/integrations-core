@@ -724,7 +724,6 @@
 * datadog-torchserve: 4.1.1
 * datadog-traefik-mesh: 3.1.1
 * datadog-traffic-server: 3.3.1
-* datadog-trend-micro-cloud-one: 1.0.0
 * datadog-twemproxy: 3.1.0
 * datadog-twistlock: 6.1.1
 * datadog-varnish: 4.1.0
@@ -973,7 +972,6 @@
 * datadog-torchserve: 4.1.0
 * datadog-traefik-mesh: 3.1.0
 * datadog-traffic-server: 3.3.0
-* datadog-trend-micro-cloud-one: 1.0.0
 * datadog-twemproxy: 3.1.0
 * datadog-twistlock: 6.1.0
 * datadog-varnish: 4.1.0
@@ -1222,7 +1220,6 @@
 * datadog-torchserve: 4.1.0
 * datadog-traefik-mesh: 3.1.0
 * datadog-traffic-server: 3.3.0
-* datadog-trend-micro-cloud-one: 1.0.0
 * datadog-twemproxy: 3.1.0
 * datadog-twistlock: 6.1.0
 * datadog-varnish: 4.1.0
@@ -1471,7 +1468,6 @@
 * datadog-torchserve: 4.1.0
 * datadog-traefik-mesh: 3.1.0
 * datadog-traffic-server: 3.3.0
-* datadog-trend-micro-cloud-one: 1.0.0
 * datadog-twemproxy: 3.1.0
 * datadog-twistlock: 6.1.0
 * datadog-varnish: 4.1.0
@@ -1720,7 +1716,6 @@
 * datadog-torchserve: 4.1.0
 * datadog-traefik-mesh: 3.1.0
 * datadog-traffic-server: 3.3.0
-* datadog-trend-micro-cloud-one: 1.0.0
 * datadog-twemproxy: 3.1.0
 * datadog-twistlock: 6.1.0
 * datadog-varnish: 4.1.0
@@ -1969,7 +1964,6 @@
 * datadog-torchserve: 4.1.0
 * datadog-traefik-mesh: 3.1.0
 * datadog-traffic-server: 3.3.0
-* datadog-trend-micro-cloud-one: 1.0.0
 * datadog-twemproxy: 3.1.0
 * datadog-twistlock: 6.1.0
 * datadog-varnish: 4.1.0
