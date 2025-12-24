@@ -191,6 +191,8 @@ integration/crio:
 - crio/**/*
 integration/crowdstrike_fdr:
 - crowdstrike_fdr/**/*
+integration/cyberark_endpoint_privilege_manager:
+- cyberark_endpoint_privilege_manager/**/*
 integration/databricks:
 - databricks/**/*
 integration/datadog_checks_tests_helper:
