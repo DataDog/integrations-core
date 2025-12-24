@@ -1,0 +1,625 @@
+id: "cisco-asa"
+tests:
+  - sample: "<190>2025-11-25T07:19:40Z: %ASA-4-733100: [ Scanning] drop rate-1 exceeded. Current burst rate is 19 per second, max configured rate is 33; Current average rate is 50 per second, max configured rate is 33; Cumulative total count is 44"
+    result:
+      custom:
+        cumulative_total: 44.0
+        current_average_rate: 50.0
+        current_burst_rate: 19.0
+        max_configured_average_rate: 33.0
+        max_configured_burst_rate: 33.0
+        message_id: "733100"
+        object: "Scanning"
+        rate_id: 1.0
+        service: "threat-detection"
+        severity: 4
+        timestamp: 1764055180000
+      message: "[ Scanning] drop rate-1 exceeded. Current burst rate is 19 per second, max configured rate is 33; Current average rate is 50 per second, max configured rate is 33; Cumulative total count is 44"
+      service: "threat-detection"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055180000
+  - sample: "<190>2025-11-25T07:17:18Z: %ASA-4-733102: Threat-detection adds host 192.0.2.3 to shun list"
+    result:
+      custom:
+        action: "adds"
+        host: "192.0.2.3"
+        message_id: "733102"
+        service: "threat-detection"
+        severity: 4
+        timestamp: 1764055038000
+      message: "Threat-detection adds host 192.0.2.3 to shun list"
+      service: "threat-detection"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055038000
+  - sample: "<190>2025-11-25T07:16:55Z: %ASA-4-733104: TCP Intercept SYN flood attack detected to 192.0.2.3/1194 (192.0.2.14/443). Average rate of 47 SYNs/sec exceeded the threshold of 48"
+    result:
+      custom:
+        message_id: "733104"
+        network:
+          destination:
+            geoip: {}
+            ip: "192.0.2.3"
+            port: 1194
+        protocol: "TCP"
+        rate: 47.0
+        rate_threshold: 48.0
+        rate_type: "Average"
+        rate_unit: "SYNs/sec"
+        real_ip: "192.0.2.14"
+        real_port: 443
+        service: "threat-detection"
+        severity: 4
+        timestamp: 1764055015000
+      message: "TCP Intercept SYN flood attack detected to 192.0.2.3/1194 (192.0.2.14/443). Average rate of 47 SYNs/sec exceeded the threshold of 48"
+      service: "threat-detection"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055015000
+  - sample: "<190>2025-11-25T07:19:27Z: %ASA-6-109005: Authentication succeeded for user 'james.anderson' from 192.0.2.2/1194 to 192.0.2.1/1194 on interface tap0"
+    result:
+      custom:
+        evt:
+          outcome: "succeeded"
+        interface: "tap0"
+        message_id: "109005"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.2"
+            port: 1194
+          destination:
+            geoip: {}
+            ip: "192.0.2.1"
+            port: 1194
+        service: "user-activity"
+        severity: 6
+        timestamp: 1764055167000
+        usr:
+          name: "james.anderson"
+      message: "Authentication succeeded for user 'james.anderson' from 192.0.2.2/1194 to 192.0.2.1/1194 on interface tap0"
+      service: "user-activity"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055167000
+  - sample: "<190>2025-11-25T07:17:53Z: %ASA-3-109010: Auth from 192.0.2.5/1195 to 192.0.2.4/1195 failed (too many pending auths) on interface tun0"
+    result:
+      custom:
+        evt:
+          outcome: "failed"
+        interface: "tun0"
+        message_id: "109010"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.5"
+            port: 1195
+          destination:
+            geoip: {}
+            ip: "192.0.2.4"
+            port: 1195
+        reason: "too many pending auths"
+        service: "user-activity"
+        severity: 3
+        timestamp: 1764055073000
+      message: "Auth from 192.0.2.5/1195 to 192.0.2.4/1195 failed (too many pending auths) on interface tun0"
+      service: "user-activity"
+      status: "error"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055073000
+  - sample: "<190>2025-11-25T07:16:22Z: %ASA-3-109023: User from 192.0.2.1/443 to 192.0.2.3/443 on interface eth0 using test service must authenticate before using this service"
+    result:
+      custom:
+        interface: "eth0"
+        message_id: "109023"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.1"
+            port: 443
+          destination:
+            geoip: {}
+            ip: "192.0.2.3"
+            port: 443
+        service: "user-activity"
+        service_name: "test service"
+        severity: 3
+        timestamp: 1764054982000
+      message: "User from 192.0.2.1/443 to 192.0.2.3/443 on interface eth0 using test service must authenticate before using this service"
+      service: "user-activity"
+      status: "error"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764054982000
+  - sample: "<190>2025-11-25T07:19:14Z: %ASA-4-109033: Authentication failed for admin user mason.young from 198.51.100.11. Interactive challenge processing is not supported for protocol"
+    result:
+      custom:
+        evt:
+          outcome: "failed"
+        message_id: "109033"
+        network:
+          client:
+            geoip: {}
+            ip: "198.51.100.11"
+        protocol: "protocol"
+        service: "user-activity"
+        severity: 4
+        timestamp: 1764055154000
+        user_type: "admin"
+        usr:
+          name: "mason.young"
+      message: "Authentication failed for admin user mason.young from 198.51.100.11. Interactive challenge processing is not supported for protocol"
+      service: "user-activity"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055154000
+  - sample: "<190>2025-11-25T07:19:29Z: %ASA-6-109007: Authorization permitted for user 'liam.wilson' from 192.0.2.5/443 to 198.51.100.8/443 on interface ens160"
+    result:
+      custom:
+        evt:
+          outcome: "permitted"
+        interface: "ens160"
+        message_id: "109007"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.5"
+            port: 443
+          destination:
+            geoip: {}
+            ip: "198.51.100.8"
+            port: 443
+        service: "user-activity"
+        severity: 6
+        timestamp: 1764055169000
+        usr:
+          name: "liam.wilson"
+      message: "Authorization permitted for user 'liam.wilson' from 192.0.2.5/443 to 198.51.100.8/443 on interface ens160"
+      service: "user-activity"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055169000
+  - sample: "<190>2025-11-25T07:15:47Z: %ASA-6-109024: Authorization denied from 10.10.10.10/10 to 11.11.11.11/11 (not authenticated) on interface ens140 using protocol to"
+    result:
+      custom:
+        evt:
+          outcome: "denied"
+        interface: "ens140"
+        message_id: "109024"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+            port: 10
+          destination:
+            geoip: {}
+            ip: "11.11.11.11"
+            port: 11
+        protocol: "protocol"
+        service: "user-activity"
+        severity: 6
+        timestamp: 1764054947000
+      message: "Authorization denied from 10.10.10.10/10 to 11.11.11.11/11 (not authenticated) on interface ens140 using protocol to"
+      service: "user-activity"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764054947000
+  - sample: "<190>2025-11-25T07:17:10Z: %ASA-5-502101: New user added to local dbase: Uname: sophia.lee Priv: 4 Encpass: *****"
+    result:
+      custom:
+        action: "New user added to local dbase"
+        message_id: "502101"
+        privilege_level: "4"
+        service: "user-activity"
+        severity: 5
+        timestamp: 1764055030000
+        usr:
+          name: "sophia.lee"
+      message: "New user added to local dbase: Uname: sophia.lee Priv: 4 Encpass: *****"
+      service: "user-activity"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055030000
+  - sample: "<190>2025-11-25T07:17:38Z: %ASA-6-415001: HTTP - matched matched_string in policy-map pm_access_control_core, header field count exceeded connection_action OpenVPN-TAP-Windows6:192.0.2.6/443 to OpenVPN-TAP-Windows6:198.51.100.8/80"
+    result:
+      custom:
+        connection_action: "connection_action"
+        destination_interface: "OpenVPN-TAP-Windows6"
+        matched_string: "matched_string"
+        message_id: "415001"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.6"
+            port: 443
+          destination:
+            geoip: {}
+            ip: "198.51.100.8"
+            port: 80
+        policy_map: "pm_access_control_core"
+        reason: "header field count exceeded"
+        service: "firewall"
+        severity: 6
+        source_interface: "OpenVPN-TAP-Windows6"
+        timestamp: 1764055058000
+      message: "HTTP - matched matched_string in policy-map pm_access_control_core, header field count exceeded connection_action OpenVPN-TAP-Windows6:192.0.2.6/443 to OpenVPN-TAP-Windows6:198.51.100.8/80"
+      service: "firewall"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055058000
+  - sample: "<190>2025-11-25T07:17:52Z: %ASA-5-415013: HTTP - policy-map map-name:Malformed chunked encoding connection_action ens160:192.0.2.4/1194 to Ethernet0:192.0.2.6/1196"
+    result:
+      custom:
+        connection_action: "connection_action"
+        destination_interface: "Ethernet0"
+        message_id: "415013"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.4"
+            port: 1194
+          destination:
+            geoip: {}
+            ip: "192.0.2.6"
+            port: 1196
+        policy_map: "map-name"
+        reason: "Malformed chunked encoding"
+        service: "firewall"
+        severity: 5
+        source_interface: "ens160"
+        timestamp: 1764055072000
+      message: "HTTP - policy-map map-name:Malformed chunked encoding connection_action ens160:192.0.2.4/1194 to Ethernet0:192.0.2.6/1196"
+      service: "firewall"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055072000
+  - sample: "<190>2025-11-25T07:19:48Z: %ASA-6-110002: Failed to locate egress interface for protocol from tap0:198.51.100.8/1194 to 192.0.2.1/1194"
+    result:
+      custom:
+        message_id: "110002"
+        network:
+          client:
+            geoip: {}
+            ip: "198.51.100.8"
+            port: 1194
+          destination:
+            geoip: {}
+            ip: "192.0.2.1"
+            port: 1194
+        protocol: "protocol"
+        reason: "Failed to locate egress interface"
+        service: "firewall"
+        severity: 6
+        source_interface: "tap0"
+        timestamp: 1764055188000
+      message: "Failed to locate egress interface for protocol from tap0:198.51.100.8/1194 to 192.0.2.1/1194"
+      service: "firewall"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055188000
+  - sample: "<190>2025-11-25T07:18:29Z: %ASA-6-110004: Egress interface changed from eth0 to br0 on ip_protocol connection 108098402 for zone-new/eth0:192.0.2.5/443(192.0.2.2/1199 ) to zone-dest/br0:192.0.2.2/1194(192.0.2.7/443 )"
+    result:
+      custom:
+        connection_id: 1.08098402E8
+        inside_interface: "br0"
+        inside_interface_zone: "zone-dest"
+        inside_ip: "192.0.2.2"
+        inside_mapped_ip: "192.0.2.7"
+        inside_mapped_port: 443
+        inside_port: 1194
+        message_id: "110004"
+        new_interface: "br0"
+        old_interface: "eth0"
+        outside_interface: "eth0"
+        outside_interface_zone: "zone-new"
+        outside_ip: "192.0.2.5"
+        outside_mapped_ip: "192.0.2.2"
+        outside_mapped_port: 1199
+        outside_port: 443
+        protocol: "ip_protocol"
+        reason: "Egress interface changed"
+        service: "firewall"
+        severity: 6
+        timestamp: 1764055109000
+      message: "Egress interface changed from eth0 to br0 on ip_protocol connection 108098402 for zone-new/eth0:192.0.2.5/443(192.0.2.2/1199 ) to zone-dest/br0:192.0.2.2/1194(192.0.2.7/443 )"
+      service: "firewall"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055109000
+  - sample: "<190>2025-11-25T07:17:02Z: %ASA-5-746007: user-identity: NetBIOS response failed from User david.murphy at 203.0.113.7"
+    result:
+      custom:
+        message_id: "746007"
+        network:
+          client:
+            geoip: {}
+            ip: "203.0.113.7"
+        service: "firewall"
+        severity: 5
+        timestamp: 1764055022000
+        usr:
+          name: "david.murphy"
+      message: "user-identity: NetBIOS response failed from User david.murphy at 203.0.113.7"
+      service: "firewall"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055022000
+  - sample: "<190>2025-11-25T07:19:21Z: %ASA-3-746016: user-identity: DNS lookup for 192.0.2.13 failed, reason:reason"
+    result:
+      custom:
+        message_id: "746016"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.13"
+        reason: "reason"
+        service: "firewall"
+        severity: 3
+        timestamp: 1764055161000
+      message: "user-identity: DNS lookup for 192.0.2.13 failed, reason:reason"
+      service: "firewall"
+      status: "error"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055161000
+  - sample: "<190>2025-11-25T07:16:11Z: %ASA-6-746001: user-identity: identity_lookup_store started"
+    result:
+      custom:
+        database: "identity_lookup_store"
+        download_status: "started"
+        message_id: "746001"
+        service: "firewall"
+        severity: 6
+        timestamp: 1764054971000
+      message: "user-identity: identity_lookup_store started"
+      service: "firewall"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764054971000
+  - sample: "<190>2025-11-25T07:19:30Z: %ASA-4-405001: Received ARP response collision from 203.0.113.1/3A:4F:B9:27:88:10 on interface tap1 with existing ARP entry 192.0.2.4/02:1A:6C:3F:92:11"
+    result:
+      custom:
+        existing_arp_ip: "192.0.2.4"
+        existing_arp_ip_mac_address: "02:1A:6C:3F:92:11"
+        interface: "tap1"
+        message_id: "405001"
+        network:
+          client:
+            geoip: {}
+            ip: "203.0.113.1"
+        service: "network-activity"
+        severity: 4
+        source_mac_address: "3A:4F:B9:27:88:10"
+        timestamp: 1764055170000
+      message: "Received ARP response collision from 203.0.113.1/3A:4F:B9:27:88:10 on interface tap1 with existing ARP entry 192.0.2.4/02:1A:6C:3F:92:11"
+      service: "network-activity"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055170000
+  - sample: "<190>2025-11-25T07:16:58Z: %ASA-2-106001: Inbound TCP connection denied from 192.0.2.3/443 to 192.0.2.3/1194 flags tcp_flags on interface br1"
+    result:
+      custom:
+        interface: "br1"
+        message_id: "106001"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.3"
+            port: 443
+          destination:
+            geoip: {}
+            ip: "192.0.2.3"
+            port: 1194
+        protocol: "TCP"
+        service: "network-activity"
+        severity: 2
+        tcp_flag: "tcp_flags"
+        timestamp: 1764055018000
+      message: "Inbound TCP connection denied from 192.0.2.3/443 to 192.0.2.3/1194 flags tcp_flags on interface br1"
+      service: "network-activity"
+      status: "critical"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055018000
+  - sample: "<190>2025-11-25T07:17:02Z: %ASA-2-106002: protocol Connection denied by outbound list acl_ID src 192.0.2.3 dest 192.0.2.4"
+    result:
+      custom:
+        message_id: "106002"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.3"
+          destination:
+            geoip: {}
+            ip: "192.0.2.4"
+        outbound_list: "acl_ID"
+        protocol: "protocol"
+        service: "network-activity"
+        severity: 2
+        timestamp: 1764055022000
+      message: "protocol Connection denied by outbound list acl_ID src 192.0.2.3 dest 192.0.2.4"
+      service: "network-activity"
+      status: "critical"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055022000
+  - sample: "<190>2025-11-25T07:19:23Z: %ASA-2-106006: Deny inbound UDP from 192.0.2.10/1194 to 192.0.2.12/1195 on interface Ethernet0"
+    result:
+      custom:
+        interface: "Ethernet0"
+        message_id: "106006"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.10"
+            port: 1194
+          destination:
+            geoip: {}
+            ip: "192.0.2.12"
+            port: 1195
+        protocol: "UDP"
+        service: "network-activity"
+        severity: 2
+        timestamp: 1764055163000
+      message: "Deny inbound UDP from 192.0.2.10/1194 to 192.0.2.12/1195 on interface Ethernet0"
+      service: "network-activity"
+      status: "critical"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055163000
+  - sample: "<190>2025-11-25T07:17:09Z: %ASA-4-338001: Dynamic Filter monitored blacklisted protocol traffic from br0:192.0.2.4/443 (192.0.2.1/443) to ens33:192.0.2.1/1194 (192.0.2.1/80) source malware-test-example1.badsite resolved from local list: mycoolapp-preview.mock, threat-level: 0, category: category_name"
+    result:
+      custom:
+        action: "monitored"
+        category: "category_name"
+        client_mapped_ip: "192.0.2.1"
+        client_mapped_port: 443
+        destination_mapped_ip: "192.0.2.1"
+        destination_mapped_port: 80
+        domain_name: "mycoolapp-preview.mock"
+        in_interface: "br0"
+        list_type: "local"
+        malicious_address: "malware-test-example1.badsite"
+        message_id: "338001"
+        network:
+          client:
+            geoip: {}
+            ip: "192.0.2.4"
+            port: 443
+          destination:
+            geoip: {}
+            ip: "192.0.2.1"
+            port: 1194
+        out_interface: "ens33"
+        protocol: "protocol"
+        service: "network-activity"
+        severity: 4
+        threat_level: "0"
+        timestamp: 1764055029000
+        traffic_type: "blacklisted"
+      message: "Dynamic Filter monitored blacklisted protocol traffic from br0:192.0.2.4/443 (192.0.2.1/443) to ens33:192.0.2.1/1194 (192.0.2.1/80) source malware-test-example1.badsite resolved from local list: mycoolapp-preview.mock, threat-level: 0, category: category_name"
+      service: "network-activity"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1764055029000
+  - sample: "<190>2025-12-05T10:53:28Z: %ASA-3-322002: ARP inspection check failed for arp request received from host 0E:7D:FA:13:B9:09 on interface br1. This host is advertising MAC Address 0E:7D:FA:13:B9:09 for IP Address 1.0.0.1, which is statically bound to MAC Address 22:9B:4E:57:03:D1"
+    result:
+      custom:
+        bound_mac_address: "22:9B:4E:57:03:D1"
+        client_mac_address: "0E:7D:FA:13:B9:09"
+        host_mac_address: "0E:7D:FA:13:B9:09"
+        interface: "br1"
+        message_id: "322002"
+        network:
+          client:
+            geoip: {}
+            ip: "1.0.0.1"
+        service: "network-activity"
+        severity: 3
+        timestamp: 1764932008000
+      message: "ARP inspection check failed for arp request received from host 0E:7D:FA:13:B9:09 on interface br1. This host is advertising MAC Address 0E:7D:FA:13:B9:09 for IP Address 1.0.0.1, which is statically bound to MAC Address 22:9B:4E:57:03:D1"
+      service: "network-activity"
+      status: "error"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1764932008000
+  - sample: "<190>2025-12-05T10:53:36Z: %ASA-3-322003: ARP inspection check failed for arp request received from host EA:7B:BE:11:56:8D on interface wlan1. This host is advertising MAC Address EA:7B:BE:11:56:8D for IP Address 8.8.4.4, which is not bound to any MAC Address"
+    result:
+      custom:
+        client_mac_address: "EA:7B:BE:11:56:8D"
+        host_mac_address: "EA:7B:BE:11:56:8D"
+        interface: "wlan1"
+        message_id: "322003"
+        network:
+          client:
+            geoip: {}
+            ip: "8.8.4.4"
+        service: "network-activity"
+        severity: 3
+        timestamp: 1764932016000
+      message: "ARP inspection check failed for arp request received from host EA:7B:BE:11:56:8D on interface wlan1. This host is advertising MAC Address EA:7B:BE:11:56:8D for IP Address 8.8.4.4, which is not bound to any MAC Address"
+      service: "network-activity"
+      status: "error"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1764932016000
+  - sample: "<190>2025-12-05T10:51:16Z: %ASA-2-106016: Deny IP spoof from 1.1.1.1 to 1.1.1.1 on interface wlan1"
+    result:
+      custom:
+        interface: "wlan1"
+        message_id: "106016"
+        network:
+          client:
+            geoip: {}
+            ip: "1.1.1.1"
+          destination:
+            geoip: {}
+            ip: "1.1.1.1"
+        service: "network-activity"
+        severity: 2
+        timestamp: 1764931876000
+      message: "Deny IP spoof from 1.1.1.1 to 1.1.1.1 on interface wlan1"
+      service: "network-activity"
+      status: "critical"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1764931876000
+  - sample: "<190>2025-12-05T10:52:52Z: %ASA-4-733100: Host 8.8.4.4 is attacking. Current burst rate is 15 per second, max configured rate is 42; Current average rate is 46 per second, max configured rate is 50; Cumulative total count is 34"
+    result:
+      custom:
+        cumulative_total: 34.0
+        current_average_rate: 46.0
+        current_burst_rate: 15.0
+        max_configured_average_rate: 50.0
+        max_configured_burst_rate: 42.0
+        message_id: "733100"
+        object_ip: "8.8.4.4"
+        service: "threat-detection"
+        severity: 4
+        timestamp: 1764931972000
+      message: "Host 8.8.4.4 is attacking. Current burst rate is 15 per second, max configured rate is 42; Current average rate is 46 per second, max configured rate is 50; Cumulative total count is 34"
+      service: "threat-detection"
+      status: "warn"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1764931972000
+  - sample: "<190>2025-12-05T10:51:25Z: %ASA-1-106022: Deny SCP connection spoof from 8.8.8.8 to 1.0.0.1 on interface tun0"
+    result:
+      custom:
+        interface: "tun0"
+        message_id: "106022"
+        network:
+          client:
+            geoip: {}
+            ip: "8.8.8.8"
+          destination:
+            geoip: {}
+            ip: "1.0.0.1"
+        protocol: "SCP"
+        service: "network-activity"
+        severity: 1
+        timestamp: 1764931885000
+      message: "Deny SCP connection spoof from 8.8.8.8 to 1.0.0.1 on interface tun0"
+      service: "network-activity"
+      status: "alert"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1764931885000
