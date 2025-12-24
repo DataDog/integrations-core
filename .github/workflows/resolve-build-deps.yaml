@@ -210,9 +210,9 @@ jobs:
       # PBS stands for "Python Build Standalone": https://astral.sh/blog/python-build-standalone
       env:
         PYTHON_PATCH: 11
-        PBS_RELEASE: 20251209
-        PBS_SHA256__aarch64: 8c5bd56675d883166e200e50af7c894331564dc810dcb3a53ea465c0df11b461
-        PBS_SHA256__x86_64: b35d2aa6c8737efc0c23983797addd9a22a0cdc29a82f39599486ea1fec752ba
+        PBS_RELEASE: 20251217
+        PBS_SHA256__aarch64: 324b24ebd50c16cf3a88360fc0e85ced38b04abcf580bc73cf95def4852e0c29
+        PBS_SHA256__x86_64: 70f76d40609999213b44a37e947dc0fe0b975f48d206f8931992892870bd4026
       run: |
         set -u
         curl -fsSL -o pbs.tgz "https://github.com/astral-sh/python-build-standalone/releases/download/$PBS_RELEASE/cpython-$PYTHON_VERSION.$PYTHON_PATCH+$PBS_RELEASE-${{ matrix.job.arch }}-apple-darwin-install_only_stripped.tar.gz"
