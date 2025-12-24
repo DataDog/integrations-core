@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 23.3.3 / 2025-12-16
+
+***Fixed***:
+
+* Fix missing table owner and toast table fields in Postgres schema collection.
+  Omit empty tables from collection.
+  Fix the missing description in Postgres schema databases.
+  Add snapshot tests for Postgres schema collection. ([#22134](https://github.com/DataDog/integrations-core/pull/22134))
+
+## 23.3.2 / 2025-12-16
+
+***Fixed***:
+
+* Fixes a regression introduced in ([#21347](https://github.com/DataDog/integrations-core/pull/21347)) that caused us to cache recently seen FQT events for 0.36 seconds instead of 3600 seconds ([#22113](https://github.com/DataDog/integrations-core/pull/22113))
+
+## 23.3.1 / 2025-12-15
+
+***Fixed***:
+
+* Fixed collection of Postgres schema owners. ([#22101](https://github.com/DataDog/integrations-core/pull/22101))
+
 ## 23.3.0 / 2025-11-26
 
 ***Added***:
