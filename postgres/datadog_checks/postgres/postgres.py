@@ -1142,8 +1142,16 @@ class PostgreSql(DatabaseCheck):
                     self._collect_wal_metrics()
 
             if self._query_manager.queries:
-                self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
-                self._query_manager.execute(extra_tags=tags)
+                if self.autodiscovery:
+                    for dbname in self.autodiscovery.get_items():
+                        # run custom queries against each discovered database with the correct db tag
+                        db = functools.partial(self.db_pool.get_connection, dbname=dbname)
+                        autodiscovery_tags = list(self.tags_without_db) + [f"db:{dbname}"]
+                        self._query_manager.executor = functools.partial(self.execute_query_raw, db=db)
+                        self._query_manager.execute(extra_tags=autodiscovery_tags)
+                else:
+                    self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
+                    self._query_manager.execute(extra_tags=tags)
 
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
