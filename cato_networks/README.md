@@ -4,8 +4,8 @@
 
 This integration ingests the following logs:
 
-- **Audit Logs**: This logs provide detailed information on admin actions performed within the system.
-- **Events**: This logs provide detailed insights into security, detection and response, connectivity, and system events within the Cato Networks platform.
+- **Audit Logs**: These logs provide detailed information on admin actions performed within the system.
+- **Events**: These logs provide detailed insights into security, detection and response, connectivity, and system events within the Cato Networks platform.
 
 Integrate Cato Networks with Datadog to gain insights into audit logs and events using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
@@ -23,8 +23,8 @@ Integrate Cato Networks with Datadog to gain insights into audit logs and events
 3. Click **Apply** button and copy the **Token**.
 4. Navigate to **Account** > **Account Info** and copy the **Account ID**.
 5. Identify your Cato Networks Region by checking the prefix of your URL: 
-    - cc.us1.catonetworks.com - us1 
-    - cc.catonetworks.com - Keep region as empty
+    - `cc.us1.catonetworks.com` - us1 
+    - `cc.catonetworks.com` - Keep region as empty
 
 #### Connect your Cato Networks Account to Datadog
 
@@ -40,17 +40,17 @@ Integrate Cato Networks with Datadog to gain insights into audit logs and events
 ### Event Log collection
 
 #### Configure AWS S3 Bucket
-**Note**: Please use **cato-networks** as the **S3 prefix**.  
-Please refer the [Configuring the AWS S3 Bucket][2] 
+When configuring the AWS bucket, use **cato-networks** as the **S3 prefix**.
+For more information, see [Configuring the AWS S3 Bucket][2].
 
-#### Configure Event Integration in CATO Network
-Please refer the [Adding Amazon S3 Integration for Events][3]
+#### Set up event integration in CATO networks
+For more information on configuring the event integration in a CATO network, see [Adding Amazon S3 Integration for Events][3].
 
 #### Configure Datadog Forwarder
-Please refer the [Datadog Forwarder][4]
+See information on configuring the [Datadog Forwarder][4].
 
 
-## Data Collected
+## Data collected
 
 ### Logs
 
