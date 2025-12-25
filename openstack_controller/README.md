@@ -36,7 +36,13 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
        domain_id: "<DOMAIN_ID>"
    ```
 
-2. [Restart the Agent][5]
+2. We recommend using the `keystone_server_url` parameter, however if using the `openstack_config_file_path` and `openstack_cloud_name` configuration options, since agent version `7.72.0`, installing the Openstack SDK is required:
+
+```shell
+sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install openstacksdk==4.7.0
+```
+
+3. [Restart the Agent][5]
 
 **Note**: If you are upgrading the integration to v6.0.0 or later from v5.0.0 or older, you need to enable the `use_legacy_check_version` flag to use newer features. You may also need to make changes to your configuration to maintain compatibility. See the [sample openstack controller.d/conf.yaml][4] for details.  
 
