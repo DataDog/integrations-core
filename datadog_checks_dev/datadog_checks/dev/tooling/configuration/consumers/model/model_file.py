@@ -29,7 +29,9 @@ def build_model_file(
     if model_id in model_info.deprecation_data:
         model_file_lines += _define_deprecation_functions(model_id, section_name)
 
-    model_file_lines += _define_validator_functions(model_id, model_info.validator_data, options_with_defaults)
+    model_file_lines += _define_validator_functions(
+        model_id, model_info.validator_data, options_with_defaults, model_info.secure_fields
+    )
 
     config_lines = []
     for i, line in enumerate(model_file_lines):
@@ -139,7 +141,8 @@ def _define_deprecation_functions(model_id, section_name):
     return model_file_lines
 
 
-def _define_validator_functions(model_id, validator_data, need_defaults):
+def _define_validator_functions(model_id, validator_data, need_defaults, secure_fields=None):
+    secure_fields = secure_fields or []
     model_file_lines = ['']
     model_file_lines.append("    @model_validator(mode='before')")
     model_file_lines.append('    def _initial_validation(cls, values):')
@@ -163,6 +166,18 @@ def _define_validator_functions(model_id, validator_data, need_defaults):
         model_file_lines.append(f'            if info.field_name == {option_name!r}:')
         for import_path in import_paths:
             model_file_lines.append(f'                value = validators.{import_path}(value, field=field)')
+
+    # Add security validation for secure fields
+    if secure_fields:
+        model_file_lines.append('')
+        model_file_lines.append('            # Security validation for secure fields')
+        for normalized_name, original_name in secure_fields:
+            model_file_lines.append(f'            if info.field_name == {normalized_name!r}:')
+            model_file_lines.append(
+                f"                value = validation.security.validate_file_path("
+                f"{original_name!r}, value, info.context.get('provider', ''), "
+                f"info.context.get('check_name', ''), info.context.get('security_config'))"
+            )
 
     if need_defaults:
         model_file_lines.append('        else:')
