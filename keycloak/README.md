@@ -52,6 +52,7 @@ Linux command
     **Note**: 
       - `PORT`: Port should be similar to the port provided in **Configure syslog message forwarding from keycloak** section.
       - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
+      - In Keycloak version 26.3, [counting framing] [8] for log messages was introduced. This can cause the log message to not be parsed correctly in the log pipeline. This feature can be disabled by setting `log-syslog-counting-framing=false` in the Keycloak configuration file. 
 
 3. [Restart the Agent][2].
 
@@ -157,3 +158,4 @@ For further assistance, contact [Datadog support][1].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/keycloak/datadog_checks/keycloak/data/conf.yaml.example
 [7]: https://www.keycloak.org/server/logging
+[8]: https://www.keycloak.org/docs/latest/upgrading/index.html#syslog-counting-framing-now-enabled-based-on-protocol
