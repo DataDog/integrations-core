@@ -215,8 +215,6 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        self.log.debug(f"provider: {self.provider}")
-
 
         metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
         if not isinstance(metric_patterns, dict):
@@ -298,6 +296,7 @@ class AgentCheck(object):
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+        self.__security_config = None
         self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
@@ -399,6 +398,24 @@ class AgentCheck(object):
             self.__logs_enabled = bool(datadog_agent.get_config('logs_enabled'))
 
         return self.__logs_enabled
+
+    @property
+    def security_config(self):
+        # type: () -> dict
+        """
+        Returns the integration security configuration, loaded once and cached.
+
+        The security config controls file path validation for untrusted providers.
+        """
+        if self.__security_config is None:
+            self.__security_config = {
+                'enabled': bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
+                'file_paths_allowlist': datadog_agent.get_config('integration_file_paths_allowlist') or [],
+                'trusted_providers': datadog_agent.get_config('integration_trusted_providers') or ['file', 'remote-config'],
+                'excluded_checks': datadog_agent.get_config('integration_security_excluded_checks') or [],
+            }
+
+        return self.__security_config
 
     @property
     def formatted_tags(self):
@@ -606,7 +623,14 @@ class AgentCheck(object):
                 return config_model
 
     def _get_config_model_context(self, config):
-        return {'logger': self.log, 'warning': self.warning, 'configured_fields': frozenset(config)}
+        return {
+            'logger': self.log,
+            'warning': self.warning,
+            'configured_fields': frozenset(config),
+            'provider': self.provider,
+            'check_name': self.name,
+            'security_config': self.security_config,
+        }
 
     def register_secret(self, secret: str) -> None:
         """
