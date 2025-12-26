@@ -16,12 +16,18 @@ instances:
     ## @param pc_ip - string - required
     ## The IP address or FQDN of the Prism Central.
     ## This is required to connect to your Nutanix Prism Central instance.
+    ##
+    ## You can optionally include the port in this field (e.g., 'prism-central.example.com:9440').
+    ## If a port is specified here, do not set the pc_port option, as this will cause a configuration error.
     #
   - pc_ip: prism-central.example.com
 
     ## @param pc_port - integer - optional - default: 9440
     ## The port of the Prism Central API.
     ## Default is 9440 for HTTPS.
+    ##
+    ## Note: If you include the port in the pc_ip field (e.g., 'prism-central.example.com:9440'),
+    ## do not set this option as it will cause a configuration error.
     #
     # pc_port: 9440
 

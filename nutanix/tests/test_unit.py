@@ -7,6 +7,7 @@ from unittest import mock
 
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nutanix import NutanixCheck
 from tests.metrics import (
@@ -402,3 +403,27 @@ def test_events_no_duplicates_on_subsequent_runs(
     dd_run_check(check)
 
     assert len(aggregator.events) == 0, "Expected no events when there are no new events since last collection"
+
+
+def test_pc_ip_with_port_raises_error(mock_instance):
+    """Test that ConfigurationError is raised when pc_ip contains a port."""
+
+    instance = mock_instance.copy()
+    instance['pc_ip'] = '10.0.0.197:9440'
+
+    with pytest.raises(ConfigurationError) as exc_info:
+        NutanixCheck('nutanix', {}, [instance])
+
+    assert "Conflicting configuration" in str(exc_info.value)
+
+
+def test_pc_ip_without_port(mock_instance):
+    """Test that pc_port is used when pc_ip has no port."""
+    instance = mock_instance.copy()
+    instance['pc_ip'] = '10.0.0.197'
+
+    check = NutanixCheck('nutanix', {}, [instance])
+
+    assert check.pc_ip == '10.0.0.197'
+    assert check.pc_port == 9440
+    assert check.base_url == 'https://10.0.0.197:9440'

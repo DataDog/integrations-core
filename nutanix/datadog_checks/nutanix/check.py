@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
 from datadog_checks.nutanix.utils import retry_on_rate_limit
@@ -21,7 +21,14 @@ class NutanixCheck(AgentCheck):
         self.page_limit = self.instance.get("page_limit", 50)
 
         self.pc_ip = self.instance.get("pc_ip")
-        self.pc_port = self.instance.get("pc_port", 9440)
+        self.pc_port = self.instance.get("pc_port")
+        if self.pc_ip and ":" in self.pc_ip:
+            host, _, port = self.pc_ip.rpartition(":")
+            if port.isdigit():
+                if "pc_port" in self.instance:
+                    raise ConfigurationError(f"Conflicting configuration: pc_ip ({port}) and pc_port ({self.pc_port})")
+                self.pc_ip, self.pc_port = host, int(port)
+        self.pc_port = self.pc_port or 9440
 
         pc_username = self.instance.get("pc_username")
         pc_password = self.instance.get("pc_password")
