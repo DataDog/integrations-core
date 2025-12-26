@@ -116,12 +116,13 @@ def merged_prs(ctx, from_ref, to_ref, release_milestone, exclude_releases, expor
         print(','.join([change[field] for field in ['url', 'teams', 'next_tag', 'title']]))
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help="Prints some release stats we want to track")
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--from-ref', '-f', help="Reference to start stats on (first RC tagged)", required=True)
 @click.option('--to-ref', '-t', help="Reference to end stats at (current RC/final tag)", required=True)
 @click.option('--release-milestone', '-r', help="Github release milestone", required=True)
 @click.pass_context
 def report(ctx, from_ref, to_ref, release_milestone):
+    """Generate release statistics report."""
     agent_release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
     integrations_release = Release.from_github(
         ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref

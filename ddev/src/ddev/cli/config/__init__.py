@@ -13,8 +13,9 @@ from ddev.cli.config.set import set_value
 from ddev.cli.config.show import show
 
 
-@click.group(short_help='Manage the config file')
+@click.group()
 def config():
+    """Manage ddev's configuration."""
     pass
 
 

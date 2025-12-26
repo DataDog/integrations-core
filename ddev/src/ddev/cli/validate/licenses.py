@@ -330,10 +330,11 @@ def read_file_lines(file, encoding='utf-8'):
         return f.readlines()
 
 
-@click.command(short_help='Validate third-party license list')
+@click.command()
 @click.option('--sync', '-s', is_flag=True, help='Generate the `LICENSE-3rdparty.csv` file')
 @click.pass_obj
 def licenses(app: Application, sync: bool):
+    """Validate list of third-party licenses."""
     import difflib
     import os
     from collections import defaultdict

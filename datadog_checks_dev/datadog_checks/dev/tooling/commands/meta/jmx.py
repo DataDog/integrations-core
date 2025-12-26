@@ -7,8 +7,9 @@ import click
 from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='JMX utilities')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def jmx():
+    """Manage JMX configurations."""
     pass
 
 

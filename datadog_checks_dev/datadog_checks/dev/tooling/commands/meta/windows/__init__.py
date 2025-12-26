@@ -9,8 +9,9 @@ from .pdh import pdh
 ALL_COMMANDS = [pdh]
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='Windows utilities')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def windows():
+    """Manage Windows-specific tools."""
     pass
 
 
