@@ -56,6 +56,7 @@ from .utils import (
     requires_over_10,
     requires_over_14,
     requires_over_16,
+    requires_over_17,
     run_one_check,
     run_vacuum_thread,
 )
@@ -391,6 +392,51 @@ def test_buffercache_metrics(aggregator, integration_check, pg_instance):
     unused_buffers_tags = base_tags + ['db:shared']
     unused_metric = 'postgresql.buffercache.unused_buffers'
     aggregator.assert_metric(unused_metric, count=1, tags=unused_buffers_tags)
+
+
+@requires_over_17
+def test_buffercache_metrics_skipped_on_aurora_17(aggregator, integration_check, pg_instance):
+    """
+    Aurora PostgreSQL 17+ crashes with Bus Error when querying pg_buffercache.
+    Verify that buffercache metrics are skipped on Aurora PostgreSQL 17+.
+    See: https://github.com/DataDog/integrations-core/issues/21633
+    """
+    pg_instance['collect_buffercache_metrics'] = True
+    check = integration_check(pg_instance)
+
+    # Simulate Aurora PostgreSQL 17+
+    # Note: is_aurora must be set before run() since initialize_is_aurora() only sets it if None
+    check.is_aurora = True
+
+    check.run()
+
+    # Buffercache metrics should NOT be collected on Aurora 17+
+    for metric in _iterate_metric_name(BUFFERCACHE_METRICS):
+        aggregator.assert_metric(metric, count=0)
+
+
+@requires_over_10
+def test_buffercache_metrics_collected_on_non_aurora_17(aggregator, integration_check, pg_instance):
+    """
+    Verify that buffercache metrics are still collected on non-Aurora PostgreSQL 17+.
+    """
+    pg_instance['collect_buffercache_metrics'] = True
+    check = integration_check(pg_instance)
+
+    # Simulate non-Aurora PostgreSQL 17+
+    check.is_aurora = False
+
+    with _get_superconn(pg_instance) as conn:
+        with conn.cursor() as cur:
+            cur.execute('CHECKPOINT;')
+            cur.execute('select * FROM persons;')
+
+    check.run()
+    base_tags = _get_expected_tags(check, pg_instance)
+
+    # Buffercache metrics SHOULD be collected on non-Aurora
+    persons_tags = base_tags + ['relation:persons', 'db:datadog_test', 'schema:public']
+    aggregator.assert_metric('postgresql.buffercache.used_buffers', count=1, tags=persons_tags)
 
 
 def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
