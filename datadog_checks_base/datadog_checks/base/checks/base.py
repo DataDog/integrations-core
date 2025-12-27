@@ -27,6 +27,7 @@ from datadog_checks.base.utils.agent.utils import should_profile_memory
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.models.validation.security import SecurityConfig
 from datadog_checks.base.utils.tagging import GENERIC_TAGS
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -214,7 +215,6 @@ class AgentCheck(object):
 
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
-
 
         metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
         if not isinstance(metric_patterns, dict):
@@ -408,12 +408,13 @@ class AgentCheck(object):
         The security config controls file path validation for untrusted providers.
         """
         if self.__security_config is None:
-            self.__security_config = {
-                'enabled': bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
-                'file_paths_allowlist': datadog_agent.get_config('integration_file_paths_allowlist') or [],
-                'trusted_providers': datadog_agent.get_config('integration_trusted_providers') or ['file', 'remote-config'],
-                'excluded_checks': datadog_agent.get_config('integration_security_excluded_checks') or [],
-            }
+            self.__security_config = SecurityConfig(
+                ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
+                file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
+                trusted_providers=datadog_agent.get_config('integration_trusted_providers')
+                or ['file', 'remote-config'],
+                excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
+            )
 
         return self.__security_config
 
