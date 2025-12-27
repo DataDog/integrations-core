@@ -174,9 +174,14 @@ def _define_validator_functions(model_id, validator_data, need_defaults, secure_
         for normalized_name, original_name in secure_fields:
             model_file_lines.append(f'            if info.field_name == {normalized_name!r}:')
             model_file_lines.append(
-                f"                value = validation.security.validate_file_path("
-                f"{original_name!r}, value, info.context.get('provider', ''), "
-                f"info.context.get('check_name', ''), info.context.get('security_config'))"
+                "                if not validation.security.validate_secure_field("
+                "value, info.context.get('provider', ''), "
+                "info.context.get('check_name', ''), info.context.get('security_config')):"
+            )
+            model_file_lines.append(
+                f"                    raise ValueError("
+                f"f\"Field '{original_name}' is not allowed from untrusted provider "
+                f"'{{info.context.get('provider', '')}}'\")"
             )
 
     if need_defaults:

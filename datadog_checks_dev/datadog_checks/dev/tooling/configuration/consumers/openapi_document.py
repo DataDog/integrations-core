@@ -88,7 +88,7 @@ def build_openapi_document(section: dict, model_id: str, schema_name: str, error
             model_info.add_deprecation(model_id, option_name, section_option['deprecation'])
 
         # Track secure fields for security validation
-        if type_data.get('secure_field', False):
+        if section_option.get('secure_field', False):
             model_info.add_secure_field(normalized_option_name, option_name)
 
         if section_option['required']:

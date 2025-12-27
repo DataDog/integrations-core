@@ -7,138 +7,123 @@ Security validation for integration configuration parameters.
 This module provides functions to validate file path configuration parameters
 based on the provider trust settings. The security configuration is loaded once
 in the AgentCheck class and passed via the validation context.
-
-Security config structure (from AgentCheck.security_config):
-{
-    'enabled': bool,                    # integration_ignore_untrusted_file_params
-    'file_paths_allowlist': list[str],  # integration_file_paths_allowlist
-    'trusted_providers': list[str],     # integration_trusted_providers
-    'excluded_checks': list[str],       # integration_security_excluded_checks
-}
 """
+
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 
-# Type alias for security config
-SecurityConfig = dict[str, bool | list[str]]
+# Default values for security config
+DEFAULT_TRUSTED_PROVIDERS = ['file', 'remote-config']
 
 
-def is_provider_trusted(provider: str, security_config: SecurityConfig) -> bool:
+@dataclass
+class SecurityConfig:
     """
-    Check if the given provider is in the trusted providers list.
+    Security configuration for integration file path validation.
 
-    Args:
-        provider: The configuration provider name (e.g., 'file', 'remote-config', 'kubernetes')
-        security_config: The security configuration dict from AgentCheck.security_config
-
-    Returns:
-        True if the provider is trusted, False otherwise.
+    Attributes:
+        ignore_untrusted_file_params: Whether to ignore file params from untrusted providers
+            (maps to integration_ignore_untrusted_file_params). Defaults to False.
+        file_paths_allowlist: List of allowed file path prefixes. Defaults to empty list.
+        trusted_providers: List of trusted configuration providers. Defaults to ['file', 'remote-config'].
+        excluded_checks: List of check names excluded from security validation. Defaults to empty list.
     """
-    trusted = security_config.get('trusted_providers', ['file', 'remote-config'])
-    return provider in trusted
+
+    ignore_untrusted_file_params: bool = False
+    file_paths_allowlist: list[str] = field(default_factory=list)
+    trusted_providers: list[str] = field(default_factory=lambda: DEFAULT_TRUSTED_PROVIDERS.copy())
+    excluded_checks: list[str] = field(default_factory=list)
+
+    def is_enabled(self) -> bool:
+        """Check if file path security enforcement is enabled."""
+        return self.ignore_untrusted_file_params
+
+    def is_provider_trusted(self, provider: str) -> bool:
+        """
+        Check if the given provider is in the trusted providers list.
+
+        Args:
+            provider: The configuration provider name (e.g., 'file', 'remote-config', 'kubernetes')
+
+        Returns:
+            True if the provider is trusted, False otherwise.
+        """
+        return provider in self.trusted_providers
+
+    def is_file_path_allowed(self, path: str) -> bool:
+        """
+        Check if the given file path is in the allowlist.
+
+        Args:
+            path: The file path to validate
+
+        Returns:
+            True if the path is allowed, False otherwise.
+            An empty allowlist means all paths are allowed.
+        """
+        if not self.file_paths_allowlist:
+            # Empty allowlist means all paths are allowed (backward compatibility)
+            return True
+        return any(path.startswith(allowed) for allowed in self.file_paths_allowlist)
+
+    def is_check_excluded(self, check_name: str) -> bool:
+        """
+        Check if the given check is excluded from security restrictions.
+
+        Args:
+            check_name: The name of the check/integration
+
+        Returns:
+            True if the check is excluded from security restrictions, False otherwise.
+        """
+        return check_name in self.excluded_checks
 
 
-def is_file_path_allowed(path: str, security_config: SecurityConfig) -> bool:
-    """
-    Check if the given file path is in the allowlist.
-
-    Args:
-        path: The file path to validate
-        security_config: The security configuration dict from AgentCheck.security_config
-
-    Returns:
-        True if the path is allowed, False otherwise.
-        An empty allowlist means all paths are allowed.
-    """
-    allowlist = security_config.get('file_paths_allowlist', [])
-    if not allowlist:
-        # Empty allowlist means all paths are allowed (backward compatibility)
-        return True
-    return any(path.startswith(allowed) for allowed in allowlist)
-
-
-def is_check_excluded(check_name: str, security_config: SecurityConfig) -> bool:
-    """
-    Check if the given check is excluded from security restrictions.
-
-    Args:
-        check_name: The name of the check/integration
-        security_config: The security configuration dict from AgentCheck.security_config
-
-    Returns:
-        True if the check is excluded from security restrictions, False otherwise.
-    """
-    excluded = security_config.get('excluded_checks', [])
-    return check_name in excluded
-
-
-def is_security_enabled(security_config: SecurityConfig) -> bool:
-    """
-    Check if file path security enforcement is enabled.
-
-    Args:
-        security_config: The security configuration dict from AgentCheck.security_config
-
-    Returns:
-        True if security is enabled, False otherwise.
-    """
-    return bool(security_config.get('enabled', False))
-
-
-def validate_file_path(
-    field_name: str,
+def validate_secure_field(
     value: object,
     provider: str,
     check_name: str,
     security_config: SecurityConfig | None = None,
-) -> object:
+) -> bool:
     """
-    Validate a file path field value based on security settings.
+    Validate a secure field value based on security settings.
 
-    This function checks if a file path configuration parameter should be allowed
+    This function checks if a configuration parameter should be allowed
     based on the provider trust settings and allowlist configuration.
 
     Args:
-        field_name: The name of the configuration field being validated
-        value: The file path value to validate
+        value: The value to validate
         provider: The configuration provider name
         check_name: The name of the check/integration
-        security_config: The security configuration dict from AgentCheck.security_config.
-                        If None, validation is skipped.
+        security_config: The SecurityConfig instance. If None, validation is skipped.
 
     Returns:
-        The original value if validation passes
-
-    Raises:
-        ValueError: If the file path is not allowed from the given provider
+        True if the value is allowed, False if it should be blocked.
     """
-    # If no security config provided, skip validation
+    # If no security config provided, allow
     if security_config is None:
-        return value
+        return True
 
-    # If value is not a string (e.g., None), skip validation
+    # If value is not a string (e.g., None), allow
     if not isinstance(value, str):
-        return value
+        return True
 
-    # If security is not enabled, allow everything
-    if not is_security_enabled(security_config):
-        return value
+    # If security is not enabled, allow
+    if not security_config.is_enabled():
+        return True
 
-    # If check is excluded from security restrictions, allow everything
-    if is_check_excluded(check_name, security_config):
-        return value
+    # If check is excluded from security restrictions, allow
+    if security_config.is_check_excluded(check_name):
+        return True
 
-    # If provider is trusted, allow everything
-    if is_provider_trusted(provider, security_config):
-        return value
+    # If provider is trusted, allow
+    if security_config.is_provider_trusted(provider):
+        return True
 
-    # If file path is in the allowlist, allow it
-    if is_file_path_allowed(value, security_config):
-        return value
+    # If file path is in the allowlist, allow
+    if security_config.is_file_path_allowed(value):
+        return True
 
-    # Block the file path from untrusted provider
-    raise ValueError(
-        f"Field '{field_name}' contains file path '{value}' from untrusted provider '{provider}'. "
-        f"To allow this, either add the provider to 'integration_trusted_providers' or "
-        f"add the path to 'integration_file_paths_allowlist' in datadog.yaml."
-    )
+    # Block the value from untrusted provider
+    return False
