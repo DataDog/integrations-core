@@ -80,14 +80,14 @@ class SecurityConfig:
         return check_name in self.excluded_checks
 
 
-def validate_secure_field(
+def validate_require_trusted_provider(
     value: object,
     provider: str,
     check_name: str,
     security_config: SecurityConfig | None = None,
 ) -> bool:
     """
-    Validate a secure field value based on security settings.
+    Check if a value is allowed based on security settings.
 
     This function checks if a configuration parameter should be allowed
     based on the provider trust settings and allowlist configuration.
