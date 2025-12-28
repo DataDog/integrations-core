@@ -48,32 +48,6 @@ class ClickhouseCheck(AgentCheck):
         self._database_identifier = None
         self._agent_hostname = None
 
-        # Cloud metadata configuration
-        self._cloud_metadata = {}
-
-        # AWS cloud metadata
-        aws_config = self.instance.get('aws', {})
-        if aws_config.get('instance_endpoint'):
-            self._cloud_metadata['aws'] = {'instance_endpoint': aws_config['instance_endpoint']}
-
-        # GCP cloud metadata
-        gcp_config = self.instance.get('gcp', {})
-        if gcp_config.get('project_id') and gcp_config.get('instance_id'):
-            self._cloud_metadata['gcp'] = {
-                'project_id': gcp_config['project_id'],
-                'instance_id': gcp_config['instance_id'],
-            }
-
-        # Azure cloud metadata
-        azure_config = self.instance.get('azure', {})
-        if azure_config.get('deployment_type') and azure_config.get('fully_qualified_domain_name'):
-            self._cloud_metadata['azure'] = {
-                'deployment_type': azure_config['deployment_type'],
-                'fully_qualified_domain_name': azure_config['fully_qualified_domain_name'],
-            }
-            if azure_config.get('database_name'):
-                self._cloud_metadata['azure']['database_name'] = azure_config['database_name']
-
         # Database instance metadata collection interval
         self._database_instance_collection_interval = float(
             self.instance.get('database_instance_collection_interval', 300)
@@ -187,10 +161,6 @@ class ClickhouseCheck(AgentCheck):
                     "connection_host": self._server,
                 },
             }
-
-            # Add cloud metadata if available
-            if self._cloud_metadata:
-                event["cloud_metadata"] = self._cloud_metadata
 
             self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

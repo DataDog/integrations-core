@@ -415,7 +415,6 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
-            "cloud_metadata": getattr(self._check, 'cloud_metadata', {}),
             'service': getattr(self._config, 'service', None),
             "clickhouse_activity": active_sessions,
             "clickhouse_connections": active_connections,
@@ -437,6 +436,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         """
         Main method to collect and submit statement samples from active queries
         Similar to Postgres _collect_statement_samples
+
+        Note: Plan type payloads are disabled for ClickHouse as they are not needed.
+        Activity events are still collected separately.
         """
         start_time = time.time()
 
@@ -452,9 +454,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         skipped_count = 0
         error_count = 0
 
+        # Plan type payloads are disabled for ClickHouse - only track for logging
         for row in rows:
             try:
-                # Check if we should submit this sample based on rate limiting
                 query_signature = row.get('query_signature')
                 if not query_signature:
                     self._log.debug("Skipping row without query signature")
@@ -465,21 +467,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     skipped_count += 1
                     continue
 
-                # Create the event payload
-                event = self._create_sample_event(row)
-
-                # Log the event payload for debugging
-                self._log.debug(
-                    "Query sample event payload: ddsource=%s, query_signature=%s",
-                    event.get('ddsource'),
-                    query_signature[:50] if query_signature else 'N/A',
-                )
-
-                # Submit the event
-                event_json = json.dumps(event, default=default_json_event_encoding)
-                self._check.database_monitoring_query_sample(event_json)
-                submitted_count += 1
-                self._log.debug("Submitted query sample for signature: %s", query_signature[:50])
+                # Plan type events are disabled - just count as skipped
+                # Activity events (dbm_type: activity) are still submitted separately
+                skipped_count += 1
 
             except Exception as e:
                 error_count += 1
@@ -514,6 +504,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         Create a database monitoring query sample event (plan type)
         Format follows Postgres integration pattern
         This represents currently executing queries from system.processes
+
+        Note: This method is no longer used for submission as plan type payloads
+        are disabled for ClickHouse. Kept for test compatibility.
         """
         # Use current_database from the query if available, fallback to check's default db
         db = row.get('current_database') or self._check._db
@@ -537,7 +530,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     "comments": row.get('dd_comments'),
                 },
             },
-            "clickhouse": {k: v for k, v in row.items() if k not in system_processes_sample_exclude_keys},
+            "clickhouse": {k: v for k, v in row.items() if k not in system_processes_sample_exclude_keys and v is not None},
         }
 
         # Add duration if available (elapsed time in seconds, convert to nanoseconds)
