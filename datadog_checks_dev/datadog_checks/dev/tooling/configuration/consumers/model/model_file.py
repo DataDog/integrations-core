@@ -30,7 +30,7 @@ def build_model_file(
         model_file_lines += _define_deprecation_functions(model_id, section_name)
 
     model_file_lines += _define_validator_functions(
-        model_id, model_info.validator_data, options_with_defaults, model_info.secure_fields
+        model_id, model_info.validator_data, options_with_defaults, model_info.require_trusted_providers
     )
 
     config_lines = []
@@ -141,8 +141,8 @@ def _define_deprecation_functions(model_id, section_name):
     return model_file_lines
 
 
-def _define_validator_functions(model_id, validator_data, need_defaults, secure_fields=None):
-    secure_fields = secure_fields or []
+def _define_validator_functions(model_id, validator_data, need_defaults, require_trusted_providers=None):
+    require_trusted_providers = require_trusted_providers or []
     model_file_lines = ['']
     model_file_lines.append("    @model_validator(mode='before')")
     model_file_lines.append('    def _initial_validation(cls, values):')
@@ -167,14 +167,14 @@ def _define_validator_functions(model_id, validator_data, need_defaults, secure_
         for import_path in import_paths:
             model_file_lines.append(f'                value = validators.{import_path}(value, field=field)')
 
-    # Add security validation for secure fields
-    if secure_fields:
+    # Add security validation for fields requiring trusted provider
+    if require_trusted_providers:
         model_file_lines.append('')
-        model_file_lines.append('            # Security validation for secure fields')
-        for normalized_name, original_name in secure_fields:
+        model_file_lines.append('            # Security validation for fields requiring trusted provider')
+        for normalized_name, original_name in require_trusted_providers:
             model_file_lines.append(f'            if info.field_name == {normalized_name!r}:')
             model_file_lines.append(
-                "                if not validation.security.validate_secure_field("
+                "                if not validation.security.validate_require_trusted_provider("
                 "value, info.context.get('provider', ''), "
                 "info.context.get('check_name', ''), info.context.get('security_config')):"
             )
