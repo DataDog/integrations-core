@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2025-present
+# (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
@@ -100,7 +100,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
     def __init__(self, check: ClickhouseCheck, config):
         # Default collection interval if not specified
-        collection_interval = getattr(config, 'collection_interval', 10)
+        collection_interval = getattr(config, 'collection_interval', 1)
 
         super(ClickhouseStatementSamples, self).__init__(
             check,
@@ -530,7 +530,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     "comments": row.get('dd_comments'),
                 },
             },
-            "clickhouse": {k: v for k, v in row.items() if k not in system_processes_sample_exclude_keys and v is not None},
+            "clickhouse": {
+                k: v for k, v in row.items() if k not in system_processes_sample_exclude_keys and v is not None
+            },
         }
 
         # Add duration if available (elapsed time in seconds, convert to nanoseconds)

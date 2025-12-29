@@ -97,7 +97,7 @@ class ClickhouseCheck(AgentCheck):
             class QueryMetricsConfig:
                 def __init__(self, config_dict):
                     self.enabled = config_dict.get('enabled', True)
-                    self.collection_interval = config_dict.get('collection_interval', 60)
+                    self.collection_interval = config_dict.get('collection_interval', 10)
                     self.run_sync = config_dict.get('run_sync', False)
                     self.full_statement_text_cache_max_size = config_dict.get(
                         'full_statement_text_cache_max_size', 10000
@@ -117,7 +117,7 @@ class ClickhouseCheck(AgentCheck):
             class QuerySamplesConfig:
                 def __init__(self, config_dict):
                     self.enabled = config_dict.get('enabled', True)
-                    self.collection_interval = config_dict.get('collection_interval', 10)
+                    self.collection_interval = config_dict.get('collection_interval', 1)
                     self.run_sync = config_dict.get('run_sync', False)
                     self.samples_per_hour_per_query = config_dict.get('samples_per_hour_per_query', 15)
                     self.seen_samples_cache_maxsize = config_dict.get('seen_samples_cache_maxsize', 10000)

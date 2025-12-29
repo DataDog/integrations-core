@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2025-present
+# (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
@@ -43,10 +43,12 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 # List of internal Cloud users to exclude from query metrics
 # These are Datadog Cloud internal service accounts
-INTERNAL_CLOUD_USERS = frozenset({
-    # Add internal Cloud user names here as needed
-    # 'internal_service_user',
-})
+INTERNAL_CLOUD_USERS = frozenset(
+    {
+        # Add internal Cloud user names here as needed
+        # 'internal_service_user',
+    }
+)
 
 STATEMENTS_QUERY = """
 SELECT
@@ -98,7 +100,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
     """Collects telemetry for SQL statements from system.query_log"""
 
     def __init__(self, check: ClickhouseCheck, config):
-        collection_interval = float(getattr(config, 'collection_interval', 60))
+        collection_interval = float(getattr(config, 'collection_interval', 10))
         super(ClickhouseStatementMetrics, self).__init__(
             check,
             run_sync=getattr(config, 'run_sync', False),
