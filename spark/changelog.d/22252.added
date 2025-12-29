@@ -1,0 +1,1 @@
+Handle Spark driver startup message gracefully instead of raising a JSON parse error.
