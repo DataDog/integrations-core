@@ -96,28 +96,3 @@ def test_database_instance_metadata(aggregator, instance, datadog_agent, dd_run_
     assert 'dbm' in event['metadata']
     assert 'connection_host' in event['metadata']
     assert event['metadata']['connection_host'] == instance['server']
-
-
-def test_database_instance_metadata_with_cloud_metadata(aggregator, instance, datadog_agent, dd_run_check):
-    """Test that database_instance metadata includes cloud metadata when configured."""
-    instance = instance.copy()
-    instance['aws'] = {'instance_endpoint': 'my-clickhouse.us-east-1.rds.amazonaws.com'}
-    instance['gcp'] = {'project_id': 'my-project', 'instance_id': 'my-instance'}
-
-    check = ClickhouseCheck('clickhouse', {}, [instance])
-    check.check_id = 'test:789'
-    dd_run_check(check)
-
-    # Get database monitoring metadata events
-    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-
-    # Find the database_instance event
-    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
-
-    assert event is not None
-    assert 'cloud_metadata' in event
-    assert 'aws' in event['cloud_metadata']
-    assert event['cloud_metadata']['aws']['instance_endpoint'] == 'my-clickhouse.us-east-1.rds.amazonaws.com'
-    assert 'gcp' in event['cloud_metadata']
-    assert event['cloud_metadata']['gcp']['project_id'] == 'my-project'
-    assert event['cloud_metadata']['gcp']['instance_id'] == 'my-instance'

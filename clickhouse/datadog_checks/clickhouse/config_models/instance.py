@@ -20,24 +20,6 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-class Aws(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    instance_endpoint: Optional[str] = None
-
-
-class Azure(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    database_name: Optional[str] = None
-    deployment_type: Optional[str] = None
-    fully_qualified_domain_name: Optional[str] = None
-
-
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -50,15 +32,6 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
-class Gcp(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    instance_id: Optional[str] = None
-    project_id: Optional[str] = None
-
-
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -68,6 +41,18 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class QueryMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[float] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
+    run_sync: Optional[bool] = None
+
+
 class QuerySamples(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -75,12 +60,12 @@ class QuerySamples(BaseModel):
     )
     activity_collection_interval: Optional[float] = None
     activity_enabled: Optional[bool] = None
-    activity_max_rows: Optional[float] = None
+    activity_max_rows: Optional[int] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     run_sync: Optional[bool] = None
-    samples_per_hour_per_query: Optional[float] = None
-    seen_samples_cache_maxsize: Optional[float] = None
+    samples_per_hour_per_query: Optional[int] = None
+    seen_samples_cache_maxsize: Optional[int] = None
 
 
 class InstanceConfig(BaseModel):
@@ -89,8 +74,6 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    aws: Optional[Aws] = None
-    azure: Optional[Azure] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
@@ -99,15 +82,15 @@ class InstanceConfig(BaseModel):
     dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    gcp: Optional[Gcp] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
     port: Optional[int] = None
+    query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
-    server: Optional[str] = None
+    server: str
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None

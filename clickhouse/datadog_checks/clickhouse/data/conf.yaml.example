@@ -24,11 +24,10 @@ init_config:
 #
 instances:
 
-  -
-    ## @param server - string - optional
+    ## @param server - string - required
     ## The hostname used to connect to the system.
     #
-    # server: <SERVER>
+  - server: <SERVER>
 
     ## @param port - integer - optional - default: 9000
     ## The port used to connect to the system.
@@ -93,122 +92,57 @@ instances:
     #
     # dbm: false
 
-    ## Configuration for collecting query samples when Database Monitoring (DBM) is enabled.
-    ## Query samples provide insights into the queries being executed on your ClickHouse instance.
+    ## Configure collection of query samples
     #
     # query_samples:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query samples.
+        ## Enable collection of query samples. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 1
+        ## Set the query sample collection interval (in seconds). Each collection involves a single query to
+        ## `system.processes` to capture currently executing queries.
+        #
+        # collection_interval: 1
+
+        ## @param samples_per_hour_per_query - integer - optional - default: 15
+        ## Set the rate limit for how many query sample events will be ingested per hour per normalized query.
+        #
+        # samples_per_hour_per_query: 15
+
+        ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
+        ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
+        ## for databases with a very large number of unique normalized queries which exceed the cache's limit.
+        #
+        # seen_samples_cache_maxsize: 10000
+
+        ## @param activity_enabled - boolean - optional - default: true
+        ## Enable collection of database activity snapshots. Requires `dbm: true`.
+        #
+        # activity_enabled: true
+
+        ## @param activity_max_rows - integer - optional - default: 1000
+        ## Set the maximum number of active sessions to include in each activity snapshot.
+        #
+        # activity_max_rows: 1000
+
+    ## Configure collection of query metrics
+    #
+    # query_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query metrics. Requires `dbm: true`.
         #
         # enabled: true
 
         ## @param collection_interval - number - optional - default: 10
-        ## The interval in seconds between query sample collections.
-        ## Lower values provide more granular data but increase overhead.
+        ## Set the query metric collection interval (in seconds). Each collection involves a single query to
+        ## `system.query_log`. If a non-default value is chosen then that exact same value must be used for *every*
+        ## check instance. Running different instances with different collection intervals is not supported.
         #
         # collection_interval: 10
-
-        ## @param samples_per_hour_per_query - number - optional - default: 15
-        ## The maximum number of samples to collect per unique query signature per hour.
-        ## This helps limit the volume of data collected while still providing useful insights.
-        #
-        # samples_per_hour_per_query: 15
-
-        ## @param seen_samples_cache_maxsize - number - optional - default: 10000
-        ## The maximum size of the cache used to track which query samples have been collected.
-        ## A larger cache can help avoid collecting duplicate samples.
-        #
-        # seen_samples_cache_maxsize: 10000
-
-        ## @param run_sync - boolean - optional - default: false
-        ## Whether to run query sample collection synchronously in the check run.
-        ## Set to false (default) to run asynchronously in a separate thread.
-        #
-        # run_sync: false
-
-        ## @param activity_enabled - boolean - optional - default: true
-        ## Enable collection of database activity snapshots.
-        ## Activity snapshots capture currently executing queries and active connections.
-        #
-        # activity_enabled: true
-
-        ## @param activity_collection_interval - number - optional - default: 10
-        ## The interval in seconds between activity snapshot collections.
-        ## Lower values capture more activity data but increase overhead.
-        ## For fast ClickHouse queries, consider using 1-5 seconds.
-        #
-        # activity_collection_interval: 10
-
-        ## @param activity_max_rows - number - optional - default: 1000
-        ## The maximum number of active sessions to include in each activity snapshot.
-        #
-        # activity_max_rows: 1000
-
-    ## This block defines the configuration for AWS RDS and Aurora instances.
-    ##
-    ## Complete this section if you have installed the Datadog AWS Integration to enrich instances
-    ## with ClickHouse integration telemetry.
-    #
-    # aws:
-
-        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-        ## Equal to the Endpoint.Address of the instance the agent is connecting to.
-        ## This value is optional if the value of `server` is already configured to the instance endpoint.
-        ##
-        ## For more information on instance endpoints,
-        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
-        #
-        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-
-    ## This block defines the configuration for Google Cloud SQL instances.
-    ##
-    ## Complete this section if you have installed the Datadog GCP Integration to enrich instances
-    ## with ClickHouse integration telemetry.
-    #
-    # gcp:
-
-        ## @param project_id - string - optional - default: foo-project
-        ## Equal to the GCP resource's project ID.
-        ##
-        ## For more information on project IDs,
-        ## see the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
-        #
-        # project_id: foo-project
-
-        ## @param instance_id - string - optional - default: foo-database
-        ## Equal to the GCP resource's instance ID.
-        ##
-        ## For more information on instance IDs,
-        ## see the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
-        #
-        # instance_id: foo-database
-
-    ## This block defines the configuration for Azure Database for ClickHouse.
-    ##
-    ## Complete this section if you have installed the Datadog Azure Integration to enrich instances
-    ## with ClickHouse integration telemetry.
-    #
-    # azure:
-
-        ## @param deployment_type - string - optional - default: flexible_server
-        ## Equal to the deployment type for the managed database.
-        ##
-        ## For Azure, this is typically 'flexible_server' or 'single_server'.
-        #
-        # deployment_type: flexible_server
-
-        ## @param fully_qualified_domain_name - string - optional - default: my-clickhouse.database.windows.net
-        ## Equal to the fully qualified domain name of the Azure database.
-        ##
-        ## This value is optional if the value of `server` is already configured to the fully qualified domain name.
-        #
-        # fully_qualified_domain_name: my-clickhouse.database.windows.net
-
-        ## @param database_name - string - optional
-        ## The database name for the Azure instance.
-        #
-        # database_name: <DATABASE_NAME>
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
@@ -229,51 +163,48 @@ instances:
     ## Each query must have 2 fields, and can have a third optional field:
     ##
     ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-    ##            Use the pipe `|` if you require a multi-line script.
+    ##     Use the pipe `|` if you require a multi-line script.
     ## 2. columns - The list representing each column, ordered sequentially from left to right.
-    ##              The number of columns must equal the number of columns returned in the query.
-    ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is a `tag` type, this column is
-    ##                          considered a tag and applied to every
-    ##                          metric collected by this particular query.
-    ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to the following `tag` types to
-    ##                          tag each metric in the row with the name and value
-    ##                          of the item in this column:
-    ##                           i. tag           - This is the default tag type
-    ##                           ii. tag_list     - This allows multiple values to be attached
-    ##                                             to the tag name. For example: 
-    ##
-    ##                                             query = {
-    ##                                               "name": "example",
-    ##                                               "query": "...",
-    ##                                               "columns": [
-    ##                                                 {"name": "server_tag", "type": "tag_list"},
-    ##                                                 {"name": "foo", "type": "gauge"},
-    ##                                               ]
-    ##                                             }
-    ##
-    ##                                             May result in:
-    ##                                             gauge("foo", tags=[
-    ##                                                                 "server_tag:us",
-    ##                                                                 "server_tag:primary",
-    ##                                                                 "server_tag:default"
-    ##                                                               ])
-    ##                                             gauge("foo", tags=["server_tag:eu"])
-    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
-    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
-    ##                          You can use the `count` type to perform aggregation
-    ##                          for queries that return multiple rows with the same or no tags.
-    ##              Columns without a name are ignored. To skip a column, enter:
-    ##                - {}
+    ##     The number of columns must equal the number of columns returned in the query.
+    ##     There are 2 required pieces of data:
+    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
+    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
+    ##           to every metric collected by this particular query.
+    ##       2. type - The submission method (gauge, monotonic_count, etc.).
+    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
+    ##           and value of the item in this column:
+    ##             1. tag - This is the default tag type
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##                 ```
+    ##                 query = {
+    ##                   "name": "example",
+    ##                   "query": "...",
+    ##                   "columns": [
+    ##                     {"name": "server_tag", "type": "tag_list"},
+    ##                     {"name": "foo", "type": "gauge"},
+    ##                   ]
+    ##                 }
+    ##                 ```
+    ##                 May result in:
+    ##                 ```
+    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
+    ##                 gauge("foo", tags=["server_tag:eu"])
+    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                 ```
+    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
+    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
+    ##           the same or no tags.
+    ##     Columns without a name are ignored. To skip a column, enter:
+    ##     ```
+    ##       - {}
+    ##     ```
     ## 3. tags (optional) - A list of tags to apply to each metric.
     ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
     ##     If collection_interval is not set, the query will be run every check run.
-    ##     If the collection interval is less than check collection interval, 
-    ##     the query will be run every check run.
-    ##     If the collection interval is greater than check collection interval, 
-    ##     the query will NOT BE RUN exactly at the collection interval.
+    ##     If the collection interval is less than check collection interval, the query will be run every check
+    ##     run.
+    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
+    ##     exactly at the collection interval.
     ##     The query will be run at the next check run after the collection interval has passed.
     ## 5. metric_prefix (optional) - The prefix to apply to each metric.
     #
