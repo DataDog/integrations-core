@@ -148,6 +148,7 @@ jobs:
         ddev config set repo ${{ inputs.repo }}
         ddev config set orgs.ci.dd_url "https://app.datadoghq.com"
         ddev config set org ci
+        ddev config set check_update false
 
     - name: Validate Agent integration version requirements
       if: inputs.agent-reqs
