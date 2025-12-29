@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "boto3==1.40.21",
+    "boto3==1.42.17",
 ]
 
 [project.urls]

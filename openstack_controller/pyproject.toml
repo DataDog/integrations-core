@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "openstacksdk==4.7.0",
+    "openstacksdk==4.8.0",
 ]
 
 [project.urls]
