@@ -17,7 +17,7 @@ files:
     options:
     - name: host
       description: |
-        The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
+        The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
         e.g. `/var/run/postgresql`.
       value:
         type: string
