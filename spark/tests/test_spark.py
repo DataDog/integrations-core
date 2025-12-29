@@ -1188,6 +1188,21 @@ def test_do_not_crash_on_version_collection_failure():
 
 
 @pytest.mark.unit
+def test_driver_startup_message_is_skipped(caplog):
+    check = SparkCheck('spark', {}, [DRIVER_CONFIG])
+    response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
+
+    with caplog.at_level(logging.DEBUG):
+        with mock.patch.object(check, '_rest_request', return_value=response):
+            result = check._rest_request_to_json(
+                DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
+            )
+
+    assert result is None
+    assert 'spark driver not ready yet' in caplog.text.lower()
+
+
+@pytest.mark.unit
 def test_ssl(dd_run_check):
     run_ssl_server()
     c = SparkCheck('spark', {}, [SSL_CONFIG])

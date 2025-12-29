@@ -701,6 +701,12 @@ class SparkCheck(AgentCheck):
             response_json = response.json()
 
         except JSONDecodeError as e:
+            response_text = response.text.strip()
+            if response_text and 'spark is starting up' in response_text.lower():
+                self.log.debug(
+                    "Spark driver not ready yet at %s: %s", self._get_url_base(address), response_text
+                )
+                return None
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
