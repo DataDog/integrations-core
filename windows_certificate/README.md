@@ -55,7 +55,7 @@ instances:
     enable_crl_monitoring: true
 ```
 
-Begnning with Agent v7.70, the integration can validate certificates and their certificate chains. To enable the certificate chain validation, set the following in the integration:
+Beginning with Agent v7.70, the integration can validate certificates and their certificate chains. To enable the certificate chain validation, set the following in the integration:
 ```yaml
 instances:    
   - certificate_store: CA
@@ -91,6 +91,12 @@ The windows_certificate integration does not include any events.
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+
+### Certificates with identical subjects
+
+The integration identifies certificates primarily by their subject, not by serial number. When multiple certificates share the same subject but have different serial numbers (for example, an expired certificate and its renewed replacement), the integration may only detect one of them, often the expired certificate.
+
+**Solution**: Delete the expired certificate from the Windows Certificate Store so only the valid, renewed certificate is monitored. While `certificate_serial_number` is available as a tag on metrics and service checks, it cannot be used for filtering in the configuration. The integration only supports filtering by `certificate_subjects`.
 
 Need help? Contact [Datadog support][9].
 
