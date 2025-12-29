@@ -29,6 +29,13 @@ REMOVED_INTEGRATIONS = {
     'trend_micro_cloud_one': 'Trend Micro Cloud One',
 }
 
+# Integrations that should be added with `ddev release agent changelog` output.
+# This mainly for integrations that were released and then later removed, but are
+# still present in some of the git tags for agent releases.
+EXCLUDED_INTEGRATIONS = {
+    'trend_micro_cloud_one',  # git show 7.72.0:requirements-agent-release.txt | grep 'trend-micro-cloud-one'
+}
+
 
 @click.command(
     short_help="Provide a list of updated checks on a given Datadog Agent version, in changelog form",
@@ -75,6 +82,8 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
             for name, ver in version_changes.items():
+                if name in EXCLUDED_INTEGRATIONS:
+                    continue
                 try:
                     display_name = app.repo.integrations.get(name).display_name
                     display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)

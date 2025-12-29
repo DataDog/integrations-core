@@ -66,6 +66,26 @@ def test_changelog_since_to(fake_changelog, ddev, mocker):
     assert mock_fetch_tags.call_count == 1
 
 
+def test_changelog_skips_excluded_integrations(ddev, mocker):
+    mocker.patch('ddev.utils.git.GitRepository.fetch_tags')
+    mocker.patch(
+        'ddev.cli.release.agent.changelog.get_changes_per_agent',
+        return_value={
+            '7.99.0': {
+                'trend_micro_cloud_one': ('1.0.0', False),
+                'foo': ('1.2.3', False),
+            }
+        },
+    )
+
+    result = ddev('release', 'agent', 'changelog', '--since', '7.98.0', '--to', '7.99.0')
+    assert result.exit_code == 0
+
+    assert 'trend_micro_cloud_one' not in result.output
+    assert 'Trend Micro Cloud One' not in result.output
+    assert '* foo [1.2.3]' in result.output
+
+
 @pytest.fixture
 def repo_with_fake_changelog(repo_with_history, config_file):
     config_file.model.repos['core'] = str(repo_with_history.path)
