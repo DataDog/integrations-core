@@ -17,4 +17,65 @@ jobs:
       contents: read
     with:
       repo: core
+    secrets: inherit
+
+  dependency-resolution:
+    name: Dependency resolution up-to-date
+    if: >-
+      github.base_ref == 'master'
+      && contains(github.event.pull_request.labels.*.name, 'bot/resolve-build-deps')
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+
+      - name: Validate `.deps/` matches `agent_requirements.in`
+        run: |-
+          python - <<'PY'
+          import hashlib
+          import json
+          import sys
+          from pathlib import Path
+
+          direct = Path("agent_requirements.in")
+          metadata = Path(".deps/metadata.json")
+          resolved_dir = Path(".deps/resolved")
+          image_digests = Path(".deps/image_digests.json")
+
+          if not direct.is_file():
+              print("::error::Missing agent_requirements.in")
+              sys.exit(1)
+
+          if not metadata.is_file():
+              print("::error::Missing .deps/metadata.json. Run the dependency resolution workflow (label: bot/resolve-build-deps).")
+              sys.exit(1)
+
+          expected = hashlib.sha256(direct.read_bytes()).hexdigest()
+          try:
+              data = json.loads(metadata.read_text(encoding="utf-8"))
+          except Exception as e:
+              print(f"::error::Failed to parse .deps/metadata.json: {e}")
+              sys.exit(1)
+
+          actual = data.get("sha256")
+          if actual != expected:
+              print("::error::Dependency resolution is out of date for agent_requirements.in. Wait for the resolve-build-deps workflow to push updates, or re-run it.")
+              sys.exit(1)
+
+          if not image_digests.is_file():
+              print("::error::Missing .deps/image_digests.json. Dependency resolution appears incomplete.")
+              sys.exit(1)
+
+          if not resolved_dir.is_dir() or not any(resolved_dir.glob("*.txt")):
+              print("::error::Missing .deps/resolved/*.txt lockfiles. Dependency resolution appears incomplete.")
+              sys.exit(1)
+
+          print("Dependency resolution is up to date.")
+          PY
 

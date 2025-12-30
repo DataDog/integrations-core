@@ -7,6 +7,12 @@ on:
     - master
     - 7.*.*
 
+  pull_request_target:
+    types: [labeled]
+    branches:
+    - master
+    - 7.*.*
+
   push:
     branches:
     - master
@@ -14,7 +20,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' && true || false }}
+  cancel-in-progress: ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && true || false }}
 
 defaults:
   run:
@@ -38,12 +44,55 @@ jobs:
     permissions:
       actions: write
       contents: read
+      pull-requests: write
     outputs:
-      builder_changed: ${{ steps.dependency-check.outputs.builder_changed }}
-      should_run_build: ${{ steps.dependency-check.outputs.should_run_build }}
+      builder_changed: ${{ steps.dependency-check.outputs.builder_changed || steps.dependency-check-skip.outputs.builder_changed }}
+      should_run_build: ${{ steps.dependency-check.outputs.should_run_build || steps.dependency-check-skip.outputs.should_run_build }}
+      checkout_ref: ${{ steps.set_sha.outputs.curr_sha || github.sha }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Verify label and fork status
+        id: pr-target-precheck
+        if: github.event_name == 'pull_request_target'
+        run: |
+          if [ "${{ github.event.label.name }}" != "bot/resolve-build-deps" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "reason=Label is not bot/resolve-build-deps" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "is_fork=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "skip=false" >> $GITHUB_OUTPUT
+          echo "is_fork=false" >> $GITHUB_OUTPUT
+
+      - name: Find fork-skip comment
+        if: github.event_name == 'pull_request_target' && steps.pr-target-precheck.outputs.is_fork == 'true'
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+        id: find_fork_skip_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "Dependency resolution cannot be pushed to forked PR branches"
+          comment-author: "github-actions[bot]"
+
+      - name: Comment and skip (fork PRs)
+        if: github.event_name == 'pull_request_target' && steps.pr-target-precheck.outputs.is_fork == 'true'
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find_fork_skip_comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |-
+            ⚠️ **Dependency resolution cannot be pushed to forked PR branches**
+
+            This workflow can update `.deps/` by committing directly to the PR branch, but GitHub Actions cannot push commits to branches in forks.
+
+            Options:
+            - Run the dependency resolution locally and push the resulting `.deps/` changes, or
+            - Ask a maintainer to apply the changes from a branch in `integrations-core`.
 
       - name: Define diff commits
         id: set_sha
@@ -54,9 +103,17 @@ jobs:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EVENT_BEFORE: ${{ github.event.before }}
 
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: >-
+            ${{ github.event_name == 'workflow_dispatch'
+              && github.sha
+              || steps.set_sha.outputs.curr_sha }}
+
       - name: Get changed files
         id: changed-files
-        if: github.event_name != 'workflow_dispatch'
+        if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request_target' || steps.pr-target-precheck.outputs.skip != 'true')
         run: |
           REPO="${{ github.repository }}"
 
@@ -70,10 +127,18 @@ jobs:
 
       - name: Check if build should run
         id: dependency-check
+        if: github.event_name != 'pull_request_target' || steps.pr-target-precheck.outputs.skip != 'true'
         run: .github/workflows/scripts/resolve_deps_check_should_run.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FILES_CHANGED: ${{ steps.changed-files.outputs.files_changed }}
+
+      - name: Skip build (non-matching label or fork PR)
+        id: dependency-check-skip
+        if: github.event_name == 'pull_request_target' && steps.pr-target-precheck.outputs.skip == 'true'
+        run: |
+          echo "should_run_build=false" >> $GITHUB_OUTPUT
+          echo "builder_changed=false" >> $GITHUB_OUTPUT
 
   test:
     name: Run tests
@@ -84,6 +149,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.check-should-run.outputs.checkout_ref }}
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
@@ -126,6 +193,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        ref: ${{ needs.check-should-run.outputs.checkout_ref }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
@@ -224,6 +293,8 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        ref: ${{ needs.check-should-run.outputs.checkout_ref }}
 
     - name: Install management dependencies
       run: |
@@ -260,7 +331,16 @@ jobs:
 
   publish:
     name: Publish artifacts and update lockfiles via PR
-    if: needs.check-should-run.outputs.should_run_build == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.'))))
+    if: >-
+      needs.check-should-run.outputs.should_run_build == 'true'
+      && (
+        github.event_name == 'push'
+        || github.event_name == 'pull_request_target'
+        || (
+          github.event_name == 'workflow_dispatch'
+          && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.'))
+        )
+      )
     needs:
     - build
     - build-macos
@@ -272,10 +352,19 @@ jobs:
       id-token: write
 
     steps:
+    - name: Create token
+      uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+      id: token-generator
+      with:
+        app-id: ${{ vars.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
+        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
+        repositories: integrations-core
+
     - name: Checkout code
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
-        ref: "${{ github.head_ref }}"
+        token: ${{ steps.token-generator.outputs.token }}
+        ref: ${{ needs.check-should-run.outputs.checkout_ref }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
@@ -307,15 +396,29 @@ jobs:
         rm ${{ steps.auth.outputs.credentials_file_path }}
         rm -rf targets
 
-    - name: Create token
-      uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
-      id: token-generator
-      with:
-        app-id: ${{ vars.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
-        repositories: integrations-core
+    - name: Commit and push `.deps/` to the PR branch
+      if: github.event_name == 'pull_request_target'
+      run: |-
+        if [ -z "$(git status --porcelain)" ]; then
+          echo "No changes to commit."
+          exit 0
+        fi
+
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git config user.name "github-actions[bot]"
+
+        git add .deps
+
+        if git diff --cached --quiet; then
+          echo "No changes staged."
+          exit 0
+        fi
+
+        git commit -m "Update dependency resolution"
+        git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
 
     - name: Create pull request
+      if: github.event_name != 'pull_request_target'
       uses: peter-evans/create-pull-request@4e1beaa7521e8b457b572c090b25bd3db56bf1c5 # v5.0.3
       with:
         token: ${{ steps.token-generator.outputs.token }}
