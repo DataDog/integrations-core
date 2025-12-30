@@ -1188,18 +1188,107 @@ def test_do_not_crash_on_version_collection_failure():
 
 
 @pytest.mark.unit
-def test_driver_startup_message_is_skipped(caplog):
+def test_driver_startup_message_retry_forever(caplog):
+    """Default behavior (startup_wait_retries=0): retry forever, never raise."""
     check = SparkCheck('spark', {}, [DRIVER_CONFIG])
     response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
 
     with caplog.at_level(logging.DEBUG):
         with mock.patch.object(check, '_rest_request', return_value=response):
-            result = check._rest_request_to_json(
-                DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
-            )
+            # Call multiple times - should always return None
+            for _ in range(5):
+                result = check._rest_request_to_json(
+                    DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
+                )
+                assert result is None
 
-    assert result is None
     assert 'spark driver not ready yet' in caplog.text.lower()
+
+
+@pytest.mark.unit
+def test_driver_startup_message_disabled(aggregator):
+    """When startup_wait_retries=-1, treat startup messages as errors immediately."""
+    from simplejson import JSONDecodeError
+
+    config = DRIVER_CONFIG.copy()
+    config['startup_wait_retries'] = -1
+    check = SparkCheck('spark', {}, [config])
+    response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
+
+    with mock.patch.object(check, '_rest_request', return_value=response):
+        with pytest.raises(JSONDecodeError):
+            check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+
+    aggregator.assert_service_check(
+        SPARK_DRIVER_SERVICE_CHECK,
+        status=SparkCheck.CRITICAL,
+        tags=['url:{}'.format(config['spark_url'])],
+    )
+
+
+@pytest.mark.unit
+def test_driver_startup_message_limited_retries(aggregator, caplog):
+    """When startup_wait_retries>0, retry N times then raise."""
+    from simplejson import JSONDecodeError
+
+    config = DRIVER_CONFIG.copy()
+    config['startup_wait_retries'] = 3
+    check = SparkCheck('spark', {}, [config])
+    response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
+
+    with caplog.at_level(logging.DEBUG):
+        with mock.patch.object(check, '_rest_request', return_value=response):
+            # First 3 attempts should return None
+            for i in range(3):
+                result = check._rest_request_to_json(
+                    config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
+                )
+                assert result is None, f"Attempt {i + 1} should return None"
+
+            # 4th attempt should raise
+            with pytest.raises(JSONDecodeError):
+                check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+
+    assert 'attempt 1/3' in caplog.text.lower()
+    assert 'attempt 3/3' in caplog.text.lower()
+    assert 'retries exhausted' in caplog.text.lower()
+
+    aggregator.assert_service_check(
+        SPARK_DRIVER_SERVICE_CHECK,
+        status=SparkCheck.CRITICAL,
+        tags=['url:{}'.format(config['spark_url'])],
+    )
+
+
+@pytest.mark.unit
+def test_driver_startup_retry_counter_resets_on_success(caplog):
+    """Verify the retry counter resets after a successful JSON response."""
+    config = DRIVER_CONFIG.copy()
+    config['startup_wait_retries'] = 2
+    check = SparkCheck('spark', {}, [config])
+    startup_response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
+    success_response = MockResponse(json_data=[{"id": "app_001", "name": "TestApp"}])
+
+    with caplog.at_level(logging.DEBUG):
+        with mock.patch.object(check, '_rest_request', return_value=startup_response):
+            # Use 1 retry
+            result = check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+            assert result is None
+            assert check._startup_retry_count == 1
+
+        # Successful response resets counter
+        with mock.patch.object(check, '_rest_request', return_value=success_response):
+            result = check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+            assert result == [{"id": "app_001", "name": "TestApp"}]
+            assert check._startup_retry_count == 0
+
+        # After reset, we should have 2 retries available again
+        with mock.patch.object(check, '_rest_request', return_value=startup_response):
+            for _ in range(2):
+                result = check._rest_request_to_json(
+                    config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
+                )
+                assert result is None
 
 
 @pytest.mark.unit

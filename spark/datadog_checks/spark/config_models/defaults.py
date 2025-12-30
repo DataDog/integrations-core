@@ -100,6 +100,10 @@ def instance_spark_proxy_enabled():
     return False
 
 
+def instance_startup_wait_retries():
+    return 0
+
+
 def instance_streaming_metrics():
     return True
 
