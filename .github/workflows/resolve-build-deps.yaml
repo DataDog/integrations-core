@@ -44,7 +44,6 @@ jobs:
     permissions:
       actions: write
       contents: read
-      pull-requests: write
     outputs:
       builder_changed: ${{ steps.dependency-check.outputs.builder_changed || steps.dependency-check-skip.outputs.builder_changed }}
       should_run_build: ${{ steps.dependency-check.outputs.should_run_build || steps.dependency-check-skip.outputs.should_run_build }}
@@ -68,31 +67,6 @@ jobs:
 
           echo "skip=false" >> $GITHUB_OUTPUT
           echo "is_fork=false" >> $GITHUB_OUTPUT
-
-      - name: Find fork-skip comment
-        if: github.event_name == 'pull_request_target' && steps.pr-target-precheck.outputs.is_fork == 'true'
-        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
-        id: find_fork_skip_comment
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body-includes: "Dependency resolution cannot be pushed to forked PR branches"
-          comment-author: "github-actions[bot]"
-
-      - name: Comment and skip (fork PRs)
-        if: github.event_name == 'pull_request_target' && steps.pr-target-precheck.outputs.is_fork == 'true'
-        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-id: ${{ steps.find_fork_skip_comment.outputs.comment-id }}
-          edit-mode: replace
-          body: |-
-            ⚠️ **Dependency resolution cannot be pushed to forked PR branches**
-
-            This workflow can update `.deps/` by committing directly to the PR branch, but GitHub Actions cannot push commits to branches in forks.
-
-            Options:
-            - Run the dependency resolution locally and push the resulting `.deps/` changes, or
-            - Ask a maintainer to apply the changes from a branch in `integrations-core`.
 
       - name: Define diff commits
         id: set_sha
