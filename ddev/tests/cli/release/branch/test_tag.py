@@ -1,3 +1,92 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
+
+def test_tag_check_open_prs_warns_and_allows_continue(ddev, mocker, monkeypatch):
+    monkeypatch.setenv('DD_GITHUB_USER', 'test-user')
+    monkeypatch.setenv('DD_GITHUB_TOKEN', 'test-token')
+
+    mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.99.x')
+    mocker.patch('ddev.utils.git.GitRepository.pull', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.fetch_tags', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.tags', return_value=['7.99.0'])
+    mocker.patch('ddev.cli.release.branch.tag.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.utils.git.GitRepository.tag', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.push', return_value='OK')
+
+    mock_pr = mocker.MagicMock()
+    mock_pr.number = 1234
+    mock_pr.title = 'Fix thing'
+    mock_pr.html_url = 'https://example.invalid/pr/1234'
+    list_prs = mocker.patch(
+        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
+        return_value=[mock_pr],
+    )
+
+    result = ddev(
+        'release',
+        'branch',
+        'tag',
+        '--final',
+        input='y\n',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert 'Found 1 open PR(s) targeting base branch 7.99.x' in result.output
+    assert '#1234 Fix thing' in result.output
+    list_prs.assert_called_once_with('7.99.x')
+
+
+def test_tag_skip_open_pr_check(ddev, mocker, monkeypatch):
+    monkeypatch.setenv('DD_GITHUB_USER', 'test-user')
+    monkeypatch.setenv('DD_GITHUB_TOKEN', 'test-token')
+
+    mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.99.x')
+    mocker.patch('ddev.utils.git.GitRepository.pull', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.fetch_tags', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.tags', return_value=['7.99.0'])
+    mocker.patch('ddev.cli.release.branch.tag.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.utils.git.GitRepository.tag', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.push', return_value='OK')
+
+    list_prs = mocker.patch('ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base')
+
+    result = ddev(
+        'release',
+        'branch',
+        'tag',
+        '--final',
+        '--skip-open-pr-check',
+        input='y\n',
+    )
+
+    assert result.exit_code == 0, result.output
+    list_prs.assert_not_called()
+
+
+def test_tag_no_github_token_does_not_abort(ddev, mocker):
+    mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.99.x')
+    mocker.patch('ddev.utils.git.GitRepository.pull', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.fetch_tags', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.tags', return_value=['7.99.0'])
+    mocker.patch('ddev.cli.release.branch.tag.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.utils.git.GitRepository.tag', return_value='OK')
+    mocker.patch('ddev.utils.git.GitRepository.push', return_value='OK')
+    list_prs = mocker.patch('ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base')
+
+    result = ddev(
+        'release',
+        'branch',
+        'tag',
+        '--final',
+        input='y\n',
+    )
+
+    assert result.exit_code == 0, result.output
+    list_prs.assert_not_called()
+
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
