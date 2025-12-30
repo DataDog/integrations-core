@@ -68,10 +68,30 @@ jobs:
           echo "skip=false" >> $GITHUB_OUTPUT
           echo "is_fork=false" >> $GITHUB_OUTPUT
 
+      - name: Checkout workflow scripts
+        if: github.event_name != 'pull_request_target' || steps.pr-target-precheck.outputs.skip != 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # For pull_request_target, checkout the trusted base SHA first so scripts can't be
+          # modified by the PR branch.
+          ref: >-
+            ${{ github.event_name == 'pull_request_target'
+              && github.event.pull_request.base.sha
+              || github.sha }}
+          fetch-depth: 1
+
+      - name: Copy workflow scripts
+        if: github.event_name != 'pull_request_target' || steps.pr-target-precheck.outputs.skip != 'true'
+        run: |
+          mkdir -p /tmp/resolve-deps-scripts
+          cp .github/workflows/scripts/resolve_deps_define_diff_commits.sh /tmp/resolve-deps-scripts/
+          cp .github/workflows/scripts/resolve_deps_check_should_run.sh /tmp/resolve-deps-scripts/
+          chmod +x /tmp/resolve-deps-scripts/*.sh
+
       - name: Define diff commits
         id: set_sha
         if: github.event_name != 'workflow_dispatch'
-        run: .github/workflows/scripts/resolve_deps_define_diff_commits.sh
+        run: /tmp/resolve-deps-scripts/resolve_deps_define_diff_commits.sh
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -102,7 +122,7 @@ jobs:
       - name: Check if build should run
         id: dependency-check
         if: github.event_name != 'pull_request_target' || steps.pr-target-precheck.outputs.skip != 'true'
-        run: .github/workflows/scripts/resolve_deps_check_should_run.sh
+        run: /tmp/resolve-deps-scripts/resolve_deps_check_should_run.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FILES_CHANGED: ${{ steps.changed-files.outputs.files_changed }}
