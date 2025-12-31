@@ -175,13 +175,13 @@ def _define_validator_functions(model_id, validator_data, need_defaults, require
             model_file_lines.append(f'            if info.field_name == {normalized_name!r}:')
             model_file_lines.append(
                 "                if not validation.security.validate_require_trusted_provider("
-                "value, info.context.get('provider', ''), "
-                "info.context.get('check_name', ''), info.context.get('security_config')):"
+                "value, info.context.get('security_config')):"
             )
             model_file_lines.append(
                 f"                    raise ValueError("
                 f"f\"Field '{original_name}' is not allowed from untrusted provider "
-                f"'{{info.context.get('provider', '')}}'\")"
+                f"'{{info.context.get('security_config').provider if info.context.get('security_config') else ''}}'\")"
+                "# noqa: E501"
             )
 
     if need_defaults:

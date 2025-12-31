@@ -628,8 +628,6 @@ class AgentCheck(object):
             'logger': self.log,
             'warning': self.warning,
             'configured_fields': frozenset(config),
-            'provider': self.provider,
-            'check_name': self.name,
             'security_config': self.security_config,
         }
 
