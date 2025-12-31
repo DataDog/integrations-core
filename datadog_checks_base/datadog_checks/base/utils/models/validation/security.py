@@ -23,6 +23,8 @@ class SecurityConfig:
     Security configuration for integration file path validation.
 
     Attributes:
+        check_name: The name of the check/integration.
+        provider: The configuration provider name (e.g., 'file', 'remote-config', 'kubernetes').
         ignore_untrusted_file_params: Whether to ignore file params from untrusted providers
             (maps to integration_ignore_untrusted_file_params). Defaults to False.
         file_paths_allowlist: List of allowed file path prefixes. Defaults to empty list.
@@ -30,6 +32,8 @@ class SecurityConfig:
         excluded_checks: List of check names excluded from security validation. Defaults to empty list.
     """
 
+    check_name: str = ''
+    provider: str = ''
     ignore_untrusted_file_params: bool = False
     file_paths_allowlist: list[str] = field(default_factory=list)
     trusted_providers: list[str] = field(default_factory=lambda: DEFAULT_TRUSTED_PROVIDERS.copy())
@@ -82,8 +86,6 @@ class SecurityConfig:
 
 def validate_require_trusted_provider(
     value: object,
-    provider: str,
-    check_name: str,
     security_config: SecurityConfig | None = None,
 ) -> bool:
     """
@@ -94,9 +96,8 @@ def validate_require_trusted_provider(
 
     Args:
         value: The value to validate
-        provider: The configuration provider name
-        check_name: The name of the check/integration
-        security_config: The SecurityConfig instance. If None, validation is skipped.
+        security_config: The SecurityConfig instance containing check_name, provider,
+            and security settings. If None, validation is skipped.
 
     Returns:
         True if the value is allowed, False if it should be blocked.
@@ -114,11 +115,11 @@ def validate_require_trusted_provider(
         return True
 
     # If check is excluded from security restrictions, allow
-    if security_config.is_check_excluded(check_name):
+    if security_config.is_check_excluded(security_config.check_name):
         return True
 
     # If provider is trusted, allow
-    if security_config.is_provider_trusted(provider):
+    if security_config.is_provider_trusted(security_config.provider):
         return True
 
     # If file path is in the allowlist, allow
