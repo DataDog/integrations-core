@@ -164,5 +164,5 @@ For any further assistance, contact [Datadog support][3].
 [3]: https://docs.datadoghq.com/help/
 [4]: https://docs.datadoghq.com/agent/
 [5]: https://www.cisco.com/c/en/us/support/security/firepower-ngfw/series.html
-[6]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
+[6]: https://github.com/DataDog/integrations-core/blob/master/cisco_secure_firewall/datadog_checks/cisco_secure_firewall/data/conf.yaml.example
 [7]: https://www.cisco.com/c/en/us/products/collateral/security/firesight-management-center/datasheet-c78-736775.html
