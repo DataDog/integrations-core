@@ -87,7 +87,7 @@ def tag(app, final, skip_open_pr_check):
 
     prompt = f'Create and push this tag: {new_tag}?'
     if prs:
-        prompt = f'Open PRs found targeting {branch_name}. Create and push this tag anyway: {new_tag}?'
+        prompt = f'Open PRs found targeting {branch_name}. Create and push this tag anyway: {new_tag}? [y/n]'
 
     if not click.confirm(prompt):
         app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
