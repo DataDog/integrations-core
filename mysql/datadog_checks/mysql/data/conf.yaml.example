@@ -378,6 +378,18 @@ instances:
         #
         # extra_performance_metrics: false
 
+        ## @param query_error_stats - boolean - optional - default: true
+        ## These metrics are reported if `performance_schema` is enabled in the MySQL instance,
+        ## the version for that instance is >= 8.0.0, and DBM is enabled.
+        ##
+        ## Metric provided: 
+        ## - mysql.performance.errors_raised
+        ## This metric is tagged with:
+        ## - `error_number` (the MySQL error number)
+        ## - `error_name` (the MySQL error name, e.g., ER_NO_SUCH_TABLE)
+        #
+        # query_error_stats: true
+
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` enable Database Monitoring.
     #

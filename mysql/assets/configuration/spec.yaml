@@ -382,6 +382,20 @@ files:
                   type: boolean
                   example: false
 
+              - name: query_error_stats
+                description: |
+                  These metrics are reported if `performance_schema` is enabled in the MySQL instance,
+                  the version for that instance is >= 8.0.0, and DBM is enabled.
+
+                  Metric provided: 
+                  - mysql.performance.errors_raised
+                  This metric is tagged with:
+                  - `error_number` (the MySQL error number)
+                  - `error_name` (the MySQL error name, e.g., ER_NO_SUCH_TABLE)
+                value:
+                  type: boolean
+                  example: true
+
           - name: dbm
             description: |
               Set to `true` enable Database Monitoring.

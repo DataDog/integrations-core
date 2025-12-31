@@ -468,7 +468,12 @@ class MySql(DatabaseCheck):
 
         if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-            if not self.is_mariadb and self.version.version_compatible((8, 0, 0)) and self._config.dbm_enabled:
+            if (
+                not self.is_mariadb
+                and self.version.version_compatible((8, 0, 0))
+                and self._config.dbm_enabled
+                and self._config.query_error_stats_enabled
+            ):
                 error_query = QUERY_ERRORS_RAISED.copy()
                 error_query['query'] = error_query['query'].format(user=self._config.user)
                 queries.extend([error_query])

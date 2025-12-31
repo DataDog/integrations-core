@@ -43,6 +43,7 @@ class MySQLConfig(object):
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
         self.replication_enabled = is_affirmative(self.options.get('replication', self.dbm_enabled))
         self.table_rows_stats_enabled = is_affirmative(self.options.get('table_rows_stats_metrics', False))
+        self.query_error_stats_enabled = is_affirmative(self.options.get('query_error_stats', True))
         self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
         self.full_statement_text_samples_per_hour_per_query = instance.get(
