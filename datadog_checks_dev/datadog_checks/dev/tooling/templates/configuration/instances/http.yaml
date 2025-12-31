@@ -4,18 +4,18 @@
       http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
       https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
       no_proxy:
-      - <HOSTNAME_1>
-      - <HOSTNAME_2>
+        - <HOSTNAME_1>
+        - <HOSTNAME_2>
     type: object
     properties:
-    - name: http
-      type: string
-    - name: https
-      type: string
-    - name: no_proxy
-      type: array
-      items:
+      - name: http
         type: string
+      - name: https
+        type: string
+      - name: no_proxy
+        type: array
+        items:
+          type: string
   description: |
     This overrides the `proxy` setting in `init_config`.
 
@@ -100,7 +100,7 @@
   value:
     example: disabled
     type: string
-    enum: 
+    enum:
       - required
       - optional
       - disabled
@@ -116,6 +116,7 @@
 - name: kerberos_cache
   value:
     type: string
+    require_trusted_provider: true
   description: |
     Sets the KRB5CCNAME environment variable.
     It should point to a credential cache with a valid TGT.
@@ -156,6 +157,7 @@
   value:
     example: <KEYTAB_FILE_PATH>
     type: string
+    require_trusted_provider: true
   description: Set the path to your Kerberos key tab file.
 - name: auth_token
   value:
@@ -170,12 +172,12 @@
         <OPTION_2>: <VALUE_2>
     type: object
     properties:
-    - name: reader
-      type: object
-      properties: []
-    - name: writer
-      type: object
-      properties: []
+      - name: reader
+        type: object
+        properties: []
+      - name: writer
+        type: object
+        properties: []
   description: |
     This allows for the use of authentication information from dynamic sources.
     Both a reader and writer must be configured.
@@ -254,6 +256,7 @@
   value:
     example: <CERT_PATH>
     type: string
+    require_trusted_provider: true
   description: |
     The path to a single file in PEM format containing a certificate as well as any
     number of CA certificates needed to establish the certificate's authenticity for
@@ -262,6 +265,7 @@
   value:
     example: <PRIVATE_KEY_PATH>
     type: string
+    require_trusted_provider: true
   description: |
     The unencrypted private key to use for `tls_cert` when connecting to services. This is
     required if `tls_cert` is set and it does not already contain a private key.
@@ -269,6 +273,7 @@
   value:
     example: <CA_CERT_PATH>
     type: string
+    require_trusted_provider: true
   description: |
     The path to a file of concatenated CA certificates in PEM format or a directory
     containing several CA certificates in PEM format. If a directory, the directory
@@ -277,9 +282,9 @@
 - name: tls_protocols_allowed
   value:
     example:
-    - 'SSLv3'
-    - 'TLSv1.2'
-    - 'TLSv1.3'
+      - 'SSLv3'
+      - 'TLSv1.2'
+      - 'TLSv1.3'
     type: array
     items:
       type: string

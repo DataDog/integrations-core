@@ -12,8 +12,8 @@
 
 - name: is_jmx
   description: |
-   Whether or not this instance is a configuration for a JMX integration.
-   If `is_jmx` is set to true at the init_config level, this flag is ignored.
+    Whether or not this instance is a configuration for a JMX integration.
+    If `is_jmx` is set to true at the init_config level, this flag is ignored.
   hidden: true
   value:
     example: false
@@ -57,6 +57,7 @@
     This option is supported in Java 8 and below.
   value:
     type: string
+    require_trusted_provider: true
 
 - name: name
   description: Set the instance name to be used as the `instance` tag.
@@ -64,9 +65,10 @@
     type: string
 
 - name: java_bin_path
-  description: "`java_bin_path` should be set if the Agent cannot find your java executable."
+  description: '`java_bin_path` should be set if the Agent cannot find your java executable.'
   value:
     type: string
+    require_trusted_provider: true
 
 - name: java_options
   description: 'A list of Java JVM options, for example: "-Xmx200m -Xms50m".'
@@ -79,6 +81,7 @@
     `trust_store_path` should be set if SSL is enabled.
   value:
     type: string
+    require_trusted_provider: true
 
 - name: trust_store_password
   description: |
@@ -94,6 +97,7 @@
     `key_store_path` should be set if client authentication is enabled on the target JVM.
   value:
     type: string
+    require_trusted_provider: true
 
 - name: key_store_password
   description: |
@@ -122,7 +126,7 @@
     will give up on that connection and retry.
   value:
     example: 15000
-    type: number 
+    type: number
 
 - name: collect_default_jvm_metrics
   description: Configures the collection of default JVM metrics.
