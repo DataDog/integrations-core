@@ -26,7 +26,15 @@
       "source_type_name": "Valence Security",
       "events": {
         "creates_events": false
-      }    
+      }
+    },
+    "dashboards": {
+      "Valence Security Overview": "assets/dashboards/valence_security_overview.json",
+      "Valence Security Alert Insights": "assets/dashboards/valence_security_alert_insights.json",
+      "Valence Security Audit Insights": "assets/dashboards/valence_security_audit_insights.json"
+    },
+    "logs": {
+      "source": "valence-security"
     }
   },
   "author": {

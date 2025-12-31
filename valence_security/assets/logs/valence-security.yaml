@@ -1,0 +1,320 @@
+id: valence-security
+metric_id: valence-security
+backend_only: false
+facets:
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+pipeline:
+  type: pipeline
+  name: Valence Security
+  enabled: true
+  filter:
+    query: source:valence-security
+  processors:
+    - type: pipeline
+      name: Alerts
+      enabled: true
+      filter:
+        query: service:alerts
+      processors:
+        - type: arithmetic-processor
+          name: Convert `alert.creationTimestamp` epoch to milliseconds epoch
+          enabled: true
+          expression: alert.creationTimestamp*1000
+          target: timestamp
+          replaceMissing: false
+        - name: Lookup for `alert_type_details.severity` to `status`
+          enabled: true
+          source: alert_type_details.severity
+          target: status
+          lookupTable: |-
+            Critical,alert
+            High,critical
+            Medium,warning
+            Low,info
+          type: lookup-processor
+        - type: string-builder-processor
+          name: Map `alert.events.actorApp.id` to `usr.id`
+          enabled: true
+          template: "%{alert.events.actorApp.id}"
+          target: usr.id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.actorUser.id` to `usr.id`
+          enabled: true
+          template: "%{alert.events.actorUser.id}"
+          target: usr.id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.actorApp.name` to `usr.name`
+          enabled: true
+          template: "%{alert.events.actorApp.name}"
+          target: usr.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.actorUser.name` to `usr.name`
+          enabled: true
+          template: "%{alert.events.actorUser.name}"
+          target: usr.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.actorApp.email` to `usr.email`
+          enabled: true
+          template: "%{alert.events.actorApp.email}"
+          target: usr.email
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.actorUser.email` to `usr.email`
+          enabled: true
+          template: "%{alert.events.actorUser.email}"
+          target: usr.email
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.action.actionName` to `evt.name`
+          enabled: true
+          template: "%{alert.events.action.actionName}"
+          target: evt.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.eventResult` to `evt.outcome`
+          enabled: true
+          template: "%{alert.events.eventResult}"
+          target: evt.outcome
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.ip` to `network.client.ip`
+          enabled: true
+          template: "%{alert.events.ip}"
+          target: network.client.ip
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Map `alert.events.userAgent` to `http.useragent`
+          enabled: true
+          template: "%{alert.events.userAgent}"
+          target: http.useragent
+          replaceMissing: false
+    - type: pipeline
+      name: Audit Logs
+      enabled: true
+      filter:
+        query: service:audit-logs
+      processors:
+        - type: arithmetic-processor
+          name: Convert `timeEpoch` epoch to milliseconds epoch
+          enabled: true
+          expression: timeEpoch*1000
+          target: timestamp
+          replaceMissing: false
+        - name: Lookup for `success` to `status`
+          enabled: true
+          source: success
+          target: status
+          lookupTable: |-
+            true,Ok
+            false,Error
+          type: lookup-processor
+        - type: attribute-remapper
+          name: Map `actor` to `usr.name`
+          enabled: true
+          sources:
+            - actor
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `action` to `evt.name`
+          enabled: true
+          sources:
+            - action
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `success` to `evt.outcome`
+          enabled: true
+          sources:
+            - success
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ipAddress` to `network.client.ip`
+          enabled: true
+          sources:
+            - ipAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: geo-ip-parser
+      name: Extract geolocation information from the Client IP
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: message-remapper
+      name: Define `alert.summaryLine`, `details` as the official message of the log
+      enabled: true
+      sources:
+        - alert.summaryLine
+        - details
+    - type: pipeline
+      name: User Management
+      enabled: true
+      filter:
+        query: service:audit-logs @evt.name:("User created" OR "User deleted" OR "User
+          access updated")
+      processors:
+        - type: grok-parser
+          name: Parse User Management Logs
+          enabled: true
+          source: message
+          samples:
+            - Created user test1@example.com with role "readonly" with access to
+              Duo "Duo Primary", Google Workspace "Google Workspcae Primary" and
+              permission sets None
+            - Created user test1@example.com with role "admin" with access to
+              all platforms and permission sets None
+            - Deleted user test1@example.com with role "admin" with access to
+              all platforms and permission sets None
+            - Updated user test1@example.com to role "admin" with access to all
+              platforms and permission sets None
+            - Updated user test1@example.com to role "readonly" with access to
+              CrowdStrike "CrowdStrike Primary" and permission sets
+              ALLOW_SAASAPPS_FOR_READONLY (Valence Managed)
+          grok:
+            supportRules: ""
+            matchRules: rule_user_management %{notSpace:user_change_details.activity}
+              user\s+%{data:user_change_details.username}\s+(with|to) role
+              ("%{notSpace:user_change_details.role}") with access to
+              %{data:user_change_details.platforms:array("",", ")} and
+              permission sets %{data:user_change_details.permission_sets}
+    - type: pipeline
+      name: Policy Management
+      enabled: true
+      filter:
+        query: service:audit-logs @evt.name:("Policy created or updated" OR "Policy
+          disabled")
+      processors:
+        - type: grok-parser
+          name: Parse Policy Management Logs
+          enabled: true
+          source: message
+          samples:
+            - 'Created a policy on Integrations. Policy name: "Test Policy".
+              Platform: "Google Workspace". Instance(s): "Google Workspcae
+              Primary"'
+            - 'Updated a policy on Data Shares. Policy name: "Data Shares".
+              Platform: "Google Workspace". Instance(s): "Google Workspcae
+              Primary: EDS"'
+            - 'Disabled a policy on Integrations. Policy name: "Test". Platform:
+              "Microsoft 365". Instance(s): "Microsoft 365 Primary"'
+          grok:
+            supportRules: ""
+            matchRules: 'rule_policy_management %{notSpace:policy_change_details.activity} a
+              policy on %{regex("[^.]*"):policy_change_details.type}. Policy
+              name: "%{data:policy_change_details.name}". Platform:
+              "%{regex("[^\"]*"):policy_change_details.platform}".
+              Instance\(s\):
+              "%{regex("[^\"]*"):policy_change_details.instances}"'
+    - type: pipeline
+      name: Connector Management
+      enabled: true
+      filter:
+        query: service:audit-logs @evt.name:("Connector created" OR "Connector deleted"
+          OR "Authenticate connector" OR "Connector renamed" OR "Upload data to
+          connector")
+      processors:
+        - type: grok-parser
+          name: Parse Connector Management Logs
+          enabled: true
+          source: message
+          samples:
+            - Created Datadog connector named "Datadog Events API SIEM"
+            - Deleted Box connector named "Primary"
+            - Renamed Datadog connector from "Primary" to "Primary"
+            - Authenticated Microsoft Sentinel connector named "Microsoft
+              Sentinel SIEM" via method "Microsoft Sentinel Log Analytics Push"
+            - Uploaded data file "dwd_clients.csv" of kind "Domain Wide
+              Delegation Apps" to a Google Workspace connector named "Google
+              Workspcae Primary"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_upload_data_to_connector Uploaded data file
+              "%{regex("[^\"]*"):connector_details.file_name}" of kind
+              "%{regex("[^\"]*"):connector_details.kind}" to a
+              %{data:connector_details.type} connector named
+              "%{data:connector_details.name}"
+
+              rule_renamed_connector %{notSpace:connector_change_details.activity} %{data:connector_change_details.type} connector from "%{data:connector_change_details.old_name}" to "%{data:connector_change_details.new_name}"
+
+              rule_connector_management %{notSpace:connector_change_details.activity} %{data:connector_change_details.type} connector named "%{data:connector_change_details.name}"( via method "%{data:connector_change_details.method}")?
+    - type: pipeline
+      name: API Key Management
+      enabled: true
+      filter:
+        query: service:audit-logs @evt.name:"API Key created"
+      processors:
+        - type: grok-parser
+          name: Parse API Key Management Logs
+          enabled: true
+          source: message
+          samples:
+            - Created API Key "test_api" for "test_api_valenceapi@example.com"
+          grok:
+            supportRules: ""
+            matchRules: rule_api_key_management %{notSpace:api_key_change_details.activity}
+              API Key "%{data:api_key_change_details.name}" for
+              "%{data:api_key_change_details.service_user}"
