@@ -1,7 +1,11 @@
-# (C) Datadog, Inc. 2025-present
+# (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from unittest.mock import call as c
+
 import pytest
+
+from ddev.utils.git import GitRepository
 
 
 def test_tag_check_open_prs_warns_and_allows_continue(ddev, mocker, monkeypatch):
@@ -87,14 +91,6 @@ def test_tag_no_github_token_does_not_abort(ddev, mocker):
     assert result.exit_code == 0, result.output
     list_prs.assert_not_called()
 
-# (C) Datadog, Inc. 2024-present
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
-from unittest.mock import call as c
-
-import pytest
-
-from ddev.utils.git import GitRepository
 
 NO_CONFIRMATION_SO_ABORT = 'Did not get confirmation, aborting. Did not create or push the tag.'
 RC_NUMBER_PROMPT = 'What RC number are we tagging? (hit ENTER to accept suggestion) [{}]'
