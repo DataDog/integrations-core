@@ -56,7 +56,7 @@
                         "id": 8369692212563770,
                         "definition": {
                             "type": "note",
-                            "content": "This group provides a high-level view of Valence Security audit and alert logs, showing activity trends, log volume, key users and source IPs, service and status distribution, and geolocation insights to support quick monitoring and triage.",
+                            "content": "This group provides a high-level view of Valence Security audit and alert logs, showing activity trends, log volume, key users and Client IPs, service and status distribution, and geolocation insights to support quick monitoring and triage.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -408,7 +408,7 @@
                     {
                         "id": 5106768104170177,
                         "definition": {
-                            "title": "Top source IPs",
+                            "title": "Top client IPs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "bar_chart",
@@ -477,7 +477,7 @@
                     {
                         "id": 655898757309227,
                         "definition": {
-                            "title": "Geolocation distribution of source IPs",
+                            "title": "Geolocation distribution of client IPs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "geomap",
@@ -518,7 +518,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 250,
                                         "order_by": [
                                             {
                                                 "type": "formula",

@@ -33,7 +33,7 @@ Integrate Valence Security with Datadog to gain insights into alerts and audit l
    | API Key | The API Key of your Valence Security |
    | Get Alerts | Control the collection of Alerts from Valence Security. <br> Enabled by default.|
    | Get Audit Logs | Control the collection of Audit Logs from Valence Security. <br> Enabled by default.|
-2. Click the **Save**.
+2. Click **Save**.
 
 ## Data Collected
 

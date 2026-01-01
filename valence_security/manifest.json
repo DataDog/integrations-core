@@ -10,7 +10,48 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Valence Security alerts and audit logs",
     "title": "Valence Security",
-    "media": [],
+    "media": [
+      {
+        "caption": "Valence Security Overview",
+        "image_url": "images/valence_security_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Overview",
+        "image_url": "images/valence_security_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Alert Insights",
+        "image_url": "images/valence_security_alert_insights_1_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Alert Insights",
+        "image_url": "images/valence_security_alert_insights__1_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Alert Insights",
+        "image_url": "images/valence_security_alert_insights_2_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Alert Insights",
+        "image_url": "images/valence_security_alert_insights_2_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Audit Insights",
+        "image_url": "images/valence_security_audit_insights_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Audit Insights",
+        "image_url": "images/valence_security_audit_insights_dark.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
