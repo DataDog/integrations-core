@@ -38,7 +38,6 @@
                             "title": "Number of Tests",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -52,7 +51,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -97,7 +96,6 @@
                             "title": "Latency by Source, Destination, Test ID",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -106,7 +104,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -153,11 +151,11 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View network path",
+                                    "label": "View related Network Path",
                                     "link": "/network/path?query={{test_id}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 },
                                 {
-                                    "label": "View network path Map",
+                                    "label": "View related Network Path Map",
                                     "link": "/network/path?query={{test_id}}&aggr=false&groups=destination.hostname&inspected-paths=0%3A{{test_id.value}}&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
@@ -175,7 +173,6 @@
                             "title": "Latency by Source",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -184,7 +181,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -229,7 +226,7 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View network path",
+                                    "label": "View related Network Path",
                                     "link": "/network/path?query={{source.display_name}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
@@ -247,7 +244,6 @@
                             "title": "Latency by Destination",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -256,7 +252,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -281,7 +277,7 @@
                                     ],
                                     "response_format": "scalar",
                                     "sort": {
-                                        "count": 10,
+                                        "count": 100,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -301,7 +297,7 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View network path",
+                                    "label": "View related Network Path",
                                     "link": "/network/path?query={{destination.hostname}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
@@ -359,7 +355,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -408,7 +404,7 @@
                     {
                         "id": 5055442318282703,
                         "definition": {
-                            "title": "Latency By Cloud Provider",
+                            "title": "By Cloud Provider",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -442,7 +438,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*AWS* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*AWS* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -457,7 +453,7 @@
                                             "name": "query2",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*GCP* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*GCP* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -472,7 +468,7 @@
                                             "name": "query3",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*Azure* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*Azure* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -597,7 +593,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -670,7 +666,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -743,7 +739,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -816,7 +812,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -889,7 +885,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -962,7 +958,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1035,7 +1031,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1108,7 +1104,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1181,7 +1177,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1254,7 +1250,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1328,7 +1324,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1402,7 +1398,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1476,7 +1472,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1549,7 +1545,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1622,7 +1618,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1695,7 +1691,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1768,7 +1764,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1841,7 +1837,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -1889,7 +1885,7 @@
                     {
                         "id": 7483450978213822,
                         "definition": {
-                            "title": "Source AS Number and Name",
+                            "title": "Source AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1914,14 +1910,13 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "source.geoip.as.number",
                                                     "source.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
@@ -1963,7 +1958,7 @@
                     {
                         "id": 2893939261411214,
                         "definition": {
-                            "title": "Hop AS Number and Name",
+                            "title": "Hop AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1988,14 +1983,13 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.hops.geoip.as.number",
                                                     "traceroute.runs.hops.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
@@ -2037,7 +2031,7 @@
                     {
                         "id": 8015093315851005,
                         "definition": {
-                            "title": "Destination AS Number and Name",
+                            "title": "Destination AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -2062,14 +2056,13 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number",
                                                     "traceroute.runs.destination.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
@@ -2154,7 +2147,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2202,7 +2195,7 @@
                     {
                         "id": 4086286058721509,
                         "definition": {
-                            "title": "Latency By Cloud Provider",
+                            "title": "By Cloud Provider",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -2236,7 +2229,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*AWS* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*AWS* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2250,7 +2243,7 @@
                                             "name": "query2",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*GCP* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*GCP* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2264,7 +2257,7 @@
                                             "name": "query3",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*Azure* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*Azure* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2388,7 +2381,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2460,7 +2453,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2532,7 +2525,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2604,7 +2597,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2676,7 +2669,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2748,7 +2741,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2820,7 +2813,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2892,7 +2885,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -2964,7 +2957,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3036,7 +3029,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3109,7 +3102,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3182,7 +3175,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3255,7 +3248,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3327,7 +3320,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3399,7 +3392,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3471,7 +3464,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3543,7 +3536,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3615,7 +3608,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3662,7 +3655,7 @@
                     {
                         "id": 5714237441920493,
                         "definition": {
-                            "title": "Source AS Number and Name",
+                            "title": "Source AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -3687,14 +3680,13 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "source.geoip.as.number",
                                                     "source.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
@@ -3735,7 +3727,7 @@
                     {
                         "id": 8559447817806918,
                         "definition": {
-                            "title": "Hop AS Number and Name",
+                            "title": "Hop AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -3760,20 +3752,20 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.hops.geoip.as.number",
                                                     "traceroute.runs.hops.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
-                                                    "aggregation": "avg",
-                                                    "order": "desc"
+                                                    "aggregation": "count",
+                                                    "order": "desc",
+                                                    "metric": "count"
                                                 }
                                             },
                                             "compute": {
@@ -3807,7 +3799,7 @@
                     {
                         "id": 4862218959449537,
                         "definition": {
-                            "title": "Destination AS Number and Name",
+                            "title": "Destination AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -3832,14 +3824,13 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number",
                                                     "traceroute.runs.destination.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
@@ -3887,6 +3878,295 @@
             }
         },
         {
+            "id": 6709992512229933,
+            "definition": {
+                "title": "Change",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6418020617309625,
+                        "definition": {
+                            "title": "Top latency increase (compare to 1 day before)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "change",
+                            "requests": [
+                                {
+                                    "increase_good": false,
+                                    "order_by": "change",
+                                    "change_type": "absolute",
+                                    "order_dir": "desc",
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "day_before(query1)"
+                                        },
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "network_path",
+                                            "search": {
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
+                                            },
+                                            "indexes": [
+                                                "netpath-path"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "destination.hostname"
+                                                ],
+                                                "limit": 1000,
+                                                "sort": {
+                                                    "aggregation": "avg",
+                                                    "metric": "e2e_probe.rtt.avg",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "e2e_probe.rtt.avg"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "show_present": false
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7354640533650690,
+                        "definition": {
+                            "title": "Top latency decrease (compare to 1 day before)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "change",
+                            "requests": [
+                                {
+                                    "increase_good": false,
+                                    "order_by": "change",
+                                    "change_type": "absolute",
+                                    "order_dir": "asc",
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "day_before(query1)"
+                                        },
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "network_path",
+                                            "search": {
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
+                                            },
+                                            "indexes": [
+                                                "netpath-path"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "destination.hostname"
+                                                ],
+                                                "limit": 1000,
+                                                "sort": {
+                                                    "aggregation": "avg",
+                                                    "metric": "e2e_probe.rtt.avg",
+                                                    "order": "desc"
+                                                },
+                                                "should_exclude_missing": true
+                                            },
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "e2e_probe.rtt.avg"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "show_present": false
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4034977792780474,
+                        "definition": {
+                            "title": "Latency by Destination Hostname",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "ewma_5(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "network_path",
+                                            "search": {
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
+                                            },
+                                            "indexes": [
+                                                "netpath-path"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "destination.hostname"
+                                                ],
+                                                "limit": 1000,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                }
+                                            },
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "e2e_probe.rtt.avg"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6425859095196122,
+                        "definition": {
+                            "title": "Packet Loss by Destination Hostname",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "ewma_5(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "network_path",
+                                            "search": {
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
+                                            },
+                                            "indexes": [
+                                                "netpath-path"
+                                            ],
+                                            "group_by": {
+                                                "fields": [
+                                                    "destination.hostname"
+                                                ],
+                                                "limit": 1000,
+                                                "sort": {
+                                                    "aggregation": "count",
+                                                    "metric": "count",
+                                                    "order": "desc"
+                                                }
+                                            },
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "e2e_probe.packet_loss_percentage"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 9,
+                "is_column_break": true
+            }
+        },
+        {
             "id": 102646794596151,
             "definition": {
                 "title": "Packet Loss",
@@ -3923,7 +4203,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -3972,7 +4252,7 @@
                     {
                         "id": 3964382895791829,
                         "definition": {
-                            "title": "Latency By Cloud Provider",
+                            "title": "By Cloud Provider",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -4006,7 +4286,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*AWS* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*AWS* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4021,7 +4301,7 @@
                                             "name": "query2",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*GCP* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*GCP* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4036,7 +4316,7 @@
                                             "name": "query3",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name source.display_name:*Azure* $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name source.display_name:*Azure* $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4161,7 +4441,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4234,7 +4514,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4307,7 +4587,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4380,7 +4660,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4453,7 +4733,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4526,7 +4806,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4599,7 +4879,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4672,7 +4952,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4745,7 +5025,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4818,7 +5098,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4892,7 +5172,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -4966,7 +5246,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -5040,7 +5320,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -5113,7 +5393,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -5186,7 +5466,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -5259,7 +5539,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -5332,7 +5612,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -5405,7 +5685,7 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
@@ -5453,7 +5733,7 @@
                     {
                         "id": 988394194638365,
                         "definition": {
-                            "title": "Source AS Number and Name",
+                            "title": "Source AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -5478,14 +5758,13 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "source.geoip.as.number",
                                                     "source.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
@@ -5527,7 +5806,7 @@
                     {
                         "id": 2470244021695548,
                         "definition": {
-                            "title": "Hop AS Number and Name",
+                            "title": "Hop AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -5552,14 +5831,13 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.hops.geoip.as.number",
                                                     "traceroute.runs.hops.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
@@ -5601,7 +5879,7 @@
                     {
                         "id": 4631037139229508,
                         "definition": {
-                            "title": "Destination AS Number and Name",
+                            "title": "Destination AS Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -5626,14 +5904,13 @@
                                             "name": "query1",
                                             "data_source": "network_path",
                                             "search": {
-                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_ip $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as"
+                                                "query": "$dest_hostname $src_name $origin $hop_as $hop_country $test_id $hop_city $dst_as $dst_city $dst_country $src_country $src_city $src_public_ip $src_as $hop_ip"
                                             },
                                             "indexes": [
                                                 "netpath-path"
                                             ],
                                             "group_by": {
                                                 "fields": [
-                                                    "traceroute.runs.destination.geoip.as.number",
                                                     "traceroute.runs.destination.geoip.as.name"
                                                 ],
                                                 "limit": 1000,
@@ -5676,10 +5953,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 0,
+                "y": 9,
                 "width": 12,
-                "height": 18,
-                "is_column_break": true
+                "height": 18
             }
         }
     ],
@@ -5764,7 +6040,7 @@
         },
         {
             "name": "hop_ip",
-            "prefix": "traceroute.runs.destination.ip_address",
+            "prefix": "traceroute.runs.hops.ip_address",
             "available_values": [],
             "default": "*"
         },
@@ -5777,6 +6053,7 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
+    "pause_auto_refresh": false,
     "template_variable_presets": [
         {
             "name": "Synthetics",
