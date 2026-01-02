@@ -85,17 +85,17 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.12.10"
+ENV PYTHON_VERSION="3.13.11"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb'; `
+      -Hash '30d4654b3eac7ddfdf2682db4c8dcb490f3055f4f33c6906d6b828f680152101'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
-    & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
-    & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location virtualenv; `
-    & 'C:\Program Files\Python312\python.exe' -m virtualenv 'C:\py3'; `
-    Add-ToPath -Append 'C:\Program Files\Python312'
+    & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
+    & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location virtualenv; `
+    & 'C:\Program Files\Python313\python.exe' -m virtualenv 'C:\py3'; `
+    Add-ToPath -Append 'C:\Program Files\Python313'
 
 # Install IBM MQ
 ENV IBM_MQ_VERSION="9.2.4.0"
@@ -127,11 +127,11 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV OPENSSL_VERSION="3.5.2"
+ENV OPENSSL_VERSION="3.5.4"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash 'c53a47e5e441c930c3928cf7bf6fb00e5d129b630e0aa873b08258656e7345ec'; `
+      -Hash '967311f84955316969bdb1d8d4b983718ef42338639c621ec4c34fddef355e99'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `

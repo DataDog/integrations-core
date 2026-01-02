@@ -8,6 +8,8 @@ Track disk utilization and failed volumes on each of your HDFS DataNodes. This A
 
 Use this check (hdfs_datanode) and its counterpart check (hdfs_namenode), not the older two-in-one check (hdfs); that check is deprecated.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.

@@ -6,6 +6,8 @@
 
 The Intercom integration seamlessly collects admin activities, data events, conversations, news items, and ticket data, and ingests them into Datadog for comprehensive analysis using [webhooks][6].
 
+**Minimum Agent version:** 7.57.1
+
 ## Setup
 
 Follow the instructions below to configure this integration for your Intercom account.

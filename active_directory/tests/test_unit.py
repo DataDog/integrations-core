@@ -31,6 +31,10 @@ def mock_service_states(mocker):
 
 
 def assert_metrics(aggregator, global_tags, service_states):
+    # NTDS metrics are included by default
+    for metric in METRICS_CONFIG['NTDS']['counters'][0].values():
+        aggregator.assert_metric(f"active_directory.{metric['metric_name']}", 9000, global_tags, count=1)
+
     for service_name, exists in service_states.items():
         for service_display_name in SERVICE_METRIC_MAP[service_name]:
             service_metric_name = METRICS_CONFIG[service_display_name]['name']
@@ -46,16 +50,16 @@ def assert_metrics(aggregator, global_tags, service_states):
                 # Only assert metrics for services that exist
                 # If a service doesn't exist, its metrics shouldn't be collected at all
                 if exists:
-                    aggregator.assert_metric(metric_name, 9000, global_tags)
+                    aggregator.assert_metric(metric_name, 9000, global_tags, count=1)
 
 
 @pytest.mark.parametrize(
     'service_states',
     [
-        {'NTDS': True, 'Netlogon': True, 'DHCPServer': True, 'DFSR': True},
-        {'NTDS': True, 'Netlogon': False, 'DHCPServer': False, 'DFSR': False},
-        {'NTDS': True, 'Netlogon': True, 'DHCPServer': False, 'DFSR': False},
-        {'NTDS': False, 'Netlogon': False, 'DHCPServer': False, 'DFSR': False},
+        {'Netlogon': True, 'DHCPServer': True, 'DFSR': True},
+        {'Netlogon': False, 'DHCPServer': False, 'DFSR': False},
+        {'Netlogon': True, 'DHCPServer': False, 'DFSR': False},
+        {'Netlogon': False, 'DHCPServer': False, 'DFSR': False},
     ],
 )
 def test_all_services_existing(

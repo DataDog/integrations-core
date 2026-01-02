@@ -12,7 +12,7 @@ from urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, 
 import mock
 import pytest
 import urllib3
-from requests import RequestException
+from requests import ConnectionError, RequestException
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -1465,3 +1465,188 @@ def test_integration_driver_2(aggregator, dd_run_check):
     )
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.unit
+def test_debounce_connection_failure(aggregator, dd_run_check, caplog):
+    # Mock connection failure
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        # First run: expect warning, no CRITICAL check
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+
+        # Verify no CRITICAL check sent for spark.driver.can_connect
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+        # Second run: expect CRITICAL (wrapped by dd_run_check as Exception)
+        with pytest.raises(Exception) as excinfo:
+            dd_run_check(c)
+
+        assert "Connection refused" in str(excinfo.value)
+
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 1
+        assert service_checks[0].status == SparkCheck.CRITICAL
+
+
+@pytest.mark.unit
+def test_connection_failure_non_k8s(aggregator, dd_run_check):
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', []))
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        with pytest.raises(Exception) as excinfo:
+            dd_run_check(c)
+
+        assert "Connection refused" in str(excinfo.value)
+
+    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    assert len(service_checks) == 1
+    assert service_checks[0].status == SparkCheck.CRITICAL
+
+
+@pytest.mark.unit
+def test_debounce_connection_failure_terminal_phase(aggregator, dd_run_check, caplog):
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        with caplog.at_level(logging.DEBUG):
+            dd_run_check(c)
+
+        assert "Pod phase is terminal, suppressing request error" in caplog.text
+
+    # Expect NO service check because we suppress errors for failed pods
+    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_debounce_connection_recovery(aggregator, dd_run_check, caplog):
+    # Mock connection failure
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
+
+    c = SparkCheck('spark', {}, [instance])
+
+    # 1. Fail (Debounce)
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+        # Verify no CRITICAL check sent
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+    caplog.clear()
+    aggregator.reset()
+
+    # 2. Success (Reset)
+    with mock.patch('requests.Session.get', driver_requests_get_mock):
+        dd_run_check(c)
+
+        # Verify success
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) > 0
+        assert service_checks[0].status == SparkCheck.OK
+
+        # Verify internal state was reset
+        assert c._connection_error_seen is False
+
+    caplog.clear()
+    aggregator.reset()
+
+    # 3. Fail (Debounce again)
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+        # Verify no CRITICAL check sent
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "pod_phase",
+    ["Failed", "Succeeded", "Unknown"],
+)
+def test_debounce_connection_failure_all_terminal_phases(aggregator, dd_run_check, caplog, pod_phase):
+    """Test that all terminal pod phases suppress connection errors."""
+
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:{}'.format(pod_phase)]
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        with caplog.at_level(logging.DEBUG):
+            dd_run_check(c)
+
+        assert "Pod phase is terminal, suppressing request error" in caplog.text
+
+    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog):
+    """Test that 'No route to host' errors are also debounced."""
+
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("No route to host")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        # First run: expect warning, no CRITICAL check
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_get_pod_phase():
+    """Test _get_pod_phase static method."""
+    assert SparkCheck._get_pod_phase(['pod_phase:Running']) == 'running'
+    assert SparkCheck._get_pod_phase(['pod_phase:Failed']) == 'failed'
+    assert SparkCheck._get_pod_phase(['other:tag', 'pod_phase:Succeeded']) == 'succeeded'
+    assert SparkCheck._get_pod_phase(['other:tag']) is None
+    assert SparkCheck._get_pod_phase(None) is None
+    assert SparkCheck._get_pod_phase([]) is None

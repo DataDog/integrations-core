@@ -4,6 +4,8 @@
 
 Get metrics from Microsoft Active Directory to visualize and monitor its performances.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -20,7 +22,24 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 2. [Restart the Agent][5]
 
-**Note**: Versions 1.13.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][10].
+**Note**: Use version 4.4.0 or later of this check to collect the latest metrics.
+
+#### Service checks
+Datadog recommends enabling the [Windows Services][10] integration to also monitor the state of the Active Directory services.
+
+Example configuration:
+```yaml
+instances:
+  - services:
+    - ntds
+    - netlogon
+    - dhcp
+    - dfsr
+    - adws
+    - kdc
+```
+
+**Note:** The Datadog Agent might not have access to all the services (e.g. NTDS). See [Service permissions][11] for more information to grant access.
 
 ### Validation
 
@@ -67,10 +86,6 @@ The Netlogon and Security metrics help address several monitoring scenarios:
 
 The Active Directory check does not include any events.
 
-### Service Checks
-
-The Active Directory check does not include any service checks.
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
@@ -83,4 +98,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
 [9]: https://docs.datadoghq.com/help/
-[10]: https://github.com/DataDog/integrations-core/blob/7.33.x/active_directory/datadog_checks/active_directory/data/conf.yaml.example
+[10]: https://docs.datadoghq.com/integrations/windows-service/
+[11]: https://docs.datadoghq.com/integrations/windows-service/#service-permissions

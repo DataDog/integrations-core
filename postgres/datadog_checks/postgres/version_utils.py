@@ -7,6 +7,10 @@ from semver import VersionInfo
 
 from datadog_checks.base.log import get_check_logger
 
+DEV_VERSION_PATTERN = re.compile(r'(\d+)([a-zA-Z]+)(\d+)')
+RDS_VERSION_PATTERN = re.compile(r'(\d+\.\d+)-rds\.(\d+)')
+VERSION_SPLIT_PATTERN = re.compile(r'[ _]')
+
 V8_3 = VersionInfo.parse("8.3.0")
 V9 = VersionInfo.parse("9.0.0")
 V9_1 = VersionInfo.parse("9.1.0")
@@ -21,6 +25,7 @@ V14 = VersionInfo.parse("14.0.0")
 V15 = VersionInfo.parse("15.0.0")
 V16 = VersionInfo.parse("16.0.0")
 V17 = VersionInfo.parse("17.0.0")
+V18 = VersionInfo.parse("18.0.0")
 
 
 class VersionUtils(object):
@@ -70,7 +75,7 @@ class VersionUtils(object):
             pass
         try:
             # Version may be missing minor eg: 10.0 and it might have an edition suffix (e.g. 12.3_TDE_1.0)
-            version = re.split('[ _]', raw_version)[0].split('.')
+            version = VERSION_SPLIT_PATTERN.split(raw_version)[0].split('.')
             version = [int(part) for part in version]
             while len(version) < 3:
                 version.append(0)
@@ -79,7 +84,7 @@ class VersionUtils(object):
             pass
         try:
             # Postgres might be in development, with format \d+[beta|rc]\d+
-            match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', raw_version)
+            match = DEV_VERSION_PATTERN.match(raw_version)
             if match:
                 version = list(match.groups())
                 return VersionInfo.parse('{}.0.0-{}.{}'.format(*version))
@@ -88,7 +93,7 @@ class VersionUtils(object):
         except ValueError:
             # RDS changes the version format when the version switches to EOL.
             # Example: 11.22-rds.20241121.
-            match = re.match(r'(\d+\.\d+)-rds\.(\d+)', raw_version)
+            match = RDS_VERSION_PATTERN.match(raw_version)
             if match:
                 version = list(match.groups())
                 return VersionInfo.parse('{}.{}'.format(*version))

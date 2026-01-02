@@ -450,19 +450,27 @@ QUERY_PG_REPLICATION_STATS_METRICS = {
     'name': 'replication_stats_metrics',
     'query': """
 SELECT
-    pg_stat_replication.application_name,
-    pg_stat_replication.state,
-    pg_stat_replication.sync_state,
-    pg_stat_replication.client_addr,
-    pg_stat_replication_slot.slot_name,
-    pg_stat_replication_slot.slot_type,
-    GREATEST (0, age(pg_stat_replication.backend_xmin)) as backend_xmin_age,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.flush_lag)) as flush_lag,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag
-FROM pg_stat_replication as pg_stat_replication
-LEFT JOIN pg_replication_slots as pg_stat_replication_slot
-ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
+    rep.application_name,
+    rep.state,
+    rep.sync_state,
+    rep.client_addr,
+    slot.slot_name,
+    slot.slot_type,
+    GREATEST (0, age(rep.backend_xmin)) as backend_xmin_age,
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, sent_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, write_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, flush_lsn),
+    pg_wal_lsn_diff(
+    CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, replay_lsn),
+    GREATEST (0, EXTRACT(epoch from rep.write_lag)) as write_lag,
+    GREATEST (0, EXTRACT(epoch from rep.flush_lag)) as flush_lag,
+    GREATEST (0, EXTRACT(epoch from rep.replay_lag)) AS replay_lag
+FROM pg_stat_replication as rep
+LEFT JOIN pg_replication_slots as slot
+ON rep.pid = slot.active_pid;
 """.strip(),
     'columns': [
         {'name': 'wal_app_name', 'type': 'tag'},
@@ -472,6 +480,10 @@ ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
         {'name': 'slot_name', 'type': 'tag_not_null'},
         {'name': 'slot_type', 'type': 'tag_not_null'},
         {'name': 'replication.backend_xmin_age', 'type': 'gauge'},
+        {'name': 'replication.sent_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.write_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.flush_lsn_delay', 'type': 'gauge'},
+        {'name': 'replication.replay_lsn_delay', 'type': 'gauge'},
         {'name': 'replication.wal_write_lag', 'type': 'gauge'},
         {'name': 'replication.wal_flush_lag', 'type': 'gauge'},
         {'name': 'replication.wal_replay_lag', 'type': 'gauge'},
@@ -791,7 +803,7 @@ EXTRACT (EPOCH FROM now() - min(modification))
     ],
 }
 
-STAT_WAL_METRICS = {
+STAT_WAL_METRICS_LT_18 = {
     'name': 'stat_wal_metrics',
     'query': """
 SELECT wal_records, wal_fpi,
@@ -809,6 +821,22 @@ SELECT wal_records, wal_fpi,
         {'name': 'wal.sync', 'type': 'monotonic_count'},
         {'name': 'wal.write_time', 'type': 'monotonic_count'},
         {'name': 'wal.sync_time', 'type': 'monotonic_count'},
+    ],
+}
+
+# TODO: Handle missing wal IO metrics for PG18
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'wal.records', 'type': 'monotonic_count'},
+        {'name': 'wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'wal.buffers_full', 'type': 'monotonic_count'},
     ],
 }
 

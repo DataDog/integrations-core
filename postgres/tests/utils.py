@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import threading
 import time
 
 import psycopg
 import pytest
+
+from datadog_checks.base import AgentCheck
 
 from .common import PASSWORD_ADMIN, POSTGRES_VERSION, USER_ADMIN
 
@@ -131,7 +134,7 @@ def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
     return run_query_thread(pg_instance, vacuum_query, application_name, init_stmts)
 
 
-def run_one_check(check, cancel=True):
+def run_one_check(check: AgentCheck, cancel=True):
     """
     Run check and immediately cancel.
     Waits for all threads to close before continuing.
@@ -145,6 +148,17 @@ def run_one_check(check, cancel=True):
         check.statement_metrics._job_loop_future.result()
     if check.metadata_samples._job_loop_future is not None:
         check.metadata_samples._job_loop_future.result()
+
+
+def normalize_object(obj):
+    if isinstance(obj, dict):
+        return {k: normalize_object(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        normalized = [normalize_object(item) for item in obj]
+        return sorted(normalized, key=lambda x: json.dumps(x, sort_keys=True))
+    if isinstance(obj, tuple):
+        return tuple(normalize_object(item) for item in obj)
+    return obj
 
 
 # WaitGroup is used like go's sync.WaitGroup

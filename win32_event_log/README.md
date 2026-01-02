@@ -11,6 +11,8 @@ Enable this integration to:
 
 For more information, see the [Windows Event Logging documentation][13].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

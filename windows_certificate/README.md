@@ -4,6 +4,8 @@
 
 This integration monitors the Local Machine certificates in the [Windows Certificate Store][1] to check whether any have expired.
 
+**Minimum Agent version:** 7.66.0
+
 ## Setup
 
 ### Installation
@@ -53,7 +55,7 @@ instances:
     enable_crl_monitoring: true
 ```
 
-Begnning with Agent v7.70, the integration can validate certificates and their certificate chains. To enable the certificate chain validation, set the following in the integration:
+Beginning with Agent v7.70, the integration can validate certificates and their certificate chains. To enable the certificate chain validation, set the following in the integration:
 ```yaml
 instances:    
   - certificate_store: CA
@@ -90,7 +92,15 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+### Certificates with identical subjects
+
+When multiple certificates share the same subject but have different serial numbers or thumbprints (for example, an expired certificate and its renewed replacement), the integration may only detect one of them, often the expired certificate.
+
+**Agent v7.70.0 and later**: The `certificate_thumbprint` and `certificate_serial_number` tags are available on metrics and service checks, allowing you to distinguish between certificates with identical subjects in Datadog monitors and dashboards. While these tags cannot be used for filtering in the integration configuration (only `certificate_subjects` is supported), you can create custom monitors that group by `certificate_thumbprint` or `certificate_serial_number` instead of the default `subject_cn` grouping to monitor each certificate separately.
+
+**Agent versions prior to v7.70.0**: If you are running an Agent version older than v7.70.0, delete the expired certificate from the Windows Certificate Store so only the valid, renewed certificate is monitored.
+
+Need additional help? Contact [Datadog support][9].
 
 
 [1]: https://learn.microsoft.com/en-us/windows-hardware/drivers/install/certificate-stores

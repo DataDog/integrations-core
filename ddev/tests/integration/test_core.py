@@ -47,9 +47,20 @@ class TestIsIntegration:
 
         assert integration.is_integration is True
 
-    def test_not_integration(self, local_repo):
+    @pytest.mark.parametrize(
+        "integration_name",
+        [
+            # These are all packages that can be returned by `get` but are not integrations
+            "datadog_checks_base",
+            "datadog_checks_dependency_provider",
+            "datadog_checks_dev",
+            "datadog_checks_downloader",
+            "ddev",
+        ],
+    )
+    def test_not_integration(self, local_repo, integration_name):
         repo = Repository(local_repo.name, str(local_repo))
-        integration = repo.integrations.get('datadog_checks_downloader')
+        integration = repo.integrations.get(integration_name)
 
         assert integration.is_integration is False
 

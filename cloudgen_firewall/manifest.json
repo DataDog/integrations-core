@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fec157b4-467e-4faa-8db6-b80baea69b00",
   "app_id": "cloudgen-firewall",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

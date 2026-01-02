@@ -234,7 +234,72 @@ files:
       - name: data_streams_enabled
         description: |
           Collects consumer lag metric in seconds. It may result in additional billing charges.
+          Note: This is automatically enabled when enable_cluster_monitoring is set to true.
         value:
           type: boolean
           example: false
         display_default: false
+      - name: enable_cluster_monitoring
+        description: |
+          (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
+          and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
+          May increase resource consumption on large clusters.
+
+          When enabled, this automatically:
+            - Collects highwater mark offsets for all topic partitions (same as monitor_all_broker_highwatermarks)
+            - Collects consumer lag for all consumer groups (same as monitor_unlisted_consumer_groups)
+            - Enables Data Streams monitoring (same as data_streams_enabled)
+        value:
+          type: boolean
+          example: false
+        display_default: false
+      - name: schema_registry_url
+        description: |
+          Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
+        value:
+          type: string
+          example: http://localhost:8081
+      - name: schema_registry_username
+        description: |
+          Username for Schema Registry Basic Authentication.
+          Used in combination with schema_registry_password.
+        value:
+          type: string
+          example: <USERNAME>
+      - name: schema_registry_password
+        description: |
+          Password for Schema Registry Basic Authentication.
+          Used in combination with schema_registry_username.
+        secret: true
+        value:
+          type: string
+          example: <PASSWORD>
+      - name: schema_registry_tls_verify
+        description: |
+          Whether to verify the Schema Registry TLS certificate.
+          Set to false to disable verification (not recommended for production).
+        value:
+          type: boolean
+          example: true
+        display_default: true
+      - name: schema_registry_tls_ca_cert
+        description: |
+          Path to a custom CA certificate file for Schema Registry TLS verification.
+          If not specified, uses the system's default CA bundle.
+        value:
+          type: string
+          example: /path/to/ca_cert.pem
+      - name: schema_registry_tls_cert
+        description: |
+          Path to the client certificate file for Schema Registry mutual TLS authentication.
+          Must be used in combination with schema_registry_tls_key.
+        value:
+          type: string
+          example: /path/to/client_cert.pem
+      - name: schema_registry_tls_key
+        description: |
+          Path to the client private key file for Schema Registry mutual TLS authentication.
+          Must be used in combination with schema_registry_tls_cert.
+        value:
+          type: string
+          example: /path/to/client_key.pem

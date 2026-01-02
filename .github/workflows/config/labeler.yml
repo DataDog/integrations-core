@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/barracuda_secure_edge:
+- barracuda_secure_edge/**/*
 integration/bentoml:
 - bentoml/**/*
 integration/beyondtrust_identity_security_insights:
@@ -157,6 +159,8 @@ integration/cloud_foundry_api:
 - cloud_foundry_api/**/*
 integration/cloudera:
 - cloudera/**/*
+integration/cloudgen_firewall:
+- cloudgen_firewall/**/*
 integration/cockroachdb:
 - cockroachdb/**/*
 integration/cofense_triage:
@@ -257,6 +261,8 @@ integration/forcepoint_secure_web_gateway:
 - forcepoint_secure_web_gateway/**/*
 integration/forcepoint_security_service_edge:
 - forcepoint_security_service_edge/**/*
+integration/forescout:
+- forescout/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/freshservice:
@@ -283,6 +289,8 @@ integration/gpu:
 - gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
+integration/guarddog:
+- guarddog/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:
@@ -323,6 +331,8 @@ integration/ibm_i:
 - ibm_i/**/*
 integration/ibm_mq:
 - ibm_mq/**/*
+integration/ibm_spectrum_lsf:
+- ibm_spectrum_lsf/**/*
 integration/ibm_was:
 - ibm_was/**/*
 integration/iboss:
@@ -357,8 +367,12 @@ integration/juniper_srx_firewall:
 - juniper_srx_firewall/**/*
 integration/kafka:
 - kafka/**/*
+integration/kafka_actions:
+- kafka_actions/**/*
 integration/kafka_consumer:
 - kafka_consumer/**/*
+integration/kandji:
+- kandji/**/*
 integration/karpenter:
 - karpenter/**/*
 integration/keda:
@@ -485,6 +499,8 @@ integration/nvidia_nim:
 - nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/obsidian_security:
+- obsidian_security/**/*
 integration/octopus_deploy:
 - octopus_deploy/**/*
 integration/oke:
@@ -563,6 +579,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/push_security:
+- push_security/**/*
 integration/quarkus:
 - quarkus/**/*
 integration/rabbitmq:
@@ -571,6 +589,8 @@ integration/ray:
 - ray/**/*
 integration/redisdb:
 - redisdb/**/*
+integration/resend:
+- resend/**/*
 integration/rethinkdb:
 - rethinkdb/**/*
 integration/riak:
@@ -709,8 +729,6 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trellix_endpoint_security:
 - trellix_endpoint_security/**/*
-integration/trend_micro_cloud_one:
-- trend_micro_cloud_one/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
 integration/trend_micro_vision_one_endpoint_security:
@@ -777,8 +795,8 @@ integration/zerofox_cloud_platform:
 - zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
-integration/cloudgen_firewall:
-- cloudgen_firewall/**/*
+integration/zscaler_private_access:
+- zscaler_private_access/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt

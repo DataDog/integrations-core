@@ -2,12 +2,39 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import subprocess
+from contextlib import nullcontext
 
 import pytest
 
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
 from tests.helpers.git import ClonedRepo
+
+
+@pytest.fixture(scope="module")
+def set_up_repository(local_clone: ClonedRepo):
+    repo = Repository(local_clone.path.name, str(local_clone.path))
+
+    repo.git.capture("config", "user.name", "test_user")
+
+    repo.git.capture("checkout", "master")
+    (repo.path / "test1.txt").touch()
+    repo.git.capture("add", ".")
+    repo.git.capture("commit", "-m", "test1")
+    (repo.path / "test2.txt").touch()
+    repo.git.capture("add", ".")
+    repo.git.capture("commit", "-m", "test2")
+
+    repo.git.capture("checkout", "-b", "my-branch")
+
+    (repo.path / "test3.txt").touch()
+    repo.git.capture("add", ".")
+    repo.git.capture("commit", "-m", "test3")
+
+    repo.git.capture("checkout", "master")
+
+    yield repo
+    local_clone.reset_branch()
 
 
 def test_current_branch(repository):
@@ -42,6 +69,78 @@ def test_get_latest_commit(repository):
     assert short_sha1 not in commit_status2
     assert short_sha2 in commit_status2
     assert short_sha2 not in commit_status1
+
+
+@pytest.mark.parametrize(
+    "args, n, source, expected, context",
+    [
+        (
+            ["author:%an", "message:%f"],
+            None,
+            None,
+            [
+                {"author": "test_user", "message": "test2"},
+                {"author": "test_user", "message": "test1"},
+            ],
+            nullcontext(),
+        ),
+        (
+            ["author:%an", "message:%f"],
+            2,
+            None,
+            [{"author": "test_user", "message": "test2"}, {"author": "test_user", "message": "test1"}],
+            nullcontext(),
+        ),
+        (
+            ["author:%an", "message:%f"],
+            0,
+            None,
+            [],
+            nullcontext(),
+        ),
+        (
+            ["author:%an", "message:%f"],
+            3,
+            "my-branch",
+            [
+                {"author": "test_user", "message": "test3"},
+                {"author": "test_user", "message": "test2"},
+                {"author": "test_user", "message": "test1"},
+            ],
+            nullcontext(),
+        ),
+        (
+            ["%H", "%f"],
+            1,
+            None,
+            None,
+            pytest.raises(ValueError),
+        ),
+    ],
+    ids=[
+        "test_log_no_n",
+        "test_log_two_commits",
+        "test_log_zero_commits",
+        "test_log_branch_three_commits",
+        "test_log_invalid_format_raises",
+    ],
+)
+def test_get_log(set_up_repository, local_clone, config_file, args, n, source, expected, context):
+    config_file.model.repos['core'] = str(local_clone.path)
+    config_file.save()
+
+    repo = set_up_repository
+    kwargs = {}
+    if n is not None:
+        kwargs['n'] = n
+    if source:
+        kwargs['source'] = source
+
+    with context:
+        if n is None:
+            assert len(expected) < len(repo.git.log(args, **kwargs))
+        else:
+            assert repo.git.log(args, **kwargs) == expected
 
 
 def test_tags(repository):

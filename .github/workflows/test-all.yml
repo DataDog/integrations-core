@@ -1403,6 +1403,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j0a5a061:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: GuardDog
+      target: guarddog
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   j1fede0e:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1703,6 +1723,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j203c004:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IBM Spectrum LSF
+      target: ibm_spectrum_lsf
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   j440815a:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1828,6 +1868,26 @@ jobs:
     with:
       job-name: Kafka
       target: kafka
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  jf06de9b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kafka Actions
+      target: kafka_actions
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -2547,27 +2607,27 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.12-4.4-standalone
-        - py3.12-4.4-shard
-        - py3.12-4.4-auth
-        - py3.12-4.4-tls
-        - py3.12-5.0-standalone
-        - py3.12-5.0-shard
-        - py3.12-5.0-auth
-        - py3.12-5.0-tls
-        - py3.12-6.0-standalone
-        - py3.12-6.0-shard
-        - py3.12-6.0-auth
-        - py3.12-6.0-tls
-        - py3.12-7.0-standalone
-        - py3.12-7.0-shard
-        - py3.12-7.0-auth
-        - py3.12-7.0-tls
-        - py3.12-8.0-standalone
-        - py3.12-8.0-shard
-        - py3.12-8.0-auth
-        - py3.12-8.0-tls
-        - py3.12-8.0-standalone-newyork
+        - py3.13-4.4-standalone
+        - py3.13-4.4-shard
+        - py3.13-4.4-auth
+        - py3.13-4.4-tls
+        - py3.13-5.0-standalone
+        - py3.13-5.0-shard
+        - py3.13-5.0-auth
+        - py3.13-5.0-tls
+        - py3.13-6.0-standalone
+        - py3.13-6.0-shard
+        - py3.13-6.0-auth
+        - py3.13-6.0-tls
+        - py3.13-7.0-standalone
+        - py3.13-7.0-shard
+        - py3.13-7.0-auth
+        - py3.13-7.0-tls
+        - py3.13-8.0-standalone
+        - py3.13-8.0-shard
+        - py3.13-8.0-auth
+        - py3.13-8.0-tls
+        - py3.13-8.0-standalone-newyork
       fail-fast: false
   j211906c:
     uses: ./.github/workflows/test-target.yml
@@ -2593,16 +2653,16 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.12-5.7
-        - py3.12-8.0.36
-        - py3.12-8.4.0
-        - py3.12-8.0-group
-        - py3.12-mariadb-10.5
-        - py3.12-mariadb-10.6
-        - py3.12-mariadb-10.11
-        - py3.12-mariadb-11.4
-        - py3.12-percona-8.0.42
-        - py3.12-percona-8.4
+        - py3.13-5.7
+        - py3.13-8.0.36
+        - py3.13-8.4.0
+        - py3.13-8.0-group
+        - py3.13-mariadb-10.5
+        - py3.13-mariadb-10.6
+        - py3.13-mariadb-10.11
+        - py3.13-mariadb-11.4
+        - py3.13-percona-8.0.42
+        - py3.13-percona-8.4
       fail-fast: false
   j5df646e:
     uses: ./.github/workflows/test-target.yml
@@ -2928,23 +2988,25 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.12-9.6-UTF8
-        - py3.12-10.0-UTF8
-        - py3.12-11.0-UTF8
-        - py3.12-12.17-UTF8
-        - py3.12-13.0-UTF8
-        - py3.12-14.0-UTF8
-        - py3.12-15.0-UTF8
-        - py3.12-16.0-UTF8
-        - py3.12-17.0-UTF8
-        - py3.12-10.0-C
-        - py3.12-11.0-C
-        - py3.12-12.17-C
-        - py3.12-13.0-C
-        - py3.12-14.0-C
-        - py3.12-15.0-C
-        - py3.12-16.0-C
-        - py3.12-17.0-C
+        - py3.13-9.6-UTF8
+        - py3.13-10.0-UTF8
+        - py3.13-11.0-UTF8
+        - py3.13-12.17-UTF8
+        - py3.13-13.0-UTF8
+        - py3.13-14.0-UTF8
+        - py3.13-15.0-UTF8
+        - py3.13-16.0-UTF8
+        - py3.13-17.0-UTF8
+        - py3.13-18.0-UTF8
+        - py3.13-10.0-C
+        - py3.13-11.0-C
+        - py3.13-12.17-C
+        - py3.13-13.0-C
+        - py3.13-14.0-C
+        - py3.13-15.0-C
+        - py3.13-16.0-C
+        - py3.13-17.0-C
+        - py3.13-18.0-C
       fail-fast: false
   j8e38a40:
     uses: ./.github/workflows/test-target.yml
@@ -3490,16 +3552,16 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.12-linux-FreeTDS-2019-single
-        - py3.12-linux-FreeTDS-2019-ha
-        - py3.12-linux-FreeTDS-2022-single
-        - py3.12-linux-FreeTDS-2022-ha
-        - py3.12-linux-odbc-2019-single
-        - py3.12-linux-odbc-2019-ha
-        - py3.12-linux-odbc-2022-single
-        - py3.12-linux-odbc-2022-ha
-        - py3.12-linux-2022-newyork
-        - py3.12-linux-2022-tokyo
+        - py3.13-linux-FreeTDS-2019-single
+        - py3.13-linux-FreeTDS-2019-ha
+        - py3.13-linux-FreeTDS-2022-single
+        - py3.13-linux-FreeTDS-2022-ha
+        - py3.13-linux-odbc-2019-single
+        - py3.13-linux-odbc-2019-ha
+        - py3.13-linux-odbc-2022-single
+        - py3.13-linux-odbc-2022-ha
+        - py3.13-linux-2022-newyork
+        - py3.13-linux-2022-tokyo
       fail-fast: false
   jaf4b616:
     uses: ./.github/workflows/test-target.yml

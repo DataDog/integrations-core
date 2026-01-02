@@ -2,7 +2,38 @@
 
 <!-- towncrier release notes start -->
 
-## 6.8.0 / 2025-09-05
+## 6.10.1 / 2025-12-19
+
+***Fixed***:
+
+* Support Protobuf messages with schema registry ([#22020](https://github.com/DataDog/integrations-core/pull/22020))
+
+## 6.10.0 / 2025-11-26
+
+***Added***:
+
+* Add Kafka Cluster Monitoring ([#21736](https://github.com/DataDog/integrations-core/pull/21736))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 6.9.1 / 2025-10-31 / Agent 7.73.0
+
+***Fixed***:
+
+* Correctly support schema registry bytes in Avro & Protobuf messages ([#21632](https://github.com/DataDog/integrations-core/pull/21632))
+
+## 6.9.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump `confluent-kafka` to 2.11.1 ([#21259](https://github.com/DataDog/integrations-core/pull/21259))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Set ruff formatting rules in pyproject.toml to inherit from the global ones of the repo. ([#21206](https://github.com/DataDog/integrations-core/pull/21206))
+
+## 6.8.0 / 2025-09-05 / Agent 7.71.0
 
 ***Added***:
 

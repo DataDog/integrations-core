@@ -42,7 +42,7 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-          "slurmctld"
+        "slurmctld"
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"

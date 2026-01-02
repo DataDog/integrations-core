@@ -2,7 +2,91 @@
 
 <!-- towncrier release notes start -->
 
-## 37.20.0 / 2025-09-17
+## 37.26.1 / 2025-12-22
+
+***Fixed***:
+
+* Updates perf counters to ignore case. Fixes an error with double counting in exchange.activemanager.database_mounted metric. ([#22028](https://github.com/DataDog/integrations-core/pull/22028))
+
+## 37.26.0 / 2025-12-19
+
+***Security***:
+
+* Bump urllib3 to version 2.6.2 ([#22172](https://github.com/DataDog/integrations-core/pull/22172))
+
+## 37.25.0 / 2025-12-12
+
+***Security***:
+
+* Bump urllib3 version to 2.6.0 ([#22076](https://github.com/DataDog/integrations-core/pull/22076))
+
+***Fixed***:
+
+* Pin krb5 version until 0.9.0 is fixed ([#21987](https://github.com/DataDog/integrations-core/pull/21987))
+* Unpin krb5 after having updated cython in our build system ([#21991](https://github.com/DataDog/integrations-core/pull/21991))
+
+## 37.24.0 / 2025-11-18
+
+***Added***:
+
+* Create shared schemas collector for the Postgres, MySQL, and SQL Server integrations ([#21720](https://github.com/DataDog/integrations-core/pull/21720))
+* [wmi_check] Allow tag aliases for wmi `tag_by` and `tag_queries` parameters ([#21792](https://github.com/DataDog/integrations-core/pull/21792))
+
+***Fixed***:
+
+* Fix YAML configuration parsing to properly handle Unicode characters on Windows systems where the UTF-8 locale is not enabled by default. ([#21852](https://github.com/DataDog/integrations-core/pull/21852))
+
+## 37.23.2 / 2025-12-19 / Agent 7.73.2
+
+***Security***:
+
+* Bump urllib3 to version 2.6.2 ([#22172](https://github.com/DataDog/integrations-core/pull/22172))
+
+## 37.23.1 / 2025-12-15 / Agent 7.73.1
+
+***Security***:
+
+* Bump urllib3 version to 2.6.0 ([#22076](https://github.com/DataDog/integrations-core/pull/22076))
+
+## 37.23.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Bump ddtrace to version 3.16.4 ([#21773](https://github.com/DataDog/integrations-core/pull/21773))
+
+## 37.22.1 / 2025-10-29
+
+***Fixed***:
+
+* Fix missed collection event to use correct collection interval. ([#21766](https://github.com/DataDog/integrations-core/pull/21766))
+
+## 37.22.0 / 2025-10-27
+
+***Added***:
+
+* Added error health event for DBM async jobs ([#21703](https://github.com/DataDog/integrations-core/pull/21703))
+* Add health event for missed DBM async job executions ([#21719](https://github.com/DataDog/integrations-core/pull/21719))
+
+***Fixed***:
+
+* Update CA certificate loading logic to not load certificates when `tls_verify` is false ([#21607](https://github.com/DataDog/integrations-core/pull/21607))
+* Add `certifi` fallback for missing default CA certificates ([#21609](https://github.com/DataDog/integrations-core/pull/21609))
+
+## 37.21.1 / 2025-10-09 / Agent 7.72.0
+
+***Fixed***:
+
+* Fix helper method `config_set_persistent_cache_id` to ensure that the persistent cache id generated is stable between agent restarts. ([#21577](https://github.com/DataDog/integrations-core/pull/21577))
+
+## 37.21.0 / 2025-09-30
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add DatabaseCheck base class for database integrations ([#21202](https://github.com/DataDog/integrations-core/pull/21202))
+* Add tag normalization support to TagManager with optional tag_normalizer parameter and normalize flags for set_tag/set_tags_from_list/delete_tag methods. ([#21474](https://github.com/DataDog/integrations-core/pull/21474))
+
+## 37.20.0 / 2025-09-17 / Agent 7.71.0
 
 ***Added***:
 
