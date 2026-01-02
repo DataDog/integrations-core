@@ -151,11 +151,11 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View related Network Path",
+                                    "label": "View network path",
                                     "link": "/network/path?query={{test_id}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 },
                                 {
-                                    "label": "View related Network Path Map",
+                                    "label": "View network path map",
                                     "link": "/network/path?query={{test_id}}&aggr=false&groups=destination.hostname&inspected-paths=0%3A{{test_id.value}}&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
@@ -226,7 +226,7 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View related Network Path",
+                                    "label": "View network path",
                                     "link": "/network/path?query={{source.display_name}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
@@ -297,7 +297,7 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "View related Network Path",
+                                    "label": "View network path",
                                     "link": "/network/path?query={{destination.hostname}}&aggr=false&groups=destination.hostname&refresh_mode=paused&rpg=100&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
                                 }
                             ]
@@ -6053,7 +6053,6 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
-    "pause_auto_refresh": false,
     "template_variable_presets": [
         {
             "name": "Synthetics",
