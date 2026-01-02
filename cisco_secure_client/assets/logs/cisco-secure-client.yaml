@@ -27,28 +27,6 @@ facets:
     name: OS
     path: http.useragent_details.os.family
     source: log
-  - description: ""
-    facetType: range
-    groups:
-      - Web Access
-    name: Received Byte
-    path: network.bytes_read
-    source: log
-    type: integer
-    unit:
-      name: byte
-      family: bytes
-  - description: ""
-    facetType: range
-    groups:
-      - Web Access
-    name: Sent Byte
-    path: network.bytes_written
-    source: log
-    type: integer
-    unit:
-      name: byte
-      family: bytes
   - groups:
       - Geoip
     name: City Name
@@ -139,6 +117,26 @@ facets:
     name: Destination Port
     path: network.destination.port
     source: log
+  - facetType: range
+    groups:
+      - Web Access
+    name: Received Byte
+    path: network.bytes_read
+    source: log
+    type: integer
+    unit:
+      name: byte
+      family: bytes
+  - facetType: range
+    groups:
+      - Web Access
+    name: Sent Byte
+    path: network.bytes_written
+    source: log
+    type: integer
+    unit:
+      name: byte
+      family: bytes
   - groups:
       - User
     name: User Name
