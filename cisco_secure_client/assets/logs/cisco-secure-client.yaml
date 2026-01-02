@@ -3,6 +3,11 @@ metric_id: cisco-secure-client
 backend_only: false
 facets:
   - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
       - Web Access
     name: User-Agent
     path: http.useragent
@@ -22,6 +27,28 @@ facets:
     name: OS
     path: http.useragent_details.os.family
     source: log
+  - description: ""
+    facetType: range
+    groups:
+      - Web Access
+    name: Received Byte
+    path: network.bytes_read
+    source: log
+    type: integer
+    unit:
+      name: byte
+      family: bytes
+  - description: ""
+    facetType: range
+    groups:
+      - Web Access
+    name: Sent Byte
+    path: network.bytes_written
+    source: log
+    type: integer
+    unit:
+      name: byte
+      family: bytes
   - groups:
       - Geoip
     name: City Name
@@ -68,6 +95,51 @@ facets:
     path: network.client.port
     source: log
   - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Destination IP
+    path: network.destination.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Destination Port
+    path: network.destination.port
+    source: log
+  - groups:
       - User
     name: User Name
     path: usr.name
@@ -84,16 +156,35 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - "<190>2025-11-20T07:37:58Z: %ASA-6-113039: Group group User test-user
+        - "<190>2025-11-20T07:37:58Z: %FTD-6-113039: Group group User test-user
           IP 10.10.10.10 AnyConnect_parent session started."
         - "<190>2025-11-20T07:37:58Z: %FTD-6-113039: Group group User test-user
           IP 10.10.10.10 AnyConnect_parent session started."
+        - <134>1 1639132851.416656563 TCP9001 events anyconnect_vpn_disconnect
+          user id 'user.name1' local ip 1.1.1.1 connected from 1.1.1.1
+        - "<134>1 1720045578.340434385 labs_appliance events
+          type=anyconnect_vpn_session_manager msg= 'Sess-ID[137048] Peer
+          IP=1.1.1.1 User[sophia.lee]: Session connected. Session Type: TLS '"
       grok:
         supportRules: ""
-        matchRules: parse_header
-          (\<%{integer}\>)?%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}:\s*%{notSpace}-%{integer:severity}-%{word:message_id}:\s*%{data:message}
+        matchRules: >-
+          parse_header
+          (\<%{integer}\>)?%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}:\s*%{notSpace}-%{integer:severity}-%{word:message_id}:\s*%{greedyData:message}
+
+          parse_meraki (\<%{integer}\>)?(%{integer}\s+)?%{number:epoch_time} %{notSpace:device}\s*%{greedyData:message}
+    - type: arithmetic-processor
+      name: Convert epoch time to millisecond
+      enabled: true
+      expression: epoch_time * 1000
+      target: timestamp
+      replaceMissing: false
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
     - type: message-remapper
-      name: Define `message` as official message of the log
+      name: Define `message` as the official message of the log
       enabled: true
       sources:
         - message
@@ -102,48 +193,102 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - Group HQ-FullTunnel User olivia.martin IP 8.8.4.4 AnyConnect_parent
+        - Group HQ-FullTunnel User olivia.martin IP 1.1.1.1 AnyConnect_parent
           session started.
-        - Group Corp-VPN-Split User mason.young IP 8.8.8.8 IPv6 User Filter
+        - Group Corp-VPN-Split User mason.young IP 1.1.1.1 IPv6 User Filter
           temp_filter configured for AnyConnect. This setting has been
           deprecated, terminating connection
-        - "Unsupported AnyConnect client connection rejected from 8.8.8.8.
+        - "Unsupported AnyConnect client connection rejected from 1.1.1.1.
           Client info: user-agent string. Reason: reason"
         - "DAP: User sophia.lee, Addr 9.9.9.9, Connection connection: The
           following DAP records were selected for this connection: string"
         - Group:Corp-VPN IPv4 Address=1.0.0.1 IPv6 address=1.0.0.1 assigned to
           session.
       grok:
-        supportRules: ""
+        supportRules:
+          parse_group_user_ip Group %{regex(".*(?= User )"):group} User
+          %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip}
         matchRules: >-
-          rule_113035  Group %{regex(".*(?= User )"):group} User %{regex(".*(?=
-          IP )"):usr.name} IP %{ip:network.client.ip} Session terminated:
-          AnyConnect not enabled or invalid AnyConnect image on the
-          %{data:device_name}
+          rule_113035  %{parse_group_user_ip} Session terminated: AnyConnect not
+          enabled or invalid AnyConnect image on the %{greedyData:device_name}
 
-          rule_716059 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:source_ip} AnyConnect session resumed connection from IP %{ip:network.client.ip}.
+          rule_716059 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:source_ip} AnyConnect session resumed connection from IP %{ip:network.client.ip}(.)?
 
-          rule_722056 Unsupported AnyConnect client connection rejected from %{ip:network.client.ip}. Client info: %{regex(".*(?=. Reason: )"):http.useragent}. Reason: %{data:reason}
+          rule_722056 Unsupported AnyConnect client connection rejected from %{ip:network.client.ip}. Client info:\s*%{regex(".*(?=. Reason: )"):http.useragent}. Reason:\s*%{greedyData:reason}
 
-          rule_734001 DAP: User %{regex(".*(?=, Addr )"):user}, Addr %{ip:network.client.ip}, Connection %{regex(".*(?=: The following)"):connection}: The following DAP records were selected for this connection: %{data:dap_records:array(", ")}
+          rule_734001 DAP: User %{regex(".*(?=, Addr )"):usr.name}, Addr %{ip:network.client.ip}, Connection %{regex(".*(?=: The following)"):connection}: The following DAP records were selected for this connection: %{data:dap_records:array(", ")}
 
-          rule_751005 AnyConnect client reconnect authentication failed. Session ID:\s*%{regex("[^,]*"):session_id}, Error:\s*%{data:error}
+          rule_751005 AnyConnect client reconnect authentication failed. Session ID:\s*%{regex("[^,]*"):session_id}, Error:\s*%{greedyData:error}
 
-          rule_751020 Local:\s*%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username:\s*%{regex(".*?(?=\\sAn\\s)"):usr.name} %{data}
+          rule_751020 Local:\s*%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username:\s*%{regex(".*?(?=\\sAn\\s)"):usr.name} %{greedyData}
 
           rule_751021 %{data:usr.name} %{notSpace:protocol} with %{regex(".*(?= encryption )"):encryption_type} encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client.
 
           rule_751025 Group:%{regex(".*(?= IPv4 Address=)"):group} IPv4 Address=%{ip:assigned_ipv4_address} IPv6 address=%{ip:assigned_ipv6_address} assigned to session.
 
-          rule_722054 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} SVC terminating connection: Failed to install Redirect URL: %{notSpace:redirect_url} Redirect ACL: non_exist for %{ip:assigned_ip}.
+          rule_722054 %{parse_group_user_ip} SVC terminating connection: Failed to install Redirect URL:\s*%{notSpace:redirect_url} Redirect ACL: non_exist for %{ip:assigned_ip}.
 
-          rule_716061 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} IPv6 User Filter %{notSpace:ipv6_user_filter} configured for AnyConnect. This setting has been deprecated, terminating connection
+          rule_716061 %{parse_group_user_ip} IPv6 User Filter %{notSpace:ipv6_user_filter} configured for AnyConnect. This setting has been deprecated, terminating connection
 
-          rule_722053 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip} Unknown client %{regex("(.+?)(?= connection)"):http.useragent} connection
+          rule_722053 %{parse_group_user_ip} Unknown client %{regex("(.+?)(?= connection)"):http.useragent} connection
 
-          rule_722053_113038_113039_716058_716060 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip}%{data}
+          rule_113038_113039_716058_716060 %{parse_group_user_ip}%{greedyData}
+    - type: grok-parser
+      name: Parsing message of the meraki logs
+      enabled: true
+      source: message
+      samples:
+        - events anyconnect_vpn_connect user id 'lily.collins' local ip 1.1.1.1
+          connected from 1.1.1.1
+        - "events type=anyconnect_vpn_session_manager msg= 'Sess-ID[369] Peer
+          IP=1.1.1.1 User[user.name1]: Session disconnected. Session Type: SSL,
+          Duration: 1d:24h:00m:00s, Bytes xmt: 22412809, Bytes rcv: 4138099,
+          Reason: Max time exceeded '"
+        - "events type=anyconnect_vpn_session_manager msg= 'Sess-ID[396] Peer
+          IP=1.1.1.1 User[user.name2]: Deleted TLS tunnel[396.17] from DB.
+          Reason: DPD kill '"
+        - "events type=anyconnect_vpn_auth_success msg= 'Peer IP=1.1.1.1 Peer
+          port=57096 AAA[7]: AAA authentication successful '"
+        - " events type=anyconnect_vpn_auth_failure msg= 'Peer IP=1.1.1.1Peer
+          port[8748] AAA[8]: AAA authenticate failed retval=7 - Authentication
+          failure '"
+        - "events type=anyconnect_vpn_auth_success msg= 'RADIUS[511] Server
+          IP=1.1.1.1 Server port=1812 Peer IP=1.1.1.1 Peer port=56193
+          User=user.name4: Authentication request accepted. '"
+        - events type=anyconnect_vpn_general msg= 'AnyConnect server is started.
+          '
+      grok:
+        supportRules: >-
+          parse_session_id_ip_and_user Sess-ID\[%{notSpace:session_id}\] Peer
+          IP=\s*%{ip:network.client.ip} User\[%{regex("[^\\]]*"):usr.name}\]
+
+          parse_event_type_header events type=\s*%{notSpace:evt.name} msg=\s*
+        matchRules: >-
+          parsing_anyconnect_vpn_connection events %{notSpace:evt.name} user id
+          '%{regex("[^']*"):usr.name}' local ip %{ip:local_ip}
+          (connected|reconnected) from %{ip:network.client.ip}
+
+          parsing_session_connection %{parse_event_type_header}'%{parse_session_id_ip_and_user}:\s*%{regex("Session disconnected|Session connected"):action}. Session Type:\s*%{notSpace:session_type}(, Duration:\s*%{notSpace:duration}, Bytes xmt:\s*%{number:network.bytes_read}, Bytes rcv:\s*%{number:network.bytes_written}, Reason:\s*%{regex(".*(?= \\')"):reason})?\s*'
+
+          parsing_tls_tunnel %{parse_event_type_header}'%{parse_session_id_ip_and_user}:\s*(conn_id\[%{number:connection_id}\])? %{regex("Deleted TLS tunnel|Deleted DTLS tunnel|Added DTLS tunnel|Added TLS tunnel"):action}\[%{notSpace:tunnel_id}\] (from|to) %{notSpace}(\.\sReason:\s%{regex(".*(?= \\')"):reason})?\s'
+
+          parsing_auth %{parse_event_type_header}'(%{regex("[^\\[]*")}\[%{notSpace}\] )?(Server IP=%{ip:network.destination.ip} Server port=%{integer:network.destination.port} )?Peer IP=%{ip:network.client.ip}\s*Peer port(=%{integer:network.client.port}|\[%{integer:network.client.port}\])(\s*User=%{regex("[^:]*"):usr.name})?%{greedyData}
+
+          parsing_message %{parse_event_type_header} '%{regex(".*(?= \\')"):message}\s*'
+    - name: Lookup on `evt.name` to `evt.name`
+      enabled: true
+      source: evt.name
+      target: evt.name
+      lookupTable: |-
+        anyconnect_vpn_general,VPN General
+        anyconnect_vpn_auth_success,VPN Auth Success
+        anyconnect_vpn_auth_failure,VPN Auth Failure
+        anyconnect_vpn_session_manager,VPN Session Manager
+        anyconnect_vpn_connect,VPN Connect
+        anyconnect_vpn_disconnect,VPN Disconnect
+      type: lookup-processor
     - type: category-processor
-      name: Define `reason` based on `message_id`
+      name: Define `reason` based on the `message_id`
       enabled: true
       categories:
         - filter:
@@ -167,14 +312,14 @@ pipeline:
         - filter:
             query: "@message_id:113038"
           name: Unable to create session
+        - filter:
+            query: "@message_id:722054"
+          name: Redirect ACL missing or invalid
       target: reason
     - type: category-processor
       name: Define `action` based on the `message_id`
       enabled: true
       categories:
-        - filter:
-            query: "@message_id:113038"
-          name: Parent session creation failed
         - filter:
             query: "@message_id:113039"
           name: Session started
@@ -184,17 +329,10 @@ pipeline:
         - filter:
             query: "@message_id:716059"
           name: Session resumed
+        - filter:
+            query: "@message_id:113038"
+          name: Session creation failed
       target: action
-    - type: date-remapper
-      name: Define `timestamp` as the official date of the log
-      enabled: true
-      sources:
-        - timestamp
-    - type: status-remapper
-      name: Define `severity` as the official status of the log
-      enabled: true
-      sources:
-        - severity
     - type: user-agent-parser
       name: Extracting user-agent information from the `http.useragent`
       enabled: true
@@ -210,3 +348,15 @@ pipeline:
         - network.client.ip
       target: network.client.geoip
       ip_processing_behavior: do-nothing
+    - type: geo-ip-parser
+      name: Extract geolocation information for Destination IP
+      enabled: true
+      sources:
+        - network.destination.ip
+      target: network.destination.geoip
+      ip_processing_behavior: do-nothing
+    - type: status-remapper
+      name: Define `severity` as the official status of the log
+      enabled: true
+      sources:
+        - severity
