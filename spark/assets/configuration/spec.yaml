@@ -137,13 +137,8 @@ files:
           example: true
       - name: startup_wait_retries
         description: |
-          Controls how to handle "Spark is starting up" responses from the driver.
-          When the Spark driver is not yet ready, it returns a non-JSON startup message
-          instead of the expected JSON response.
-
-          Set to -1 to disable this feature and treat startup messages as errors immediately.
-          Set to 0 to retry forever (always skip startup messages without failing).
-          Set to a positive integer to retry that many times before marking the check as failed.
+          How many times to retry when Spark returns a startup message instead of JSON.
+          Set to -1 to disable, 0 to retry forever, or a positive number to limit retries.
         value:
           type: integer
           display_default: 0
