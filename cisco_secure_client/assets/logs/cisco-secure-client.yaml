@@ -120,23 +120,23 @@ facets:
   - facetType: range
     groups:
       - Web Access
-    name: Received Byte
+    name: Network Bytes Read
     path: network.bytes_read
     source: log
-    type: integer
+    type: double
     unit:
-      name: byte
       family: bytes
+      name: byte
   - facetType: range
     groups:
       - Web Access
-    name: Sent Byte
+    name: Bytes Written
     path: network.bytes_written
     source: log
-    type: integer
+    type: double
     unit:
-      name: byte
       family: bytes
+      name: byte
   - groups:
       - User
     name: User Name
