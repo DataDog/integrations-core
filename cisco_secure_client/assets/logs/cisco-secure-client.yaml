@@ -207,22 +207,22 @@ pipeline:
       grok:
         supportRules:
           parse_group_user_ip Group %{regex(".*(?= User )"):group} User
-          %{regex(".*(?= IP )"):usr.name} IP %{ip:network.client.ip}
+          %{notSpace:usr.name} IP %{ip:network.client.ip}
         matchRules: >-
           rule_113035  %{parse_group_user_ip} Session terminated: AnyConnect not
           enabled or invalid AnyConnect image on the %{greedyData:device_name}
 
-          rule_716059 Group %{regex(".*(?= User )"):group} User %{regex(".*(?= IP )"):usr.name} IP %{ip:source_ip} AnyConnect session resumed connection from IP %{ip:network.client.ip}(.)?
+          rule_716059 Group %{regex(".*(?= User )"):group} User %{notSpace:usr.name} IP %{ip:source_ip} AnyConnect session resumed connection from IP %{ip:network.client.ip}(.)?
 
           rule_722056 Unsupported AnyConnect client connection rejected from %{ip:network.client.ip}. Client info:\s*%{regex(".*(?=. Reason: )"):http.useragent}. Reason:\s*%{greedyData:reason}
 
-          rule_734001 DAP: User %{regex(".*(?=, Addr )"):usr.name}, Addr %{ip:network.client.ip}, Connection %{regex(".*(?=: The following)"):connection}: The following DAP records were selected for this connection: %{data:dap_records:array(", ")}
+          rule_734001 DAP: User %{notSpace:usr.name}, Addr %{ip:network.client.ip}, Connection %{regex(".*(?=: The following)"):connection}: The following DAP records were selected for this connection: %{data:dap_records:array(", ")}
 
           rule_751005 AnyConnect client reconnect authentication failed. Session ID:\s*%{regex("[^,]*"):session_id}, Error:\s*%{greedyData:error}
 
-          rule_751020 Local:\s*%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username:\s*%{regex(".*?(?=\\sAn\\s)"):usr.name} %{greedyData}
+          rule_751020 Local:\s*%{ip:local_ip}\s*:\s*%{integer:local_port} Remote:\s*%{ip:network.client.ip}\s*:\s*%{integer:network.client.port} Username:\s*%{notSpace:usr.name} %{greedyData}
 
-          rule_751021 %{data:usr.name} %{notSpace:protocol} with %{regex(".*(?= encryption )"):encryption_type} encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client.
+          rule_751021 %{notSpace:usr.name} %{notSpace:protocol} with %{regex(".*(?= encryption )"):encryption_type} encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client.
 
           rule_751025 Group:%{regex(".*(?= IPv4 Address=)"):group} IPv4 Address=%{ip:assigned_ipv4_address} IPv6 address=%{ip:assigned_ipv6_address} assigned to session.
 

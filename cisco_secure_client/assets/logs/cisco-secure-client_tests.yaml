@@ -1,177 +1,529 @@
 id: "cisco-secure-client"
 tests:
  -
-  sample: "<190>2025-12-05T10:51:16Z: %ASA-4-113035: Group Employee-Access User evelyn.baker IP 4.2.2.1 Session terminated: AnyConnect not enabled or invalid AnyConnect image on the device_123"
+  sample: "<190>2025-12-05T10:51:16Z: %FTD-4-113035: Group Employee-Access User evelyn.baker IP 4.2.2.1 Session terminated: AnyConnect not enabled or invalid AnyConnect image on the device_123"
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:51:16Z: %ASA-4-113035: Group Employee-Access User evelyn.baker IP 4.2.2.1 Session terminated: AnyConnect not enabled or invalid AnyConnect image on the device_123"
+    custom:
+      device_name: "device_123"
+      group: "Employee-Access"
+      message_id: "113035"
+      network:
+        client:
+          geoip: {}
+          ip: "4.2.2.1"
+      reason: "Invalid or disabled AnyConnect image"
+      severity: 4
+      timestamp: 1764931876000
+      usr:
+        name: "evelyn.baker"
+    message: "Group Employee-Access User evelyn.baker IP 4.2.2.1 Session terminated: AnyConnect not enabled or invalid AnyConnect image on the device_123"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931876000
  -
-  sample: "<190>2025-12-05T10:53:52Z: %ASA-4-113038: Group Mobility-Users User ava.clark IP 8.8.8.8 Unable to create AnyConnect_parent session."
+  sample: "<190>2025-12-05T10:53:52Z: %FTD-4-113038: Group Mobility-Users User ava.clark IP 8.8.8.8 Unable to create AnyConnect_parent session."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:53:52Z: %ASA-4-113038: Group Mobility-Users User ava.clark IP 8.8.8.8 Unable to create AnyConnect_parent session."
+    custom:
+      action: "Session creation failed"
+      group: "Mobility-Users"
+      message_id: "113038"
+      network:
+        client:
+          geoip: {}
+          ip: "8.8.8.8"
+      reason: "Unable to create session"
+      severity: 4
+      timestamp: 1764932032000
+      usr:
+        name: "ava.clark"
+    message: "Group Mobility-Users User ava.clark IP 8.8.8.8 Unable to create AnyConnect_parent session."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764932032000
  -
-  sample: "<190>2025-12-05T10:51:21Z: %ASA-6-113039: Group RemoteUsers User harper.green IP 8.8.4.4 AnyConnect_parent session started."
+  sample: "<190>2025-12-05T10:51:21Z: %FTD-6-113039: Group RemoteUsers User harper.green IP 8.8.4.4 AnyConnect_parent session started."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:51:21Z: %ASA-6-113039: Group RemoteUsers User harper.green IP 8.8.4.4 AnyConnect_parent session started."
+    custom:
+      action: "Session started"
+      group: "RemoteUsers"
+      message_id: "113039"
+      network:
+        client:
+          geoip: {}
+          ip: "8.8.4.4"
+      severity: 6
+      timestamp: 1764931881000
+      usr:
+        name: "harper.green"
+    message: "Group RemoteUsers User harper.green IP 8.8.4.4 AnyConnect_parent session started."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931881000
  -
-  sample: "<190>2025-12-05T10:52:26Z: %ASA-6-716058: Group Branch01-VPN User daniel.thomas IP 8.8.8.8 AnyConnect session lost connection. Waiting to resume."
+  sample: "<190>2025-12-05T10:52:26Z: %FTD-6-716058: Group Branch01-VPN User daniel.thomas IP 8.8.8.8 AnyConnect session lost connection. Waiting to resume."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:52:26Z: %ASA-6-716058: Group Branch01-VPN User daniel.thomas IP 8.8.8.8 AnyConnect session lost connection. Waiting to resume."
+    custom:
+      action: "Session connection lost"
+      group: "Branch01-VPN"
+      message_id: "716058"
+      network:
+        client:
+          geoip: {}
+          ip: "8.8.8.8"
+      severity: 6
+      timestamp: 1764931946000
+      usr:
+        name: "daniel.thomas"
+    message: "Group Branch01-VPN User daniel.thomas IP 8.8.8.8 AnyConnect session lost connection. Waiting to resume."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931946000
  -
-  sample: "<190>2025-12-05T10:54:13Z: %ASA-6-716059: Group Staging-VPN User olivia.martin IP 10.10.10.11 AnyConnect session resumed connection from IP 10.10.10.10."
+  sample: "<190>2025-12-05T10:54:13Z: %FTD-6-716059: Group Staging-VPN User olivia.martin IP 10.10.10.11 AnyConnect session resumed connection from IP 10.10.10.10."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:54:13Z: %ASA-6-716059: Group Staging-VPN User olivia.martin IP 10.10.10.11 AnyConnect session resumed connection from IP 10.10.10.10."
+    custom:
+      action: "Session resumed"
+      group: "Staging-VPN"
+      message_id: "716059"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      severity: 6
+      source_ip: "10.10.10.11"
+      timestamp: 1764932053000
+      usr:
+        name: "olivia.martin"
+    message: "Group Staging-VPN User olivia.martin IP 10.10.10.11 AnyConnect session resumed connection from IP 10.10.10.10."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764932053000
  -
-  sample: "<190>2025-12-05T10:53:48Z: %ASA-6-716060: Group RemoteUsers User aiden.gonzalez IP 1.0.0.1 Terminated AnyConnect session in inactive state to accept a new connection: License limit reached."
+  sample: "<190>2025-12-05T10:53:48Z: %FTD-6-716060: Group RemoteUsers User aiden.gonzalez IP 1.0.0.1 Terminated AnyConnect session in inactive state to accept a new connection: License limit reached."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:53:48Z: %ASA-6-716060: Group RemoteUsers User aiden.gonzalez IP 1.0.0.1 Terminated AnyConnect session in inactive state to accept a new connection: License limit reached."
+    custom:
+      group: "RemoteUsers"
+      message_id: "716060"
+      network:
+        client:
+          geoip: {}
+          ip: "1.0.0.1"
+      reason: "AnyConnect license limit reached"
+      severity: 6
+      timestamp: 1764932028000
+      usr:
+        name: "aiden.gonzalez"
+    message: "Group RemoteUsers User aiden.gonzalez IP 1.0.0.1 Terminated AnyConnect session in inactive state to accept a new connection: License limit reached."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764932028000
  -
-  sample: "<190>2025-12-05T10:50:55Z: %ASA-3-716061: Group Exec-Full User sophia.lee IP 4.2.2.2 IPv6 User Filter temp_filter configured for AnyConnect. This setting has been deprecated, terminating connection"
+  sample: "<190>2025-12-05T10:50:55Z: %FTD-3-716061: Group Exec-Full User sophia.lee IP 4.2.2.2 IPv6 User Filter temp_filter configured for AnyConnect. This setting has been deprecated, terminating connection"
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:50:55Z: %ASA-3-716061: Group Exec-Full User sophia.lee IP 4.2.2.2 IPv6 User Filter temp_filter configured for AnyConnect. This setting has been deprecated, terminating connection"
+    custom:
+      group: "Exec-Full"
+      ipv6_user_filter: "temp_filter"
+      message_id: "716061"
+      network:
+        client:
+          geoip: {}
+          ip: "4.2.2.2"
+      reason: "IPv6 user filter is deprecated"
+      severity: 3
+      timestamp: 1764931855000
+      usr:
+        name: "sophia.lee"
+    message: "Group Exec-Full User sophia.lee IP 4.2.2.2 IPv6 User Filter temp_filter configured for AnyConnect. This setting has been deprecated, terminating connection"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931855000
  -
-  sample: "<190>2025-12-05T10:51:15Z: %ASA-4-722056: Unsupported AnyConnect client connection rejected from 8.8.4.4. Client info: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36. Reason: reason"
+  sample: "<190>2025-12-05T10:51:15Z: %FTD-4-722056: Unsupported AnyConnect client connection rejected from 8.8.4.4. Client info: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36. Reason: reason"
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:51:15Z: %ASA-4-722056: Unsupported AnyConnect client connection rejected from 8.8.4.4. Client info: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36. Reason: reason"
+    custom:
+      http:
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "123"
+            minor: "0"
+            patch: "6312"
+            patch_minor: "86"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      message_id: "722056"
+      network:
+        client:
+          geoip: {}
+          ip: "8.8.4.4"
+      reason: "reason"
+      severity: 4
+      timestamp: 1764931875000
+    message: "Unsupported AnyConnect client connection rejected from 8.8.4.4. Client info: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36. Reason: reason"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931875000
  -
-  sample: "<190>2025-12-05T10:50:26Z: %ASA-6-734001: DAP: User alexander.parker, Addr 1.0.0.1, Connection connection: The following DAP records were selected for this connection: string"
+  sample: "<190>2025-12-05T10:50:26Z: %FTD-6-734001: DAP: User alexander.parker, Addr 1.0.0.1, Connection connection: The following DAP records were selected for this connection: string"
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:50:26Z: %ASA-6-734001: DAP: User alexander.parker, Addr 1.0.0.1, Connection connection: The following DAP records were selected for this connection: string"
+    custom:
+      connection: "connection"
+      dap_records:
+       - "string"
+      message_id: "734001"
+      network:
+        client:
+          geoip: {}
+          ip: "1.0.0.1"
+      severity: 6
+      timestamp: 1764931826000
+      usr:
+        name: "alexander.parker"
+    message: "DAP: User alexander.parker, Addr 1.0.0.1, Connection connection: The following DAP records were selected for this connection: string"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931826000
  -
-  sample: "<190>2025-12-05T10:50:08Z: %ASA-3-751005: AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
+  sample: "<190>2025-12-05T10:50:08Z: %FTD-3-751005: AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:50:08Z: %ASA-3-751005: AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
+    custom:
+      error: "error"
+      message_id: "751005"
+      reason: "AnyConnect client reconnect authentication failure"
+      session_id: "41"
+      severity: 3
+      timestamp: 1764931808000
+    message: "AnyConnect client reconnect authentication failed. Session ID: 41, Error: error"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931808000
  -
-  sample: "<190>2025-12-05T10:53:01Z: %ASA-3-751020: Local:8.8.4.4:443 Remote:4.2.2.2:1194 Username:noah.white An test remote access connection failed. Attempting to use an NSA Suite B crypto algorithm (CYF) without an AnyConnect Premium license."
+  sample: "<190>2025-12-05T10:53:01Z: %FTD-3-751020: Local:8.8.4.4:443 Remote:4.2.2.2:1194 Username:noah.white An test remote access connection failed. Attempting to use an NSA Suite B crypto algorithm (CYF) without an AnyConnect Premium license."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:53:01Z: %ASA-3-751020: Local:8.8.4.4:443 Remote:4.2.2.2:1194 Username:noah.white An test remote access connection failed. Attempting to use an NSA Suite B crypto algorithm (CYF) without an AnyConnect Premium license."
+    custom:
+      local_ip: "8.8.4.4"
+      local_port: 443
+      message_id: "751020"
+      network:
+        client:
+          geoip: {}
+          ip: "4.2.2.2"
+          port: 1194
+      reason: "AnyConnect premium license disabled"
+      severity: 3
+      timestamp: 1764931981000
+      usr:
+        name: "noah.white"
+    message: "Local:8.8.4.4:443 Remote:4.2.2.2:1194 Username:noah.white An test remote access connection failed. Attempting to use an NSA Suite B crypto algorithm (CYF) without an AnyConnect Premium license."
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931981000
  -
-  sample: "<190>2025-12-05T10:52:36Z: %ASA-4-751021: noah.white UDP with AES-GCM encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client."
+  sample: "<190>2025-12-05T10:52:36Z: %FTD-4-751021: noah.white UDP with AES-GCM encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:52:36Z: %ASA-4-751021: noah.white UDP with AES-GCM encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client."
+    custom:
+      encryption_type: "AES-GCM"
+      message_id: "751021"
+      protocol: "UDP"
+      reason: "Unsupported AnyConnect client version"
+      severity: 4
+      timestamp: 1764931956000
+      usr:
+        name: "noah.white"
+    message: "noah.white UDP with AES-GCM encryption is not supported with this version of the AnyConnect Client. Please upgrade to the latest Anyconnect Client."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931956000
  -
-  sample: "<190>2025-12-05T10:49:59Z: %ASA-5-751025: Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
+  sample: "<190>2025-12-05T10:49:59Z: %FTD-5-751025: Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:49:59Z: %ASA-5-751025: Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
+    custom:
+      assigned_ipv4_address: "208.67.222.222"
+      assigned_ipv6_address: "208.67.222.222"
+      group: "Engineering-VPN"
+      message_id: "751025"
+      severity: 5
+      timestamp: 1764931799000
+    message: "Group:Engineering-VPN IPv4 Address=208.67.222.222 IPv6 address=208.67.222.222 assigned to session."
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931799000
  -
-  sample: "<190>2025-12-05T10:53:49Z: %ASA-4-722054: Group Corp-VPN User chloe.campbell IP 4.2.2.1 SVC terminating connection: Failed to install Redirect URL: https://www.google.com/ Redirect ACL: non_exist for 4.2.2.1."
+  sample: "<190>2025-12-05T10:53:49Z: %FTD-4-722054: Group Corp-VPN User chloe.campbell IP 4.2.2.1 SVC terminating connection: Failed to install Redirect URL: https://www.google.com/ Redirect ACL: non_exist for 4.2.2.1."
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:53:49Z: %ASA-4-722054: Group Corp-VPN User chloe.campbell IP 4.2.2.1 SVC terminating connection: Failed to install Redirect URL: https://www.google.com/ Redirect ACL: non_exist for 4.2.2.1."
+    custom:
+      assigned_ip: "4.2.2.1"
+      group: "Corp-VPN"
+      message_id: "722054"
+      network:
+        client:
+          geoip: {}
+          ip: "4.2.2.1"
+      reason: "Redirect ACL missing or invalid"
+      redirect_url: "https://www.google.com/"
+      severity: 4
+      timestamp: 1764932029000
+      usr:
+        name: "chloe.campbell"
+    message: "Group Corp-VPN User chloe.campbell IP 4.2.2.1 SVC terminating connection: Failed to install Redirect URL: https://www.google.com/ Redirect ACL: non_exist for 4.2.2.1."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764932029000
  -
-  sample: "<190>2025-12-05T10:51:52Z: %ASA-6-722053: Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36 connection"
+  sample: "<190>2025-12-05T10:51:52Z: %FTD-6-722053: Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36 connection"
   result:
-    custom: {}
-    message: "<190>2025-12-05T10:51:52Z: %ASA-6-722053: Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36 connection"
+    custom:
+      group: "RemoteUsers"
+      http:
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "123"
+            minor: "0"
+            patch: "6312"
+            patch_minor: "86"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      message_id: "722053"
+      network:
+        client:
+          geoip: {}
+          ip: "1.1.1.1"
+      severity: 6
+      timestamp: 1764931912000
+      usr:
+        name: "harper.green"
+    message: "Group RemoteUsers User harper.green IP 1.1.1.1 Unknown client Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36 connection"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1764931912000
  -
   sample: "<134>1 1639132851.416656563 TCP9001 events anyconnect_vpn_connect user id 'grace.hill' local ip 208.67.220.220 reconnected from 9.9.9.9"
   result:
-    custom: {}
-    message: "<134>1 1639132851.416656563 TCP9001 events anyconnect_vpn_connect user id 'grace.hill' local ip 208.67.220.220 reconnected from 9.9.9.9"
+    custom:
+      device: "TCP9001"
+      epoch_time: 1.6391328514166565E9
+      evt:
+        name: "VPN Connect"
+      local_ip: "208.67.220.220"
+      network:
+        client:
+          geoip: {}
+          ip: "9.9.9.9"
+      timestamp: 1.6391328514166565E12
+      usr:
+        name: "grace.hill"
+    message: "events anyconnect_vpn_connect user id 'grace.hill' local ip 208.67.220.220 reconnected from 9.9.9.9"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1639132851416
  -
   sample: "<134>1 1639132851.416656563 TCP9001 events type=anyconnect_vpn_session_manager msg= 'Sess-ID[163170] Peer IP=8.8.8.8 User[emma.johnson]: Session disconnected. Session Type: SSL, Duration: 1d:24h:00m:00s, Bytes xmt: 163170, Bytes rcv: 163170, Reason: Max time exceeded '"
   result:
-    custom: {}
-    message: "<134>1 1639132851.416656563 TCP9001 events type=anyconnect_vpn_session_manager msg= 'Sess-ID[163170] Peer IP=8.8.8.8 User[emma.johnson]: Session disconnected. Session Type: SSL, Duration: 1d:24h:00m:00s, Bytes xmt: 163170, Bytes rcv: 163170, Reason: Max time exceeded '"
+    custom:
+      action: "Session disconnected"
+      device: "TCP9001"
+      duration: "1d:24h:00m:00s"
+      epoch_time: 1.6391328514166565E9
+      evt:
+        name: "VPN Session Manager"
+      network:
+        bytes_read: 163170.0
+        bytes_written: 163170.0
+        client:
+          geoip: {}
+          ip: "8.8.8.8"
+      reason: "Max time exceeded"
+      session_id: "163170"
+      session_type: "SSL"
+      timestamp: 1.6391328514166565E12
+      usr:
+        name: "emma.johnson"
+    message: "events type=anyconnect_vpn_session_manager msg= 'Sess-ID[163170] Peer IP=8.8.8.8 User[emma.johnson]: Session disconnected. Session Type: SSL, Duration: 1d:24h:00m:00s, Bytes xmt: 163170, Bytes rcv: 163170, Reason: Max time exceeded '"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1639132851416
  -
   sample: "<134>1 1639132851.416656563 TCP9001 events type=anyconnect_vpn_session_manager msg= 'Sess-ID[261224] Peer IP=8.8.8.8 User[james.anderson]: Deleted TLS tunnel[261224] from DB. Reason: DPD kill '"
   result:
-    custom: {}
-    message: "<134>1 1639132851.416656563 TCP9001 events type=anyconnect_vpn_session_manager msg= 'Sess-ID[261224] Peer IP=8.8.8.8 User[james.anderson]: Deleted TLS tunnel[261224] from DB. Reason: DPD kill '"
+    custom:
+      action: "Deleted TLS tunnel"
+      device: "TCP9001"
+      epoch_time: 1.6391328514166565E9
+      evt:
+        name: "VPN Session Manager"
+      network:
+        client:
+          geoip: {}
+          ip: "8.8.8.8"
+      reason: "DPD kill"
+      session_id: "261224"
+      timestamp: 1.6391328514166565E12
+      tunnel_id: "261224"
+      usr:
+        name: "james.anderson"
+    message: "events type=anyconnect_vpn_session_manager msg= 'Sess-ID[261224] Peer IP=8.8.8.8 User[james.anderson]: Deleted TLS tunnel[261224] from DB. Reason: DPD kill '"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1639132851416
  -
   sample: "<134>1 1639132851.416656563 TCP9001 events type=anyconnect_vpn_auth_success msg= 'RADIUS[475814] Server IP=149.112.112.112 Server port=1194 Peer IP=149.112.112.112 Peer port=1197 User=abigail.nelson: Authentication request accepted. '"
   result:
-    custom: {}
-    message: "<134>1 1639132851.416656563 TCP9001 events type=anyconnect_vpn_auth_success msg= 'RADIUS[475814] Server IP=149.112.112.112 Server port=1194 Peer IP=149.112.112.112 Peer port=1197 User=abigail.nelson: Authentication request accepted. '"
+    custom:
+      device: "TCP9001"
+      epoch_time: 1.6391328514166565E9
+      evt:
+        name: "VPN Auth Success"
+      network:
+        client:
+          geoip: {}
+          ip: "149.112.112.112"
+          port: 1197
+        destination:
+          geoip: {}
+          ip: "149.112.112.112"
+          port: 1194
+      timestamp: 1.6391328514166565E12
+      usr:
+        name: "abigail.nelson"
+    message: "events type=anyconnect_vpn_auth_success msg= 'RADIUS[475814] Server IP=149.112.112.112 Server port=1194 Peer IP=149.112.112.112 Peer port=1197 User=abigail.nelson: Authentication request accepted. '"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1639132851416
  -
   sample: "<134>1 1720051390.733639600 labs_appliance events type=anyconnect_vpn_general msg= 'AnyConnect server is started. '"
   result:
-    custom: {}
-    message: "<134>1 1720051390.733639600 labs_appliance events type=anyconnect_vpn_general msg= 'AnyConnect server is started. '"
+    custom:
+      device: "labs_appliance"
+      epoch_time: 1.7200513907336397E9
+      evt:
+        name: "VPN General"
+      message: "AnyConnect server is started."
+      timestamp: 1.7200513907336396E12
+    message: "events type=anyconnect_vpn_general msg= 'AnyConnect server is started. '"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1720051390733
  -
   sample: "<134>1 1720045578.339796505 labs_appliance events type=anyconnect_vpn_auth_success msg= 'Peer IP=1.1.1.1 Peer port=57096 AAA[7]: AAA authentication successful '"
   result:
-    custom: {}
-    message: "<134>1 1720045578.339796505 labs_appliance events type=anyconnect_vpn_auth_success msg= 'Peer IP=1.1.1.1 Peer port=57096 AAA[7]: AAA authentication successful '"
+    custom:
+      device: "labs_appliance"
+      epoch_time: 1.7200455783397965E9
+      evt:
+        name: "VPN Auth Success"
+      network:
+        client:
+          geoip: {}
+          ip: "1.1.1.1"
+          port: 57096
+      timestamp: 1.7200455783397966E12
+    message: "events type=anyconnect_vpn_auth_success msg= 'Peer IP=1.1.1.1 Peer port=57096 AAA[7]: AAA authentication successful '"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1720045578339
  -
   sample: "<134>1 1720051237.124589040 labs_appliance events type=anyconnect_vpn_auth_failure msg= 'Peer IP=8.8.8.8Peer port[1194] AAA[8]: AAA authenticate failed retval=7 - Authentication failure '"
   result:
-    custom: {}
-    message: "<134>1 1720051237.124589040 labs_appliance events type=anyconnect_vpn_auth_failure msg= 'Peer IP=8.8.8.8Peer port[1194] AAA[8]: AAA authenticate failed retval=7 - Authentication failure '"
+    custom:
+      device: "labs_appliance"
+      epoch_time: 1.720051237124589E9
+      evt:
+        name: "VPN Auth Failure"
+      network:
+        client:
+          geoip: {}
+          ip: "8.8.8.8"
+          port: 1194
+      timestamp: 1.7200512371245889E12
+    message: "events type=anyconnect_vpn_auth_failure msg= 'Peer IP=8.8.8.8Peer port[1194] AAA[8]: AAA authenticate failed retval=7 - Authentication failure '"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1720051237124
  -
   sample: "<134>1 1720045578.340434385 labs_appliance  events type=anyconnect_vpn_session_manager msg= 'Sess-ID[309409] Peer IP=156.154.71.1 User[emma.johnson]: Session connected. Session Type: TLS '"
   result:
-    custom: {}
-    message: "<134>1 1720045578.340434385 labs_appliance  events type=anyconnect_vpn_session_manager msg= 'Sess-ID[309409] Peer IP=156.154.71.1 User[emma.johnson]: Session connected. Session Type: TLS '"
+    custom:
+      action: "Session connected"
+      device: "labs_appliance"
+      epoch_time: 1.7200455783404343E9
+      evt:
+        name: "VPN Session Manager"
+      network:
+        client:
+          geoip: {}
+          ip: "156.154.71.1"
+      session_id: "309409"
+      session_type: "TLS"
+      timestamp: 1.7200455783404343E12
+      usr:
+        name: "emma.johnson"
+    message: "events type=anyconnect_vpn_session_manager msg= 'Sess-ID[309409] Peer IP=156.154.71.1 User[emma.johnson]: Session connected. Session Type: TLS '"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1720045578340
  -
   sample: "<134>1 1720045578.495767745 labs_appliance events anyconnect_vpn_connect user id 'charlotte.king' local ip 1.1.1.1 connected from 1.1.1.1"
   result:
-    custom: {}
-    message: "<134>1 1720045578.495767745 labs_appliance events anyconnect_vpn_connect user id 'charlotte.king' local ip 1.1.1.1 connected from 1.1.1.1"
+    custom:
+      device: "labs_appliance"
+      epoch_time: 1.7200455784957678E9
+      evt:
+        name: "VPN Connect"
+      local_ip: "1.1.1.1"
+      network:
+        client:
+          geoip: {}
+          ip: "1.1.1.1"
+      timestamp: 1.7200455784957678E12
+      usr:
+        name: "charlotte.king"
+    message: "events anyconnect_vpn_connect user id 'charlotte.king' local ip 1.1.1.1 connected from 1.1.1.1"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1720045578495
  -
   sample: "<134>1 1720045578.515109505 labs_appliance events anyconnect_vpn_disconnect user id 'david.murphy' local ip 77.88.8.1 connected from 4.2.2.2"
   result:
-    custom: {}
-    message: "<134>1 1720045578.515109505 labs_appliance events anyconnect_vpn_disconnect user id 'david.murphy' local ip 77.88.8.1 connected from 4.2.2.2"
+    custom:
+      device: "labs_appliance"
+      epoch_time: 1.7200455785151095E9
+      evt:
+        name: "VPN Disconnect"
+      local_ip: "77.88.8.1"
+      network:
+        client:
+          geoip: {}
+          ip: "4.2.2.2"
+      timestamp: 1.7200455785151096E12
+      usr:
+        name: "david.murphy"
+    message: "events anyconnect_vpn_disconnect user id 'david.murphy' local ip 77.88.8.1 connected from 4.2.2.2"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1720045578515
