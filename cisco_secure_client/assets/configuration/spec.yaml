@@ -1,0 +1,14 @@
+name: Cisco Secure Client
+files:
+- name: cisco_secure_client.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp # or udp
+      port: <PORT>
+      service: cisco-secure-client
+      source: cisco-secure-client
+      log_processing_rules:
+        - type: include_at_match
+          name: include_anyconnect_logs
+          pattern: .*(AnyConnect|anyconnect|113038|113039|734001|751025|722053|722054).*
