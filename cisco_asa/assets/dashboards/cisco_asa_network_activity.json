@@ -6,9 +6,9 @@
             "id": 1267739665566534,
             "definition": {
                 "type": "image",
-                "url": "https://upload.wikimedia.org/wikipedia/commons/0/08/Cisco_logo_blue_2016.svg",
-                "url_dark_theme": "",
-                "sizing": "none",
+                "url": "/static/images/logos/cisco-asa_large.svg",
+                "url_dark_theme": "/static/images/logos/cisco-asa_reversed_large.svg",
+                "sizing": "contain",
                 "has_background": false,
                 "has_border": false,
                 "vertical_align": "center",
@@ -771,13 +771,13 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@network.client.geoip.country.iso_code",
-                                                    "limit": 250,
-                                                    "sort": {
-                                                        "aggregation": "count",
+                                                "limit": 250,
+                                                "sort": {
+                                                    "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
+                                                },
+                                                "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
