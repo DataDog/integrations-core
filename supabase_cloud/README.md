@@ -1,14 +1,14 @@
 ## Overview
 
 [Supabase][2] is a Postgres development platform that provides a managed Postgres database with additional features including
-Authentication, instant APIs, Edge Functions, Realtime subscriptions, Object Storage, and Vector embeddings. 
+user authentication, client libraries, Edge Functions, Realtime subscriptions, Object Storage, and Vector embeddings.
 While Supabase supports a self-hosted version, this integration only supports Supabase Cloud project instances.
 
 With this integration, you can, per Supabase project:
 - Collect essential Postgres Database metrics and monitor critical behavior on primary and replica instances.
 - Collect Postgres server OS metrics and monitor CPU/Filesystem/Memory/Network load.
 - Collect Postgres database logs which can include slow statements, errors, and audit statements.
-- Collect Supabase application layer logs such as edge functions and Auth/REST/Storage/Realtime APIs.
+- Collect Supabase application layer logs from edge functions and Auth/REST/Storage/Realtime APIs.
 - Collect business logic log messages from your edge function applications.
 
 ## Setup
@@ -61,6 +61,10 @@ to generate the PAT from a user in your organization with read-only permissions.
 ### Metrics
 
 See [metadata.csv][5] for the full list of metrics provided by this integration.
+
+If your project contains a Postgres read replica **and** you provide a Personal Access Token to the integration,
+the integration will also collect metrics from the read replica, tagging the metrics with the appropriate
+`supabase_identifier` value.
 
 ### Logs
 
