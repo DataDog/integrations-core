@@ -99,3 +99,181 @@ pipeline:
       enabled: true
       sources:
         - timestamp
+    - type: pipeline
+      name: AI Interactions
+      enabled: true
+      filter:
+        query: source:microsoft-copilot service:user-detail
+      processors:
+        - type: date-remapper
+          name: Define `createdDateTime` as the official date of the log
+          enabled: true
+          sources:
+            - createdDateTime
+    - type: pipeline
+      name: aiResponses with text in body.content
+      enabled: true
+      filter:
+        query: source:microsoft-copilot service:user-detail @interactionType:aiResponse
+          !@body.content:?attachment*
+      processors:
+        - type: date-remapper
+          name: Define `createdDateTime` as the official date of the log
+          enabled: true
+          sources:
+            - createdDateTime
+        - type: grok-parser
+          name: Parse `body.content` for guardrail response
+          enabled: true
+          source: body.content
+          samples:
+            - "{\"createdDateTime\":\"2025-08-29T11:40:18.403Z\",\"sessionId\":\
+              \"19:h_PqBJFhOc6bwvzCu2yymQylwXHlG_06FR9c4EqDSgU1@thread.v2\",\"l\
+              ocale\":\"en-us\",\"body\":{\"contentType\":\"text\",\"content\":\
+              \"Sorry, Copilot can't generate high quality content for this. Try
+              something
+              else\"},\"conversationType\":\"appchat\",\"interactionType\":\"ai\
+              Response\",\"service\":\"user-detail\",\"requestId\":\"sdrT2poWDn\
+              7JasQrAh4uTW.2295.1.1\",\"appClass\":\"IPM.SkypeTeams.Message.Cop\
+              ilot.Outlook\",\"etag\":\"1756467618403\",\"from\":{\"application\
+              \":{\"displayName\":\"Copilot in
+              Outlook\",\"applicationIdentityType\":\"bot\",\"@odata\":{\"type\
+              \":\"#microsoft.graph.teamworkApplicationIdentity\"},\"id\":\"fb8\
+              d773d-7ef8-4ec0-a117-179f88add510\"},\"@odata\":{\"type\":\"#micr\
+              osoft.graph.chatMessageFromIdentitySet\"}},\"id\":\"1756467618403\
+              \"}"
+          grok:
+            supportRules: ""
+            matchRules: GRParsingRule %{regex("(I'm sorry|Sorry|I am sorry|I apologize|As
+              an|As an AI|I'm an|I'm just|As a language model|As an Assistant|I
+              cannot|I do not|.[1,100] is illegal and unethical|I'm really
+              sorry|My apologies|.[0,100]If you have any other non-malicious
+              requests|I'm not able to provide|I am really sorry|I cannot
+              create|I cannot support|I can't provide|I can't assist|I can't
+              help with).*"):copilot.guardrail}
+    - type: pipeline
+      name: aiResponses with text in attachments.0.content
+      enabled: true
+      filter:
+        query: source:microsoft-copilot service:user-detail @interactionType:aiResponse
+          @body.content:?attachment*
+      processors:
+        - type: date-remapper
+          name: Define `createdDateTime` as the official date of the log
+          enabled: true
+          sources:
+            - createdDateTime
+        - type: attribute-remapper
+          name: Map `attachments.0.content` to `copilot.first_attachment_content`
+          enabled: true
+          sources:
+            - attachments.0.content
+          sourceType: attribute
+          target: copilot.first_attachment_content
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `copilot.first_attachment_content` as JSON
+          enabled: true
+          source: copilot.first_attachment_content
+          samples:
+            - "{\"copilot\":{\"first_attachment_content\":\"{\\r\\n  \\\"type\\\
+              \": \\\"AdaptiveCard\\\",\\r\\n  \\\"version\\\":
+              \\\"1.0\\\",\\r\\n  \\\"body\\\":
+              [\\r\\n    {\\r\\n      \\\"type\\\":
+              \\\"TextBlock\\\",\\r\\n      \\\"text\\\": \\\"To help you
+              prepare for your day, I checked your schedule, messages, files,
+              and meeting transcripts for today. Here's what I found:\\\\n\\\\n-
+              **Meetings**: You have **no meetings scheduled for today**.\\\\n-
+              **Emails**: There are **no new emails** received today.\\\\n-
+              **Chats**: You haven't received any new Teams messages
+              today.\\\\n- **Files**: No new files have been shared with you
+              today.\\\\n- **Meeting Transcripts**: There are no transcripts or
+              updates from meetings today.\\\\n\\\\nIt looks like your day is
+              currently clear! Would you like help planning tasks, setting
+              goals, or exploring something new
+              today?\\\",\\r\\n      \\\"wrap\\\":
+              true\\r\\n    }\\r\\n  ]\\r\\n}\"},\"attachments\":[{\"attachment\
+              Id\":\"c9c5fe0bd767404bb6a9897c3982773e\",\"contentType\":\"appli\
+              cation/vnd.microsoft.card.adaptive\",\"content\":\"{\\r\\n  \\\"t\
+              ype\\\": \\\"AdaptiveCard\\\",\\r\\n  \\\"version\\\":
+              \\\"1.0\\\",\\r\\n  \\\"body\\\":
+              [\\r\\n    {\\r\\n      \\\"type\\\":
+              \\\"TextBlock\\\",\\r\\n      \\\"text\\\": \\\"To help you
+              prepare for your day, I checked your schedule, messages, files,
+              and meeting transcripts for today. Here's what I found:\\\\n\\\\n-
+              **Meetings**: You have **no meetings scheduled for today**.\\\\n-
+              **Emails**: There are **no new emails** received today.\\\\n-
+              **Chats**: You haven't received any new Teams messages
+              today.\\\\n- **Files**: No new files have been shared with you
+              today.\\\\n- **Meeting Transcripts**: There are no transcripts or
+              updates from meetings today.\\\\n\\\\nIt looks like your day is
+              currently clear! Would you like help planning tasks, setting
+              goals, or exploring something new
+              today?\\\",\\r\\n      \\\"wrap\\\":
+              true\\r\\n    }\\r\\n  ]\\r\\n}\"}],\"createdDateTime\":\"2025-09\
+              -02T19:16:39.112Z\",\"sessionId\":\"19:HAdeVkq_3P490gYUZoB1O17ouW\
+              wD9TBe0Od_8E5gcZQ1@thread.v2\",\"locale\":\"en-us\",\"body\":{\"c\
+              ontentType\":\"html\",\"content\":\"<attachment
+              id=\\\"c9c5fe0bd767404bb6a9897c3982773e\\\"></attachment>\"},\"co\
+              nversationType\":\"bizchat\",\"interactionType\":\"aiResponse\",\
+              \"service\":\"user-detail\",\"requestId\":\"6F4793D8-66B3-4DAD-91\
+              80-386F87A1CD25\",\"appClass\":\"IPM.SkypeTeams.Message.Copilot.B\
+              izChat\",\"etag\":\"1756840599112\",\"from\":{\"application\":{\"\
+              displayName\":\"Microsoft 365
+              Chat\",\"applicationIdentityType\":\"bot\",\"@odata\":{\"type\":\
+              \"#microsoft.graph.teamworkApplicationIdentity\"},\"id\":\"fb8d77\
+              3d-7ef8-4ec0-a117-179f88add510\"},\"@odata\":{\"type\":\"#microso\
+              ft.graph.chatMessageFromIdentitySet\"}},\"id\":\"1756840599112\"}"
+          grok:
+            supportRules: ""
+            matchRules: json_parsing %{data:copilot.first_attachment_content:json}
+        - type: grok-parser
+          name: Parse `copilot.first_attachment_content.body.0.text` for guardrail
+            response
+          enabled: true
+          source: copilot.first_attachment_content.body.0.text
+          samples:
+            - "{\"copilot\":{\"first_attachment_content\":{\"type\":\"AdaptiveC\
+              ard\",\"body\":[{\"text\":\"I can't help with that. If you're
+              having trouble accessing something you need for work, I recommend
+              reaching out to your IT or security team—they'll be able to guide
+              you through the proper channels. Let me know if you'd like help
+              drafting a message or finding the right
+              contact.\",\"type\":\"TextBlock\",\"wrap\":true}],\"version\":\"1\
+              .0\"}},\"attachments\":[{\"attachmentId\":\"22fe4e8348574b13ba668\
+              4e27d51b3c8\",\"contentType\":\"application/vnd.microsoft.card.ad\
+              aptive\",\"content\":\"{\\r\\n  \\\"type\\\":
+              \\\"AdaptiveCard\\\",\\r\\n  \\\"version\\\":
+              \\\"1.0\\\",\\r\\n  \\\"body\\\":
+              [\\r\\n    {\\r\\n      \\\"type\\\":
+              \\\"TextBlock\\\",\\r\\n      \\\"text\\\": \\\"I can't help with
+              that. If you're having trouble accessing something you need for
+              work, I recommend reaching out to your IT or security team—they'll
+              be able to guide you through the proper channels. Let me know if
+              you'd like help drafting a message or finding the right
+              contact.\\\",\\r\\n      \\\"wrap\\\":
+              true\\r\\n    }\\r\\n  ]\\r\\n}\"}],\"createdDateTime\":\"2025-08\
+              -29T11:51:11.355Z\",\"sessionId\":\"19:PcPQbnhjChEKut9De2_xFmsGbX\
+              QNYDtM33W6OAlBkJU1@thread.v2\",\"locale\":\"en-us\",\"body\":{\"c\
+              ontentType\":\"html\",\"content\":\"<attachment
+              id=\\\"22fe4e8348574b13ba6684e27d51b3c8\\\"></attachment>\"},\"co\
+              nversationType\":\"bizchat\",\"interactionType\":\"aiResponse\",\
+              \"service\":\"user-detail\",\"requestId\":\"CDDDEE59-FE2A-46A1-BC\
+              00-F7630E0B6847\",\"appClass\":\"IPM.SkypeTeams.Message.Copilot.B\
+              izChat\",\"etag\":\"1756468271355\",\"from\":{\"application\":{\"\
+              displayName\":\"Microsoft 365
+              Chat\",\"applicationIdentityType\":\"bot\",\"@odata\":{\"type\":\
+              \"#microsoft.graph.teamworkApplicationIdentity\"},\"id\":\"fb8d77\
+              3d-7ef8-4ec0-a117-179f88add510\"},\"@odata\":{\"type\":\"#microso\
+              ft.graph.chatMessageFromIdentitySet\"}},\"id\":\"1756468271355\"}"
+          grok:
+            supportRules: ""
+            matchRules: GRParsingRule %{regex("(I'm sorry|Sorry|I am sorry|I apologize|As
+              an|As an AI|I'm an|I'm just|As a language model|As an Assistant|I
+              cannot|I do not|.[1,100] is illegal and unethical|I'm really
+              sorry|My apologies|.[0,100]If you have any other non-malicious
+              requests|I'm not able to provide|I am really sorry|I cannot
+              create|I cannot support|I can't provide|I can't assist|I can't
+              help with that).*"):copilot.guardrail}

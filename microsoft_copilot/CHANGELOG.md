@@ -1,5 +1,12 @@
 # CHANGELOG - Microsoft Copilot
 
+## 1.1.0 / 2026-01-05
+
+***Added***:
+
+* Incorporate AI Interactions as log messages from the Microsoft Graph API Change Notification mechanism
+* Introduce monitor for alerting on spikes in Copilot guardrail responses
+
 ## 1.0.0 / 2025-09-24
 
 ***Added***:

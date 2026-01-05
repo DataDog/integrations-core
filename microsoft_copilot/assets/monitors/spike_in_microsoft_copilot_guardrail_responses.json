@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2025-09-24",
+  "last_updated_at": "2025-09-24",
+  "title": "Spike in Microsoft 365 Copilot Guardrail Responses",
+  "description": "Alert when detecting a spike in Microsoft 365 Copilot guardrail responses.",
+  "definition": {
+	"id": 217891054,
+	"name": "Spike in Microsoft 365 Copilot Guardrail Responses",
+	"type": "query alert",
+	"query": "sum(last_30m):avg:microsoft_copilot.airesponse.guardrail.count{*} > 50",
+	"message": "The number of recent guardrail responses from Microsoft 365 Copilot has {{#is_alert}}exceeded threshold{{/is_alert}}{{#is_alert_recovery}}recovered and is under threshold{{/is_alert_recovery}}.\\n\\n@email@example.com",
+	"tags": [
+		"source:microsoft-copilot",
+		"service:user-detail"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 50
+		},
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"require_full_window": true,
+		"new_host_delay": 300
+	},
+	"priority": null
+},
+  "tags": [
+    "integration:microsoft-copilot"
+  ]
+}

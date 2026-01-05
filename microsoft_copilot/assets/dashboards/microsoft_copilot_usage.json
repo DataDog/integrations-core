@@ -107,7 +107,7 @@
               "vertical_align": "center",
               "show_tick": false,
               "tick_pos": "50%",
-              "tick_edge": "left",
+              "tick_edge": "top",
               "has_padding": false
             },
             "layout": {
@@ -214,16 +214,16 @@
               "x": 6,
               "y": 3,
               "width": 6,
-              "height": 3
+              "height": 5
             }
           },
           {
-            "id": 8138763535560108,
+            "id": 657900507349421,
             "definition": {
               "type": "note",
               "content": "_Microsoft 365 Copilot usage reports become available through the API [approximately 72 hours](https://learn.microsoft.com/en-us/microsoft-365/admin/activity-reports/microsoft-365-copilot-usage?view=o365-worldwide) after the activity occurs._",
               "background_color": "blue",
-              "font_size": "16",
+              "font_size": "14",
               "text_align": "center",
               "vertical_align": "center",
               "show_tick": false,
@@ -237,6 +237,31 @@
               "width": 6,
               "height": 2
             }
+          },
+          {
+            "id": 2353057361495464,
+            "definition": {
+              "title": "Monitor Summary",
+              "type": "manage_status",
+              "display_format": "list",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(source:microsoft-copilot AND service:user-detail)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 2
+            }
           }
         ]
       },
@@ -244,7 +269,7 @@
         "x": 0,
         "y": 0,
         "width": 12,
-        "height": 7
+        "height": 9
       }
     },
     {
@@ -1244,9 +1269,514 @@
       },
       "layout": {
         "x": 0,
-        "y": 7,
+        "y": 9,
         "width": 12,
         "height": 17
+      }
+    },
+    {
+      "id": 4045398119388688,
+      "definition": {
+        "title": "User Detail Logs",
+        "background_color": "pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1945022109528680,
+            "definition": {
+              "title": "All Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "query": {
+                    "query_string": "source:microsoft-copilot",
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "desc"
+                    },
+                    "data_source": "logs_stream",
+                    "storage": "hot",
+                    "indexes": []
+                  },
+                  "response_format": "event_list",
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 26,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 7863103500340419,
+      "definition": {
+        "title": "Prompt and Response Detail",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2853491448254754,
+            "definition": {
+              "title": "User Prompts versus AI Responses",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "AI Response",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "User Prompt",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail @interactionType:aiResponse !@body.content:OK??I'll?search?for*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail @interactionType:userPrompt"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "custom_links": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 5472682666849643,
+            "definition": {
+              "title": "AI Response Applications",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail @interactionType:aiResponse @from.application.displayName:*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@from.application.displayName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8593062323429679,
+            "definition": {
+              "title": "Top Guardrail Responses",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail @copilot.guardrail:* @interactionType:aiResponse"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@copilot.guardrail",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2372542214241925,
+            "definition": {
+              "title": "Top User Prompts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail @interactionType:userPrompt @body.contentType:text !@body.content:?attachment*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@body.content",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 2983504937860021,
+            "definition": {
+              "title": "Top Linked Document Names in Responses",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail @links.displayName:* @interactionType:aiResponse"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@links.displayName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1403392661116272,
+            "definition": {
+              "title": "Top Links in Responses",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail @links.linkUrl:*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@links.linkUrl",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 11,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 16,
+        "is_column_break": true
       }
     },
     {
@@ -1259,7 +1789,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 2853491448254754,
+            "id": 8241158012048184,
             "definition": {
               "title": "User Interaction Across All Applications",
               "title_size": "16",
@@ -1651,72 +2181,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 16,
         "width": 12,
-        "height": 15,
-        "is_column_break": true
-      }
-    },
-    {
-      "id": 4045398119388688,
-      "definition": {
-        "title": "User Detail Logs",
-        "background_color": "pink",
-        "show_title": true,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 1945022109528680,
-            "definition": {
-              "title": "All Logs",
-              "title_size": "16",
-              "title_align": "left",
-              "requests": [
-                {
-                  "query": {
-                    "query_string": "source:microsoft-copilot",
-                    "sort": {
-                      "column": "timestamp",
-                      "order": "desc"
-                    },
-                    "data_source": "logs_stream",
-                    "storage": "hot",
-                    "indexes": []
-                  },
-                  "response_format": "event_list",
-                  "columns": [
-                    {
-                      "field": "status_line",
-                      "width": "auto"
-                    },
-                    {
-                      "field": "timestamp",
-                      "width": "auto"
-                    },
-                    {
-                      "field": "content",
-                      "width": "auto"
-                    }
-                  ]
-                }
-              ],
-              "type": "list_stream"
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 12,
-              "height": 4
-            }
-          }
-        ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 15,
-        "width": 12,
-        "height": 5
+        "height": 15
       }
     }
   ],

@@ -4,101 +4,6 @@ tests:
       {
         "service": "user-detail-report",
         "report": {
-          "wordCopilotLastActivityDate": "2025-07-24",
-          "powerPointCopilotLastActivityDate": "",
-          "oneNoteCopilotLastActivityDate": "",
-          "displayName": "3357D5DFDE4F6402EEE3D70CEB6506B9",
-          "excelCopilotLastActivityDate": "",
-          "loopCopilotLastActivityDate": "",
-          "microsoftTeamsCopilotLastActivityDate": "",
-          "lastActivityDate": "2025-11-26",
-          "reportRefreshDate": "2025-11-26",
-          "copilotActivityUserDetailsByPeriod": [
-            {
-              "reportPeriod": 7
-            }
-          ],
-          "copilotChatLastActivityDate": "2025-11-26",
-          "outlookCopilotLastActivityDate": "2025-11-26",
-          "userPrincipalName": "7079588E2ABDBF417AE4D75B69483B93"
-        },
-        "active": {
-          "excel": 0,
-          "microsoftTeams": 0,
-          "oneNote": 0,
-          "copilotChat": 1,
-          "loop": 0,
-          "powerPoint": 0,
-          "word": 0,
-          "outlook": 1
-        }
-      }
-    result:
-      custom:
-        active:
-          copilotChat: 1
-          excel: 0
-          loop: 0
-          microsoftTeams: 0
-          oneNote: 0
-          outlook: 1
-          powerPoint: 0
-          word: 0
-        report:
-          copilotActivityUserDetailsByPeriod:
-            - reportPeriod: 7
-          copilotChatLastActivityDate: "2025-11-26"
-          displayName: "3357D5DFDE4F6402EEE3D70CEB6506B9"
-          excelCopilotLastActivityDate: ""
-          lastActivityDate: "2025-11-26"
-          loopCopilotLastActivityDate: ""
-          microsoftTeamsCopilotLastActivityDate: ""
-          oneNoteCopilotLastActivityDate: ""
-          outlookCopilotLastActivityDate: "2025-11-26"
-          powerPointCopilotLastActivityDate: ""
-          reportRefreshDate: "2025-11-26"
-          userPrincipalName: "7079588E2ABDBF417AE4D75B69483B93"
-          wordCopilotLastActivityDate: "2025-07-24"
-        service: "user-detail-report"
-      message: |-
-        {
-          "service" : "user-detail-report",
-          "report" : {
-            "wordCopilotLastActivityDate" : "2025-07-24",
-            "powerPointCopilotLastActivityDate" : "",
-            "oneNoteCopilotLastActivityDate" : "",
-            "displayName" : "3357D5DFDE4F6402EEE3D70CEB6506B9",
-            "excelCopilotLastActivityDate" : "",
-            "loopCopilotLastActivityDate" : "",
-            "microsoftTeamsCopilotLastActivityDate" : "",
-            "lastActivityDate" : "2025-11-26",
-            "reportRefreshDate" : "2025-11-26",
-            "copilotActivityUserDetailsByPeriod" : [ {
-              "reportPeriod" : 7
-            } ],
-            "copilotChatLastActivityDate" : "2025-11-26",
-            "outlookCopilotLastActivityDate" : "2025-11-26",
-            "userPrincipalName" : "7079588E2ABDBF417AE4D75B69483B93"
-          },
-          "active" : {
-            "excel" : 0,
-            "microsoftTeams" : 0,
-            "oneNote" : 0,
-            "copilotChat" : 1,
-            "loop" : 0,
-            "powerPoint" : 0,
-            "word" : 0,
-            "outlook" : 1
-          }
-        }
-      service: "user-detail-report"
-      tags:
-        - "source:LOGS_SOURCE"
-      timestamp: 1
-  - sample: >-
-      {
-        "service": "user-detail-report",
-        "report": {
           "wordCopilotLastActivityDate": "",
           "powerPointCopilotLastActivityDate": "",
           "oneNoteCopilotLastActivityDate": "",
@@ -190,3 +95,506 @@ tests:
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1
+  - sample: >-
+      {
+        "attachments": [
+          {
+            "attachmentId": "058a3da4759b4b6dafd1afb826380a0e",
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "content": "{\r\n  \"type\": \"AdaptiveCard\",\r\n  \"version\": \"1.0\",\r\n  \"body\": [\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"text\": \"You asked whether there were any important emails from your manager last week. Based on the search, it appears that **you are listed as your own manager**, so I looked for emails sent by you to yourself or through distribution lists you’re part of.\\n\\n### 📬 Emails Sent by You Last Week\\n\\nThere are two emails from last week that you sent through distribution lists:\\n\\n1. **[THis is a test](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8e97a367-b427-4ecc-8514-53c4f0831cfa)** — Sent to yourself and others via a distribution list [1](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSRAAA%3d&exvsurl=1&viewmodel=ReadMessageItem).\\n2. **[More slop](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8a4d2a71-59a6-4a60-8b05-5c66d96ee1dc)** — Also sent to the same group [2](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem).\\n\\nThese messages may have been part of internal testing or informal communication, as suggested by their subject lines. If you were expecting messages from someone else acting as your manager, let me know and I can help identify that person or expand the search.\",\r\n      \"wrap\": true\r\n    },\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"id\": \"MessageTextField\",\r\n      \"text\": \"You asked whether there were any important emails from your manager last week. Based on the search, it appears that **you are listed as your own manager**, so I looked for emails sent by you to yourself or through distribution lists you’re part of.\\n\\n### 📬 Emails Sent by You Last Week\\n\\nThere are two emails from last week that you sent through distribution lists:\\n\\n1. **<Email>THis is a test</Email>** — Sent to yourself and others via a distribution list[^3^].\\n2. **<Email>More slop</Email>** — Also sent to the same group[^4^].\\n\\nThese messages may have been part of internal testing or informal communication, as suggested by their subject lines. If you were expecting messages from someone else acting as your manager, let me know and I can help identify that person or expand the search.\",\r\n      \"wrap\": true\r\n    }\r\n  ]\r\n}"
+          }
+        ],
+        "createdDateTime": "2025-09-10T20:19:03.678Z",
+        "sessionId": "19:0CJ-1p9cphG3eUoR0BiPXJw1kT_H5gyEVgFxKBzJ9FU1@thread.v2",
+        "locale": "en-us",
+        "body": {
+          "contentType": "html",
+          "content": "<attachment id=\"058a3da4759b4b6dafd1afb826380a0e\"></attachment>"
+        },
+        "conversationType": "bizchat",
+        "interactionType": "aiResponse",
+        "service": "user-detail",
+        "requestId": "ec14849c-1d2d-4930-994e-008eb4faf816",
+        "appClass": "IPM.SkypeTeams.Message.Copilot.BizChat",
+        "etag": "1757535543678",
+        "from": {
+          "application": {
+            "displayName": "Microsoft 365 Chat",
+            "applicationIdentityType": "bot",
+            "@odata": {
+              "type": "#microsoft.graph.teamworkApplicationIdentity"
+            },
+            "id": "fb8d773d-7ef8-4ec0-a117-179f88add510"
+          },
+          "@odata": {
+            "type": "#microsoft.graph.chatMessageFromIdentitySet"
+          }
+        },
+        "links": [
+          {
+            "displayName": "This is a test",
+            "linkUrl": "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8e97a367-b427-4ecc-8514-53c4f0831cfa",
+            "linkType": "Email"
+          },
+          {
+            "displayName": "More questions",
+            "linkUrl": "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem",
+            "linkType": "Outlook"
+          },
+          {
+            "displayName": "This is another test",
+            "linkUrl": "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem",
+            "linkType": "Outlook"
+          },
+          {
+            "displayName": "Another email about SLOP",
+            "linkUrl": "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAWIcaIAAA%3d&exvsurl=1&viewmodel=ReadMessageItem",
+            "linkType": "Outlook"
+          },
+          {
+            "displayName": "This is a message",
+            "linkUrl": "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAOzkLIAAA%3d&exvsurl=1&viewmodel=ReadMessageItem",
+            "linkType": "Outlook"
+          },
+          {
+            "displayName": "Brian Wilson",
+            "linkUrl": "https://www.office.com/search?q=Brian+Wilson",
+            "linkType": "Web"
+          }
+        ],
+        "id": "1757535543678"
+      }
+    result:
+      custom:
+        appClass: "IPM.SkypeTeams.Message.Copilot.BizChat"
+        attachments:
+          - attachmentId: "058a3da4759b4b6dafd1afb826380a0e"
+            contentType: "application/vnd.microsoft.card.adaptive"
+            content: "{\r\n  \"type\": \"AdaptiveCard\",\r\n  \"version\": \"1.0\",\r\n  \"body\": [\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"text\": \"You asked whether there were any important emails from your manager last week. Based on the search, it appears that **you are listed as your own manager**, so I looked for emails sent by you to yourself or through distribution lists you’re part of.\\n\\n### 📬 Emails Sent by You Last Week\\n\\nThere are two emails from last week that you sent through distribution lists:\\n\\n1. **[THis is a test](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8e97a367-b427-4ecc-8514-53c4f0831cfa)** — Sent to yourself and others via a distribution list [1](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSRAAA%3d&exvsurl=1&viewmodel=ReadMessageItem).\\n2. **[More slop](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8a4d2a71-59a6-4a60-8b05-5c66d96ee1dc)** — Also sent to the same group [2](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem).\\n\\nThese messages may have been part of internal testing or informal communication, as suggested by their subject lines. If you were expecting messages from someone else acting as your manager, let me know and I can help identify that person or expand the search.\",\r\n      \"wrap\": true\r\n    },\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"id\": \"MessageTextField\",\r\n      \"text\": \"You asked whether there were any important emails from your manager last week. Based on the search, it appears that **you are listed as your own manager**, so I looked for emails sent by you to yourself or through distribution lists you’re part of.\\n\\n### 📬 Emails Sent by You Last Week\\n\\nThere are two emails from last week that you sent through distribution lists:\\n\\n1. **<Email>THis is a test</Email>** — Sent to yourself and others via a distribution list[^3^].\\n2. **<Email>More slop</Email>** — Also sent to the same group[^4^].\\n\\nThese messages may have been part of internal testing or informal communication, as suggested by their subject lines. If you were expecting messages from someone else acting as your manager, let me know and I can help identify that person or expand the search.\",\r\n      \"wrap\": true\r\n    }\r\n  ]\r\n}"
+        body:
+          content: "<attachment id=\"058a3da4759b4b6dafd1afb826380a0e\"></attachment>"
+          contentType: "html"
+        conversationType: "bizchat"
+        copilot:
+          first_attachment_content:
+            body:
+              - text: |-
+                  You asked whether there were any important emails from your manager last week. Based on the search, it appears that **you are listed as your own manager**, so I looked for emails sent by you to yourself or through distribution lists you’re part of.
+                  
+                  ### 📬 Emails Sent by You Last Week
+                  
+                  There are two emails from last week that you sent through distribution lists:
+                  
+                  1. **[THis is a test](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8e97a367-b427-4ecc-8514-53c4f0831cfa)** — Sent to yourself and others via a distribution list [1](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSRAAA%3d&exvsurl=1&viewmodel=ReadMessageItem).
+                  2. **[More slop](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8a4d2a71-59a6-4a60-8b05-5c66d96ee1dc)** — Also sent to the same group [2](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem).
+                  
+                  These messages may have been part of internal testing or informal communication, as suggested by their subject lines. If you were expecting messages from someone else acting as your manager, let me know and I can help identify that person or expand the search.
+                type: "TextBlock"
+                wrap: true
+              - id: "MessageTextField"
+                text: |-
+                  You asked whether there were any important emails from your manager last week. Based on the search, it appears that **you are listed as your own manager**, so I looked for emails sent by you to yourself or through distribution lists you’re part of.
+                  
+                  ### 📬 Emails Sent by You Last Week
+                  
+                  There are two emails from last week that you sent through distribution lists:
+                  
+                  1. **<Email>THis is a test</Email>** — Sent to yourself and others via a distribution list[^3^].
+                  2. **<Email>More slop</Email>** — Also sent to the same group[^4^].
+                  
+                  These messages may have been part of internal testing or informal communication, as suggested by their subject lines. If you were expecting messages from someone else acting as your manager, let me know and I can help identify that person or expand the search.
+                type: "TextBlock"
+                wrap: true
+            type: "AdaptiveCard"
+            version: "1.0"
+        createdDateTime: "2025-09-10T20:19:03.678Z"
+        etag: "1757535543678"
+        from:
+          '@odata':
+            type: "#microsoft.graph.chatMessageFromIdentitySet"
+          application:
+            '@odata':
+              type: "#microsoft.graph.teamworkApplicationIdentity"
+            applicationIdentityType: "bot"
+            displayName: "Microsoft 365 Chat"
+            id: "fb8d773d-7ef8-4ec0-a117-179f88add510"
+        id: "1757535543678"
+        interactionType: "aiResponse"
+        links:
+          - displayName: "This is a test"
+            linkUrl: "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8e97a367-b427-4ecc-8514-53c4f0831cfa"
+            linkType: "Email"
+          - displayName: "More questions"
+            linkUrl: "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem"
+            linkType: "Outlook"
+          - displayName: "This is another test"
+            linkUrl: "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem"
+            linkType: "Outlook"
+          - displayName: "Another email about SLOP"
+            linkUrl: "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAWIcaIAAA%3d&exvsurl=1&viewmodel=ReadMessageItem"
+            linkType: "Outlook"
+          - displayName: "This is a message"
+            linkUrl: "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAOzkLIAAA%3d&exvsurl=1&viewmodel=ReadMessageItem"
+            linkType: "Outlook"
+          - displayName: "Brian Wilson"
+            linkUrl: "https://www.office.com/search?q=Brian+Wilson"
+            linkType: "Web"
+        locale: "en-us"
+        requestId: "ec14849c-1d2d-4930-994e-008eb4faf816"
+        service: "user-detail"
+        sessionId: "19:0CJ-1p9cphG3eUoR0BiPXJw1kT_H5gyEVgFxKBzJ9FU1@thread.v2"
+      message: |-
+        {
+          "attachments" : [ {
+            "attachmentId" : "058a3da4759b4b6dafd1afb826380a0e",
+            "contentType" : "application/vnd.microsoft.card.adaptive",
+            "content" : "{\r\n  \"type\": \"AdaptiveCard\",\r\n  \"version\": \"1.0\",\r\n  \"body\": [\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"text\": \"You asked whether there were any important emails from your manager last week. Based on the search, it appears that **you are listed as your own manager**, so I looked for emails sent by you to yourself or through distribution lists you’re part of.\\n\\n### 📬 Emails Sent by You Last Week\\n\\nThere are two emails from last week that you sent through distribution lists:\\n\\n1. **[THis is a test](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8e97a367-b427-4ecc-8514-53c4f0831cfa)** — Sent to yourself and others via a distribution list [1](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSRAAA%3d&exvsurl=1&viewmodel=ReadMessageItem).\\n2. **[More slop](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8a4d2a71-59a6-4a60-8b05-5c66d96ee1dc)** — Also sent to the same group [2](https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem).\\n\\nThese messages may have been part of internal testing or informal communication, as suggested by their subject lines. If you were expecting messages from someone else acting as your manager, let me know and I can help identify that person or expand the search.\",\r\n      \"wrap\": true\r\n    },\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"id\": \"MessageTextField\",\r\n      \"text\": \"You asked whether there were any important emails from your manager last week. Based on the search, it appears that **you are listed as your own manager**, so I looked for emails sent by you to yourself or through distribution lists you’re part of.\\n\\n### 📬 Emails Sent by You Last Week\\n\\nThere are two emails from last week that you sent through distribution lists:\\n\\n1. **<Email>THis is a test</Email>** — Sent to yourself and others via a distribution list[^3^].\\n2. **<Email>More slop</Email>** — Also sent to the same group[^4^].\\n\\nThese messages may have been part of internal testing or informal communication, as suggested by their subject lines. If you were expecting messages from someone else acting as your manager, let me know and I can help identify that person or expand the search.\",\r\n      \"wrap\": true\r\n    }\r\n  ]\r\n}"
+          } ],
+          "createdDateTime" : "2025-09-10T20:19:03.678Z",
+          "sessionId" : "19:0CJ-1p9cphG3eUoR0BiPXJw1kT_H5gyEVgFxKBzJ9FU1@thread.v2",
+          "locale" : "en-us",
+          "body" : {
+            "contentType" : "html",
+            "content" : "<attachment id=\"058a3da4759b4b6dafd1afb826380a0e\"></attachment>"
+          },
+          "conversationType" : "bizchat",
+          "interactionType" : "aiResponse",
+          "service" : "user-detail",
+          "requestId" : "ec14849c-1d2d-4930-994e-008eb4faf816",
+          "appClass" : "IPM.SkypeTeams.Message.Copilot.BizChat",
+          "etag" : "1757535543678",
+          "from" : {
+            "application" : {
+              "displayName" : "Microsoft 365 Chat",
+              "applicationIdentityType" : "bot",
+              "@odata" : {
+                "type" : "#microsoft.graph.teamworkApplicationIdentity"
+              },
+              "id" : "fb8d773d-7ef8-4ec0-a117-179f88add510"
+            },
+            "@odata" : {
+              "type" : "#microsoft.graph.chatMessageFromIdentitySet"
+            }
+          },
+          "links" : [ {
+            "displayName" : "This is a test",
+            "linkUrl" : "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem&EntityRepresentationId=8e97a367-b427-4ecc-8514-53c4f0831cfa",
+            "linkType" : "Email"
+          }, {
+            "displayName" : "More questions",
+            "linkUrl" : "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAZ0SSQAAA%3d&exvsurl=1&viewmodel=ReadMessageItem",
+            "linkType" : "Outlook"
+          }, {
+            "displayName" : "This is another test",
+            "linkUrl" : "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEMAACUJk89%2b91KSpzvNQvmmU8aAAAZz6ftAAA%3d&exvsurl=1&viewmodel=ReadMessageItem",
+            "linkType" : "Outlook"
+          }, {
+            "displayName" : "Another email about SLOP",
+            "linkUrl" : "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAWIcaIAAA%3d&exvsurl=1&viewmodel=ReadMessageItem",
+            "linkType" : "Outlook"
+          }, {
+            "displayName" : "This is a message",
+            "linkUrl" : "https://outlook.office365.com/owa/?ItemID=AAMkADVjZGM3YTg3LTFlYjAtNDMzOS1hOTk1LTc5ZDJjNDRmZWMzMgBGAAAAAADUZjfnpiS9SIZQOJtoPwAeBwCUJk89%2b91KSpzvNQvmmU8aAAAAAAEJAACUJk89%2b91KSpzvNQvmmU8aAAAOzkLIAAA%3d&exvsurl=1&viewmodel=ReadMessageItem",
+            "linkType" : "Outlook"
+          }, {
+            "displayName" : "Brian Wilson",
+            "linkUrl" : "https://www.office.com/search?q=Brian+Wilson",
+            "linkType" : "Web"
+          } ],
+          "id" : "1757535543678"
+        }
+      service: "user-detail"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1757535543678
+  - sample: >-
+      {
+        "conversationType": "bizchat",
+        "interactionType": "aiResponse",
+        "service": "user-detail",
+        "requestId": "F67371A4-CC64-43CF-97F7-E2F4DF99098E",
+        "createdDateTime": "2025-09-10T19:10:27.667Z",
+        "appClass": "IPM.SkypeTeams.Message.Copilot.BizChat",
+        "etag": "1757531427667",
+        "from": {
+          "application": {
+            "displayName": "Microsoft 365 Chat",
+            "applicationIdentityType": "bot",
+            "@odata": {
+              "type": "#microsoft.graph.teamworkApplicationIdentity"
+            },
+            "id": "fb8d773d-7ef8-4ec0-a117-179f88add510"
+          },
+          "@odata": {
+            "type": "#microsoft.graph.chatMessageFromIdentitySet"
+          }
+        },
+        "sessionId": "19:gM1aoErSrOLtqi7ZZMAiF4MoiuSofu95LEK7fsGMEA41@thread.v2",
+        "id": "1757531427667",
+        "locale": "en-us",
+        "body": {
+          "contentType": "text",
+          "content": "OK, I'll search for 'Lucky Lips'..."
+        }
+      }
+    result:
+      custom:
+        appClass: "IPM.SkypeTeams.Message.Copilot.BizChat"
+        body:
+          content: "OK, I'll search for 'Lucky Lips'..."
+          contentType: "text"
+        conversationType: "bizchat"
+        createdDateTime: "2025-09-10T19:10:27.667Z"
+        etag: "1757531427667"
+        from:
+          '@odata':
+            type: "#microsoft.graph.chatMessageFromIdentitySet"
+          application:
+            '@odata':
+              type: "#microsoft.graph.teamworkApplicationIdentity"
+            applicationIdentityType: "bot"
+            displayName: "Microsoft 365 Chat"
+            id: "fb8d773d-7ef8-4ec0-a117-179f88add510"
+        id: "1757531427667"
+        interactionType: "aiResponse"
+        locale: "en-us"
+        requestId: "F67371A4-CC64-43CF-97F7-E2F4DF99098E"
+        service: "user-detail"
+        sessionId: "19:gM1aoErSrOLtqi7ZZMAiF4MoiuSofu95LEK7fsGMEA41@thread.v2"
+      message: |-
+        {
+          "conversationType" : "bizchat",
+          "interactionType" : "aiResponse",
+          "service" : "user-detail",
+          "requestId" : "F67371A4-CC64-43CF-97F7-E2F4DF99098E",
+          "createdDateTime" : "2025-09-10T19:10:27.667Z",
+          "appClass" : "IPM.SkypeTeams.Message.Copilot.BizChat",
+          "etag" : "1757531427667",
+          "from" : {
+            "application" : {
+              "displayName" : "Microsoft 365 Chat",
+              "applicationIdentityType" : "bot",
+              "@odata" : {
+                "type" : "#microsoft.graph.teamworkApplicationIdentity"
+              },
+              "id" : "fb8d773d-7ef8-4ec0-a117-179f88add510"
+            },
+            "@odata" : {
+              "type" : "#microsoft.graph.chatMessageFromIdentitySet"
+            }
+          },
+          "sessionId" : "19:gM1aoErSrOLtqi7ZZMAiF4MoiuSofu95LEK7fsGMEA41@thread.v2",
+          "id" : "1757531427667",
+          "locale" : "en-us",
+          "body" : {
+            "contentType" : "text",
+            "content" : "OK, I'll search for 'Lucky Lips'..."
+          }
+        }
+      service: "user-detail"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1757531427667
+  - sample: >-
+      {
+        "createdDateTime": "2025-08-29T11:40:18.403Z",
+        "sessionId": "19:h_PqBJFhOc6bwvzCu2yymQylwXHlG_06FR9c4EqDSgU1@thread.v2",
+        "locale": "en-us",
+        "body": {
+          "contentType": "text",
+          "content": "Sorry, Copilot can't generate high quality content for this."
+        },
+        "conversationType": "appchat",
+        "interactionType": "aiResponse",
+        "service": "user-detail",
+        "requestId": "sdrT2poWDn7JasQrAh4uTW.2295.1.1",
+        "appClass": "IPM.SkypeTeams.Message.Copilot.Outlook",
+        "etag": "1756467618403",
+        "from": {
+          "application": {
+            "displayName": "Copilot in Outlook",
+            "applicationIdentityType": "bot",
+            "@odata": {
+              "type": "#microsoft.graph.teamworkApplicationIdentity"
+            },
+            "id": "fb8d773d-7ef8-4ec0-a117-179f88add510"
+          },
+          "@odata": {
+            "type": "#microsoft.graph.chatMessageFromIdentitySet"
+          }
+        },
+        "id": "1756467618403"
+      }
+    result:
+      custom:
+        appClass: "IPM.SkypeTeams.Message.Copilot.Outlook"
+        body:
+          content: "Sorry, Copilot can't generate high quality content for this."
+          contentType: "text"
+        conversationType: "appchat"
+        copilot:
+          guardrail: "Sorry, Copilot can't generate high quality content for this."
+        createdDateTime: "2025-08-29T11:40:18.403Z"
+        etag: "1756467618403"
+        from:
+          '@odata':
+            type: "#microsoft.graph.chatMessageFromIdentitySet"
+          application:
+            '@odata':
+              type: "#microsoft.graph.teamworkApplicationIdentity"
+            applicationIdentityType: "bot"
+            displayName: "Copilot in Outlook"
+            id: "fb8d773d-7ef8-4ec0-a117-179f88add510"
+        id: "1756467618403"
+        interactionType: "aiResponse"
+        locale: "en-us"
+        requestId: "sdrT2poWDn7JasQrAh4uTW.2295.1.1"
+        service: "user-detail"
+        sessionId: "19:h_PqBJFhOc6bwvzCu2yymQylwXHlG_06FR9c4EqDSgU1@thread.v2"
+      message: |-
+        {
+          "conversationType" : "appchat",
+          "interactionType" : "aiResponse",
+          "service" : "user-detail",
+          "requestId" : "sdrT2poWDn7JasQrAh4uTW.2295.1.1",
+          "createdDateTime" : "2025-08-29T11:40:18.403Z",
+          "appClass" : "IPM.SkypeTeams.Message.Copilot.Outlook",
+          "etag" : "1756467618403",
+          "from" : {
+            "application" : {
+              "displayName" : "Copilot in Outlook",
+              "applicationIdentityType" : "bot",
+              "@odata" : {
+                "type" : "#microsoft.graph.teamworkApplicationIdentity"
+              },
+              "id" : "fb8d773d-7ef8-4ec0-a117-179f88add510"
+            },
+            "@odata" : {
+              "type" : "#microsoft.graph.chatMessageFromIdentitySet"
+            }
+          },
+          "sessionId" : "19:h_PqBJFhOc6bwvzCu2yymQylwXHlG_06FR9c4EqDSgU1@thread.v2",
+          "id" : "1756467618403",
+          "locale" : "en-us",
+          "body" : {
+            "contentType" : "text",
+            "content" : "Sorry, Copilot can't generate high quality content for this."
+          }
+        }
+      service: "user-detail"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1756467618403
+  - sample: >-
+      {
+        "attachments": [
+          {
+            "attachmentId": "12d22eb4041d44ce8514ebacaa20ea47",
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "content": "{\r\n  \"type\": \"AdaptiveCard\",\r\n  \"version\": \"1.0\",\r\n  \"body\": [\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"text\": \"I can't help with that. If you're having trouble accessing something you need for work, I recommend reaching out to your IT or security team—they'll be able to guide you through the proper channels. Let me know if you'd like help drafting a message or finding the right contact.\",\r\n      \"wrap\": true\r\n    }\r\n  ]\r\n}"
+          }
+        ],
+        "createdDateTime": "2025-08-29T11:51:11.355Z",
+        "sessionId": "19:PcPQbnhjChEKut9De2_xFmsGbXQNYDtM33W6OAlBkJU1@thread.v2",
+        "locale": "en-us",
+        "body": {
+          "contentType": "html",
+          "content": "<attachment id=\"12d22eb4041d44ce8514ebacaa20ea47\"></attachment>"
+        },
+        "conversationType": "bizchat",
+        "interactionType": "aiResponse",
+        "service": "user-detail",
+        "requestId": "CDDDEE59-FE2A-46A1-BC00-F7630E0B6847",
+        "appClass": "IPM.SkypeTeams.Message.Copilot.BizChat",
+        "etag": "1756468271355",
+        "from": {
+          "application": {
+            "displayName": "Microsoft 365 Chat",
+            "applicationIdentityType": "bot",
+            "@odata": {
+              "type": "#microsoft.graph.teamworkApplicationIdentity"
+            },
+            "id": "fb8d773d-7ef8-4ec0-a117-179f88add510"
+          },
+          "@odata": {
+            "type": "#microsoft.graph.chatMessageFromIdentitySet"
+          }
+        },
+        "id": "1756468271355"
+      }
+    result:
+      custom:
+        appClass: "IPM.SkypeTeams.Message.Copilot.BizChat"
+        attachments:
+          - attachmentId: "12d22eb4041d44ce8514ebacaa20ea47"
+            contentType: "application/vnd.microsoft.card.adaptive"
+            content: "{\r\n  \"type\": \"AdaptiveCard\",\r\n  \"version\": \"1.0\",\r\n  \"body\": [\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"text\": \"I can't help with that. If you're having trouble accessing something you need for work, I recommend reaching out to your IT or security team—they'll be able to guide you through the proper channels. Let me know if you'd like help drafting a message or finding the right contact.\",\r\n      \"wrap\": true\r\n    }\r\n  ]\r\n}"
+        body:
+          content: "<attachment id=\"12d22eb4041d44ce8514ebacaa20ea47\"></attachment>"
+          contentType: "html"
+        conversationType: "bizchat"
+        copilot:
+          first_attachment_content:
+            body:
+              - text: "I can't help with that. If you're having trouble accessing something you need for work, I recommend reaching out to your IT or security team—they'll be able to guide you through the proper channels. Let me know if you'd like help drafting a message or finding the right contact."
+                type: "TextBlock"
+                wrap: true
+            type: "AdaptiveCard"
+            version: "1.0"
+          guardrail: "I can't help with that. If you're having trouble accessing something you need for work, I recommend reaching out to your IT or security team—they'll be able to guide you through the proper channels. Let me know if you'd like help drafting a message or finding the right contact."
+        createdDateTime: "2025-08-29T11:51:11.355Z"
+        etag: "1756468271355"
+        from:
+          '@odata':
+            type: "#microsoft.graph.chatMessageFromIdentitySet"
+          application:
+            '@odata':
+              type: "#microsoft.graph.teamworkApplicationIdentity"
+            applicationIdentityType: "bot"
+            displayName: "Microsoft 365 Chat"
+            id: "fb8d773d-7ef8-4ec0-a117-179f88add510"
+        id: "1756468271355"
+        interactionType: "aiResponse"
+        locale: "en-us"
+        requestId: "CDDDEE59-FE2A-46A1-BC00-F7630E0B6847"
+        service: "user-detail"
+        sessionId: "19:PcPQbnhjChEKut9De2_xFmsGbXQNYDtM33W6OAlBkJU1@thread.v2"
+      message: |-
+        {
+          "attachments" : [ {
+            "attachmentId" : "12d22eb4041d44ce8514ebacaa20ea47",
+            "contentType" : "application/vnd.microsoft.card.adaptive",
+            "content" : "{\r\n  \"type\": \"AdaptiveCard\",\r\n  \"version\": \"1.0\",\r\n  \"body\": [\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"text\": \"I can't help with that. If you're having trouble accessing something you need for work, I recommend reaching out to your IT or security team—they'll be able to guide you through the proper channels. Let me know if you'd like help drafting a message or finding the right contact.\",\r\n      \"wrap\": true\r\n    }\r\n  ]\r\n}"
+          } ],
+          "createdDateTime" : "2025-08-29T11:51:11.355Z",
+          "sessionId" : "19:PcPQbnhjChEKut9De2_xFmsGbXQNYDtM33W6OAlBkJU1@thread.v2",
+          "locale" : "en-us",
+          "body" : {
+            "contentType" : "html",
+            "content" : "<attachment id=\"12d22eb4041d44ce8514ebacaa20ea47\"></attachment>"
+          },
+          "conversationType" : "bizchat",
+          "interactionType" : "aiResponse",
+          "service" : "user-detail",
+          "requestId" : "CDDDEE59-FE2A-46A1-BC00-F7630E0B6847",
+          "appClass" : "IPM.SkypeTeams.Message.Copilot.BizChat",
+          "etag" : "1756468271355",
+          "from" : {
+            "application" : {
+              "displayName" : "Microsoft 365 Chat",
+              "applicationIdentityType" : "bot",
+              "@odata" : {
+                "type" : "#microsoft.graph.teamworkApplicationIdentity"
+              },
+              "id" : "fb8d773d-7ef8-4ec0-a117-179f88add510"
+            },
+            "@odata" : {
+              "type" : "#microsoft.graph.chatMessageFromIdentitySet"
+            }
+          },
+          "id" : "1756468271355"
+        }
+      service: "user-detail"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1756468271355
