@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pymqi==1.12.11",
+    "pymqi==1.12.13",
 ]
 
 [project.urls]
