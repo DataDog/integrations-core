@@ -266,7 +266,7 @@ pipeline:
           '%{regex("[^']*"):usr.name}' local ip %{ip:local_ip}
           (connected|reconnected) from %{ip:network.client.ip}
 
-          parsing_session_connection %{parse_event_type_header}'%{parse_session_id_ip_and_user}:\s*%{regex("Session disconnected|Session connected"):action}. Session Type:\s*%{notSpace:session_type}(, Duration:\s*%{notSpace:duration}, Bytes xmt:\s*%{number:network.bytes_read}, Bytes rcv:\s*%{number:network.bytes_written}, Reason:\s*%{regex(".*(?= \\')"):reason})?\s*'
+          parsing_session_connection %{parse_event_type_header}'%{parse_session_id_ip_and_user}:\s*%{regex("Session disconnected|Session connected"):action}. Session Type:\s*%{notSpace:session_type}(, Duration:\s*%{notSpace:duration}, Bytes xmt:\s*%{number:network.bytes_written}, Bytes rcv:\s*%{number:network.bytes_read}, Reason:\s*%{regex(".*(?= \\')"):reason})?\s*'
 
           parsing_tls_tunnel %{parse_event_type_header}'%{parse_session_id_ip_and_user}:\s*(conn_id\[%{number:connection_id}\])? %{regex("Deleted TLS tunnel|Deleted DTLS tunnel|Added DTLS tunnel|Added TLS tunnel"):action}\[%{notSpace:tunnel_id}\] (from|to) %{notSpace}(\.\sReason:\s%{regex(".*(?= \\')"):reason})?\s'
 
