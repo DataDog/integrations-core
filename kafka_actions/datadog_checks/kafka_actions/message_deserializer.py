@@ -17,6 +17,83 @@ from google.protobuf.json_format import MessageToJson
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
 
 
+def _read_varint(data):
+    shift = 0
+    result = 0
+    bytes_read = 0
+
+    for byte in data:
+        bytes_read += 1
+        result |= (byte & 0x7F) << shift
+        if (byte & 0x80) == 0:
+            return result, bytes_read
+        shift += 7
+
+    raise ValueError("Incomplete varint")
+
+
+def _read_protobuf_message_indices(payload):
+    """
+    Read the Confluent Protobuf message indices array.
+
+    The Confluent Protobuf wire format includes message indices after the schema ID:
+    [message_indices_length:varint][message_indices:varint...]
+
+    The indices indicate which message type to use from the .proto schema.
+    For example, [0] = first message, [1] = second message, [0, 0] = nested message.
+
+    Args:
+        payload: bytes after the schema ID
+
+    Returns:
+        tuple: (message_indices list, remaining payload bytes)
+    """
+    array_len, bytes_read = _read_varint(payload)
+    payload = payload[bytes_read:]
+
+    indices = []
+    for _ in range(array_len):
+        index, bytes_read = _read_varint(payload)
+        indices.append(index)
+        payload = payload[bytes_read:]
+
+    return indices, payload
+
+
+def _get_protobuf_message_class(schema_info, message_indices):
+    """Get the protobuf message class based on schema info and message indices.
+
+    Args:
+        schema_info: Tuple of (descriptor_pool, file_descriptor_set)
+        message_indices: List of indices (e.g., [0], [1], [2, 0] for nested)
+
+    Returns:
+        Message class for the specified type
+    """
+    pool, descriptor_set = schema_info
+
+    # First index is the message type in the file
+    file_descriptor = descriptor_set.file[0]
+    message_descriptor_proto = file_descriptor.message_type[message_indices[0]]
+
+    package = file_descriptor.package
+    name_parts = [message_descriptor_proto.name]
+
+    # Handle nested messages if there are more indices
+    current_proto = message_descriptor_proto
+    for idx in message_indices[1:]:
+        current_proto = current_proto.nested_type[idx]
+        name_parts.append(current_proto.name)
+
+    if package:
+        full_name = f"{package}.{'.'.join(name_parts)}"
+    else:
+        full_name = '.'.join(name_parts)
+
+    message_descriptor = pool.FindMessageTypeByName(full_name)
+    return message_factory.GetMessageClass(message_descriptor)
+
+
 class MessageDeserializer:
     """Handles deserialization of Kafka messages with support for JSON, BSON, Protobuf, and Avro."""
 
@@ -78,26 +155,29 @@ class MessageDeserializer:
                 )
             schema_id = int.from_bytes(message[1:5], 'big')
             message = message[5:]  # Skip the magic byte and schema ID bytes
-            return self._deserialize_bytes(message, message_format, schema), schema_id
+            return self._deserialize_bytes(message, message_format, schema, uses_schema_registry=True), schema_id
         else:
             # Fallback behavior: try without schema registry format first, then with it
             try:
-                return self._deserialize_bytes(message, message_format, schema), None
+                return self._deserialize_bytes(message, message_format, schema, uses_schema_registry=False), None
             except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as e:
                 # If the message is not valid, it might be a schema registry message
                 if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
                     raise e
                 schema_id = int.from_bytes(message[1:5], 'big')
                 message = message[5:]  # Skip the magic byte and schema ID bytes
-                return self._deserialize_bytes(message, message_format, schema), schema_id
+                return self._deserialize_bytes(message, message_format, schema, uses_schema_registry=True), schema_id
 
-    def _deserialize_bytes(self, message: bytes, message_format: str, schema) -> str | None:
+    def _deserialize_bytes(
+        self, message: bytes, message_format: str, schema, uses_schema_registry: bool = False
+    ) -> str | None:
         """Deserialize message bytes to JSON string.
 
         Args:
             message: Raw message bytes
             message_format: 'json', 'bson', 'protobuf', 'avro', or 'string'
             schema: Schema object (for protobuf/avro)
+            uses_schema_registry: Whether to extract Confluent message indices from the message
 
         Returns:
             JSON string representation, or None if message is empty
@@ -106,7 +186,7 @@ class MessageDeserializer:
             return None
 
         if message_format == 'protobuf':
-            return self._deserialize_protobuf(message, schema)
+            return self._deserialize_protobuf(message, schema, uses_schema_registry)
         elif message_format == 'avro':
             return self._deserialize_avro(message, schema)
         elif message_format == 'bson':
@@ -158,13 +238,30 @@ class MessageDeserializer:
         except Exception as e:
             raise ValueError(f"Failed to deserialize BSON message: {e}")
 
-    def _deserialize_protobuf(self, message: bytes, schema) -> str:
-        """Deserialize Protobuf message."""
-        if schema is None:
+    def _deserialize_protobuf(self, message: bytes, schema_info, uses_schema_registry: bool) -> str:
+        """Deserialize Protobuf message using google.protobuf with strict validation.
+        
+        Args:
+            message: Raw protobuf bytes
+            schema_info: Tuple of (descriptor_pool, file_descriptor_set) from _build_protobuf_schema
+            uses_schema_registry: Whether to extract Confluent message indices from the message
+        """
+        if schema_info is None:
             raise ValueError("Protobuf schema is required")
 
         try:
-            bytes_consumed = schema.ParseFromString(message)
+            if uses_schema_registry:
+                message_indices, message = _read_protobuf_message_indices(message)
+                # Empty indices array means use the first message type (index 0)
+                if not message_indices:
+                    message_indices = [0]
+            else:
+                message_indices = [0]
+
+            message_class = _get_protobuf_message_class(schema_info, message_indices)
+            schema_instance = message_class()
+
+            bytes_consumed = schema_instance.ParseFromString(message)
 
             # Strict validation: ensure all bytes consumed
             if bytes_consumed != len(message):
@@ -173,7 +270,7 @@ class MessageDeserializer:
                     f"Read {bytes_consumed} bytes, but message has {len(message)} bytes."
                 )
 
-            return MessageToJson(schema)
+            return MessageToJson(schema_instance)
         except Exception as e:
             raise ValueError(f"Failed to deserialize Protobuf message: {e}")
 
@@ -251,7 +348,12 @@ class MessageDeserializer:
         return schema
 
     def _build_protobuf_schema(self, schema_str: str):
-        """Build a Protobuf schema from base64-encoded FileDescriptorSet."""
+        """Build a Protobuf schema from base64-encoded FileDescriptorSet.
+        
+        Returns:
+            Tuple of (descriptor_pool, file_descriptor_set) for use with
+            _get_protobuf_message_class to select the correct message type.
+        """
         schema_bytes = base64.b64decode(schema_str)
         descriptor_set = descriptor_pb2.FileDescriptorSet()
         descriptor_set.ParseFromString(schema_bytes)
@@ -260,23 +362,7 @@ class MessageDeserializer:
         for fd_proto in descriptor_set.file:
             pool.Add(fd_proto)
 
-        first_fd = descriptor_set.file[0]
-        first_message_proto = first_fd.message_type[0]
-
-        package = first_fd.package
-        message_name = first_message_proto.name
-        if package:
-            full_name = f"{package}.{message_name}"
-        else:
-            full_name = message_name
-
-        message_descriptor = pool.FindMessageTypeByName(full_name)
-        schema = message_factory.GetMessageClass(message_descriptor)()
-
-        if schema is None:
-            raise ValueError("Protobuf schema cannot be None")
-
-        return schema
+        return (pool, descriptor_set)
 
 
 class DeserializedMessage:
