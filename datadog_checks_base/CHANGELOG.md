@@ -2,6 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 37.26.1 / 2025-12-22
+
+***Fixed***:
+
+* Updates perf counters to ignore case. Fixes an error with double counting in exchange.activemanager.database_mounted metric. ([#22028](https://github.com/DataDog/integrations-core/pull/22028))
+
+## 37.26.0 / 2025-12-19
+
+***Security***:
+
+* Bump urllib3 to version 2.6.2 ([#22172](https://github.com/DataDog/integrations-core/pull/22172))
+
+## 37.25.0 / 2025-12-12
+
+***Security***:
+
+* Bump urllib3 version to 2.6.0 ([#22076](https://github.com/DataDog/integrations-core/pull/22076))
+
+***Fixed***:
+
+* Pin krb5 version until 0.9.0 is fixed ([#21987](https://github.com/DataDog/integrations-core/pull/21987))
+* Unpin krb5 after having updated cython in our build system ([#21991](https://github.com/DataDog/integrations-core/pull/21991))
+
 ## 37.24.0 / 2025-11-18
 
 ***Added***:
@@ -13,7 +36,19 @@
 
 * Fix YAML configuration parsing to properly handle Unicode characters on Windows systems where the UTF-8 locale is not enabled by default. ([#21852](https://github.com/DataDog/integrations-core/pull/21852))
 
-## 37.23.0 / 2025-10-31
+## 37.23.2 / 2025-12-19 / Agent 7.73.2
+
+***Security***:
+
+* Bump urllib3 to version 2.6.2 ([#22172](https://github.com/DataDog/integrations-core/pull/22172))
+
+## 37.23.1 / 2025-12-15 / Agent 7.73.1
+
+***Security***:
+
+* Bump urllib3 version to 2.6.0 ([#22076](https://github.com/DataDog/integrations-core/pull/22076))
+
+## 37.23.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

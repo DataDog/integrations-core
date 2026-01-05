@@ -12,7 +12,7 @@
 
 * Touch up on the nginx config template ([#21757](https://github.com/DataDog/integrations-core/pull/21757))
 
-## 9.1.1 / 2025-10-31
+## 9.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 
