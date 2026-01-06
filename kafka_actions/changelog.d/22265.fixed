@@ -1,0 +1,1 @@
+Fix Kafka message decoding when using Protobuf with schema registry.
