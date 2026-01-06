@@ -69,8 +69,6 @@ tests:
         actor:
           user:
             name: "topdog"
-        status: "Success"
-        status_id: 1
       system:
         action: "Accepted"
         algorithm: "RSA"
@@ -142,8 +140,6 @@ tests:
         src_endpoint:
           ip: "192.168.1.100"
           port: "22334"
-        status: "Failure"
-        status_id: 2
         type_name: "Authentication: Logon"
         type_uid: 300201
         user:
@@ -186,8 +182,6 @@ tests:
         src_endpoint:
           ip: "192.168.1.100"
           port: "49630"
-        status: "Success"
-        status_id: 1
         type_name: "Authentication: Logon"
         type_uid: 300201
         user:
