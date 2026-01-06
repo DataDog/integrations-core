@@ -144,7 +144,7 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
 - `provider` is the optional WMI provider (default to `32` on Datadog Agent 32-bit or `64`). It is used to request WMI data from the non-default provider. Available options are: `32` or `64`.
   See [MSDN][9] for more information.
 
-- `tag_by` optionally lets you tag each metric with a property from the WMI class you're using. This is only useful when you have multiple values for your WMI query. Starting with Agent v7.74 aliases can be set for property tags by appending `AS <ALIAS_NAME>` to the property name. For example: `Name AS wmi_name` will be tagged as `wmi_name:value` instead of `Name:value`.
+- `tag_by` optionally lets you tag each metric with a property from the WMI class you're using. This is only useful when you have multiple values for your WMI query. For Agent versions 7.74 and later, aliases can be set for property tags by appending `AS <ALIAS_NAME>` to the property name. For example: `Name AS wmi_name` is tagged as `wmi_name:value` instead of `Name:value`.
 
 - `tags` optionally lets you tag each metric with a set of fixed values.
 
