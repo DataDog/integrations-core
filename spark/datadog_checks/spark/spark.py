@@ -88,9 +88,8 @@ class SparkCheck(AgentCheck):
 
         # Startup retry configuration:
         # -1: disable (treat startup messages as JSON parse errors immediately)
-        #  0: retry forever (always skip startup messages)
         # >0: retry N times before marking as broken
-        self._startup_wait_retries = int(self.instance.get('startup_wait_retries', 0))
+        self._startup_wait_retries = int(self.instance.get('startup_wait_retries', 3))
         self._startup_retry_count = 0
 
     def check(self, _):
@@ -711,15 +710,7 @@ class SparkCheck(AgentCheck):
             response_text = response.text.strip()
             if response_text and 'spark is starting up' in response_text.lower():
                 # Handle startup message based on retry configuration
-                if self._startup_wait_retries == -1:
-                    # Disabled: treat as error immediately
-                    pass
-                elif self._startup_wait_retries == 0:
-                    # Retry forever
-                    self.log.debug("Spark driver not ready yet at %s: %s", self._get_url_base(address), response_text)
-                    return None
-                else:
-                    # Retry N times before marking as broken
+                if self._startup_wait_retries > 0:
                     self._startup_retry_count += 1
                     if self._startup_retry_count <= self._startup_wait_retries:
                         self.log.debug(

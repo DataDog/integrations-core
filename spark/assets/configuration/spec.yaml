@@ -137,12 +137,16 @@ files:
           example: true
       - name: startup_wait_retries
         description: |
-          How many times to retry when Spark returns a startup message instead of JSON.
-          Set to -1 to disable, 0 to retry forever, or a positive number to limit retries.
+          Controls how to handle "Spark is starting up" responses from the driver.
+          When the Spark driver is not yet ready, it returns a non-JSON startup message
+          instead of the expected JSON response.
+
+          Set to 0 or less to disable this feature and treat startup messages as errors immediately.
+          Set to a positive integer to retry that many times before marking the check as failed.
         value:
           type: integer
-          display_default: 0
-          example: 0
+          display_default: 3
+          example: 3
       - template: instances/http
         overrides:
           auth_token.description: |

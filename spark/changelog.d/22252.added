@@ -1,1 +1,1 @@
-Handle Spark driver startup message gracefully instead of raising a JSON parse error.
+Add `startup_wait_retries` option to handle Spark driver startup messages gracefully.

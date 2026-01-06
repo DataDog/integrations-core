@@ -1188,30 +1188,44 @@ def test_do_not_crash_on_version_collection_failure():
 
 
 @pytest.mark.unit
-def test_driver_startup_message_retry_forever(caplog):
-    """Default behavior (startup_wait_retries=0): retry forever, never raise."""
+def test_driver_startup_message_default_retries(aggregator, caplog):
+    """Default behavior (startup_wait_retries=3): retry 3 times then raise."""
+    from simplejson import JSONDecodeError
+
     check = SparkCheck('spark', {}, [DRIVER_CONFIG])
     response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
 
     with caplog.at_level(logging.DEBUG):
         with mock.patch.object(check, '_rest_request', return_value=response):
-            # Call multiple times - should always return None
-            for _ in range(5):
+            # First 3 attempts should return None (default is 3 retries)
+            for i in range(3):
                 result = check._rest_request_to_json(
                     DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
                 )
-                assert result is None
+                assert result is None, f"Attempt {i + 1} should return None"
+
+            # 4th attempt should raise
+            with pytest.raises(JSONDecodeError):
+                check._rest_request_to_json(DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
 
     assert 'spark driver not ready yet' in caplog.text.lower()
+    assert 'retries exhausted' in caplog.text.lower()
+
+    aggregator.assert_service_check(
+        SPARK_DRIVER_SERVICE_CHECK,
+        status=SparkCheck.CRITICAL,
+        tags=['url:{}'.format(DRIVER_CONFIG['spark_url'])],
+    )
 
 
 @pytest.mark.unit
-def test_driver_startup_message_disabled(aggregator):
-    """When startup_wait_retries=-1, treat startup messages as errors immediately."""
+@pytest.mark.parametrize("retries_value", [0, -1, -5])
+def test_driver_startup_message_disabled(aggregator, retries_value):
+    """When startup_wait_retries<=0, treat startup messages as errors immediately."""
     from simplejson import JSONDecodeError
 
     config = DRIVER_CONFIG.copy()
-    config['startup_wait_retries'] = -1
+    config['startup_wait_retries'] = retries_value
     check = SparkCheck('spark', {}, [config])
     response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
 
