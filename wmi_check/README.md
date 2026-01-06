@@ -122,7 +122,7 @@ instances:
 ```
 #### Configuration options
 
-_This feature is available starting with version 5.3 of the agent_
+_This feature is available starting with version 5.3 of the Agent_
 
 Each WMI query has 2 required options, `class` and `metrics` and six optional options, `host`, `namespace`, `filters`, `provider`, `tag_by`, and `tag_queries`.
 
@@ -154,7 +154,7 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
   - `<TARGET_CLASS>` is the class to link to
   - `<LINK_TARGET_CLASS_PROPERTY>` is the target class property to link to
   - `<TARGET_PROPERTY>` contains the value to tag with
-  - `<TAG_ALIAS>` is the alias to use for the tag. If not provided, the target property's name will be used. This functionality is available starting with Agent v7.74.
+  - `<TAG_ALIAS>` is the alias to use for the tag. If not provided, the target property's name is used. This functionality is available with Agent versions 7.74 and later.
 
   It translates to a WMI query:
   `SELECT '<TARGET_PROPERTY>' FROM '<TARGET_CLASS>' WHERE '<LINK_TARGET_CLASS_PROPERTY>' = '<LINK_SOURCE_PROPERTY>'`
@@ -163,9 +163,9 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
 
 The setting `[IDProcess, Win32_Process, Handle, CommandLine]` tags each process with its command line. For example: `commandline:agent.exe`.
 
-An alias can be set for these tags with the setting `[IDProcess, Win32_Process, Handle, CommandLine AS cmd]`. For example: `cmd:agent.exe`
+An alias can be set for these tags with the setting `[IDProcess, Win32_Process, Handle, CommandLine AS cmd]`. For example: `cmd:agent.exe`.
 
-Any instance number is removed from tag_by values, for example: `name:process#1` => `name:process`. **Note:** The Agent must be running under an **Administrator** account for this to work as the `CommandLine` property is not accessible to non-admins.
+Any instance number is removed from `tag_by` values, for example: `name:process#1` => `name:process`. **Note**: The Agent must be running under an **Administrator** account for this to work because the `CommandLine` property is not accessible to non-admins.
 
 ### Validation
 
