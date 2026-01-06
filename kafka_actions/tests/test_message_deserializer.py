@@ -341,9 +341,12 @@ class TestMessageDeserializer:
             b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
         )
 
-        # Protobuf message WITH Schema Registry format (magic byte 0x00 + schema ID 350 = 0x015E)
+        # Protobuf message WITH Schema Registry format (Confluent wire format)
+        # - magic byte 0x00 + schema ID 350 = 0x015E
+        # - message indices: [0] encoded as varint array (0x01 0x00 = 1 element, value 0)
         protobuf_message_with_sr = (
-            b'\x00\x00\x00\x01\x5e'
+            b'\x00\x00\x00\x01\x5e'  # Schema Registry header
+            b'\x01\x00'  # Message indices: array length 1, index [0]
             b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
             b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
         )
