@@ -4,8 +4,8 @@
 
 ***Added***:
 
-* Incorporate AI Interactions as log messages from the Microsoft Graph API Change Notification mechanism
-* Introduce monitor for alerting on spikes in Copilot guardrail responses
+* Added AI interaction log messages sourced from Microsoft Graph change notifications
+* Added a monitor that alerts on spikes in Copilot guardrail responses
 
 ## 1.0.0 / 2025-09-24
 

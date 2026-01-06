@@ -11,15 +11,15 @@ By integrating Microsoft Copilot usage tracking with Datadog, you can ingest and
 into the value Microsoft Copilot delivers within your Microsoft 365 environment.
 
 With this integration, you can:
-- Track user activity through logs that capture each user's "last activity" per Microsoft 365 application.
-- Identify the number of Microsoft Copilot licenses that have not been used for extended periods of time.
-- Monitor real-time individual AI interactions via logs that are created from [Microsoft Change Notifications for Copilot AI interactions][4]
-- Be alerted to a spike in AI guardrail responses from Copilot.
+- Track user activity through logs that capture each user's "last activity" per Microsoft 365 application
+- Identify the number of Microsoft Copilot licenses that have not been used for extended periods
+- Monitor real-time individual AI interactions using logs generated from [Microsoft Change Notifications for Copilot AI interactions][4]
+- Receive alerts when Copilot AI guardrail responses spike
 
 Microsoft computes Copilot usage reports on a time-delayed basis of [up to 72 hours][3]; real-time AI interactions
 are not affected by this. Upon detection of a new report, this integration:
-- Submits metrics for active and enabled summary user counts per application.
-- Submits a log message for each user's last activity per application.
+- Submits metrics for active and enabled summary user counts per application
+- Submits a log message for each user's last activity per application
 
 ## Setup
 
