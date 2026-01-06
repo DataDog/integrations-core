@@ -975,17 +975,17 @@ def test_protobuf_message_indices_with_schema_registry():
 
 def test_protobuf_empty_message_indices_with_schema_registry():
     """Test Confluent Protobuf wire format with empty message indices array.
-    
+
     When message indices array is empty (encoded as varint 0x00), it should
     default to using the first message type (index 0).
-    
+
     This test uses real message bytes from a Kafka topic to ensure the
     deserialization handles the Confluent wire format correctly.
     """
     key = b'null'
-    
+
     # Schema from real Kafka topic - Purchase message
-    # message Purchase { string order_id = 1; string customer_id = 2; int64 order_date = 3; 
+    # message Purchase { string order_id = 1; string customer_id = 2; int64 order_date = 3;
     #                    string city = 6; string country = 7; }
     protobuf_schema = (
         'CrkDCgxzY2hlbWEucHJvdG8SCHB1cmNoYXNlIpMBCghQdXJjaGFzZRIZCghvcmRlcl9pZBgBIAEoCVIH'
@@ -998,7 +998,7 @@ def test_protobuf_empty_message_indices_with_schema_registry():
         'b0INUHVyY2hhc2VQcm90b2IGcHJvdG8z'
     )
     parsed_schema = build_schema('protobuf', protobuf_schema)
-    
+
     # Real message from Kafka topic "human-orders"
     # Hex breakdown:
     #   00 00 00 00 01 - Schema Registry header (magic byte + schema ID 1)
@@ -1006,7 +1006,7 @@ def test_protobuf_empty_message_indices_with_schema_registry():
     #   0a 05 31 32 33 34 35 ... - Protobuf payload (Purchase message)
     message_hex = '0000000001000a0531323334351205363738393018f4eae0c4b8333a064d657869636f'
     message_bytes = bytes.fromhex(message_hex)
-    
+
     # Test with uses_schema_registry=True (explicit)
     result = deserialize_message(MockedMessage(message_bytes, key), 'protobuf', parsed_schema, True, 'json', '', False)
     assert result[0], "Deserialization should succeed"
@@ -1014,7 +1014,7 @@ def test_protobuf_empty_message_indices_with_schema_registry():
     assert '67890' in result[0], "Should contain customer_id"
     assert 'Mexico' in result[0], "Should contain country"
     assert result[1] == 1, "Should detect schema ID 1"
-    
+
     # Test with uses_schema_registry=False (fallback mode)
     result_fallback = deserialize_message(
         MockedMessage(message_bytes, key), 'protobuf', parsed_schema, False, 'json', '', False

@@ -240,7 +240,7 @@ class MessageDeserializer:
 
     def _deserialize_protobuf(self, message: bytes, schema_info, uses_schema_registry: bool) -> str:
         """Deserialize Protobuf message using google.protobuf with strict validation.
-        
+
         Args:
             message: Raw protobuf bytes
             schema_info: Tuple of (descriptor_pool, file_descriptor_set) from _build_protobuf_schema
@@ -349,7 +349,7 @@ class MessageDeserializer:
 
     def _build_protobuf_schema(self, schema_str: str):
         """Build a Protobuf schema from base64-encoded FileDescriptorSet.
-        
+
         Returns:
             Tuple of (descriptor_pool, file_descriptor_set) for use with
             _get_protobuf_message_class to select the correct message type.
