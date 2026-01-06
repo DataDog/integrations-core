@@ -21,6 +21,8 @@ tests:
         severity_id: 1
         type_name: "Authentication: Logoff"
         type_uid: 300202
+        status: "Other"
+        status_id: 99
         user:
           name: "marc.szalkiewicz"
         actor:
@@ -67,6 +69,8 @@ tests:
         actor:
           user:
             name: "topdog"
+        status: "Success"
+        status_id: 1
       system:
         action: "Accepted"
         algorithm: "RSA"
@@ -101,6 +105,8 @@ tests:
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
+        status: "Other"
+        status_id: 99
         src_endpoint:
           ip: "172.22.179.72"
         type_name: "Authentication: Other"
@@ -123,6 +129,8 @@ tests:
         class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
+        status: "Failure"
+        status_id: 2
         metadata:
           product:
             name: "OpenSSH"
@@ -165,6 +173,8 @@ tests:
         class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
+        status: "Success"
+        status_id: 1
         metadata:
           product:
             name: "OpenSSH"

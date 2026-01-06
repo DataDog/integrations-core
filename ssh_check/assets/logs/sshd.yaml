@@ -190,7 +190,7 @@ pipeline:
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: '@system.action:(Accepted OR "Starting session" OR "Close session" OR "session opened")'
+                    query: '@system.action:(Accepted OR "Starting session" OR "Close session" OR "session opened" OR "session closed")'
                   name: Success
                   id: 1
                 - filter:
