@@ -215,7 +215,7 @@ pipeline:
           sourceType: attribute
           target: dns.answer.type
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `returncode` to `dns.flags.rcode`
@@ -225,7 +225,7 @@ pipeline:
           sourceType: attribute
           target: dns.flags.rcode
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `domain` to `dns.question.name`
@@ -235,7 +235,7 @@ pipeline:
           sourceType: attribute
           target: dns.question.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: geo-ip-parser
           name: GeoIP Parser for External IP
@@ -269,7 +269,7 @@ pipeline:
           sourceType: attribute
           target: cisco.umbrella.dns.external.geoip.country.iso_code
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Cisco Umbrella Proxy logs
@@ -285,7 +285,7 @@ pipeline:
           sourceType: attribute
           target: network.client.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `destinationip` to `network.destination.ip`
@@ -295,7 +295,7 @@ pipeline:
           sourceType: attribute
           target: network.destination.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `url` to `http.url`
@@ -305,7 +305,7 @@ pipeline:
           sourceType: attribute
           target: http.url
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `statuscode` to `http.status_code`
@@ -315,7 +315,7 @@ pipeline:
           sourceType: attribute
           target: http.status_code
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `referer` to `http.referer`
@@ -325,7 +325,7 @@ pipeline:
           sourceType: attribute
           target: http.referer
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `useragent` to `http.useragent`
@@ -335,7 +335,7 @@ pipeline:
           sourceType: attribute
           target: http.useragent
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `requestmethod` to `http.method`
@@ -416,4 +416,350 @@ pipeline:
           target: cisco.umbrella.dns.responsesize
           targetType: attribute
           preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: " OCSF sub pipeline for DNS Activity [4003]"
+      enabled: true
+      filter:
+        query: service:dns
+      processors:
+        - type: schema-processor
+          name: OCSF Processor - DNS Activity
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: DNS Activity
+            classUid: 4003
+            extensions: []
+            profiles: []
+          mappers:
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Traffic
+                  id: 6
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.metadata
+              sources:
+                - temp
+              sourceType: attribute
+              target: ocsf.metadata
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.time
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.rcode_id
+              categories:
+                - filter:
+                    query: '@returnmessage:"NOERROR"'
+                  name: NoError
+                  id: 0
+                - filter:
+                    query: '@returnmessage:"FORMERR"'
+                  name: FormError
+                  id: 1
+                - filter:
+                    query: '@returnmessage:"SERVFAIL"'
+                  name: ServError
+                  id: 2
+                - filter:
+                    query: '@returnmessage:"NXDOMAIN"'
+                  name: NXDomain
+                  id: 3
+                - filter:
+                    query: '@returnmessage:"NOTIMP"'
+                  name: NotImp
+                  id: 4
+                - filter:
+                    query: '@returnmessage:"REFUSED"'
+                  name: Refused
+                  id: 5
+                - filter:
+                    query: '@returnmessage:"YXDOMAIN"'
+                  name: YXDomain
+                  id: 6
+                - filter:
+                    query: '@returnmessage:"XRRSET"'
+                  name: YXRRSet
+                  id: 7
+                - filter:
+                    query: '@returnmessage:"NOTAUTH"'
+                  name: NotAuth
+                  id: 9
+                - filter:
+                    query: '@returnmessage:"NOTZONE"'
+                  name: NotZone
+                  id: 10
+              targets:
+                name: ocsf.rcode
+                id: ocsf.rcode_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.query.type
+              sources:
+                - querytype
+              sourceType: attribute
+              target: ocsf.query.type
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint.ip
+              sources:
+                - internal_ip
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint.proxy_endpoint
+              sources:
+                - external_ip
+              sourceType: attribute
+              target: ocsf.src_endpoint.proxy_endpoint
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.query.hostname
+              sources:
+                - domain
+              sourceType: attribute
+              target: ocsf.query.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@verdict:(allowed OR Allowed)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@verdict:(blocked OR Blocked)"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.name
+          enabled: true
+          template: Cisco Umbrella
+          target: ocsf.metadata.product.name
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Add ocsf.metadata.vendor.name
+          enabled: true
+          template: Cisco
+          target: ocsf.metadata.vendor.name
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `domain` to `ocsf.dns.query.hostname`
+          enabled: true
+          sources:
+            - domain
+          sourceType: attribute
+          target: ocsf.dns.query.hostname
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: OCSF sub pipeline for HTTP Activity [4002]
+      enabled: true
+      filter:
+        query: service:proxy
+      processors:
+        - type: schema-processor
+          name: OCSF Processor - http activity
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: HTTP Activity
+            classUid: 4002
+            extensions: []
+            profiles: []
+          mappers:
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@requestmethod:"Connect"'
+                  name: Connect
+                  id: 1
+                - filter:
+                    query: '@requestmethod:"Delete"'
+                  name: Delete
+                  id: 2
+                - filter:
+                    query: '@requestmethod:"Get"'
+                  name: Get
+                  id: 3
+                - filter:
+                    query: '@requestmethod:"Head"'
+                  name: Head
+                  id: 4
+                - filter:
+                    query: '@requestmethod:"Options"'
+                  name: Options
+                  id: 5
+                - filter:
+                    query: '@requestmethod:"Post"'
+                  name: Post
+                  id: 6
+                - filter:
+                    query: '@requestmethod:"Put"'
+                  name: Put
+                  id: 7
+                - filter:
+                    query: '@requestmethod:"Trace"'
+                  name: Trace
+                  id: 8
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.metadata
+              sources:
+                - placeholder
+              sourceType: attribute
+              target: ocsf.metadata
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.product
+              sources:
+                - Cisco Umbrella
+              sourceType: attribute
+              target: ocsf.metadata.product
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.time
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.http_response.code
+              sources:
+                - statuscode
+              sourceType: attribute
+              target: ocsf.http_response.code
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint.ip
+              sources:
+                - internalip
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.status_code
+              sources:
+                - statuscode
+              sourceType: attribute
+              target: ocsf.status_code
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.http_request.user_agent
+              sources:
+                - useragent
+              sourceType: attribute
+              target: ocsf.http_request.user_agent
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.name
+          enabled: true
+          template: Cisco Umbrella
+          target: ocsf.metadata.product.name
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Add ocsf.metadata.vendor.name
+          enabled: true
+          template: Cisco
+          target: ocsf.metadata.vendor.name
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `http.url` to ` ocsf.http_request.url`
+          enabled: true
+          sources:
+            - http.url
+          sourceType: attribute
+          target: ocsf.http_request.url
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `http.referer` to ` ocsf.http_request.referer`
+          enabled: true
+          sources:
+            - http.referer
+          sourceType: attribute
+          target: ocsf.http_request.referer
+          targetType: attribute
+          preserveSource: true
           overrideOnConflict: false
