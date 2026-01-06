@@ -205,7 +205,7 @@ Get-WmiObject -List -Namespace ROOT\xyz | Select Name
 
 ... or drop `-Namespace` parameter for the default namespace.
 
-To find a WMI class `abc`, one can run the following PowerShell command:
+To find a WMI class `abc`, run the following PowerShell command:
 
 ```
 Get-WmiObject -List | WHERE{$_.Name -Like "*abc*"}

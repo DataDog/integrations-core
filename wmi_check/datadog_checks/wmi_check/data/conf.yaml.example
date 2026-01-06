@@ -138,7 +138,7 @@ instances:
     # tag_by: Name AS wmi_name,Label
 
     ## @param tag_queries - list of lists - optional
-    ## The `tag_queries` parameter lets you specify a list of queries, to tag metrics with a target class property.
+    ## The `tag_queries` parameter lets you specify a list of queries to tag metrics with a target class property.
     ## Each item in the list is a set of :
     ##
     ## `[<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY> AS <TAG_ALIAS>]`
@@ -147,7 +147,7 @@ instances:
     ##   * `<TARGET_CLASS>` is the class to link to
     ##   * `<LINK_TARGET_CLASS_PROPERTY>` is the target class property to link to
     ##   * `<TARGET_PROPERTY>` contains the value to tag with
-    ##   * `<TAG_ALIAS>` is the alias to use for the tag. If not provided, the target property's name will be used.
+    ##   * `<TAG_ALIAS>` is the alias to use for the tag. If not provided, the target property's name is used.
     ##
     ## It translates to a WMI query:
     ##
