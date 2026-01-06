@@ -10,7 +10,7 @@
 
   The fix is to conditionally sum the row count: only when the index_id is in (0, 1), which translates to heap and clustered index partitions. Both of these contain the true row count for the given partition, whereas other partition types (e.g. non-clustered indexes) should not be considered in the row count calculation. This leads to the expected value being calcualted. ([#22055](https://github.com/DataDog/integrations-core/pull/22055))
 
-## 22.12.0 / 2025-11-26
+## 22.12.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 

@@ -8,7 +8,7 @@
 
 * Update auto_conf.yaml to use openmetrics_endpoint instead of deprecated prometheus_url parameter. ([#21930](https://github.com/DataDog/integrations-core/pull/21930))
 
-## 1.3.0 / 2025-11-26
+## 1.3.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
