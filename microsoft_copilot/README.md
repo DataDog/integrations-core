@@ -2,22 +2,17 @@
 
 ## Overview
 
-[Microsoft Copilot][1] is an AI assistant integrated into Microsoft 365, the cloud-based suite of productivity and
-communication tools that includes Microsoft Office applications. Once a user within the Microsoft 365 organization
-is assigned a Copilot license, they can access Copilot directly through Copilot Chat or through Microsoft 365
-applications, including Outlook, Word, Excel, PowerPoint, OneNote, and Teams.
+[Microsoft Copilot][1] is an AI assistant integrated into Microsoft 365 applications such as Outlook, Word, Excel, PowerPoint, OneNote, and Teams. After a user in a Microsoft 365 organization is assigned a Copilot license, they can access Copilot through Copilot Chat or directly within supported Microsoft 365 applications.
 
-By integrating Microsoft Copilot usage tracking with Datadog, you can ingest and analyze user activity to gain insight
-into the value Microsoft Copilot delivers within your Microsoft 365 environment.
+By integrating Microsoft Copilot usage tracking with Datadog, you can ingest logs and metrics that reflect user activity and assess the value Copilot delivers within your Microsoft 365 environment.
 
 With this integration, you can:
-- Track user activity through logs that capture each user's "last activity" per Microsoft 365 application
-- Identify the number of Microsoft Copilot licenses that have not been used for extended periods
+- Track user activity through logs that capture each user's last activity per Microsoft 365 application
+- Identify Microsoft Copilot licenses that have not been used for extended periods
 - Monitor real-time individual AI interactions using logs generated from [Microsoft Change Notifications for Copilot AI interactions][4]
 - Receive alerts when Copilot AI guardrail responses spike
 
-Microsoft computes Copilot usage reports on a time-delayed basis of [up to 72 hours][3]; real-time AI interactions
-are not affected by this. Upon detection of a new report, this integration:
+Microsoft computes Copilot usage reports with a delay of [up to 72 hours][3]. Real-time AI interaction logs are not affected by this delay. Upon detection of a new report, this integration:
 - Submits metrics for active and enabled summary user counts per application
 - Submits a log message for each user's last activity per application
 
@@ -29,8 +24,7 @@ Connect a Microsoft 365 tenant to start tracking Copilot usage.
 
 ### Logs
 
-The Microsoft Copilot integration collects a log message for each user's Copilot activity once per day as well as
-a real-time log message for each AI interaction.
+The Microsoft Copilot integration collects daily summary log messages for user Copilot activity and real-time log messages for individual AI interactions.
 
 ### Metrics
 
