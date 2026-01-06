@@ -1,0 +1,34 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "25199617-08df-4cbf-91b0-89d5599f79c5",
+  "app_id": "battery",
+  "owner": "windows-products",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health of your laptop's battery.",
+    "title": "battery",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::OS & System",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

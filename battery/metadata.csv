@@ -1,0 +1,9 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+system.battery.cycle_count,gauge,,,,The number of charge/discharge cycles the battery has experienced,,battery,,,
+system.battery.maximum_capacity,gauge,,milliwatt hours,,The battery's current fully charged capacity in mWh,,battery,,,
+system.battery.maximum_capacity_pct,gauge,,percent,,The percentage of maximum battery capacity relative to when it was new,,battery,,,
+system.battery.design_capacity,gauge,,milliwatt hours,,The theoretical capacity of the battery when new in mWh,,battery,,,
+system.battery.current_charge_pct,gauge,,percent,,The current percentage of battery charge,,battery,,,
+system.battery.voltage,gauge,,millivolts,,The current battery voltage across the battery terminals in millivolts,,battery,,,
+system.battery.charge_rate,gauge,,milliwatts,,The current rate of battery charge or discharge in milliwatts,,battery,,,
+system.battery.power_state,gauge,,unit,,The current state of the battery. Reports 1 if the battery has a valid state and 0 if no state is available,,battery,,,
