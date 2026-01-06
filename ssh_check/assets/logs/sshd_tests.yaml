@@ -15,14 +15,14 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-            event_code: "session closed"
+          event_code: "session closed"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
         type_name: "Authentication: Logoff"
         type_uid: 300202
-        status: "Other"
-        status_id: 99
+        status: "Success"
+        status_id: 1
         user:
           name: "marc.szalkiewicz"
         actor:
@@ -53,7 +53,7 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-            event_code: "Accepted"
+          event_code: "Accepted"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -99,7 +99,7 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-            event_code: "disconnect"
+          event_code: "disconnect"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -133,7 +133,7 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-            event_code: "Failed"
+          event_code: "Failed"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -175,7 +175,7 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-            event_code: "Starting session"
+          event_code: "Starting session"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -217,7 +217,7 @@ tests:
           product:
             name: "OpenSSH"
             vendor_name: "OpenBSD"
-            event_code: "Close session"
+          event_code: "Close session"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
