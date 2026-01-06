@@ -160,7 +160,7 @@ instances:
     ## When the Spark driver is not yet ready, it returns a non-JSON startup message
     ## instead of the expected JSON response.
     ##
-    ## Set to 0 or less to disable this feature and treat startup messages as errors immediately.
+    ## Set to 0 to disable this feature and treat startup messages as errors immediately.
     ## Set to a positive integer to retry that many times before marking the check as failed.
     #
     # startup_wait_retries: 3
