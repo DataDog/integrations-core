@@ -460,15 +460,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `temp` to `ocsf.metadata`
-              sources:
-                - temp
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.time
+            - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -660,14 +652,6 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
-              sources:
-                - placeholder
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp

@@ -155,14 +155,10 @@ tests:
         category_uid: 4
         class_name: "DNS Activity"
         class_uid: 4003
-        dns:
-          query:
-            hostname: "optimizationguide-pa.someapis.com"
         metadata:
           product:
             name: "Cisco Umbrella"
-          vendor:
-            name: "Cisco"
+            vendor_name: "Cisco"
           version: "1.5.0"
         query:
           hostname: "optimizationguide-pa.someapis.com"
@@ -171,6 +167,9 @@ tests:
         rcode_id: 0
         severity: "Informational"
         severity_id: 1
+        src_endpoint:
+          ip: "185.64.148.0"
+          proxy_endpoint: "185.64.148.0"
         status: "Failure"
         status_id: 2
         time: 1702288020000
@@ -408,14 +407,10 @@ tests:
         category_uid: 4
         class_name: "DNS Activity"
         class_uid: 4003
-        dns:
-          query:
-            hostname: "test.com"
         metadata:
           product:
             name: "Cisco Umbrella"
-          vendor:
-            name: "Cisco"
+            vendor_name: "Cisco"
           version: "1.5.0"
         query:
           hostname: "test.com"
@@ -424,6 +419,9 @@ tests:
         rcode_id: 0
         severity: "Informational"
         severity_id: 1
+        src_endpoint:
+          ip: "185.64.148.0"
+          proxy_endpoint: "185.64.148.0"
         status: "Success"
         status_id: 1
         time: 1702990616000
@@ -646,14 +644,10 @@ tests:
         category_uid: 4
         class_name: "DNS Activity"
         class_uid: 4003
-        dns:
-          query:
-            hostname: "instagram.com"
         metadata:
           product:
             name: "Cisco Umbrella"
-          vendor:
-            name: "Cisco"
+            vendor_name: "Cisco"
           version: "1.5.0"
         query:
           hostname: "instagram.com"
@@ -662,6 +656,9 @@ tests:
         rcode_id: 0
         severity: "Informational"
         severity_id: 1
+        src_endpoint:
+          ip: "185.64.148.0"
+          proxy_endpoint: "185.64.148.0"
         time: 1702990616000
       policycategories:
        -
@@ -920,6 +917,7 @@ tests:
           id: 1
           label: "Networks"
           type: "network"
+      internalip: "185.64.148.0"
       isolated:
         fileaction: ""
         state: "not-isolated"
@@ -953,7 +951,7 @@ tests:
         class_name: "HTTP Activity"
         class_uid: 4002
         http_request:
-          referer: ""
+          referrer: ""
           url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
           user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
         http_response:
@@ -961,8 +959,7 @@ tests:
         metadata:
           product:
             name: "Cisco Umbrella"
-          vendor:
-            name: "Cisco"
+            vendor_name: "Cisco"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -984,11 +981,13 @@ tests:
       responsefilename: ""
       securityoverridden: false
       sha256: ""
+      statuscode: 303
       tenantcontrols: false
       time: "10:00:41"
       timestamp: 1702288841000
       type: "proxy"
       url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+      useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
       verdict: "blocked"
       warnstatus: ""
     message: |-
@@ -1273,6 +1272,7 @@ tests:
           id: 1
           label: "Networks"
           type: "network"
+      internalip: "185.64.148.0"
       isolated:
         fileaction: ""
         state: "not-isolated"
@@ -1306,7 +1306,7 @@ tests:
         class_name: "HTTP Activity"
         class_uid: 4002
         http_request:
-          referer: ""
+          referrer: ""
           url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
           user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
         http_response:
@@ -1314,8 +1314,7 @@ tests:
         metadata:
           product:
             name: "Cisco Umbrella"
-          vendor:
-            name: "Cisco"
+            vendor_name: "Cisco"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1337,11 +1336,13 @@ tests:
       responsefilename: ""
       securityoverridden: false
       sha256: ""
+      statuscode: 303
       tenantcontrols: false
       time: "10:00:35"
       timestamp: 1701943235000
       type: "proxy"
       url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+      useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
       verdict: "allowed"
       warnstatus: ""
     message: |-
