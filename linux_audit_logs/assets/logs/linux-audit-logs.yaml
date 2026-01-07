@@ -555,7 +555,7 @@ pipeline:
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
         - type: schema-processor
-          name: OCSF Processor
+          name: Apply OCSF schema for 0
           enabled: true
           schema:
             schemaType: ocsf
@@ -672,7 +672,7 @@ pipeline:
           target: ocsf.user.uid
           replaceMissing: false
         - type: schema-processor
-          name: OCSF Processor
+          name: Apply OCSF schema for 3002
           enabled: true
           schema:
             schemaType: ocsf
@@ -872,7 +872,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.path
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: ocsf.user.uid
@@ -897,7 +897,7 @@ pipeline:
           target: ocsf.user.uid
           replaceMissing: false
         - type: schema-processor
-          name: OCSF Processor
+          name: Apply OCSF schema for 3001
           enabled: true
           schema:
             schemaType: ocsf
@@ -1128,7 +1128,7 @@ pipeline:
           target: ocsf.group.uid
           replaceMissing: false
         - type: schema-processor
-          name: OCSF Processor
+          name: Apply OCSF schema for 3006
           enabled: true
           schema:
             schemaType: ocsf
@@ -1353,7 +1353,7 @@ pipeline:
         query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
       processors:
         - type: schema-processor
-          name: OCSF Processor
+          name: Apply OCSF schema for 3005
           enabled: true
           schema:
             schemaType: ocsf
@@ -1584,7 +1584,7 @@ pipeline:
         query: "@type:PATH"
       processors:
         - type: schema-processor
-          name: OCSF Processor
+          name: Apply OCSF schema for 1001
           enabled: true
           schema:
             schemaType: ocsf
