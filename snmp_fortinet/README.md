@@ -8,6 +8,9 @@ For details of monitored metrics, see the [SNMP Data Collected][1] section.
 
 ## Setup
 
+**The Fortinet integration is Generally Available. To learn more about billing implications, visit our [pricing page][7]**
+
+
 To install and configure the SNMP integration, see the [Network Device Monitoring][2] documentation.
 
 ## Vendor profiles
@@ -37,4 +40,5 @@ Additional helpful documentation, links, and articles:
 [4]: https://docs.datadoghq.com/help/
 [5]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [6]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
+[7]: https://www.datadoghq.com/pricing/?product=network-monitoring&tab=network-device-monitoring#products
 

@@ -6,7 +6,7 @@ The Versa integration lets you monitor your Versa environment within [Network De
 
 ## Setup
 
-**The Versa NDM integration is in Preview and will not be billed until it is Generally Available.**
+**The Versa NDM integration is Generally Available. To learn more about billing implications, visit our [pricing page][10]**
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
@@ -55,3 +55,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/versa/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/versa/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/pricing/?product=network-monitoring&tab=network-device-monitoring#products
