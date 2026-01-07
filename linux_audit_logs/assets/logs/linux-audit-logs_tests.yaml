@@ -731,42 +731,407 @@ tests:
  -
   sample: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
   result:
-    custom: {}
+    custom:
+      AUID: "serviceuser"
+      ID: "root"
+      auid: 1001
+      event_id: 879
+      msg:
+        exe: "/sbin/semanage"
+        hostname: "localhost"
+        id: 0
+        new-range: "?"
+        new-role: "staff_r"
+        new-seuser: "user_u"
+        old-range: "s0"
+        old-role: "user_r"
+        old-seuser: "user_u"
+        op:
+         - "seuser-role"
+         - "range"
+        res: "success"
+        terminal: "pts/0"
+      msg_raw: ""
+      network:
+        client:
+          geoip:
+            invalidAddress: "?"
+          ip: "?"
+      ocsf:
+        activity_id: 1
+        activity_name: "Assign Privileges"
+        actor:
+          process:
+            pid: 11107
+            user:
+              name: "root"
+              uid: "0"
+          session:
+            uid: "21"
+          user:
+            name: "serviceuser"
+            uid: "1001"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "User Access Management"
+        class_uid: 3005
+        metadata:
+          event_code: "ROLE_ASSIGN"
+          product:
+            name: "Linux Audit Logs"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          hostname: "localhost"
+          ip: "?"
+        status: "Success"
+        status_id: 1
+        time: 1740720945670
+        user:
+          name: "user_u"
+      pid: 11107
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      ses: 21
+      status: "ok"
+      subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      timestamp: 1.74072094567E12
+      type: "ROLE_ASSIGN"
+      usr:
+        id: 0
+        name: "root"
     message: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1740720945670
  -
   sample: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=? new-role=? new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
   result:
-    custom: {}
+    custom:
+      AUID: "devuser"
+      ID: "root"
+      auid: 1001
+      event_id: 1002
+      msg:
+        exe: "/sbin/semanage"
+        hostname: "localhost"
+        id: 0
+        new-range: "?"
+        new-role: "?"
+        new-seuser: "?"
+        old-range: "s0"
+        old-role: "user_r"
+        old-seuser: "test1"
+        op:
+         - "seuser"
+        res: "success"
+        terminal: "pts/0"
+      msg_raw: ""
+      network:
+        client:
+          geoip:
+            invalidAddress: "?"
+          ip: "?"
+      ocsf:
+        activity_id: 2
+        activity_name: "Revoke Privileges"
+        actor:
+          process:
+            pid: 49119
+            user:
+              name: "root"
+              uid: "0"
+          session:
+            uid: "17"
+          user:
+            name: "devuser"
+            uid: "1001"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "User Access Management"
+        class_uid: 3005
+        metadata:
+          event_code: "ROLE_REMOVE"
+          product:
+            name: "Linux Audit Logs"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          hostname: "localhost"
+          ip: "?"
+        status: "Success"
+        status_id: 1
+        time: 1740130059788
+        user:
+          name: "test1"
+      pid: 49119
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      ses: 17
+      status: "ok"
+      subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      timestamp: 1.740130059788E12
+      type: "ROLE_REMOVE"
+      usr:
+        id: 0
+        name: "root"
     message: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=? new-role=? new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1740130059788
  -
   sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/etc/shadow\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=NORMAL cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
   result:
-    custom: {}
+    custom:
+      OGID: "root"
+      cap_fe: 0
+      cap_fi: 0
+      cap_fp: 0
+      cap_frootid: 0
+      cap_fver: 0
+      dev: "fd:03"
+      event_id: 2247
+      file_name: "shadow"
+      inode: 50314523
+      item: 0
+      mode: 100000
+      msg_raw: ""
+      name: "/etc/shadow"
+      nametype: "NORMAL"
+      obj: "system_u:object_r:shadow_t:s0"
+      ocsf:
+        activity_id: 2
+        activity_name: "Read"
+        actor:
+          user:
+            name: "root"
+            uid: "0"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "File System Activity"
+        class_uid: 1001
+        device:
+          type: "Unknown"
+          type_id: 0
+          uid: "fd:03"
+        file:
+          name: "shadow"
+          path: "/etc/shadow"
+          type: "Regular File"
+          type_id: 1
+        metadata:
+          event_code: "PATH"
+          product:
+            name: "Linux Audit Logs"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1740378301873
+      ogid: 0
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      rdev: "00:00"
+      timestamp: 1.740378301873E12
+      type: "PATH"
+      usr:
+        id: 0
+        name: "root"
     message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/etc/shadow\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=NORMAL cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1740378301873
  -
   sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/x86_64-linux-gnu/libcrypt.so.1\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=DELETE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
   result:
-    custom: {}
+    custom:
+      OGID: "root"
+      cap_fe: 0
+      cap_fi: 0
+      cap_fp: 0
+      cap_frootid: 0
+      cap_fver: 0
+      dev: "fd:03"
+      event_id: 2247
+      file_name: "libcrypt.so.1"
+      inode: 50314523
+      item: 0
+      mode: 100000
+      msg_raw: ""
+      name: "/lib/x86_64-linux-gnu/libcrypt.so.1"
+      nametype: "DELETE"
+      obj: "system_u:object_r:shadow_t:s0"
+      ocsf:
+        activity_id: 4
+        activity_name: "Delete"
+        actor:
+          user:
+            name: "root"
+            uid: "0"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "File System Activity"
+        class_uid: 1001
+        device:
+          type: "Unknown"
+          type_id: 0
+          uid: "fd:03"
+        file:
+          ext: "so"
+          name: "libcrypt.so.1"
+          path: "/lib/x86_64-linux-gnu/libcrypt.so.1"
+          type: "Regular File"
+          type_id: 1
+        metadata:
+          event_code: "PATH"
+          product:
+            name: "Linux Audit Logs"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1740378301873
+      ogid: 0
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      rdev: "00:00"
+      timestamp: 1.740378301873E12
+      type: "PATH"
+      usr:
+        id: 0
+        name: "root"
     message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/x86_64-linux-gnu/libcrypt.so.1\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=DELETE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1740378301873
  -
   sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
   result:
-    custom: {}
+    custom:
+      OGID: "root"
+      cap_fe: 0
+      cap_fi: 0
+      cap_fp: 0
+      cap_frootid: 0
+      cap_fver: 0
+      dev: "fd:03"
+      event_id: 2247
+      folder_name: "lib"
+      inode: 50314523
+      item: 0
+      mode: 100000
+      msg_raw: ""
+      name: "/lib/"
+      nametype: "PARENT"
+      obj: "system_u:object_r:shadow_t:s0"
+      ocsf:
+        activity_id: 2
+        activity_name: "Read"
+        actor:
+          user:
+            name: "root"
+            uid: "0"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "File System Activity"
+        class_uid: 1001
+        device:
+          type: "Unknown"
+          type_id: 0
+          uid: "fd:03"
+        file:
+          name: "lib"
+          path: "/lib/"
+          type: "Folder"
+          type_id: 2
+        metadata:
+          event_code: "PATH"
+          product:
+            name: "Linux Audit Logs"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1740378301873
+      ogid: 0
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      rdev: "00:00"
+      timestamp: 1.740378301873E12
+      type: "PATH"
+      usr:
+        id: 0
+        name: "root"
     message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1740378301873
  -
   sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/run/nginx.pid\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=CREATE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
   result:
-    custom: {}
+    custom:
+      OGID: "root"
+      cap_fe: 0
+      cap_fi: 0
+      cap_fp: 0
+      cap_frootid: 0
+      cap_fver: 0
+      dev: "fd:03"
+      event_id: 2247
+      file_name: "nginx.pid"
+      inode: 50314523
+      item: 0
+      mode: 100000
+      msg_raw: ""
+      name: "/run/nginx.pid"
+      nametype: "CREATE"
+      obj: "system_u:object_r:shadow_t:s0"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          user:
+            name: "root"
+            uid: "0"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "File System Activity"
+        class_uid: 1001
+        device:
+          type: "Unknown"
+          type_id: 0
+          uid: "fd:03"
+        file:
+          ext: "pid"
+          name: "nginx.pid"
+          path: "/run/nginx.pid"
+          type: "Regular File"
+          type_id: 1
+        metadata:
+          event_code: "PATH"
+          product:
+            name: "Linux Audit Logs"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1740378301873
+      ogid: 0
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      rdev: "00:00"
+      timestamp: 1.740378301873E12
+      type: "PATH"
+      usr:
+        id: 0
+        name: "root"
     message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/run/nginx.pid\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=CREATE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1740378301873
