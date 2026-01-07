@@ -2,7 +2,15 @@
 
 <!-- towncrier release notes start -->
 
-## 22.12.0 / 2025-11-26
+## 22.12.1 / 2025-12-22
+
+***Fixed***:
+
+* Fix table row count calculation for sqlserver.table.row_count. Previously, we joined with indexes which produced one row per table-index combination before grouping. This resulted in inflated row count values when grouping by table because the multiple index rows were summed together.
+
+  The fix is to conditionally sum the row count: only when the index_id is in (0, 1), which translates to heap and clustered index partitions. Both of these contain the true row count for the given partition, whereas other partition types (e.g. non-clustered indexes) should not be considered in the row count calculation. This leads to the expected value being calcualted. ([#22055](https://github.com/DataDog/integrations-core/pull/22055))
+
+## 22.12.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
@@ -14,7 +22,7 @@
 
 * Support `only_custom_queries` configuration option in the SQL Server integration ([#21304](https://github.com/DataDog/integrations-core/pull/21304))
 
-## 22.11.0 / 2025-10-31
+## 22.11.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

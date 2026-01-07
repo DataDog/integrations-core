@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.3.0 / 2025-11-26
+## 1.4.0 / 2025-12-22
+
+***Added***:
+
+* Skip errors when reading unimplemented metrics ([#22158](https://github.com/DataDog/integrations-core/pull/22158))
+
+## 1.3.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
