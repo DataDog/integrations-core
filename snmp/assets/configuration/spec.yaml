@@ -294,6 +294,13 @@ files:
         value:
           type: string
           example: <AUTHENTICATION_PROTOCOL>
+        enum:
+          - MD5
+          - SHA
+          - SHA224
+          - SHA256
+          - SHA384
+          - SHA512
         fleet_configurable: true
       - name: authKey
         description: |
@@ -314,6 +321,13 @@ files:
         value:
           type: string
           example: <PRIVACY_TYPE>
+        enum:
+          - DES
+          - AES
+          - AES192
+          - AES192C
+          - AES256
+          - AES256C
         fleet_configurable: true
       - name: privKey
         description: |
@@ -521,6 +535,7 @@ files:
               match_value: eth5
               disabled: true
       - name: ping
+        fleet_configurable: true
         description: |
           Configure ICMP pings for all hosts in SNMP autodiscovery
           Each device is pinged with these settings each time the SNMP
@@ -544,17 +559,20 @@ files:
         options:
         - name: enabled
           description: Enables/Disables pinging devices
+          fleet_configurable: true
           value:
             type: boolean
             example: true
             display_default: false
         - name: count
           description: Number of pings to send per check run
+          fleet_configurable: true
           value:
             type: integer
             example: 2
         - name: timeout
           description: Timeout for all pings to execute in milliseconds
+          fleet_configurable: true
           value:
             type: integer
             example: 3000
@@ -573,6 +591,7 @@ files:
               If `use_raw_socket` is set to true, you MUST also enable the
               system-probe which has elevated privileges, see system-probe.yaml.example
               to enable it.
+            fleet_configurable: true
             value:
               type: boolean
               example: true
