@@ -92,9 +92,16 @@ def set_default_driver_conf():
         os.environ.setdefault('TDSVER', '8.0')
 
 
+# helper function ensures database name is correctly escaped
+# anywhere a `USE` statement is needed
 def construct_use_statement(database):
+    # use bracket-quoting to handle non-regular identifiers
     switch_db_tmpl = """USE [{}];"""
+
+    # doubling right-bracket is the only special handling needed
+    # for strings within bracket-quoting in SQL Server
     database_escaped = database.replace(']', ']]')
+
     return switch_db_tmpl.format(database_escaped)
 
 
