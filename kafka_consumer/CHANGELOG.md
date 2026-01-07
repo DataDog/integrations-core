@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.10.2 / 2026-01-06
+
+***Fixed***:
+
+* Fix Kafka message decoding when using Protobuf with schema registry. ([#22265](https://github.com/DataDog/integrations-core/pull/22265))
+
 ## 6.10.1 / 2025-12-19
 
 ***Fixed***:
