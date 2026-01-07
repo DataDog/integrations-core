@@ -13,7 +13,7 @@ The Cisco ACI Integration lets you:
 
 ## Setup
 
-**The Cisco ACI integration is Generally Available. To learn more about billing implications, visit our [pricing page][19]**
+**The Cisco ACI integration is Generally Available. To learn more about billing implications, visit our [pricing page][19].**
 
 ### Installation
 
