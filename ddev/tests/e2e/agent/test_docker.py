@@ -61,7 +61,7 @@ class TestStart:
                 id='custom build with jmx',
             ),
             pytest.param(
-                'registry.datadoghq.com/datadog/agent:7.46.0',
+                'registry.datadoghq.com/agent:7.46.0',
                 'registry.datadoghq.com/agent:7.46.0',
                 False,
                 id='Specific stable release',
