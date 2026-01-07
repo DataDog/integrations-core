@@ -16,7 +16,7 @@ Integrate Valence Security with Datadog to analyze alerts and audit logs using p
 1. Log in to the Valence Security platform using an admin account.
 2. Navigate to **Administration** > **Settings** > **Valence API**.
 3. Click **+ Generate API Key** and provide the following details:
-   - **API key description**: A description of the API key’s purpose.
+   - **API key description**: A description of the API key's purpose.
    - **Display name**: A user-friendly name to identify the API key.
    - **Role**: The role associated with the API key (select **Admin**).
 4. Click **Generate** and copy the API key.
