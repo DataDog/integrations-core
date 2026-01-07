@@ -8,7 +8,7 @@
 
 * Support Protobuf messages with schema registry ([#22020](https://github.com/DataDog/integrations-core/pull/22020))
 
-## 6.10.0 / 2025-11-26
+## 6.10.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
