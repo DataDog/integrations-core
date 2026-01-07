@@ -110,7 +110,7 @@ class NutanixCheck(AgentCheck):
                     self.cluster_names[cluster_id] = cluster_name
 
                 if self._is_prism_central_cluster(cluster):
-                    self.log.debug("Skipping Prism Central cluster")
+                    self.log.debug("Skipping Prism Central cluster from cluster metrics collection")
                     continue
 
                 self._process_cluster(cluster)
@@ -346,13 +346,27 @@ class NutanixCheck(AgentCheck):
         self.log.debug("HTTP request: %s %s, kwargs=%s", method.upper(), url, kwargs)
         http_method = getattr(self.http, method.lower())
         response = http_method(url, **kwargs)
-        self.log.debug(
-            "HTTP response: %s %s, status_code=%s, payload='%s'",
-            method.upper(),
-            url,
-            response.status_code,
-            response.text,
-        )
+        status = response.status_code
+
+        # rate limits
+        if status == 429:
+            self.log.debug(
+                "HTTP 429 rate limited: %s %s, payload_length=%s",
+                method.upper(),
+                url,
+                len(response.content) if response.content else 0,
+            )
+
+        # any other non-2xx response
+        elif not response.ok:
+            self.log.debug(
+                "HTTP non-2xx response: %s %s, status_code=%s, payload_length=%s",
+                method.upper(),
+                url,
+                status,
+                len(response.content) if response.content else 0,
+            )
+
         return response
 
     def _get_paginated_request_data(self, endpoint, params=None):
