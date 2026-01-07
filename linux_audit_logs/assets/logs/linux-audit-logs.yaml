@@ -410,7 +410,7 @@ pipeline:
       enabled: true
       filter:
         query: "@type:(ADD_GROUP OR DEL_GROUP OR ADD_USER OR DEL_USER OR USER_CHAUTHTOK
-          OR USER_AUTH OR ROLE_ASSIGN OR ROLE_REMOVE OR PATH)"
+          OR USER_AUTH OR ROLE_ASSIGN OR ROLE_REMOVE)"
       processors:
         - type: string-builder-processor
           name: Add product name
@@ -474,6 +474,66 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+    - type: pipeline
+      name: OCSF pre transformations for class File System Activity [1001]
+      enabled: true
+      filter:
+        query: "@type:PATH"
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: Linux Audit Logs
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: Linux
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: grok-parser
+          name: Extracting file or folder name
+          enabled: true
+          source: name
+          samples:
+            - /etc/shadow
+            - /run/
+            - /run/nginx.pid
+          grok:
+            supportRules: file_or_folder_path (/%{regex("[^/]*")})*
+            matchRules: >-
+              rule_extract_folder_name
+              %{file_or_folder_path}/%{regex("[^/]*"):folder_name}/
+
+              rule_extract_file_name %{file_or_folder_path}/%{data:file_name}
+        - type: grok-parser
+          name: Extracting file extention
+          enabled: true
+          source: file_name
+          samples:
+            - nginx.pid
+            - libcrypt.so.1
+            - ld.so.cache
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_extract_file_extention_1
+              (%{regex("[^.]*")}.)+%{word:ocsf.file.ext}.%{number}
+
+              rule_extract_file_extention_2 (%{regex("[^.]*")}.)+%{word:ocsf.file.ext}
+        - type: string-builder-processor
+          name: Set ocsf.file.name attribute
+          enabled: true
+          template: "%{folder_name}%{file_name}"
+          target: ocsf.file.name
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{ouid}%{usr.id}"
+          target: ocsf.actor.user.uid
+          replaceMissing: true
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
@@ -1473,6 +1533,14 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.actor
+              sources:
+                - ocsf.actor
+              sourceType: attribute
+              target: ocsf.actor
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
             - name: ocsf.metadata.event_code
               sources:
                 - type
@@ -1558,11 +1626,11 @@ pipeline:
             - name: ocsf.file.type_id
               categories:
                 - filter:
-                    query: "@file_type:file"
+                    query: "@file_name:*"
                   name: Regular File
                   id: 1
                 - filter:
-                    query: "@file_type:folder"
+                    query: "@folder_name:*"
                   name: Folder
                   id: 2
               targets:
@@ -1598,6 +1666,19 @@ pipeline:
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
               fallback:
                 values: {}
                 sources: {}
@@ -1656,16 +1737,16 @@ pipeline:
               type: schema-remapper
             - name: ocsf.actor.user.uid
               sources:
-                - ouid
+                - ocsf.actor.user.uid
               sourceType: attribute
               target: ocsf.actor.user.uid
               targetFormat: string
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
             - name: ocsf.actor.user.name
               sources:
-                - OUID
+                - usr.name
               sourceType: attribute
               target: ocsf.actor.user.name
               targetFormat: string
@@ -1678,7 +1759,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.user
               targetFormat: string
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
             - name: ocsf.actor
@@ -1731,9 +1812,10 @@ pipeline:
               type: schema-remapper
             - name: ocsf.device.uid
               sources:
-                - ocsf.device.uid
+                - dev
               sourceType: attribute
               target: ocsf.device.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper

@@ -263,3 +263,73 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740980591704
+ -
+  sample: "type=DEL_GROUP msg=audit(1765794074.279:2333): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-group grp=\"testuser\" acct=\"testuser\" exe=\"/usr/sbin/userdel\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\""
+  result:
+    custom: {}
+    message: "type=DEL_GROUP msg=audit(1765794074.279:2333): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-group grp=\"testuser\" acct=\"testuser\" exe=\"/usr/sbin/userdel\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=ADD_USER msg=audit(1635509157.089:345): pid=73290 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=add-user acct=\"serviceuser\" exe=\"/usr/sbin/useradd\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+  result:
+    custom: {}
+    message: "type=ADD_USER msg=audit(1635509157.089:345): pid=73290 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=add-user acct=\"serviceuser\" exe=\"/usr/sbin/useradd\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=DEL_USER msg=audit(1740379094.277:2332): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-user id=1003 exe=\"/usr/sbin/userdel\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"testuser\""
+  result:
+    custom: {}
+    message: "type=DEL_USER msg=audit(1740379094.277:2332): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-user id=1003 exe=\"/usr/sbin/userdel\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"testuser\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=USER_CHAUTHTOK msg=audit(1635509189.860:347): pid=73297 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023 msg='op=PAM:chauthtok grantors=pam_pwquality,pam_unix acct=\"serviceuser\" exe=\"/usr/bin/passwd\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+  result:
+    custom: {}
+    message: "type=USER_CHAUTHTOK msg=audit(1635509189.860:347): pid=73297 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023 msg='op=PAM:chauthtok grantors=pam_pwquality,pam_unix acct=\"serviceuser\" exe=\"/usr/bin/passwd\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
+  result:
+    custom: {}
+    message: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=? new-role=? new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
+  result:
+    custom: {}
+    message: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=? new-role=? new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/etc/shadow\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=NORMAL cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  result:
+    custom: {}
+    message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/etc/shadow\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=NORMAL cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/x86_64-linux-gnu/libcrypt.so.1\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=DELETE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  result:
+    custom: {}
+    message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/x86_64-linux-gnu/libcrypt.so.1\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=DELETE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  result:
+    custom: {}
+    message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/run/nginx.pid\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=CREATE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  result:
+    custom: {}
+    message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/run/nginx.pid\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=CREATE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
