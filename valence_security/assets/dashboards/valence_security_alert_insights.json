@@ -26,7 +26,7 @@
             "id": 3555392315975327,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a comprehensive view of Valence Security alerts, enabling security teams to monitor, investigate, and analyze alert activity. It offers insights into alert trends, alert distribution by severity and type, action distribution by type, top alerts and actors, as well as client IP and geolocation information.\n\nFor more information, see the [Valence Security Integration Documentation](https://docs.datadoghq.com/integrations/valence_security/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard provides a centralized view of Valence Security alerts, enabling security teams to monitor, investigate, and analyze alert activity. It includes visualizations for alert trends, alert distribution by severity and type, action distribution by type, top alerts and actors, and associated client IP and geolocation data.\n\nFor more information, see the [Valence Security integration documentation](https://docs.datadoghq.com/integrations/valence_security/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the displayed time range.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -56,7 +56,7 @@
                         "id": 2892598859511308,
                         "definition": {
                             "type": "note",
-                            "content": "This group provides a high-level overview of alerts, alert trends, distribution by severity, and detailed alert logs.",
+                            "content": "This group provides a high-level overview of alerts, alert trends, distributions by severity, and detailed alert logs.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -1412,7 +1412,7 @@
                     {
                         "id": 1298360141403289,
                         "definition": {
-                            "title": "Top associated mitre tactics",
+                            "title": "Top associated MITRE tactics",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1481,7 +1481,7 @@
                     {
                         "id": 2281125926695008,
                         "definition": {
-                            "title": "Top associated mitre techniques",
+                            "title": "Top associated MITRE techniques",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

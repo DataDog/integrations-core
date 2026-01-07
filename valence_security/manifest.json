@@ -6,7 +6,7 @@
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
-    "support": "README.md#Support",
+    "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Valence Security alerts and audit logs",
     "title": "Valence Security",
@@ -28,7 +28,7 @@
       },
       {
         "caption": "Valence Security Alert Insights",
-        "image_url": "images/valence_security_alert_insights__1_dark.png",
+        "image_url": "images/valence_security_alert_insights_1_dark.png",
         "media_type": "image"
       },
       {

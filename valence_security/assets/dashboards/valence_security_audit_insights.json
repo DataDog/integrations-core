@@ -26,7 +26,7 @@
             "id": 3555392315975327,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a comprehensive view of Valence Security audit logs, enabling teams to monitor, investigate, and analyze audit activity across connected platforms. It also provides visibility into user actions, authentication events, top users, and client IP and geolocation information.\n\nFor more information, see the [Valence Security Integration Documentation](https://docs.datadoghq.com/integrations/valence_security/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard provides a centralized view of Valence Security audit logs, enabling teams to monitor, investigate, and analyze audit activity across connected platforms. It includes visualizations for user actions, authentication events, top users, and associated client IP and geolocation data.\n\nFor more information, see the [Valence Security integration documentation](https://docs.datadoghq.com/integrations/valence_security/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the displayed time range.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -56,7 +56,7 @@
                         "id": 4113384263644434,
                         "definition": {
                             "type": "note",
-                            "content": "This group provides a high-level overview of audit logs, audit logs trend, top users and audit activities, associated client IP and geographic details, and detailed audit logs.",
+                            "content": "This group provides a high-level overview of audit activity, including audit log trends, top users and actions, associated client IP and geolocation data, and detailed audit logs.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -606,7 +606,7 @@
                         "id": 5233471207449274,
                         "definition": {
                             "type": "note",
-                            "content": "This group offers insights into audit activities, including login attempts with trend, created and deleted user information, and policy modifications.",
+                            "content": "This group provides insights into audit activity, including login attempt trends, user creation and deletion activity, and policy modifications.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",

@@ -26,7 +26,7 @@
             "id": 3555392315975327,
             "definition": {
                 "type": "note",
-                "content": "[Valence Security](https://www.valencesecurity.com/) is SaaS security platform that protects cloud applications by discovering, monitoring, and remediating risks across business apps. It reduces exposure from misconfigurations, third-party integrations, and identity threats, ensuring continuous compliance and data protection for SaaS environments.\n\nThis dashboard provides a unified view of Valence Security data by combining audit logs and alerts.\n\nFor more information, see the [Valence Security Integration Documentation](https://docs.datadoghq.com/integrations/valence_security/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "[Valence Security](https://www.valencesecurity.com/) is a SaaS security platform that protects cloud applications by discovering, monitoring, and remediating risks across business applications. It reduces exposure from misconfigurations, third-party integrations, and identity threats across SaaS environments.\n\nThis dashboard provides a unified view of Valence Security data by combining audit logs and alert data.\n\nFor more information, see the [Valence Security integration documentation](https://docs.datadoghq.com/integrations/valence_security/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the displayed time range.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -56,7 +56,7 @@
                         "id": 8369692212563770,
                         "definition": {
                             "type": "note",
-                            "content": "This group provides a high-level view of Valence Security audit and alert logs, showing activity trends, log volume, key users and Client IPs, service and status distribution, and geolocation insights to support quick monitoring and triage.",
+                            "content": "This group provides a high-level view of Valence Security audit and alert logs, including activity trends, log volume, key users and client IPs, service and status distributions, and geolocation data.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -615,7 +615,7 @@
                         "id": 6860380797096924,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates the Valence Security alert and audit logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security/overview).",
+                            "content": "Datadog Cloud SIEM analyzes and correlates Valence Security alert and audit logs to generate security signals. If you do not see signals, confirm that [Datadog Cloud SIEM](/security/overview) is enabled in your account.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
