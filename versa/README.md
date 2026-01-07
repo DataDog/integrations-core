@@ -6,7 +6,7 @@ The Versa integration lets you monitor your Versa environment within [Network De
 
 ## Setup
 
-**The Versa NDM integration is Generally Available. To learn more about billing implications, visit our [pricing page][10]**
+**The Versa NDM integration is Generally Available. To learn more about billing implications, visit our [pricing page][10].**
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
