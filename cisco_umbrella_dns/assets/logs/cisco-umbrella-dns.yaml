@@ -460,7 +460,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
+            - name: Map `temp` to `ocsf.metadata`
               sources:
                 - temp
               sourceType: attribute
@@ -525,7 +525,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.query.type
+            - name: Map `querytype` to `ocsf.query.type`
               sources:
                 - querytype
               sourceType: attribute
@@ -534,24 +534,24 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.ip
+            - name: Map `internalip` to `ocsf.src_endpoint.ip`
               sources:
-                - internal_ip
+                - internalip
               sourceType: attribute
               target: ocsf.src_endpoint.ip
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.proxy_endpoint
+            - name: Map `externalip` to `ocsf.src_endpoint.proxy_endpoint`
               sources:
-                - external_ip
+                - externalip
               sourceType: attribute
               target: ocsf.src_endpoint.proxy_endpoint
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.query.hostname
+            - name: Map `domain` to `ocsf.query.hostname`
               sources:
                 - domain
               sourceType: attribute
@@ -584,21 +584,11 @@ pipeline:
           target: ocsf.metadata.product.name
           replaceMissing: true
         - type: string-builder-processor
-          name: Add ocsf.metadata.vendor.name
+          name: Add ocsf.metadata.product.vendor_name
           enabled: true
           template: Cisco
-          target: ocsf.metadata.vendor.name
+          target: ocsf.metadata.product.vendor_name
           replaceMissing: true
-        - type: attribute-remapper
-          name: Map `domain` to `ocsf.dns.query.hostname`
-          enabled: true
-          sources:
-            - domain
-          sourceType: attribute
-          target: ocsf.dns.query.hostname
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
     - type: pipeline
       name: OCSF sub pipeline for HTTP Activity [4002]
       enabled: true
@@ -678,15 +668,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product
-              sources:
-                - Cisco Umbrella
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.time
+            - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -695,7 +677,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.http_response.code
+            - name: Map `statuscode` to `ocsf.http_response.code`
               sources:
                 - statuscode
               sourceType: attribute
@@ -704,31 +686,48 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.ip
+            - name: Map `internalip` to `ocsf.src_endpoint.ip`
               sources:
                 - internalip
               sourceType: attribute
               target: ocsf.src_endpoint.ip
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.status_code
+            - name: Map `statuscode` to `ocsf.status_code`
               sources:
                 - statuscode
               sourceType: attribute
               target: ocsf.status_code
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.http_request.user_agent
+            - name: Map `useragent` to `ocsf.http_request.user_agent`
               sources:
                 - useragent
               sourceType: attribute
               target: ocsf.http_request.user_agent
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `http.referer` to `ocsf.http_request.referrer`
+              sources:
+                - http.referer
+              sourceType: attribute
+              target: ocsf.http_request.referrer
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `http.url` to `ocsf.http_request.url`
+              sources:
+                - http.url
+              sourceType: attribute
+              target: ocsf.http_request.url
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
         - type: string-builder-processor
@@ -738,28 +737,8 @@ pipeline:
           target: ocsf.metadata.product.name
           replaceMissing: true
         - type: string-builder-processor
-          name: Add ocsf.metadata.vendor.name
+          name: Add ocsf.metadata.product.vendor_name
           enabled: true
           template: Cisco
-          target: ocsf.metadata.vendor.name
+          target: ocsf.metadata.product.vendor_name
           replaceMissing: true
-        - type: attribute-remapper
-          name: Map `http.url` to ` ocsf.http_request.url`
-          enabled: true
-          sources:
-            - http.url
-          sourceType: attribute
-          target: ocsf.http_request.url
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `http.referer` to ` ocsf.http_request.referer`
-          enabled: true
-          sources:
-            - http.referer
-          sourceType: attribute
-          target: ocsf.http_request.referer
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
