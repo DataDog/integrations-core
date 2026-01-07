@@ -124,24 +124,6 @@ pipeline:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
             - type: schema-category-mapper
-              name: ocsf.type_name
-              categories:
-                - filter:
-                    query: '@system.action:(Accepted OR Failed OR "Starting session" OR "session opened")'
-                  name: "Authentication: Logon"
-                  id: 300201
-                - filter:
-                    query: '@system.action:("session closed" OR "Close session")'
-                  name: "Authentication: Logoff"
-                  id: 300202
-                - filter:
-                    query: '@system.action:*'
-                  name: "Authentication: Other"
-                  id: 300299
-              targets:
-                name: ocsf.type_name
-                id: ocsf.type_uid
-            - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
                 - filter:
