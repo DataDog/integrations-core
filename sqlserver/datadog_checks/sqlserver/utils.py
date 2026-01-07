@@ -93,7 +93,9 @@ def set_default_driver_conf():
 
 
 def construct_use_statement(database):
-    return 'use [{}]'.format(database)
+    switch_db_tmpl = """USE [{}];"""
+    database_escaped = database.replace(']', ']]')
+    return switch_db_tmpl.format(database_escaped)
 
 
 def is_statement_proc(text):

@@ -95,12 +95,12 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
     STATIC_INFO_YEAR,
-    SWITCH_DB_STATEMENT,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.utils import (
+    construct_use_statement,
     is_azure_sql_database,
     set_default_driver_conf,
 )
@@ -828,7 +828,8 @@ class SQLServer(DatabaseCheck):
                 for db in self.databases:
                     check_err_message = "Database {} connection service check failed: {}"
                     try:
-                        cursor.execute(SWITCH_DB_STATEMENT.format(db.name))
+                        switch_db_statement = construct_use_statement(db.name)
+                        cursor.execute(switch_db_statement)
                         cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
                         cursor.fetchall()
                         self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
@@ -843,7 +844,8 @@ class SQLServer(DatabaseCheck):
                         )
                         continue
                 # Switch DB back to MASTER
-                cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
+                switch_db_statement = construct_use_statement(self.connection.DEFAULT_DATABASE)
+                cursor.execute(switch_db_statement)
 
     def get_databases(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)

@@ -8,7 +8,7 @@ import contextlib
 from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.sqlserver.utils import execute_query
+from datadog_checks.sqlserver.utils import construct_use_statement, execute_query
 
 if TYPE_CHECKING:
     from datadog_checks.sqlserver import SQLServer
@@ -17,7 +17,6 @@ from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollecto
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     STATIC_INFO_MAJOR_VERSION,
-    SWITCH_DB_STATEMENT,
 )
 from datadog_checks.sqlserver.queries import (
     COLUMN_QUERY,
@@ -105,7 +104,8 @@ class SQLServerSchemaCollector(SchemaCollector):
     def _get_cursor(self, database_name):
         with self._check.connection.open_managed_default_connection():
             with self._check.connection.get_managed_cursor() as cursor:
-                cursor.execute(SWITCH_DB_STATEMENT.format(database_name))
+                switch_db_statement = construct_use_statement(database_name)
+                cursor.execute(switch_db_statement)
                 query = self._get_tables_query()
                 cursor.execute(query)
                 yield cursor
@@ -166,7 +166,8 @@ class SQLServerSchemaCollector(SchemaCollector):
             # Use a key_prefix to get a separate connection to avoid conflicts with the main connection
             with self._check.connection.open_managed_default_connection(key_prefix="schemas-pre-2017"):
                 with self._check.connection.get_managed_cursor(key_prefix="schemas-pre-2017") as cursor:
-                    cursor.execute(SWITCH_DB_STATEMENT.format(database.get("name")))
+                    switch_db_statement = construct_use_statement(database.get("name"))
+                    cursor.execute(switch_db_statement)
                     table_id = str(cursor_row.get("table_id"))
                     columns_query = COLUMN_QUERY.replace("schema_tables.table_id", table_id)
                     cursor.execute(columns_query)
