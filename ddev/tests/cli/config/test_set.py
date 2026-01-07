@@ -52,7 +52,7 @@ def test_standard_complex(ddev, config_file, helpers):
     )
 
     config_file.load()
-    assert config_file.model.agents["latest"] == {"docker": "datadog/agent:latest", "local": "latest"}
+    assert config_file.model.agents["latest"] == {"docker": "registry.datadoghq.com/agent:latest", "local": "latest"}
 
 
 def test_standard_hidden(ddev, config_file, helpers):
