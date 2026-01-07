@@ -63,6 +63,7 @@ def test_construct_use_statement(db_name, expected):
 
     assert use_stmt == expected
 
+
 def test_get_cursor(instance_docker):
     """
     Ensure we don't leak connection info in case of a KeyError when the

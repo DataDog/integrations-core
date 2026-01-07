@@ -100,7 +100,6 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.utils import (
-    construct_use_statement,
     is_azure_sql_database,
     set_default_driver_conf,
 )

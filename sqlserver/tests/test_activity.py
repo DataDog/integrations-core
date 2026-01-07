@@ -18,7 +18,7 @@ import mock
 import pytest
 from dateutil import parser
 
-from datadog_checks.base.utils.db.utils import construct_use_statement, DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, construct_use_statement, default_json_event_encoding
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
