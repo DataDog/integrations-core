@@ -52,9 +52,9 @@ def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_
     if match := re.match(AGENT_IMAGE_REGEX, agent_build):
         org, image, tag = match.groups()
 
-        if org != 'datadog':
+        if org != 'datadog' and org != 'registry.datadoghq.com': # todo: drop registry.datadoghq.com
             # Some non datadog image has been selected
-            return agent_build  # todo: support registry.datadoghq.com
+            return agent_build
 
         version_match = re.match(AGENT_VERSION_REGEX, tag)
 
