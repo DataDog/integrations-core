@@ -26,6 +26,7 @@ from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
+    construct_use_statement,
     extract_sql_comments_and_procedure_name,
     get_unixodbc_sysconfig,
     is_non_empty_file,
@@ -44,6 +45,23 @@ except ImportError:
 # mark the whole module
 pytestmark = pytest.mark.unit
 
+
+@pytest.mark.parametrize(
+    'db_name, expected',
+    [
+        ('my_database', 'USE [my_database];'),
+        (']rh_bracket]', 'USE []]rh_bracket]]];'),
+        ('[lh_bracket[', 'USE [[lh_bracket[];'),
+        ('[bracketed]', 'USE [[bracketed]]];'),
+    ],
+)
+def test_construct_use_statement(db_name, expected):
+    """
+    Test functionality of constructing USE statement
+    """
+    use_stmt = construct_use_statement(db_name)
+
+    assert use_stmt == expected
 
 def test_get_cursor(instance_docker):
     """

@@ -18,7 +18,7 @@ import mock
 import pytest
 from dateutil import parser
 
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import construct_use_statement, DBMAsyncJob, default_json_event_encoding
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
@@ -136,7 +136,7 @@ def test_collect_load_activity(
 
     def run_test_query(c, q):
         cur = c.cursor()
-        cur.execute("USE [{}]".format(database))
+        cur.execute(construct_use_statement(database))
         # 0xFF can't be decoded to Unicode, which makes it good test data,
         # since Unicode is a default format
         cur.execute("SET CONTEXT_INFO 0xff")
@@ -318,7 +318,7 @@ def test_activity_nested_blocking_transactions(
 
     def run_queries(conn, queries):
         cur = conn.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute(construct_use_statement("datadog_test-1"))
         cur.execute("BEGIN TRANSACTION")
         for q in queries:
             try:
@@ -455,7 +455,7 @@ def test_activity_metadata(
 
     def _run_test_query(conn, q):
         cur = conn.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute(construct_use_statement("datadog_test-1"))
         cur.execute(q)
 
     def _obfuscate_sql(sql_query, options=None):
