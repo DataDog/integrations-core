@@ -8,7 +8,7 @@ For details of monitored metrics, see the [SNMP Data Collected][1] section.
 
 ## Setup
 
-**The Fortinet integration is Generally Available. To learn more about billing implications, visit our [pricing page][7]**
+**The Fortinet integration is Generally Available. To learn more about billing implications, visit our [pricing page][7].**
 
 To install and configure the SNMP integration, see the [Network Device Monitoring][2] documentation.
 
