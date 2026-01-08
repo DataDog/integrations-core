@@ -70,7 +70,11 @@ def test_tag_skip_open_pr_check(ddev, mocker, monkeypatch):
     list_prs.assert_not_called()
 
 
-def test_tag_no_github_token_does_not_abort(ddev, mocker):
+def test_tag_no_github_token_does_not_abort(ddev, mocker, monkeypatch):
+    # Delete these env vars for testing
+    for env_var in ('DD_GITHUB_USER', 'DD_GITHUB_TOKEN', 'GITHUB_USER', 'GITHUB_ACTOR', 'GH_TOKEN', 'GITHUB_TOKEN'):
+        monkeypatch.delenv(env_var, raising=False)
+
     mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.99.x')
     mocker.patch('ddev.utils.git.GitRepository.pull', return_value='OK')
     mocker.patch('ddev.utils.git.GitRepository.fetch_tags', return_value='OK')
