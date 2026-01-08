@@ -468,8 +468,157 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: pipeline
+      name: OCSF sub pipeline for HTTP Activity [4002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: service:proxy
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 4002
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: HTTP Activity
+            classUid: 4002
+            extensions: []
+            profiles: []
+          mappers:
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@requestmethod:"CONNECT"'
+                  name: Connect
+                  id: 1
+                - filter:
+                    query: '@requestmethod:"DELETE"'
+                  name: Delete
+                  id: 2
+                - filter:
+                    query: '@requestmethod:"GET"'
+                  name: Get
+                  id: 3
+                - filter:
+                    query: '@requestmethod:"HEAD"'
+                  name: Head
+                  id: 4
+                - filter:
+                    query: '@requestmethod:"OPTIONS"'
+                  name: Options
+                  id: 5
+                - filter:
+                    query: '@requestmethod:"POST"'
+                  name: Post
+                  id: 6
+                - filter:
+                    query: '@requestmethod:"PUT"'
+                  name: Put
+                  id: 7
+                - filter:
+                    query: '@requestmethod:"TRACE"'
+                  name: Trace
+                  id: 8
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `statuscode` to `ocsf.http_response.code`
+              sources:
+                - statuscode
+              sourceType: attribute
+              target: ocsf.http_response.code
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `internalip` to `ocsf.src_endpoint.ip`
+              sources:
+                - internalip
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `statuscode` to `ocsf.status_code`
+              sources:
+                - statuscode
+              sourceType: attribute
+              target: ocsf.status_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `useragent` to `ocsf.http_request.user_agent`
+              sources:
+                - useragent
+              sourceType: attribute
+              target: ocsf.http_request.user_agent
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `http.referer` to `ocsf.http_request.referrer`
+              sources:
+                - http.referer
+              sourceType: attribute
+              target: ocsf.http_request.referrer
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `http.url` to `ocsf.http_request.url.url_string`
+              sources:
+                - http.url
+              sourceType: attribute
+              target: ocsf.http_request.url.url_string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.name
+          enabled: true
+          template: Cisco Umbrella
+          target: ocsf.metadata.product.name
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.vendor_name
+          enabled: true
+          template: Cisco
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: true
+    - type: pipeline
       name: " OCSF sub pipeline for DNS Activity [4003]"
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: service:dns
       processors:
@@ -619,151 +768,6 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-        - type: string-builder-processor
-          name: Add ocsf.metadata.product.name
-          enabled: true
-          template: Cisco Umbrella
-          target: ocsf.metadata.product.name
-          replaceMissing: true
-        - type: string-builder-processor
-          name: Add ocsf.metadata.product.vendor_name
-          enabled: true
-          template: Cisco
-          target: ocsf.metadata.product.vendor_name
-          replaceMissing: true
-    - type: pipeline
-      name: OCSF sub pipeline for HTTP Activity [4002]
-      enabled: true
-      filter:
-        query: service:proxy
-      processors:
-        - type: schema-processor
-          name: Apply OCSF schema for 4002
-          enabled: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: HTTP Activity
-            classUid: 4002
-            extensions: []
-            profiles: []
-          mappers:
-            - name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: '@requestmethod:"CONNECT"'
-                  name: Connect
-                  id: 1
-                - filter:
-                    query: '@requestmethod:"DELETE"'
-                  name: Delete
-                  id: 2
-                - filter:
-                    query: '@requestmethod:"GET"'
-                  name: Get
-                  id: 3
-                - filter:
-                    query: '@requestmethod:"HEAD"'
-                  name: Head
-                  id: 4
-                - filter:
-                    query: '@requestmethod:"OPTIONS"'
-                  name: Options
-                  id: 5
-                - filter:
-                    query: '@requestmethod:"POST"'
-                  name: Post
-                  id: 6
-                - filter:
-                    query: '@requestmethod:"PUT"'
-                  name: Put
-                  id: 7
-                - filter:
-                    query: '@requestmethod:"TRACE"'
-                  name: Trace
-                  id: 8
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Informational
-                  id: 1
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: Map `timestamp` to `ocsf.time`
-              sources:
-                - timestamp
-              sourceType: attribute
-              target: ocsf.time
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `statuscode` to `ocsf.http_response.code`
-              sources:
-                - statuscode
-              sourceType: attribute
-              target: ocsf.http_response.code
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `internalip` to `ocsf.src_endpoint.ip`
-              sources:
-                - internalip
-              sourceType: attribute
-              target: ocsf.src_endpoint.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `statuscode` to `ocsf.status_code`
-              sources:
-                - statuscode
-              sourceType: attribute
-              target: ocsf.status_code
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `useragent` to `ocsf.http_request.user_agent`
-              sources:
-                - useragent
-              sourceType: attribute
-              target: ocsf.http_request.user_agent
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `http.referer` to `ocsf.http_request.referrer`
-              sources:
-                - http.referer
-              sourceType: attribute
-              target: ocsf.http_request.referrer
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `http.url` to `ocsf.http_request.url.url_string`
-              sources:
-                - http.url
-              sourceType: attribute
-              target: ocsf.http_request.url.url_string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
         - type: string-builder-processor
           name: Add ocsf.metadata.product.name
           enabled: true
