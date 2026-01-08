@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 6.2.0 / 2025-11-26
+## 6.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
@@ -12,7 +12,7 @@
 
 * Fix the example in the config template ([#21869](https://github.com/DataDog/integrations-core/pull/21869))
 
-## 6.1.1 / 2025-10-31
+## 6.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 
