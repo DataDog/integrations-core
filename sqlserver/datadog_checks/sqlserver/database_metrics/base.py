@@ -33,6 +33,18 @@ class SqlserverDatabaseMetricsBase:
         self._query_executors: List[QueryExecutor] = []
         self.log = get_check_logger()
 
+
+    # SQLSERVER_MAJOR_VERSIONS = [
+    #     (2025, 17),
+    #     (2022, 16),
+    #     (2019, 15),
+    #     (2017, 14),
+    #     (2016, 13),
+    #     (2014, 12),
+    #     (2012, 11),
+    #     (2008, 10),     # 2008 and 2008 R2 share major version 10, but R2 is 10.50.x, 2008 is 10.00.x
+    # ]
+    # https://learn.microsoft.com/en-us/troubleshoot/sql/releases/download-and-install-latest-updates
     @property
     def major_version(self) -> Optional[int]:
         return self.server_static_info.get(STATIC_INFO_MAJOR_VERSION, 0)
