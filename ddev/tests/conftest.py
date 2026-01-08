@@ -137,6 +137,8 @@ def temp_dir(tmp_path) -> Path:
 
 @pytest.fixture(scope='session', autouse=True)
 def isolation() -> Generator[Path, None, None]:
+    from unittest.mock import patch
+
     with temp_directory() as d:
         data_dir = d / 'data'
         data_dir.mkdir()
@@ -149,7 +151,9 @@ def isolation() -> Generator[Path, None, None]:
             'LINES': '24',
         }
         with d.as_cwd(default_env_vars):
-            yield d
+            # Prevent upgrade check from registering atexit handlers during tests
+            with patch('ddev.cli.upgrade_check.atexit.register'):
+                yield d
 
 
 @pytest.fixture(scope='session')
