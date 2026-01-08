@@ -651,35 +651,35 @@ pipeline:
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: '@requestmethod:"CONNECT"'
+                    query: '@http.method:"CONNECT"'
                   name: Connect
                   id: 1
                 - filter:
-                    query: '@requestmethod:"DELETE"'
+                    query: '@http.method:"DELETE"'
                   name: Delete
                   id: 2
                 - filter:
-                    query: '@requestmethod:"GET"'
+                    query: '@http.method:"GET"'
                   name: Get
                   id: 3
                 - filter:
-                    query: '@requestmethod:"HEAD"'
+                    query: '@http.method:"HEAD"'
                   name: Head
                   id: 4
                 - filter:
-                    query: '@requestmethod:"OPTIONS"'
+                    query: '@http.method:"OPTIONS"'
                   name: Options
                   id: 5
                 - filter:
-                    query: '@requestmethod:"POST"'
+                    query: '@http.method:"POST"'
                   name: Post
                   id: 6
                 - filter:
-                    query: '@requestmethod:"PUT"'
+                    query: '@http.method:"PUT"'
                   name: Put
                   id: 7
                 - filter:
-                    query: '@requestmethod:"TRACE"'
+                    query: '@http.method:"TRACE"'
                   name: Trace
                   id: 8
               targets:
