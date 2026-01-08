@@ -946,13 +946,15 @@ tests:
         destination:
           ip: ""
       ocsf:
+        activity_id: 6
+        activity_name: "Post"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "HTTP Activity"
         class_uid: 4002
         http_request:
           referrer: ""
-          url: 
+          url:
             url_string: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
           user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
         http_response:
@@ -979,6 +981,7 @@ tests:
         type: "content"
       port: 443
       referer: ""
+      requestmethod: "POST"
       responsefilename: ""
       securityoverridden: false
       sha256: ""
@@ -1302,13 +1305,15 @@ tests:
         destination:
           ip: ""
       ocsf:
+        activity_id: 6
+        activity_name: "Post"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "HTTP Activity"
         class_uid: 4002
         http_request:
           referrer: ""
-          url: 
+          url:
             url_string: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
           user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
         http_response:
@@ -1335,6 +1340,7 @@ tests:
         type: "content"
       port: 443
       referer: ""
+      requestmethod: "POST"
       responsefilename: ""
       securityoverridden: false
       sha256: ""
