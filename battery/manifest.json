@@ -10,7 +10,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor the health of your laptop's battery.",
-    "title": "battery",
+    "title": "Battery",
     "media": [],
     "classifier_tags": [
       "Supported OS::Windows",
@@ -21,9 +21,14 @@
     ]
   },
   "assets": {
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {}
+    "integration": {
+      "source_type_name": "Battery",
+      "metrics": {
+        "prefix": "system.",
+        "check": "system.battery.current_charge_pct",
+        "metadata_path": "metadata.csv"
+      }
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

@@ -4,6 +4,7 @@
 
 This check monitors battery health of MacOS and Windows laptops.
 
+**Minimum Agent version:** 7.75.0
 
 ## Setup
 
@@ -14,17 +15,17 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-The configuration is located in the `battery.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][1]. See the [sample wlan.d/conf.yaml][4] for all available configuration options. When you are done editing the configuration file, [restart the Agent][11] to load the new configuration.
+The configuration is located in the `battery.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][1]. See the [sample battery.d/conf.yaml][4] for all available configuration options. When you are done editing the configuration file, [restart the Agent][5] to load the new configuration.
 
 ### Validation
 
-!!! Add steps to validate integration is functioning as expected !!!
+[Run the Agent's `status` subcommand][6] and look for `battery` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-battery does not include any metrics.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -37,6 +38,8 @@ Need help? Contact [Datadog support][3].
 [1]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
-[4]: <LINK-to-conf.yaml>
+[4]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/battery.d/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/battery/metadata.csv
 
