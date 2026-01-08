@@ -66,9 +66,9 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
     def enabled(self) -> bool:
         if not self.include_ao_metrics:
             return False
-        if not self.year and not is_azure_database(self.engine_edition):
-            return False
-        if self.year > 2012 or is_azure_database(self.engine_edition):
+        if is_azure_database(self.engine_edition):
+            return True
+        if self.check.major_version > 11:
             return True
         return False
 
@@ -84,8 +84,8 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
-            f"year={self.year}, "
-            f"engine_edition={self.engine_edition}, "
+            f"year={self.check.year}, "
+            f"engine_edition={self.check.engine_edition}, "
             f"include_ao_metrics={self.include_ao_metrics})"
         )
 
@@ -168,12 +168,12 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
         }
 
         # Include metrics based on version
-        if self.year >= 2016:
+        if self.major_version >= 13:
             column_definitions_metrics["DRS.secondary_lag_seconds"] = {
                 "name": "ao.secondary_lag_seconds",
                 "type": "gauge",
             }
-        if self.year >= 2014:
+        if self.major_version >= 12:
             column_definitions_metrics["DRS.is_primary_replica"] = {
                 "name": "ao.is_primary_replica",
                 "type": "gauge",
