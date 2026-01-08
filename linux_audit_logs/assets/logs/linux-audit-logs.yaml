@@ -460,7 +460,10 @@ pipeline:
       enabled: true
       filter:
         query: "@type:(ADD_GROUP OR DEL_GROUP OR ADD_USER OR DEL_USER OR USER_CHAUTHTOK
-          OR USER_AUTH OR ROLE_ASSIGN OR ROLE_REMOVE OR PATH)"
+          OR USER_AUTH OR ROLE_ASSIGN OR ROLE_REMOVE OR PATH OR USER_ROLE_CHANGE
+          OR USER_SELINUX_ERR OR DAEMON_CONFIG OR DAEMON_ABORT OR
+          USER_MAC_CONFIG_CHANGE OR MAC_CONFIG_CHANGE OR MAC_STATUS OR
+          MAC_POLICY_LOAD OR AVC OR CONFIG_CHANGE OR SYSCALL)"
       processors:
         - type: string-builder-processor
           name: Add product name
