@@ -167,8 +167,6 @@ Then create the same user from a mongos proxy. This action creates the local use
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
-
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
@@ -220,7 +218,7 @@ To configure this check for an Agent running on a host:
 
 ##### Database Autodiscovery
 
-Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance. 
+Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance.
 Please note that database autodiscovery is disabled by default. Read access to the autodiscovered databases is required to collect metrics from them.
 To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
 
