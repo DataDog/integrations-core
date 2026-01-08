@@ -110,6 +110,8 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
     config = ConfigFileWithOverrides(path)
     config.reset()
 
+    # Disable upgrade check in tests to avoid messages spam.
+    config.global_model.upgrade_check = False
     # Provide a real default for times when tests have no need to modify the repo
     config.global_model.repos['core'] = str(local_repo)
     config.save()
