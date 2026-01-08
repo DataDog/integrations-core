@@ -5,7 +5,6 @@
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
 )
-from datadog_checks.sqlserver.utils import is_azure_database
 
 from .base import SqlserverDatabaseMetricsBase
 

@@ -171,6 +171,7 @@ def parse_sqlserver_year(version):
         return None
     return int(match.group(1))
 
+
 def parse_sqlserver_major_version(version):
     """
     Parses the SQL Server major version out of the full version
