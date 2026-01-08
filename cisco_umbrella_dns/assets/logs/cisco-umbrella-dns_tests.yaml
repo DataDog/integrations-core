@@ -952,7 +952,8 @@ tests:
         class_uid: 4002
         http_request:
           referrer: ""
-          url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+          url: 
+            url_string: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
           user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
         http_response:
           code: 303
@@ -1307,7 +1308,8 @@ tests:
         class_uid: 4002
         http_request:
           referrer: ""
-          url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+          url: 
+            url_string: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
           user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
         http_response:
           code: 303

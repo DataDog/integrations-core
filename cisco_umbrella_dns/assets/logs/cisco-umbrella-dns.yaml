@@ -231,8 +231,8 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Request URL
-    path: ocsf.http_request.url
+    name: Request URL String
+    path: ocsf.http_request.url.url_string
     source: log
 pipeline:
   type: pipeline
@@ -651,35 +651,35 @@ pipeline:
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: '@requestmethod:"Connect"'
+                    query: '@requestmethod:"CONNECT"'
                   name: Connect
                   id: 1
                 - filter:
-                    query: '@requestmethod:"Delete"'
+                    query: '@requestmethod:"DELETE"'
                   name: Delete
                   id: 2
                 - filter:
-                    query: '@requestmethod:"Get"'
+                    query: '@requestmethod:"GET"'
                   name: Get
                   id: 3
                 - filter:
-                    query: '@requestmethod:"Head"'
+                    query: '@requestmethod:"HEAD"'
                   name: Head
                   id: 4
                 - filter:
-                    query: '@requestmethod:"Options"'
+                    query: '@requestmethod:"OPTIONS"'
                   name: Options
                   id: 5
                 - filter:
-                    query: '@requestmethod:"Post"'
+                    query: '@requestmethod:"POST"'
                   name: Post
                   id: 6
                 - filter:
-                    query: '@requestmethod:"Put"'
+                    query: '@requestmethod:"PUT"'
                   name: Put
                   id: 7
                 - filter:
-                    query: '@requestmethod:"Trace"'
+                    query: '@requestmethod:"TRACE"'
                   name: Trace
                   id: 8
               targets:
@@ -756,11 +756,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `http.url` to `ocsf.http_request.url`
+            - name: Map `http.url` to `ocsf.http_request.url.url_string`
               sources:
                 - http.url
               sourceType: attribute
-              target: ocsf.http_request.url
+              target: ocsf.http_request.url.url_string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
