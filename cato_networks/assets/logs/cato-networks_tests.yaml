@@ -166,7 +166,6 @@ tests:
       "time" : 1763478148991,
       "event_message" : "ApiKey login successfully"
     }
-  service: "events"
   result:
     custom:
       account_id: 20000232
@@ -190,6 +189,7 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
+      service: "events"
       src_country: "India"
       src_country_code: "IN"
       src_is_site_or_vpn: "API"
@@ -257,7 +257,6 @@ tests:
       "indication" : "Cybersquatting Malicious Activity",
       "status" : "Open"
     }
-  service: "events"
   result:
     custom:
       account_id: 20000232
@@ -283,6 +282,7 @@ tests:
       raw_data: ""
       rule_id: "691d9f390a267b749814b123"
       rule_name: "Test"
+      service: "events"
       src_is_site_or_vpn: "SDP User"
       src_site_id: 2
       src_site_name: "John Doe"
@@ -390,7 +390,6 @@ tests:
       "event_id" : "e278205a1f4c73",
       "time" : 1763473282069
     }
-  service: "events"
   result:
     custom:
       ISP_name: "Bharti Airtel Ltd."
@@ -448,6 +447,7 @@ tests:
       qos_priority: 255
       rule_id: "3145367409754000885"
       rule_name: "Block QUIC services"
+      service: "events"
       src_country: "India"
       src_country_code: "IN"
       src_is_site_or_vpn: "SDP User"
@@ -542,7 +542,6 @@ tests:
       "event_message" : "License job applied 1 and revoked 0 licenses",
       "time_str" : "2025-11-19T05:52:40Z"
     }
-  service: "events"
   result:
     custom:
       account_id: 20000232
@@ -557,6 +556,7 @@ tests:
         name: "System"
       internalId: "a7cc4c4bb7fe123a"
       internal_id: "a7cc4c4bb7feda4e"
+      service: "events"
       time: 1763531560065
       time_str: "2025-11-19T05:52:40Z"
     message: |-

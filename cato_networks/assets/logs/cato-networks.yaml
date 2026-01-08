@@ -124,6 +124,23 @@ pipeline:
   filter:
     query: source:cato-networks
   processors:
+    - type: pipeline
+      name: Parsing events
+      enabled: true
+      filter:
+        query: -service:audit-logs
+      processors:
+        - type: string-builder-processor
+          name: Set `service` to events
+          enabled: true
+          template: events
+          target: service
+          replaceMissing: true
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
     - type: date-remapper
       name: Define `fieldsMap.insertion_date`, `time` as the official date of the log
       enabled: true
