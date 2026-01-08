@@ -169,7 +169,7 @@ def test_bjobs_no_output(mock_client, dd_run_check, aggregator, instance, caplog
 
     assert_metrics(ALL_DEFAULT_METRICS, BJOBS_METRICS, aggregator)
 
-    assert "Skipping bjobs metrics; unexpected cli command output. Number of columns: 1, expected: 12" in caplog.text
+    assert "Skipping bjobs metrics; unexpected cli command output. Number of columns: 1, expected: 14" in caplog.text
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

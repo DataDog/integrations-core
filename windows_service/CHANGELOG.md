@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 6.6.0 / 2025-11-26
+## 6.6.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
@@ -11,7 +11,7 @@
 * Add restarts metric to Windows services ([#21840](https://github.com/DataDog/integrations-core/pull/21840))
 * Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
 
-## 6.5.0 / 2025-10-31
+## 6.5.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

@@ -4,8 +4,6 @@ on:
   push:
     tags:
     - ddev-v*
-    branches:
-    - master
   pull_request:
     paths:
     - .github/workflows/build-ddev.yml
