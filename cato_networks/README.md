@@ -47,7 +47,7 @@ For more information, see [Configuring the AWS S3 Bucket][2].
 For more information on configuring the event integration in a CATO network, see [Adding Amazon S3 Integration for Events][3].
 
 #### Configure Datadog Forwarder
-See information on configuring the [Datadog Forwarder][4].
+See information on configuring the [Datadog Forwarder][4]. When configuring the Lambda Forwarder, set the environment variable **DD_SOURCE** to **cato-networks**.
 
 
 ## Data collected
