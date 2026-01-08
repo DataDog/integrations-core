@@ -24,13 +24,13 @@ Integrate Valence Security with Datadog to analyze alerts and audit logs using p
    - `app.valencesecurity.com`: US
    - `appeu.valencesecurity.com`: EU
 
-### Connect your Valence Security Account to Datadog
+### Connect your Valence Security account to Datadog
 
-1. Add your `Region` and `API Key`.
+1. Add your `Region` and `API key`.
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
    | Region | The Valence Security region. |
-   | API Key | The Valence Security API key. |
+   | API key | The Valence Security API key. |
    | Get Alerts | Collect alert logs from Valence Security (enabled by default). |
    | Get Audit Logs | Collect audit logs from Valence Security (enabled by default).  |
 2. Click **Save**.

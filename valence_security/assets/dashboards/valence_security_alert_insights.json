@@ -1,6 +1,6 @@
 {
     "title": "Valence Security Alert Insights",
-    "description": "This dashboard provides detailed visibility into SaaS security risks by detecting suspicious activities, misconfigurations, identity threats, and data exposure across cloud applications.",
+    "description": "This dashboard provides visibility into SaaS security risks, including suspicious activity, misconfigurations, identity threats, and data exposure across cloud applications.",
     "widgets": [
         {
             "id": 2839099304967605,
@@ -322,7 +322,7 @@
                         "id": 8530488148624033,
                         "definition": {
                             "type": "note",
-                            "content": "This group offers insights into alert activity, covering alert types, top alerts and actors, alert status trends, key actions, MITRE ATT&CK tactics and techniques, and associated client IP and geographic details.",
+                            "content": "This group offers insights into alert activity, covering alert types, top alerts and actors, alert status trends, key actions, MITRE ATT&CK tactics and techniques, and associated client IP and geolocation data.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",

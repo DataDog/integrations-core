@@ -1,6 +1,6 @@
 {
     "title": "Valence Security Audit Insights",
-    "description": "This dashboard provides detailed visibility into user and system activities, capturing configuration changes, access events, and administrative actions.",
+    "description": "This dashboard provides visibility into user and system activities, including configuration changes, access events, and administrative actions.",
     "widgets": [
         {
             "id": 2839099304967605,
