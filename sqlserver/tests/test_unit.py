@@ -30,6 +30,7 @@ from datadog_checks.sqlserver.utils import (
     get_unixodbc_sysconfig,
     is_non_empty_file,
     parse_sqlserver_year,
+    parse_sqlserver_major_version,
     set_default_driver_conf,
 )
 
@@ -497,6 +498,11 @@ Microsoft SQL Server 2019 (RTM-CU12) (KB5004524) - 15.0.4153.1 (X64)
 def test_parse_sqlserver_year(version, expected_year):
     assert parse_sqlserver_year(version) == expected_year
 
+@pytest.mark.parametrize(
+    "version,expected_major_version", [(SQL_SERVER_2012_VERSION_EXAMPLE, 11), (SQL_SERVER_2019_VERSION_EXAMPLE, 15)]
+)
+def test_parse_sqlserver_major_version(version, expected_major_version):
+    assert parse_sqlserver_major_version(version) == expected_major_version
 
 @pytest.mark.parametrize(
     "instance_host,split_host,split_port",

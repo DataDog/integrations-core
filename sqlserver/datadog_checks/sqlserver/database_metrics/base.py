@@ -38,6 +38,18 @@ class SqlserverDatabaseMetricsBase:
     def major_version(self) -> Optional[int]:
         return self.server_static_info.get(STATIC_INFO_MAJOR_VERSION, 0)
 
+    # Database Engine edition of the instance of SQL Server installed on the server.
+    # 1 = Personal or Desktop Engine (Not available in SQL Server 2005 (9.x) and later versions.)
+    # 2 = Standard (For Standard, Standard Developer, Web, and Business Intelligence.)
+    # 3 = Enterprise (For Enterprise, Enterprise Developer, Developer, and Evaluation editions.)
+    # 4 = Express (For Express, Express with Tools, and Express with Advanced Services)
+    # 5 = SQL Database
+    # 6 = Azure Synapse Analytics
+    # 8 = Azure SQL Managed Instance
+    # 9 = Azure SQL Edge (For all editions of Azure SQL Edge)
+    # 11 = Azure Synapse serverless SQL pool, or Microsoft Fabric
+    # 12 = Microsoft Fabric SQL database in Microsoft Fabric.
+    # https://learn.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql?view=sql-server-ver17
     @property
     def engine_edition(self) -> Optional[int]:
         return self.server_static_info.get(STATIC_INFO_ENGINE_EDITION)
