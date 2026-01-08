@@ -1676,7 +1676,7 @@ pipeline:
                   name: Delete
                   id: 4
                 - filter:
-                    query: "@nametype:(CREATE OR DELETE PARENT OR NORMAL OR UNKNOWN)"
+                    query: "-@nametype:(CREATE OR DELETE PARENT OR NORMAL OR UNKNOWN)"
                   name: Other
                   id: 99
               targets:
