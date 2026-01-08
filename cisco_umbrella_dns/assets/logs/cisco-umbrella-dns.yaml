@@ -234,15 +234,6 @@ facets:
     name: Request URL
     path: ocsf.http_request.url
     source: log
-  - groups:
-      - OCSF
-    name: Request Method
-    path: ocsf.http_request.http_method
-    source: log
-  - groups:
-      - OCSF
-    name: Request User Agent
-    path: ocsf.http_request.user_agent
 pipeline:
   type: pipeline
   name: Cisco Umbrella DNS
