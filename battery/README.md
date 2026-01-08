@@ -10,7 +10,7 @@ This check monitors battery health of MacOS and Windows laptops.
 
 ### Installation
 
-The battery check is included in the [Datadog Agent][2] package.
+The Battery check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -21,6 +21,8 @@ The configuration is located in the `battery.d/conf.yaml` file in the `conf.d/` 
 
 [Run the Agent's `status` subcommand][6] and look for `battery` under the Checks section.
 
+**Note**: If no battery is detected in the system, the check will not run.
+
 ## Data Collected
 
 ### Metrics
@@ -29,7 +31,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-battery does not include any events.
+The Battery check does not include any events.
 
 ## Troubleshooting
 
