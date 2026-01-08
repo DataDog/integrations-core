@@ -15,7 +15,6 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 class SqlserverDatabaseMetricsBase:
     def __init__(
         self,
-        check,
         config,
         new_query_executor,
         server_static_info,

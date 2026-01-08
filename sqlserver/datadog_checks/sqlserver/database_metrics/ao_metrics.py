@@ -68,7 +68,7 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
             return False
         if is_azure_database(self.engine_edition):
             return True
-        if self.check.major_version > 11:
+        if self.major_version > 11:
             return True
         return False
 
@@ -84,8 +84,8 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
-            f"year={self.check.year}, "
-            f"engine_edition={self.check.engine_edition}, "
+            f"major_version={self.major_version}, "
+            f"engine_edition={self.engine_edition}, "
             f"include_ao_metrics={self.include_ao_metrics})"
         )
 
