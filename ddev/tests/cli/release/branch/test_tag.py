@@ -8,9 +8,12 @@ import pytest
 from ddev.utils.git import GitRepository
 
 
-def test_tag_check_open_prs_warns_and_allows_continue(ddev, mocker, monkeypatch):
+def test_tag_check_open_prs_warns_and_allows_continue(ddev, mocker, monkeypatch, config_file):
     monkeypatch.setenv('DD_GITHUB_USER', 'test-user')
     monkeypatch.setenv('DD_GITHUB_TOKEN', 'test-token')
+    # Also set in config (env vars aren't re-read after config_file fixture runs)
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
 
     mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.99.x')
     mocker.patch('ddev.utils.git.GitRepository.pull', return_value='OK')
@@ -70,10 +73,13 @@ def test_tag_skip_open_pr_check(ddev, mocker, monkeypatch):
     list_prs.assert_not_called()
 
 
-def test_tag_no_github_token_does_not_abort(ddev, mocker, monkeypatch):
+def test_tag_no_github_token_does_not_abort(ddev, mocker, monkeypatch, config_file):
     # Delete these env vars for testing
     for env_var in ('DD_GITHUB_USER', 'DD_GITHUB_TOKEN', 'GITHUB_USER', 'GITHUB_ACTOR', 'GH_TOKEN', 'GITHUB_TOKEN'):
         monkeypatch.delenv(env_var, raising=False)
+    # Also clear from config (env vars were already read when config_file fixture ran)
+    config_file.model.github = {'user': '', 'token': ''}
+    config_file.save()
 
     mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.99.x')
     mocker.patch('ddev.utils.git.GitRepository.pull', return_value='OK')
