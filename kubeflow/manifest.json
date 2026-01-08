@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "0db7b333-38a1-4e09-af1b-317da2f9f413",
   "app_id": "kubeflow",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

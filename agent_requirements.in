@@ -6,12 +6,11 @@ binary==1.0.2
 boto3==1.40.21
 botocore==1.40.21
 cachetools==6.2.0
-clickhouse-cityhash==1.0.2.4
-clickhouse-driver==0.2.9
+clickhouse-connect==0.8.18
 cm-client==45.0.4
-confluent-kafka==2.8.0
+confluent-kafka==2.11.1
 cryptography==45.0.6
-ddtrace==3.12.3
+ddtrace==3.16.4
 dnspython==2.7.0
 fastavro==1.12.0
 foundationdb==6.3.25
@@ -21,7 +20,7 @@ jellyfish==1.2.0
 kubernetes==33.1.0
 lazy-loader==0.4
 ldap3==2.9.1
-lxml==5.1.1
+lxml==6.0.1
 lz4==4.4.4
 mmh3==5.2.0
 oauthlib==3.3.1
@@ -29,13 +28,11 @@ openstacksdk==4.7.0
 orjson==3.11.3
 packaging==25.0
 paramiko==3.5.1
-ply==3.11
 prometheus-client==0.22.1
 protobuf==6.32.0
 psutil==6.0.0
-psycopg[binary,pool]==3.2.7
+psycopg[c,pool]==3.2.10
 pyasn1==0.4.8
-pycryptodomex==3.23.0
 pydantic==2.11.7
 pyjwt==2.10.1
 pymongo[srv]==4.8.0; python_version >= '3.9'
@@ -43,7 +40,6 @@ pymqi==1.12.11
 pymysql==1.1.2
 pyodbc==5.2.0
 pyopenssl==25.1.0
-pysmi==1.2.1
 pysnmp-mibs==0.1.6
 pysnmp==5.1.0
 pysocks==1.7.1
@@ -53,7 +49,7 @@ python3-gearman==0.1.0; sys_platform != 'win32'
 pyvmomi==8.0.3.0.1
 pywin32==311; sys_platform == 'win32'
 pyyaml==6.0.2
-redis==6.4.0
+redis==6.2.0
 requests-kerberos==0.15.0
 requests-ntlm==1.3.0
 requests-oauthlib==2.0.0
@@ -68,6 +64,6 @@ simplejson==3.20.1
 snowflake-connector-python==3.17.2
 supervisor==4.3.0
 tuf==4.0.0
-urllib3==2.5.0
+urllib3==2.6.2
 vertica-python==1.4.0
 wrapt==1.17.3

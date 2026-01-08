@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "67feed3c-1676-4d6b-9d72-3ca8c0a6e3dc",
   "app_id": "windows-certificate",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -34,7 +35,6 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "iissvcs",
         "CERTLM.MSC"
       ],
       "service_checks": {

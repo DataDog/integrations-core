@@ -10,6 +10,8 @@ This integration parses the following log types:
 
 Get detailed visibility into these logs with out-of-the-box dashboards, and strengthen security with prebuilt Cloud SIEM detection rules for proactive threat monitoring and response.
 
+**Minimum Agent version:** 7.67.0
+
 ## Setup
 
 ### Installation

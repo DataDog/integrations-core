@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import threading
 import time
 
 import psycopg
 import pytest
+
+from datadog_checks.base import AgentCheck
 
 from .common import PASSWORD_ADMIN, POSTGRES_VERSION, USER_ADMIN
 
@@ -67,16 +70,16 @@ def _get_superconn(db_instance, application_name='test', autocommit=True):
     )
 
 
-def lock_table(pg_instance, table, lock_mode):
-    lock_conn = _get_superconn(pg_instance)
+def lock_table(pg_instance, table, lock_mode, application_name='test'):
+    lock_conn = _get_superconn(pg_instance, application_name)
     cur = lock_conn.cursor()
     cur.execute('BEGIN')
     cur.execute(f'lock {table} IN {lock_mode} MODE')
     return lock_conn
 
 
-def kill_session(pg_instance, query_pattern):
-    with _get_superconn(pg_instance) as conn:
+def kill_session(pg_instance, query_pattern, application_name='test'):
+    with _get_superconn(pg_instance, application_name) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 f"""SELECT pg_cancel_backend(pid)
@@ -85,19 +88,19 @@ WHERE query ~* '{query_pattern}' AND pid!=pg_backend_pid()"""
             )
 
 
-def kill_vacuum(pg_instance):
-    kill_session(pg_instance, '^vacuum')
+def kill_vacuum(pg_instance, application_name='test'):
+    kill_session(pg_instance, '^vacuum', application_name)
 
 
 # Wait until the query yielding a single value cross the provided threshold
-def _wait_for_value(db_instance, lower_threshold, query, attempts=10):
+def _wait_for_value(db_instance, lower_threshold, query, attempts=10, application_name='test'):
     value = 0
     current_attempt = 0
     # Stats table behave slightly differently than normal tables
     # Repeating the same query within a transaction will yield the
     # same value, despite the fact that the transaction is in READ COMMITED
     # To avoid this, we avoid transaction block created by the with statement
-    conn = _get_superconn(db_instance)
+    conn = _get_superconn(db_instance, application_name)
     while value <= lower_threshold and current_attempt < attempts:
         with conn.cursor() as cur:
             cur.execute(query)
@@ -131,7 +134,7 @@ def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
     return run_query_thread(pg_instance, vacuum_query, application_name, init_stmts)
 
 
-def run_one_check(check, cancel=True):
+def run_one_check(check: AgentCheck, cancel=True):
     """
     Run check and immediately cancel.
     Waits for all threads to close before continuing.
@@ -145,6 +148,17 @@ def run_one_check(check, cancel=True):
         check.statement_metrics._job_loop_future.result()
     if check.metadata_samples._job_loop_future is not None:
         check.metadata_samples._job_loop_future.result()
+
+
+def normalize_object(obj):
+    if isinstance(obj, dict):
+        return {k: normalize_object(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        normalized = [normalize_object(item) for item in obj]
+        return sorted(normalized, key=lambda x: json.dumps(x, sort_keys=True))
+    if isinstance(obj, tuple):
+        return tuple(normalize_object(item) for item in obj)
+    return obj
 
 
 # WaitGroup is used like go's sync.WaitGroup

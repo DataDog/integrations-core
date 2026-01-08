@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e03a0916-8708-4417-82e4-1f0c7bbee655",
   "app_id": "active-directory",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

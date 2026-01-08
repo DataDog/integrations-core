@@ -6,8 +6,8 @@
             "id": 4568158192584104,
             "definition": {
                 "type": "image",
-                "url": "https://www.iboss.com/storage/2022/09/500x144-logo-black@2x.png",
-                "url_dark_theme": "https://www.iboss.com/core/assets/iboss/img/2022_iboss-wordmark-primary-white.svg",
+                "url": "https://static.datadoghq.com/static/images/logos/iboss_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/iboss_reversed_large.svg",
                 "sizing": "contain",
                 "margin": "md",
                 "has_background": true,

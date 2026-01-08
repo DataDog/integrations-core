@@ -10,6 +10,8 @@ Enable the Datadog-Ceph integration to:
 - Receive service checks in case of issues
 - Monitor I/O performance metrics
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

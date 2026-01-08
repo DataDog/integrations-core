@@ -9,7 +9,7 @@ on:
         type: string
       environment:
         required: false
-        description: Environment to test, e.g. "py3.12". By default runs all
+        description: Environment to test, e.g. "py3.13". By default runs all
         default: ""
         type: string
       test-py3:
@@ -48,9 +48,9 @@ jobs:
     with:
       repo: core
 
-      job-name: "[${{ inputs.integration }} - ${{inputs.agent-image}}] ${{ inputs.platform }}"
+      job-name: "${{ inputs.integration }}-${{ inputs.platform }}-${{ inputs.environment }}"
       platform: ${{ inputs.platform }}
-      runner: ${{ inputs.platform == 'linux' && '["ubuntu-22.04"]' || inputs.platform == 'windows' && '["windows-2022"]' || '["macos-13"]' }}
+      runner: ${{ inputs.platform == 'linux' && '["ubuntu-22.04"]' || inputs.platform == 'windows' && '["windows-2022"]' || '["macos-14-large"]' }}
 
       target: ${{ inputs.integration }}
 
@@ -59,9 +59,8 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       target-env: ${{ inputs.environment }}
+      context: "test-agent-target"
     secrets: inherit
     permissions:
        # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github

@@ -267,6 +267,7 @@ class TestNew:
                 '0000000000000000000000000000000000000000\nFoo',
             ],
         )
+        mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
         return repo_with_towncrier.path / 'ddev' / 'changelog.d'
 
     def test_start(self, ddev, fragments_dir, helpers, mocker):

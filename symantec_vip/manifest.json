@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "291079db-0a41-435b-a908-747c06c703a2",
   "app_id": "symantec-vip",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

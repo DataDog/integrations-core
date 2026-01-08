@@ -2,13 +2,32 @@
 
 <!-- towncrier release notes start -->
 
+## 1.6.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 1.5.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 1.4.1 / 2025-09-24 / Agent 7.71.0
+
+***Fixed***:
+
+* Updated to build psycopg from source to fix a problem with FIPS compatibility ([#21074](https://github.com/DataDog/integrations-core/pull/21074))
+
 ## 1.4.0 / 2025-09-05
 
 ***Added***:
 
 * Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
 
-## 1.3.0 / 2025-09-04
+## 1.3.0 / 2025-09-04 / Agent 7.70.1
 
 ***Added***:
 

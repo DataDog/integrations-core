@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "88d1372f-1732-4d6d-b3b3-f2f4ccd08209",
   "app_id": "microsoft-dns",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

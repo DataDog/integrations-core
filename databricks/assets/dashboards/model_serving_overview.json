@@ -1,6 +1,6 @@
 {
   "title": "Databricks Model Serving",
-  "description": "This Dashboard provides a high level overview of your Pinecone service. Use it to monitor the health and performance of your vector database. \n\nFor further information, see the [Pinecone Integration Documentation](https://docs.datadoghq.com/integrations/pinecone/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "description": "This dashboard provides a high level overview of the health of your Databricks model serving endpoints.",
   "widgets": [
     {
       "id": 4831622862262762,
@@ -15,7 +15,7 @@
             "id": 696611051845420,
             "definition": {
               "type": "note",
-              "content": "This dashboard provides a high level overview of the health of your Databricks model serving endpoints. These include metrics such as latency, request rate, error rate, CPU usage, etc. This can be used to visualize how your serving infrastructure is behaving.\n\nFor more information about Databricks model serving, see [Databricks Model Serving](https://docs.databricks.com/en/machine-learning/model-serving/index.html) and [Serving Endpoints](https://docs.databricks.com/api/workspace/servingendpoints) .\n\nFor further information on Datadog's integration with Databricks, see the [Databricks Integration Documentation](##TODO##).",
+              "content": "This dashboard provides a high level overview of the health of your Databricks model serving endpoints. These include metrics such as latency, request rate, error rate, CPU usage, etc. This can be used to visualize how your serving infrastructure is behaving.\n\nFor more information about Databricks model serving, see [Databricks Model Serving](https://docs.databricks.com/en/machine-learning/model-serving/index.html) and [Serving Endpoints](https://docs.databricks.com/api/workspace/servingendpoints) .\n\nFor further information on Datadog's integration with Databricks, see the [Databricks Integration Documentation](https://docs.datadoghq.com/integrations/databricks/).",
               "background_color": "transparent",
               "font_size": "14",
               "text_align": "left",

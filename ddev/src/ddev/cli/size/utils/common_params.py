@@ -12,6 +12,7 @@ def common_params(func: Callable) -> Callable:
     @click.option("--compressed", is_flag=True, help="Measure compressed size")
     @click.option(
         "--format",
+        show_default=True,
         help="Format of the output (comma-separated values: png, csv, markdown, json)",
         callback=lambda _, __, v: v.split(",") if v else [],
     )
