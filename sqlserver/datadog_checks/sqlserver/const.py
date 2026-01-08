@@ -64,7 +64,6 @@ expected_sys_databases_columns = [
 ]
 
 DATABASE_SERVICE_CHECK_QUERY = """SELECT 1;"""
-SWITCH_DB_STATEMENT = """USE [{}];"""
 
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 

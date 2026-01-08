@@ -196,6 +196,7 @@ jobs:
 
     - name: Configure ddev
       run: |-
+        ddev config set upgrade_check false
         ddev config set repos.${{ inputs.repo }} .
         ddev config set repo ${{ inputs.repo }}
 
