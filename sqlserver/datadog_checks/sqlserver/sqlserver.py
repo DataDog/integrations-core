@@ -428,8 +428,8 @@ class SQLServer(DatabaseCheck):
                     if STATIC_INFO_MAJOR_VERSION not in self.static_info_cache:
                         cursor.execute("SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion")
                         result = cursor.fetchone()
-                        if result:
-                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
+                        if result and result[0] is not None:
+                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = int(result[0])
                         else:
                             self.log.warning("failed to load version static information due to empty results")
                             # Fallback to trying to parse the major version from the version string
