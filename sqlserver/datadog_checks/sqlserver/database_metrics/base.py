@@ -9,7 +9,7 @@ from typing import Callable, List, Optional
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.core import QueryExecutor
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS, STATIC_INFO_YEAR
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_RDS
 
 
 class SqlserverDatabaseMetricsBase:
@@ -34,8 +34,8 @@ class SqlserverDatabaseMetricsBase:
         self.log = get_check_logger()
 
     @property
-    def year(self) -> Optional[int]:
-        return self.server_static_info.get(STATIC_INFO_YEAR)
+    def major_version(self) -> Optional[int]:
+        return self.server_static_info.get(STATIC_INFO_MAJOR_VERSION, 0)
 
     @property
     def engine_edition(self) -> Optional[int]:
@@ -80,7 +80,7 @@ class SqlserverDatabaseMetricsBase:
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
-            f"year={self.year}, "
+            f"major_version={self.major_version}, "
             f"engine_edition={self.engine_edition})"
             f"is_rds={self.is_rds})"
         )

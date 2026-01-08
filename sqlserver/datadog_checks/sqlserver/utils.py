@@ -172,6 +172,18 @@ def parse_sqlserver_year(version):
     return int(match.group(1))
 
 
+def parse_sqlserver_major_version(version):
+    """
+    Parses the SQL Server major version out of the full version
+    :param version: String representation of full SQL Server version (from @@version)
+    :return: integer representation of SQL Server major version (i.e. 12, 13)
+    """
+    match = re.search(r"(\d+)\.\d+\.\d+\.\d+", version)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
 def is_azure_database(engine_edition):
     """
     Checks if engine edition matches Azure SQL MI or Azure SQL DB
