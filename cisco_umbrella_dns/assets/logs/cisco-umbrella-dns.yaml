@@ -424,7 +424,7 @@ pipeline:
         query: service:dns
       processors:
         - type: schema-processor
-          name: OCSF Processor - DNS Activity
+          name: Apply OCSF schema for 4003
           enabled: true
           schema:
             schemaType: ocsf
@@ -588,7 +588,7 @@ pipeline:
         query: service:proxy
       processors:
         - type: schema-processor
-          name: OCSF Processor - http activity
+          name: Apply OCSF schema for 4002
           enabled: true
           schema:
             schemaType: ocsf
