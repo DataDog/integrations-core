@@ -26,7 +26,7 @@ The integration runs commands such as `lsid`, `bhosts`, and `lsclusters`. In ord
 
 To get the environment variables necessary for the Agent service, locate the `<LSF_TOP_DIR>/conf/profile.lsf` file and run the following command:
 
-`env -i bash -c "source <LSF_TOP_DIR>/conf/profile.lsf; env"`
+```env -i bash -c "source <LSF_TOP_DIR>/conf/profile.lsf; env"```
 
 Running this command outputs a list of environment variables necessary to run the IBM Spectrum LSF commands.
 
@@ -88,43 +88,43 @@ Each time there is an Agent update, `/etc/init/datadog-agent.conf` is wiped and 
 
 1. Edit the `ibm_spectrum_lsf.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `ibm_spectrum_lsf` performance data. See the [sample ibm_spectrum_lsf.d/conf.yaml][4] for all available configuration options.
 
-The IBM Spectrum LSF integration runs a series of management commands to collect data. To control which commands are run and which metrics are emitted, use the `metric_sources` configuration option. By default, data from the following commands are collected, but you can enable more optional metrics or opt out of collecting any set of metrics: `lsclusters`, `lshosts`, `bhosts`, `lsload`, `bqueues`, `bslots`, `bjobs`.
+  The IBM Spectrum LSF integration runs a series of management commands to collect data. To control which commands are run and which metrics are emitted, use the `metric_sources` configuration option. By default, data from the following commands are collected, but you can enable more optional metrics or opt out of collecting any set of metrics: `lsclusters`, `lshosts`, `bhosts`, `lsload`, `bqueues`, `bslots`, `bjobs`.
 
-For example, if you want to only measure GPU-specific metrics, your `metrics_sources` will look like:
-```
-  metric_sources:
-    - lsload_gpu
-    - bhosts_gpu
-```
+  For example, if you want to only measure GPU-specific metrics, your `metrics_sources` will look like:
+  ```
+    metric_sources:
+      - lsload_gpu
+      - bhosts_gpu
+  ```
 
-The `badmin_perfmon` metric source collects data from the `badmin perfmon view -json` command. This collects [overall statistics][12] about the cluster. To collect these metrics, performance collection must be enabled on your server using the `badmin perfmon start <COLLECTION_INTERVAL>` command. By default, the integration runs this command automatically (and stops collection once the Agent is turned off). However, you can turn off this behavior by setting `badmin_perfmon_auto: false`.
+  The `badmin_perfmon` metric source collects data from the `badmin perfmon view -json` command. This collects [overall statistics][12] about the cluster. To collect these metrics, performance collection must be enabled on your server using the `badmin perfmon start <COLLECTION_INTERVAL>` command. By default, the integration runs this command automatically (and stops collection once the Agent is turned off). However, you can turn off this behavior by setting `badmin_perfmon_auto: false`.
 
-Since collecting these metrics can add extra load on your server, we recommend setting a higher collection interval for these metrics, or at least 60. The exact interval depends on the load and size of your cluster. View IBM Spectrum LSF's [recommendations][13] for managing high query load.
+  Since collecting these metrics can add extra load on your server, we recommend setting a higher collection interval for these metrics, or at least 60. The exact interval depends on the load and size of your cluster. View IBM Spectrum LSF's [recommendations][13] for managing high query load.
 
-Similarly, the `bhist` command collects information about completed jobs, which can be query-intensive, so we recommend monitoring this command with the `min_collection_interval` set to 60.
+  Similarly, the `bhist` command collects information about completed jobs, which can be query-intensive, so we recommend monitoring this command with the `min_collection_interval` set to 60.
 
-Here is a sample configuration monitoring all available metrics:
+  Here is a sample configuration monitoring all available metrics:
 
-```
-instances:
- - cluster_name: test-cluster
-   metric_sources:
-    - lsclusters
-    - lshosts
-    - bhosts
-    - lsload
-    - bqueues
-    - bslots
-    - bjobs
-    - lsload_gpu
-    - bhosts_gpu
-- cluster_name: test-cluster
-  badmin_perfmon_auto: false
-  metric_sources:
-    - badmin_perfmon
-    - bhist
-  min_collection_interval: 60
-```
+  ```
+  instances:
+  - cluster_name: test-cluster
+    metric_sources:
+      - lsclusters
+      - lshosts
+      - bhosts
+      - lsload
+      - bqueues
+      - bslots
+      - bjobs
+      - lsload_gpu
+      - bhosts_gpu
+  - cluster_name: test-cluster
+    badmin_perfmon_auto: false
+    metric_sources:
+      - badmin_perfmon
+      - bhist
+    min_collection_interval: 60
+  ```
 
 2. [Restart the Agent][5].
 
@@ -151,7 +151,7 @@ The IBM Spectrum LSF integration does not include any service checks.
 
 Use the `datadog-agent check` command to view the metrics the integration is collecting, as well as  debug logs from the check:
 
-`sudo -u dd-agent bash -c "source /usr/share/lsf/conf/profile.lsf && datadog-agent check ibm_spectrum_lsf -l debug"`
+```sudo -u dd-agent bash -c "source /usr/share/lsf/conf/profile.lsf && datadog-agent check ibm_spectrum_lsf -l debug"```
 
 Need help? Contact [Datadog support][9].
 
