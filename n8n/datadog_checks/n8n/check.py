@@ -63,7 +63,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                 else:
                     self.log.debug("Malformed N8N Server version format: %s", version)
             else:
-                self.log.debug("Could not retrieve version metadata.")
+                self.log.debug("Could not retrieve version metadata; code %s: %s", response.status_code response.reason)
         except Exception as e:
             self.log.debug("Error retrieving version metadata: %s", e)
 
