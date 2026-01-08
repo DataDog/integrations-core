@@ -821,7 +821,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.path
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: ocsf.user.uid
@@ -1662,7 +1662,7 @@ pipeline:
                 - filter:
                     query: "@nametype:UNKNOWN"
                   name: Unknown
-                  id: 1
+                  id: 0
                 - filter:
                     query: "@nametype:CREATE"
                   name: Create

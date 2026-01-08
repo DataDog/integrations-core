@@ -847,11 +847,13 @@ tests:
         activity_name: "Revoke Privileges"
         actor:
           process:
+            path: "/sbin/semanage"
             pid: 49119
             user:
               name: "root"
               uid: "0"
           session:
+            terminal: "pts/0"
             uid: "17"
           user:
             name: "devuser"
@@ -867,7 +869,7 @@ tests:
             vendor_name: "Linux"
           version: "1.5.0"
         privileges:
-          - "user_r"
+         - "user_r"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -882,7 +884,7 @@ tests:
       post_msg_kv: ""
       pre_msg_kv: ""
       privileges:
-          - "user_r"
+       - "user_r"
       ses: 17
       status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
