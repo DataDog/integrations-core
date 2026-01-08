@@ -8,7 +8,7 @@
 
 * Add collecting channel and queue desc fields as tags for metrics ([#21948](https://github.com/DataDog/integrations-core/pull/21948))
 
-## 8.6.0 / 2025-11-26
+## 8.6.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
