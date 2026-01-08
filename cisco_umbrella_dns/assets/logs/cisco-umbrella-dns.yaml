@@ -184,6 +184,65 @@ facets:
     unit:
       family: bytes
       name: byte
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+  - groups:
+      - OCSF
+    name: Request URL
+    path: ocsf.http_request.url
+    source: log
+  - groups:
+      - OCSF
+    name: Request Method
+    path: ocsf.http_request.http_method
+    source: log
+  - groups:
+      - OCSF
+    name: Request User Agent
+    path: ocsf.http_request.user_agent
 pipeline:
   type: pipeline
   name: Cisco Umbrella DNS
