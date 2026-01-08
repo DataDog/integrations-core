@@ -393,9 +393,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `http.user_agent_details.os.family` to `ocsf.src_endpoint.os`
+              name: Map `http.useragent_details.os.family` to `ocsf.src_endpoint.os`
               sources:
-                - http.user_agent_details.os.family
+                - http.useragent_details.os.family
               target: ocsf.src_endpoint.os
               preserveSource: true
               overrideOnConflict: true
