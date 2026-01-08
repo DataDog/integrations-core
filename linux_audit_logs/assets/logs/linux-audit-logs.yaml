@@ -406,84 +406,66 @@ pipeline:
       sources:
         - status
     - type: pipeline
-      name: OCSF pre transformations
-      enabled: true
-      filter:
-        query: "@type:(ADD_GROUP OR DEL_GROUP OR ADD_USER OR DEL_USER OR USER_CHAUTHTOK
-          OR USER_AUTH OR ROLE_ASSIGN OR ROLE_REMOVE)"
-      processors:
-        - type: string-builder-processor
-          name: Add product name
-          enabled: true
-          template: Linux Audit Logs
-          target: ocsf.metadata.product.name
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Add product vendor
-          enabled: true
-          template: Linux
-          target: ocsf.metadata.product.vendor_name
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{usr.id}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-    - type: pipeline
-      name: OCSF pre transformations for role assign
+      name: Parsing User Role Assign logs
       enabled: true
       filter:
         query: "@type:ROLE_ASSIGN"
       processors:
         - type: attribute-remapper
-          name: Map `msg.new-seuser` to `ocsf.user.name`
+          name: Map `msg.new-seuser` to `target_user_name`
           enabled: true
           sources:
             - msg.new-seuser
           sourceType: attribute
-          target: ocsf.user.name
+          target: target_user_name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: grok-parser
+          name: Convert `msg.new-role` into an array
+          enabled: true
+          source: msg.new-role
+          samples:
+            - staff_r
+          grok:
+            supportRules: ""
+            matchRules: rule_convert_role_into_array %{data:privileges:array}
     - type: pipeline
-      name: OCSF pre transformations for role remove
+      name: Parsing User Role Remove logs
       enabled: true
       filter:
         query: "@type:ROLE_REMOVE"
       processors:
         - type: attribute-remapper
-          name: Map `msg.old-seuser` to `ocsf.user.name`
+          name: Map `msg.old-seuser` to `target_user_name`
           enabled: true
           sources:
             - msg.old-seuser
           sourceType: attribute
-          target: ocsf.user.name
+          target: target_user_name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: grok-parser
+          name: Convert `msg.old-role` into an array
+          enabled: true
+          source: msg.old-role
+          samples:
+            - staff_r
+          grok:
+            supportRules: ""
+            matchRules: rule_convert_role_into_array %{data:privileges:array}
     - type: pipeline
-      name: OCSF pre transformations for class File System Activity [1001]
+      name: OCSF pre transformations
       enabled: true
       filter:
-        query: "@type:PATH"
+        query: "@type:(ADD_GROUP OR DEL_GROUP OR ADD_USER OR DEL_USER OR USER_CHAUTHTOK
+          OR USER_AUTH OR ROLE_ASSIGN OR ROLE_REMOVE OR PATH)"
       processors:
         - type: string-builder-processor
           name: Add product name
           enabled: true
-          template: Linux Audit Logs
+          template: Linux Audit
           target: ocsf.metadata.product.name
           replaceMissing: false
         - type: string-builder-processor
@@ -492,48 +474,6 @@ pipeline:
           template: Linux
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
-        - type: grok-parser
-          name: Extracting file or folder name
-          enabled: true
-          source: name
-          samples:
-            - /etc/shadow
-            - /run/
-            - /run/nginx.pid
-          grok:
-            supportRules: file_or_folder_path (/%{regex("[^/]*")})*
-            matchRules: >-
-              rule_extract_folder_name
-              %{file_or_folder_path}/%{regex("[^/]*"):folder_name}/
-
-              rule_extract_file_name %{file_or_folder_path}/%{data:file_name}
-        - type: grok-parser
-          name: Extracting file extention
-          enabled: true
-          source: file_name
-          samples:
-            - nginx.pid
-            - libcrypt.so.1
-            - ld.so.cache
-          grok:
-            supportRules: ""
-            matchRules: >-
-              rule_extract_file_extention_1
-              (%{regex("[^.]*")}.)+%{word:ocsf.file.ext}.%{number}
-
-              rule_extract_file_extention_2 (%{regex("[^.]*")}.)+%{word:ocsf.file.ext}
-        - type: string-builder-processor
-          name: Set ocsf.file.name attribute
-          enabled: true
-          template: "%{folder_name}%{file_name}"
-          target: ocsf.file.name
-          replaceMissing: true
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{ouid}%{usr.id}"
-          target: ocsf.actor.user.uid
-          replaceMissing: true
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
@@ -542,18 +482,6 @@ pipeline:
           DAEMON_ABORT OR USER_MAC_CONFIG_CHANGE OR MAC_CONFIG_CHANGE OR
           MAC_STATUS OR MAC_POLICY_LOAD OR AVC OR CONFIG_CHANGE OR SYSCALL)"
       processors:
-        - type: string-builder-processor
-          name: Add product name
-          enabled: true
-          template: Linux Audit Logs
-          target: ocsf.metadata.product.name
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Add product vendor
-          enabled: true
-          template: Linux
-          target: ocsf.metadata.product.vendor_name
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 0
           enabled: true
@@ -665,6 +593,24 @@ pipeline:
       filter:
         query: "@type:USER_AUTH"
       processors:
+        - type: string-builder-processor
+          name: Set ocsf.actor.session.uid attribute
+          enabled: true
+          template: "%{ses}"
+          target: ocsf.actor.session.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.process.user.uid attribute
+          enabled: true
+          template: "%{usr.id}"
+          target: ocsf.actor.process.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{auid}"
+          target: ocsf.actor.user.uid
+          replaceMissing: false
         - type: string-builder-processor
           name: Set ocsf.user.uid attribute
           enabled: true
@@ -872,7 +818,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.path
               targetFormat: string
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
             - name: ocsf.user.uid
@@ -890,6 +836,24 @@ pipeline:
       filter:
         query: "@type:(ADD_USER OR DEL_USER OR USER_CHAUTHTOK)"
       processors:
+        - type: string-builder-processor
+          name: Set ocsf.actor.session.uid attribute
+          enabled: true
+          template: "%{ses}"
+          target: ocsf.actor.session.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.process.user.uid attribute
+          enabled: true
+          template: "%{usr.id}"
+          target: ocsf.actor.process.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{auid}"
+          target: ocsf.actor.user.uid
+          replaceMissing: false
         - type: string-builder-processor
           name: Set ocsf.user.uid attribute
           enabled: true
@@ -1122,6 +1086,24 @@ pipeline:
         query: "@type:(ADD_GROUP OR DEL_GROUP)"
       processors:
         - type: string-builder-processor
+          name: Set ocsf.actor.session.uid attribute
+          enabled: true
+          template: "%{ses}"
+          target: ocsf.actor.session.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.process.user.uid attribute
+          enabled: true
+          template: "%{usr.id}"
+          target: ocsf.actor.process.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{auid}"
+          target: ocsf.actor.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
           name: Set ocsf.group.uid attribute
           enabled: true
           template: "%{msg.id}"
@@ -1352,6 +1334,24 @@ pipeline:
       filter:
         query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
       processors:
+        - type: string-builder-processor
+          name: Set ocsf.actor.session.uid attribute
+          enabled: true
+          template: "%{ses}"
+          target: ocsf.actor.session.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.process.user.uid attribute
+          enabled: true
+          template: "%{usr.id}"
+          target: ocsf.actor.process.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{auid}"
+          target: ocsf.actor.user.uid
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3005
           enabled: true
@@ -1437,11 +1437,11 @@ pipeline:
               type: schema-remapper
             - name: ocsf.privileges
               sources:
-                - ocsf.privileges
+                - privileges
               sourceType: attribute
               target: ocsf.privileges
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: ocsf.user
@@ -1472,11 +1472,11 @@ pipeline:
               type: schema-remapper
             - name: ocsf.user.name
               sources:
-                - ocsf.user.name
+                - target_user_name
               sourceType: attribute
               target: ocsf.user.name
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: ocsf.actor.process.pid
@@ -1577,12 +1577,72 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.actor.process.path
+              sources:
+                - msg.exe
+              sourceType: attribute
+              target: ocsf.actor.process.path
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.actor.session.terminal
+              sources:
+                - msg.terminal
+              sourceType: attribute
+              target: ocsf.actor.session.terminal
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class File System Activity [1001]
       enabled: true
       filter:
         query: "@type:PATH"
       processors:
+        - type: grok-parser
+          name: Extracting file or folder name
+          enabled: true
+          source: name
+          samples:
+            - /etc/shadow
+            - /run/
+            - /run/nginx.pid
+          grok:
+            supportRules: file_or_folder_path (/%{regex("[^/]*")})*
+            matchRules: >-
+              rule_extract_folder_name
+              %{file_or_folder_path}/%{regex("[^/]*"):folder_name}/
+
+              rule_extract_file_name %{file_or_folder_path}/%{data:file_name}
+        - type: grok-parser
+          name: Extracting file extention
+          enabled: true
+          source: file_name
+          samples:
+            - nginx.pid
+            - libcrypt.so.1
+            - ld.so.cache
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_extract_file_extention_1
+              (%{regex("[^.]*")}.)+%{word:ocsf.file.ext}.%{number}
+
+              rule_extract_file_extention_2 (%{regex("[^.]*")}.)+%{word:ocsf.file.ext}
+        - type: string-builder-processor
+          name: Set ocsf.file.name attribute
+          enabled: true
+          template: "%{folder_name}%{file_name}"
+          target: ocsf.file.name
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{ouid}%{usr.id}"
+          target: ocsf.actor.user.uid
+          replaceMissing: true
         - type: schema-processor
           name: Apply OCSF schema for 1001
           enabled: true

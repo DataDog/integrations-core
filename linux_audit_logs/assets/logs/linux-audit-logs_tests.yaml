@@ -34,7 +34,7 @@ tests:
         metadata:
           event_code: "USER_MAC_CONFIG_CHANGE"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -108,7 +108,7 @@ tests:
         metadata:
           event_code: "USER_AUTH"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -154,7 +154,7 @@ tests:
         metadata:
           event_code: "MAC_STATUS"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -198,7 +198,7 @@ tests:
         metadata:
           event_code: "AVC"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -248,7 +248,7 @@ tests:
         metadata:
           event_code: "USER_SELINUX_ERR"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -296,7 +296,7 @@ tests:
         metadata:
           event_code: "USER_ROLE_CHANGE"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -337,7 +337,7 @@ tests:
         metadata:
           event_code: "MAC_CONFIG_CHANGE"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -404,7 +404,7 @@ tests:
         metadata:
           event_code: "ADD_GROUP"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -478,7 +478,7 @@ tests:
         metadata:
           event_code: "DEL_GROUP"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -549,7 +549,7 @@ tests:
         metadata:
           event_code: "ADD_USER"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -623,7 +623,7 @@ tests:
         metadata:
           event_code: "DEL_USER"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -699,7 +699,7 @@ tests:
         metadata:
           event_code: "USER_CHAUTHTOK"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -762,11 +762,13 @@ tests:
         activity_name: "Assign Privileges"
         actor:
           process:
+            path: "/sbin/semanage"
             pid: 11107
             user:
               name: "root"
               uid: "0"
           session:
+            terminal: "pts/0"
             uid: "21"
           user:
             name: "serviceuser"
@@ -778,9 +780,11 @@ tests:
         metadata:
           event_code: "ROLE_ASSIGN"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
+        privileges:
+          - "staff_r"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -794,9 +798,12 @@ tests:
       pid: 11107
       post_msg_kv: ""
       pre_msg_kv: ""
+      privileges:
+          - "staff_r"
       ses: 21
       status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      target_user_name: "user_u"
       timestamp: 1.74072094567E12
       type: "ROLE_ASSIGN"
       usr:
@@ -856,9 +863,11 @@ tests:
         metadata:
           event_code: "ROLE_REMOVE"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
+        privileges:
+          - "user_r"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -872,9 +881,12 @@ tests:
       pid: 49119
       post_msg_kv: ""
       pre_msg_kv: ""
+      privileges:
+          - "user_r"
       ses: 17
       status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      target_user_name: "test1"
       timestamp: 1.740130059788E12
       type: "ROLE_REMOVE"
       usr:
@@ -928,7 +940,7 @@ tests:
         metadata:
           event_code: "PATH"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -991,7 +1003,7 @@ tests:
         metadata:
           event_code: "PATH"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -1053,7 +1065,7 @@ tests:
         metadata:
           event_code: "PATH"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
@@ -1116,7 +1128,7 @@ tests:
         metadata:
           event_code: "PATH"
           product:
-            name: "Linux Audit Logs"
+            name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Informational"
