@@ -41,7 +41,7 @@ tests:
       network:
         client:
           ip: "172.22.179.72"
-          port: "58599"
+          port: 58599
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -59,7 +59,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "172.22.179.72"
-          port: "58599"
+          port: 58599
         status: "Success"
         status_id: 1
         type_name: "Authentication: Logon"
@@ -88,27 +88,6 @@ tests:
       system:
         action: "disconnect"
         type: "11: disconnected by user"
-      ocsf:
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        activity_id: 99
-        activity_name: "Other"
-        metadata:
-          product:
-            name: "OpenSSH"
-            vendor_name: "OpenBSD"
-          event_code: "disconnect"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        status: "Other"
-        status_id: 99
-        src_endpoint:
-          ip: "172.22.179.72"
-        type_name: "Authentication: Other"
-        type_uid: 300299
     message: "Received disconnect from 172.22.179.72: 11: disconnected by user"
     tags:
      - "source:LOGS_SOURCE"
@@ -119,7 +98,7 @@ tests:
       network:
         client:
           ip: "192.168.1.100"
-          port: "22334"
+          port: 22334
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -139,7 +118,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "192.168.1.100"
-          port: "22334"
+          port: 22334
         type_name: "Authentication: Logon"
         type_uid: 300201
         user:
@@ -161,7 +140,7 @@ tests:
       network:
         client:
           ip: "192.168.1.100"
-          port: "49630"
+          port: 49630
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -181,7 +160,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "192.168.1.100"
-          port: "49630"
+          port: 49630
         type_name: "Authentication: Logon"
         type_uid: 300201
         user:
@@ -205,7 +184,7 @@ tests:
       network:
         client:
           ip: "192.168.1.100"
-          port: "49630"
+          port: 49630
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -223,7 +202,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "192.168.1.100"
-          port: "49630"
+          port: 49630
         status: "Success"
         status_id: 1
         type_name: "Authentication: Logoff"
