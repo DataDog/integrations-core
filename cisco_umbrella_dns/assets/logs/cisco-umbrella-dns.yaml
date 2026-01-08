@@ -395,7 +395,7 @@ pipeline:
           sourceType: attribute
           target: http.method
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `requestsize` to `network.bytes_read`
@@ -651,35 +651,35 @@ pipeline:
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: '@http.method:"CONNECT"'
+                    query: '@requestmethod:"CONNECT"'
                   name: Connect
                   id: 1
                 - filter:
-                    query: '@http.method:"DELETE"'
+                    query: '@requestmethod:"DELETE"'
                   name: Delete
                   id: 2
                 - filter:
-                    query: '@http.method:"GET"'
+                    query: '@requestmethod:"GET"'
                   name: Get
                   id: 3
                 - filter:
-                    query: '@http.method:"HEAD"'
+                    query: '@requestmethod:"HEAD"'
                   name: Head
                   id: 4
                 - filter:
-                    query: '@http.method:"OPTIONS"'
+                    query: '@requestmethod:"OPTIONS"'
                   name: Options
                   id: 5
                 - filter:
-                    query: '@http.method:"POST"'
+                    query: '@requestmethod:"POST"'
                   name: Post
                   id: 6
                 - filter:
-                    query: '@http.method:"PUT"'
+                    query: '@requestmethod:"PUT"'
                   name: Put
                   id: 7
                 - filter:
-                    query: '@http.method:"TRACE"'
+                    query: '@requestmethod:"TRACE"'
                   name: Trace
                   id: 8
               targets:
