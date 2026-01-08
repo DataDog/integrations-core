@@ -178,9 +178,16 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `@journald._SOURCE_REALTIME_TIMESTAMP` to `ocsf.time`
+              name: Map `journald._HOSTNAME` to `ocsf.dst_endpoint.hostname`
               sources:
-                - '@journald._SOURCE_REALTIME_TIMESTAMP'
+                - journald._HOSTNAME
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `journald._SOURCE_REALTIME_TIMESTAMP` to `ocsf.time`
+              sources:
+                - journald._SOURCE_REALTIME_TIMESTAMP
               target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
