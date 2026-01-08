@@ -35,7 +35,7 @@ class SqlserverDatabaseMetricsBase:
 
     @property
     def major_version(self) -> Optional[int]:
-        return self.server_static_info.get(STATIC_INFO_MAJOR_VERSION, 0)
+        return self.server_static_info.get(STATIC_INFO_MAJOR_VERSION) or 0
 
     @property
     def engine_edition(self) -> Optional[int]:
