@@ -109,7 +109,10 @@ tests:
           severity_id: 1
           src_endpoint:
             ip: "172.17.0.1"
-            os: "Linux"
+            os:
+              name: "Linux"
+              type: "Linux"
+              type_id: 200
           status: "Failure"
           status_code: "404"
           status_id: 2
@@ -178,7 +181,10 @@ tests:
           severity_id: 1
           src_endpoint:
             ip: "172.17.0.1"
-            os: "Linux"
+            os:
+              name: "Linux"
+              type: "Linux"
+              type_id: 200
           status: "Success"
           status_code: "200"
           status_id: 1
