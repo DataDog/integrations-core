@@ -305,7 +305,7 @@ pipeline:
                   name: Windows
                   id: 100
                 - filter:
-                    query: '(@http.useragent_details.os.family:(Linux OR "Red Hat" OR Ubuntu OR Debian OR Fedora OR CentOS OR *BSD*)'
+                    query:'@http.useragent_details.os.family:(Linux OR "Red Hat" OR Ubuntu OR Debian OR Fedora OR CentOS OR *BSD*)'
                   name: Linux
                   id: 200
                 - filter:
