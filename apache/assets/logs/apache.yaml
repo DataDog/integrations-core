@@ -109,7 +109,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Apache - OCSF
+  name: Apache
   enabled: true
   filter:
     query: source:apache
