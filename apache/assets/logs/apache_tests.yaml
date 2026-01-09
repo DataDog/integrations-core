@@ -109,7 +109,10 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "192.0.2.1"
-          os: "Windows"
+          os:
+            name: "Windows"
+            type: "Windows"
+            type_id: 100
         status: "Failure"
         status_code: "404"
         status_id: 2
