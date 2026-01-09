@@ -109,7 +109,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Nginx - OCSF
+  name: Nginx
   enabled: true
   filter:
     query: source:nginx
