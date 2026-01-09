@@ -167,7 +167,7 @@ pipeline:
           name: Add ocsf.metadata.product.vendor_name
           enabled: true
           template: "Microsoft"
-          target: ocsf.metadata.product.name
+          target: ocsf.metadata.product.vendor_name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 4002
@@ -190,7 +190,7 @@ pipeline:
                   id: 3
                 - filter:
                     query: "@http.method:HEAD"
-                  name: Head
+                  name: Head  
                   id: 4
                 - filter:
                     query: "@http.method:OPTIONS"
@@ -283,9 +283,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `http.url_details.queryString:querystring` to `ocsf.http_request.url.query_string`
+              name: Map `http.url_details.queryString` to `ocsf.http_request.url.query_string`
               sources:
-                - http.url_details.queryString:querystring
+                - http.url_details.queryString
               target: ocsf.http_request.url.query_string
               preserveSource: true
               overrideOnConflict: true
@@ -325,7 +325,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `http.os.family` to `ocsf.src_endpoint.os`
+              name: Map `http.useragent_details.os.family` to `ocsf.src_endpoint.os`
               sources:
                 - http.useragent_details.os.family
               target: ocsf.src_endpoint.os
@@ -343,7 +343,7 @@ pipeline:
               name: Map `duration` to `ocsf.duration`
               sources:
                 - duration
-              targ  et: ocsf.duration
+              target: ocsf.duration
               preserveSource: true
               targetFormat: double
               overrideOnConflict: true
