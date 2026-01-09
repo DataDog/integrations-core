@@ -133,7 +133,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
 | `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics", "use_openmetrics": "true"}` |
 
-**Note**: For GKE environments, use port `9990` instead of `9090` in the `agent_endpoint` configuration. Example for GKE:
+**Note**: For GKE environments, use port `9990` instead of `9090` in the `agent_endpoint` configuration. For example:
 ```json
 {"agent_endpoint": "http://%%host%%:9990/metrics", "use_openmetrics": "true"}
 ```
