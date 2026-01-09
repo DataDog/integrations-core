@@ -70,7 +70,6 @@ TEST_METRICS = [
     'n8n.nodejs.heap.space.size.used.bytes',
     'n8n.nodejs.heap.total.bytes',
     'n8n.nodejs.heap.used.bytes',
-    'n8n.nodejs.version.info',
     'n8n.process.cpu.system.seconds.count',
     'n8n.process.cpu.user.seconds.count',
     'n8n.process.heap.bytes',
@@ -104,5 +103,4 @@ TEST_METRICS = [
     'n8n.workflow.started.count',
     'n8n.workflow.success.count',
     'n8n.process.cpu.seconds.count',
-    'n8n.version.info',
 ]

@@ -46,7 +46,6 @@ n8n.nodejs.heap.space.size.total.bytes,gauge,,,,Process heap space size total fr
 n8n.nodejs.heap.space.size.used.bytes,gauge,,,,Process heap space size used from Node.js in bytes.,0,n8n,,,
 n8n.nodejs.heap.total.bytes,gauge,,,,Total heap size allocated in bytes,0,n8n,,,
 n8n.nodejs.heap.used.bytes,gauge,,,,Heap memory used in bytes,0,n8n,,,
-n8n.nodejs.version.info,gauge,,,,Node.js version info.,0,n8n,,,
 n8n.process.cpu.seconds.count,count,,,,Total user and system CPU time spent in seconds.,0,n8n,,,
 n8n.process.cpu.system.seconds.count,count,,,,Total system CPU time spent in seconds.,0,n8n,,,
 n8n.process.cpu.user.seconds.count,count,,,,Total user CPU time spent in seconds.,0,n8n,,,
@@ -73,7 +72,6 @@ n8n.queue.jobs.duration.seconds.bucket,count,,,,Histogram bucket for job duratio
 n8n.queue.jobs.duration.seconds.count,count,,,,The count of job duration in seconds,0,n8n,,,
 n8n.queue.jobs.duration.seconds.sum,count,,,,The sum of job duration in seconds,0,n8n,,,
 n8n.readiness.check,gauge,,,,Readiness check metric with status code as tag,0,n8n,,,status_code
-n8n.version.info,gauge,,,,n8n version info.,0,n8n,,,
 n8n.workflow.executions.active,gauge,,,,Number of active workflow executions,0,n8n,,,
 n8n.workflow.executions.count,count,,,,Total number of workflow executions,0,n8n,,,
 n8n.workflow.executions.duration.seconds.bucket,count,,,,Histogram bucket for workflow execution duration in seconds,0,n8n,,,

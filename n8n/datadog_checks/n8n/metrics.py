@@ -49,7 +49,6 @@ METRIC_MAP = {
     'nodejs_heap_space_size_used_bytes': 'nodejs.heap.space.size.used.bytes',
     'nodejs_heap_total_bytes': 'nodejs.heap.total.bytes',
     'nodejs_heap_used_bytes': 'nodejs.heap.used.bytes',
-    'nodejs_version_info': 'nodejs.version.info',
     'process_cpu_system_seconds': 'process.cpu.system.seconds',
     'process_cpu_user_seconds': 'process.cpu.user.seconds',
     'process_heap_bytes': 'process.heap.bytes',
@@ -79,5 +78,4 @@ METRIC_MAP = {
     'workflow_started': 'workflow.started',
     'workflow_success': 'workflow.success',
     'process_cpu_seconds': 'process.cpu.seconds',
-    'version_info': 'version.info',
 }

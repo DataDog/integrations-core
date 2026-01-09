@@ -35,11 +35,17 @@ class N8nCheck(OpenMetricsBaseCheckV2):
             'rename_labels': {
                 'version': 'n8n_version',
             },
+            'exclude_metrics': [
+                'nodejs_version_info',
+                'version_info',
+            ],
         }
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
         endpoint = urljoin(self.openmetrics_endpoint, self._version_endpoint)
+        version_submitted = False
+
         try:
             response = self.http.get(endpoint)
 
@@ -60,12 +66,104 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                         'patch': patch,
                     }
                     self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+                    version_submitted = True
                 else:
-                    self.log.debug("Malformed N8N Server version format: %s", version)
+                    self.log.debug("Malformed N8N Server version format: %s, will try to parse from metrics", version)
             else:
-                self.log.debug("Could not retrieve version metadata; code %s: %s", response.status_code response.reason)
+                self.log.debug(
+                    "Could not retrieve version metadata; code %s: %s", response.status_code, response.reason
+                )
         except Exception as e:
             self.log.debug("Error retrieving version metadata: %s", e)
+
+        # Fallback: try to parse version from metrics endpoint if not submitted yet
+        if not version_submitted:
+            self._submit_version_from_metrics()
+
+    def _submit_version_from_metrics(self):
+        """Fallback method to parse n8n version from the metrics endpoint"""
+        try:
+            response = self.http.get(self.openmetrics_endpoint)
+
+            if response.ok:
+                lines = response.text.splitlines()
+                for line in lines:
+                    # Look for the version_info metric with the raw prefix
+                    if line.startswith(f'{self.raw_metric_prefix}version_info{{'):
+                        # n8n_version_info{version="v1.117.2",major="1",minor="117",patch="2"} 1
+                        if 'major=' in line and 'minor=' in line and 'patch=' in line:
+                            # Extract the label values
+                            import re
+
+                            major_match = re.search(r'major="([^"]+)"', line)
+                            minor_match = re.search(r'minor="([^"]+)"', line)
+                            patch_match = re.search(r'patch="([^"]+)"', line)
+
+                            if major_match and minor_match and patch_match:
+                                major = major_match.group(1)
+                                minor = minor_match.group(1)
+                                patch = patch_match.group(1)
+
+                                version_raw = f'{major}.{minor}.{patch}'
+                                version_parts = {
+                                    'major': major,
+                                    'minor': minor,
+                                    'patch': patch,
+                                }
+                                self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+                                self.log.debug("Submitted n8n version metadata from metrics: %s", version_raw)
+                                break
+            else:
+                self.log.debug(
+                    "Could not retrieve n8n version from metrics; code %s: %s", response.status_code, response.reason
+                )
+        except Exception as e:
+            self.log.debug("Error retrieving n8n version from metrics: %s", e)
+
+    @AgentCheck.metadata_entrypoint
+    def _submit_nodejs_version_metadata(self):
+        """Parse Node.js version from the metrics endpoint"""
+        try:
+            response = self.http.get(self.openmetrics_endpoint)
+
+            if response.ok:
+                lines = response.text.splitlines()
+                for line in enumerate(lines):
+                    # Look for the nodejs_version_info metric with the raw prefix
+                    if line.startswith(f'{self.raw_metric_prefix}nodejs_version_info{{'):
+                        # n8n_nodejs_version_info{version="v22.18.0",major="22",minor="18",patch="0"} 1
+                        if 'major=' in line and 'minor=' in line and 'patch=' in line:
+                            # Extract the label values
+                            import re
+
+                            major_match = re.search(r'major="([^"]+)"', line)
+                            minor_match = re.search(r'minor="([^"]+)"', line)
+                            patch_match = re.search(r'patch="([^"]+)"', line)
+
+                            if major_match and minor_match and patch_match:
+                                major = major_match.group(1)
+                                minor = minor_match.group(1)
+                                patch = patch_match.group(1)
+
+                                version_raw = f'{major}.{minor}.{patch}'
+                                version_parts = {
+                                    'major': major,
+                                    'minor': minor,
+                                    'patch': patch,
+                                }
+                                self.set_metadata(
+                                    'nodejs.version', version_raw, scheme='semver', part_map=version_parts
+                                )
+                                self.log.debug("Submitted Node.js version metadata: %s", version_raw)
+                                break
+            else:
+                self.log.debug(
+                    "Could not retrieve Node.js version from metrics; code %s: %s",
+                    response.status_code,
+                    response.reason,
+                )
+        except Exception as e:
+            self.log.debug("Error retrieving Node.js version metadata: %s", e)
 
     def _check_n8n_readiness(self):
         endpoint = urljoin(self.openmetrics_endpoint, self._ready_endpoint)
@@ -74,6 +172,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         # Check if status_code is available
         if response.status_code is None:
             self.log.warning("The readiness endpoint did not return a status code")
+            metric_tags = self.tags + ['status_code:null']
         else:
             metric_tags = self.tags + [f'status_code:{response.status_code}']
 
@@ -83,4 +182,5 @@ class N8nCheck(OpenMetricsBaseCheckV2):
     def check(self, instance):
         super().check(instance)
         self._submit_version_metadata()
+        self._submit_nodejs_version_metadata()
         self._check_n8n_readiness()
