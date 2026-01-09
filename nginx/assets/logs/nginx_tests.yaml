@@ -317,7 +317,10 @@ tests:
           severity_id: 1
           src_endpoint:
             ip: "127.0.0.1"
-            os: "Mac OS X"
+            os:
+              name: "Windows"
+              type: "Windows"
+              type_id: 100
           status: "Success"
           status_code: "206"
           status_id: 1
