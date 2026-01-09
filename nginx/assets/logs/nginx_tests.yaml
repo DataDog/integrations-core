@@ -318,9 +318,9 @@ tests:
           src_endpoint:
             ip: "127.0.0.1"
             os:
-              name: "Windows"
-              type: "Windows"
-              type_id: 100
+              name: "Mac OS X"
+              type: "macOS"
+              type_id: 300
           status: "Success"
           status_code: "206"
           status_id: 1
