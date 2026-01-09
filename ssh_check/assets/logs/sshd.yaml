@@ -23,6 +23,51 @@ facets:
     name: Action
     path: system.action
     source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: User
+    path: ocsf.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
 pipeline:
   type: pipeline
   name: Sshd
