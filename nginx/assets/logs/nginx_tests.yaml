@@ -325,8 +325,8 @@ tests:
             ip: "127.0.0.1"
             os:
               name: "Mac OS X"
-              type: "Other"
-              type_id: 99
+              type: "macOS"
+              type_id: 300
           status: "Success"
           status_code: "206"
           status_id: 1

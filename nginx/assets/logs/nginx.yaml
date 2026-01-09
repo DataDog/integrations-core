@@ -305,7 +305,7 @@ pipeline:
                   name: Windows
                   id: 100
                 - filter:
-                    query: "@http.useragent_details.os.family:(Linux OR Red\ Hat OR Ubuntu OR Debian OR Fedora OR CentOS OR *BSD*)"
+                    query: '(@http.useragent_details.os.family:(Linux OR "Red Hat" OR Ubuntu OR Debian OR Fedora OR CentOS OR *BSD*)'
                   name: Linux
                   id: 200
                 - filter:
@@ -313,7 +313,7 @@ pipeline:
                   name: Android
                   id: 201
                 - filter:
-                    query: "@http.useragent_details.os.family:(Mac\ OS\ X OR macOS)"
+                    query: '@http.useragent_details.os.family:("Mac OS X" OR macOS)'
                   name: macOS
                   id: 300
                 - filter:
