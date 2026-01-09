@@ -1,0 +1,28 @@
+## Configuration for local development testing
+#
+init_config:
+
+instances:
+
+  ## This is a basic configuration for testing against a local Prefect server
+  - url: http://localhost:4200
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    tags:
+      - env:development
+      - integration:prefect
+      
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

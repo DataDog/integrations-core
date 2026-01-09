@@ -1,0 +1,121 @@
+name: Prefect
+files:
+- name: prefect.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: prefect_url
+      required: true
+      description: The URL of the Prefect server.
+      value:
+        type: string
+        example: http://localhost:4200
+    - name: work_pool_names
+      description: |
+        A mapping of work pool name patterns to include or exclude, with each entry being a regular expression.
+
+        Patterns defined in `exclude` will take precedence in case of overlap.
+      value:
+        type: object
+        example:
+          include:
+            - <WORK_POOL_NAME_REGEX_1>
+            - <WORK_POOL_NAME_REGEX_2>
+          exclude:
+            - <WORK_POOL_NAME_REGEX_1>
+            - <WORK_POOL_NAME_REGEX_2>
+        properties:
+          - name: include
+            type: array
+            items:
+              type: string
+          - name: exclude
+            type: array
+            items:
+              type: string
+    - name: work_queue_names
+      description: |
+        A mapping of work queue name patterns to include or exclude, with each entry being a regular expression.
+
+        Patterns defined in `exclude` will take precedence in case of overlap.
+      value:
+        type: object
+        example:
+          include:
+            - <WORK_QUEUE_NAME_REGEX_1>
+            - <WORK_QUEUE_NAME_REGEX_2>
+          exclude:
+            - <WORK_QUEUE_NAME_REGEX_1>
+            - <WORK_QUEUE_NAME_REGEX_2>
+        properties:
+          - name: include
+            type: array
+            items:
+              type: string
+          - name: exclude
+            type: array
+            items:
+              type: string
+    - name: deployment_names
+      description: |
+        A mapping of deployment name patterns to include or exclude, with each entry being a regular expression.
+
+        Patterns defined in `exclude` will take precedence in case of overlap.
+      value:
+        type: object
+        example:
+          include:
+            - <DEPLOYMENT_NAME_REGEX_1>
+            - <DEPLOYMENT_NAME_REGEX_2>
+          exclude:
+            - <DEPLOYMENT_NAME_REGEX_1>
+            - <DEPLOYMENT_NAME_REGEX_2>
+        properties:
+          - name: include
+            type: array
+            items:
+              type: string
+          - name: exclude
+            type: array
+            items:
+              type: string
+    - name: event_names
+      description: |
+        A mapping of event name patterns to include or exclude, with each entry being a regular expression.
+
+        Patterns defined in `exclude` will take precedence in case of overlap.
+      value:
+        type: object
+        example: &event_names
+          include:
+            - <EVENT_NAME_REGEX_1>
+            - <EVENT_NAME_REGEX_2>
+          exclude:
+            - <EVENT_NAME_REGEX_1>
+            - <EVENT_NAME_REGEX_2>
+        default:
+          include:
+            - ^prefect\.task-run\..*$
+            - ^prefect\.flow-run\..*$
+            - ^prefect\.[a-z-]+\.(ready|not-ready)$
+        properties:
+          - name: include
+            type: array
+            items:
+              type: string
+          - name: exclude
+            type: array
+            items:
+              type: string
+    - name: custom_headers
+      description: |
+        Additional HTTP headers to include in all requests to the Prefect API.
+      value:
+        type: object
+        example:
+          Authorization: "Bearer <YOUR_TOKEN>"
+          Custom-Header: "CustomValue"
+    - template: instances/default
