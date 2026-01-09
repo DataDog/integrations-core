@@ -35,6 +35,7 @@
   secret: true
   value:
     type: string
+  fleet_configurable: true
 
 - name: process_name_regex
   description: |
@@ -84,6 +85,7 @@
   secret: true
   value:
     type: string
+  fleet_configurable: true
 
 - name: key_store_path
   description: |
