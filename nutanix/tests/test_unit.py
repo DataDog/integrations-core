@@ -208,6 +208,16 @@ def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http
     )
 
 
+def test_list_tasks_pagination(mock_instance, mock_http_get):
+    instance = mock_instance.copy()
+    instance["page_limit"] = 50
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    tasks = check._list_tasks()
+
+    assert len(tasks) == 14
+    assert [t.get("extId") for t in tasks] == ["task-1", "task-2", "task-3", "task-4"]
+
+
 # Mock datetime to match events fixture creation times
 MOCK_DATETIME = datetime(2025, 10, 14, 11, 15, 00, tzinfo=timezone.utc)
 LAST_EVENT_TIMESTAMP = datetime(2025, 12, 4, 15, 53, tzinfo=timezone.utc)

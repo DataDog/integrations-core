@@ -31,8 +31,8 @@ INSTANCE = {
 AWS_INSTANCE = {
     "pc_ip": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com",
     "pc_port": 9440,
-    "pc_username": "dd_agent_viewer",
-    "pc_password": "DummyP4ssw0rd!",
+    "pc_username": "dd_agent",
+    "pc_password": "DummyPassw0rd!",
     "tls_verify": False,
     "page_limit": 2,  # Use limit=2 to match paginated fixtures
 }
@@ -57,13 +57,13 @@ def mock_instance():
 def mock_http_get(mocker):
     def mock_response(url, params=None, *args, **kwargs):
         # Print request details for debugging
-        # print("\n" + "=" * 60)
-        # print(f"[MOCK REQUEST] URL: {url}")
-        # if params:
-        #     print(f"[MOCK REQUEST] Params: {params}")
-        # else:
-        #     print("[MOCK REQUEST] Params: None")
-        # print("=" * 60)
+        print("\n" + "=" * 60)
+        print(f"[MOCK REQUEST] URL: {url}")
+        if params:
+            print(f"[MOCK REQUEST] Params: {params}")
+        else:
+            print("[MOCK REQUEST] Params: None")
+        print("=" * 60)
 
         mock_resp = mocker.Mock()
         mock_resp.status_code = 200
@@ -122,7 +122,7 @@ def mock_http_get(mocker):
             if page is None:
                 page = 0
             if limit is None:
-                limit = 2
+                limit = 50
 
             paginated_fixture = f"hosts_b6d83094-9404-48de-9c74-ca6bddc3a01d_limit{limit}_page{page}.json"
             # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
@@ -138,7 +138,7 @@ def mock_http_get(mocker):
             if page is None:
                 page = 0
             if limit is None:
-                limit = 2
+                limit = 50
 
             paginated_fixture = f"hosts_0006411c-0286-bc71-9f02-191e334d457b_limit{limit}_page{page}.json"
             # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
@@ -153,7 +153,7 @@ def mock_http_get(mocker):
             if page is None:
                 page = 0
             if limit is None:
-                limit = 2
+                limit = 50
 
             paginated_fixture = f"clusters_limit{limit}_page{page}.json"
             # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
@@ -168,7 +168,7 @@ def mock_http_get(mocker):
             if page is None:
                 page = 0
             if limit is None:
-                limit = 2
+                limit = 50
 
             paginated_fixture = f"vms_stats_limit{limit}_page{page}.json"
             # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
@@ -183,7 +183,7 @@ def mock_http_get(mocker):
             if page is None:
                 page = 0
             if limit is None:
-                limit = 2
+                limit = 50
 
             paginated_fixture = f"vms_limit{limit}_page{page}.json"
             # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
@@ -198,31 +198,26 @@ def mock_http_get(mocker):
             if page is None:
                 page = 0
             if limit is None:
-                limit = 2
+                limit = 50
 
             paginated_fixture = f"events_limit{limit}_page{page}.json"
             # print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
-            try:
-                response_data = load_fixture(paginated_fixture)
-                mock_resp.json = mocker.Mock(return_value=response_data)
-                return mock_resp
-            except FileNotFoundError:
-                # If fixture doesn't exist, return empty response (end of pagination)
-                print("[MOCK] Fixture not found, returning empty response")
-                empty_response = {
-                    "data": [],
-                    "$reserved": {"$fv": "v4.r1"},
-                    "$objectType": "monitoring.v4.serviceability.ListEventsApiResponse",
-                    "metadata": {
-                        "flags": [],
-                        "$reserved": {"$fv": "v1.r0"},
-                        "$objectType": "common.v1.response.ApiResponseMetadata",
-                        "links": [],
-                        "totalAvailableResults": 0,
-                    },
-                }
-                mock_resp.json = mocker.Mock(return_value=empty_response)
-                return mock_resp
+            response_data = load_fixture(paginated_fixture)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
+
+        # Tasks endpoint - always paginated
+        if 'api/prism/v4.0/config/tasks' in url:
+            # Default to page 0, limit 2 if not specified
+            if page is None:
+                page = 0
+            if limit is None:
+                limit = 50
+
+            paginated_fixture = f"tasks_limit{limit}_page{page}.json"
+            response_data = load_fixture(paginated_fixture)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         # Default response for unmapped URLs - return HTTP error
         # print(f"[MOCK ERROR] No matching endpoint for URL: {url}")

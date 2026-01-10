@@ -38,6 +38,9 @@ class NutanixCheck(AgentCheck):
         if pc_password and "password" not in self.instance:
             self.instance["password"] = pc_password
 
+        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events"))
+        self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks"))
+
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
         if not self.base_url.startswith("http"):
             self.base_url = "https://" + self.base_url
@@ -71,7 +74,9 @@ class NutanixCheck(AgentCheck):
 
         self._collect_cluster_metrics()
         self._collect_vm_metrics()
-        self._collect_events()
+
+        if self.collect_events_enabled:
+            self._collect_events()
 
         if self.external_tags:
             self.set_external_tags(self.external_tags)
@@ -405,6 +410,11 @@ class NutanixCheck(AgentCheck):
             if not next_link:
                 break
 
+            if "tasks" in url and page == 2:
+                import pdb
+
+                pdb.set_trace()
+
             page += 1
             req_params["$page"] = page
 
@@ -430,6 +440,10 @@ class NutanixCheck(AgentCheck):
     def _list_hosts_by_cluster(self, cluster_id: str):
         """Fetch all hosts/hosts for a specific cluster."""
         return self._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
+
+    def _list_tasks(self):
+        """Fetch all tasks from Prism Central."""
+        return self._get_paginated_request_data("api/prism/v4.0/config/tasks")
 
     def _get_cluster_stats(self, cluster_id: str):
         """
