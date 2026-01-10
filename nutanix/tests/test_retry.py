@@ -17,6 +17,7 @@ def test_retry_on_rate_limit_success_no_retry(dd_run_check, aggregator, mock_ins
     mock_response.status_code = 200
     mock_response.json.return_value = {"data": {"test": "data"}}
     mock_response.raise_for_status = Mock()
+    mock_response.content = b'{"data": {"test": "data"}}'
 
     mock_get = mocker.patch('requests.Session.get', return_value=mock_response)
 
@@ -36,12 +37,14 @@ def test_retry_on_rate_limit_429_then_success(dd_run_check, aggregator, mock_ins
     mock_response_429 = Mock(spec=Response)
     mock_response_429.status_code = 429
     mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
+    mock_response_429.content = b''
 
     # Second response: success
     mock_response_200 = Mock(spec=Response)
     mock_response_200.status_code = 200
     mock_response_200.json.return_value = {"data": {"test": "data"}}
     mock_response_200.raise_for_status = Mock()
+    mock_response_200.content = b'{"data": {"test": "data"}}'
 
     mock_get = mocker.patch('requests.Session.get', side_effect=[mock_response_429, mock_response_200])
     mock_sleep = mocker.patch('time.sleep')
@@ -68,6 +71,7 @@ def test_retry_on_rate_limit_max_retries_exceeded(dd_run_check, aggregator, mock
     mock_response_429 = Mock(spec=Response)
     mock_response_429.status_code = 429
     mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
+    mock_response_429.content = b''
 
     mock_get = mocker.patch('requests.Session.get', return_value=mock_response_429)
     mock_sleep = mocker.patch('time.sleep')
@@ -94,6 +98,7 @@ def test_retry_on_non_429_error_no_retry(dd_run_check, aggregator, mock_instance
     mock_response_500 = Mock(spec=Response)
     mock_response_500.status_code = 500
     mock_response_500.raise_for_status.side_effect = HTTPError(response=mock_response_500)
+    mock_response_500.content = b''
 
     mock_get = mocker.patch('requests.Session.get', return_value=mock_response_500)
     mock_sleep = mocker.patch('time.sleep')
@@ -123,11 +128,13 @@ def test_retry_with_custom_config(dd_run_check, aggregator, mock_instance, mocke
     mock_response_429 = Mock(spec=Response)
     mock_response_429.status_code = 429
     mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
+    mock_response_429.content = b''
 
     mock_response_200 = Mock(spec=Response)
     mock_response_200.status_code = 200
     mock_response_200.json.return_value = {"data": {"test": "data"}}
     mock_response_200.raise_for_status = Mock()
+    mock_response_200.content = b'{"data": {"test": "data"}}'
 
     mock_get = mocker.patch('requests.Session.get', side_effect=[mock_response_429, mock_response_200])
     mock_sleep = mocker.patch('time.sleep')
@@ -154,11 +161,13 @@ def test_retry_exponential_backoff(dd_run_check, aggregator, mock_instance, mock
     mock_response_429 = Mock(spec=Response)
     mock_response_429.status_code = 429
     mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
+    mock_response_429.content = b''
 
     mock_response_200 = Mock(spec=Response)
     mock_response_200.status_code = 200
     mock_response_200.json.return_value = {"data": {"test": "data"}}
     mock_response_200.raise_for_status = Mock()
+    mock_response_200.content = b'{"data": {"test": "data"}}'
 
     mock_get = mocker.patch(
         'requests.Session.get', side_effect=[mock_response_429, mock_response_429, mock_response_429, mock_response_200]
@@ -192,6 +201,7 @@ def test_retry_disabled_with_zero_max_retries(dd_run_check, aggregator, mock_ins
     mock_response_429 = Mock(spec=Response)
     mock_response_429.status_code = 429
     mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
+    mock_response_429.content = b''
 
     mock_get = mocker.patch('requests.Session.get', return_value=mock_response_429)
     mock_sleep = mocker.patch('time.sleep')
@@ -215,11 +225,13 @@ def test_health_check_with_retry(dd_run_check, aggregator, mock_instance, mocker
     mock_response_429 = Mock(spec=Response)
     mock_response_429.status_code = 429
     mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
+    mock_response_429.content = b''
 
     # Second response: success
     mock_response_200 = Mock(spec=Response)
     mock_response_200.status_code = 200
     mock_response_200.raise_for_status = Mock()
+    mock_response_200.content = b''
 
     mock_get = mocker.patch('requests.Session.get', side_effect=[mock_response_429, mock_response_200])
     mock_sleep = mocker.patch('time.sleep')
@@ -307,12 +319,14 @@ def test_post_request_with_retry_on_429(dd_run_check, aggregator, mock_instance,
     mock_response_429 = Mock(spec=Response)
     mock_response_429.status_code = 429
     mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
+    mock_response_429.content = b''
 
     # Second response: success
     mock_response_200 = Mock(spec=Response)
     mock_response_200.status_code = 201
     mock_response_200.json.return_value = {"data": {"created": True}}
     mock_response_200.raise_for_status = Mock()
+    mock_response_200.content = b'{"data": {"created": true}}'
 
     mock_post = mocker.patch('requests.Session.post', side_effect=[mock_response_429, mock_response_200])
     mock_sleep = mocker.patch('time.sleep')
