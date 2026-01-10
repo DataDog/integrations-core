@@ -2158,7 +2158,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.vm.hypervisor.memory_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
+                      "query": "avg:nutanix.vm.memory.usage_ppm{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
                       "aggregator": "avg"
                     }
                   ],
