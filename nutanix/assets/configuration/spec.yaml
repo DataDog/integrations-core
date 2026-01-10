@@ -76,6 +76,13 @@ files:
             value:
               type: number
               example: 30
+          - name: collect_events
+            description: |
+              Whether to collect events from Prism Central.
+              Default is true.
+            value:
+              type: boolean
+              example: true
           - template: instances/http
           - template: instances/default
             overrides:

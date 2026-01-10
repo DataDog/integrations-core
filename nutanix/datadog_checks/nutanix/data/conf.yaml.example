@@ -68,6 +68,12 @@ instances:
     #
     # pc_max_backoff_seconds: 30
 
+    ## @param collect_events - boolean - optional - default: true
+    ## Whether to collect events from Prism Central.
+    ## Default is true.
+    #
+    # collect_events: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

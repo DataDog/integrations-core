@@ -30,6 +30,8 @@ class NutanixCheck(AgentCheck):
                 self.pc_ip, self.pc_port = host, int(port)
         self.pc_port = self.pc_port or 9440
 
+        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events", True))
+
         pc_username = self.instance.get("pc_username")
         pc_password = self.instance.get("pc_password")
 
@@ -71,7 +73,9 @@ class NutanixCheck(AgentCheck):
 
         self._collect_cluster_metrics()
         self._collect_vm_metrics()
-        self._collect_events()
+
+        if self.collect_events_enabled:
+            self._collect_events()
 
         if self.external_tags:
             self.set_external_tags(self.external_tags)
