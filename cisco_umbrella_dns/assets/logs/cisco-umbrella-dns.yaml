@@ -468,6 +468,37 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.name
+          enabled: true
+          template: Cisco Umbrella
+          target: ocsf.metadata.product.name
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.vendor_name
+          enabled: true
+          template: Cisco
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: true
+        - type: grok-parser
+          name: Parsing `ocsf.http_request.url.query_string` from `http.url`
+          enabled: true
+          source: http.url
+          samples:
+            - /datadoghq/company?test=var1%20Pl
+          grok:
+            supportRules: ""
+            matchRules: >
+              extract_query_string
+              %{regex("[^?]+")}\?%{regex(".*"):ocsf.http_request.url.query_string}
+    - type: pipeline
       name: OCSF sub pipeline for HTTP Activity [4002]
       enabled: true
       ocsf:
@@ -484,7 +515,8 @@ pipeline:
             className: HTTP Activity
             classUid: 4002
             extensions: []
-            profiles: []
+            profiles:
+              - network_proxy
           mappers:
             - name: ocsf.activity_id
               categories:
@@ -602,18 +634,32 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-        - type: string-builder-processor
-          name: Add ocsf.metadata.product.name
-          enabled: true
-          template: Cisco Umbrella
-          target: ocsf.metadata.product.name
-          replaceMissing: true
-        - type: string-builder-processor
-          name: Add ocsf.metadata.product.vendor_name
-          enabled: true
-          template: Cisco
-          target: ocsf.metadata.product.vendor_name
-          replaceMissing: true
+            - name: Map `externalip` to `ocsf.proxy_endpoint.ip`
+              sources:
+                - externalip
+              sourceType: attribute
+              target: ocsf.proxy_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@verdict:(allowed OR Allowed)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@verdict:(blocked OR Blocked)"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: " OCSF sub pipeline for DNS Activity [4003]"
       enabled: true
@@ -734,14 +780,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `externalip` to `ocsf.src_endpoint.proxy_endpoint`
-              sources:
-                - externalip
-              sourceType: attribute
-              target: ocsf.src_endpoint.proxy_endpoint
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `domain` to `ocsf.query.hostname`
               sources:
                 - domain
@@ -768,15 +806,3 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-        - type: string-builder-processor
-          name: Add ocsf.metadata.product.name
-          enabled: true
-          template: Cisco Umbrella
-          target: ocsf.metadata.product.name
-          replaceMissing: true
-        - type: string-builder-processor
-          name: Add ocsf.metadata.product.vendor_name
-          enabled: true
-          template: Cisco
-          target: ocsf.metadata.product.vendor_name
-          replaceMissing: true
