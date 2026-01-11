@@ -1,0 +1,1 @@
+Add use_per_instance_collection option for Windows PDH counters to fix bulk API returning zeros
