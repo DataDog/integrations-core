@@ -387,6 +387,8 @@ integration/klaviyo:
 - klaviyo/**/*
 integration/kong:
 - kong/**/*
+integration/krakend:
+- krakend/**/*
 integration/kube_apiserver_metrics:
 - kube_apiserver_metrics/**/*
 integration/kube_controller_manager:
@@ -441,6 +443,8 @@ integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/litellm:
 - litellm/**/*
+integration/lustre:
+- lustre/**/*
 integration/mac_audit_logs:
 - mac_audit_logs/**/*
 integration/mailchimp:
