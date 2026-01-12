@@ -258,9 +258,9 @@ pipeline:
                 name: ocsf.status
                 id: ocsf.status_id
             - type: schema-remapper
-              name: Map `server.ip` to `ocsf.dst_endpoint.ip`
+              name: Map `http.server_name` to `ocsf.dst_endpoint.ip`
               sources:
-                - server.ip
+                - http.server_name
               target: ocsf.dst_endpoint.ip
               preserveSource: true
               overrideOnConflict: true
