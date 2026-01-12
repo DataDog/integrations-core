@@ -60,6 +60,22 @@ class MySqlSchemaCollector(SchemaCollector):
         config.max_tables = check._config.schemas_config.get('max_tables', 300)
         super().__init__(check, config)
 
+    def _supports_json_aggregation(self) -> bool:
+        """
+        Check if MySQL/MariaDB version supports json_arrayagg and json_object functions.
+        
+        - MySQL: json_arrayagg introduced in 8.0.19
+        - MariaDB: json_arrayagg introduced in 10.5.0
+        
+        Returns:
+            bool: True if version supports JSON aggregation functions
+        """
+        if self._check.is_mariadb:
+            return self._check.version.version_compatible((10, 5, 0))
+        else:
+            # MySQL 8.0.19+ supports json_arrayagg
+            return self._check.version.version_compatible((8, 0, 19))
+
     @property
     def kind(self):
         return "mysql_databases"
