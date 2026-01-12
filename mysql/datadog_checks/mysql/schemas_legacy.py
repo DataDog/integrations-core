@@ -17,11 +17,11 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.queries import (
-    SQL_COLUMNS,
-    SQL_DATABASES,
-    SQL_FOREIGN_KEYS,
-    SQL_PARTITION,
-    SQL_TABLES,
+    SQL_SCHEMAS_LEGACY_COLUMNS,
+    SQL_SCHEMAS_LEGACY_DATABASES,
+    SQL_SCHEMAS_LEGACY_FOREIGN_KEYS,
+    SQL_SCHEMAS_LEGACY_PARTITION,
+    SQL_SCHEMAS_LEGACY_TABLES,
     get_indexes_query,
 )
 
@@ -118,7 +118,7 @@ def agent_check_getter(self):
 class MySqlSchemaCollectorLegacy:
     """
     Legacy schema collector for MySQL versions that don't support JSON aggregation functions.
-    
+
     This collector uses the traditional approach of querying each database separately
     and aggregating results in Python. It's compatible with MySQL < 8.0.19 and MariaDB < 10.5.0.
     """
@@ -305,7 +305,7 @@ class MySqlSchemaCollectorLegacy:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
-        self._cursor_run(cursor, query=SQL_DATABASES)
+        self._cursor_run(cursor, query=SQL_SCHEMAS_LEGACY_DATABASES)
         rows = cursor.fetchall()
         return rows
 
@@ -315,7 +315,7 @@ class MySqlSchemaCollectorLegacy:
         list of table dicts
         "name": str
         """
-        self._cursor_run(cursor, query=SQL_TABLES, params=db_name)
+        self._cursor_run(cursor, query=SQL_SCHEMAS_LEGACY_TABLES, params=db_name)
         tables_info = cursor.fetchall()
         return tables_info
 
@@ -340,7 +340,7 @@ class MySqlSchemaCollectorLegacy:
     def _populate_with_columns_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(
             cursor,
-            query=SQL_COLUMNS.format(table_names),
+            query=SQL_SCHEMAS_LEGACY_COLUMNS.format(table_names),
             params=db_name,
         )
         rows = cursor.fetchall()
@@ -401,7 +401,7 @@ class MySqlSchemaCollectorLegacy:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(table_names), params=db_name)
+        self._cursor_run(cursor, query=SQL_SCHEMAS_LEGACY_FOREIGN_KEYS.format(table_names), params=db_name)
         rows = cursor.fetchall()
         for row in rows:
             table_name = row["table_name"]
@@ -410,7 +410,7 @@ class MySqlSchemaCollectorLegacy:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_PARTITION.format(table_names), params=db_name)
+        self._cursor_run(cursor, query=SQL_SCHEMAS_LEGACY_PARTITION.format(table_names), params=db_name)
         rows = cursor.fetchall()
         if not rows:
             return

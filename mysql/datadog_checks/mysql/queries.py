@@ -89,15 +89,17 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
-# Alisases add to homogenize fields across different database types like SQLServer, PostgreSQL
-SQL_DATABASES = """
+# Schema collection queries - Legacy approach (MySQL < 8.0.19, MariaDB < 10.5.0)
+# These queries use parameterized filtering and Python-side aggregation
+
+SQL_SCHEMAS_LEGACY_DATABASES = """
 SELECT schema_name as `name`,
        default_character_set_name as `default_character_set_name`,
        default_collation_name as `default_collation_name`
        FROM information_schema.SCHEMATA
        WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
 
-SQL_TABLES = """\
+SQL_SCHEMAS_LEGACY_TABLES = """\
 SELECT table_name as `name`,
        engine as `engine`,
        row_format as `row_format`,
@@ -106,7 +108,7 @@ SELECT table_name as `name`,
        WHERE TABLE_SCHEMA = %s AND TABLE_TYPE="BASE TABLE"
 """
 
-SQL_COLUMNS = """\
+SQL_SCHEMAS_LEGACY_COLUMNS = """\
 SELECT table_name as `table_name`,
        column_name as `name`,
        column_type as `column_type`,
@@ -119,7 +121,7 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
-SQL_INDEXES = """\
+SQL_SCHEMAS_LEGACY_INDEXES = """\
 SELECT
     table_name as `table_name`,
     index_name as `name`,
@@ -137,7 +139,7 @@ FROM INFORMATION_SCHEMA.STATISTICS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
-SQL_INDEXES_8_0_13 = """\
+SQL_SCHEMAS_LEGACY_INDEXES_8_0_13 = """\
 SELECT
     table_name as `table_name`,
     index_name as `name`,
@@ -155,7 +157,7 @@ FROM INFORMATION_SCHEMA.STATISTICS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
-SQL_FOREIGN_KEYS = """\
+SQL_SCHEMAS_LEGACY_FOREIGN_KEYS = """\
 SELECT
     kcu.constraint_schema as constraint_schema,
     kcu.constraint_name as name,
@@ -185,7 +187,7 @@ GROUP BY
     rc.delete_rule
 """
 
-SQL_PARTITION = """\
+SQL_SCHEMAS_LEGACY_PARTITION = """\
 SELECT
     table_name as `table_name`,
     partition_name as `name`,
@@ -281,8 +283,10 @@ def get_indexes_query(version, is_mariadb, table_names):
     Get the appropriate indexes query based on MySQL version and flavor.
     The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
     MariaDB doesn't support functional indexes.
+    
+    This function is used by the legacy schema collector for MySQL < 8.0.19 and MariaDB < 10.5.0.
     """
     if not is_mariadb and version.version_compatible((8, 0, 13)):
-        return SQL_INDEXES_8_0_13.format(table_names)
+        return SQL_SCHEMAS_LEGACY_INDEXES_8_0_13.format(table_names)
     else:
-        return SQL_INDEXES.format(table_names)
+        return SQL_SCHEMAS_LEGACY_INDEXES.format(table_names)
