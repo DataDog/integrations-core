@@ -10,7 +10,7 @@ Collect n8n metrics including:
 - Workflow metrics: Can include workflow ID labels.
 - Node metrics: Can include node type labels.
 - Credential metrics: Can include credential type labels.
-- Queue Metrics
+- Queue metrics
 
 
 ## Setup
