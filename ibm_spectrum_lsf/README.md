@@ -16,7 +16,7 @@ The IBM Spectrum LSF check is included in the [Datadog Agent][2] package.
 
 Install the Datadog Agent and configure the IBM Spectrum LSF check on the management host of your cluster. This integration monitors the entire cluster.
 
-#### On Linux
+#### Additional Configuration on Linux
 
 Add the `dd-agent` user as an LSF [administrator][10].
 
