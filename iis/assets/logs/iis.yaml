@@ -258,9 +258,9 @@ pipeline:
                 name: ocsf.status
                 id: ocsf.status_id
             - type: schema-remapper
-              name: Map `host` to `ocsf.dst_endpoint.ip`
+              name: Map `server.ip` to `ocsf.dst_endpoint.ip`
               sources:
-                - host
+                - server.ip
               target: ocsf.dst_endpoint.ip
               preserveSource: true
               overrideOnConflict: true
@@ -334,13 +334,36 @@ pipeline:
               target: ocsf.src_endpoint.ip
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `http.useragent_details.os.family   ` to `ocsf.src_endpoint.os`
-              sources:
-                - http.useragent_details.os.family
-              target: ocsf.src_endpoint.os
-              preserveSource: true
-              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.src_endpoint.os.type_id
+              categories:
+                - filter:
+                    query: "@http.useragent_details.os.family:Windows"
+                  name: Windows
+                  id: 100
+                - filter:
+                    query: '@http.useragent_details.os.family:(Linux OR "Red Hat" OR Ubuntu OR Debian OR Fedora OR CentOS OR *BSD*)'
+                  name: Linux
+                  id: 200
+                - filter:
+                    query: "@http.useragent_details.os.family:Android"
+                  name: Android
+                  id: 201
+                - filter:
+                    query: '@http.useragent_details.os.family:("Mac OS X" OR macOS)'
+                  name: macOS
+                  id: 300
+                - filter:
+                    query: "@http.useragent_details.os.family:iOS"
+                  name: Ios
+                  id: 301
+                - filter:
+                    query: "@http.useragent_details.os.family:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.src_endpoint.os.type
+                id: ocsf.src_endpoint.os.type_id
             - type: schema-remapper
               name: Map `http.status_code` to `ocsf.status_code`
               sources:
