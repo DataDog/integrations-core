@@ -1,0 +1,15 @@
+
+# Event definitions for JMeter integration
+#
+# This file is used to define the structure of events emitted by the integration.
+# The `creates_events` field in manifest.json must be set to `true` when this file is present.
+
+- name: "JMeter Test Started"
+  description: "Emitted when a JMeter test plan starts execution."
+  source_type_name: "JMeter"
+  type: "info"
+  
+- name: "JMeter Test Ended"
+  description: "Emitted when a JMeter test plan finishes execution."
+  source_type_name: "JMeter"
+  type: "success"
