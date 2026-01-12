@@ -153,6 +153,15 @@ class MySqlSchemaCollectorLegacy:
     def shut_down(self):
         self._data_submitter.submit()
 
+    def collect_schemas(self):
+        """
+        Wrapper method to match the interface of MySqlSchemaCollector.
+        This allows both collectors to be used interchangeably via a common interface.
+        """
+        # Tags are managed by metadata.py, so we pass them from the parent check
+        tags = self._check.tag_manager.get_tags() if hasattr(self._check, 'tag_manager') else []
+        return self.collect_databases_data(tags)
+
     def _cursor_run(self, cursor, query, params=None):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
