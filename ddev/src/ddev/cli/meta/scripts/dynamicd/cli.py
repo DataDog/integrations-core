@@ -106,8 +106,7 @@ def dynamicd(
     llm_api_key = app.config.raw_data.get("dynamicd", {}).get("llm_api_key")
     if not llm_api_key:
         app.display_error(
-            "LLM API key not configured. Set it with:\n"
-            "  ddev config set dynamicd.llm_api_key <YOUR_ANTHROPIC_API_KEY>"
+            "LLM API key not configured. Set it with:\n  ddev config set dynamicd.llm_api_key <YOUR_ANTHROPIC_API_KEY>"
         )
         app.abort()
 
@@ -115,8 +114,7 @@ def dynamicd(
     dd_api_key = app.config.org.config.get("api_key")
     if not dd_api_key:
         app.display_error(
-            "Datadog API key not configured. Set it with:\n"
-            "  ddev config set orgs.<org>.api_key <YOUR_DD_API_KEY>"
+            "Datadog API key not configured. Set it with:\n  ddev config set orgs.<org>.api_key <YOUR_DD_API_KEY>"
         )
         app.abort()
 
@@ -129,20 +127,20 @@ def dynamicd(
         if scenario is None:
             app.abort("No scenario selected")
 
-    app.display_info(f"")
+    app.display_info("")
     app.display_info(f"╔{'═' * 60}╗")
     app.display_info(f"║{'DynamicD - Smart Fake Data Generator':^60}║")
     app.display_info(f"╚{'═' * 60}╝")
-    app.display_info(f"")
+    app.display_info("")
     app.display_info(f"  Integration: {intg.display_name}")
     app.display_info(f"  Scenario:    {scenario}")
     if duration > 0:
         app.display_info(f"  Duration:    {duration}s")
     else:
-        app.display_info(f"  Duration:    forever (Ctrl+C to stop)")
+        app.display_info("  Duration:    forever (Ctrl+C to stop)")
     app.display_info(f"  Rate:        {rate} metrics/batch (every 10s)")
     app.display_info(f"  Site:        {dd_site}")
-    app.display_info(f"")
+    app.display_info("")
 
     # Build context
     app.display_info("Building integration context...")
@@ -159,7 +157,7 @@ def dynamicd(
             context=context,
             scenario=scenario,
             dd_site=dd_site,
-            metrics_per_second=rate,
+            metrics_per_batch=rate,
             duration=duration,
             api_key=llm_api_key,
             on_status=on_status,
@@ -214,10 +212,10 @@ def dynamicd(
         click.echo(result.stderr, err=True)
 
     if result.success:
-        app.display_success(f"")
+        app.display_success("")
         app.display_success(f"Simulation completed successfully (attempts: {result.attempts})")
     else:
-        app.display_error(f"")
+        app.display_error("")
         app.display_error(f"Simulation failed after {result.attempts} attempts")
         app.abort()
 
@@ -237,7 +235,7 @@ def _select_scenario_interactive(app: Application) -> str | None:
     while True:
         try:
             choice = click.prompt(
-                "Enter number (1-6)",
+                f"Enter number (1-{len(scenarios_list)})",
                 type=int,
                 default=1,
             )
@@ -248,4 +246,3 @@ def _select_scenario_interactive(app: Application) -> str | None:
             return None
         except ValueError:
             app.display_warning("Please enter a valid number")
-

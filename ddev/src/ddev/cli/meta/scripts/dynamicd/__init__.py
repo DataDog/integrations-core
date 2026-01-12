@@ -11,4 +11,3 @@ based on integration metadata.
 from ddev.cli.meta.scripts.dynamicd.cli import dynamicd
 
 __all__ = ['dynamicd']
-

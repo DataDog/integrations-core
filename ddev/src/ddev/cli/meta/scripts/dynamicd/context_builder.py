@@ -7,13 +7,19 @@ from __future__ import annotations
 
 import csv
 import json
+import logging
 import re
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ddev.integration.core import Integration
+
+logger = logging.getLogger(__name__)
+
+# Limits to avoid exceeding LLM token limits
+MAX_METRICS_IN_PROMPT = 80
+MAX_CONFIG_OPTIONS_IN_PROMPT = 30
 
 
 @dataclass
@@ -50,76 +56,81 @@ class IntegrationContext:
 
         # PRIORITY: Dashboard metrics first (these MUST be populated)
         if self.dashboard_metrics:
-            lines.extend([
-                "## PRIORITY METRICS (Used in Dashboard - MUST be populated with realistic values)",
-                "",
-                "These metrics appear on the integration's dashboard. They MUST ALL be generated",
-                "with realistic, correlated values so the dashboard looks meaningful.",
-                "",
-                "CRITICAL: Each metric MUST include ALL its required tags with realistic values!",
-                "Dashboard widgets group by these tags - empty/missing tags cause 'N/A' display.",
-                "",
-            ])
-            
+            lines.extend(
+                [
+                    "## PRIORITY METRICS (Used in Dashboard - MUST be populated with realistic values)",
+                    "",
+                    "These metrics appear on the integration's dashboard. They MUST ALL be generated",
+                    "with realistic, correlated values so the dashboard looks meaningful.",
+                    "",
+                    "CRITICAL: Each metric MUST include ALL its required tags with realistic values!",
+                    "Dashboard widgets group by these tags - empty/missing tags cause 'N/A' display.",
+                    "",
+                ]
+            )
+
             for metric_name in self.dashboard_metrics:
                 # Find the full metric info
-                metric_info = next(
-                    (m for m in self.metrics if m.get('metric_name') == metric_name),
-                    None
-                )
+                metric_info = next((m for m in self.metrics if m.get('metric_name') == metric_name), None)
                 metric_line = f"- **`{metric_name}`**"
                 if metric_info:
                     if metric_info.get('metric_type'):
                         metric_line += f" (type: {metric_info['metric_type']})"
                     if metric_info.get('unit_name'):
                         metric_line += f" [unit: {metric_info['unit_name']}]"
-                
+
                 # Add REQUIRED TAGS for this metric
                 metric_tags = self.dashboard_tags.get(metric_name, [])
                 if metric_tags:
                     metric_line += f"\n  **REQUIRED TAGS**: `{', '.join(metric_tags)}`"
-                
+
                 if metric_info and metric_info.get('description'):
                     desc = metric_info['description'][:150]
                     metric_line += f"\n  Description: {desc}"
-                    
+
                 lines.append(metric_line)
                 lines.append("")  # Blank line between metrics
 
             # Summary of all tags needed
             if all_dashboard_tags:
-                lines.extend([
-                    "",
-                    "## REQUIRED TAGS (Must have realistic values - NEVER use 'N/A' or empty)",
-                    "",
-                    "The dashboard groups by these tags. Each MUST have realistic values:",
-                    "",
-                ])
+                lines.extend(
+                    [
+                        "",
+                        "## REQUIRED TAGS (Must have realistic values - NEVER use 'N/A' or empty)",
+                        "",
+                        "The dashboard groups by these tags. Each MUST have realistic values:",
+                        "",
+                    ]
+                )
                 for tag in sorted(all_dashboard_tags):
                     # Provide example values for common tags
                     examples = _get_tag_examples(tag)
                     lines.append(f"- `{tag}`: {examples}")
                 lines.append("")
 
-            lines.extend([
-                "",
-                "IMPORTANT: The above dashboard metrics should show CORRELATED behavior.",
-                "For example, if queue depth increases, related latency metrics should also increase.",
-                "",
-            ])
+            lines.extend(
+                [
+                    "",
+                    "IMPORTANT: The above dashboard metrics should show CORRELATED behavior.",
+                    "For example, if queue depth increases, related latency metrics should also increase.",
+                    "",
+                ]
+            )
 
         # All other metrics
-        lines.extend([
-            "## All Available Metrics",
-            "The following metrics are defined for this integration:",
-            "",
-        ])
+        lines.extend(
+            [
+                "## All Available Metrics",
+                "The following metrics are defined for this integration:",
+                "",
+            ]
+        )
 
         # Add metrics in a structured format (excluding dashboard metrics already shown)
         dashboard_set = set(self.dashboard_metrics)
         other_metrics = [m for m in self.metrics if m.get('metric_name') not in dashboard_set]
 
-        for metric in other_metrics[:80]:  # Limit to avoid token limits
+        for metric in other_metrics[:MAX_METRICS_IN_PROMPT]:
             metric_line = f"- `{metric.get('metric_name', 'unknown')}`"
             if metric.get('metric_type'):
                 metric_line += f" (type: {metric['metric_type']})"
@@ -130,17 +141,19 @@ class IntegrationContext:
                 metric_line += f": {desc}"
             lines.append(metric_line)
 
-        if len(other_metrics) > 80:
-            lines.append(f"... and {len(other_metrics) - 80} more metrics")
+        if len(other_metrics) > MAX_METRICS_IN_PROMPT:
+            lines.append(f"... and {len(other_metrics) - MAX_METRICS_IN_PROMPT} more metrics")
 
         # Add config options if available
         if self.config_options:
-            lines.extend([
-                "",
-                "## Configuration Options (key entities/parameters)",
-                "",
-            ])
-            for opt in self.config_options[:30]:
+            lines.extend(
+                [
+                    "",
+                    "## Configuration Options (key entities/parameters)",
+                    "",
+                ]
+            )
+            for opt in self.config_options[:MAX_CONFIG_OPTIONS_IN_PROMPT]:
                 opt_line = f"- `{opt.get('name', 'unknown')}`"
                 if opt.get('description'):
                     desc = opt['description'][:150]
@@ -149,11 +162,13 @@ class IntegrationContext:
 
         # Add service checks
         if self.service_checks:
-            lines.extend([
-                "",
-                "## Service Checks",
-                "",
-            ])
+            lines.extend(
+                [
+                    "",
+                    "## Service Checks",
+                    "",
+                ]
+            )
             for check in self.service_checks:
                 check_line = f"- `{check.get('name', 'unknown')}`"
                 if check.get('description'):
@@ -177,12 +192,10 @@ def _get_tag_examples(tag_name: str) -> str:
         'region': 'e.g., "us-east-1", "eu-west-1", "ap-southeast-1"',
         'zone': 'e.g., "zone-a", "zone-b", "zone-c"',
         'datacenter': 'e.g., "dc1", "dc2", "aws-use1"',
-        
         # Worker/Process tags
         'worker': 'e.g., "worker-01-12345", "celery-web-1-9876"',
         'process': 'e.g., "main", "worker", "scheduler"',
         'pid': 'e.g., "12345", "67890"',
-        
         # Network tags
         'endpoint': 'e.g., "/api/v1/users", "/health", "/metrics"',
         'method': 'e.g., "GET", "POST", "PUT", "DELETE"',
@@ -192,35 +205,30 @@ def _get_tag_examples(tag_name: str) -> str:
         'port': 'e.g., "8080", "443", "5432"',
         'dir': 'e.g., "inbound", "outbound", "in", "out"',
         'direction': 'e.g., "ingress", "egress"',
-        
         # Database tags
         'db': 'e.g., "users_db", "analytics", "cache"',
         'database': 'e.g., "postgres_main", "mysql_replica"',
         'table': 'e.g., "users", "orders", "events"',
         'query_type': 'e.g., "select", "insert", "update", "delete"',
-        
         # Queue tags
         'queue': 'e.g., "high-priority", "default", "background-jobs"',
         'topic': 'e.g., "user-events", "notifications", "analytics"',
         'exchange': 'e.g., "main", "dead-letter", "events"',
-        
         # AI/ML tags
         'model': 'e.g., "gpt-4", "claude-3", "llama-70b", "mixtral"',
         'api_provider': 'e.g., "openai", "anthropic", "azure", "bedrock"',
         'api_key_alias': 'e.g., "prod-key-1", "dev-key-alpha", "team-ml"',
         'end_user': 'e.g., "user_12345", "service_account", "api_client"',
         'user': 'e.g., "alice@company.com", "bob@company.com"',
-        
         # Drop/Error tags
         'drop': 'e.g., "buffer_full", "timeout", "rate_limited"',
         'reason': 'e.g., "timeout", "connection_reset", "invalid_data"',
         'error_type': 'e.g., "timeout", "auth_failed", "rate_limit"',
-        
         # State tags
         'state': 'e.g., "running", "stopped", "pending"',
-        'status': 'e.g., "healthy", "degraded", "critical"',
+        'health_status': 'e.g., "healthy", "degraded", "critical"',
     }
-    
+
     return tag_examples.get(tag_name, f'Use realistic values appropriate for "{tag_name}"')
 
 
@@ -230,7 +238,7 @@ def build_context(integration: Integration) -> IntegrationContext:
     manifest = integration.manifest
 
     display_name = manifest.get("/display_name", "") or manifest.get("/tile/title", integration.name)
-    
+
     # Read description from README.md (much richer than manifest)
     description = _read_readme(integration)
     if not description:
@@ -239,18 +247,10 @@ def build_context(integration: Integration) -> IntegrationContext:
 
     # Extract categories from classifier_tags
     classifier_tags = manifest.get("/tile/classifier_tags", []) or []
-    categories = [
-        tag.replace("Category::", "")
-        for tag in classifier_tags
-        if tag.startswith("Category::")
-    ]
+    categories = [tag.replace("Category::", "") for tag in classifier_tags if tag.startswith("Category::")]
 
     # Extract supported OS
-    supported_os = [
-        tag.replace("Supported OS::", "")
-        for tag in classifier_tags
-        if tag.startswith("Supported OS::")
-    ]
+    supported_os = [tag.replace("Supported OS::", "") for tag in classifier_tags if tag.startswith("Supported OS::")]
 
     # Get metric prefix
     metric_prefix = manifest.get("/assets/integration/metrics/prefix", "") or f"{integration.name}."
@@ -266,7 +266,7 @@ def build_context(integration: Integration) -> IntegrationContext:
 
     # Read dashboard metrics (PRIORITY - these must be populated)
     dashboard_metrics = _read_dashboard_metrics(integration, metric_prefix)
-    
+
     # Read dashboard tags (tells us which tags each metric needs)
     dashboard_tags = _read_dashboard_tags(integration)
 
@@ -308,13 +308,15 @@ def _read_config_options(integration: Integration) -> list[dict[str, str]]:
 
     try:
         import yaml
+
         with spec_file.open(encoding='utf-8') as f:
             spec = yaml.safe_load(f)
 
-        options = []
+        options: list[dict[str, str]] = []
         _extract_options(spec, options)
         return options
     except Exception:
+        logger.debug("Failed to read config options from %s", spec_file, exc_info=True)
         return []
 
 
@@ -325,11 +327,13 @@ def _extract_options(spec: dict | list, options: list[dict[str, str]], depth: in
 
     if isinstance(spec, dict):
         if 'name' in spec and 'description' in spec:
-            options.append({
-                'name': spec.get('name', ''),
-                'description': spec.get('description', ''),
-                'required': str(spec.get('required', False)),
-            })
+            options.append(
+                {
+                    'name': spec.get('name', ''),
+                    'description': spec.get('description', ''),
+                    'required': str(spec.get('required', False)),
+                }
+            )
         for value in spec.values():
             _extract_options(value, options, depth + 1)
     elif isinstance(spec, list):
@@ -340,7 +344,7 @@ def _extract_options(spec: dict | list, options: list[dict[str, str]], depth: in
 def _read_readme(integration: Integration) -> str:
     """
     Read the README.md file and extract the Overview section.
-    
+
     The README contains much richer context about what the integration does
     than the manifest.json description.
     """
@@ -350,29 +354,24 @@ def _read_readme(integration: Integration) -> str:
 
     try:
         content = readme_file.read_text(encoding='utf-8')
-        
+
         # Extract the Overview section (most useful for understanding the integration)
         # README format is typically: ## Overview\n\n<content>\n\n## Setup
-        import re
-        
         # Try to find Overview section
-        overview_match = re.search(
-            r'##\s*Overview\s*\n+(.*?)(?=\n##|\Z)',
-            content,
-            re.DOTALL | re.IGNORECASE
-        )
-        
+        overview_match = re.search(r'##\s*Overview\s*\n+(.*?)(?=\n##|\Z)', content, re.DOTALL | re.IGNORECASE)
+
         if overview_match:
             overview = overview_match.group(1).strip()
             # Limit to first 2000 chars to avoid token bloat
             if len(overview) > 2000:
                 overview = overview[:2000] + "..."
             return overview
-        
+
         # Fallback: return first 1500 chars of README
         return content[:1500] + "..." if len(content) > 1500 else content
-        
+
     except Exception:
+        logger.debug("Failed to read README from %s", readme_file, exc_info=True)
         return ""
 
 
@@ -387,13 +386,14 @@ def _read_service_checks(integration: Integration) -> list[dict[str, str]]:
             data = json.load(f)
         return data if isinstance(data, list) else []
     except Exception:
+        logger.debug("Failed to read service checks from %s", service_checks_file, exc_info=True)
         return []
 
 
 def _read_dashboard_metrics(integration: Integration, metric_prefix: str) -> list[str]:
     """
     Extract metrics used in dashboard widgets.
-    
+
     These are the PRIORITY metrics that must be populated for the dashboard to look good.
     """
     dashboards_dir = integration.path / "assets" / "dashboards"
@@ -401,11 +401,13 @@ def _read_dashboard_metrics(integration: Integration, metric_prefix: str) -> lis
         return []
 
     metrics = set()
-    
+
     # Pattern to extract metric names from dashboard queries
     # Matches patterns like: avg:ibm_mq.queue.depth_current{...}
-    metric_pattern = re.compile(r'(?:avg|sum|max|min|count|rate|diff|derivative|integral|cumsum|top|anomalies|forecast|outliers|ewma|median|percentile|stddev|timeshift):([a-zA-Z0-9_\.]+)\{')
-    
+    metric_pattern = re.compile(
+        r'(?:avg|sum|max|min|count|rate|diff|derivative|integral|cumsum|top|anomalies|forecast|outliers|ewma|median|percentile|stddev|timeshift):([a-zA-Z0-9_\.]+)\{'
+    )
+
     # Also match simple metric references without aggregation
     simple_pattern = re.compile(rf'{re.escape(metric_prefix)}[a-zA-Z0-9_\.]+')
 
@@ -413,18 +415,19 @@ def _read_dashboard_metrics(integration: Integration, metric_prefix: str) -> lis
         try:
             with dashboard_file.open(encoding='utf-8') as f:
                 dashboard_content = f.read()
-            
+
             # Find all metric names using the aggregation pattern
             for match in metric_pattern.finditer(dashboard_content):
                 metric_name = match.group(1)
                 if metric_name.startswith(metric_prefix):
                     metrics.add(metric_name)
-            
+
             # Also find simple metric references
             for match in simple_pattern.finditer(dashboard_content):
                 metrics.add(match.group(0))
-                
+
         except Exception:
+            logger.debug("Failed to read dashboard metrics from %s", dashboard_file, exc_info=True)
             continue
 
     # Return sorted list for consistent ordering
@@ -434,7 +437,7 @@ def _read_dashboard_metrics(integration: Integration, metric_prefix: str) -> lis
 def _read_dashboard_tags(integration: Integration) -> dict[str, list[str]]:
     """
     Extract tags used for grouping in dashboard widgets.
-    
+
     This tells us WHICH TAGS must be populated for dashboards to display properly.
     Returns: dict mapping metric names to list of required tags.
     """
@@ -443,22 +446,19 @@ def _read_dashboard_tags(integration: Integration) -> dict[str, list[str]]:
         return {}
 
     metric_tags: dict[str, set[str]] = {}
-    
+
     # Pattern to extract "by {tag1, tag2}" groupings
     # e.g., "sum:litellm.request.total{*} by {team,api_key_alias}"
     by_pattern = re.compile(r'([a-zA-Z0-9_\.]+)\{[^}]*\}\s*(?:by\s*\{([^}]+)\})?')
-    
+
     # Pattern to extract tags from filter expressions like {tag:value}
     filter_tag_pattern = re.compile(r'\{([^}:,\s]+):[^}]+\}')
-    
-    # Pattern for $variable references which indicate tag-based filtering
-    variable_pattern = re.compile(r'\$([a-zA-Z_][a-zA-Z0-9_]*)')
 
     for dashboard_file in dashboards_dir.glob("*.json"):
         try:
             with dashboard_file.open(encoding='utf-8') as f:
                 content = f.read()
-            
+
             # Find "by {tags}" groupings
             for match in by_pattern.finditer(content):
                 metric_name = match.group(1)
@@ -467,14 +467,14 @@ def _read_dashboard_tags(integration: Integration) -> dict[str, list[str]]:
                     if metric_name not in metric_tags:
                         metric_tags[metric_name] = set()
                     metric_tags[metric_name].update(tags)
-            
+
             # Find tags used in filters
             for match in filter_tag_pattern.finditer(content):
                 tag_name = match.group(1)
                 # Add to all metrics as a common tag
                 for metric in metric_tags:
                     metric_tags[metric].add(tag_name)
-                    
+
             # Parse JSON to find template variables (these indicate important tags)
             try:
                 dashboard_json = json.loads(content)
@@ -486,11 +486,11 @@ def _read_dashboard_tags(integration: Integration) -> dict[str, list[str]]:
                         for metric in metric_tags:
                             metric_tags[metric].add(tag_name)
             except json.JSONDecodeError:
-                pass
-                
+                logger.debug("Failed to parse JSON from %s", dashboard_file)
+
         except Exception:
+            logger.debug("Failed to read dashboard tags from %s", dashboard_file, exc_info=True)
             continue
 
     # Convert sets to sorted lists
     return {k: sorted(v) for k, v in metric_tags.items()}
-

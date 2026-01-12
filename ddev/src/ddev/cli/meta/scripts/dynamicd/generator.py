@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-import re
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from ddev.cli.meta.scripts.dynamicd.constants import DEFAULT_MODEL, MAX_TOKENS
@@ -27,11 +27,11 @@ def generate_simulator_script(
     context: IntegrationContext,
     scenario: str,
     dd_site: str,
-    metrics_per_second: int,
+    metrics_per_batch: int,
     duration: int,
     api_key: str,
     model: str = DEFAULT_MODEL,
-    on_status: callable | None = None,
+    on_status: Callable[[str], None] | None = None,
 ) -> str:
     """
     Generate a simulator script using two-stage LLM prompting.
@@ -40,7 +40,7 @@ def generate_simulator_script(
         context: Integration context with metadata
         scenario: Selected scenario (healthy, degraded, etc.)
         dd_site: Datadog site URL
-        metrics_per_second: Target metrics rate
+        metrics_per_batch: Target metrics per batch (batches sent every 10s)
         duration: Duration in seconds (0 = forever)
         api_key: Anthropic API key
         model: Claude model to use
@@ -52,9 +52,7 @@ def generate_simulator_script(
     try:
         import anthropic
     except ImportError as e:
-        raise GeneratorError(
-            "anthropic package is required. Install with: pip install anthropic"
-        ) from e
+        raise GeneratorError("anthropic package is required. Install with: pip install anthropic") from e
 
     client = anthropic.Anthropic(api_key=api_key)
 
@@ -97,7 +95,7 @@ def generate_simulator_script(
         stage1_analysis=stage1_analysis,
         scenario=scenario,
         dd_site=dd_site,
-        metrics_per_second=metrics_per_second,
+        metrics_per_batch=metrics_per_batch,
         duration=duration,
     )
 
@@ -130,7 +128,7 @@ def fix_script_error(
     attempt: int,
     api_key: str,
     model: str = DEFAULT_MODEL,
-    on_status: callable | None = None,
+    on_status: Callable[[str], None] | None = None,
 ) -> str:
     """
     Use the LLM to fix an error in the generated script.
@@ -149,9 +147,7 @@ def fix_script_error(
     try:
         import anthropic
     except ImportError as e:
-        raise GeneratorError(
-            "anthropic package is required. Install with: pip install anthropic"
-        ) from e
+        raise GeneratorError("anthropic package is required. Install with: pip install anthropic") from e
 
     client = anthropic.Anthropic(api_key=api_key)
 
@@ -210,4 +206,3 @@ def _clean_script(script: str) -> str:
         script = "#!/usr/bin/env python3\n" + script
 
     return script
-

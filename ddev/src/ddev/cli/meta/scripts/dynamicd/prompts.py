@@ -13,8 +13,8 @@ from ddev.cli.meta.scripts.dynamicd.constants import SCENARIOS
 # This prompt analyzes the integration and produces an enhanced understanding
 # that will be used to guide the script generation.
 
-STAGE1_SYSTEM_PROMPT = """You are an expert in observability, monitoring systems, and the operational 
-characteristics of various software services. Your task is to analyze a Datadog integration and 
+STAGE1_SYSTEM_PROMPT = """You are an expert in observability, monitoring systems, and the operational
+characteristics of various software services. Your task is to analyze a Datadog integration and
 produce a detailed understanding of:
 
 1. What this service/software does
@@ -25,7 +25,7 @@ produce a detailed understanding of:
 
 You will output a structured analysis that will be used to generate realistic fake telemetry data."""
 
-STAGE1_USER_PROMPT_TEMPLATE = """Analyze the following Datadog integration and provide a detailed understanding 
+STAGE1_USER_PROMPT_TEMPLATE = """Analyze the following Datadog integration and provide a detailed understanding
 that can be used to generate realistic fake telemetry data.
 
 {integration_context}
@@ -75,7 +75,7 @@ Please provide your analysis in the following JSON format:
 }}
 ```
 
-Be specific to this integration's domain. Use your knowledge of {display_name} and similar services 
+Be specific to this integration's domain. Use your knowledge of {display_name} and similar services
 to provide realistic operational insights."""
 
 
@@ -85,7 +85,7 @@ to provide realistic operational insights."""
 # This prompt uses the Stage 1 analysis to generate the actual simulator script.
 
 STAGE2_SYSTEM_PROMPT = """You are an expert Python developer specializing in observability and monitoring.
-Your task is to generate a high-quality, self-contained Python script that simulates realistic 
+Your task is to generate a high-quality, self-contained Python script that simulates realistic
 telemetry data for a Datadog integration.
 
 The script must:
@@ -102,14 +102,14 @@ CRITICAL REQUIREMENTS:
 1. EVERY BATCH MUST INCLUDE ALL DASHBOARD METRICS (marked as PRIORITY)
    - Do NOT randomly select metrics - generate ALL dashboard metrics every batch
    - The batch should include 1 data point per metric per entity combination
-   
+
 2. METRICS MUST BE MATHEMATICALLY CONSISTENT (Critical!)
    - Related metrics must add up correctly
    - Example: If total_drops=5000, then buffer_drops + threadtable_drops + queue_drops should = 5000
    - Example: If requests_total=1000, then requests_success + requests_failed should = 1000
    - Breakdown metrics should distribute the total, not all be 0
    - Parent/child metrics must have logical relationships
-   
+
 3. TAGS ARE MANDATORY (dashboards group by tags - missing tags = "N/A" display):
    - NEVER use empty strings, "N/A", "null", or placeholder values for tags
    - The integration context lists REQUIRED TAGS for each metric - use them ALL
@@ -123,18 +123,18 @@ CRITICAL REQUIREMENTS:
      - endpoint: "/api/v1/chat", "/api/v1/completions", "/health"
      - dir/direction: "inbound", "outbound"
      - api_provider: "openai", "anthropic", "azure"
-   
-3. METRIC CORRELATIONS (Very Important):
+
+4. METRIC CORRELATIONS (Very Important):
    - Metrics must tell a COHERENT STORY - related metrics should move together
    - Use shared "state" variables: base_load, error_rate, queue_depth
    - Derive multiple metrics from these shared states
    - Example: if latency increases, throughput should decrease
    - The dashboard should look like a REAL system
 
-4. Use exact metric names from the integration - do not invent new ones
-5. Respect metric types (gauge=3, count=1, rate=2)"""
+5. Use exact metric names from the integration - do not invent new ones
+6. Respect metric types (gauge=3, count=1, rate=2)"""
 
-STAGE2_USER_PROMPT_TEMPLATE = """Generate a Python script that simulates realistic telemetry data for the 
+STAGE2_USER_PROMPT_TEMPLATE = """Generate a Python script that simulates realistic telemetry data for the
 {display_name} integration.
 
 ## Integration Context
@@ -149,7 +149,7 @@ Based on analysis, here's what we know about this service:
 
 ## Configuration
 - Datadog Site: {dd_site}
-- Metrics per batch target: {metrics_per_second} (but include ALL dashboard metrics regardless)
+- Metrics per batch target: {metrics_per_batch} (but include ALL dashboard metrics regardless)
 - Batch interval: 10 seconds (send metrics every 10 seconds, not every second)
 - Duration: {duration} seconds (0 = run forever)
 
@@ -201,7 +201,7 @@ METRICS_ENDPOINT = f"https://api.{{DATADOG_SITE}}/api/v2/series"
 
 SCENARIO = "{scenario}"
 DURATION_SECONDS = {duration}  # 0 = run forever
-METRICS_PER_BATCH = {metrics_per_second}
+METRICS_PER_BATCH = {metrics_per_batch}
 BATCH_INTERVAL_SECONDS = 10.0  # Send every 10 seconds (realistic monitoring interval)
 
 # =============================================================================
@@ -260,7 +260,7 @@ def send_metrics(metrics: list, api_key: str) -> bool:
         "DD-API-KEY": api_key,
         "Content-Type": "application/json",
     }}
-    
+
     # V2 API format - series is a list of metric objects
     payload = {{
         "series": [
@@ -278,7 +278,7 @@ def send_metrics(metrics: list, api_key: str) -> bool:
             for m in metrics
         ]
     }}
-    
+
     response = requests.post(
         f"https://api.{{DATADOG_SITE}}/api/v2/series",
         headers=headers,
@@ -297,7 +297,7 @@ if SCENARIO == "incident":
 
 # Derived metrics from shared state
 cpu_percent = system_load * 80 + random.uniform(-5, 5)
-memory_percent = system_load * 70 + random.uniform(-3, 3)  
+memory_percent = system_load * 70 + random.uniform(-3, 3)
 latency_ms = 10 + (system_load * 200) + random.uniform(-10, 10)
 error_rate = 0.01 if system_load < 0.8 else (system_load - 0.8) * 0.5
 ```
@@ -320,7 +320,7 @@ def build_stage2_prompt(
     stage1_analysis: str,
     scenario: str,
     dd_site: str,
-    metrics_per_second: int,
+    metrics_per_batch: int,
     duration: int,
 ) -> tuple[str, str]:
     """Build the Stage 2 (script generation) prompt."""
@@ -333,7 +333,7 @@ def build_stage2_prompt(
         scenario=scenario,
         scenario_description=scenario_description,
         dd_site=dd_site,
-        metrics_per_second=metrics_per_second,
+        metrics_per_batch=metrics_per_batch,
         duration=duration,
     )
     return STAGE2_SYSTEM_PROMPT, user_prompt
@@ -363,4 +363,3 @@ Fix the error and return the complete corrected script. Output ONLY the Python c
 Return ONLY the corrected Python code, no explanations. Make sure to fix the specific error mentioned."""
 
     return system_prompt, user_prompt
-

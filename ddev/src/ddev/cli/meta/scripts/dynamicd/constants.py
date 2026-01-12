@@ -36,4 +36,3 @@ DATADOG_SITES = {
 
 # Output directory name
 FAKE_DATA_DIR = "fake_data"
-
