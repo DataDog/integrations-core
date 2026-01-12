@@ -94,11 +94,13 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ### Certificates with identical subjects
 
-The integration identifies certificates primarily by their subject, not by serial number. When multiple certificates share the same subject but have different serial numbers (for example, an expired certificate and its renewed replacement), the integration may only detect one of them, often the expired certificate.
+When multiple certificates share the same subject but have different serial numbers or thumbprints (for example, an expired certificate and its renewed replacement), the integration may only detect one of them, often the expired certificate.
 
-**Solution**: Delete the expired certificate from the Windows Certificate Store so only the valid, renewed certificate is monitored. While `certificate_serial_number` is available as a tag on metrics and service checks, it cannot be used for filtering in the configuration. The integration only supports filtering by `certificate_subjects`.
+**Agent v7.70.0 and later**: The `certificate_thumbprint` and `certificate_serial_number` tags are available on metrics and service checks, allowing you to distinguish between certificates with identical subjects in Datadog monitors and dashboards. While these tags cannot be used for filtering in the integration configuration (only `certificate_subjects` is supported), you can create custom monitors that group by `certificate_thumbprint` or `certificate_serial_number` instead of the default `subject_cn` grouping to monitor each certificate separately.
 
-Need help? Contact [Datadog support][9].
+**Agent versions prior to v7.70.0**: If you are running an Agent version older than v7.70.0, delete the expired certificate from the Windows Certificate Store so only the valid, renewed certificate is monitored.
+
+Need additional help? Contact [Datadog support][9].
 
 
 [1]: https://learn.microsoft.com/en-us/windows-hardware/drivers/install/certificate-stores
