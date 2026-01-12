@@ -110,9 +110,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
                     supports_json_aggregation = self._check.version.version_compatible((8, 0, 19))
 
             if supports_json_aggregation:
-                self._log.debug(
-                    "Using new schema collector with JSON aggregation"
-                )
+                self._log.debug("Using new schema collector with JSON aggregation")
                 self._schemas_collector = MySqlSchemaCollector(self._check)
             else:
                 self._log.debug("Using legacy schema collector")

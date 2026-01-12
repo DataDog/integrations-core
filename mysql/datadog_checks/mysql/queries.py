@@ -409,7 +409,7 @@ def get_indexes_query(version, is_mariadb, table_names):
     Get the appropriate indexes query based on MySQL version and flavor.
     The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
     MariaDB doesn't support functional indexes.
-    
+
     This function is used by the legacy schema collector for MySQL < 8.0.19 and MariaDB < 10.5.0.
     """
     if not is_mariadb and version.version_compatible((8, 0, 13)):

@@ -63,10 +63,10 @@ class MySqlSchemaCollector(SchemaCollector):
     def _supports_json_aggregation(self) -> bool:
         """
         Check if MySQL/MariaDB version supports json_arrayagg and json_object functions.
-        
+
         - MySQL: json_arrayagg introduced in 8.0.19
         - MariaDB: json_arrayagg introduced in 10.5.0
-        
+
         Returns:
             bool: True if version supports JSON aggregation functions
         """

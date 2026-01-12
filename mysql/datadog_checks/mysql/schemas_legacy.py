@@ -122,6 +122,7 @@ class MySqlSchemaCollectorLegacy:
     This collector uses the traditional approach of querying each database separately
     and aggregating results in Python. It's compatible with MySQL < 8.0.19 and MariaDB < 10.5.0.
     """
+
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
