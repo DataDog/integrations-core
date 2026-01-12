@@ -50,7 +50,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: User
+    name: Target Name
     path: ocsf.user.name
     source: log
   - groups:
