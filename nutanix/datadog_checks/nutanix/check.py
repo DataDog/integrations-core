@@ -616,6 +616,9 @@ class NutanixCheck(AgentCheck):
                 if entity_name:
                     event_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
 
+        # Distinguish Prism Central events from tasks
+        event_tags.append("ntnx_type:event")
+
         self.event(
             {
                 "timestamp": self._parse_timestamp(created_time)
@@ -656,7 +659,7 @@ class NutanixCheck(AgentCheck):
 
         start_time = now - timedelta(seconds=self.sampling_interval)
 
-        # Format time for API (ISO 8601 with Z suffix)
+        # format time for API in ISO 8601 format
         start_time_str = start_time.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
         params = {}
@@ -680,8 +683,8 @@ class NutanixCheck(AgentCheck):
                 return
 
             for task in tasks:
-                # Belt-and-suspenders: the API filter should prevent duplicates, but
-                # we defensively skip anything <= the last seen timestamp.
+                # the API filter should prevent duplicates
+                # this is for safety
                 if self.last_task_collection_time:
                     task_time_str = task.get("createdTime")
                     if task_time_str:
@@ -690,7 +693,8 @@ class NutanixCheck(AgentCheck):
                             continue
 
                 self._process_task(task)
-                # We request tasks ordered by createdTime asc, so the last one is the most recent.
+
+            # tasks are ordered by creationTime, last one is the most recent.
             most_recent_time_str = tasks[-1].get("createdTime")
             most_recent_time = (
                 datetime.fromisoformat(most_recent_time_str.replace("Z", "+00:00")) if most_recent_time_str else None
@@ -749,6 +753,9 @@ class NutanixCheck(AgentCheck):
                 task_tags.append(f"ntnx_entity_id:{entity_id}")
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
+
+        # Distinguish Prism Central tasks from events
+        task_tags.append("ntnx_type:task")
 
         # Build message text
         msg_text = task_description
