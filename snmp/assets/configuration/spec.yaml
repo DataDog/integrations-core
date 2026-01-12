@@ -294,13 +294,6 @@ files:
         value:
           type: string
           example: <AUTHENTICATION_PROTOCOL>
-        enum:
-          - MD5
-          - SHA
-          - SHA224
-          - SHA256
-          - SHA384
-          - SHA512
         fleet_configurable: true
       - name: authKey
         description: |
@@ -321,13 +314,6 @@ files:
         value:
           type: string
           example: <PRIVACY_TYPE>
-        enum:
-          - DES
-          - AES
-          - AES192
-          - AES192C
-          - AES256
-          - AES256C
         fleet_configurable: true
       - name: privKey
         description: |

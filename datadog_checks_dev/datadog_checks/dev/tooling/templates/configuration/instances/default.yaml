@@ -12,6 +12,7 @@
 - name: metric_patterns
   description: |
     A mapping of metrics to include or exclude, with each entry being a regular expression.
+
     Metrics defined in `exclude` will take precedence in case of overlap.
   value:
     example:
