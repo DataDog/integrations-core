@@ -8,7 +8,7 @@ from operator import attrgetter
 import pymysql
 
 from datadog_checks.mysql.cursor import CommenterDictCursor
-from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
+from datadog_checks.mysql.schemas_legacy import MySqlSchemaCollectorLegacy
 
 from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
@@ -27,6 +27,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
+DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 
 MARIADB_TABLE_NAME = "information_schema.GLOBAL_VARIABLES"
 MYSQL_TABLE_NAME = "performance_schema.global_variables"
@@ -50,7 +51,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
     def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
         self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
         self._databases_data_collection_interval = config.schemas_config.get(
-            "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
+            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
 
@@ -85,7 +86,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0
         self._db = None
-        self._databases_data = DatabasesData(self, check, config)
+        self._databases_data = MySqlSchemaCollectorLegacy(self, check, config)
         self._last_settings_collection_time = 0
         self._last_databases_collection_time = 0
 

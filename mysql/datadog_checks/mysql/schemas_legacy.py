@@ -27,7 +27,7 @@ from datadog_checks.mysql.queries import (
 
 from .util import get_list_chunks
 
-DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
+DEFAULT_SCHEMAS_LEGACY_COLLECTION_INTERVAL = 600
 
 
 class SubmitData:
@@ -115,7 +115,13 @@ def agent_check_getter(self):
     return self._check
 
 
-class DatabasesData:
+class MySqlSchemaCollectorLegacy:
+    """
+    Legacy schema collector for MySQL versions that don't support JSON aggregation functions.
+    
+    This collector uses the traditional approach of querying each database separately
+    and aggregating results in Python. It's compatible with MySQL < 8.0.19 and MariaDB < 10.5.0.
+    """
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -126,7 +132,7 @@ class DatabasesData:
         self._log = check.log
         self._tags = []
         collection_interval = config.schemas_config.get(
-            'collection_interval', DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
+            'collection_interval', DEFAULT_SCHEMAS_LEGACY_COLLECTION_INTERVAL
         )
         base_event = {
             "host": None,
@@ -266,7 +272,7 @@ class DatabasesData:
                 self._data_submitter.submit()
         finally:
             self._data_submitter.reset()  # Ensure we reset in case of errors
-        self._log.debug("Finished collect_databases_data")
+        self._log.debug("Finished collect_databases_data (legacy)")
 
     def _fetch_for_databases(self, db_infos, cursor):
         start_time = time.time()
