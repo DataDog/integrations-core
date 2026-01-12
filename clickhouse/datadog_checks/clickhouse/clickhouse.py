@@ -13,6 +13,7 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding
 
 from . import queries
 from .__about__ import __version__
+from .completed_query_samples import ClickhouseCompletedQuerySamples
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
@@ -130,6 +131,25 @@ class ClickhouseCheck(AgentCheck):
         else:
             self.statement_samples = None
 
+        # Initialize completed query samples (from system.query_log - completed queries)
+        self._completed_query_samples_config = self.instance.get('completed_query_samples', {})
+        if self._dbm_enabled and self._completed_query_samples_config.get('enabled', True):
+            # Create a simple config object for completed query samples
+            class CompletedQuerySamplesConfig:
+                def __init__(self, config_dict):
+                    self.enabled = config_dict.get('enabled', True)
+                    self.collection_interval = config_dict.get('collection_interval', 10)
+                    self.run_sync = config_dict.get('run_sync', False)
+                    self.samples_per_hour_per_query = config_dict.get('samples_per_hour_per_query', 15)
+                    self.seen_samples_cache_maxsize = config_dict.get('seen_samples_cache_maxsize', 10000)
+                    self.max_samples_per_collection = config_dict.get('max_samples_per_collection', 1000)
+
+            self.completed_query_samples = ClickhouseCompletedQuerySamples(
+                self, CompletedQuerySamplesConfig(self._completed_query_samples_config)
+            )
+        else:
+            self.completed_query_samples = None
+
     def _send_database_instance_metadata(self):
         """Send database instance metadata to the metadata intake."""
         if self.database_identifier not in self._database_instance_emitted:
@@ -180,6 +200,10 @@ class ClickhouseCheck(AgentCheck):
         # Run statement samples if DBM is enabled (from system.processes)
         if self.statement_samples:
             self.statement_samples.run_job_loop(self._tags)
+
+        # Run completed query samples if DBM is enabled (from system.query_log)
+        if self.completed_query_samples:
+            self.completed_query_samples.run_job_loop(self._tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):

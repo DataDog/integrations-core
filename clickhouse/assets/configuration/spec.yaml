@@ -189,6 +189,52 @@ files:
           value:
             type: number
             default: 1
+    - name: completed_query_samples
+      description: Configure collection of completed query samples from system.query_log
+      options:
+        - name: enabled
+          description: |
+            Enable collection of completed query samples. Requires `dbm: true`.
+            These samples represent individual completed queries and appear on the DBM Query Samples page.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the completed query samples collection interval (in seconds).
+            Lower values show more recent queries but increase collection overhead.
+          value:
+            type: number
+            example: 10
+        - name: samples_per_hour_per_query
+          description: |
+            Set the maximum number of samples to collect per hour per unique query signature.
+            This rate limiting prevents excessive data collection for frequently executed queries.
+          value:
+            type: number
+            example: 15
+        - name: seen_samples_cache_maxsize
+          hidden: true
+          description: |
+            Set the max size of the cache used for rate limiting samples.
+          value:
+            type: number
+            default: 10000
+        - name: max_samples_per_collection
+          hidden: true
+          description: |
+            Maximum number of samples to collect in a single run (applies LIMIT in SQL).
+            Prevents overwhelming the agent with too many samples at once.
+          value:
+            type: number
+            default: 1000
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the completed query samples collection synchronously. For testing only.
+          value:
+            type: boolean
+            example: false
     - name: database_instance_collection_interval
       hidden: true
       description: |

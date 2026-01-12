@@ -144,6 +144,39 @@ instances:
         #
         # collection_interval: 10
 
+    ## Configure collection of completed query samples from system.query_log
+    #
+    # completed_query_samples:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of completed query samples. Requires `dbm: true`.
+        ## These samples represent individual completed queries and appear on the DBM Query Samples page.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the completed query samples collection interval (in seconds).
+        ## Lower values show more recent queries but increase collection overhead.
+        #
+        # collection_interval: 10
+
+        ## @param samples_per_hour_per_query - integer - optional - default: 15
+        ## Set the maximum number of samples to collect per hour per unique query signature.
+        ## This rate limiting prevents excessive data collection for frequently executed queries.
+        #
+        # samples_per_hour_per_query: 15
+
+        ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
+        ## Set the max size of the cache used for rate limiting samples.
+        #
+        # seen_samples_cache_maxsize: 10000
+
+        ## @param max_samples_per_collection - integer - optional - default: 1000
+        ## Maximum number of samples to collect in a single run.
+        ## Prevents overwhelming the agent with too many samples at once.
+        #
+        # max_samples_per_collection: 1000
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.
@@ -174,7 +207,7 @@ instances:
     ##           This can also be set to the following `tag` types to tag each metric in the row with the name
     ##           and value of the item in this column:
     ##             1. tag - This is the default tag type
-    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example:
     ##                 ```
     ##                 query = {
     ##                   "name": "example",
