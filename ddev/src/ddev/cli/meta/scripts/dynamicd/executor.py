@@ -65,7 +65,7 @@ def execute_script(
 
     while attempt < MAX_RETRIES:
         attempt += 1
-        status(f"🚀 Executing script (attempt {attempt}/{MAX_RETRIES})...")
+        status(f"Executing script (attempt {attempt}/{MAX_RETRIES})...")
 
         # Inject the Datadog API key into the script as well (belt and suspenders)
         executable_script = _inject_api_key(current_script, dd_api_key)
@@ -74,7 +74,7 @@ def execute_script(
         result = _run_script(executable_script, timeout, env_vars=env_vars)
 
         if result.return_code == 0:
-            status("✅ Script executed successfully!")
+            status("Script executed successfully!")
             return ExecutionResult(
                 success=True,
                 return_code=result.return_code,
@@ -91,7 +91,7 @@ def execute_script(
         if result.stdout:
             error_message += f"Stdout:\n{result.stdout}\n"
 
-        status(f"❌ Script failed:\n{error_message[:500]}")
+        status(f"Script failed:\n{error_message[:500]}")
 
         if attempt < MAX_RETRIES:
             try:
@@ -103,10 +103,10 @@ def execute_script(
                     on_status=on_status,
                 )
             except GeneratorError as e:
-                status(f"⚠️ Could not get error fix from LLM: {e}")
+                status(f"Could not get error fix from LLM: {e}")
                 break
         else:
-            status(f"❌ Max retries ({MAX_RETRIES}) exceeded")
+            status(f"Max retries ({MAX_RETRIES}) exceeded")
 
     # All retries exhausted
     return ExecutionResult(

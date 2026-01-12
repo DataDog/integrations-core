@@ -99,7 +99,7 @@ The script must:
 8. Have clear, readable code with comments
 
 CRITICAL REQUIREMENTS:
-1. EVERY BATCH MUST INCLUDE ALL DASHBOARD METRICS (marked with 🎯)
+1. EVERY BATCH MUST INCLUDE ALL DASHBOARD METRICS (marked as PRIORITY)
    - Do NOT randomly select metrics - generate ALL dashboard metrics every batch
    - The batch should include 1 data point per metric per entity combination
    
@@ -250,7 +250,7 @@ Make the script:
 4. Support the selected scenario with appropriate metric modifications
 5. Print progress information as it runs
 6. Handle the API key being passed via environment variable DATADOG_API_KEY
-7. ENSURE ALL DASHBOARD METRICS (marked with 🎯) are generated in every batch
+7. ENSURE ALL DASHBOARD METRICS (marked as PRIORITY) are generated in every batch
 8. USE THE CORRECT DATADOG API V2 FORMAT for sending metrics:
 
 ```python

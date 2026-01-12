@@ -51,12 +51,12 @@ class IntegrationContext:
         # PRIORITY: Dashboard metrics first (these MUST be populated)
         if self.dashboard_metrics:
             lines.extend([
-                "## 🎯 PRIORITY METRICS (Used in Dashboard - MUST be populated with realistic values)",
+                "## PRIORITY METRICS (Used in Dashboard - MUST be populated with realistic values)",
                 "",
                 "These metrics appear on the integration's dashboard. They MUST ALL be generated",
                 "with realistic, correlated values so the dashboard looks meaningful.",
                 "",
-                "⚠️ CRITICAL: Each metric MUST include ALL its required tags with realistic values!",
+                "CRITICAL: Each metric MUST include ALL its required tags with realistic values!",
                 "Dashboard widgets group by these tags - empty/missing tags cause 'N/A' display.",
                 "",
             ])
@@ -90,7 +90,7 @@ class IntegrationContext:
             if all_dashboard_tags:
                 lines.extend([
                     "",
-                    "## 🏷️ REQUIRED TAGS (Must have realistic values - NEVER use 'N/A' or empty)",
+                    "## REQUIRED TAGS (Must have realistic values - NEVER use 'N/A' or empty)",
                     "",
                     "The dashboard groups by these tags. Each MUST have realistic values:",
                     "",
@@ -103,7 +103,7 @@ class IntegrationContext:
 
             lines.extend([
                 "",
-                "⚠️ IMPORTANT: The above dashboard metrics should show CORRELATED behavior.",
+                "IMPORTANT: The above dashboard metrics should show CORRELATED behavior.",
                 "For example, if queue depth increases, related latency metrics should also increase.",
                 "",
             ])

@@ -63,7 +63,7 @@ def generate_simulator_script(
             on_status(msg)
 
     # Stage 1: Analyze the integration
-    status("🔍 Stage 1: Analyzing integration context...")
+    status("Stage 1: Analyzing integration context...")
     integration_context_str = context.to_prompt_context()
 
     stage1_system, stage1_user = build_stage1_prompt(
@@ -86,10 +86,10 @@ def generate_simulator_script(
     except anthropic.APIError as e:
         raise GeneratorError(f"Stage 1 API error: {e}") from e
 
-    status("✅ Stage 1 complete: Service analysis ready")
+    status("Stage 1 complete: Service analysis ready")
 
     # Stage 2: Generate the script
-    status(f"🔧 Stage 2: Generating simulator script for scenario '{scenario}'...")
+    status(f"Stage 2: Generating simulator script for scenario '{scenario}'...")
 
     stage2_system, stage2_user = build_stage2_prompt(
         integration_context=integration_context_str,
@@ -119,7 +119,7 @@ def generate_simulator_script(
     # Clean up the script (remove markdown code blocks if present)
     script = _clean_script(script)
 
-    status("✅ Stage 2 complete: Script generated")
+    status("Stage 2 complete: Script generated")
 
     return script
 
@@ -159,7 +159,7 @@ def fix_script_error(
         if on_status:
             on_status(msg)
 
-    status(f"🔄 Attempt {attempt}: Asking LLM to fix the error...")
+    status(f"Attempt {attempt}: Asking LLM to fix the error...")
 
     system_prompt, user_prompt = build_error_correction_prompt(
         original_script=original_script,
@@ -185,7 +185,7 @@ def fix_script_error(
     # Clean up the script
     fixed_script = _clean_script(fixed_script)
 
-    status("✅ Received corrected script")
+    status("Received corrected script")
 
     return fixed_script
 

@@ -139,13 +139,13 @@ def dynamicd(
     if duration > 0:
         app.display_info(f"  Duration:    {duration}s")
     else:
-        app.display_info(f"  Duration:    ♾️  forever (Ctrl+C to stop)")
+        app.display_info(f"  Duration:    forever (Ctrl+C to stop)")
     app.display_info(f"  Rate:        {rate} metrics/batch (every 10s)")
     app.display_info(f"  Site:        {dd_site}")
     app.display_info(f"")
 
     # Build context
-    app.display_info("📦 Building integration context...")
+    app.display_info("Building integration context...")
     context = build_context(intg)
     app.display_info(f"   Found {len(context.metrics)} metrics, {len(context.config_options)} config options")
 
@@ -190,11 +190,11 @@ def dynamicd(
             integration_name=intg.name,
             scenario=scenario,
         )
-        app.display_success(f"📁 Script saved to: {saved_path.relative_to(app.repo.path)}")
+        app.display_success(f"Script saved to: {saved_path.relative_to(app.repo.path)}")
 
     # Execute the script
     app.display_info("")
-    app.display_info("▶️  Starting simulation...")
+    app.display_info("Starting simulation...")
     app.display_info("")
 
     result = execute_script(
@@ -210,15 +210,15 @@ def dynamicd(
 
     if result.stderr:
         app.display_warning("")
-        app.display_warning("⚠️ Errors:")
+        app.display_warning("Errors:")
         click.echo(result.stderr, err=True)
 
     if result.success:
         app.display_success(f"")
-        app.display_success(f"✅ Simulation completed successfully (attempts: {result.attempts})")
+        app.display_success(f"Simulation completed successfully (attempts: {result.attempts})")
     else:
         app.display_error(f"")
-        app.display_error(f"❌ Simulation failed after {result.attempts} attempts")
+        app.display_error(f"Simulation failed after {result.attempts} attempts")
         app.abort()
 
 
