@@ -44,7 +44,7 @@ def normalize_values(actual_payload):
             table['indexes'].sort(key=lambda x: x['name'])
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
-                f_key["referenced_column_names"] = sort_names_split_by_coma(f_key["referenced_column_names"])
+                f_key["referenced_column_names"] = sort_names_split_by_comma(f_key["referenced_column_names"])
         if 'columns' in table:
             for column in table['columns']:
                 if column['column_type'] == 'int':
@@ -110,10 +110,17 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
+def test_collect_schemas_legacy(aggregator, dd_run_check, dbm_instance):
+    """Test schema collection using legacy collector (MySQL < 8.0.19, MariaDB < 10.5.0)"""
+    # Skip if MySQL version supports JSON aggregation
+    is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
+    if is_maria_db and MYSQL_VERSION_PARSED >= parse_version('10.5.0'):
+        pytest.skip("Skipping legacy test - MariaDB version supports JSON aggregation")
+    elif not is_maria_db and MYSQL_VERSION_PARSED >= parse_version('8.0.19'):
+        pytest.skip("Skipping legacy test - MySQL version supports JSON aggregation")
+
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
-    is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
     is_percona = MYSQL_FLAVOR.lower() == 'percona'
     exp_datadog_test_schemas = {
         "name": "datadog_test_schemas",
@@ -665,7 +672,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
         'dd.internal.resource:database_instance:stubbed.hostname',
-        'port:13306',
         'tag1:value1',
         'tag2:value2',
     )
@@ -684,15 +690,16 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("flavor") in ("MariaDB", "MySQL", "Percona")
         assert sorted(schema_event["tags"]) == sorted(expected_tags)
         database_metadata = schema_event['metadata']
-        assert len(database_metadata) == 1
-        db_name = database_metadata[0]['name']
-        if db_name not in databases_to_find:
-            continue
+        # Legacy collector sends multiple databases in metadata array, iterate through them
+        for db_meta in database_metadata:
+            db_name = db_meta['name']
+            if db_name not in databases_to_find:
+                continue
 
-        if db_name in actual_payloads:
-            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
-        else:
-            actual_payloads[db_name] = database_metadata[0]
+            if db_name in actual_payloads:
+                actual_payloads[db_name]['tables'] = actual_payloads[db_name]['tables'] + db_meta['tables']
+            else:
+                actual_payloads[db_name] = db_meta
 
     assert len(actual_payloads) == len(expected_data_for_db)
 

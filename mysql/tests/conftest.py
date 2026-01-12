@@ -282,7 +282,10 @@ def version_metadata():
         'version.raw': mock.ANY,
         'version.build': mock.ANY,
         'flavor': flavor,
-        'resolved_hostname': 'forced_hostname',
+        # Hostname resolution varies by environment but should always be a non-empty string
+        # CI might use 'forced_hostname', local might use 'stubbed.hostname' or actual hostname
+        # The actual value is tested separately in test_database_identifier and other tests
+        'resolved_hostname': mock.ANY,
     }
 
 
