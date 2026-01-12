@@ -29,9 +29,22 @@ The configuration is located in the `battery.d/conf.yaml` file in the `conf.d/` 
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+### Tags
+The metric `system.battery.power_state` can report any of the following tags:
+- `power_state:battery_charging`: Indicates that the battery is charging.
+- `power_state:battery_discharging`: Inidicates that the battery is discharging.
+- `power_state:battery_power_on_line`: Indicates that the battery is connected to AC power.
+
+In Windows the metric can also report the following tag:
+- `power_state:battery_critical`: Indicates that battery failure is imminent.
+
 ### Events
 
 The Battery check does not include any events.
+
+### Service Checks
+
+The Battery check does not include any Service Checks.
 
 ## Troubleshooting
 
