@@ -23,6 +23,8 @@
   "assets": {
     "integration": {
       "source_type_name": "Battery",
+      "auto_install": true,
+      "source_type_id": 68269943,
       "metrics": {
         "prefix": "system.",
         "check": "system.battery.current_charge_pct",
