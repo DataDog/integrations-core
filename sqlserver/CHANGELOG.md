@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 22.12.2 / 2026-01-09
+
+***Fixed***:
+
+* Replace SQLServer checks for year with checks for major version. ([#22285](https://github.com/DataDog/integrations-core/pull/22285))
+* Fix default check in SQL Server major version ([#22291](https://github.com/DataDog/integrations-core/pull/22291))
+
 ## 22.12.1 / 2025-12-22
 
 ***Fixed***:
