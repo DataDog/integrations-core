@@ -3,11 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from unittest import mock
 
 import pytest
 from packaging.version import parse as parse_version
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.schemas import MySqlSchemaCollector
+from datadog_checks.mysql.schemas_legacy import MySqlSchemaCollectorLegacy
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
@@ -23,7 +26,7 @@ def dbm_instance(instance_complex):
     return instance_complex
 
 
-def sort_names_split_by_coma(names):
+def sort_names_split_by_comma(names):
     names_arr = names.split(',')
     sorted_columns = sorted(names_arr)
     return ','.join(sorted_columns)
@@ -729,3 +732,65 @@ def test_schemas_collection_config(dbm_instance):
     dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
     check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     assert check._config.schemas_config == {"enabled": True, "max_execution_time": 0}
+
+
+# Dual-Mode Schema Collection Tests
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'flavor, version, is_mariadb, version_compatible, expected_collector_class',
+    [
+        # MySQL old version should use legacy collector
+        ('MySQL', '5.7.0', False, False, MySqlSchemaCollectorLegacy),
+        # MySQL new version should use new collector
+        ('MySQL', '8.0.19', False, True, MySqlSchemaCollector),
+        # MariaDB old version should use legacy collector
+        ('MariaDB', '10.4.0', True, False, MySqlSchemaCollectorLegacy),
+        # MariaDB new version should use new collector
+        ('MariaDB', '10.5.0', True, True, MySqlSchemaCollector),
+    ],
+)
+def test_metadata_version_detection(flavor, version, is_mariadb, version_compatible, expected_collector_class):
+    """Test that metadata.py selects correct collector based on MySQL/MariaDB version"""
+    check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True, 'collect_schemas': {'enabled': True}}],
+    )
+    # Mock version
+    check.version = mock.Mock(flavor=flavor, version=version, build='')
+    check.version.version_compatible = mock.Mock(return_value=version_compatible)
+    check.is_mariadb = is_mariadb
+
+    # Get the collector (triggers lazy instantiation)
+    collector = check._mysql_metadata._get_schemas_collector()
+
+    # Verify correct collector type
+    assert isinstance(collector, expected_collector_class)
+
+
+@pytest.mark.unit
+def test_metadata_lazy_instantiation():
+    """Test that schema collector is only created when first accessed"""
+    check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True, 'collect_schemas': {'enabled': True}}],
+    )
+
+    # Initially, _schemas_collector should be None
+    assert check._mysql_metadata._schemas_collector is None
+
+    # Mock version for the check
+    check.version = mock.Mock(flavor='MySQL', version='8.0.19', build='')
+    check.version.version_compatible = mock.Mock(return_value=True)
+    check.is_mariadb = False
+
+    # First access should create it
+    collector1 = check._mysql_metadata._get_schemas_collector()
+    assert collector1 is not None
+
+    # Second access should return the same instance
+    collector2 = check._mysql_metadata._get_schemas_collector()
+    assert collector1 is collector2
