@@ -10,7 +10,7 @@
 * Support bhist metrics to monitor completed jobs. ([#22030](https://github.com/DataDog/integrations-core/pull/22030))
 * Add a user tag to running job metrics. ([#22072](https://github.com/DataDog/integrations-core/pull/22072))
 
-## 1.0.0 / 2025-11-25
+## 1.0.0 / 2025-11-25 / Agent 7.74.0
 
 ***Added***:
 
