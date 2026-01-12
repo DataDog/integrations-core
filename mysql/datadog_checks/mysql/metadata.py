@@ -216,7 +216,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             "dbms": "mysql",
             "kind": "mysql_variables",
             "collection_interval": self.collection_interval,
-            'dbms_version': self._check.version.version + '+' + self._check.version.build,
+            'dbms_version': self._check.dbms_version,
             "tags": self._tags,
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,

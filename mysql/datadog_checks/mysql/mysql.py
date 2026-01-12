@@ -224,6 +224,12 @@ class MySql(DatabaseCheck):
         return self._cloud_metadata
 
     @property
+    def dbms_version(self):
+        if self.version is None:
+            return None
+        return self.version.version + '+' + self.version.build
+
+    @property
     def database_identifier(self):
         # type: () -> str
         if self._database_identifier is None:
@@ -1398,7 +1404,7 @@ class MySql(DatabaseCheck):
                 "dbms": "mysql",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
-                'dbms_version': self.version.version + '+' + self.version.build,
+                'dbms_version': self.dbms_version,
                 'integration_version': __version__,
                 "tags": self.tag_manager.get_tags(),
                 "timestamp": time.time() * 1000,
