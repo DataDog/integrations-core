@@ -66,6 +66,7 @@ class InstanceConfig(BaseModel):
     db_include: Optional[tuple[str, ...]] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     enable_per_db_metrics: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None

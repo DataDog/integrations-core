@@ -154,6 +154,7 @@ class InstanceConfig(BaseModel):
     connection_reset_timeout: Optional[int] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: bool
+    enable_legacy_tags_normalization: Optional[bool] = None
     event_resource_filters: Optional[tuple[str, ...]] = None
     excluded_host_tags: Optional[tuple[str, ...]] = None
     host: str

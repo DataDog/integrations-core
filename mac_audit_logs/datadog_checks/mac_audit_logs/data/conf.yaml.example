@@ -38,6 +38,11 @@ instances:
     #
     min_collection_interval: 15
 
+    ## @param enable_legacy_tags_normalization - boolean - optional - default: true
+    ## Whether to enable the legacy tags normalization.
+    #
+    # enable_legacy_tags_normalization: false
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event).

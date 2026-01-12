@@ -427,6 +427,48 @@ def test_normalize_tag(case, tag, expected_tag):
     assert check.normalize_tag(tag) == expected_tag, 'Failed case: {}'.format(case)
 
 
+@pytest.mark.parametrize(
+    'case, tag, expected_tag',
+    [
+        ('nothing to normalize', 'abc:123', 'abc:123'),
+        ('unicode', 'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
+        ('hyphens preserved', 'foo,+*-/()[]{}-  \t\nbar:123', 'foo_-_-_bar:123'),
+        ('leading and trailing hyphens preserved', '--abc:123--', '--abc:123--'),
+        ('hyphens with underscores', 'foo-bar_baz', 'foo-bar_baz'),
+        ('simple hyphen', 'my-service', 'my-service'),
+        ('multiple hyphens', 'my-service-name-here', 'my-service-name-here'),
+        ('hyphen in tag value', 'service:my-service-name', 'service:my-service-name'),
+        ('mixed chars with hyphen', 'service:my-service_v2.0', 'service:my-service_v2.0'),
+        ('redundant underscore', 'foo_____bar', 'foo_bar'),
+        ('invalid chars and underscore', 'foo++__bar', 'foo_bar'),
+        ('leading and trailing underscores', '__abc:123__', 'abc:123'),
+    ],
+)
+def test_normalize_tag_non_legacy(case, tag, expected_tag):
+    """Test normalize_tag with enable_legacy_tags_normalization=False preserves hyphens."""
+    check = AgentCheck(instances=[{'enable_legacy_tags_normalization': False}])
+    assert check.normalize_tag(tag) == expected_tag, 'Failed case: {}'.format(case)
+
+
+@pytest.mark.parametrize(
+    'case, tag, legacy_expected, non_legacy_expected',
+    [
+        ('hyphen replaced vs preserved', 'my-service', 'my_service', 'my-service'),
+        ('instance name with hyphen', '_need-to__be_normalized-', 'need_to_be_normalized', 'need-to_be_normalized-'),
+        ('url-like tag', 'url:https://my-domain.com', 'url:https:_my_domain.com', 'url:https:_my-domain.com'),
+    ],
+)
+def test_normalize_tag_legacy_vs_non_legacy(case, tag, legacy_expected, non_legacy_expected):
+    """Test that legacy normalization replaces hyphens while non-legacy preserves them."""
+    # Legacy behavior (default)
+    legacy_check = AgentCheck()
+    assert legacy_check.normalize_tag(tag) == legacy_expected, 'Failed legacy case: {}'.format(case)
+
+    # Non-legacy behavior
+    non_legacy_check = AgentCheck(instances=[{'enable_legacy_tags_normalization': False}])
+    assert non_legacy_check.normalize_tag(tag) == non_legacy_expected, 'Failed non-legacy case: {}'.format(case)
+
+
 class TestMetrics:
     def test_namespace(self, aggregator):
         check = AgentCheck()

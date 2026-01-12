@@ -133,6 +133,8 @@ class AgentCheck(object):
     ALL_CAP_RE = re.compile(rb'([a-z0-9])([A-Z])')
     METRIC_REPLACEMENT = re.compile(rb'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
     TAG_REPLACEMENT = re.compile(rb'[,\+\*\-/()\[\]{}\s]')
+    # Non-legacy tag replacement preserves hyphens (-) which are allowed in Datadog tags
+    TAG_REPLACEMENT_NON_LEGACY = re.compile(rb'[,\+\*/()\[\]{}\s]')
     MULTIPLE_UNDERSCORE_CLEANUP = re.compile(rb'__+')
     DOT_UNDERSCORE_CLEANUP = re.compile(rb'_*\._*')
 
@@ -201,6 +203,9 @@ class AgentCheck(object):
         self.warnings = []  # type: List[str]
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
+        )
+        self.enable_legacy_tags_normalization = (
+            is_affirmative(self.instance.get('enable_legacy_tags_normalization', True)) if instance else True
         )
         self.debug_metrics = {}
         if self.init_config is not None:
@@ -1262,12 +1267,21 @@ class AgentCheck(object):
         # type: (Union[str, bytes]) -> str
         """Normalize tag values.
 
-        This happens for legacy reasons, when we cleaned up some characters (like '-')
-        which are allowed in tags.
+        When `enable_legacy_tags_normalization` is True (default), this normalizes
+        characters like '-' which are actually allowed in Datadog tags. This legacy
+        behavior is preserved for backward compatibility.
+
+        When `enable_legacy_tags_normalization` is False, hyphens are preserved in
+        tag values, making it consistent with Datadog's official tag rules.
         """
         if isinstance(tag, str):
             tag = tag.encode('utf-8', 'ignore')
-        tag = self.TAG_REPLACEMENT.sub(rb'_', tag)
+
+        if self.enable_legacy_tags_normalization:
+            tag = self.TAG_REPLACEMENT.sub(rb'_', tag)
+        else:
+            tag = self.TAG_REPLACEMENT_NON_LEGACY.sub(rb'_', tag)
+
         tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', tag)
         tag = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', tag).strip(b'_')
         return to_native_string(tag)

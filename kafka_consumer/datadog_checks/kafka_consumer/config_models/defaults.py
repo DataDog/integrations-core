@@ -40,6 +40,10 @@ def instance_enable_cluster_monitoring():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_min_collection_interval():
     return 15
 

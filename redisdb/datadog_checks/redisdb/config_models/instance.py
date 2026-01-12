@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
     disable_connection_cache: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     host: str
     keys: Optional[tuple[str, ...]] = None
     metric_patterns: Optional[MetricPatterns] = None

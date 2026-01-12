@@ -28,6 +28,10 @@ def instance_enable_extra_params():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_enable_lnetctl_detailed():
     return False
 
