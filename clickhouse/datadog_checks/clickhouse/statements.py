@@ -24,11 +24,14 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-# Query to fetch aggregated metrics from system.query_log
+# Query to fetch aggregated metrics from system.query_log using checkpoint-based collection
 # This is the ClickHouse equivalent of Postgres pg_stat_statements
 #
 # Key design decisions:
 # - Queries the LOCAL system.query_log table on this node only
+# - Uses checkpoint-based time windows with microsecond precision for exactly-once semantics
+# - Uses event_time_microseconds with exclusive lower bound (>) to prevent double-counting
+# - Uses fromUnixTimestamp64Micro() for proper DateTime64(6) type conversion
 # - Uses event_date predicate for partition pruning optimization
 # - Uses is_initial_query=1 to only count queries once (not sub-queries)
 # - Uses type != 'QueryStart' to get one record per completed query
@@ -68,10 +71,13 @@ SELECT
     sum(result_rows) as total_result_rows,
     sum(result_bytes) as total_result_bytes,
     sum(memory_usage) as total_memory_usage,
-    max(memory_usage) as peak_memory_usage
+    max(memory_usage) as peak_memory_usage,
+    max(event_time_microseconds) as max_event_time_microseconds
 FROM system.query_log
-WHERE event_date >= toDate(now() - INTERVAL {collection_interval} SECOND)
-  AND event_time >= now() - INTERVAL {collection_interval} SECOND
+WHERE
+  event_time_microseconds > fromUnixTimestamp64Micro({last_checkpoint_microseconds})
+  AND event_time_microseconds <= fromUnixTimestamp64Micro({current_checkpoint_microseconds})
+  AND event_date >= toDate(fromUnixTimestamp64Micro({last_checkpoint_microseconds}))
   AND type != 'QueryStart'
   AND is_initial_query = 1
   AND query NOT LIKE '%system.query_log%'
@@ -97,7 +103,10 @@ def _row_key(row):
 
 
 class ClickhouseStatementMetrics(DBMAsyncJob):
-    """Collects telemetry for SQL statements from system.query_log"""
+    """Collects telemetry for SQL statements from system.query_log using checkpoint-based collection"""
+
+    # Persistent cache key for storing the last collection timestamp
+    CHECKPOINT_CACHE_KEY = "query_metrics_last_checkpoint_microseconds"
 
     def __init__(self, check: ClickhouseCheck, config):
         collection_interval = float(getattr(config, 'collection_interval', 10))
@@ -136,6 +145,11 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / getattr(config, 'full_statement_text_samples_per_hour_per_query', 1),
         )
 
+        # Checkpoint state for exactly-once collection semantics
+        # Will be loaded from persistent cache on first collection
+        self._last_checkpoint_microseconds = None
+        self._current_checkpoint_microseconds = None
+
     def _execute_query(self, query):
         """Execute a query and return the results using the dedicated client"""
         if self._cancel_event.is_set():
@@ -161,20 +175,29 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
         """
-        Collect per-statement metrics from system.query_log and emit as:
-        1. FQT events (dbm_type: fqt) - for query text catalog
-        2. Query metrics payload - for time-series metrics
+        Collect and submit query metrics, saving checkpoint on success.
+
+        Critical: Checkpoint is ONLY saved after successful submission to ensure
+        exactly-once semantics and automatic retry on failure.
         """
         try:
+            # Step 1: Collect rows (loads checkpoint internally)
             rows = self._collect_metrics_rows()
+
             if not rows:
+                # No new queries, but still advance checkpoint
+                # This prevents re-scanning the same time window
+                if self._current_checkpoint_microseconds:
+                    self._save_checkpoint(self._current_checkpoint_microseconds)
+                    self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
+                    self._log.debug("Advanced checkpoint (no new queries)")
                 return
 
-            # Emit FQT (Full Query Text) events
+            # Step 2: Emit FQT (Full Query Text) events
             for event in self._rows_to_fqt_events(rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
 
-            # Prepare metrics payload wrapper
+            # Step 3: Prepare metrics payload wrapper
             payload_wrapper = {
                 'host': self._check.reported_hostname,
                 'database_instance': self._check.database_identifier,
@@ -185,22 +208,33 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                 'clickhouse_version': self._get_clickhouse_version(),
             }
 
-            # Get query metrics payloads (may be split into multiple if too large)
+            # Step 4: Get query metrics payloads (may be split into multiple if too large)
             payloads = self._get_query_metrics_payloads(payload_wrapper, rows)
 
+            # Step 5: Submit all payloads
             for payload in payloads:
                 payload_data = json.loads(payload)
                 num_rows = len(payload_data.get('clickhouse_rows', []))
                 self._log.info(
-                    "Submitting query metrics payload: %d bytes, %d rows, database_instance=%s",
+                    "Submitting query metrics payload: %d bytes, %d rows",
                     len(payload),
                     num_rows,
-                    payload_data.get('database_instance', 'MISSING'),
                 )
                 self._check.database_monitoring_query_metrics(payload)
 
+            # Step 6: CRITICAL - Only save checkpoint AFTER successful submission
+            if self._current_checkpoint_microseconds:
+                self._save_checkpoint(self._current_checkpoint_microseconds)
+                self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
+
+                self._log.info(
+                    "Successfully advanced checkpoint to %d microseconds",
+                    self._current_checkpoint_microseconds
+                )
+
         except Exception:
             self._log.exception('Unable to collect statement metrics due to an error')
+            # Don't save checkpoint on error - will retry same window next time
             return []
 
     def _get_clickhouse_version(self):
@@ -257,25 +291,158 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
         users_list = ", ".join(f"'{user}'" for user in INTERNAL_CLOUD_USERS)
         return f"AND user NOT IN ({users_list})"
 
+    def _load_checkpoint(self) -> int:
+        """
+        Load the last successful collection timestamp from persistent cache.
+
+        Returns:
+            int: Timestamp in microseconds since Unix epoch
+
+        Behavior:
+            - On first run: Returns (current_time - collection_interval)
+            - On subsequent runs: Returns last saved checkpoint
+            - On cache error: Falls back to default lookback
+            - Uses ClickHouse server time to avoid clock drift
+        """
+        try:
+            # Attempt to read from persistent cache
+            cached_value = self._check.read_persistent_cache(self.CHECKPOINT_CACHE_KEY)
+            if cached_value:
+                checkpoint = int(cached_value)
+                self._log.debug(
+                    "Loaded checkpoint from persistent cache: %d microseconds",
+                    checkpoint
+                )
+                return checkpoint
+        except Exception as e:
+            self._log.warning(
+                "Could not load checkpoint from persistent cache: %s. "
+                "Will use default lookback window.",
+                str(e)
+            )
+
+        # First run or cache error - calculate default checkpoint
+        # IMPORTANT: Use ClickHouse's time, not agent's time, to avoid clock drift
+        try:
+            result = self._execute_query("SELECT toUnixTimestamp64Micro(now64(6))")
+            if result and len(result) > 0:
+                current_time_micros = int(result[0][0])
+
+                # Lookback by collection_interval seconds
+                default_checkpoint = current_time_micros - int(
+                    self._metrics_collection_interval * 1_000_000
+                )
+
+                self._log.info(
+                    "Using default checkpoint (lookback %d seconds): %d microseconds",
+                    int(self._metrics_collection_interval),
+                    default_checkpoint
+                )
+                return default_checkpoint
+        except Exception as e:
+            self._log.error("Failed to get current time from ClickHouse: %s", e)
+            raise
+
+        # Should rarely reach here
+        raise Exception("Unable to determine checkpoint timestamp")
+
+    def _save_checkpoint(self, timestamp_microseconds: int):
+        """
+        Save the current collection timestamp to persistent cache.
+
+        Args:
+            timestamp_microseconds: The checkpoint timestamp to save
+
+        Note:
+            - Only called AFTER successful metric submission
+            - Failures are logged but don't raise exceptions
+            - Next collection will retry with previous checkpoint
+        """
+        try:
+            self._check.write_persistent_cache(
+                self.CHECKPOINT_CACHE_KEY,
+                str(timestamp_microseconds)
+            )
+            self._log.debug(
+                "Saved checkpoint to persistent cache: %d microseconds",
+                timestamp_microseconds
+            )
+        except Exception as e:
+            self._log.error(
+                "Failed to save checkpoint to persistent cache: %s. "
+                "Next collection will retry the same time window.",
+                str(e)
+            )
+
+    def _get_current_checkpoint_microseconds(self) -> int:
+        """
+        Get the current checkpoint timestamp from ClickHouse server.
+
+        Returns:
+            int: Current timestamp in microseconds
+
+        Note:
+            - Always uses ClickHouse's clock, not agent's clock
+            - This prevents issues with clock drift between agent and database
+            - Captured BEFORE executing the metrics collection query
+        """
+        try:
+            result = self._execute_query("SELECT toUnixTimestamp64Micro(now64(6))")
+            if result and len(result) > 0:
+                return int(result[0][0])
+        except Exception as e:
+            self._log.error(
+                "Failed to get current timestamp from ClickHouse: %s",
+                str(e)
+            )
+            raise
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_query_log_statements(self):
         """
-        Load aggregated query metrics from the local system.query_log table.
-        This is analogous to Postgres loading from pg_stat_statements.
+        Load aggregated query metrics using checkpoint-based collection.
 
-        Queries only the local node's query_log - each ClickHouse node maintains
-        its own query_log table with queries executed on that specific node.
+        Flow:
+            1. Load or initialize last checkpoint
+            2. Capture current checkpoint (before query execution)
+            3. Query window: (last_checkpoint, current_checkpoint]
+            4. Return results (checkpoint saved later on success)
         """
         try:
+            # Step 1: Load checkpoint if first run
+            if self._last_checkpoint_microseconds is None:
+                self._last_checkpoint_microseconds = self._load_checkpoint()
+
+            # Step 2: Capture current checkpoint BEFORE executing query
+            # This ensures we don't miss any queries that arrive during execution
+            self._current_checkpoint_microseconds = self._get_current_checkpoint_microseconds()
+
+            # Step 3: Build query with checkpoint window
             query = STATEMENTS_QUERY.format(
-                collection_interval=int(self._metrics_collection_interval),
+                last_checkpoint_microseconds=self._last_checkpoint_microseconds,
+                current_checkpoint_microseconds=self._current_checkpoint_microseconds,
                 internal_user_filter=self._get_internal_user_filter(),
             )
+
+            # Step 4: Execute query
             rows = self._execute_query(query)
 
-            self._log.debug("Loaded %s rows from local system.query_log", len(rows))
+            # Calculate actual time window
+            window_seconds = (
+                self._current_checkpoint_microseconds -
+                self._last_checkpoint_microseconds
+            ) / 1_000_000.0
 
-            # Convert to list of dicts
+            self._log.info(
+                "Loaded %d rows from system.query_log. "
+                "Window: [%d, %d] microseconds (%.2f seconds elapsed)",
+                len(rows),
+                self._last_checkpoint_microseconds,
+                self._current_checkpoint_microseconds,
+                window_seconds
+            )
+
+            # Step 5: Convert to list of dicts
             result_rows = []
             for row in rows:
                 (
@@ -296,6 +463,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                     total_result_bytes,
                     total_memory_usage,
                     peak_memory_usage,
+                    max_event_time_microseconds,  # NEW: for debugging/validation
                 ) = row
 
                 # Parse quantiles array: [p50, p90, p95, p99]
@@ -329,6 +497,9 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                         'result_bytes': int(total_result_bytes) if total_result_bytes else 0,
                         'memory_usage': int(total_memory_usage) if total_memory_usage else 0,
                         'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
+                        'max_event_time_microseconds': int(max_event_time_microseconds)
+                            if max_event_time_microseconds
+                            else self._current_checkpoint_microseconds,
                     }
                 )
 
@@ -336,6 +507,10 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
 
         except Exception as e:
             self._log.exception("Failed to load statements from system.query_log: %s", e)
+
+            # IMPORTANT: Don't update checkpoint on error
+            # Next collection will retry the same window
+
             self._check.count(
                 "dd.clickhouse.statement_metrics.error",
                 1,
