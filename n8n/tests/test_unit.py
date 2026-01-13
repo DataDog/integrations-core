@@ -96,7 +96,7 @@ def test_nodejs_version_metadata(datadog_agent, instance):
     ):
         check = N8nCheck('n8n', {}, [instance])
         check.check_id = 'test:nodejs'
-        
+
         check._submit_nodejs_version_metadata()
 
     nodejs_version_metadata = {
@@ -106,7 +106,7 @@ def test_nodejs_version_metadata(datadog_agent, instance):
         'nodejs.version.patch': '0',
         'nodejs.version.raw': '22.18.0',
     }
-    
+
     datadog_agent.assert_metadata('test:nodejs', nodejs_version_metadata)
 
 

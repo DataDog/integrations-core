@@ -63,7 +63,9 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                         'minor': minor,
                         'patch': patch,
                     }
-                    self.set_metadata('version', version_raw, scheme='parts', final_scheme='semver', part_map=version_parts)
+                    self.set_metadata(
+                        'version', version_raw, scheme='parts', final_scheme='semver', part_map=version_parts
+                    )
                     version_submitted = True
                 else:
                     self.log.debug("Malformed N8N Server version format: %s, will try to parse from metrics", version)
@@ -108,7 +110,13 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                                     'minor': minor,
                                     'patch': patch,
                                 }
-                                self.set_metadata('version', version_raw, scheme='parts', final_scheme='semver', part_map=version_parts)
+                                self.set_metadata(
+                                    'version',
+                                    version_raw,
+                                    scheme='parts',
+                                    final_scheme='semver',
+                                    part_map=version_parts,
+                                )
                                 self.log.debug("Submitted n8n version metadata from metrics: %s", version_raw)
                                 break
             else:
@@ -144,7 +152,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                                 patch = patch_match.group(1)
 
                                 version_raw = f'{major}.{minor}.{patch}'
-                                
+
                                 # Manually submit each metadata field
                                 self.set_metadata('nodejs.version.major', major)
                                 self.set_metadata('nodejs.version.minor', minor)
