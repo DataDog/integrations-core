@@ -29,6 +29,10 @@ from datadog_checks.base.utils.tracking import tracked_method
 # This is the ClickHouse equivalent of Postgres pg_stat_activity
 # Note: result_rows, result_bytes, query_start_time, query_start_time_microseconds
 # don't exist in ClickHouse (as of 24.11), so they're excluded
+#
+# Uses {processes_table} placeholder for ClickHouse Cloud clusterAllReplicas() support:
+# - For ClickHouse Cloud: clusterAllReplicas('default', system.processes)
+# - For self-hosted: system.processes
 ACTIVE_QUERIES_QUERY = """
 SELECT
     elapsed,
@@ -57,7 +61,7 @@ SELECT
     client_hostname,
     is_cancelled,
     http_user_agent
-FROM system.processes
+FROM {processes_table}
 WHERE query NOT LIKE '%system.processes%'
   AND query NOT LIKE '%system.query_log%'
   AND query != ''
@@ -65,13 +69,15 @@ WHERE query NOT LIKE '%system.processes%'
 
 # Query to get active connections aggregated by user, database, etc
 # Similar to Postgres PG_ACTIVE_CONNECTIONS_QUERY
+#
+# Uses {processes_table} placeholder for ClickHouse Cloud clusterAllReplicas() support
 ACTIVE_CONNECTIONS_QUERY = """
 SELECT
     user,
     query_kind,
     current_database,
     count(*) as connections
-FROM system.processes
+FROM {processes_table}
 WHERE query NOT LIKE '%system.processes%'
 GROUP BY user, query_kind, current_database
 """
@@ -191,18 +197,26 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         """
         Fetch currently running queries from system.processes
         This is analogous to Postgres querying pg_stat_activity
+
+        For ClickHouse Cloud: Uses clusterAllReplicas('default', system.processes) to query
+        all nodes in the cluster.
+        For self-hosted: Queries only the local node's system.processes.
         """
         start_time = time.time()
 
         try:
+            # Get the appropriate table reference based on deployment type
+            processes_table = self._check.get_system_table('processes')
+            query = ACTIVE_QUERIES_QUERY.format(processes_table=processes_table)
+
             # Use the dedicated client for this job
             if self._db_client is None:
                 self._db_client = self._check.create_dbm_client()
-            result = self._db_client.query(ACTIVE_QUERIES_QUERY)
+            result = self._db_client.query(query)
             rows = result.result_rows
 
             self._report_check_hist_metrics(start_time, len(rows), "get_active_queries")
-            self._log.debug("Loaded %s rows from system.processes", len(rows))
+            self._log.debug("Loaded %s rows from %s", len(rows), processes_table)
 
             return rows
         except Exception as e:
@@ -335,18 +349,25 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         """
         Get aggregated active connection counts from system.processes
         Similar to Postgres _get_active_connections from pg_stat_activity
+
+        For ClickHouse Cloud: Uses clusterAllReplicas to aggregate across all nodes.
+        For self-hosted: Aggregates only the local node's connections.
         """
         try:
             start_time = time.time()
 
+            # Get the appropriate table reference based on deployment type
+            processes_table = self._check.get_system_table('processes')
+            query = ACTIVE_CONNECTIONS_QUERY.format(processes_table=processes_table)
+
             # Use the dedicated client for this job
             if self._db_client is None:
                 self._db_client = self._check.create_dbm_client()
-            result = self._db_client.query(ACTIVE_CONNECTIONS_QUERY)
+            result = self._db_client.query(query)
             rows = result.result_rows
 
             elapsed_ms = (time.time() - start_time) * 1000
-            self._log.debug("Retrieved %s connection aggregation rows in %.2f ms", len(rows), elapsed_ms)
+            self._log.debug("Retrieved %s connection aggregation rows from %s in %.2f ms", len(rows), processes_table, elapsed_ms)
 
             # Convert to list of dicts
             connections = []

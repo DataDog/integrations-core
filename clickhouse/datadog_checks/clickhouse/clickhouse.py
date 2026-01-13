@@ -44,6 +44,10 @@ class ClickhouseCheck(AgentCheck):
         self._verify = self.instance.get('verify', True)
         self._tags = self.instance.get('tags', [])
 
+        # ClickHouse Cloud configuration
+        # When true, uses clusterAllReplicas() to query system tables across all nodes
+        self._clickhouse_cloud = is_affirmative(self.instance.get('clickhouse_cloud', False))
+
         # DBM-related properties
         self._resolved_hostname = None
         self._database_identifier = None
@@ -246,6 +250,44 @@ class ClickhouseCheck(AgentCheck):
             # Create a unique identifier based on server, port, and database name
             self._database_identifier = "{}:{}:{}".format(self._server, self._port, self._db)
         return self._database_identifier
+
+    @property
+    def is_clickhouse_cloud(self):
+        """
+        Returns True if this is a ClickHouse Cloud instance.
+
+        When True, DBM components should use clusterAllReplicas() to query system tables
+        across all nodes in the cluster, since ClickHouse Cloud abstracts replicas behind
+        a managed service endpoint.
+        """
+        return self._clickhouse_cloud
+
+    def get_system_table(self, table_name):
+        """
+        Get the appropriate system table reference based on deployment type.
+
+        For ClickHouse Cloud: Returns clusterAllReplicas('default', system.<table>)
+        For self-hosted: Returns system.<table>
+
+        Args:
+            table_name: The system table name (e.g., 'query_log', 'processes')
+
+        Returns:
+            str: The table reference to use in SQL queries
+
+        Example:
+            >>> self.get_system_table('query_log')
+            "clusterAllReplicas('default', system.query_log)"  # Cloud
+            >>> self.get_system_table('query_log')
+            "system.query_log"  # Self-hosted
+        """
+        if self._clickhouse_cloud:
+            # ClickHouse Cloud: Use clusterAllReplicas to query all nodes
+            # The cluster name in ClickHouse Cloud is always 'default'
+            return f"clusterAllReplicas('default', system.{table_name})"
+        else:
+            # Self-hosted: Query the local system table directly
+            return f"system.{table_name}"
 
     def validate_config(self):
         if not self._server:
