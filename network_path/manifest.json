@@ -28,7 +28,10 @@
       },
       "metrics": {
         "prefix": "datadog.network_path.",
-        "check": "datadog.network_path.path.monitored",
+        "check": [
+          "datadog.network_path.path.monitored",
+          "datadog.network_path.collector.workers"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -38,7 +41,8 @@
       "auto_install": true
     },
     "dashboards": {
-      "Network Path Agents": "assets/dashboards/network_path_agents.json"
+      "Network Path Agents": "assets/dashboards/network_path_agents.json",
+      "Network Path Overview": "assets/dashboards/network_path_overview.json"
     }
   },
   "author": {

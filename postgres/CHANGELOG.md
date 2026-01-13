@@ -2,6 +2,15 @@
 
 <!-- towncrier release notes start -->
 
+## 23.3.3 / 2025-12-16 / Agent 7.74.0
+
+***Fixed***:
+
+* Fix missing table owner and toast table fields in Postgres schema collection.
+  Omit empty tables from collection.
+  Fix the missing description in Postgres schema databases.
+  Add snapshot tests for Postgres schema collection. ([#22134](https://github.com/DataDog/integrations-core/pull/22134))
+
 ## 23.3.2 / 2025-12-16
 
 ***Fixed***:
