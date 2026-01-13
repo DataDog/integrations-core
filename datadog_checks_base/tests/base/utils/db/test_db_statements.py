@@ -469,7 +469,7 @@ class TestStatementMetrics:
             {
                 'calls': 20,
                 'total_time': 2000,
-                'min_plan_time': 0.05,
+                'min_plan_time': 0.2,
                 'max_plan_time': 0.8,
                 'query': 'SELECT 1',
                 'db': 'test',
@@ -482,7 +482,7 @@ class TestStatementMetrics:
         assert result[0]['calls'] == 5
         assert result[0]['total_time'] == 500
         # Plan timing columns should now show the diff since both rows have them
-        assert result[0]['min_plan_time'] == pytest.approx(-0.05, abs=0.001)
+        assert result[0]['min_plan_time'] == pytest.approx(0.1, abs=0.001)
         assert result[0]['max_plan_time'] == pytest.approx(0.3, abs=0.001)
 
     def test_compute_derivative_rows_with_columns_removed(self):
