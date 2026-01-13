@@ -71,7 +71,7 @@ n8n.queue.jobs.count,count,,,,Total number of queue jobs,0,n8n,,,
 n8n.queue.jobs.duration.seconds.bucket,count,,,,Histogram bucket for job duration in seconds,0,n8n,,,
 n8n.queue.jobs.duration.seconds.count,count,,,,The count of job duration in seconds,0,n8n,,,
 n8n.queue.jobs.duration.seconds.sum,count,,,,The sum of job duration in seconds,0,n8n,,,
-n8n.readiness.check,gauge,,,,Readiness check metric with status code as tag,0,n8n,,,status_code
+n8n.readiness.check,gauge,,,,Readiness check status (1 if ready with status code 200 otherwise 0) with status code tag,0,n8n,,,status_code
 n8n.workflow.executions.active,gauge,,,,Number of active workflow executions,0,n8n,,,
 n8n.workflow.executions.count,count,,,,Total number of workflow executions,0,n8n,,,
 n8n.workflow.executions.duration.seconds.bucket,count,,,,Histogram bucket for workflow execution duration in seconds,0,n8n,,,

@@ -84,3 +84,63 @@ def test_version_metadata_fallback(datadog_agent, instance):
         'version.raw': '1.117.2',
     }
     datadog_agent.assert_metadata('test:456', version_metadata)
+
+
+def test_nodejs_version_metadata(datadog_agent, instance):
+    # Mock the HTTP response for Node.js version metadata collection
+    with mock.patch(
+        'requests.Session.get',
+        side_effect=[
+            mock.Mock(ok=True, status_code=200, text=open(common.get_fixture_path('n8n.txt')).read()),
+        ],
+    ):
+        check = N8nCheck('n8n', {}, [instance])
+        check.check_id = 'test:nodejs'
+        
+        check._submit_nodejs_version_metadata()
+
+    nodejs_version_metadata = {
+        'nodejs.version.scheme': 'semver',
+        'nodejs.version.major': '22',
+        'nodejs.version.minor': '18',
+        'nodejs.version.patch': '0',
+        'nodejs.version.raw': '22.18.0',
+    }
+    
+    datadog_agent.assert_metadata('test:nodejs', nodejs_version_metadata)
+
+
+def test_readiness_check_ready(aggregator, instance):
+    with mock.patch(
+        'requests.Session.get',
+        return_value=mock.Mock(ok=True, status_code=200),
+    ):
+        check = N8nCheck('n8n', {}, [instance])
+        check._check_n8n_readiness()
+
+    # Assert metric value is 1 (ready) with status_code:200 tag
+    aggregator.assert_metric('n8n.readiness.check', value=1, tags=['status_code:200'])
+
+
+def test_readiness_check_not_ready(aggregator, instance):
+    with mock.patch(
+        'requests.Session.get',
+        return_value=mock.Mock(ok=False, status_code=503),
+    ):
+        check = N8nCheck('n8n', {}, [instance])
+        check._check_n8n_readiness()
+
+    # Assert metric value is 0 (not ready) with status_code:503 tag
+    aggregator.assert_metric('n8n.readiness.check', value=0, tags=['status_code:503'])
+
+
+def test_readiness_check_no_status_code(aggregator, instance):
+    with mock.patch(
+        'requests.Session.get',
+        return_value=mock.Mock(ok=False, status_code=None),
+    ):
+        check = N8nCheck('n8n', {}, [instance])
+        check._check_n8n_readiness()
+
+    # Assert metric value is 0 (not ready) with status_code:null tag
+    aggregator.assert_metric('n8n.readiness.check', value=0, tags=['status_code:null'])

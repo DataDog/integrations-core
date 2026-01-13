@@ -27,7 +27,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         self._version_endpoint = DEFAULT_VERSION_ENDPOINT
         # Get the N8N API port if specified, otherwise use the default 5678.
         self.server_port = str(self.instance.get('server_port', 5678))
-        self.raw_metric_prefix = self.instance.get('raw_metric_prefix', 'n8n')
+        self.raw_metric_prefix = self.instance.get('raw_metric_prefix', 'n8n_')
 
     def get_default_config(self):
         return {
@@ -45,10 +45,8 @@ class N8nCheck(OpenMetricsBaseCheckV2):
     def _submit_version_metadata(self):
         endpoint = urljoin(self.openmetrics_endpoint, self._version_endpoint)
         version_submitted = False
-
         try:
             response = self.http.get(endpoint)
-
             if response.ok:
                 data = response.json()
                 version = data.get("versionCli", "")
@@ -65,7 +63,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                         'minor': minor,
                         'patch': patch,
                     }
-                    self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+                    self.set_metadata('version', version_raw, scheme='parts', final_scheme='semver', part_map=version_parts)
                     version_submitted = True
                 else:
                     self.log.debug("Malformed N8N Server version format: %s, will try to parse from metrics", version)
@@ -110,7 +108,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                                     'minor': minor,
                                     'patch': patch,
                                 }
-                                self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+                                self.set_metadata('version', version_raw, scheme='parts', final_scheme='semver', part_map=version_parts)
                                 self.log.debug("Submitted n8n version metadata from metrics: %s", version_raw)
                                 break
             else:
@@ -128,7 +126,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
 
             if response.ok:
                 lines = response.text.splitlines()
-                for line in enumerate(lines):
+                for line in lines:
                     # Look for the nodejs_version_info metric with the raw prefix
                     if line.startswith(f'{self.raw_metric_prefix}nodejs_version_info{{'):
                         # n8n_nodejs_version_info{version="v22.18.0",major="22",minor="18",patch="0"} 1
@@ -146,14 +144,13 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                                 patch = patch_match.group(1)
 
                                 version_raw = f'{major}.{minor}.{patch}'
-                                version_parts = {
-                                    'major': major,
-                                    'minor': minor,
-                                    'patch': patch,
-                                }
-                                self.set_metadata(
-                                    'nodejs.version', version_raw, scheme='semver', part_map=version_parts
-                                )
+                                
+                                # Manually submit each metadata field
+                                self.set_metadata('nodejs.version.major', major)
+                                self.set_metadata('nodejs.version.minor', minor)
+                                self.set_metadata('nodejs.version.patch', patch)
+                                self.set_metadata('nodejs.version.raw', version_raw)
+                                self.set_metadata('nodejs.version.scheme', 'semver')
                                 self.log.debug("Submitted Node.js version metadata: %s", version_raw)
                                 break
             else:
@@ -169,15 +166,22 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         endpoint = urljoin(self.openmetrics_endpoint, self._ready_endpoint)
         response = self.http.get(endpoint)
 
-        # Check if status_code is available
+        # Determine metric value and status_code tag
         if response.status_code is None:
             self.log.warning("The readiness endpoint did not return a status code")
+            metric_value = 0
             metric_tags = self.tags + ['status_code:null']
+        elif response.status_code == 200:
+            # Ready - submit 1
+            metric_value = 1
+            metric_tags = self.tags + [f'status_code:{response.status_code}']
         else:
+            # Not ready - submit 0
+            metric_value = 0
             metric_tags = self.tags + [f'status_code:{response.status_code}']
 
-        # Submit metric with value 1 and status_code as tag
-        self.gauge('readiness.check', 1, tags=metric_tags)
+        # Submit metric with appropriate value and status_code tag
+        self.gauge('readiness.check', metric_value, tags=metric_tags)
 
     def check(self, instance):
         super().check(instance)
