@@ -53,6 +53,10 @@
       {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/"
+      },
+      {
+        "url": "https://docs.datadoghq.com/integrations/openai",
+        "resource_type": "documentation"
       }
     ]
   },

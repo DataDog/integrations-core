@@ -656,6 +656,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:RUN',
+            'user:test-user',
+            'project:default',
         ],
         "val": 42,
     },
@@ -669,6 +671,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:RUN',
+            'user:test-user',
+            'project:default',
         ],
         "val": 0.54,
     },
@@ -682,6 +686,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:RUN',
+            'user:test-user',
+            'project:default',
         ],
         "val": 7,
     },
@@ -695,6 +701,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:RUN',
+            'user:test-user',
+            'project:default',
         ],
         "val": 22,
     },
@@ -708,6 +716,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:RUN',
+            'user:test-user',
+            'project:default',
         ],
         "val": 79,
     },
@@ -721,6 +731,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:RUN',
+            'user:test-user',
+            'project:default',
         ],
         "val": 0,
     },
@@ -734,6 +746,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:RUN',
+            'user:test-user',
+            'project:default',
         ],
         "val": 60,
     },
@@ -747,6 +761,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -759,6 +775,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -771,6 +789,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -783,6 +803,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -795,6 +817,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": 0,
     },
@@ -807,6 +831,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -819,6 +845,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": 120,
     },
@@ -832,6 +860,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -844,6 +874,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -856,6 +888,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -868,6 +902,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -880,6 +916,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": 0,
     },
@@ -892,6 +930,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -904,6 +944,8 @@ BJOBS_METRICS = [
             'lsf_cluster_name:test-cluster',
             'queue:normal',
             'status:PEND',
+            'user:test-user',
+            'project:default',
         ],
         "val": -1,
     },
@@ -1091,6 +1133,562 @@ BHOST_GPU_METRICS = [
     },
 ]
 
+BADMIN_PERFMON_METRICS = [
+    # current
+    {
+        "name": "ibm_spectrum_lsf.perfmon.mbatchd.processed_requests.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 32,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.queries.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 11,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.host.queries.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 8,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.queue.queries.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 4,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submission_requests.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submitted.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.dispatched.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.completed.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.sent_remote.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.accepted_remote.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.scheduling_interval.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.scheduler.host_matches.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.buckets.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 3,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.reordered.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.slots.utilization.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": -1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.memory.utilization.current",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": -1,
+    },
+    # avg
+    {
+        "name": "ibm_spectrum_lsf.perfmon.mbatchd.processed_requests.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 35,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.queries.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 12,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.host.queries.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 8,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.queue.queries.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 4,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submission_requests.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submitted.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.dispatched.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.completed.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.sent_remote.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.accepted_remote.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.scheduling_interval.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.scheduler.host_matches.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.buckets.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 3,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.reordered.avg",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    # min
+    {
+        "name": "ibm_spectrum_lsf.perfmon.mbatchd.processed_requests.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 32,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.queries.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 11,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.host.queries.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 8,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.queue.queries.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 4,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submission_requests.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submitted.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.dispatched.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.completed.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.sent_remote.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.accepted_remote.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.scheduling_interval.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.scheduler.host_matches.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.buckets.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.reordered.min",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    # max
+    {
+        "name": "ibm_spectrum_lsf.perfmon.mbatchd.processed_requests.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 39,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.queries.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 13,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.host.queries.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 8,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.queue.queries.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 4,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submission_requests.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 3,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submitted.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 3,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.dispatched.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 2,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.completed.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.sent_remote.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.accepted_remote.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.scheduling_interval.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.scheduler.host_matches.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 2,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.buckets.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 3,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.reordered.max",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    # total
+    {
+        "name": "ibm_spectrum_lsf.perfmon.mbatchd.processed_requests.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 71,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.queries.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 24,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.host.queries.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 16,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.queue.queries.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 8,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submission_requests.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 3,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.submitted.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 3,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.dispatched.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 2,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.completed.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.sent_remote.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.accepted_remote.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.scheduling_interval.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.scheduler.host_matches.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.buckets.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.jobs.reordered.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.memory.utilization.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 100,
+    },
+    {
+        "name": "ibm_spectrum_lsf.perfmon.slots.utilization.total",
+        "tags": ['lsf_cluster_name:test-cluster'],
+        "val": 100,
+    },
+]
+
+BHIST_METRICS = [
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2211', 'user:test-user', 'job_name:test-job'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending_user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2211', 'user:test-user', 'job_name:test-job'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.running",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2211', 'user:test-user', 'job_name:test-job'],
+        "val": 56,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2211', 'user:test-user', 'job_name:test-job'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.system_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2211', 'user:test-user', 'job_name:test-job'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.unknown",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2211', 'user:test-user', 'job_name:test-job'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.total",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2211', 'user:test-user', 'job_name:test-job'],
+        "val": 56,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2212', 'user:test-user', 'job_name:test-job1'],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending_user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2212', 'user:test-user', 'job_name:test-job1'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.running",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2212', 'user:test-user', 'job_name:test-job1'],
+        "val": 57,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2212', 'user:test-user', 'job_name:test-job1'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.system_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2212', 'user:test-user', 'job_name:test-job1'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.unknown",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2212', 'user:test-user', 'job_name:test-job1'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.total",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2212', 'user:test-user', 'job_name:test-job1'],
+        "val": 58,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:3', 'user:test-user', 'job_name:myArray'],
+        "val": 6,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending_user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:3', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.running",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:3', 'user:test-user', 'job_name:myArray'],
+        "val": 4,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:3', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.system_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:3', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.unknown",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:3', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.total",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:3', 'user:test-user', 'job_name:myArray'],
+        "val": 10,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:4', 'user:test-user', 'job_name:myArray'],
+        "val": 6,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending_user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:4', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.running",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:4', 'user:test-user', 'job_name:myArray'],
+        "val": 4,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:4', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.system_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:4', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.unknown",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:4', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.total",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:4', 'user:test-user', 'job_name:myArray'],
+        "val": 10,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:5', 'user:test-user', 'job_name:myArray'],
+        "val": 10,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.pending_user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:5', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.running",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:5', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.user_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:5', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.system_suspended",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:5', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.unknown",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:5', 'user:test-user', 'job_name:myArray'],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.completed.total",
+        "tags": ['lsf_cluster_name:test-cluster', 'job_id:2226', 'task_id:5', 'user:test-user', 'job_name:myArray'],
+        "val": 10,
+    },
+]
+
 ALL_METRICS = (
     LSID_METRICS
     + CLUSTER_METRICS
@@ -1102,4 +1700,17 @@ ALL_METRICS = (
     + BQUEUES_METRICS
     + BJOBS_METRICS
     + GPULOAD_METRICS
+    + BADMIN_PERFMON_METRICS
+    + BHIST_METRICS
+)
+
+ALL_DEFAULT_METRICS = (
+    LSID_METRICS
+    + CLUSTER_METRICS
+    + BHOST_METRICS
+    + BSLOTS_METRICS
+    + LHOST_METRICS
+    + LSLOAD_METRICS
+    + BQUEUES_METRICS
+    + BJOBS_METRICS
 )

@@ -18,6 +18,14 @@ def test_update_python_version_success(fake_repo, ddev, mocker):
             'windows_amd64_sha256': '200ddff856bbff949d2cc1be42e8807c07538abd6b6966d5113a094cf628c5c5',
         },
     )
+    mocker.patch(
+        'ddev.cli.meta.scripts.upgrade_python.get_pbs_release_info',
+        return_value={
+            'release': '20251210',
+            'aarch64': 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+            'x86_64': 'f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5',
+        },
+    )
 
     result = ddev('meta', 'scripts', 'upgrade-python-version')
 
@@ -46,11 +54,14 @@ def test_update_python_version_success(fake_repo, ddev, mocker):
     assert '-Hash \'200ddff856bbff949d2cc1be42e8807c07538abd6b6966d5113a094cf628c5c5\'' in contents
     assert 'ENV PYTHON_VERSION="3.13.7"' not in contents
 
-    # Verify macOS workflow was updated
+    # Verify macOS workflow was updated with PBS format
     workflow_file = fake_repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
     contents = workflow_file.read_text()
-    assert 'python-3.13.9-macos11.pkg' in contents
-    assert 'python-3.13.7-macos11.pkg' not in contents
+    assert 'PYTHON_PATCH: 9' in contents
+    assert 'PYTHON_PATCH: 7' not in contents
+    assert 'PBS_RELEASE: 20251210' in contents
+    assert 'PBS_SHA256__aarch64: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2' in contents
+    assert 'PBS_SHA256__x86_64: f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5' in contents
 
 
 def test_update_python_version_already_latest(fake_repo, ddev, mocker):

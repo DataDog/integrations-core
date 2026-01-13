@@ -35,6 +35,7 @@
 
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_private_key_password
+  secret: true
   value:
     example: <PRIVATE_KEY_PASSWORD>
     type: string
