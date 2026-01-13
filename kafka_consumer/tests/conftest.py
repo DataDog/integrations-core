@@ -44,6 +44,12 @@ def dd_environment():
             ]
         )
 
+        # Add stabilization sleep at the END for Kerberos to allow the cluster to fully stabilize
+        # before the e2e agent runs. This helps avoid flaky failures where the broker is briefly
+        # unavailable between setup completion and test execution.
+        if common.AUTHENTICATION == "kerberos":
+            conditions.append(WaitFor(sleep_for_stabilization))
+
         with docker_run(
             common.DOCKER_IMAGE_PATH,
             conditions=conditions,
@@ -114,6 +120,16 @@ def initialize_topics():
             time.sleep(5)
 
 
+def sleep_for_stabilization():
+    """
+    Allow extra time for Kerberos environment to stabilize after all conditions pass.
+    This helps avoid flaky failures where the broker is briefly unavailable between
+    setup completion and test execution.
+    """
+    time.sleep(10)
+    return True
+
+
 def wait_for_ssl_ready():
     try:
         client = _create_admin_client()
@@ -127,7 +143,7 @@ def wait_for_ssl_ready():
 def _create_admin_client():
     config = {
         "bootstrap.servers": common.INSTANCE['kafka_connect_str'],
-        "socket.timeout.ms": 5000,  # Increased for SSL handshake
+        "socket.timeout.ms": 10000,  # Increased for SSL handshake
         "topic.metadata.refresh.interval.ms": 2000,
     }
     auth_config = common.get_authentication_configuration(common.INSTANCE)
