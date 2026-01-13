@@ -54,6 +54,6 @@ class SqlserverServerStateMetrics(SqlserverDatabaseMetricsBase):
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
             f"include_server_state_metrics={self.include_server_state_metrics}, "
-            f"year={self.year}, "
+            f"major_version={self.major_version}, "
             f"engine_edition={self.engine_edition})"
         )

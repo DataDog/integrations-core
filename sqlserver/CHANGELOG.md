@@ -2,7 +2,22 @@
 
 <!-- towncrier release notes start -->
 
-## 22.12.0 / 2025-11-26
+## 22.12.2 / 2026-01-09
+
+***Fixed***:
+
+* Replace SQLServer checks for year with checks for major version. ([#22285](https://github.com/DataDog/integrations-core/pull/22285))
+* Fix default check in SQL Server major version ([#22291](https://github.com/DataDog/integrations-core/pull/22291))
+
+## 22.12.1 / 2025-12-22
+
+***Fixed***:
+
+* Fix table row count calculation for sqlserver.table.row_count. Previously, we joined with indexes which produced one row per table-index combination before grouping. This resulted in inflated row count values when grouping by table because the multiple index rows were summed together.
+
+  The fix is to conditionally sum the row count: only when the index_id is in (0, 1), which translates to heap and clustered index partitions. Both of these contain the true row count for the given partition, whereas other partition types (e.g. non-clustered indexes) should not be considered in the row count calculation. This leads to the expected value being calcualted. ([#22055](https://github.com/DataDog/integrations-core/pull/22055))
+
+## 22.12.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
