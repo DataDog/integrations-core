@@ -17,9 +17,14 @@ class NutanixCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(NutanixCheck, self).__init__(name, init_config, instances)
 
+        self._parse_config()
+        self._initialize_check_attributes()
+
+    def _parse_config(self):
         self.sampling_interval = self.instance.get("min_collection_interval", 120)
         self.page_limit = self.instance.get("page_limit", 50)
 
+        # setup
         self.pc_ip = self.instance.get("pc_ip")
         self.pc_port = self.instance.get("pc_port")
         if self.pc_ip and ":" in self.pc_ip:
@@ -30,8 +35,7 @@ class NutanixCheck(AgentCheck):
                 self.pc_ip, self.pc_port = host, int(port)
         self.pc_port = self.pc_port or 9440
 
-        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events", True))
-
+        # http auth
         pc_username = self.instance.get("pc_username")
         pc_password = self.instance.get("pc_password")
 
@@ -40,9 +44,10 @@ class NutanixCheck(AgentCheck):
         if pc_password and "password" not in self.instance:
             self.instance["password"] = pc_password
 
-        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events"))
-        self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks"))
+        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events"), True)
+        self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks"), True)
 
+    def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
         if not self.base_url.startswith("http"):
             self.base_url = "https://" + self.base_url
@@ -53,11 +58,10 @@ class NutanixCheck(AgentCheck):
         self.base_tags.append(f"prism_central:{self.pc_ip}")
 
         self.external_tags = []
-        self.cluster_names = {}  # Mapping of cluster_id -> cluster_name
-        self.host_names = {}  # Mapping of host_id -> host_name
-        self.last_event_collection_time = None  # Track last event collection timestamp
-        # Track the timestamp of the most recently collected task (timezone-aware datetime)
-        self.last_task_collection_time = None
+        self.cluster_names = {}  # cluster_id -> cluster_name
+        self.host_names = {}  # host_id -> host_name
+        self.last_event_collection_time = None  # last event time
+        self.last_task_collection_time = None  # last task time
 
     def _set_external_tags_for_host(self, hostname: str, tags: list[str]):
         for i, entry in enumerate(self.external_tags):
@@ -68,7 +72,7 @@ class NutanixCheck(AgentCheck):
         self.external_tags.append((hostname, {self.__NAMESPACE__: tags}))
 
     def check(self, _):
-        # Clear caches at the beginning of each check run to prevent unbounded growth
+        # clear caches
         self.cluster_names = {}
         self.host_names = {}
         self.external_tags = []
@@ -115,7 +119,7 @@ class NutanixCheck(AgentCheck):
                 return
 
             for cluster in clusters:
-                # Store cluster name mapping for VM tagging
+                # map cluster name
                 cluster_id = cluster.get("extId")
                 cluster_name = cluster.get("name")
                 if cluster_id and cluster_name:
@@ -222,7 +226,7 @@ class NutanixCheck(AgentCheck):
             host_id = host.get("extId")
             hostname = host.get("hostName")
 
-            # Store host name mapping for VM tagging
+            # map host name
             if host_id and hostname:
                 self.host_names[host_id] = hostname
 
@@ -261,7 +265,7 @@ class NutanixCheck(AgentCheck):
         if host_type := host.get("hostType"):
             tags.append(f"ntnx_host_type:{host_type}")
 
-        # Handle nested hypervisor tags
+        # hypervisor tags
         hypervisor = host.get("hypervisor", {})
         if hypervisor_name := hypervisor.get("fullName"):
             tags.append(f"ntnx_hypervisor_name:{hypervisor_name}")
@@ -322,14 +326,14 @@ class NutanixCheck(AgentCheck):
         host_id = vm.get("host", {}).get("extId")
         if host_id:
             tags.append(f"ntnx_host_id:{host_id}")
-            # Add host name if available in mapping
+            # add host name
             if host_id in self.host_names:
                 tags.append(f"ntnx_host_name:{self.host_names[host_id]}")
 
         cluster_id = vm.get("cluster", {}).get("extId")
         if cluster_id:
             tags.append(f"ntnx_cluster_id:{cluster_id}")
-            # Add cluster name if available in mapping
+            # add cluster name
             if cluster_id in self.cluster_names:
                 tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
 
@@ -369,7 +373,7 @@ class NutanixCheck(AgentCheck):
                 len(response.content) if response.content else 0,
             )
 
-        # any other non-2xx response
+        # other errors
         elif not response.ok:
             self.log.debug(
                 "HTTP non-2xx response: %s %s, status_code=%s, payload_length=%s",
@@ -388,11 +392,11 @@ class NutanixCheck(AgentCheck):
 
         url = f"{self.base_url}/{endpoint}"
 
-        # Initialize pagination parameters
+        # init pagination
         page = 0
         limit = self.page_limit
 
-        # Create a copy of params to avoid mutating the caller's dictionary
+        # copy params
         req_params = {} if params is None else params.copy()
 
         req_params["$page"] = page
@@ -410,7 +414,7 @@ class NutanixCheck(AgentCheck):
 
             all_items.extend(data)
 
-            # Check metadata for next link to determine if more pages exist
+            # check next page
             links = payload.get("metadata", {}).get("links", [])
             next_link = next((l.get("href") for l in links if l.get("rel") == "next"), None)
 
@@ -661,7 +665,7 @@ class NutanixCheck(AgentCheck):
 
         start_time = now - timedelta(seconds=self.sampling_interval)
 
-        # format time for API in ISO 8601 format
+        # format time
         start_time_str = start_time.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
         params = {}
@@ -685,8 +689,7 @@ class NutanixCheck(AgentCheck):
                 return
 
             for task in tasks:
-                # the API filter should prevent duplicates
-                # this is added for safety
+                # avoid duplicates
                 if self.last_task_collection_time:
                     task_time_str = task.get("createdTime")
                     if task_time_str:
@@ -696,7 +699,7 @@ class NutanixCheck(AgentCheck):
 
                 self._process_task(task)
 
-            # tasks are ordered by creationTime, last one is the most recent.
+            # update last time
             most_recent_time_str = tasks[-1].get("createdTime")
             most_recent_time = (
                 datetime.fromisoformat(most_recent_time_str.replace("Z", "+00:00")) if most_recent_time_str else None
@@ -716,7 +719,7 @@ class NutanixCheck(AgentCheck):
         created_time = task.get("createdTime")
         status = task.get("status", "UNKNOWN")
 
-        # determine event alert type based on task status
+        # alert type
         alert_type_map = {
             "SUCCEEDED": "success",
             "FAILED": "error",
@@ -726,12 +729,12 @@ class NutanixCheck(AgentCheck):
         }
         alert_type = alert_type_map.get(status, "info")
 
-        # prepare tags
+        # tags
         task_tags = self.base_tags.copy()
         task_tags.append(f"ntnx_task_id:{task_id}")
         task_tags.append(f"ntnx_task_status:{status}")
 
-        # add cluster information
+        # cluster info
         cluster_ext_ids = task.get("clusterExtIds", [])
         if cluster_ext_ids:
             for cluster_id in cluster_ext_ids:
@@ -739,14 +742,14 @@ class NutanixCheck(AgentCheck):
                 if cluster_id in self.cluster_names:
                     task_tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
 
-        # add owner information
+        # owner info
         if owner := task.get("ownedBy"):
             if owner_name := owner.get("name"):
                 task_tags.append(f"ntnx_owner_name:{owner_name}")
             if owner_id := owner.get("extId"):
                 task_tags.append(f"ntnx_owner_id:{owner_id}")
 
-        # add affected entities information
+        # affected entities
         entities_affected = task.get("entitiesAffected", [])
         for entity in entities_affected:
             if entity_type := entity.get("rel"):
@@ -756,10 +759,10 @@ class NutanixCheck(AgentCheck):
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
 
-        # distinguish Nutanix tasks from Nutanix events
+        # distinguish from other events we emit
         task_tags.append("ntnx_type:task")
 
-        # build message text
+        # message text
         msg_text = task_description
         if progress := task.get("progressPercentage"):
             msg_text += f" (Progress: {progress}%)"
