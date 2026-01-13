@@ -595,7 +595,7 @@
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
-                          "unit_name": "byte_in_binary_bytes_family"
+                          "unit_name": "byte_in_decimal_bytes_family"
                         }
                       },
                       "formula": "query1"
@@ -642,7 +642,7 @@
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
-                          "unit_name": "byte_in_binary_bytes_family"
+                          "unit_name": "byte_in_decimal_bytes_family"
                         }
                       },
                       "formula": "query1"
@@ -718,13 +718,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -775,13 +769,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -832,12 +820,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -916,13 +899,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -973,12 +950,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1086,12 +1058,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1198,12 +1165,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1310,13 +1272,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1584,12 +1540,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1640,12 +1591,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1696,12 +1642,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1780,12 +1721,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1874,12 +1810,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1963,12 +1894,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2244,13 +2170,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2304,13 +2224,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "time": {},
               "type": "timeseries",
               "requests": [
@@ -2364,12 +2278,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2477,12 +2386,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2590,13 +2494,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2648,13 +2546,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2706,12 +2598,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2819,12 +2706,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2904,12 +2786,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -2989,13 +2866,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -3075,12 +2946,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value"
-              ],
+              "legend_columns": ["avg", "min", "max", "value"],
               "type": "timeseries",
               "requests": [
                 {
@@ -3219,5 +3085,5 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
-  "reflow_type": "fixed",
+  "reflow_type": "fixed"
 }
