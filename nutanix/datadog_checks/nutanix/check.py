@@ -684,7 +684,7 @@ class NutanixCheck(AgentCheck):
 
             for task in tasks:
                 # the API filter should prevent duplicates
-                # this is for safety
+                # this is added for safety
                 if self.last_task_collection_time:
                     task_time_str = task.get("createdTime")
                     if task_time_str:
@@ -714,7 +714,7 @@ class NutanixCheck(AgentCheck):
         created_time = task.get("createdTime")
         status = task.get("status", "UNKNOWN")
 
-        # Determine alert type based on task status
+        # determine event alert type based on task status
         alert_type_map = {
             "SUCCEEDED": "success",
             "FAILED": "error",
@@ -724,12 +724,12 @@ class NutanixCheck(AgentCheck):
         }
         alert_type = alert_type_map.get(status, "info")
 
-        # Extract entity information for tagging
+        # prepare tags
         task_tags = self.base_tags.copy()
         task_tags.append(f"ntnx_task_id:{task_id}")
         task_tags.append(f"ntnx_task_status:{status}")
 
-        # Add cluster information
+        # add cluster information
         cluster_ext_ids = task.get("clusterExtIds", [])
         if cluster_ext_ids:
             for cluster_id in cluster_ext_ids:
@@ -737,14 +737,14 @@ class NutanixCheck(AgentCheck):
                 if cluster_id in self.cluster_names:
                     task_tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
 
-        # Add owner information
+        # add owner information
         if owner := task.get("ownedBy"):
             if owner_name := owner.get("name"):
                 task_tags.append(f"ntnx_owner_name:{owner_name}")
             if owner_id := owner.get("extId"):
                 task_tags.append(f"ntnx_owner_id:{owner_id}")
 
-        # Add affected entities information
+        # add affected entities information
         entities_affected = task.get("entitiesAffected", [])
         for entity in entities_affected:
             if entity_type := entity.get("rel"):
@@ -754,10 +754,10 @@ class NutanixCheck(AgentCheck):
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
 
-        # Distinguish Prism Central tasks from events
+        # distinguish Nutanix tasks from Nutanix events
         task_tags.append("ntnx_type:task")
 
-        # Build message text
+        # build message text
         msg_text = task_description
         if progress := task.get("progressPercentage"):
             msg_text += f" (Progress: {progress}%)"
