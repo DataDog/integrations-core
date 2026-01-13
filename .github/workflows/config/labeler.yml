@@ -747,6 +747,8 @@ integration/varnish:
 - varnish/**/*
 integration/vault:
 - vault/**/*
+integration/vectra:
+- vectra/**/*
 integration/velero:
 - velero/**/*
 integration/versa:

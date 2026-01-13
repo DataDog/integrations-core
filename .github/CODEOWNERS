@@ -733,6 +733,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /guarddog/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /guarddog/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/vectra/                                                             @DataDog/saas-integrations
+/vectra/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/vectra/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/vectra/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /valence_security/                                                   @DataDog/saas-integrations
 /valence_security/*.md                                               @DataDog/saas-integrations @DataDog/documentation
 /valence_security/manifest.json                                      @DataDog/saas-integrations @DataDog/documentation
