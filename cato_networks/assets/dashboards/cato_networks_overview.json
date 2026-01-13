@@ -255,13 +255,13 @@
                             ],
                             "type": "sunburst",
                             "legend": {
-                                "type": "table"
+                                "type": "inline"
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 4,
-                            "width": 6,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -327,9 +327,9 @@
                             }
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 4,
                             "y": 4,
-                            "width": 6,
+                            "width": 8,
                             "height": 4
                         }
                     },

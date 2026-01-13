@@ -776,7 +776,7 @@
                     {
                         "id": 2593632636206706,
                         "definition": {
-                            "title": "Top mitre attack tactics",
+                            "title": "Top associated MITRE tactics",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -852,7 +852,7 @@
                     {
                         "id": 8181440523648739,
                         "definition": {
-                            "title": "Top mitre attack techniques",
+                            "title": "Top associated MITRE techniques",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2485,7 +2485,7 @@
                                 }
                             ],
                             "style": {
-                                "palette": "hostmap_blues",
+                                "palette": "yellow_to_green",
                                 "palette_flip": false
                             },
                             "view": {
