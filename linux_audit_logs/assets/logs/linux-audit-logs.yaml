@@ -539,7 +539,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
               sources:
                 - ocsf.metadata
               sourceType: attribute
@@ -547,7 +547,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product
+            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
               sources:
                 - ocsf.metadata.product
               sourceType: attribute
@@ -555,7 +555,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.time
+            - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -564,7 +564,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.name
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               sourceType: attribute
@@ -573,7 +573,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.vendor_name
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
               sourceType: attribute
@@ -582,7 +582,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.event_code
+            - name: Map `type` to `ocsf.metadata.event_code`
               sources:
                 - type
               sourceType: attribute
@@ -674,7 +674,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
               sources:
                 - ocsf.metadata
               sourceType: attribute
@@ -682,7 +682,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product
+            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
               sources:
                 - ocsf.metadata.product
               sourceType: attribute
@@ -690,7 +690,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.time
+            - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -699,7 +699,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.name
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               sourceType: attribute
@@ -707,7 +707,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.event_code
+            - name: Map `type` to `ocsf.metadata.event_code`
               sources:
                 - type
               sourceType: attribute
@@ -716,7 +716,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.vendor_name
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
               sourceType: attribute
@@ -724,7 +724,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.pid
+            - name: Map `pid` to `ocsf.actor.process.pid`
               sources:
                 - pid
               sourceType: attribute
@@ -732,7 +732,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user.uid
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
               sources:
                 - ocsf.actor.user.uid
               sourceType: attribute
@@ -740,7 +740,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.session.uid
+            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
               sources:
                 - ocsf.actor.session.uid
               sourceType: attribute
@@ -748,7 +748,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user.name
+            - name: Map `AUID` to `ocsf.actor.user.name`
               sources:
                 - AUID
               sourceType: attribute
@@ -756,7 +756,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.user
+            - name: Map `ocsf.user` to `ocsf.user`
               sources:
                 - ocsf.user
               sourceType: attribute
@@ -764,7 +764,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.user.name
+            - name: Map `msg.acct` to `ocsf.user.name`
               sources:
                 - msg.acct
               sourceType: attribute
@@ -773,7 +773,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.session.terminal
+            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
               sources:
                 - msg.terminal
               sourceType: attribute
@@ -781,7 +781,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.dst_endpoint.ip
+            - name: Map `network.client.ip` to `ocsf.dst_endpoint.ip`
               sources:
                 - network.client.ip
               sourceType: attribute
@@ -790,7 +790,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.dst_endpoint.hostname
+            - name: Map `msg.hostname` to `ocsf.dst_endpoint.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
@@ -799,7 +799,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.user.name
+            - name: Map `usr.name` to `ocsf.actor.process.user.name`
               sources:
                 - usr.name
               sourceType: attribute
@@ -807,7 +807,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.user.uid
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
               sources:
                 - ocsf.actor.process.user.uid
               sourceType: attribute
@@ -815,7 +815,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.path
+            - name: Map `msg.exe` to `ocsf.actor.process.pat`
               sources:
                 - msg.exe
               sourceType: attribute
@@ -824,7 +824,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.user.uid
+            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
               sources:
                 - ocsf.user.uid
               sourceType: attribute
@@ -925,7 +925,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
               sources:
                 - ocsf.metadata
               sourceType: attribute
@@ -933,7 +933,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product
+            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
               sources:
                 - ocsf.metadata.product
               sourceType: attribute
@@ -941,7 +941,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.time
+            - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -949,7 +949,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.name
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               sourceType: attribute
@@ -957,7 +957,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.event_code
+            - name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
               sources:
                 - type
               sourceType: attribute
@@ -966,7 +966,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.vendor_name
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
               sourceType: attribute
@@ -974,7 +974,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.pid
+            - name: Map `pid` to `ocsf.actor.process.pid`
               sources:
                 - pid
               sourceType: attribute
@@ -982,7 +982,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.user.uid
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
               sources:
                 - ocsf.actor.process.user.uid
               sourceType: attribute
@@ -990,7 +990,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user.uid
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
               sources:
                 - ocsf.actor.user.uid
               sourceType: attribute
@@ -998,7 +998,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.session.uid
+            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
               sources:
                 - ocsf.actor.session.uid
               sourceType: attribute
@@ -1006,7 +1006,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user.name
+            - name: Map `AUID` to `ocsf.actor.user.name`
               sources:
                 - AUID
               sourceType: attribute
@@ -1014,7 +1014,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.user.name
+            - name: Map `usr.name` to `ocsf.actor.process.user.name`
               sources:
                 - usr.name
               sourceType: attribute
@@ -1022,7 +1022,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.user
+            - name: Map `ocsf.user` to `ocsf.user`
               sources:
                 - ocsf.user
               sourceType: attribute
@@ -1030,7 +1030,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.user.name
+            - name: Map `msg.acct` to `ocsf.user.name`
               sources:
                 - msg.acct
               sourceType: attribute
@@ -1039,7 +1039,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.user.uid
+            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
               sources:
                 - ocsf.user.uid
               sourceType: attribute
@@ -1047,7 +1047,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.ip
+            - name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
               sources:
                 - network.client.ip
               sourceType: attribute
@@ -1056,7 +1056,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.hostname
+            - name: Map `msg.hostname` to `ocsf.src_endpoint.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
@@ -1065,7 +1065,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.session.terminal
+            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
               sources:
                 - msg.terminal
               sourceType: attribute
@@ -1073,7 +1073,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.path
+            - name: Map `msg.exe` to `ocsf.actor.process.path`
               sources:
                 - msg.exe
               sourceType: attribute
@@ -1157,104 +1157,6 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.metadata.product
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.group
-              sources:
-                - ocsf.group
-              sourceType: attribute
-              target: ocsf.group
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.time
-              sources:
-                - timestamp
-              sourceType: attribute
-              target: ocsf.time
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.metadata.product.name
-              sources:
-                - ocsf.metadata.product.name
-              sourceType: attribute
-              target: ocsf.metadata.product.name
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.metadata.event_code
-              sources:
-                - type
-              sourceType: attribute
-              target: ocsf.metadata.event_code
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.group.name
-              sources:
-                - msg.acct
-              sourceType: attribute
-              target: ocsf.group.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.metadata.product.vendor_name
-              sources:
-                - ocsf.metadata.product.vendor_name
-              sourceType: attribute
-              target: ocsf.metadata.product.vendor_name
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.actor.process.pid
-              sources:
-                - pid
-              sourceType: attribute
-              target: ocsf.actor.process.pid
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.actor.process.user.uid
-              sources:
-                - ocsf.actor.process.user.uid
-              sourceType: attribute
-              target: ocsf.actor.process.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.actor.user.uid
-              sources:
-                - ocsf.actor.user.uid
-              sourceType: attribute
-              target: ocsf.actor.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.actor.session.uid
-              sources:
-                - ocsf.actor.session.uid
-              sourceType: attribute
-              target: ocsf.actor.session.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
             - name: ocsf.status_id
               categories:
                 - filter:
@@ -1272,7 +1174,105 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.actor.user.name
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
+              sources:
+                - ocsf.metadata
+              sourceType: attribute
+              target: ocsf.metadata
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
+              sources:
+                - ocsf.metadata.product
+              sourceType: attribute
+              target: ocsf.metadata.product
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.group` to `ocsf.group`
+              sources:
+                - ocsf.group
+              sourceType: attribute
+              target: ocsf.group
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.acct` to `ocsf.group.name`
+              sources:
+                - msg.acct
+              sourceType: attribute
+              target: ocsf.group.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `pid` to `ocsf.actor.process.pid`
+              sources:
+                - pid
+              sourceType: attribute
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+              sources:
+                - ocsf.actor.process.user.uid
+              sourceType: attribute
+              target: ocsf.actor.process.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+              sources:
+                - ocsf.actor.user.uid
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+              sources:
+                - ocsf.actor.session.uid
+              sourceType: attribute
+              target: ocsf.actor.session.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUID` to `ocsf.actor.user.name`
               sources:
                 - AUID
               sourceType: attribute
@@ -1280,7 +1280,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.user.name
+            - name: Map `usr.name` to `ocsf.actor.process.user.name`
               sources:
                 - usr.name
               sourceType: attribute
@@ -1288,7 +1288,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.group.uid
+            - name: Map `ocsf.group.uid` to `ocsf.group.uid`
               sources:
                 - ocsf.group.uid
               sourceType: attribute
@@ -1296,7 +1296,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.hostname
+            - name: Map `msg.hostname` to `ocsf.src_endpoint.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
@@ -1305,7 +1305,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.ip
+            - name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
               sources:
                 - network.client.ip
               sourceType: attribute
@@ -1314,7 +1314,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.session.terminal
+            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
               sources:
                 - msg.terminal
               sourceType: attribute
@@ -1322,7 +1322,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.path
+            - name: Map `msg.exe` to `ocsf.actor.process.path`
               sources:
                 - msg.exe
               sourceType: attribute
@@ -1413,7 +1413,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
               sources:
                 - ocsf.metadata
               sourceType: attribute
@@ -1421,7 +1421,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product
+            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
               sources:
                 - ocsf.metadata.product
               sourceType: attribute
@@ -1429,7 +1429,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.time
+            - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -1438,7 +1438,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.privileges
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - privileges
               sourceType: attribute
@@ -1447,7 +1447,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.user
+            - name: Map `ocsf.user` to `ocsf.user`
               sources:
                 - ocsf.user
               sourceType: attribute
@@ -1455,7 +1455,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.name
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               sourceType: attribute
@@ -1464,7 +1464,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.vendor_name
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
               sourceType: attribute
@@ -1473,7 +1473,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.user.name
+            - name: Map `target_user_name` to `ocsf.user.name`
               sources:
                 - target_user_name
               sourceType: attribute
@@ -1482,7 +1482,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.pid
+            - name: Map `pid` to `ocsf.actor.process.pid`
               sources:
                 - pid
               sourceType: attribute
@@ -1491,7 +1491,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.user.uid
+            - name: Map `uid` to `ocsf.actor.process.user.uid`
               sources:
                 - uid
               sourceType: attribute
@@ -1500,7 +1500,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.user.name
+            - name: Map `usr.name` to `ocsf.actor.process.user.name`
               sources:
                 - usr.name
               sourceType: attribute
@@ -1509,7 +1509,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user.uid
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
               sources:
                 - ocsf.actor.user.uid
               sourceType: attribute
@@ -1518,7 +1518,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user.name
+            - name: Map `AUID` to `ocsf.actor.user.name`
               sources:
                 - AUID
               sourceType: attribute
@@ -1527,7 +1527,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user
+            - name: Map `ocsf.actor.user` to `ocsf.actor.user`
               sources:
                 - ocsf.actor.user
               sourceType: attribute
@@ -1536,7 +1536,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor
+            - name: Map `ocsf.actor` to `ocsf.actor`
               sources:
                 - ocsf.actor
               sourceType: attribute
@@ -1544,7 +1544,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.event_code
+            - name: Map `type` to `ocsf.metadata.event_code`
               sources:
                 - type
               sourceType: attribute
@@ -1553,7 +1553,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint
+            - name: Map `ocsf.src_endpoint` to `ocsf.src_endpoint`
               sources:
                 - ocsf.src_endpoint
               sourceType: attribute
@@ -1562,7 +1562,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.hostname
+            - name: Map `msg.hostname` to `ocsf.src_endpoint.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
@@ -1571,7 +1571,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.ip
+            - name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
               sources:
                 - network.client.ip
               sourceType: attribute
@@ -1580,7 +1580,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.process.path
+            - name: Map `msg.exe` to `ocsf.actor.process.path`
               sources:
                 - msg.exe
               sourceType: attribute
@@ -1589,7 +1589,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.session.terminal
+            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
               sources:
                 - msg.terminal
               sourceType: attribute
@@ -1746,7 +1746,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
               sources:
                 - ocsf.metadata
               sourceType: attribute
@@ -1754,7 +1754,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product
+            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
               sources:
                 - ocsf.metadata.product
               sourceType: attribute
@@ -1762,7 +1762,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.time
+            - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -1771,7 +1771,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.name
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               sourceType: attribute
@@ -1780,7 +1780,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.vendor_name
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
               sourceType: attribute
@@ -1789,7 +1789,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.event_code
+            - name: Map `type` to `ocsf.metadata.event_code`
               sources:
                 - type
               sourceType: attribute
@@ -1798,7 +1798,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user.uid
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
               sources:
                 - ocsf.actor.user.uid
               sourceType: attribute
@@ -1807,7 +1807,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user.name
+            - name: Map `usr.name` to `ocsf.actor.user.name`
               sources:
                 - usr.name
               sourceType: attribute
@@ -1816,7 +1816,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor.user
+            - name: Map `ocsf.actor.user` to `ocsf.actor.user`
               sources:
                 - ocsf.actor.user
               sourceType: attribute
@@ -1825,7 +1825,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.actor
+            - name: Map `ocsf.actor` to `ocsf.actor`
               sources:
                 - ocsf.actor
               sourceType: attribute
@@ -1833,7 +1833,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.file
+            - name: Map `ocsf.file` to `ocsf.file`
               sources:
                 - ocsf.file
               sourceType: attribute
@@ -1841,7 +1841,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.file.name
+            - name: Map `ocsf.file.name` to `ocsf.file.name`
               sources:
                 - ocsf.file.name
               sourceType: attribute
@@ -1849,7 +1849,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.file.path
+            - name: Map `name` to `ocsf.file.path`
               sources:
                 - name
               sourceType: attribute
@@ -1857,7 +1857,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.file.ext
+            - name: Map `ocsf.file.ext` to `ocsf.file.ext`
               sources:
                 - ocsf.file.ext
               sourceType: attribute
@@ -1865,7 +1865,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.device
+            - name: Map `ocsf.device` to `ocsf.device`
               sources:
                 - ocsf.device
               sourceType: attribute
@@ -1873,7 +1873,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.device.uid
+            - name: Map `dev` to `ocsf.device.uid`
               sources:
                 - dev
               sourceType: attribute
