@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -16,6 +17,7 @@ from .common import (
     ALL_DEFAULT_METRICS,
     ALL_METRICS,
     BADMIN_PERFMON_METRICS,
+    BHIST_METRICS,
     BJOBS_METRICS,
     CLUSTER_METRICS,
     LHOST_METRICS,
@@ -65,6 +67,7 @@ def test_check_gpu_enabled(mock_client, dd_run_check, aggregator, instance):
         'bqueues',
         'bslots',
         'bjobs',
+        'bhist',
         'lsload_gpu',
         'bhosts_gpu',
     ]
@@ -88,6 +91,7 @@ def test_check_all_metric_sources(mock_client, dd_run_check, aggregator, instanc
         'bqueues',
         'bslots',
         'bjobs',
+        'bhist',
         'lsload_gpu',
         'bhosts_gpu',
         'badmin_perfmon',
@@ -98,7 +102,6 @@ def test_check_all_metric_sources(mock_client, dd_run_check, aggregator, instanc
     dd_run_check(check)
 
     assert_metrics(ALL_METRICS, [], aggregator)
-
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
 
@@ -166,7 +169,7 @@ def test_bjobs_no_output(mock_client, dd_run_check, aggregator, instance, caplog
 
     assert_metrics(ALL_DEFAULT_METRICS, BJOBS_METRICS, aggregator)
 
-    assert "Skipping bjobs metrics; unexpected cli command output. Number of columns: 1, expected: 12" in caplog.text
+    assert "Skipping bjobs metrics; unexpected cli command output. Number of columns: 1, expected: 14" in caplog.text
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -202,28 +205,6 @@ def test_client_error(dd_run_check, aggregator, instance, caplog):
         aggregator.assert_metric("ibm_spectrum_lsf.can_connect", 0)
         aggregator.assert_all_metrics_covered()
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-def test_check_metric_sources_all(mock_client, dd_run_check, aggregator, instance):
-    instance["metric_sources"] = [
-        'lsclusters',
-        'lshosts',
-        'bhosts',
-        'lsload',
-        'bqueues',
-        'bslots',
-        'bjobs',
-        'lsload_gpu',
-        'bhosts_gpu',
-        'badmin_perfmon',
-    ]
-    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
-    check.client = mock_client
-    dd_run_check(check)
-    assert_metrics(ALL_METRICS, [], aggregator)
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_check_metric_sources_invalid(mock_client, dd_run_check, instance):
@@ -320,7 +301,18 @@ def test_badmin_perfmon_start_only_called_once(mock_client, dd_run_check, aggreg
         ),
         pytest.param(
             60,
-            ['lsclusters', 'lshosts', 'bhosts', 'lsload', 'bqueues', 'bslots', 'bjobs', 'lsload_gpu', 'bhosts_gpu'],
+            [
+                'lsclusters',
+                'lshosts',
+                'bhosts',
+                'lsload',
+                'bqueues',
+                'bslots',
+                'bjobs',
+                'bhist',
+                'lsload_gpu',
+                'bhosts_gpu',
+            ],
             0,
             [],
             ALL_DEFAULT_METRICS,
@@ -337,6 +329,7 @@ def test_badmin_perfmon_start_only_called_once(mock_client, dd_run_check, aggreg
                 'bqueues',
                 'bslots',
                 'bjobs',
+                'bhist',
                 'lsload_gpu',
                 'bhosts_gpu',
             ],
@@ -498,3 +491,27 @@ def test_badmin_perfmon_collection_not_started_manual(mock_client, dd_run_check,
     assert_metrics(LSID_METRICS, [], aggregator)
     assert mock_client.badmin_perfmon_start.call_count == 0
     assert mock_client.badmin_perfmon_stop.call_count == 0
+
+
+def test_bhist_correct_time_intervals(mock_client, dd_run_check, aggregator, instance):
+    instance['metric_sources'] = ['bhist']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    with patch('datadog_checks.ibm_spectrum_lsf.processors.get_current_datetime') as mock_get_current_datetime:
+        mock_get_current_datetime.side_effect = [
+            datetime(2025, 12, 1, 10, 0),
+            datetime(2025, 12, 1, 10, 0),
+            datetime(2025, 12, 1, 10, 0),
+            datetime(2025, 12, 1, 10, 22),
+        ]
+
+        dd_run_check(check)
+        dd_run_check(check)
+        assert mock_client.bhist.call_count == 2
+        # first call is start of check, subtract 1 minute, second call is 22 minutes later
+        assert mock_client.bhist.call_args_list == [
+            call('2025/12/01/09:59', '2025/12/01/10:00'),
+            call('2025/12/01/10:00', '2025/12/01/10:22'),
+        ]
+        assert_metrics(BHIST_METRICS + LSID_METRICS, [], aggregator)
+        aggregator.assert_all_metrics_covered()

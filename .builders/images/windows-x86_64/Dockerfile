@@ -85,11 +85,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.13.10"
+ENV PYTHON_VERSION="3.13.11"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash 'ab30cd76655c6c91243b4f4d5a8499020f6503aa58e92b3e2e94ae4af7353257'; `
+      -Hash '30d4654b3eac7ddfdf2682db4c8dcb490f3055f4f33c6906d6b828f680152101'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location --upgrade pip; `

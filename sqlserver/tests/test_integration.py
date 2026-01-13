@@ -1076,6 +1076,39 @@ def test_propagate_agent_tags(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_table_size_metrics_with_indexes(aggregator, dd_run_check, instance_docker):
+    """
+    Test that table size metrics are correctly emitted for a table with data and multiple
+    indexes. This test uses the existing test_schema.cities table which has 2 rows and 2 indexes.
+    """
+    # Use the existing test table from the testing infrastructure
+    table_name = 'cities'
+    schema_name = 'test_schema'
+    database_name = 'datadog_test_schemas'
+    expected_row_count = 2  # The setup inserts 2 rows
+
+    # Configure instance to include the test database
+    instance_docker['database_autodiscovery'] = True
+    instance_docker['autodiscovery_include'] = [database_name]
+
+    # Run the check
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(check)
+
+    # Verify that table size metrics are emitted for the cities table
+    expected_table_tags = [f'table:{table_name}', f'schema:{schema_name}', f'database:{database_name}']
+
+    # Check row_count metric
+    row_count_metrics = aggregator.metrics('sqlserver.table.row_count')
+    test_table_metrics = [m for m in row_count_metrics if all(tag in m.tags for tag in expected_table_tags)]
+    assert len(test_table_metrics) > 0, f"No row_count metrics found for table {table_name}"
+    assert test_table_metrics[0].value == expected_row_count, (
+        f"Expected row_count={expected_row_count}, got {test_table_metrics[0].value}"
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_static_information_expire(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)

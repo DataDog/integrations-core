@@ -220,9 +220,9 @@ def dep(check, require_base_check_version, min_base_check_version):
         check_base_dependencies, check_base_errors = read_check_base_dependencies(check_name)
         annotate_errors(base_req_source, check_base_errors)
         if check_base_errors:
+            failed = True
             for check_error in check_base_errors:
                 echo_failure(check_error)
-            abort()
 
         for name, versions in sorted(check_dependencies.items()):
             if not verify_dependency('Checks', name, versions, req_source):
@@ -279,6 +279,6 @@ def dep(check, require_base_check_version, min_base_check_version):
             annotate_error(agent_dependencies_file, message)
             continue
 
-        if failed:
-            abort()
+    if failed:
+        abort()
     echo_success("All dependencies are valid!")
