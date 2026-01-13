@@ -121,6 +121,8 @@ integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
 - cassandra_nodetool/**/*
+integration/cato_networks:
+- cato_networks/**/*
 integration/celery:
 - celery/**/*
 integration/ceph:
@@ -589,6 +591,8 @@ integration/ray:
 - ray/**/*
 integration/redisdb:
 - redisdb/**/*
+integration/resend:
+- resend/**/*
 integration/rethinkdb:
 - rethinkdb/**/*
 integration/riak:

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.2.0 / 2025-11-26
+## 6.2.1 / 2025-12-22
+
+***Fixed***:
+
+* Disable autogenerate session id ([#21886](https://github.com/DataDog/integrations-core/pull/21886))
+
+## 6.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
