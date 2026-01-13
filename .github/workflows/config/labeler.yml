@@ -741,6 +741,8 @@ integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:
 - twistlock/**/*
+integration/valence_security:
+- valence_security/**/*
 integration/varnish:
 - varnish/**/*
 integration/vault:
