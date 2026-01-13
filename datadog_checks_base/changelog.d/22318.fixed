@@ -1,1 +1,1 @@
-Fix KeyError when pg_stat_statements plan/timing tracking settings change between collection cycles.
+Fix KeyError in statement metrics when available metric columns change between collection cycles.
