@@ -1,0 +1,79 @@
+# bypass-global-grok-parser-rules-checks
+id: n8n
+metric_id: n8n
+backend_only: false
+pipeline:
+  type: pipeline
+  name: N8N
+  enabled: true
+  filter:
+    query: source:n8n
+  processors:
+    - type: grok-parser
+      name: Parse N8N text logs
+      enabled: true
+      source: message
+      samples:
+        - '2026-01-12T09:15:03.214Z | info  | n8n ready on 0.0.0.0, port 5678'
+        - '2026-01-12T09:15:03.219Z | info  | Version: 1.25.2'
+        - '2026-01-12T09:16:11.402Z | debug | Executing workflow "Order Webhook"'
+        - '2026-01-12T09:20:44.112Z | error | Node "HTTP Request" failed Error: Request failed with status code 401'
+      grok:
+        supportRules: ''
+        matchRules: |
+          n8n_text_log %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):timestamp} \| %{word:level}\s+\| %{data:message}
+    - type: grok-parser
+      name: Parse N8N JSON logs
+      enabled: true
+      source: message
+      samples:
+        - '{"level":"warn","message":"Permissions 0755 for n8n settings file /home/node/.n8n/config are too wide. This is ignored for now, but in the future n8n will attempt to change the permissions automatically. To automatically enforce correct permissions now set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true (recommended), or turn this check off set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false.","metadata":{"file":"instance-settings.js","function":"ensureSettingsFilePermissions","timestamp":"2026-01-12T14:54:21.727Z"}}'
+        - '{"level":"info","message":"n8n ready on ::, port 5678","metadata":{"file":"abstract-server.js","function":"init","timestamp":"2026-01-12T14:54:22.248Z"}}'
+        - '{"level":"debug","message":"User settings loaded from: /home/node/.n8n/config","metadata":{"file":"instance-settings.js","function":"loadOrCreate","timestamp":"2026-01-12T14:54:21.730Z"}}'
+      grok:
+        supportRules: ''
+        matchRules: |
+          n8n_json_log %{data::json}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+        - metadata.timestamp
+    - type: message-remapper
+      name: Define `message` as the official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level
+    - type: attribute-remapper
+      name: Map metadata.file to n8n.file
+      enabled: true
+      sources:
+        - metadata.file
+      target: n8n.file
+      target_type: attribute
+      preserve_source: false
+      override_on_conflict: false
+    - type: attribute-remapper
+      name: Map metadata.function to n8n.function
+      enabled: true
+      sources:
+        - metadata.function
+      target: n8n.function
+      target_type: attribute
+      preserve_source: false
+      override_on_conflict: false
+    - type: attribute-remapper
+      name: Map metadata.scopes to n8n.scopes
+      enabled: true
+      sources:
+        - metadata.scopes
+      target: n8n.scopes
+      target_type: attribute
+      preserve_source: false
+      override_on_conflict: false
