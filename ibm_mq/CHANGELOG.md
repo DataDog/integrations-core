@@ -2,7 +2,36 @@
 
 <!-- towncrier release notes start -->
 
-## 8.3.0 / 2025-07-10
+## 8.7.0 / 2025-12-23
+
+***Added***:
+
+* Add collecting channel and queue desc fields as tags for metrics ([#21948](https://github.com/DataDog/integrations-core/pull/21948))
+
+## 8.6.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 8.5.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.4.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Make queue discovery logic more resilient and add new metric to track broken queues ([#20549](https://github.com/DataDog/integrations-core/pull/20549))
+
+***Fixed***:
+
+* Lift `pymqi` dependency exclusion for macOS on AArch64/ARM64 ([#20815](https://github.com/DataDog/integrations-core/pull/20815))
+
+## 8.3.0 / 2025-07-10 / Agent 7.69.0
 
 ***Added***:
 

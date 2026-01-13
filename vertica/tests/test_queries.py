@@ -12,6 +12,8 @@ from datadog_checks.vertica.vertica import VerticaClient
 from . import common
 from .db import BASE_DB_OPTIONS
 
+skip_integration = pytest.mark.skip(reason="Vertica Docker image is no longer available")
+
 
 @pytest.mark.parametrize(
     'version, expected_per_projection_query',
@@ -125,6 +127,7 @@ def approx_a_day_in_seconds(t, margin=60):
     return 86400 - margin <= t <= 86400 + margin
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_licenses_query(client, builder, setup_db_tables):
     setup_db_tables(
@@ -149,6 +152,7 @@ def test_licenses_query(client, builder, setup_db_tables):
     assert approx_a_day_in_seconds(results[2][1])
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_license_audits_query(client, builder, setup_db_tables):
     setup_db_tables(
@@ -179,6 +183,7 @@ def test_license_audits_query(client, builder, setup_db_tables):
     assert results[0][1:] == [1000, 100, 900, 10]
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_system_query(client, builder, setup_db_tables):
     setup_db_tables(
@@ -227,6 +232,7 @@ def test_system_query(client, builder, setup_db_tables):
     assert results == [[40, 5, 1, 2, 20, 30, 10, None, None]]
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_projections_query(client, builder, setup_db_tables):
     setup_db_tables(
@@ -254,6 +260,7 @@ def test_projections_query(client, builder, setup_db_tables):
     assert results == [[5, 2, 3, 40, 60]]
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_projections_query_handles_zeros(client, builder, setup_db_tables):
     setup_db_tables(
@@ -274,6 +281,7 @@ def test_projections_query_handles_zeros(client, builder, setup_db_tables):
 
 
 @pytest.mark.skipif(common.VERTICA_MAJOR_VERSION >= 11, reason='Requires Vertica < 11')
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_projection_storage_queries_pre_11(client, builder, setup_db_tables):
     setup_db_tables(
@@ -333,6 +341,7 @@ def test_projection_storage_queries_pre_11(client, builder, setup_db_tables):
 
 
 @pytest.mark.skipif(common.VERTICA_MAJOR_VERSION < 11, reason='Requires Vertica >= 11')
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_projection_storage_queries_11_plus(client, builder, setup_db_tables):
     setup_db_tables(
@@ -388,6 +397,7 @@ def test_projection_storage_queries_11_plus(client, builder, setup_db_tables):
 
 
 @pytest.mark.skipif(common.VERTICA_MAJOR_VERSION >= 11, reason='Requires Vertica < 11')
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_storage_containers_queries_pre_11(client, builder, setup_db_tables):
     setup_db_tables(
@@ -433,6 +443,7 @@ def test_storage_containers_queries_pre_11(client, builder, setup_db_tables):
 
 
 @pytest.mark.skipif(common.VERTICA_MAJOR_VERSION < 11, reason='Requires Vertica >= 11')
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_storage_containers_queries_11_plus(client, builder, setup_db_tables):
     setup_db_tables(
@@ -470,6 +481,7 @@ def test_storage_containers_queries_11_plus(client, builder, setup_db_tables):
     assert total == [[9]]
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_host_resources_query(client, builder, setup_db_tables):
     setup_db_tables(
@@ -506,6 +518,7 @@ def test_host_resources_query(client, builder, setup_db_tables):
     ]
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_disk_storage_query(client, builder, setup_db_tables):
     setup_db_tables(

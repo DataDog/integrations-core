@@ -57,15 +57,6 @@ SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
 
-SQL_BINLOG_ENABLED = """\
-SELECT @@log_bin AS binlog_enabled"""
-
-SQL_SERVER_UUID = """\
-SELECT @@server_uuid"""
-
-SQL_SERVER_ID_AWS_AURORA = """\
-SHOW VARIABLES LIKE 'aurora_server_id'"""
-
 SQL_REPLICATION_ROLE_AWS_AURORA = """\
 SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role
 FROM information_schema.replica_host_status
@@ -248,6 +239,28 @@ QUERY_USER_CONNECTIONS = {
         {'name': 'processlist_host', 'type': 'tag'},
         {'name': 'processlist_db', 'type': 'tag'},
         {'name': 'processlist_state', 'type': 'tag'},
+    ],
+}
+
+QUERY_ERRORS_RAISED = {
+    'name': 'performance_schema.events_errors_summary_global_by_error',
+    'query': """
+        SELECT
+            SUM(SUM_ERROR_RAISED) as errors_raised,
+            ERROR_NUMBER as error_number,
+            ERROR_NAME as error_name
+        FROM performance_schema.events_errors_summary_by_user_by_error
+        WHERE
+            SUM_ERROR_RAISED > 0
+            AND ERROR_NUMBER IS NOT NULL
+            AND ERROR_NAME IS NOT NULL
+            AND NOT (ERROR_NAME = 'ER_NO_SYSTEM_TABLE_ACCESS' AND USER = '{user}')
+        GROUP BY ERROR_NUMBER, ERROR_NAME
+    """.strip(),
+    'columns': [
+        {'name': 'mysql.performance.errors_raised', 'type': 'monotonic_count'},
+        {'name': 'error_number', 'type': 'tag'},
+        {'name': 'error_name', 'type': 'tag'},
     ],
 }
 

@@ -33,7 +33,7 @@ jobs:
 
     env:
       FORCE_COLOR: "1"
-      PYTHON_VERSION: "3.12"
+      PYTHON_VERSION: "3.13"
       # Test results for later processing
       TEST_RESULTS_BASE_DIR: "test-results"
       # Tracing to monitor our test suite
@@ -90,6 +90,7 @@ jobs:
 
     - name: Configure ddev
       run: |-
+        ddev config set upgrade_check false
         ddev config set repos.core .
         ddev config set repo core
 

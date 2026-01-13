@@ -32,9 +32,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.count{$cluster,$host}",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.count{$cluster,$host,$node}",
+                                            "aggregator": "avg"
                                         }
                                     ]
                                 }
@@ -71,9 +70,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.cpu_capacity{$cluster,$host}",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.cpu_capacity{$cluster,$host,$node}",
+                                            "aggregator": "avg"
                                         }
                                     ]
                                 }
@@ -110,8 +108,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:system.mem.pct_usable{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:system.mem.pct_usable{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -173,9 +170,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,condition:ready}",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,$node,condition:ready}",
+                                            "aggregator": "avg"
                                         }
                                     ]
                                 }
@@ -211,9 +207,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.memory_capacity{$cluster,$host}",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.memory_capacity{$cluster,$host,$node}",
+                                            "aggregator": "avg"
                                         }
                                     ]
                                 }
@@ -245,8 +240,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:system.cpu.idle{$host,$cluster} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:system.cpu.idle{$host,$cluster,$node} by {host}"
                                         }
                                     ],
                                     "formulas": [
@@ -372,9 +366,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.by_condition{$cluster,status:true,$host} by {condition}",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.by_condition{$cluster,status:true,$host,$node} by {condition}",
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "formulas": [
@@ -426,8 +419,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.by_condition{$cluster,$host,condition:ready,status:true} by {condition,status,kube_cluster_name}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.by_condition{$cluster,$host,$node,condition:ready,status:true} by {condition,status,kube_cluster_name}"
                                         }
                                     ],
                                     "style": {
@@ -477,13 +469,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,condition:ready} by {kube_cluster_name}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,condition:ready} by {kube_cluster_name}"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "top(query1, 10, 'last', 'desc')"
+                                            "formula": "top(query1, 10, \"last\", \"desc\")"
                                         }
                                     ],
                                     "style": {
@@ -551,8 +542,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:system.cpu.idle{$host,$cluster} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:system.cpu.idle{$host,$cluster,$node} by {host}"
                                         }
                                     ],
                                     "formulas": [
@@ -611,8 +601,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:system.mem.pct_usable{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:system.mem.pct_usable{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -657,8 +646,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -700,8 +688,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.memory.usage{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.memory.usage{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -751,8 +738,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.cpu.requests{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.cpu.requests{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -802,8 +788,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.memory.requests{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.memory.requests{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -863,14 +848,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.container.cpu_requested{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.container.cpu_requested{$cluster,$host,$node} by {host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes_state.node.cpu_capacity{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.cpu_capacity{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -945,14 +928,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.container.cpu_requested{$cluster,$host} by {kube_cluster_name}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.container.cpu_requested{$cluster,$host,$node} by {kube_cluster_name}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes_state.node.cpu_capacity{$cluster,$host} by {kube_cluster_name}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.node.cpu_capacity{$cluster,$host,$node} by {kube_cluster_name}"
                                         }
                                     ],
                                     "formulas": [
@@ -1038,8 +1019,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.node.filesystem.usage_pct{$cluster,$host} by {kube_cluster_name}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:kubernetes.node.filesystem.usage_pct{$cluster,$host,$node} by {kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1090,8 +1070,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {kube_cluster_name}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:kubernetes.memory.usage_pct{$cluster,$host,$node} by {kube_cluster_name}"
                                         }
                                     ],
                                     "formulas": [
@@ -1166,8 +1145,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:system.cpu.idle{$host,$cluster} by {kube_cluster_name}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:system.cpu.idle{$host,$cluster,$node} by {kube_cluster_name}"
                                         }
                                     ],
                                     "formulas": [
@@ -1244,8 +1222,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -1295,13 +1272,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.pods.running{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.pods.running{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                            "formula": "top(query1, 50, \"mean\", \"desc\")"
                                         }
                                     ],
                                     "style": {
@@ -1342,9 +1318,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.pod.ready{$cluster,condition:true,$host} by {host,pod_name}",
-                                            "aggregator": "last",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes_state.pod.ready{$cluster,condition:true,$host,$node} by {host,pod_name}",
+                                            "aggregator": "last"
                                         }
                                     ],
                                     "formulas": [
@@ -1396,8 +1371,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.containers.running{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.containers.running{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -1458,7 +1432,7 @@
                                             "data_source": "events",
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:kubernetes $host $cluster"
+                                                "query": "source:kubernetes $host $cluster $node"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1502,7 +1476,7 @@
                             "requests": [
                                 {
                                     "query": {
-                                        "query_string": "source:kubernetes $host $cluster",
+                                        "query_string": "source:kubernetes $host $cluster $node",
                                         "data_source": "event_stream",
                                         "event_size": "s"
                                     },
@@ -1550,9 +1524,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:tls.seconds_left{kubelet:server,$cluster,$host} by {host}",
-                                            "aggregator": "last",
-                                            "semantic_mode": "combined"
+                                            "query": "max:tls.seconds_left{kubelet:server,$cluster,$host,$node} by {host}",
+                                            "aggregator": "last"
                                         }
                                     ],
                                     "formulas": [
@@ -1634,8 +1607,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -1685,8 +1657,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes_state.node.cpu_allocatable{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:kubernetes_state.node.cpu_allocatable{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -1727,9 +1698,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes_state.node.cpu_allocatable{$host, $cluster} by {host}",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:kubernetes_state.node.cpu_allocatable{$host, $cluster, $node} by {host}",
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "sort": {
@@ -1773,9 +1743,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host} by {host}",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host,$node} by {host}",
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "sort": {
@@ -1819,9 +1788,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host} by {host}",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "query": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host,$node} by {host}",
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "sort": {
@@ -1885,8 +1853,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.network.rx_bytes{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.network.rx_bytes{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -1929,8 +1896,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.io.read_bytes{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.io.read_bytes{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -1973,8 +1939,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.network.tx_bytes{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.network.tx_bytes{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {
@@ -2017,8 +1982,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.io.write_bytes{$cluster,$host} by {host}",
-                                            "semantic_mode": "combined"
+                                            "query": "sum:kubernetes.io.write_bytes{$cluster,$host,$node} by {host}"
                                         }
                                     ],
                                     "style": {

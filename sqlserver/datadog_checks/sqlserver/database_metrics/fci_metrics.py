@@ -5,7 +5,6 @@
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
 )
-from datadog_checks.sqlserver.utils import is_azure_database
 
 from .base import SqlserverDatabaseMetricsBase
 
@@ -43,9 +42,9 @@ class SqlserverFciMetrics(SqlserverDatabaseMetricsBase):
     def enabled(self):
         if not self.include_fci_metrics:
             return False
-        if not self.major_version and not is_azure_database(self.engine_edition):
-            return False
-        if self.major_version > 2012 or self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
+        if self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
+            return True
+        if self.major_version > 11:
             return True
         return False
 

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "91202d4a-1af4-4c64-88e4-5ba02b23c69f",
   "app_id": "snmp-cisco",
+  "owner": "network-device-monitoring-core",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

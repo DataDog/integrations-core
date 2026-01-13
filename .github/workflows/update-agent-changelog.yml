@@ -18,13 +18,14 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
       with:
-        python-version: 3.12
+        python-version: 3.13
     - name: Install ddev from local folder
       run: |-
         pip install -e ./datadog_checks_dev[cli]
         pip install -e ./ddev
     - name: Configure ddev
       run: |-
+        ddev config set upgrade_check false
         ddev config set repos.core .
         ddev config set repo core
     - name: Update the Agent changelog
@@ -41,7 +42,7 @@ jobs:
       id: token-generator
       with:
         app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY_2 }}
+        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
         repositories: integrations-core
     - name: Create Pull Request
       id: cpr

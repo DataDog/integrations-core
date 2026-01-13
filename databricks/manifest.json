@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f99b6e79-f50a-479d-b916-955a577e4f41",
   "app_id": "databricks",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -32,6 +33,10 @@
       {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/databricks-monitoring-datadog/"
+      },
+      {
+        "url": "https://docs.datadoghq.com/integrations/databricks",
+        "resource_type": "documentation"
       }
     ]
   },

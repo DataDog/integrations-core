@@ -1,15 +1,43 @@
-# Agent Check: LiteLLM
+# LiteLLM
 
 ## Overview
 
-[LiteLLM][1] is a lightweight, open-source proxy and analytics layer for large language model (LLM) APIs. It enables unified access, observability, and cost control across multiple LLM providers.
+Monitor, troubleshoot, and evaluate your LLM-powered applications built using [LiteLLM][1]: a lightweight, open-source proxy and analytics layer for large language model (LLM) APIs. It enables unified access, observability, and cost control across multiple LLM providers.
 
-This integration provides real-time monitoring, alerting, and analytics for all LLM API usage through LiteLLM, helping customers optimize performance, manage costs, and ensure reliability across their AI-powered applications.
+Use LLM Observability to investigate the root cause of issues, monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
+
+See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max) for an example of how you can investigate a trace.
+
+Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [LiteLLM][1] Python library requests using Datadog metrics and APM.
 
 Key metrics such as request/response counts, latency, error rates, token usage, and spend per provider or deployment are monitored. This data enables customers to track usage patterns, detect anomalies, control costs, and troubleshoot issues quickly, ensuring efficient and reliable LLM operations through LiteLLM's health check and Prometheus endpoints.
 
+**Minimum Agent version:** 7.68.0
+
 ## Setup
 
+You can configure this integration either as a standalone integration with LLM Observability, or as an agent check.
+
+Use it as an integration with LLM Observability to:
+
+- Monitor LLM agents and applications that use LiteLLM
+- Debug and troubleshoot every single operation, including calls to LiteLLM
+- See contextual visibility across prompt, model or provider selection, latency, error, token usage and cost, and more
+
+Use it as an agent check to:
+
+- Monitor the LiteLLM proxy service itself directly at the infrastructure level
+- Capture metrics like request volume, latency, error and fallback rates, token usage, and costs for the LiteLLM service
+- Support platform and SREs to ensure overall reliability of LiteLLM deployment
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "LLM Observability" xxx -->
+Get end-to-end visibility into your LLM application using LiteLLM.
+
+When you [run your LLM application with the LLM Observability SDK][12], LiteLLM and other integrations are enabled by default, so no further configuration is required. See [Automatic Instrumentation for LLM Observability][13] for details on automatic tracing provided by the LiteLLM integration.
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Agent Check: LiteLLM" xxx -->
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 ### Installation
@@ -26,15 +54,15 @@ Note: The listed metrics can only be collected if they are available. Some metri
 
 1. Edit the `litellm.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your LiteLLM performance data. See the [sample litellm.d/conf.yaml][4] for all available configuration options. Example config:
 
-```yaml
-init_config:
+    ```yaml
+    init_config:
 
-instances:
-  - openmetrics_endpoint: http://localhost:4000/metrics
-    # If authorization is required to access the endpoint, use the settings below.
-    # headers:
-    #  Authorization: Bearer sk-1234
-```
+    instances:
+      - openmetrics_endpoint: http://localhost:4000/metrics
+        # If authorization is required to access the endpoint, use the settings below.
+        # headers:
+        #  Authorization: Bearer sk-1234
+    ```
 
 2. [Restart the Agent][5].
 
@@ -77,6 +105,9 @@ LiteLLM can send logs to Datadog through its callback system. You can configure 
 
 Run the Agent's status subcommand ([see documentation][6]) and look for `litellm` under the Checks section.
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ## Data Collected
 
 ### Metrics
@@ -88,8 +119,6 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 The LiteLLM integration does not include any events.
 
 ### Service Checks
-
-The LiteLLM integration does not include any service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
@@ -109,3 +138,5 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.litellm.ai/docs/proxy/prometheus
 [11]: https://docs.litellm.ai/docs/proxy/logging
+[12]: https://docs.datadoghq.com/llm_observability/quickstart/
+[13]: https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python#litellm

@@ -36,6 +36,7 @@ files:
         description: |
           The password of the read-only credentials to connect to vCenter.
           see https://app.datadoghq.com/account/settings#integrations/vsphere
+        secret: true
         value:
           type: string
           example: <PASSWORD>
@@ -48,6 +49,12 @@ files:
         value:
             type: boolean
             example: false
+      - name: infrastructure_mode
+        description: |
+          The infrastructure mode to use. Valid values are 'full' (default) and 'basic'.
+        value:
+          type: string
+          example: full
       - name: collection_level
         description: |
           A number between 1 and 4 to specify how many metrics will be sent
@@ -311,7 +318,7 @@ files:
           is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
           then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
           and 'Green to Gray' will be included.
-          
+
           Events can only be collected if their event type ID is in the 'vim.event' class:
           https://vdc-repo.vmware.com/vmwb-repository/dcr-public/d1902b0e-d479-46bf-8ac9-cee0e31e8ec0/
           07ce8dbd-db48-4261-9b8f-c6d3ad8ba472/vim.event.Event.html

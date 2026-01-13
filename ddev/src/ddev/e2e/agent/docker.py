@@ -20,7 +20,15 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
-AGENT_VERSION_REGEX = r'^datadog/agent:\d+(?:$|\.(\d+\.\d(?:$|-jmx$)|$))'
+AGENT_IMAGE_REGEX = r'^([^/]+)/([^:]+):(.*)$'
+AGENT_VERSION_REGEX = (
+    # Main version: 7, 7.69, 7.69.0 ...
+    r"^(?P<version>\d+(?:\.[\dx]+)*|latest|main|master|nightly)"
+    # rcs: rc.1, rc ...
+    r"(?P<rc>-rc(?:\.\d+)?)?"
+    # Anny suffixes: -jmx, -linux, -full...
+    r"(?P<suffixes>(?:-[a-zA-Z0-9]+)*)$"
+)
 
 
 @contextmanager
@@ -35,6 +43,42 @@ def disable_integration_before_install(config_file):
     new = config_file.rename(config_file.parent / (config_file.name + ".example"))
     yield
     new.rename(config_file.parent / old)
+
+
+def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
+    if not agent_build:
+        return 'datadog/agent-dev:master-py3'
+
+    if match := re.match(AGENT_IMAGE_REGEX, agent_build):
+        org, image, tag = match.groups()
+
+        if org != 'datadog':
+            # Some non datadog image has been selected
+            return agent_build
+
+        version_match = re.match(AGENT_VERSION_REGEX, tag)
+
+        if version_match is None:
+            # Not sure how to extract information for a version of this shape
+            return agent_build
+
+        version = version_match.group('version')
+        rc = version_match.group('rc')
+        rc = rc if rc else ''
+        suffixes = version_match.group('suffixes')
+
+        # Add -py suffix if missing, only in agent-dev the agent does not have py3 suffix after agent 6
+        if image == 'agent-dev':
+            if not (rc != '' or any(suffix in suffixes for suffix in ['py', 'fips']) or version[0].isdigit()):
+                suffixes = f'-py{python_major}{suffixes}'
+
+        # Add jmx suffix if missing
+        if use_jmx and '-jmx' not in suffixes:
+            suffixes += '-jmx'
+
+        return f'{org}/{image}:{version}{rc}{suffixes}'
+
+    return agent_build
 
 
 class DockerAgent(AgentInterface):
@@ -99,30 +143,46 @@ class DockerAgent(AgentInterface):
         with EnvVars({'DOCKER_CLI_HINTS': 'false'}):
             return self.platform.run_command(command, **kwargs)
 
+    def _execute_lifecycle_command(
+        self, command: list[str], start_message: str, end_message_prefix: str, error_message: str
+    ) -> None:
+        """
+        Execute a lifecycle command and display status messages.
+
+        :param command: The command to execute.
+        :param start_message: The message to display before the command starts.
+        :param end_message_prefix: The prefix for the message displayed after the command finishes.
+                                   The full message will be "{prefix} {status} (code: {code})".
+        :param error_message: The error message to raise if the command fails.
+        """
+        self.app.display_header(start_message)
+        process = self._run_command(command)
+        return_code = process.returncode
+
+        text_style = self.app._style_level_error if return_code else self.app._style_level_success
+        status_text = 'failed' if return_code else 'succeeded'
+        self.app.display_header(
+            f'{end_message_prefix} {status_text} (code: {return_code})',
+            text_style=text_style,
+            characters='.',
+        )
+
+        if return_code:
+            self._show_logs()
+            raise RuntimeError(error_message)
+
     def _show_logs(self) -> None:
         self._run_command(['docker', 'logs', self._container_name])
 
     def get_id(self) -> str:
         return self._container_name
 
-    def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
+    def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         from ddev.e2e.agent.constants import AgentEnvVars
 
-        if not agent_build:
-            agent_build = 'datadog/agent-dev:master'
-
-        if agent_build.startswith("datadog/"):
-            # Add a potentially missing `py` suffix for default non-RC builds
-            if (
-                'rc' not in agent_build
-                and 'py' not in agent_build
-                and 'fips' not in agent_build
-                and not re.match(AGENT_VERSION_REGEX, agent_build)
-            ):
-                agent_build = f'{agent_build}-py{self.python_version[0]}'
-
-            if self.metadata.get('use_jmx') and not agent_build.endswith('-jmx'):
-                agent_build += '-jmx'
+        agent_build = _normalize_agent_image_name(
+            agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
+        )
 
         env_vars = env_vars.copy()
 
@@ -137,12 +197,12 @@ class DockerAgent(AgentInterface):
         # Run API on a random free port
         env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
 
-        # Disable trace Agent
-        env_vars[AgentEnvVars.APM_ENABLED] = 'false'
+        # Disable trace Agent by default (can be overridden by user-provided env_vars)
+        env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')
 
         # Set up telemetry
-        env_vars[AgentEnvVars.TELEMETRY_ENABLED] = '1'
-        env_vars[AgentEnvVars.EXPVAR_PORT] = '5000'
+        env_vars.setdefault(AgentEnvVars.TELEMETRY_ENABLED, '1')
+        env_vars.setdefault(AgentEnvVars.EXPVAR_PORT, '5000')
 
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:
@@ -244,10 +304,12 @@ class DockerAgent(AgentInterface):
         if start_commands:
             for start_command in start_commands:
                 formatted_command = self._format_command(self.platform.modules.shlex.split(start_command))
-                process = self._run_command(formatted_command)
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(f'Unable to run start-up command in Agent container `{self._container_name}`')
+                self._execute_lifecycle_command(
+                    formatted_command,
+                    f'Running start-up command: {start_command}',
+                    'Start-up command',
+                    f'Unable to run start-up command in Agent container `{self._container_name}`\n',
+                )
 
         if local_packages:
             base_pip_command = self._format_command(
@@ -255,32 +317,33 @@ class DockerAgent(AgentInterface):
             )
             for local_package, features in local_packages.items():
                 package_mount = f'{self._package_mount_dir}{local_package.name}{features}'
-                process = self._run_command([*base_pip_command, package_mount])
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(
-                        f'Unable to install package `{local_package.name}` in Agent container `{self._container_name}`'
-                    )
+                self._execute_lifecycle_command(
+                    [*base_pip_command, package_mount],
+                    f'Installing local package: {local_package.name}{features}',
+                    'Package installation',
+                    f'Unable to install package `{local_package.name}` in Agent container `{self._container_name}`',
+                )
 
         if post_install_commands:
             for post_install_command in post_install_commands:
                 formatted_command = self._format_command(self.platform.modules.shlex.split(post_install_command))
-                process = self._run_command(formatted_command)
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(
-                        f'Unable to run post-install command in Agent container `{self._container_name}`'
-                    )
+                self._execute_lifecycle_command(
+                    formatted_command,
+                    f'Running post-install command: {post_install_command}',
+                    'Post-install command',
+                    f'Unable to run post-install command in Agent container `{self._container_name}`',
+                )
 
     def stop(self) -> None:
-        stop_commands = self.metadata.get('stop_commands', [])
-        if stop_commands:
+        if stop_commands := self.metadata.get('stop_commands', []):
             for stop_command in stop_commands:
                 formatted_command = self._format_command(self.platform.modules.shlex.split(stop_command))
-                process = self._run_command(formatted_command)
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(f'Unable to run stop command in Agent container `{self._container_name}`')
+                self._execute_lifecycle_command(
+                    formatted_command,
+                    f'Running stop command: {stop_command}',
+                    'Stop command',
+                    f'Unable to run stop command in Agent container `{self._container_name}`',
+                )
 
         for command in (
             ['docker', 'stop', '-t', '0', self._container_name],

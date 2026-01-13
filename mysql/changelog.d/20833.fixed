@@ -1,1 +1,0 @@
-Moved logger instantiation in MySQL version compatibility check to the except block to only perform the costly call to `get_check_logger()` when outputting the warning log.

@@ -61,9 +61,42 @@ jobs:
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
 
+  test-minimum-base-package:
+    needs:
+    - compute-matrix
+    if: needs.compute-matrix.outputs.matrix != '[]' && github.event_name != 'merge_group'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: "minimum-base-package-${{ matrix.name }}"
+      target: "${{ matrix.target }}"
+      target-env: "${{ matrix.target-env }}"
+      platform: "${{ matrix.platform }}"
+      runner: "${{ toJson(matrix.runner) }}"
+      repo: "${{ inputs.repo }}"
+      minimum-base-package: true
+
+      # Options
+      # We never test Python in integrations-core, but some partners may want to keep testing it
+      # in marketplace and integrations-extras.
+      test-py2: ${{ inputs.repo != 'core' && (!matrix.python-support || contains(matrix.python-support, '2')) }}
+      test-py3: ${{ !matrix.python-support || contains(matrix.python-support, '3') }}
+
+      # For other repositories
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
+      python-version: "${{ inputs.python-version }}"
+      pytest-args: ${{ inputs.pytest-args }}
+      context: "pr"
+    secrets: inherit
+
   save-event:
     needs:
     - test
+    - test-minimum-base-package
     if: success() || failure()
 
     uses: ./.github/workflows/save-event.yml
@@ -71,6 +104,7 @@ jobs:
   submit-traces:
     needs:
     - test
+    - test-minimum-base-package
     if: inputs.repo == 'core' && (success() || failure()) && github.event.pull_request.head.repo.full_name == github.repository
 
     uses: ./.github/workflows/submit-traces.yml
@@ -79,6 +113,7 @@ jobs:
   upload-coverage:
     needs:
     - test
+    - test-minimum-base-package
     if: >
       !github.event.repository.private &&
       (success() || failure()) &&
@@ -109,6 +144,7 @@ jobs:
   check:
     needs:
     - test
+    - test-minimum-base-package
     # In integrations-core and integrations-extras repos the tests are flaky enough that
     # it would be a pain to merge PRs with the Merge Queue enabled.
     # While we work on the tests, we skip the job if it's triggered by Merge Queue.
@@ -121,4 +157,4 @@ jobs:
       uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
       with:
         jobs: ${{ toJSON(needs) }}
-        allowed-skips: test
+        allowed-skips: test, test-minimum-base-package

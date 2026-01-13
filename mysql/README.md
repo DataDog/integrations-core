@@ -10,6 +10,8 @@ Enable [Database Monitoring][32] (DBM) for enhanced insights into query performa
 
 MySQL version 5.6, 5.7, 8.0, and MariaDB versions 10.5, 10.6, 10.11 and 11.1 are supported.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 <div class="alert alert-info">This page describes the MySQL Agent standard integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -101,8 +103,6 @@ Query OK, 0 rows affected (0.00 sec)
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
-
 **Note**: For a full list of available configuration options, see the [sample mysql.d/conf.yaml][8].
 
 <!-- xxx tabs xxx -->
@@ -111,10 +111,6 @@ Follow the instructions below to configure this check for an Agent running on a 
 #### Host
 
 To configure this check for an Agent running on a host:
-
-Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection).
-
-For a full list of available configuration options, see the [sample `mysql.d/conf.yaml`][8].
 
 ##### Metric collection
 
@@ -288,7 +284,7 @@ metadata:
     ad.datadoghq.com/mysql.instances: |
       [
         {
-          "server": "%%host%%", 
+          "server": "%%host%%",
           "username": "datadog",
           "password": "<UNIQUEPASSWORD>"
         }
@@ -313,7 +309,7 @@ metadata:
         "mysql": {
           "instances": [
             {
-              "server": "%%host%%", 
+              "server": "%%host%%",
               "username": "datadog",
               "password": "<UNIQUEPASSWORD>"
             }

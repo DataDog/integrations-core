@@ -127,16 +127,18 @@ def test_statement_metrics(
 
     with (
         mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql,
-        mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
         mock.patch.object(
             mysql_check, '_get_aurora_replication_role', passthrough=True
         ) as m_get_aurora_replication_role,
+        mock.patch(
+            'datadog_checks.mysql.global_variables.GlobalVariables.is_aurora', new_callable=mock.PropertyMock
+        ) as m_is_aurora,
     ):
         m_obfuscate_sql.side_effect = _obfuscate_sql
-        m_get_is_aurora.return_value = False
         m_get_aurora_replication_role.return_value = None
+        m_is_aurora.return_value = False
         if aurora_replication_role:
-            m_get_is_aurora.return_value = True
+            m_is_aurora.return_value = True
             m_get_aurora_replication_role.return_value = aurora_replication_role
 
         # Run a query
@@ -153,7 +155,6 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
@@ -193,6 +194,39 @@ def test_statement_metrics(
 
 def _obfuscate_sql(query, options=None):
     return re.sub(r'\s+', ' ', query or '').strip()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize("collect_prepared_statements", [True, False])
+def test_statement_metrics_prepared_statements(
+    aggregator, dd_run_check, dbm_instance, bob_conn, collect_prepared_statements
+):
+    dbm_instance['query_metrics']['only_query_recent_statements'] = False
+    dbm_instance['query_metrics']['collect_prepared_statements'] = collect_prepared_statements
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    prepared_sql = DEFAULT_FQ_SUCCESS_QUERY
+
+    # Keep the session open so the prepared statement remains present while the check runs
+    with closing(bob_conn.cursor()) as cursor:
+        cursor.execute("PREPARE ps1 FROM '{}'".format(prepared_sql))
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        cursor.execute("DEALLOCATE PREPARE ps1")
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
+
+    query_sig = compute_sql_signature(prepared_sql)
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_sig]
+    if collect_prepared_statements:
+        assert len(matching_rows) == 1, "expected one row for prepared statement"
+    else:
+        assert len(matching_rows) == 0, "no rows for prepared statement"
 
 
 @pytest.mark.integration
@@ -345,7 +379,6 @@ def test_statement_metrics_cloud_metadata(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
@@ -366,7 +399,13 @@ def test_statement_metrics_cloud_metadata(
         (
             'information_schema',
             'select * from testdb.users',
-            [{'strategy': 'PROCEDURE', 'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"}],
+            [
+                {
+                    'strategy': 'PROCEDURE',
+                    'code': 'database_error',
+                    'message': "1044: Access denied for user 'dog'@'%' to database 'information_schema'",
+                }
+            ],
             StatementTruncationState.not_truncated.value,
         ),
         (
@@ -376,7 +415,7 @@ def test_statement_metrics_cloud_metadata(
                 {
                     'strategy': 'FQ_PROCEDURE',
                     'code': 'database_error',
-                    'message': "<class 'pymysql.err.ProgrammingError'>",
+                    'message': "1146: Table 'datadog.users' doesn't exist",
                 }
             ],
             StatementTruncationState.not_truncated.value,
@@ -433,15 +472,12 @@ def test_statement_samples_collect(
         expected_tags.add("replication_role:" + aurora_replication_role)
 
     with (
-        mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
         mock.patch.object(
             mysql_check, '_get_aurora_replication_role', passthrough=True
         ) as m_get_aurora_replication_role,
     ):
-        m_get_is_aurora.return_value = False
         m_get_aurora_replication_role.return_value = None
         if aurora_replication_role:
-            m_get_is_aurora.return_value = True
             m_get_aurora_replication_role.return_value = aurora_replication_role
 
         logger.debug("running first check")
@@ -581,7 +617,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # Fake the performance schema being disabled to validate the reporting of a warning when this condition occurs
-    mysql_check._performance_schema_enabled = False
+    mysql_check.global_variables._variables = {'performance_schema': 'OFF'}
 
     # Run this twice to confirm that duplicate warnings aren't added more than once
     mysql_check._statement_metrics.collect_per_statement_metrics()
@@ -600,13 +636,47 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     # as we faked the performance schema being disabled, running the check should restore the flag to True
     # this is to "simulate" enabling performance schema without restarting the agent
     # as the next check run will update the flag
-    assert mysql_check.performance_schema_enabled is True
+    assert mysql_check.global_variables.performance_schema_enabled is True
 
     # clear the warnings and rerun collect_per_statement_metrics
     mysql_check.warnings.clear()
     mysql_check._statement_metrics.collect_per_statement_metrics()
     mysql_check._statement_metrics.collect_per_statement_metrics()
     dd_run_check(mysql_check)
+    assert mysql_check.warnings == []
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_time_instrumentation_disabled(dbm_instance, dd_run_check):
+    # Disable query samples initially to avoid interference
+    dbm_instance['options']['extra_performance_metrics'] = False
+    dbm_instance['query_samples']['enabled'] = True
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    # Mock the time instrumentation check to return False
+    with mock.patch.object(mysql_check._statement_samples, '_is_time_instrumentation_enabled', return_value=False):
+        # Run this twice to confirm that duplicate warnings aren't added more than once
+        mysql_check._statement_samples._collect_statement_samples()
+        mysql_check._statement_samples._collect_statement_samples()
+
+        # Run the check only so that recorded warnings are actually added
+        dd_run_check(mysql_check)
+
+        assert mysql_check.warnings == [
+            'Cannot collect statement samples as time instrumentation is not enabled for statement events. '
+            'Enable time instrumentation by setting TIMED = YES for statement instruments in '
+            'performance_schema.setup_instruments. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+            'troubleshooting/#events-statements-time-instrumentation-not-enabled for more details.\n'
+            'code=events-statements-time-instrumentation-not-enabled host=stubbed.hostname'
+        ]
+
+    # clear the warnings and rerun with time instrumentation enabled
+    mysql_check.warnings.clear()
+    mysql_check._statement_samples._collect_statement_samples()
+    mysql_check._statement_samples._collect_statement_samples()
+    dd_run_check(mysql_check)
+    # Should have no warnings when time instrumentation is enabled
     assert mysql_check.warnings == []
 
 

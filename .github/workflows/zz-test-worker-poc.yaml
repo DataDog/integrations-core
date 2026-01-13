@@ -1,0 +1,159 @@
+name: ZZ - POC - Test Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      matrix_json:
+        description: 'JSON string defining the dynamic matrices for all jobs'
+        required: true
+        type: string
+      checkout_ref:
+        description: 'Commit SHA to check out. This is the commit where the repo will be checked out.'
+        required: true
+        type: string
+      source_sha:
+        description: 'Source SHA to use for the check run'
+        required: true
+        type: string
+      name:
+        required: true
+        type: string
+
+jobs:
+  create_check_run:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      check_run_id: ${{ steps.create_check.outputs.result }}
+    steps:
+      - name: Get GitHub token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.test-worker-poc
+
+      - name: Create Check Run
+        id: create_check
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ steps.octo-sts.outputs.token }}
+          script: |
+            const response = await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Test Worker POC - ${{ inputs.name }}',
+              head_sha: '${{ inputs.source_sha }}',
+              status: 'in_progress',
+              details_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
+              output: {
+                title: 'Test Worker POC Running - ${{ inputs.name }}',
+                summary: 'The test worker POC workflow is currently running for ${{ inputs.name }}.'
+              }
+            });
+            return response.data.id;
+
+  setup:
+    needs: create_check_run
+    runs-on: ubuntu-latest
+    outputs:
+      work_matrix: ${{ steps.set_matrix.outputs.work_matrix }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ inputs.checkout_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+
+      - name: Parse matrix and set matrix output
+        id: set_matrix
+        run: |
+          COMBINED_MATRIX=$(python .github/workflows/scripts/explode-matrix.py '${{ inputs.matrix_json }}')
+
+          if [ $? -ne 0 ]; then
+            echo "::error::Python script failed to generate matrix."
+            exit 1
+          fi
+
+          echo "work_matrix=$COMBINED_MATRIX" >> $GITHUB_OUTPUT
+
+          echo "Debug: Combined Matrix: $COMBINED_MATRIX"
+
+  run_work:
+    needs: setup
+    runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.work_matrix) }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ inputs.checkout_ref }}
+
+      - name: Run Generic Task
+        run: |
+          echo "Running generic logic for job: ${{ matrix.name }}"
+          echo "Platform: ${{ matrix.platform }}"
+          echo "Runner: ${{ matrix.runner }}"
+          echo "Target: ${{ matrix.target }}"
+          echo "Git SHA: $(git rev-parse HEAD)"
+
+  complete_check_run:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [create_check_run, run_work]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Get GitHub token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.test-worker-poc
+
+      - name: Complete Check Run
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ steps.octo-sts.outputs.token }}
+          script: |
+            const check_run_id = ${{ needs.create_check_run.outputs.check_run_id }};
+            const conclusion = '${{ needs.run_work.result }}';
+
+            // Map actions conclusion to check run conclusion
+            // https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28#update-a-check-run
+            let checkConclusion = conclusion;
+            if (conclusion === 'skipped') {
+              checkConclusion = 'neutral';
+            } else if (conclusion === 'cancelled') {
+              checkConclusion = 'cancelled';
+            } else if (conclusion === 'failure') {
+              checkConclusion = 'failure';
+            } else if (conclusion === 'success') {
+              checkConclusion = 'success';
+            }
+
+            await github.rest.checks.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              check_run_id: check_run_id,
+              status: 'completed',
+              conclusion: checkConclusion,
+              details_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
+              output: {
+                title: 'Test Worker POC Completed - ${{ inputs.name }}',
+                summary: `The workflow completed with status: ${conclusion} for ${{ inputs.name }}.`
+              }
+            });

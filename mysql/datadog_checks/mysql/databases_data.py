@@ -54,6 +54,7 @@ class SubmitData:
         self._total_columns_sent = 0
         self._columns_count = 0
         self.db_info.clear()
+        self.db_to_tables.clear()
         self.any_tables_found = False
 
     def store_db_infos(self, db_infos):
@@ -183,7 +184,7 @@ class DatabasesData:
         self._data_submitter.submit()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_databases_data(self, tags):
+    def collect_databases_data(self, tags):
         """
         Collects database information and schemas and submits them to the agent's queue as dictionaries.
 
@@ -247,22 +248,25 @@ class DatabasesData:
                             - data_length (int): The data length of the partition in bytes. If partition has
                                                  subpartitions, this is the sum of all subpartitions data_length.
         """
-        self._data_submitter.reset()
+        self._data_submitter.reset()  # Ensure we start fresh
         self._tags = tags
-        with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            self._data_submitter.set_base_event_data(
-                self._check.reported_hostname,
-                self._check.database_identifier,
-                self._tags,
-                self._check._config.cloud_metadata,
-                self._check.version.version,
-                self._check.version.flavor,
-            )
-            db_infos = self._query_db_information(cursor)
-            self._data_submitter.store_db_infos(db_infos)
-            self._fetch_for_databases(db_infos, cursor)
-            self._data_submitter.submit()
-            self._log.debug("Finished collect_schemas_data")
+        self._data_submitter.set_base_event_data(
+            self._check.reported_hostname,
+            self._check.database_identifier,
+            self._tags,
+            self._check._config.cloud_metadata,
+            self._check.version.version,
+            self._check.version.flavor,
+        )
+        try:
+            with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+                db_infos = self._query_db_information(cursor)
+                self._data_submitter.store_db_infos(db_infos)
+                self._fetch_for_databases(db_infos, cursor)
+                self._data_submitter.submit()
+        finally:
+            self._data_submitter.reset()  # Ensure we reset in case of errors
+        self._log.debug("Finished collect_databases_data")
 
     def _fetch_for_databases(self, db_infos, cursor):
         start_time = time.time()

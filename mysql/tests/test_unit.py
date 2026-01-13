@@ -13,7 +13,7 @@ import pytest
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
-from datadog_checks.mysql.version_utils import get_version
+from datadog_checks.mysql.version_utils import parse_version
 
 from . import common
 from .utils import deep_compare
@@ -116,31 +116,73 @@ def test__get_server_pid():
             assert mysql_check.log.exception.call_count == 0
 
 
-def test_parse_get_version():
-    class MockCursor:
-        version = (b'5.5.12-log',)
+@pytest.mark.parametrize(
+    'raw_version, version_comment, expected_version, expected_flavor, expected_build',
+    [
+        # MySQL versions
+        ('5.5.12-log', None, '5.5.12', 'MySQL', 'log'),
+        ('5.7.30-standard', None, '5.7.30', 'MySQL', 'standard'),
+        ('8.0.25-debug', None, '8.0.25', 'MySQL', 'debug'),
+        ('8.0.33-valgrind', None, '8.0.33', 'MySQL', 'valgrind'),
+        ('8.0.35-embedded', None, '8.0.35', 'MySQL', 'embedded'),
+        ('5.6.51', None, '5.6.51', 'MySQL', 'unspecified'),
+        ('8.0.35', None, '8.0.35', 'MySQL', 'unspecified'),
+        # MariaDB versions
+        ('10.3.34-MariaDB', None, '10.3.34', 'MariaDB', 'unspecified'),
+        ('10.4.24-MariaDB-log', None, '10.4.24', 'MariaDB', 'log'),
+        ('11.0.2-MariaDB', None, '11.0.2', 'MariaDB', 'unspecified'),
+        # Percona versions
+        ('5.7.39-42', 'Percona Server (GPL), Release 42, Revision 8b0a379', '5.7.39', 'Percona', 'unspecified'),
+        ('8.4.5-5', 'Percona Server (GPL), Release 5, Revision 3d3abca6', '8.4.5', 'Percona', 'unspecified'),
+        ('5.7.40-43-standard', 'Percona Server (GPL), Release 43, Revision 1a2b3c4', '5.7.40', 'Percona', 'standard'),
+    ],
+)
+def test_parse_version(raw_version, version_comment, expected_version, expected_flavor, expected_build):
+    """Test parsing of MySQL, MariaDB, and Percona versions."""
+    result = parse_version(raw_version, version_comment)
 
-        def execute(self, command):
-            pass
+    assert result.version == expected_version
+    assert result.flavor == expected_flavor
+    assert result.build == expected_build
 
-        def close(self):
-            return MockCursor()
 
-        def fetchone(self):
-            return self.version
+@pytest.mark.parametrize(
+    'version, compat_version, expected_compatible',
+    [
+        # Basic version compatibility scenarios
+        ('5.5.12', (5, 4, 0), True),  # older major.minor
+        ('5.5.12', (5, 5, 15), False),  # newer patch
+        ('5.5.12', (5, 6, 0), False),  # newer minor
+        ('5.5.12', (8, 0, 0), False),  # newer major
+        ('5.7.30', (5, 6, 0), True),  # older minor
+        ('5.7.30', (5, 7, 35), False),  # newer patch
+        ('5.7.30', (8, 0, 0), False),  # newer major
+        ('8.0.25', (5, 7, 0), True),  # older major
+        ('8.0.25', (8, 0, 30), False),  # newer patch
+        ('8.0.25', (8, 1, 0), False),  # newer minor
+        # MariaDB version compatibility
+        ('10.3.34', (10, 3, 30), True),  # older patch
+        ('10.3.34', (10, 3, 40), False),  # newer patch
+        ('10.3.34', (10, 4, 0), False),  # newer minor
+        # Edge cases - versions with letters in patch level
+        ('5.0.51a', (5, 0, 50), True),  # patchlevel extracted as 51
+        ('5.0.51a', (5, 0, 55), False),  # patchlevel extracted as 51
+        ('5.7.30b', (5, 7, 25), True),  # patchlevel extracted as 30
+        ('5.7.30b', (5, 7, 35), False),  # patchlevel extracted as 30
+    ],
+)
+def test_version_compatible(version, compat_version, expected_compatible):
+    """Test version compatibility checks - flavor and build don't affect compatibility."""
+    from datadog_checks.mysql.version_utils import MySQLVersion
 
-    class MockDatabase:
-        def cursor(self):
-            return MockCursor()
+    # Use a single flavor/build since they don't affect version compatibility
+    mysql_version = MySQLVersion(version, 'MySQL', 'unspecified')
+    actual_compatible = mysql_version.version_compatible(compat_version)
 
-    mocked_db = MockDatabase()
-    for mocked_db.version in [(b'5.5.12-log',), ('5.5.12-log',)]:
-        v = get_version(mocked_db)
-        assert v.version == '5.5.12'
-        assert v.flavor == 'MySQL'
-        assert v.build == 'log'
-        assert v.version_compatible(compat_version=(5, 4, 3))
-        assert not v.version_compatible(compat_version=(8, 0, 43))
+    assert actual_compatible == expected_compatible, (
+        f"Version {mysql_version.version} compatibility with {compat_version} "
+        f"expected {expected_compatible}, got {actual_compatible}"
+    )
 
 
 @pytest.mark.parametrize(
@@ -198,7 +240,7 @@ def test_replication_check_status(
 ):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.service_check_tags = ['foo:bar']
-    mysql_check._binlog_enabled = True  # Set binlog enabled to True for the test
+    mysql_check.global_variables._variables = {'log_bin': 'ON'}  # Set binlog enabled to True for the test
     mocked_results = {
         'Slaves_connected': slaves_connected,
     }
@@ -237,65 +279,6 @@ def test_replication_check_status(
         expected_service_check_len += 1
 
     assert len(aggregator.service_checks('mysql.replication.slave_running')) == expected_service_check_len
-
-
-def test__get_is_aurora():
-    def new_check():
-        return MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-
-    class MockCursor:
-        def __init__(self, rows, side_effect=None):
-            self.rows = rows
-            self.side_effect = side_effect
-
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def execute(self, command):
-            if self.side_effect:
-                raise self.side_effect
-
-        def close(self):
-            return MockCursor([])
-
-        def fetchall(self):
-            return self.rows
-
-    class MockDatabase:
-        def __init__(self, cursor):
-            self.cursor = cursor
-
-        def cursor(self):
-            return self.cursor
-
-    check = new_check()
-    assert True is check._get_is_aurora(MockDatabase(MockCursor(rows=[('1.72.1',)])))
-    assert True is check._get_is_aurora(None)
-    assert True is check._is_aurora
-
-    check = new_check()
-    assert True is check._get_is_aurora(
-        MockDatabase(
-            MockCursor(
-                rows=[
-                    ('1.72.1',),
-                    ('1.72.1',),
-                ]
-            )
-        )
-    )
-    assert True is check._get_is_aurora(None)
-    assert True is check._is_aurora
-
-    check = new_check()
-    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=[])))
-    assert False is check._get_is_aurora(None)
-    assert False is check._is_aurora
-
-    check = new_check()
-    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=None, side_effect=ValueError())))
-    assert None is check._is_aurora
-    assert False is check._get_is_aurora(None)
 
 
 @pytest.mark.parametrize(
@@ -530,7 +513,7 @@ def test__eliminate_duplicate_rows():
             True,
             False,
             False,
-            {'Source_UUID': 'source-uuid-123', 'Master_UUID': None},
+            [{'Source_UUID': 'source-uuid-123', 'Master_UUID': None}],
             False,
             'server-uuid-456',
             'source-uuid-123',
@@ -541,7 +524,7 @@ def test__eliminate_duplicate_rows():
             True,
             False,
             False,
-            {'Master_UUID': 'master-uuid-789'},
+            [{'Master_UUID': 'master-uuid-789'}],
             False,
             'server-uuid-456',
             'master-uuid-789',
@@ -552,18 +535,18 @@ def test__eliminate_duplicate_rows():
             True,
             False,
             False,
-            {'Source_UUID': None, 'Master_UUID': 'master-uuid-789'},
+            [{'Source_UUID': None, 'Master_UUID': 'master-uuid-789'}],
             False,
             'server-uuid-456',
             None,
             None,
         ),
         # Test case 7: Primary with binlog enabled
-        (True, False, False, {}, True, 'server-uuid-456', 'server-uuid-456', 'primary'),
+        (True, False, False, [], True, 'server-uuid-456', 'server-uuid-456', 'primary'),
         # Test case 8: No replica status and binlog disabled
         (True, False, False, None, False, 'server-uuid-456', None, None),
         # Test case 9: Empty replica status dict
-        (True, False, False, {}, False, 'server-uuid-456', None, None),
+        (True, False, False, [], False, 'server-uuid-456', None, None),
     ],
 )
 def test_set_cluster_tags(
@@ -583,7 +566,7 @@ def test_set_cluster_tags(
     mysql_check._config.replication_enabled = replication_enabled
     mysql_check.is_mariadb = is_mariadb
     mysql_check._group_replication_active = group_replication_active
-    mysql_check._binlog_enabled = binlog_enabled
+    mysql_check.global_variables._variables = {'log_bin': 'ON' if binlog_enabled else 'OFF'}
     mysql_check.server_uuid = server_uuid
 
     # Mock the _get_replica_replication_status method

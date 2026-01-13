@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e334d30a-a7df-4c06-9d1f-d8b6663df38a",
   "app_id": "exchange-server",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -38,6 +39,12 @@
         "check": "exchange.processor.cpu_user",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "Microsoft.Exchange.Directory.TopologyService",
+        "Microsoft.Exchange.ServiceHost",
+        "hostcontrollerservice",
+        "Microsoft.Exchange.RpcClientAccess.Service"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },

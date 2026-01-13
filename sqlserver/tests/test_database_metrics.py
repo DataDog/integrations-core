@@ -14,6 +14,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_SERVERNAME,
+    STATIC_INFO_YEAR,
 )
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
@@ -42,14 +43,16 @@ from .common import (
     CHECK_NAME,
     SQLSERVER_ENGINE_EDITION,
     SQLSERVER_MAJOR_VERSION,
+    SQLSERVER_YEAR,
 )
 
 INCR_FRACTION_METRICS = {'sqlserver.latches.latch_wait_time'}
 AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test-1']
 
 STATIC_SERVER_INFO = {
-    STATIC_INFO_MAJOR_VERSION: SQLSERVER_MAJOR_VERSION,
+    STATIC_INFO_YEAR: SQLSERVER_YEAR,
     STATIC_INFO_ENGINE_EDITION: SQLSERVER_ENGINE_EDITION,
+    STATIC_INFO_MAJOR_VERSION: SQLSERVER_MAJOR_VERSION,
 }
 
 
@@ -63,6 +66,7 @@ def test_sqlserver_file_stats_metrics(
     instance_docker_metrics,
     include_file_stats_metrics,
 ):
+    print("STATIC_SERVER_INFO", STATIC_SERVER_INFO)
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
         'file_stats_metrics': {'enabled': include_file_stats_metrics},
@@ -102,7 +106,7 @@ def test_sqlserver_file_stats_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             db, state, logical_name, file_location, *metric_values = result
@@ -188,7 +192,7 @@ def test_sqlserver_ao_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_ao_availability_groups:
             (
@@ -309,7 +313,7 @@ def test_sqlserver_availability_groups_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             ag, availability_group_name, synchronization_health_desc, *metric_values = result
@@ -405,7 +409,7 @@ def test_sqlserver_database_replication_stats_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             ag, availability_group_name, replica_server_name, synchronization_state_desc, *metric_values = result
@@ -548,7 +552,7 @@ def test_sqlserver_availability_replicas_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             (
@@ -618,7 +622,7 @@ def test_sqlserver_fci_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             node_name, status, failover_cluster, *metric_values = result
@@ -671,7 +675,7 @@ def test_sqlserver_primary_log_shipping_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             primary_id, primary_server, primary_db, *metric_values = result
@@ -736,7 +740,7 @@ def test_sqlserver_secondary_log_shipping_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             secondary_server, secondary_db, secondary_id, primary_server, primary_db, *metric_values = result
@@ -788,7 +792,7 @@ def test_sqlserver_server_state_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             metrics = zip(server_state_metrics.metric_names()[0], result)
@@ -837,7 +841,7 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             database_id, *metric_values = result
@@ -924,7 +928,7 @@ def test_sqlserver_index_usage_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             for row in result:
@@ -1051,7 +1055,7 @@ def test_sqlserver_db_fragmentation_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             for row in result:
@@ -1139,7 +1143,7 @@ def test_sqlserver_os_schedulers_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             scheduler_id, parent_node_id, *metric_values = result
@@ -1209,7 +1213,7 @@ def test_sqlserver_os_tasks_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             scheduler_id, *metric_values = result
@@ -1280,7 +1284,7 @@ def test_sqlserver_master_files_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             db, database, file_id, file_type, file_location, database_files_state_desc, size, state = result
@@ -1361,7 +1365,7 @@ def test_sqlserver_database_files_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for db, result in zip(AUTODISCOVERY_DBS, mocked_results):
             for row in result:
@@ -1429,7 +1433,7 @@ def test_sqlserver_table_size_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for mock_row in mocked_results:
             table_name, schema, database, *metric_values = mock_row
@@ -1460,11 +1464,11 @@ def test_sqlserver_database_stats_metrics(
     }
 
     mocked_results = [
-        ('master', 'master', 'ONLINE', 'SIMPLE', 0, False, False, False),
-        ('tempdb', 'tempdb', 'ONLINE', 'SIMPLE', 0, False, False, False),
-        ('model', 'model', 'ONLINE', 'FULL', 0, False, False, False),
-        ('msdb', 'msdb', 'ONLINE', 'SIMPLE', 0, False, False, False),
-        ('datadog_test', 'datadog_test', 'ONLINE', 'FULL', 0, False, False, False),
+        ('master', 'master', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('tempdb', 'tempdb', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('model', 'model', 'ONLINE', 'FULL', 0, 0, False, False, False),
+        ('msdb', 'msdb', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('datadog_test', 'datadog_test', 'ONLINE', 'FULL', 0, 0, False, False, False),
     ]
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -1490,10 +1494,16 @@ def test_sqlserver_database_stats_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
-            db, database, database_state_desc, database_recovery_model_desc, *metric_values = result
+            (
+                db,
+                database,
+                database_state_desc,
+                database_recovery_model_desc,
+                *metric_values,
+            ) = result
             metrics = zip(database_stats_metrics.metric_names()[0], metric_values)
             expected_tags = [
                 f'db:{db}',
@@ -1559,7 +1569,7 @@ def test_sqlserver_database_backup_metrics(
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
             db, database, *metric_values = result
@@ -1603,7 +1613,7 @@ def test_sqlserver_xe_session_metrics(
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
     expected_tags.append('session_name:datadog')
     aggregator.assert_metric("sqlserver.xe.session_status", value=1, tags=expected_tags)

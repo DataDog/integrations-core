@@ -17,6 +17,10 @@ Key Benefits:
 - **Real-time insights** into application-layer attacks with traces and logs in one unified view
 - **Edge enforcement** against OWASP API threats, credential stuffing, injection attacks, and more
 
+To learn more about securing your APIs via Envoy, see the [Datadog blog post][33].
+
+**Minimum Agent version:** 6.1.0
+
 ## Setup
 
 ### Installation (Metrics)
@@ -259,3 +263,4 @@ Need help? Contact [Datadog support][16].
 [30]: https://docs.datadoghq.com/security/application_security/?source=envoy-tile-overview
 [31]: https://docs.datadoghq.com/security/application_security/setup/envoy/?source=envoy-tile-setup
 [32]: https://docs.datadoghq.com/security/application_security/setup/istio/?source=envoy-tile-setup
+[33]: https://www.datadoghq.com/blog/app-api-protection-envoy-istio-nginx-haproxy/

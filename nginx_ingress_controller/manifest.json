@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f84e3ebf-848b-4894-a5b0-9abbd21d4189",
   "app_id": "nginx-ingress-controller",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

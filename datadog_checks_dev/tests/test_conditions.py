@@ -94,6 +94,20 @@ class TestCheckDockerLogs:
         finally:
             run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
 
+    def test_matches_service(self):
+        compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
+        check_logging_service = CheckDockerLogs(compose_file, 'I am a logging service', service='logging-service')
+        check_vault = CheckDockerLogs(compose_file, 'Vault server started', service='logging-service')
+        try:
+            run_command(['docker', 'compose', '-f', compose_file, 'up', '-d'], check=True)
+            check_logging_service()
+
+            # Only the logs for the specified service should be matched
+            with pytest.raises(RetryError):
+                check_vault()
+        finally:
+            run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
+
 
 class TestCheckEndpoints:
     def test_fail(self):

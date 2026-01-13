@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
+
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
@@ -26,6 +28,7 @@ class MySQLConfig(object):
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
+        self.disable_innodb_metrics = is_affirmative(self.options.get('disable_innodb_metrics', False))
         self.replication_channel = self.options.get('replication_channel')
         if self.replication_channel:
             self.tags.append("channel:{0}".format(self.replication_channel))
@@ -45,6 +48,8 @@ class MySQLConfig(object):
         self.full_statement_text_samples_per_hour_per_query = instance.get(
             'full_statement_text_samples_per_hour_per_query', 1
         )
+        self.statement_rows_cache_max_size = instance.get('statement_rows_cache_max_size', 10000)
+        self.statement_rows_cache_ttl = instance.get('statement_rows_cache_ttl', 3600)
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.settings_config = instance.get('collect_settings', {}) or {}
@@ -161,3 +166,11 @@ class MySQLConfig(object):
             return init_config_propagate_agent_tags
         # if neither the instance nor the init_config has set the value, return False
         return False
+
+
+def sanitize(config: dict) -> dict:
+    sanitized = copy.deepcopy(config)
+    sanitized['pass'] = '***' if sanitized.get('pass') else None
+    sanitized['password'] = '***' if sanitized.get('password') else None
+
+    return sanitized

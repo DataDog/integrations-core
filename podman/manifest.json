@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ecc06845-18ac-448e-b352-1bbf31fdfcc3",
   "app_id": "podman",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

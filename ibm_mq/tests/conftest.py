@@ -56,6 +56,11 @@ def instance_collect_all():
 
 
 @pytest.fixture
+def instance_collect_all_via_names():
+    return copy.deepcopy(common.INSTANCE_COLLECT_ALL_VIA_NAMES)
+
+
+@pytest.fixture
 def instance_queue_regex_tag():
     return copy.deepcopy(common.INSTANCE_QUEUE_REGEX_TAG)
 

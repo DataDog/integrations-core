@@ -1,0 +1,66 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "1dc65430-866a-4400-bfbb-bbc6fdf7271b",
+  "app_id": "guarddog",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into GuardDog logs.",
+    "title": "GuardDog",
+    "media": [
+      {
+        "caption": "GuardDog Rules Overview",
+        "image_url": "images/guarddog_rules_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "GuardDog Scan & Ecosystem Overview - 1",
+        "image_url": "images/guarddog_scan_ecosystem_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "GuardDog Scan & Ecosystem Overview - 2",
+        "image_url": "images/guarddog_scan_ecosystem_overview_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Developer Tools",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 57376922,
+      "source_type_name": "GuardDog",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "GuardDog Scan & Ecosystem Overview": "assets/dashboards/guarddog_scan_and_ecosystem_overview.json",
+      "GuardDog Rules Overview": "assets/dashboards/guarddog_rules_overview.json"
+    },
+    "logs": {
+      "source": "guarddog"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

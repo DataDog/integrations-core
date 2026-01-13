@@ -4,6 +4,24 @@ on:
   push:
     branches:
     - master
+    paths:
+      # List of files/paths that should trigger the run. The intention is to avoid running all tests if the commit only includes changes on assets or README
+    - '*/datadog_checks/**'
+    - '*/tests/**'
+    - 'ddev'
+    - 'datadog_check_base'
+    - 'datadog_checks_dev'
+    # Contains overrides for testing
+    - '.ddev'
+    # Want to ensure any change in workflows is validated
+    - '.github/workflows/**'
+    # Test matrices and dependencies
+    - '*/hatch.toml'
+    - '*/pyproject.toml'
+    # Some integrations might use this file to validate metrics emission
+    - '*/metadata.csv'
+    # In case some linting formatting config has changed
+    - 'pyproject.toml'
 
 jobs:
   cache:
@@ -32,7 +50,6 @@ jobs:
        contents: read
 
   publish-test-results:
-
     needs:
     - test
 

@@ -17,7 +17,7 @@ def mock_timeline():
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
         patch("ddev.cli.size.timeline.GitRepo.sparse_checkout_commit"),
-        patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
         patch("ddev.cli.size.timeline.os.walk", return_value=[(Path("/tmp") / "fake_repo" / "int", [], ["file1.py"])]),
         patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
@@ -124,7 +124,7 @@ def mock_timeline_dependencies():
         patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
         patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
         patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
         patch(
             "ddev.cli.size.timeline.get_dependencies",
             return_value={

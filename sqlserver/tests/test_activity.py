@@ -25,8 +25,9 @@ from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_he
 from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
 )
+from datadog_checks.sqlserver.utils import construct_use_statement
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_YEAR
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -136,7 +137,7 @@ def test_collect_load_activity(
 
     def run_test_query(c, q):
         cur = c.cursor()
-        cur.execute("USE [{}]".format(database))
+        cur.execute(construct_use_statement(database))
         # 0xFF can't be decoded to Unicode, which makes it good test data,
         # since Unicode is a default format
         cur.execute("SET CONTEXT_INFO 0xff")
@@ -190,7 +191,9 @@ def test_collect_load_activity(
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
+    expected_instance_tags.add(
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower())
+    )
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -271,7 +274,7 @@ def test_collect_load_activity(
 
 
 @pytest.mark.flaky
-@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_YEAR == 2019, reason='Test flakes on this set up')
 @pytest.mark.skipif(running_on_windows_ci(), reason="Test disabled due to failure impacting master pipeline")
 def test_activity_nested_blocking_transactions(
     aggregator,
@@ -316,7 +319,7 @@ def test_activity_nested_blocking_transactions(
 
     def run_queries(conn, queries):
         cur = conn.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute(construct_use_statement("datadog_test-1"))
         cur.execute("BEGIN TRANSACTION")
         for q in queries:
             try:
@@ -453,7 +456,7 @@ def test_activity_metadata(
 
     def _run_test_query(conn, q):
         cur = conn.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute(construct_use_statement("datadog_test-1"))
         cur.execute(q)
 
     def _obfuscate_sql(sql_query, options=None):
@@ -832,7 +835,7 @@ def _expected_dbm_instance_tags(check):
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
 

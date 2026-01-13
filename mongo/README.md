@@ -15,6 +15,8 @@ Enable [Database Monitoring][28] (DBM) for enhanced insights into query performa
 
 **Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and Amazon DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 <div class="alert alert-info">This page describes the standard MongoDB Agent integration. If you are looking for the Database Monitoring product for MongoDB, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -165,8 +167,6 @@ Then create the same user from a mongos proxy. This action creates the local use
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
-
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
@@ -218,7 +218,7 @@ To configure this check for an Agent running on a host:
 
 ##### Database Autodiscovery
 
-Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance. 
+Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance.
 Please note that database autodiscovery is disabled by default. Read access to the autodiscovered databases is required to collect metrics from them.
 To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
 

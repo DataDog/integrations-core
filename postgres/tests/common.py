@@ -27,6 +27,7 @@ from datadog_checks.postgres.util import (
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
+    STAT_WAL_METRICS_LT_18,
     SUBSCRIPTION_STATE_METRICS,
     WAL_FILE_METRICS,
 )
@@ -243,7 +244,7 @@ def check_db_count(aggregator, expected_tags, count=1):
         count=count,
         tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public'],
     )
-    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=15, count=1)
 
 
 def check_connection_metrics(aggregator, expected_tags, count=1):
@@ -454,9 +455,12 @@ def check_file_wal_metrics(aggregator, expected_tags, count=1):
 def check_stat_wal_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14.0:
         return
-
-    for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
-        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+    if float(POSTGRES_VERSION) < 18.0:
+        for metric_name in _iterate_metric_name(STAT_WAL_METRICS_LT_18):
+            aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+    else:
+        for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
+            aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=False):

@@ -16,8 +16,6 @@ Follow the instructions below to configure this integration for Klaviyo Marketin
 Within your Klaviyo account, first add the Datadog integration. The integration allows Datadog
 to see Klaviyo events and metrics via the Klaviyo API.
 
-TODO: Insert screenshot of Datadog Integration Tile within Klaviyo
-
 1. Log in to your [Klaviyo account][2].
 2. In the left-side panel, navigate to **Integrations**.
 3. Click **Add integrations**.

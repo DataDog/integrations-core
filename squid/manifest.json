@@ -2,6 +2,7 @@
     "manifest_version": "2.0.0",
     "app_uuid": "de18c581-69ee-48cf-ba23-7794bfb7a4bd",
     "app_id": "squid",
+    "owner": "agent-integrations",
     "display_on_public_website": true,
     "tile": {
         "overview": "README.md#Overview",
@@ -12,8 +13,13 @@
         "title": "Squid",
         "media": [
             {
-                "caption": "Squid",
-                "image_url": "images/squid.png",
+                "caption": "Squid - 1",
+                "image_url": "images/squid_1.png",
+                "media_type": "image"
+            },
+            {
+                "caption": "Squid - 2",
+                "image_url": "images/squid_2.png",
                 "media_type": "image"
             }
         ],
