@@ -416,7 +416,7 @@
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
-                          "unit_name": "second"
+                          "unit_name": "millisecond"
                         }
                       },
                       "formula": "top(query1 / 1000, 10, 'mean', 'desc')"
