@@ -819,7 +819,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `msg.exe` to `ocsf.actor.process.pat`
+            - name: Map `msg.exe` to `ocsf.actor.process.path`
               sources:
                 - msg.exe
               sourceType: attribute
@@ -963,7 +963,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+            - name: Map `type` to `ocsf.metadata.event_code`
               sources:
                 - type
               sourceType: attribute
@@ -1448,7 +1448,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+            - name: Map `privileges` to `ocsf.privileges`
               sources:
                 - privileges
               sourceType: attribute
