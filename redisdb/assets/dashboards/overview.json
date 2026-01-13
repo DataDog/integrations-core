@@ -1201,7 +1201,6 @@
             "definition": {
               "title": "Rejected connections",
               "show_legend": false,
-              "legend_size": "0",
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
@@ -1209,7 +1208,8 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Rejected connections"
+                      "alias": "Rejected connections",
+                      "formula": "query1"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1314,7 +1314,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1361,7 +1360,6 @@
               "title": "Current total",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -1470,7 +1468,6 @@
               "title": "Keys with expiration",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -1513,19 +1510,20 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
                       "alias": "Total key length",
-                      "formula": "query1"
+                      "formula": "top(query1, 10, 'mean', 'desc')"
                     }
                   ],
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:redis.key.length{$host,$key,$scope}",
+                      "query": "sum:redis.key.length{$host,$key,$scope} by {key}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
