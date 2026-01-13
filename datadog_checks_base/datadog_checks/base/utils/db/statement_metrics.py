@@ -65,7 +65,7 @@ class StatementMetrics:
             if prev is None:
                 continue
 
-            metric_columns = metrics & set(row.keys())
+            metric_columns = metrics & set(row.keys()) & set(prev.keys())
 
             # Take the diff of all metric values between the current row and the previous run's row.
             # There are a couple of edge cases to be aware of:
