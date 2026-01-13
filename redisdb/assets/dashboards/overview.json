@@ -1209,7 +1209,6 @@
                 {
                   "formulas": [
                     {
-                      "formula": "diff(query1)",
                       "alias": "Rejected connections"
                     }
                   ],
