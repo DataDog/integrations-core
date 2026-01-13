@@ -24,22 +24,25 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-# Query to fetch aggregated metrics from system.query_log
-# This is the ClickHouse equivalent of Postgres pg_stat_statements
+# Persistent cache key for storing the last collection checkpoint
+# This enables checkpoint-based collection that survives agent restarts
+CHECKPOINT_CACHE_KEY = "query_metrics_last_checkpoint_microseconds"
+
+# Query to fetch aggregated metrics from system.query_log using checkpoint-based collection
 #
 # Key design decisions:
-# - Queries the LOCAL system.query_log table on this node only
+# - Uses microsecond precision (event_time_microseconds) to avoid missing queries
+# - Uses exclusive lower bound (>) and inclusive upper bound (<=) to prevent double-counting
+# - Queries only the LOCAL system.query_log table on this node
 # - Uses event_date predicate for partition pruning optimization
 # - Uses is_initial_query=1 to only count queries once (not sub-queries)
 # - Uses type != 'QueryStart' to get one record per completed query
 # - Uses normalizeQuery() to get query text with wildcards representing the entire set
 # - Uses quantiles() to calculate p50, p90, p95, p99 simultaneously
-# - Removed ORDER BY and LIMIT to avoid losing data at high QPS
+# - Returns max(event_time_microseconds) to track the latest query timestamp in each batch
 #
-# Note: We collect count() and sum() metrics which are treated as cumulative counters
-# and then compute derivatives. Quantile metrics (p50, p90, p95, p99) are point-in-time
-# aggregates and are NOT included in derivative calculation.
-# mean_time is computed from total_time/count after derivatives.
+# Note: With checkpoint-based collection, we no longer need derivative calculation.
+# Each collection window is exclusive, so metrics represent the actual values for that window.
 
 # List of internal Cloud users to exclude from query metrics
 # These are Datadog Cloud internal service accounts
@@ -68,20 +71,27 @@ SELECT
     sum(result_rows) as total_result_rows,
     sum(result_bytes) as total_result_bytes,
     sum(memory_usage) as total_memory_usage,
-    max(memory_usage) as peak_memory_usage
+    max(memory_usage) as peak_memory_usage,
+    max(event_time_microseconds) as max_event_time_microseconds
 FROM system.query_log
-WHERE event_date >= toDate(now() - INTERVAL {collection_interval} SECOND)
-  AND event_time >= now() - INTERVAL {collection_interval} SECOND
-  AND type != 'QueryStart'
-  AND is_initial_query = 1
-  AND query NOT LIKE '%system.query_log%'
-  AND query NOT LIKE '%system.processes%'
-  AND query NOT LIKE '/* DDIGNORE */%'
-  AND query != ''
-  AND normalized_query_hash != 0
-  {internal_user_filter}
+WHERE
+    event_time_microseconds > fromUnixTimestamp64Micro({last_checkpoint_microseconds})
+    AND event_time_microseconds <= fromUnixTimestamp64Micro({current_checkpoint_microseconds})
+    AND event_date >= toDate(fromUnixTimestamp64Micro({last_checkpoint_microseconds}))
+    AND type != 'QueryStart'
+    AND is_initial_query = 1
+    AND query NOT LIKE '%system.query_log%'
+    AND query NOT LIKE '%system.processes%'
+    AND query NOT LIKE '/* DDIGNORE */%'
+    AND query != ''
+    AND normalized_query_hash != 0
+    {internal_user_filter}
 GROUP BY normalized_query_hash
 """
+
+# Query to get current timestamp from ClickHouse in microseconds
+# Using the database's clock avoids drift between agent and database time
+GET_CURRENT_TIME_QUERY = "SELECT toUnixTimestamp64Micro(now64(6))"
 
 
 def agent_check_getter(self):
@@ -97,7 +107,15 @@ def _row_key(row):
 
 
 class ClickhouseStatementMetrics(DBMAsyncJob):
-    """Collects telemetry for SQL statements from system.query_log"""
+    """
+    Collects telemetry for SQL statements from system.query_log using checkpoint-based collection.
+
+    Checkpoint-based collection ensures:
+    - No queries are missed due to collection delays
+    - No queries are double-counted
+    - Microsecond precision for high-throughput environments
+    - State survives agent restarts via persistent cache
+    """
 
     def __init__(self, check: ClickhouseCheck, config):
         collection_interval = float(getattr(config, 'collection_interval', 10))
@@ -120,6 +138,10 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
 
         # Create a separate client for this DBM job to avoid concurrent query errors
         self._db_client = None
+
+        # Track the current checkpoint for this collection cycle
+        # This is set during collection and saved only after successful submission
+        self._pending_checkpoint_microseconds = None
 
         # Obfuscator options
         obfuscate_options = {
@@ -152,6 +174,84 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             self._db_client = None
             raise e
 
+    def _get_current_checkpoint_from_db(self) -> int:
+        """
+        Get the current timestamp from ClickHouse in microseconds.
+        Using the database's clock avoids drift between agent and database time.
+
+        :return: Current timestamp in microseconds (Unix epoch)
+        """
+        rows = self._execute_query(GET_CURRENT_TIME_QUERY)
+        if rows and len(rows) > 0:
+            return int(rows[0][0])
+        # Fallback to agent time if query fails (should not happen)
+        return int(time.time() * 1_000_000)
+
+    def _read_checkpoint(self) -> int | None:
+        """
+        Read the last checkpoint from persistent cache.
+
+        :return: Last checkpoint in microseconds, or None if no checkpoint exists
+        """
+        checkpoint_str = self._check.read_persistent_cache(CHECKPOINT_CACHE_KEY)
+        if checkpoint_str:
+            try:
+                return int(checkpoint_str)
+            except (ValueError, TypeError):
+                self._log.warning("Invalid checkpoint value in cache: %s", checkpoint_str)
+        return None
+
+    def _save_checkpoint(self, checkpoint_microseconds: int):
+        """
+        Save checkpoint to persistent cache.
+        This should only be called after successful metrics submission.
+
+        :param checkpoint_microseconds: Checkpoint timestamp in microseconds
+        """
+        self._check.write_persistent_cache(CHECKPOINT_CACHE_KEY, str(checkpoint_microseconds))
+        self._log.debug("Saved checkpoint: %d", checkpoint_microseconds)
+
+    def _get_collection_window(self) -> tuple[int, int]:
+        """
+        Calculate the collection time window using checkpoint-based logic.
+
+        Returns:
+            tuple: (last_checkpoint_microseconds, current_checkpoint_microseconds)
+
+        Logic:
+        - First run: Use (current_time - collection_interval) as starting point
+        - Subsequent runs: Use last saved checkpoint as starting point
+        - Always use current database time as end point
+        """
+        # Get current time from ClickHouse (avoids clock drift)
+        current_checkpoint = self._get_current_checkpoint_from_db()
+
+        # Try to read last checkpoint from persistent cache
+        last_checkpoint = self._read_checkpoint()
+
+        if last_checkpoint is None:
+            # First run: Create initial lookback window
+            # Go back by collection_interval seconds to establish baseline
+            initial_lookback_microseconds = int(self._metrics_collection_interval * 1_000_000)
+            last_checkpoint = current_checkpoint - initial_lookback_microseconds
+            self._log.info(
+                "First collection run. Creating initial window: last=%d, current=%d (lookback=%ds)",
+                last_checkpoint,
+                current_checkpoint,
+                self._metrics_collection_interval,
+            )
+        else:
+            # Calculate actual window size for logging
+            window_seconds = (current_checkpoint - last_checkpoint) / 1_000_000
+            self._log.debug(
+                "Using checkpoint-based window: last=%d, current=%d (window=%.2fs)",
+                last_checkpoint,
+                current_checkpoint,
+                window_seconds,
+            )
+
+        return last_checkpoint, current_checkpoint
+
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
@@ -164,10 +264,20 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
         Collect per-statement metrics from system.query_log and emit as:
         1. FQT events (dbm_type: fqt) - for query text catalog
         2. Query metrics payload - for time-series metrics
+
+        Uses checkpoint-based collection to ensure no queries are missed or double-counted.
+        Checkpoint is only saved after successful submission to handle errors gracefully.
         """
         try:
+            # Reset pending checkpoint at the start of each collection
+            self._pending_checkpoint_microseconds = None
+
             rows = self._collect_metrics_rows()
             if not rows:
+                # Even if no rows, save the checkpoint to advance the window
+                # This prevents re-querying the same empty window repeatedly
+                if self._pending_checkpoint_microseconds:
+                    self._save_checkpoint(self._pending_checkpoint_microseconds)
                 return
 
             # Emit FQT (Full Query Text) events
@@ -199,8 +309,18 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                 )
                 self._check.database_monitoring_query_metrics(payload)
 
+            # Only save checkpoint after ALL payloads are successfully submitted
+            # This ensures we don't lose data if submission fails partway through
+            if self._pending_checkpoint_microseconds:
+                self._save_checkpoint(self._pending_checkpoint_microseconds)
+                self._log.info(
+                    "Collection complete. Checkpoint saved: %d",
+                    self._pending_checkpoint_microseconds,
+                )
+
         except Exception:
             self._log.exception('Unable to collect statement metrics due to an error')
+            # Do NOT save checkpoint on error - this ensures we retry the same window
             return []
 
     def _get_clickhouse_version(self):
@@ -260,20 +380,39 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_query_log_statements(self):
         """
-        Load aggregated query metrics from the local system.query_log table.
-        This is analogous to Postgres loading from pg_stat_statements.
+        Load aggregated query metrics from the local system.query_log table
+        using checkpoint-based collection.
+
+        This is analogous to Postgres loading from pg_stat_statements, but uses
+        microsecond-precision timestamps to ensure no queries are missed.
 
         Queries only the local node's query_log - each ClickHouse node maintains
         its own query_log table with queries executed on that specific node.
         """
         try:
+            # Get the collection time window
+            last_checkpoint, current_checkpoint = self._get_collection_window()
+
+            # Store the current checkpoint for saving after successful submission
+            self._pending_checkpoint_microseconds = current_checkpoint
+
+            # Calculate window size for logging
+            window_seconds = (current_checkpoint - last_checkpoint) / 1_000_000
+
             query = STATEMENTS_QUERY.format(
-                collection_interval=int(self._metrics_collection_interval),
+                last_checkpoint_microseconds=last_checkpoint,
+                current_checkpoint_microseconds=current_checkpoint,
                 internal_user_filter=self._get_internal_user_filter(),
             )
             rows = self._execute_query(query)
 
-            self._log.debug("Loaded %s rows from local system.query_log", len(rows))
+            self._log.info(
+                "Loaded %d rows from system.query_log (window=%.2fs, last=%d, current=%d)",
+                len(rows),
+                window_seconds,
+                last_checkpoint,
+                current_checkpoint,
+            )
 
             # Convert to list of dicts
             result_rows = []
@@ -296,6 +435,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                     total_result_bytes,
                     total_memory_usage,
                     peak_memory_usage,
+                    max_event_time_microseconds,  # New field for checkpoint tracking
                 ) = row
 
                 # Parse quantiles array: [p50, p90, p95, p99]
@@ -303,6 +443,10 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                 p90_time = float(duration_quantiles[1]) if duration_quantiles and len(duration_quantiles) > 1 else 0.0
                 p95_time = float(duration_quantiles[2]) if duration_quantiles and len(duration_quantiles) > 2 else 0.0
                 p99_time = float(duration_quantiles[3]) if duration_quantiles and len(duration_quantiles) > 3 else 0.0
+
+                # Calculate mean_time directly since we're not using derivatives
+                # With checkpoint-based collection, count is the actual count for this window
+                mean_time = float(total_duration_ms) / execution_count if execution_count > 0 else 0.0
 
                 result_rows.append(
                     {
@@ -314,13 +458,13 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                         'tables': tables if tables else [],
                         'count': int(execution_count) if execution_count else 0,
                         'total_time': float(total_duration_ms) if total_duration_ms else 0.0,
-                        # Quantile metrics (p50, p90, p95, p99) - these are point-in-time aggregates
-                        # and are NOT included in derivative calculation
+                        # Mean time calculated directly (no derivative needed with checkpointing)
+                        'mean_time': mean_time,
+                        # Quantile metrics (p50, p90, p95, p99) - point-in-time aggregates for this window
                         'p50_time': p50_time,
                         'p90_time': p90_time,
                         'p95_time': p95_time,
                         'p99_time': p99_time,
-                        # Note: mean_time will be calculated after derivative calculation as total_time / count
                         'result_rows': int(total_result_rows) if total_result_rows else 0,
                         'read_rows': int(total_read_rows) if total_read_rows else 0,
                         'read_bytes': int(total_read_bytes) if total_read_bytes else 0,
@@ -347,7 +491,11 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
         """
-        Collect and normalize query metrics rows
+        Collect and normalize query metrics rows.
+
+        With checkpoint-based collection, we no longer need derivative calculation.
+        Each collection window is exclusive (> last_checkpoint AND <= current_checkpoint),
+        so the metrics represent the actual values for that specific time window.
         """
         rows = self._load_query_log_statements()
         if not rows:
@@ -359,42 +507,13 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
 
-        # Get available metric columns
-        # Note: We only include counter metrics (count, totals) in derivative calculation.
-        # Aggregated metrics like mean_time, min_time, max_time, p95_time are excluded
-        # because taking derivatives of averages/percentiles is mathematically incorrect.
-        available_columns = set(rows[0].keys())
-        metric_columns = available_columns & {
-            'count',
-            'total_time',
-            'result_rows',
-            'read_rows',
-            'read_bytes',
-            'written_rows',
-            'written_bytes',
-            'result_bytes',
-            'memory_usage',
-            'peak_memory_usage',
-        }
-
-        # Compute derivative rows (calculate deltas since last collection)
-        rows_before = len(rows)
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key, execution_indicators=['count'])
-        rows_after = len(rows)
-
-        # Calculate mean_time from derivative values (total_time / count)
-        # This follows the same pattern as Postgres, MySQL, and SQL Server
-        for row in rows:
-            if row.get('count', 0) > 0:
-                row['mean_time'] = row.get('total_time', 0.0) / row['count']
-            else:
-                row['mean_time'] = 0.0
+        # Note: With checkpoint-based collection, we skip derivative calculation.
+        # The exclusive time windows ensure each query is counted exactly once.
+        # Metrics are the actual totals for the collection window.
 
         self._log.info(
-            "Query metrics: loaded=%d rows, after_derivative=%d rows (filtered=%d)",
-            rows_before,
-            rows_after,
-            rows_before - rows_after,
+            "Query metrics: collected %d rows for current window",
+            len(rows),
         )
 
         self._check.gauge(
