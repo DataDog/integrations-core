@@ -23,7 +23,7 @@ def test_cluster_metrics(dd_run_check, aggregator, aws_instance):
 
     expected_tags = [
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
-        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_cluster_name:datadog-nutanix-dev',
         'prism_central:https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com',
     ]
 
@@ -39,7 +39,7 @@ def test_cluster_stats_metrics(dd_run_check, aggregator, aws_instance):
 
     expected_tags = [
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
-        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_cluster_name:datadog-nutanix-dev',
         'prism_central:https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com',
     ]
 
@@ -54,7 +54,7 @@ def test_host_metrics(dd_run_check, aggregator, aws_instance):
     expected_tags = [
         'ntnx_type:host',
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
-        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_host_name:10-0-0-9-aws-us-east-1a',
         'ntnx_host_type:HYPER_CONVERGED',
         'ntnx_hypervisor_name:AHV 10.0.1.4',
@@ -73,7 +73,7 @@ def test_host_stats_metrics(dd_run_check, aggregator, aws_instance):
     expected_tags = [
         'ntnx_type:host',
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
-        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_host_name:10-0-0-9-aws-us-east-1a',
         'ntnx_host_type:HYPER_CONVERGED',
         'ntnx_hypervisor_name:AHV 10.0.1.4',
@@ -93,7 +93,7 @@ def test_vm_metrics(dd_run_check, aggregator, aws_instance):
     expected_tags = [
         'ntnx_type:vm',
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
-        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
         'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
         'ntnx_host_name:10-0-0-9-aws-us-east-1a',
@@ -113,7 +113,7 @@ def test_vm_stats_metrics(dd_run_check, aggregator, aws_instance):
     expected_tags = [
         'ntnx_type:vm',
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
-        'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+        'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
         'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
         'ntnx_host_name:10-0-0-9-aws-us-east-1a',

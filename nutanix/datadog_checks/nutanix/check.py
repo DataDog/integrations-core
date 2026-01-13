@@ -40,6 +40,9 @@ class NutanixCheck(AgentCheck):
         if pc_password and "password" not in self.instance:
             self.instance["password"] = pc_password
 
+        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events"))
+        self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks"))
+
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
         if not self.base_url.startswith("http"):
             self.base_url = "https://" + self.base_url
@@ -53,6 +56,8 @@ class NutanixCheck(AgentCheck):
         self.cluster_names = {}  # Mapping of cluster_id -> cluster_name
         self.host_names = {}  # Mapping of host_id -> host_name
         self.last_event_collection_time = None  # Track last event collection timestamp
+        # Track the timestamp of the most recently collected task (timezone-aware datetime)
+        self.last_task_collection_time = None
 
     def _set_external_tags_for_host(self, hostname: str, tags: list[str]):
         for i, entry in enumerate(self.external_tags):
@@ -76,6 +81,9 @@ class NutanixCheck(AgentCheck):
 
         if self.collect_events_enabled:
             self._collect_events()
+
+        if self.collect_tasks_enabled:
+            self._collect_tasks()
 
         if self.external_tags:
             self.set_external_tags(self.external_tags)
@@ -435,6 +443,23 @@ class NutanixCheck(AgentCheck):
         """Fetch all hosts/hosts for a specific cluster."""
         return self._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
 
+    def _list_tasks(self):
+        """Fetch tasks from Prism Central.
+
+        Returns a list of tasks since the last collection.
+        Uses last_task_collection_time if available, otherwise uses now - sampling_interval.
+        """
+        now = get_current_datetime()
+
+        start_time = self.last_task_collection_time or (now - timedelta(seconds=self.sampling_interval))
+        start_time_str = start_time.isoformat().replace("+00:00", "Z")
+
+        params = {}
+        params["$filter"] = f"createdTime gt {start_time_str}"
+        params["$orderBy"] = "createdTime asc"
+
+        return self._get_paginated_request_data("api/prism/v4.0/config/tasks", params=params)
+
     def _get_cluster_stats(self, cluster_id: str):
         """
         Fetch time-series stats for a specific cluster.
@@ -593,6 +618,9 @@ class NutanixCheck(AgentCheck):
                 if entity_name:
                     event_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
 
+        # Distinguish Prism Central events from tasks
+        event_tags.append("ntnx_type:event")
+
         self.event(
             {
                 "timestamp": self._parse_timestamp(created_time)
@@ -633,7 +661,7 @@ class NutanixCheck(AgentCheck):
 
         start_time = now - timedelta(seconds=self.sampling_interval)
 
-        # Format time for API (ISO 8601 with Z suffix)
+        # format time for API in ISO 8601 format
         start_time_str = start_time.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
         params = {}
@@ -643,7 +671,109 @@ class NutanixCheck(AgentCheck):
         events = self._get_paginated_request_data("api/monitoring/v4.0/serviceability/events", params=params)
 
         self.last_event_collection_time = int(
-            get_timestamp(datetime.fromisoformat(start_time_str.replace("Z", "+00:00")))
+            get_timestamp(datetime.fromisoformat(now.isoformat().replace("Z", "+00:00")))
         )
 
         return events
+
+    def _collect_tasks(self):
+        """Collect tasks from Nutanix Prism Central."""
+        try:
+            tasks = self._list_tasks()
+            if not tasks:
+                self.log.debug("No tasks found")
+                return
+
+            for task in tasks:
+                # the API filter should prevent duplicates
+                # this is added for safety
+                if self.last_task_collection_time:
+                    task_time_str = task.get("createdTime")
+                    if task_time_str:
+                        task_time = datetime.fromisoformat(task_time_str.replace("Z", "+00:00"))
+                        if task_time <= self.last_task_collection_time:
+                            continue
+
+                self._process_task(task)
+
+            # tasks are ordered by creationTime, last one is the most recent.
+            most_recent_time_str = tasks[-1].get("createdTime")
+            most_recent_time = (
+                datetime.fromisoformat(most_recent_time_str.replace("Z", "+00:00")) if most_recent_time_str else None
+            )
+
+            if most_recent_time:
+                self.last_task_collection_time = most_recent_time
+
+        except Exception as e:
+            self.log.exception("Error collecting tasks: %s", e)
+
+    def _process_task(self, task):
+        """Process and send a single task to Datadog as an event."""
+        task_id = task.get("extId", "unknown")
+        task_operation = task.get("operation", "Nutanix Task")
+        task_description = task.get("operationDescription", "")
+        created_time = task.get("createdTime")
+        status = task.get("status", "UNKNOWN")
+
+        # determine event alert type based on task status
+        alert_type_map = {
+            "SUCCEEDED": "success",
+            "FAILED": "error",
+            "RUNNING": "info",
+            "QUEUED": "info",
+            "CANCELED": "warning",
+        }
+        alert_type = alert_type_map.get(status, "info")
+
+        # prepare tags
+        task_tags = self.base_tags.copy()
+        task_tags.append(f"ntnx_task_id:{task_id}")
+        task_tags.append(f"ntnx_task_status:{status}")
+
+        # add cluster information
+        cluster_ext_ids = task.get("clusterExtIds", [])
+        if cluster_ext_ids:
+            for cluster_id in cluster_ext_ids:
+                task_tags.append(f"ntnx_cluster_id:{cluster_id}")
+                if cluster_id in self.cluster_names:
+                    task_tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
+
+        # add owner information
+        if owner := task.get("ownedBy"):
+            if owner_name := owner.get("name"):
+                task_tags.append(f"ntnx_owner_name:{owner_name}")
+            if owner_id := owner.get("extId"):
+                task_tags.append(f"ntnx_owner_id:{owner_id}")
+
+        # add affected entities information
+        entities_affected = task.get("entitiesAffected", [])
+        for entity in entities_affected:
+            if entity_type := entity.get("rel"):
+                task_tags.append(f"ntnx_entity_type:{entity_type}")
+            if entity_id := entity.get("extId"):
+                task_tags.append(f"ntnx_entity_id:{entity_id}")
+            if entity_name := entity.get("name"):
+                task_tags.append(f"ntnx_entity_name:{entity_name}")
+
+        # distinguish Nutanix tasks from Nutanix events
+        task_tags.append("ntnx_type:task")
+
+        # build message text
+        msg_text = task_description
+        if progress := task.get("progressPercentage"):
+            msg_text += f" (Progress: {progress}%)"
+
+        self.event(
+            {
+                "timestamp": self._parse_timestamp(created_time)
+                if created_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.__NAMESPACE__,
+                "msg_title": f"Task: {task_operation}",
+                "msg_text": msg_text,
+                "alert_type": alert_type,
+                "source_type_name": self.__NAMESPACE__,
+                "tags": task_tags,
+            }
+        )

@@ -21,18 +21,18 @@
 set -e
 
 # Parse arguments
-PAGE_LIMIT=${1:-2}
+PAGE_LIMIT=${1:-50}
 MAX_PAGES=${2:-20}
 
 # Retry Configuration
 MAX_RETRIES=3
-INITIAL_RETRY_DELAY=2  # seconds, will double with each retry (exponential backoff)
+INITIAL_RETRY_DELAY=2 # seconds, will double with each retry (exponential backoff)
 
 # AWS Instance Configuration
 PC_HOST="prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com"
 PC_PORT="9440"
-PC_USERNAME="dd_agent_viewer"
-PC_PASSWORD="DummyP4ssw0rd!"
+PC_USERNAME="dd_agent"
+PC_PASSWORD="DummyPassw0rd!"
 
 # API Configuration
 BASE_URL="https://${PC_HOST}:${PC_PORT}"
@@ -89,7 +89,7 @@ fetch_and_save() {
 
         if [ "$http_code" -eq 200 ]; then
             # Success - pretty print and save the response
-            echo "$response_body" | jq '.' > "${output_file}"
+            echo "$response_body" | jq '.' >"${output_file}"
             echo -e "${GREEN}✓ Saved: ${output_file}${NC}"
             echo ""
             return 0
@@ -100,7 +100,7 @@ fetch_and_save() {
         echo -e "${RED}Endpoint: ${endpoint}${NC}"
 
         # Try to pretty-print JSON error, fallback to raw output
-        if echo "$response_body" | jq '.' > /dev/null 2>&1; then
+        if echo "$response_body" | jq '.' >/dev/null 2>&1; then
             echo -e "${RED}Error response:${NC}"
             echo "$response_body" | jq '.' | sed 's/^/  /'
         else
@@ -164,7 +164,7 @@ fetch_paginated() {
 
             if [ "$http_code" -eq 200 ]; then
                 # Success - pretty print and save the response
-                echo "$response_body" | jq '.' > "${output_file}"
+                echo "$response_body" | jq '.' >"${output_file}"
                 echo -e "${GREEN}✓ Saved${NC}"
                 page_success=true
                 break
@@ -175,7 +175,7 @@ fetch_paginated() {
             echo -e "${RED}Endpoint: ${endpoint}?limit=${limit}&page=${page}${NC}"
 
             # Try to pretty-print JSON error, fallback to raw output
-            if echo "$response_body" | jq '.' > /dev/null 2>&1; then
+            if echo "$response_body" | jq '.' >/dev/null 2>&1; then
                 echo -e "${RED}Error response:${NC}"
                 echo "$response_body" | jq '.' | sed 's/^/  /'
             else
