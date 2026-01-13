@@ -1,0 +1,38 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a9265d8a-1531-4f1a-9719-54b03a1f0634",
+  "app_id": "valence-security",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Valence Security alerts and audit logs",
+    "title": "Valence Security",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Cloud",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 66560986,
+      "source_type_name": "Valence Security",
+      "events": {
+        "creates_events": false
+      }    
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
