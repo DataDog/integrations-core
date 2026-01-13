@@ -33,7 +33,7 @@ CHECKPOINT_CACHE_KEY = "query_metrics_last_checkpoint_microseconds"
 # Key design decisions:
 # - Uses microsecond precision (event_time_microseconds) to avoid missing queries
 # - Uses exclusive lower bound (>) and inclusive upper bound (<=) to prevent double-counting
-# - Queries only the LOCAL system.query_log table on this node
+# - Uses {query_log_table} placeholder for ClickHouse Cloud clusterAllReplicas() support
 # - Uses event_date predicate for partition pruning optimization
 # - Uses is_initial_query=1 to only count queries once (not sub-queries)
 # - Uses type != 'QueryStart' to get one record per completed query
@@ -43,6 +43,9 @@ CHECKPOINT_CACHE_KEY = "query_metrics_last_checkpoint_microseconds"
 #
 # Note: With checkpoint-based collection, we no longer need derivative calculation.
 # Each collection window is exclusive, so metrics represent the actual values for that window.
+#
+# For ClickHouse Cloud, {query_log_table} becomes clusterAllReplicas('default', system.query_log)
+# to query all nodes in the cluster. For self-hosted, it's just system.query_log.
 
 # List of internal Cloud users to exclude from query metrics
 # These are Datadog Cloud internal service accounts
@@ -73,7 +76,7 @@ SELECT
     sum(memory_usage) as total_memory_usage,
     max(memory_usage) as peak_memory_usage,
     max(event_time_microseconds) as max_event_time_microseconds
-FROM system.query_log
+FROM {query_log_table}
 WHERE
     event_time_microseconds > fromUnixTimestamp64Micro({last_checkpoint_microseconds})
     AND event_time_microseconds <= fromUnixTimestamp64Micro({current_checkpoint_microseconds})
@@ -380,14 +383,16 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_query_log_statements(self):
         """
-        Load aggregated query metrics from the local system.query_log table
-        using checkpoint-based collection.
+        Load aggregated query metrics from system.query_log using checkpoint-based collection.
 
         This is analogous to Postgres loading from pg_stat_statements, but uses
         microsecond-precision timestamps to ensure no queries are missed.
 
-        Queries only the local node's query_log - each ClickHouse node maintains
-        its own query_log table with queries executed on that specific node.
+        For ClickHouse Cloud: Uses clusterAllReplicas('default', system.query_log) to query
+        all nodes in the cluster, since replicas are abstracted behind the managed service.
+
+        For self-hosted: Queries only the local node's query_log - each ClickHouse node
+        maintains its own query_log table with queries executed on that specific node.
         """
         try:
             # Get the collection time window
@@ -399,16 +404,26 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             # Calculate window size for logging
             window_seconds = (current_checkpoint - last_checkpoint) / 1_000_000
 
+            # Get the appropriate table reference based on deployment type
+            # For Cloud: clusterAllReplicas('default', system.query_log)
+            # For self-hosted: system.query_log
+            query_log_table = self._check.get_system_table('query_log')
+
             query = STATEMENTS_QUERY.format(
+                query_log_table=query_log_table,
                 last_checkpoint_microseconds=last_checkpoint,
                 current_checkpoint_microseconds=current_checkpoint,
                 internal_user_filter=self._get_internal_user_filter(),
             )
             rows = self._execute_query(query)
 
+            # Log with deployment type indicator
+            deployment_mode = "Cloud (cluster-wide)" if self._check.is_clickhouse_cloud else "self-hosted (local)"
             self._log.info(
-                "Loaded %d rows from system.query_log (window=%.2fs, last=%d, current=%d)",
+                "Loaded %d rows from %s [%s] (window=%.2fs, last=%d, current=%d)",
                 len(rows),
+                query_log_table,
+                deployment_mode,
                 window_seconds,
                 last_checkpoint,
                 current_checkpoint,

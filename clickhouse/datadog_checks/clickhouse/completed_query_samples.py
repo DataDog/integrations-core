@@ -27,6 +27,10 @@ from datadog_checks.base.utils.tracking import tracked_method
 # Unlike statements.py which aggregates, this query returns individual query executions
 # Note: peak_memory_usage may not exist in all ClickHouse versions (e.g., ClickHouse Cloud)
 # We use a subquery with hasColumnInTable() to conditionally include it
+#
+# Uses {query_log_table} placeholder for ClickHouse Cloud clusterAllReplicas() support:
+# - For ClickHouse Cloud: clusterAllReplicas('default', system.query_log)
+# - For self-hosted: system.query_log
 COMPLETED_QUERIES_QUERY = """
 SELECT
     normalized_query_hash,
@@ -50,7 +54,7 @@ SELECT
     initial_query_id,
     query_kind,
     is_initial_query
-FROM system.query_log
+FROM {query_log_table}
 WHERE
   event_time_microseconds > fromUnixTimestamp64Micro({last_checkpoint_microseconds})
   AND event_time_microseconds <= fromUnixTimestamp64Micro({current_checkpoint_microseconds})
@@ -335,6 +339,10 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
             2. Capture current checkpoint (before query execution)
             3. Query window: (last_checkpoint, current_checkpoint]
             4. Return results (checkpoint saved later on success)
+
+        For ClickHouse Cloud: Uses clusterAllReplicas('default', system.query_log) to query
+        all nodes in the cluster.
+        For self-hosted: Queries only the local node's query_log.
         """
         try:
             # Step 1: Load checkpoint if first run
@@ -345,8 +353,12 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
             # This ensures we don't miss any queries that arrive during execution
             self._current_checkpoint_microseconds = self._get_current_checkpoint_microseconds()
 
+            # Get the appropriate table reference based on deployment type
+            query_log_table = self._check.get_system_table('query_log')
+
             # Step 3: Build query with checkpoint window
             query = COMPLETED_QUERIES_QUERY.format(
+                query_log_table=query_log_table,
                 last_checkpoint_microseconds=self._last_checkpoint_microseconds,
                 current_checkpoint_microseconds=self._current_checkpoint_microseconds,
                 internal_user_filter=self._get_internal_user_filter(),
@@ -362,10 +374,14 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
                 self._last_checkpoint_microseconds
             ) / 1_000_000.0
 
+            # Log with deployment type indicator
+            deployment_mode = "Cloud (cluster-wide)" if self._check.is_clickhouse_cloud else "self-hosted (local)"
             self._log.info(
-                "Loaded %d completed queries from system.query_log. "
+                "Loaded %d completed queries from %s [%s]. "
                 "Window: [%d, %d] microseconds (%.2f seconds elapsed)",
                 len(rows),
+                query_log_table,
+                deployment_mode,
                 self._last_checkpoint_microseconds,
                 self._current_checkpoint_microseconds,
                 window_seconds
