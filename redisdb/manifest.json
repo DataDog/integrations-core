@@ -13,12 +13,12 @@
     "title": "Redis",
     "media": [
       {
-        "caption": "Redis - Overview",
+        "caption": "Redis - Overview (light)",
         "image_url": "images/dashboard_light.png",
         "media_type": "image"
       },
       {
-        "caption": "Redis - Overview",
+        "caption": "Redis - Overview (dark)",
         "image_url": "images/dashboard_dark.png",
         "media_type": "image"
       }
@@ -81,4 +81,3 @@
     }
   }
 }
-
