@@ -952,6 +952,7 @@ pipeline:
                 - timestamp
               sourceType: attribute
               target: ocsf.time
+              targetFormat: integer
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
@@ -1211,6 +1212,7 @@ pipeline:
                 - timestamp
               sourceType: attribute
               target: ocsf.time
+              targetFormat: integer
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
