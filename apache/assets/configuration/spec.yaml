@@ -10,13 +10,13 @@ files:
   - template: instances
     options:
     - name: apache_status_url
+      fleet_configurable: true
       required: true
       display_priority: 2
       description: Status url of your Apache server.
       value:
         example: http://localhost/server-status?auto
         type: string
-      fleet_configurable: true
     - template: instances/http
     - template: instances/default
       overrides:
