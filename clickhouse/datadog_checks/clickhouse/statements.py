@@ -321,7 +321,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                         'p95_time': p95_time,
                         'p99_time': p99_time,
                         # Note: mean_time will be calculated after derivative calculation as total_time / count
-                        'rows': int(total_result_rows) if total_result_rows else 0,
+                        'result_rows': int(total_result_rows) if total_result_rows else 0,
                         'read_rows': int(total_read_rows) if total_read_rows else 0,
                         'read_bytes': int(total_read_bytes) if total_read_bytes else 0,
                         'written_rows': int(total_written_rows) if total_written_rows else 0,
@@ -367,7 +367,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
         metric_columns = available_columns & {
             'count',
             'total_time',
-            'rows',
+            'result_rows',
             'read_rows',
             'read_bytes',
             'written_rows',
