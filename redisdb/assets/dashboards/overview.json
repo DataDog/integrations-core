@@ -407,7 +407,6 @@
               "show_legend": true,
               "legend_layout": "horizontal",
               "legend_columns": ["avg", "min", "max", "value"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -458,7 +457,6 @@
             "id": 8558020471598403,
             "definition": {
               "title": "Slowlog query rates",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -510,7 +508,6 @@
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -566,7 +563,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1251,7 +1247,6 @@
             "id": 22,
             "definition": {
               "title": "Commands per second",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -1307,7 +1302,7 @@
     {
       "id": 3286140376470284,
       "definition": {
-        "title": "Keys",
+        "title": "Key Metrics",
         "background_color": "pink",
         "show_title": true,
         "type": "group",
@@ -1316,10 +1311,11 @@
           {
             "id": 16,
             "definition": {
-              "title": "Keys",
+              "title": "Total keys",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1363,7 +1359,7 @@
           {
             "id": 1840397376605166,
             "definition": {
-              "title": "Total keys",
+              "title": "Current total",
               "title_size": "16",
               "title_align": "left",
               "time": {},
@@ -1485,7 +1481,7 @@
                       "name": "query1",
                       "data_source": "metrics",
                       "query": "sum:redis.expires{$scope,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "last"
                     }
                   ],
                   "formulas": [
@@ -1496,7 +1492,13 @@
                 }
               ],
               "autoscale": true,
-              "precision": 2
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
             },
             "layout": {
               "x": 6,
@@ -1512,7 +1514,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {

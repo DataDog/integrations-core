@@ -11,7 +11,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
     "title": "Redis",
-    "media": [],
+    "media": [
+      {
+        "caption": "Redis - Overview",
+        "image_url": "images/dashboard_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Redis - Overview",
+        "image_url": "images/dashboard_dark.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Caching",
       "Category::Data Stores",
@@ -52,9 +63,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": [
-        "redis-server"
-      ],
+      "process_signatures": ["redis-server"],
       "source_type_id": 21,
       "auto_install": true
     },
@@ -72,3 +81,4 @@
     }
   }
 }
+
