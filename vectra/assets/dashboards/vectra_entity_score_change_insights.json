@@ -199,33 +199,28 @@
                     {
                         "id": 1702775065234150,
                         "definition": {
-                            "title": "Events by entity type",
+                            "title": "Account scoring events",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra service:entity-scoring-events @type:account $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": {
-                                                "fields": [
-                                                    "@type"
-                                                ],
-                                                "limit": 10,
-                                                "sort": {
-                                                    "aggregation": "count",
-                                                    "metric": "count",
-                                                    "order": "desc"
-                                                },
-                                                "should_exclude_missing": true
-                                            },
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -233,36 +228,82 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
+                                    "conditional_formats": [
                                         {
-                                            "formula": "query1"
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
                                         }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
+                                    ]
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 4,
-                            "width": 6,
-                            "height": 4
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7779873709748326,
+                        "definition": {
+                            "title": "Host scoring events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:vectra service:entity-scoring-events @type:host $entity_name $entity_type $category $severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 4,
+                            "width": 3,
+                            "height": 3
                         }
                     },
                     {
@@ -338,7 +379,7 @@
                             "x": 6,
                             "y": 4,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ]
@@ -347,7 +388,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 9
+                "height": 8
             }
         },
         {
@@ -1283,7 +1324,6 @@
                             "title": "Entity scoring change event details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1354,7 +1394,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 11,
                 "width": 12,
                 "height": 32
             }
