@@ -480,6 +480,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@type:(USER_ROLE_CHANGE OR USER_SELINUX_ERR OR DAEMON_CONFIG OR
           DAEMON_ABORT OR USER_MAC_CONFIG_CHANGE OR MAC_CONFIG_CHANGE OR
@@ -593,6 +595,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class Authentication [3002]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@type:USER_AUTH"
       processors:
@@ -836,6 +840,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class Account Change [3001]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@type:(ADD_USER OR DEL_USER OR USER_CHAUTHTOK)"
       processors:
@@ -1085,6 +1091,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class Group Management [3006]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@type:(ADD_GROUP OR DEL_GROUP)"
       processors:
@@ -1334,6 +1342,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class User Access Management [3005]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
       processors:
@@ -1601,6 +1611,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class File System Activity [1001]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@type:PATH"
       processors:
