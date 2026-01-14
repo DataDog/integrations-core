@@ -44,8 +44,8 @@ class NutanixCheck(AgentCheck):
         if pc_password and "password" not in self.instance:
             self.instance["password"] = pc_password
 
-        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events"), True)
-        self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks"), True)
+        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events", True))
+        self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks", True))
 
     def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
@@ -447,17 +447,12 @@ class NutanixCheck(AgentCheck):
         """Fetch all hosts/hosts for a specific cluster."""
         return self._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
 
-    def _list_tasks(self):
+    def _list_tasks(self, start_time_str):
         """Fetch tasks from Prism Central.
 
         Returns a list of tasks since the last collection.
         Uses last_task_collection_time if available, otherwise uses now - sampling_interval.
         """
-        now = get_current_datetime()
-
-        start_time = self.last_task_collection_time or (now - timedelta(seconds=self.sampling_interval))
-        start_time_str = start_time.isoformat().replace("+00:00", "Z")
-
         params = {}
         params["$filter"] = f"createdTime gt {start_time_str}"
         params["$orderBy"] = "createdTime asc"
@@ -520,7 +515,7 @@ class NutanixCheck(AgentCheck):
 
         vm_stats_data = self._get_paginated_request_data("api/vmm/v4.0/ahv/stats/vms/", params=params)
 
-        # Create dictionary mapping vmExtId -> stats
+        # create dictionary mapping vmExtId -> stats
         all_vm_stats_dict = {}
         for vm_stat in vm_stats_data:
             vm_id = vm_stat.get("extId")
@@ -551,42 +546,26 @@ class NutanixCheck(AgentCheck):
     def _collect_events(self):
         """Collect events from Nutanix Prism Central."""
         try:
-            events = self._list_events()
+            start_time = self.last_event_collection_time
+            if not start_time:
+                now = get_current_datetime()
+                start_time = (now - timedelta(seconds=self.sampling_interval)).isoformat().replace("+00:00", "Z")
+
+            events = self._list_events(start_time)
             if not events:
                 self.log.debug("No events found")
                 return
 
             for event in events:
-                if self._should_skip_event(event):
-                    continue
                 self._process_event(event)
+
+            # update last time
+            most_recent_time_str = events[-1].get("creationTime")
+            if most_recent_time_str:
+                self.last_event_collection_time = most_recent_time_str
 
         except Exception as e:
             self.log.exception("Error collecting events: %s", e)
-
-    def _should_skip_event(self, event):
-        """Check if an event should be skipped based on its timestamp.
-
-        Returns True if the event's creationTime is before or equal to last_event_collection_time.
-        """
-        if not self.last_event_collection_time:
-            return False
-
-        event_time_str = event.get("creationTime")
-        if not event_time_str:
-            return False
-
-        event_time = int(get_timestamp(datetime.fromisoformat(event_time_str.replace("Z", "+00:00"))))
-        if event_time < self.last_event_collection_time:
-            self.log.debug(
-                "Skipping event %s with timestamp %s (before last collection time %s)",
-                event.get("extId"),
-                event_time,
-                self.last_event_collection_time,
-            )
-            return True
-
-        return False
 
     def _process_event(self, event):
         """Process and send a single event to Datadog."""
@@ -655,58 +634,38 @@ class NutanixCheck(AgentCheck):
             self.log.warning("Failed to parse timestamp: %s", timestamp_str)
             return None
 
-    def _list_events(self):
+    def _list_events(self, start_time_str):
         """Fetch events from Prism Central.
 
         Returns a list of events since the last collection.
         On the first run, collects events from the last collection interval.
         """
-        now = get_current_datetime()
-
-        start_time = now - timedelta(seconds=self.sampling_interval)
-
-        # format time
-        start_time_str = start_time.replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
         params = {}
         params["$filter"] = f"creationTime gt {start_time_str}"
         params["$orderBy"] = "creationTime asc"
 
-        events = self._get_paginated_request_data("api/monitoring/v4.0/serviceability/events", params=params)
-
-        self.last_event_collection_time = int(
-            get_timestamp(datetime.fromisoformat(now.isoformat().replace("Z", "+00:00")))
-        )
-
-        return events
+        return self._get_paginated_request_data("api/monitoring/v4.0/serviceability/events", params=params)
 
     def _collect_tasks(self):
         """Collect tasks from Nutanix Prism Central."""
         try:
-            tasks = self._list_tasks()
+            start_time = self.last_task_collection_time
+            if not start_time:
+                now = get_current_datetime()
+                start_time = (now - timedelta(seconds=self.sampling_interval)).isoformat().replace("+00:00", "Z")
+
+            tasks = self._list_tasks(start_time)
             if not tasks:
                 self.log.debug("No tasks found")
                 return
 
             for task in tasks:
-                # avoid duplicates
-                if self.last_task_collection_time:
-                    task_time_str = task.get("createdTime")
-                    if task_time_str:
-                        task_time = datetime.fromisoformat(task_time_str.replace("Z", "+00:00"))
-                        if task_time <= self.last_task_collection_time:
-                            continue
-
                 self._process_task(task)
 
             # update last time
             most_recent_time_str = tasks[-1].get("createdTime")
-            most_recent_time = (
-                datetime.fromisoformat(most_recent_time_str.replace("Z", "+00:00")) if most_recent_time_str else None
-            )
-
-            if most_recent_time:
-                self.last_task_collection_time = most_recent_time
+            if most_recent_time_str:
+                self.last_task_collection_time = most_recent_time_str
 
         except Exception as e:
             self.log.exception("Error collecting tasks: %s", e)

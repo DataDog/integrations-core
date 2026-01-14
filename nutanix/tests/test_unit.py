@@ -403,12 +403,16 @@ def test_events_no_duplicates_on_subsequent_runs(
 ):
     """Test that no events are collected when there are no new events since last collection."""
     instance = mock_instance.copy()
+
     instance["collect_events"] = True
+
     check = NutanixCheck('nutanix', {}, [instance])
     get_current_datetime.return_value = MOCK_DATETIME
     dd_run_check(check)
-    assert len(aggregator.events) == 10, "Expected events to be collected on first run"
-    assert aggregator.events == EXPECTED_EVENTS
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+    assert len(events) == 10, "Expected events to be collected on first run"
+    assert events == EXPECTED_EVENTS
 
     aggregator.reset()
 
@@ -417,7 +421,8 @@ def test_events_no_duplicates_on_subsequent_runs(
     get_current_datetime.return_value = last_event_time + timedelta(seconds=check.sampling_interval + 1)
     dd_run_check(check)
 
-    assert len(aggregator.events) == 0, "Expected no events when there are no new events since last collection"
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+    assert len(events) == 0, "Expected no events when there are no new events since last collection"
 
 
 def test_pc_ip_with_port_raises_error(mock_instance):
@@ -545,7 +550,6 @@ def test_tasks_no_duplicates_on_subsequent_runs(
     """Test that no tasks are collected when there are no new tasks since last collection."""
     instance = mock_instance.copy()
     instance["page_limit"] = 50
-    instance["collect_events"] = False
     instance["collect_tasks"] = True
 
     get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
@@ -555,8 +559,10 @@ def test_tasks_no_duplicates_on_subsequent_runs(
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
-    assert len(aggregator.events) == 3, "Expected 3 tasks to be collected on first run"
-    assert aggregator.events == EXPECTED_TASKS
+    tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
+
+    assert len(tasks) == 3, "Expected 3 tasks to be collected on first run"
+    assert tasks == EXPECTED_TASKS
 
     aggregator.reset()
 
@@ -567,4 +573,5 @@ def test_tasks_no_duplicates_on_subsequent_runs(
 
     dd_run_check(check)
 
-    assert len(aggregator.events) == 0, "Expected no tasks when there are no new tasks since last collection"
+    tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
+    assert len(tasks) == 0, "Expected no tasks when there are no new tasks since last collection"
