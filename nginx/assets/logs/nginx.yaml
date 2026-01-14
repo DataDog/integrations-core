@@ -446,14 +446,14 @@ pipeline:
               targetFormat: double
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`.
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
               target: ocsf.metadata.product.name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`.
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
