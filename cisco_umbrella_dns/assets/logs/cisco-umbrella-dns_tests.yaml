@@ -159,7 +159,11 @@ tests:
           product:
             name: "Cisco Umbrella"
             vendor_name: "Cisco"
+          profiles:
+           - "network_proxy"
           version: "1.5.0"
+        proxy_endpoint:
+          ip: "185.64.148.0"
         query:
           hostname: "optimizationguide-pa.someapis.com"
           type: "A"
@@ -410,7 +414,11 @@ tests:
           product:
             name: "Cisco Umbrella"
             vendor_name: "Cisco"
+          profiles:
+           - "network_proxy"
           version: "1.5.0"
+        proxy_endpoint:
+          ip: "185.64.148.0"
         query:
           hostname: "test.com"
           type: "A"
@@ -646,7 +654,11 @@ tests:
           product:
             name: "Cisco Umbrella"
             vendor_name: "Cisco"
+          profiles:
+           - "network_proxy"
           version: "1.5.0"
+        proxy_endpoint:
+          ip: "185.64.148.0"
         query:
           hostname: "instagram.com"
           type: "A"

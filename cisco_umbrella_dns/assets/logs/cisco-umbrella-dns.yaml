@@ -748,7 +748,8 @@ pipeline:
             className: DNS Activity
             classUid: 4003
             extensions: []
-            profiles: []
+            profiles: 
+              - network_proxy
           mappers:
             - name: ocsf.severity_id
               categories:
@@ -847,6 +848,15 @@ pipeline:
                 - internalip
               sourceType: attribute
               target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `externalip` to `ocsf.proxy_endpoint.ip`
+              sources:
+                - externalip
+              sourceType: attribute
+              target: ocsf.proxy_endpoint.ip
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
