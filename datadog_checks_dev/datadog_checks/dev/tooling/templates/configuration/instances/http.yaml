@@ -73,6 +73,7 @@
     The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. /noqa
     Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials /noqa
 
+  fleet_configurable: true
 - name: use_legacy_auth_encoding
   value:
     example: true
@@ -83,11 +84,13 @@
   value:
     type: string
   description: The username to use if services are behind basic or digest auth.
+  fleet_configurable: true
 - name: password
   secret: true
   value:
     type: string
   description: The password to use if services are behind basic or NTLM auth.
+  fleet_configurable: true
 - name: ntlm_domain
   value:
     example: <NTLM_DOMAIN>\<USERNAME>
@@ -331,6 +334,7 @@
     The timeout for accessing services.
 
     This overrides the `timeout` setting in `init_config`.
+  fleet_configurable: true
 - name: connect_timeout
   value:
     type: number
