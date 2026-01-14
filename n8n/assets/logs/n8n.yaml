@@ -55,25 +55,28 @@ pipeline:
       enabled: true
       sources:
         - metadata.file
+      sourceType: attribute
       target: n8n.file
-      target_type: attribute
-      preserve_source: false
-      override_on_conflict: false
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
     - type: attribute-remapper
       name: Map metadata.function to n8n.function
       enabled: true
       sources:
         - metadata.function
+      sourceType: attribute
       target: n8n.function
-      target_type: attribute
-      preserve_source: false
-      override_on_conflict: false
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
     - type: attribute-remapper
       name: Map metadata.scopes to n8n.scopes
       enabled: true
       sources:
         - metadata.scopes
+      sourceType: attribute
       target: n8n.scopes
-      target_type: attribute
-      preserve_source: false
-      override_on_conflict: false
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
