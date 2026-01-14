@@ -157,6 +157,13 @@ CRITICAL REQUIREMENTS:
 6. Use exact metric names from the integration - do not invent new ones
 7. Respect metric types (gauge=3, count=1, rate=2)
 
+IMPORTANT - PAYLOAD SIZE LIMITS:
+   - Datadog API has payload size limits (~5MB, but aim for <500 metrics per request)
+   - If generating many metrics, split into batches of 500 and send multiple requests
+   - Keep entity counts reasonable: 2-4 instances per tag type, not dozens
+   - Example: 3 hosts x 2 endpoints x 50 metrics = 300 points (good)
+   - Avoid: 10 hosts x 10 endpoints x 50 metrics = 5000 points (too many, will fail)
+
 8. LOGS ARE MANDATORY - Generate realistic logs alongside metrics:
    - Send logs via Datadog HTTP Logs API (different endpoint from metrics)
    - Use the integration name as the "source" (e.g., source:celery, source:redis)
@@ -351,30 +358,35 @@ def send_metrics(metrics: list, api_key: str) -> bool:
         "Content-Type": "application/json",
     }}
 
-    # V2 API format - series is a list of metric objects
-    payload = {{
-        "series": [
-            {{
-                "metric": m["metric"],
-                "type": m.get("type", 0),  # 0=unspecified, 1=count, 2=rate, 3=gauge
-                "points": [
-                    {{
-                        "timestamp": m["points"][0]["timestamp"],
-                        "value": m["points"][0]["value"]
-                    }}
-                ],
-                "tags": m.get("tags", ["env:dynamicd"])  # Always include env:dynamicd
-            }}
-            for m in metrics
-        ]
-    }}
+    # Batch metrics to avoid 413 Payload Too Large errors
+    BATCH_SIZE = 500
+    for i in range(0, len(metrics), BATCH_SIZE):
+        batch = metrics[i:i + BATCH_SIZE]
 
-    response = requests.post(
-        f"https://api.{{DATADOG_SITE}}/api/v2/series",
-        headers=headers,
-        json=payload
-    )
-    response.raise_for_status()
+        # V2 API format - series is a list of metric objects
+        payload = {{
+            "series": [
+                {{
+                    "metric": m["metric"],
+                    "type": m.get("type", 0),  # 0=unspecified, 1=count, 2=rate, 3=gauge
+                    "points": [
+                        {{
+                            "timestamp": m["points"][0]["timestamp"],
+                            "value": m["points"][0]["value"]
+                        }}
+                    ],
+                    "tags": m.get("tags", ["env:dynamicd"])  # Always include env:dynamicd
+                }}
+                for m in batch
+            ]
+        }}
+
+        response = requests.post(
+            f"https://api.{{DATADOG_SITE}}/api/v2/series",
+            headers=headers,
+            json=payload
+        )
+        response.raise_for_status()
     return True
 ```
 

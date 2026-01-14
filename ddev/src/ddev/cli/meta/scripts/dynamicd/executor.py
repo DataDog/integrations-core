@@ -75,9 +75,7 @@ def execute_script(
 
         # Write to temp file and execute with env var
         # Use lambda to ensure flush=True for real-time output
-        result = _run_script(
-            executable_script, timeout, env_vars=env_vars, on_output=lambda x: print(x, flush=True)
-        )
+        result = _run_script(executable_script, timeout, env_vars=env_vars, on_output=lambda x: print(x, flush=True))
 
         if result.return_code == 0:
             status("Script executed successfully!")
