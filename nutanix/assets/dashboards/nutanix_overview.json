@@ -690,7 +690,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:nutanix.cluster.io.bandwidth{$ntnx_cluster_name,$prism_central}",
+                      "query": "sum:nutanix.cluster.io_bandwidth{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "avg"
                     }
                   ],
@@ -959,7 +959,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.controller.num.iops{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.controller.num_iops{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -987,7 +987,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.controller.num.read.iops{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.controller.num_read_iops{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1015,7 +1015,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.controller.num.write.iops{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.controller.num_write_iops{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1067,7 +1067,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.controller.avg.io.latency{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.controller.avg_io_latency{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1095,7 +1095,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.controller.avg.read.io.latency{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.controller.avg_read_io_latency{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1123,7 +1123,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.controller.avg.write.io.latency{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.controller.avg_write_io_latency{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1174,7 +1174,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.io.bandwidth{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.io_bandwidth{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1202,7 +1202,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.controller.read.io.bandwidth{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.controller.read_io_bandwidth{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1230,7 +1230,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.controller.write.io.bandwidth{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.controller.write_io_bandwidth{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1730,7 +1730,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.io_bandwidth{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [
@@ -1752,7 +1752,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.controller.read.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.controller.read_io_bandwidth{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [
@@ -1774,7 +1774,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.controller.write.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.controller.write_io_bandwidth{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [
@@ -1819,17 +1819,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.controller.num.iops{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.controller.num_iops{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:nutanix.host.controller.num.read.iops{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.controller.num_read_iops{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:nutanix.host.controller.num.write.iops{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.controller.num_write_iops{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [
@@ -1903,17 +1903,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.controller.avg.io.latency{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.controller.avg_io_latency{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:nutanix.host.controller.avg.read.io.latency{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.controller.avg_read_io_latency{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:nutanix.host.controller.avg.write.io.latency{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.controller.avg_write_io_latency{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [

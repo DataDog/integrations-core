@@ -5,25 +5,25 @@
 
 CLUSTER_STATS_METRICS = {
     "aggregateHypervisorMemoryUsagePpm": "cluster.aggregate_hypervisor.memory_usage",  # ppm
-    "controllerAvgIoLatencyUsecs": "cluster.controller.avg.io.latency",  # usecs
-    "controllerAvgReadIoLatencyUsecs": "cluster.controller.avg.read.io.latency",  # usecs
-    "controllerAvgWriteIoLatencyUsecs": "cluster.controller.avg.write.io.latency",  # usecs
-    "controllerNumIops": "cluster.controller.num.iops",
-    "controllerNumReadIops": "cluster.controller.num.read.iops",
-    "controllerNumWriteIops": "cluster.controller.num.write.iops",
-    "controllerReadIoBandwidthKbps": "cluster.controller.read.io.bandwidth",  # kbps
-    "controllerWriteIoBandwidthKbps": "cluster.controller.write.io.bandwidth",  # kbps
+    "controllerAvgIoLatencyUsecs": "cluster.controller.avg_io_latency",  # usecs
+    "controllerAvgReadIoLatencyUsecs": "cluster.controller.avg_read_io_latency",  # usecs
+    "controllerAvgWriteIoLatencyUsecs": "cluster.controller.avg_write_io_latency",  # usecs
+    "controllerNumIops": "cluster.controller.num_iops",
+    "controllerNumReadIops": "cluster.controller.num_read_iops",
+    "controllerNumWriteIops": "cluster.controller.num_write_iops",
+    "controllerReadIoBandwidthKbps": "cluster.controller.read_io_bandwidth",  # kbps
+    "controllerWriteIoBandwidthKbps": "cluster.controller.write_io_bandwidth",  # kbps
     "cpuCapacityHz": "cluster.cpu_capacity",  # hz
     "cpuUsageHz": "cluster.cpu_usage",  # hz
     "freePhysicalStorageBytes": "cluster.free_physical_storage",  # bytes
     "healthCheckScore": "cluster.health_check_score",
     "hypervisorCpuUsagePpm": "cluster.hypervisor.cpu_usage",  # ppm
-    "ioBandwidthKbps": "cluster.io.bandwidth",  # kbps
+    "ioBandwidthKbps": "cluster.io_bandwidth",  # kbps
     "logicalStorageUsageBytes": "cluster.logical_storage_usage",  # bytes
     "memoryCapacityBytes": "cluster.memory_capacity",  # bytes
-    "overallMemoryUsageBytes": "cluster.overall.memory_usage",  # bytes
-    "overallSavingsBytes": "cluster.overall.savings",  # bytes
-    "overallSavingsRatio": "cluster.overall.savings_ratio",
+    "overallMemoryUsageBytes": "cluster.overall_memory_usage",  # bytes
+    "overallSavingsBytes": "cluster.overall_savings",  # bytes
+    "overallSavingsRatio": "cluster.overall_savings_ratio",
     "powerConsumptionInstantWatt": "cluster.power_consumption_instant_watt",
     "recycleBinUsageBytes": "cluster.recycle_bin_usage",  # bytes
     "snapshotCapacityBytes": "cluster.snapshot_capacity",  # bytes
@@ -33,24 +33,24 @@ CLUSTER_STATS_METRICS = {
 
 HOST_STATS_METRICS = {
     "aggregateHypervisorMemoryUsagePpm": "host.aggregate_hypervisor.memory_usage",  # ppm
-    "controllerAvgIoLatencyUsecs": "host.controller.avg.io.latency",  # usecs
-    "controllerAvgReadIoLatencyUsecs": "host.controller.avg.read.io.latency",  # usecs
-    "controllerAvgWriteIoLatencyUsecs": "host.controller.avg.write.io.latency",  # usecs
-    "controllerNumIops": "host.controller.num.iops",
-    "controllerNumReadIops": "host.controller.num.read.iops",
-    "controllerNumWriteIops": "host.controller.num.write.iops",
-    "controllerReadIoBandwidthKbps": "host.controller.read.io.bandwidth",  # kbps
-    "controllerWriteIoBandwidthKbps": "host.controller.write.io.bandwidth",  # kbps
+    "controllerAvgIoLatencyUsecs": "host.controller.avg_io_latency",  # usecs
+    "controllerAvgReadIoLatencyUsecs": "host.controller.avg_read_io_latency",  # usecs
+    "controllerAvgWriteIoLatencyUsecs": "host.controller.avg_write_io_latency",  # usecs
+    "controllerNumIops": "host.controller.num_iops",
+    "controllerNumReadIops": "host.controller.num_read_iops",
+    "controllerNumWriteIops": "host.controller.num_write_iops",
+    "controllerReadIoBandwidthKbps": "host.controller.read_io_bandwidth",  # kbps
+    "controllerWriteIoBandwidthKbps": "host.controller.write_io_bandwidth",  # kbps
     "cpuCapacityHz": "host.cpu_capacity",  # hz
     "cpuUsageHz": "host.cpu_usage",  # hz
     "freePhysicalStorageBytes": "host.free_physical_storage",  # bytes
     "healthCheckScore": "host.health_check_score",
     "hypervisorCpuUsagePpm": "host.hypervisor.cpu_usage",  # ppm
-    "ioBandwidthKbps": "host.io.bandwidth",  # kbps
+    "ioBandwidthKbps": "host.io_bandwidth",  # kbps
     "logicalStorageUsageBytes": "host.logical_storage_usage",  # bytes
     "memoryCapacityBytes": "host.memory_capacity",  # bytes
-    "overallMemoryUsageBytes": "host.overall.memory_usage",  # bytes
-    # "overallMemoryUsagePpm": "host.overall.memory_usage", # ppm
+    "overallMemoryUsageBytes": "host.overall_memory_usage",  # bytes
+    # "overallMemoryUsagePpm": "host.overall_memory_usage", # ppm
     "powerConsumptionInstantWatt": "host.power.consumption.instant_watt",
     "storageCapacityBytes": "host.storage_capacity",  # bytes
     "storageUsageBytes": "host.storage_usage",  # bytes
