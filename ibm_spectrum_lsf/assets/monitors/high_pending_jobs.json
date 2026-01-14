@@ -3,10 +3,10 @@
 	"created_at": "2025-11-24",
 	"last_updated_at": "2025-11-24",
 	"title": "Number of Pending Jobs is Higher than Normal",
-	"description": "A high amount of pending jobs in your IBM Spectrum LSF cluster could signify a lack of resources such as CPU and GPU slots available, indicating the need to scale up your cluster.",
+	"description": "There is a higher than average number of pending jobs in your IBM Spectrum LSF cluster. A high amount of pending jobs could signify a lack of resources such as CPU and GPU slots available, indicating the need to scale up your cluster.",
 	"definition": {
 		"id": 236603394,
-		"name": "[IBM Spectrum LSF] Number of Pending Jobs is Higher than Normal",
+		"name": "Number of Pending Jobs is Higher than Normal",
 		"type": "query alert",
 		"query": "avg(last_1d):anomalies(sum:ibm_spectrum_lsf.queue.pending{*} by {queue_name,lsf_cluster_name}, 'basic', 2, direction='above', interval=300, alert_window='last_1h', count_default_zero='true') >= 1",
 		"message": "{{#is_alert}}\nNumber of Pending Jobs in IBM Spectrum LSF cluster {{lsf_cluster_name.name}} is higher than normal. \n{{/is_alert}}\n\n{{#is_warning}}\nNumber of Pending Jobs in IBM Spectrum LSF cluster {{lsf_cluster_name.name}} is higher than normal.\n{{/is_warning}}\n\n{{#is_recovery}}\nNumber of Pending Jobs in IBM Spectrum LSF cluster {{lsf_cluster_name.name}} is back to normal.\n{{/is_recovery}}",

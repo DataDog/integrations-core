@@ -3,10 +3,10 @@
 	"created_at": "2025-11-24",
 	"last_updated_at": "2025-11-24",
 	"title": "No GPU Slots Available",
-	"description": "In IBM Spectrum LSF, if there are shared available GPUs, jobs that require GPU resources but don't requst an exclusive GPU or multiple GPUs will be able to run.",
+	"description": "There are no GPU slots available in your IBM Spectrum LSF cluster. In IBM Spectrum LSF, if there are no shared available GPUs, any jobs that require GPU resources will not be able to run.",
 	"definition": {
 		"id": 236592543,
-		"name": "[IBM Spectrum LSF] No GPU Slots Available",
+		"name": "No GPU Slots Available",
 		"type": "query alert",
 		"query": "avg(last_5m):sum:ibm_spectrum_lsf.server.gpu.num_gpus_shared_available{*} by {lsf_cluster_name} <= 0",
 		"message": "{{#is_alert}}There are no GPU Slots available to be shared with other jobs on cluster {{lsf_cluster_name.name}}. This means that any IBM Spectrum LSF job submitted now will not be able to run until the current jobs that are using GPUs complete. {{/is_alert}}\n\n{{#is_recovery}}\nThere are now available GPU slots on cluster {{lsf_cluster_name.name}}. \n{{/is_recovery}}",
