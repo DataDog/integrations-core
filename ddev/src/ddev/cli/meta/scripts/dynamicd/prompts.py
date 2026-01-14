@@ -97,6 +97,24 @@ The script must:
 6. Send BOTH metrics AND logs via Datadog HTTP APIs
 7. Run in a continuous loop with configurable duration
 8. Have clear, readable code with comments
+9. NEVER use emojis anywhere - no emojis in print statements, logs, comments, or strings
+10. USE REALISTIC VALUE RANGES - avoid arbitrarily large numbers:
+    - Counts/requests: typically 0-100 per batch, not thousands
+    - Latencies: milliseconds (10-500ms typical), not seconds unless truly slow
+    - Percentages: 0-100
+    - Queue depths: 0-50 typical, up to 200 during incidents
+    - Token counts: realistic for the service (e.g., 100-2000 per request)
+    - Error rates: 0-5% healthy, 5-20% degraded, 20-50% incident
+    - Values should look like real production data, not random large numbers
+
+11. SMOOTH TRANSITIONS - values should not jump erratically:
+    - Use a base state variable that changes GRADUALLY over time
+    - Add small random noise (+-5-10%), not large random jumps
+    - For "recovery" scenario: start low, trend upward smoothly
+    - For "incident" scenario: start normal, trend downward
+    - All entities should follow similar patterns (correlated, not random)
+    - Example: base_health = min(1.0, base_health + 0.02) for gradual recovery
+    - NEVER generate completely random values each batch - use state that persists
 
 CRITICAL REQUIREMENTS:
 1. EVERY BATCH MUST INCLUDE ALL DASHBOARD METRICS (marked as PRIORITY)
@@ -150,7 +168,29 @@ CRITICAL REQUIREMENTS:
      - recovery: WARNING transitioning to INFO
    - Logs must include ddtags with "env:dynamicd" for filtering
    - Include relevant attributes: host, service, worker, task, etc.
-   - Generate 5-15 logs per batch depending on scenario severity"""
+   - Generate 5-15 logs per batch depending on scenario severity
+
+9. SERVICE CHECKS (if the integration defines them):
+   - Send service checks via Datadog API v1 `/api/v1/check_run`
+   - Use exact service check names from the integration context
+   - Status values: 0=OK, 1=WARNING, 2=CRITICAL, 3=UNKNOWN
+   - Status should correlate with scenario:
+     - healthy: status=0 (OK)
+     - degraded: status=1 (WARNING)
+     - incident: status=2 (CRITICAL)
+     - recovery: transition from WARNING to OK
+   - Include the "env:dynamicd" tag
+   - Send service checks every batch (every 10 seconds)
+
+10. EVENTS (optional, for significant state changes):
+    - Send events via Datadog API v1 `/api/v1/events`
+    - Only generate events for meaningful state changes, not every batch
+    - Event types should match scenario:
+      - incident: alert events (alert_type: "error")
+      - recovery: recovery events (alert_type: "success")
+      - maintenance: info events (alert_type: "info")
+    - Include "env:dynamicd" in tags
+    - Generate 0-3 events per batch maximum (events are rare)"""
 
 STAGE2_USER_PROMPT_TEMPLATE = """Generate a Python script that simulates realistic telemetry data for the
 {display_name} integration.
@@ -265,8 +305,24 @@ def send_logs(logs: list[dict[str, Any]], api_key: str, site: str, source: str) 
     \"\"\"Send logs to Datadog via HTTP Logs API.\"\"\"
     pass
 
+def generate_service_checks() -> list[dict[str, Any]]:
+    \"\"\"Generate service checks (only if integration defines them).\"\"\"
+    pass
+
+def send_service_checks(checks: list[dict[str, Any]], api_key: str, site: str) -> bool:
+    \"\"\"Send service checks to Datadog via API v1.\"\"\"
+    pass
+
+def generate_events() -> list[dict[str, Any]]:
+    \"\"\"Generate events for significant state changes (optional).\"\"\"
+    pass
+
+def send_events(events: list[dict[str, Any]], api_key: str, site: str) -> bool:
+    \"\"\"Send events to Datadog via API v1.\"\"\"
+    pass
+
 def main():
-    \"\"\"Main simulation loop - sends both metrics and logs each batch.\"\"\"
+    \"\"\"Main simulation loop - sends metrics, logs, service checks, and events.\"\"\"
     pass
 
 if __name__ == "__main__":
@@ -383,6 +439,109 @@ def generate_logs(scenario: str, source: str) -> list:
         logs.append({{"message": f"[{{timestamp}}] WARNING: High latency detected (2.5s)", "level": "warning"}})
 
     return logs
+```
+
+10. SEND SERVICE CHECKS using Datadog API v1 (only if the integration defines service checks):
+
+```python
+def send_service_checks(checks: list, api_key: str, site: str) -> bool:
+    \"\"\"Send service checks to Datadog using API v1.\"\"\"
+    check_endpoint = f"https://api.{{site}}/api/v1/check_run"
+
+    headers = {{
+        "DD-API-KEY": api_key,
+        "Content-Type": "application/json",
+    }}
+
+    for check in checks:
+        payload = {{
+            "check": check["check"],
+            "host_name": check.get("host_name", "dynamicd-simulator"),
+            "status": check["status"],  # 0=OK, 1=WARNING, 2=CRITICAL, 3=UNKNOWN
+            "tags": check.get("tags", ["env:dynamicd"]),
+            "message": check.get("message", ""),
+        }}
+        response = requests.post(check_endpoint, headers=headers, json=payload)
+        response.raise_for_status()
+    return True
+```
+
+Example service check generation:
+```python
+def generate_service_checks(scenario: str, service_check_names: list) -> list:
+    \"\"\"Generate service checks based on scenario. Only call if integration has service checks.\"\"\"
+    # Skip if integration has no service checks defined
+    if not service_check_names:
+        return []
+
+    status_map = {{
+        "healthy": 0,      # OK
+        "degraded": 1,     # WARNING
+        "incident": 2,     # CRITICAL
+        "recovery": 1,     # WARNING (transitioning)
+        "peak_load": 0,    # OK (high but healthy)
+        "maintenance": 3,  # UNKNOWN (expected during maintenance)
+    }}
+
+    checks = []
+    for check_name in service_check_names:
+        checks.append({{
+            "check": check_name,
+            "status": status_map.get(scenario, 0),
+            "tags": ["env:dynamicd"],
+            "message": f"DynamicD simulation - scenario: {{scenario}}",
+        }})
+    return checks
+```
+
+11. SEND EVENTS using Datadog API v1 (optional, only for significant state changes):
+
+```python
+def send_events(events: list, api_key: str, site: str) -> bool:
+    \"\"\"Send events to Datadog using API v1.\"\"\"
+    event_endpoint = f"https://api.{{site}}/api/v1/events"
+
+    headers = {{
+        "DD-API-KEY": api_key,
+        "Content-Type": "application/json",
+    }}
+
+    for event in events:
+        payload = {{
+            "title": event["title"],
+            "text": event["text"],
+            "alert_type": event.get("alert_type", "info"),  # error, warning, info, success
+            "tags": event.get("tags", ["env:dynamicd"]),
+            "source_type_name": event.get("source", "dynamicd"),
+        }}
+        response = requests.post(event_endpoint, headers=headers, json=payload)
+        response.raise_for_status()
+    return True
+```
+
+Example event generation (generate sparingly - events are for significant changes):
+```python
+def generate_events(scenario: str, prev_scenario: str, integration_name: str) -> list:
+    \"\"\"Generate events only when scenario changes or for significant issues.\"\"\"
+    events = []
+
+    # Only generate events on state transitions or during incidents
+    if scenario == "incident":
+        events.append({{
+            "title": f"{{integration_name}}: Incident detected",
+            "text": "System experiencing failures. Investigating...",
+            "alert_type": "error",
+            "tags": ["env:dynamicd", f"integration:{{integration_name}}"],
+        }})
+    elif scenario == "recovery" and prev_scenario == "incident":
+        events.append({{
+            "title": f"{{integration_name}}: Recovery in progress",
+            "text": "System recovering from incident. Metrics returning to normal.",
+            "alert_type": "success",
+            "tags": ["env:dynamicd", f"integration:{{integration_name}}"],
+        }})
+
+    return events
 ```
 
 Generate the complete, working script now. Output ONLY the Python code, no explanations."""
