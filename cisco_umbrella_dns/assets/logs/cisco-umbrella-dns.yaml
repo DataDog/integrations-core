@@ -487,17 +487,6 @@ pipeline:
           template: Cisco
           target: ocsf.metadata.product.vendor_name
           replaceMissing: true
-        - type: grok-parser
-          name: Parsing `ocsf.http_request.url.query_string` from `http.url`
-          enabled: true
-          source: http.url
-          samples:
-            - /datadoghq/company?test=var1%20Pl
-          grok:
-            supportRules: ""
-            matchRules: >
-              extract_query_string
-              %{regex("[^?]+")}\?%{regex(".*"):ocsf.http_request.url.query_string}
     - type: pipeline
       name: OCSF sub pipeline for HTTP Activity [4002]
       enabled: true
@@ -517,6 +506,7 @@ pipeline:
             extensions: []
             profiles:
               - network_proxy
+              - security_control
           mappers:
             - name: ocsf.activity_id
               categories:
@@ -660,6 +650,87 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
+        - type: grok-parser
+          name: Parsing `ocsf.http_request.url.query_string` from `http.url`
+          enabled: true
+          source: http.url
+          samples:
+            - /datadoghq/company?test=var1%20Pl
+          grok:
+            supportRules: ""
+            matchRules: >
+              extract_query_string
+              %{regex("[^?]+")}\?%{regex(".*"):ocsf.http_request.url.query_string}
+    - type: pipeline
+      name: OCSF sub pipeline for HTTP Activity [4002] malware transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "service:proxy -@amp.malware:\"\""
+      processors:
+        - type: attribute-remapper
+          name: Map `amp.disposition` to `ocsf.disposition`
+          enabled: true
+          sources:
+            - amp.disposition
+          sourceType: attribute
+          target: ocsf.disposition
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add ocsf.disposition_id
+          enabled: true
+          template: 99
+          target: ocsf.disposition_id
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `ocsf.disposition_id` to `ocsf.disposition_id`
+          enabled: true
+          sources:
+            - ocsf.disposition_id
+          sourceType: attribute
+          target: ocsf.disposition_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `amp.malware` to `ocsf.malware.name`
+          enabled: true
+          sources:
+            - amp.malware
+          sourceType: attribute
+          target: ocsf.malware.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add ocsf.malware.classification_id
+          enabled: true
+          template: 0
+          target: ocsf.malware.classification_id
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `ocsf.malware.classification_id` to `ocsf.malware.classification_id`
+          enabled: true
+          sources:
+            - ocsf.malware.classification_id
+          sourceType: attribute
+          target: ocsf.malware.classification_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: array-processor
+          name: Move classification_id into classification_ids array
+          enabled: true
+          operation:
+            source: ocsf.malware.classification_id
+            target: ocsf.malware.classification_ids
+            preserveSource: false
+            type: append
     - type: pipeline
       name: " OCSF sub pipeline for DNS Activity [4003]"
       enabled: true
