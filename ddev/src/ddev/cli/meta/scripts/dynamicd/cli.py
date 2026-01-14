@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import click
+import requests
 
 from ddev.cli.meta.scripts.dynamicd.constants import (
     DEFAULT_DURATION_SECONDS,
@@ -17,6 +18,35 @@ from ddev.cli.meta.scripts.dynamicd.constants import (
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+
+
+def validate_org(api_key: str, site: str) -> tuple[bool, str]:
+    """Validate API key and return (is_internal_org, org_name).
+
+    Checks if the API key belongs to a Datadog internal org (HQ or Staging).
+    """
+    try:
+        resp = requests.get(
+            f"https://api.{site}/api/v1/validate",
+            headers={"DD-API-KEY": api_key},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        # The validate endpoint returns {"valid": true} on success
+        # We need to call /api/v1/org to get org details
+        org_resp = requests.get(
+            f"https://api.{site}/api/v1/org",
+            headers={"DD-API-KEY": api_key},
+            timeout=10,
+        )
+        org_resp.raise_for_status()
+        org_data = org_resp.json()
+        org_name = org_data.get("org", {}).get("name", "Unknown")
+        is_internal = "datadog" in org_name.lower()
+        return is_internal, org_name
+    except requests.RequestException as e:
+        # If we can't validate, return unknown but not internal
+        return False, f"Unknown (validation failed: {e})"
 
 
 @click.command("dynamicd", short_help="Generate realistic fake telemetry data using AI")
@@ -120,6 +150,30 @@ def dynamicd(
 
     # Get Datadog site
     dd_site = app.config.org.config.get("site", "datadoghq.com")
+
+    # Validate org and warn if internal Datadog org
+    app.display_info("Validating Datadog API key...")
+    is_internal_org, org_name = validate_org(dd_api_key, dd_site)
+
+    app.display_info(f"  Target org: {org_name}")
+    app.display_info(f"  Site: {dd_site}")
+    app.display_info("")
+
+    if is_internal_org:
+        app.display_warning("=" * 60)
+        app.display_warning("WARNING: You are about to send fake data to a Datadog internal org!")
+        app.display_warning(f"  Org: {org_name}")
+        app.display_warning(f"  Site: {dd_site}")
+        app.display_warning("=" * 60)
+        app.display_warning("")
+        confirm = click.prompt(
+            "Are you sure you want to continue? Type 'y' to proceed",
+            default="n",
+            show_default=False,
+        )
+        if confirm.lower() != "y":
+            app.display_info("Aborted by user.")
+            app.abort()
 
     # Interactive scenario selection if not provided
     if scenario is None:

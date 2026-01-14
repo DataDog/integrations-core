@@ -110,7 +110,12 @@ CRITICAL REQUIREMENTS:
    - Breakdown metrics should distribute the total, not all be 0
    - Parent/child metrics must have logical relationships
 
-3. TAGS ARE MANDATORY (dashboards group by tags - missing tags = "N/A" display):
+3. MANDATORY TAG - env:dynamicd
+   - EVERY metric MUST include the tag "env:dynamicd"
+   - This tag allows users to filter out fake/test data in Datadog dashboards
+   - Add this tag to EVERY metric's tags list, without exception
+
+4. TAGS ARE MANDATORY (dashboards group by tags - missing tags = "N/A" display):
    - NEVER use empty strings, "N/A", "null", or placeholder values for tags
    - The integration context lists REQUIRED TAGS for each metric - use them ALL
    - Create 2-4 realistic entity instances per tag (e.g., 3 hosts, 2 endpoints)
@@ -124,15 +129,15 @@ CRITICAL REQUIREMENTS:
      - dir/direction: "inbound", "outbound"
      - api_provider: "openai", "anthropic", "azure"
 
-4. METRIC CORRELATIONS (Very Important):
+6. METRIC CORRELATIONS (Very Important):
    - Metrics must tell a COHERENT STORY - related metrics should move together
    - Use shared "state" variables: base_load, error_rate, queue_depth
    - Derive multiple metrics from these shared states
    - Example: if latency increases, throughput should decrease
    - The dashboard should look like a REAL system
 
-5. Use exact metric names from the integration - do not invent new ones
-6. Respect metric types (gauge=3, count=1, rate=2)"""
+7. Use exact metric names from the integration - do not invent new ones
+8. Respect metric types (gauge=3, count=1, rate=2)"""
 
 STAGE2_USER_PROMPT_TEMPLATE = """Generate a Python script that simulates realistic telemetry data for the
 {display_name} integration.
@@ -170,6 +175,10 @@ Related metrics must tell a coherent story:
 - Don't generate total=5000 with all breakdowns=0 - distribute the values logically
 - Metrics CAN be 0 if it makes sense (e.g., no errors in healthy scenario)
 - But if the parent metric has a value, child metrics should account for it
+
+## MANDATORY: env:dynamicd Tag
+EVERY metric MUST include the tag "env:dynamicd" to allow filtering fake data.
+Add this to every metric's tags list, e.g.: tags=["env:dynamicd", "host:prod-01", ...]
 
 ## Requirements
 
@@ -273,7 +282,7 @@ def send_metrics(metrics: list, api_key: str) -> bool:
                         "value": m["points"][0]["value"]
                     }}
                 ],
-                "tags": m.get("tags", [])
+                "tags": m.get("tags", ["env:dynamicd"])  # Always include env:dynamicd
             }}
             for m in metrics
         ]
