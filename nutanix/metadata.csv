@@ -81,7 +81,7 @@ nutanix.vm.controller.wss3600second_write_mb,gauge,,megabyte,,Vm Controller Wss3
 nutanix.vm.count,gauge,,,,Vm Count.,0,nutanix,count,,
 nutanix.vm.disk_capacity_bytes,gauge,,byte,,Vm Disk Capacity Bytes.,0,nutanix,capacity_bytes,,
 nutanix.vm.disk_usage_ppm,gauge,,,,Vm Disk Usage Ppm.,0,nutanix,usage_ppm,,
-nutanix.vm.guest.memory_usage_ppm,gauge,,,,Vm Guest Memory Usage Ppm.,0,nutanix,memory_usage_ppm,,
+nutanix.vm.guest_memory_usage_ppm,gauge,,,,Vm Guest Memory Usage Ppm.,0,nutanix,memory_usage_ppm,,
 nutanix.vm.hypervisor.avg_io_latency_micros,gauge,,microsecond,,Vm Hypervisor Avg Io Latency Micros.,0,nutanix,avg_io_latency_micros,,
 nutanix.vm.hypervisor.cpu_ready_time_ppm,gauge,,,,Vm Hypervisor Cpu Ready Time Ppm.,0,nutanix,cpu_ready_time_ppm,,
 nutanix.vm.hypervisor.cpu_usage_ppm,gauge,,,,Vm Hypervisor Cpu Usage Ppm.,0,nutanix,cpu_usage_ppm,,
