@@ -94,7 +94,7 @@ The script must:
 3. Model realistic entities and relationships
 4. Support different scenarios (healthy, degraded, incident, etc.)
 5. Include realistic variations, patterns, and noise
-6. Send metrics via Datadog HTTP API
+6. Send BOTH metrics AND logs via Datadog HTTP APIs
 7. Run in a continuous loop with configurable duration
 8. Have clear, readable code with comments
 
@@ -137,7 +137,20 @@ CRITICAL REQUIREMENTS:
    - The dashboard should look like a REAL system
 
 6. Use exact metric names from the integration - do not invent new ones
-7. Respect metric types (gauge=3, count=1, rate=2)"""
+7. Respect metric types (gauge=3, count=1, rate=2)
+
+8. LOGS ARE MANDATORY - Generate realistic logs alongside metrics:
+   - Send logs via Datadog HTTP Logs API (different endpoint from metrics)
+   - Use the integration name as the "source" (e.g., source:celery, source:redis)
+   - Include realistic log messages that match the scenario
+   - Log levels should correlate with scenario:
+     - healthy: mostly INFO, occasional DEBUG
+     - degraded: mix of INFO, WARNING, some ERROR
+     - incident: many ERROR and CRITICAL logs
+     - recovery: WARNING transitioning to INFO
+   - Logs must include ddtags with "env:dynamicd" for filtering
+   - Include relevant attributes: host, service, worker, task, etc.
+   - Generate 5-15 logs per batch depending on scenario severity"""
 
 STAGE2_USER_PROMPT_TEMPLATE = """Generate a Python script that simulates realistic telemetry data for the
 {display_name} integration.
@@ -207,11 +220,15 @@ import requests
 DATADOG_API_KEY = "YOUR_API_KEY"  # Will be replaced at runtime
 DATADOG_SITE = "{dd_site}"
 METRICS_ENDPOINT = f"https://api.{{DATADOG_SITE}}/api/v2/series"
+LOGS_ENDPOINT = f"https://http-intake.logs.{{DATADOG_SITE}}/api/v2/logs"
 
 SCENARIO = "{scenario}"
 DURATION_SECONDS = {duration}  # 0 = run forever
 METRICS_PER_BATCH = {metrics_per_batch}
 BATCH_INTERVAL_SECONDS = 10.0  # Send every 10 seconds (realistic monitoring interval)
+
+# Log source should match the integration name for proper filtering
+LOG_SOURCE = "{integration_name}"  # Used as ddsource in logs
 
 # =============================================================================
 # SIMULATED ENVIRONMENT
@@ -236,12 +253,20 @@ def generate_metrics() -> list[dict[str, Any]]:
     \"\"\"Generate a batch of metrics.\"\"\"
     pass
 
+def generate_logs() -> list[dict[str, Any]]:
+    \"\"\"Generate a batch of logs correlated with metrics/scenario.\"\"\"
+    pass
+
 def send_metrics(metrics: list[dict[str, Any]], api_key: str) -> bool:
     \"\"\"Send metrics to Datadog via HTTP API.\"\"\"
     pass
 
+def send_logs(logs: list[dict[str, Any]], api_key: str, site: str, source: str) -> bool:
+    \"\"\"Send logs to Datadog via HTTP Logs API.\"\"\"
+    pass
+
 def main():
-    \"\"\"Main simulation loop.\"\"\"
+    \"\"\"Main simulation loop - sends both metrics and logs each batch.\"\"\"
     pass
 
 if __name__ == "__main__":
@@ -311,6 +336,55 @@ latency_ms = 10 + (system_load * 200) + random.uniform(-10, 10)
 error_rate = 0.01 if system_load < 0.8 else (system_load - 0.8) * 0.5
 ```
 
+9. SEND LOGS using the Datadog HTTP Logs API:
+
+```python
+def send_logs(logs: list, api_key: str, site: str, source: str) -> bool:
+    \"\"\"Send logs to Datadog using the HTTP Logs API.\"\"\"
+    # Logs intake uses a different endpoint than metrics
+    logs_endpoint = f"https://http-intake.logs.{{site}}/api/v2/logs"
+
+    headers = {{
+        "DD-API-KEY": api_key,
+        "Content-Type": "application/json",
+    }}
+
+    # Format logs for the API
+    formatted_logs = [
+        {{
+            "message": log["message"],
+            "ddsource": source,  # e.g., "celery", "redis", "postgres"
+            "ddtags": f"env:dynamicd,{{log.get('tags', '')}}",
+            "hostname": log.get("hostname", "dynamicd-simulator"),
+            "service": log.get("service", source),
+            "status": log.get("level", "info"),  # debug, info, warning, error, critical
+        }}
+        for log in logs
+    ]
+
+    response = requests.post(logs_endpoint, headers=headers, json=formatted_logs)
+    response.raise_for_status()
+    return True
+```
+
+Example log generation that correlates with scenario:
+```python
+def generate_logs(scenario: str, source: str) -> list:
+    \"\"\"Generate realistic logs based on scenario.\"\"\"
+    logs = []
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    if scenario == "healthy":
+        logs.append({{"message": f"[{{timestamp}}] Task completed successfully", "level": "info"}})
+    elif scenario == "incident":
+        logs.append({{"message": f"[{{timestamp}}] ERROR: Connection timeout after 30s", "level": "error"}})
+        logs.append({{"message": f"[{{timestamp}}] CRITICAL: Queue backlog exceeded threshold", "level": "critical"}})
+    elif scenario == "degraded":
+        logs.append({{"message": f"[{{timestamp}}] WARNING: High latency detected (2.5s)", "level": "warning"}})
+
+    return logs
+```
+
 Generate the complete, working script now. Output ONLY the Python code, no explanations."""
 
 
@@ -326,6 +400,7 @@ def build_stage1_prompt(integration_context: str, display_name: str) -> tuple[st
 def build_stage2_prompt(
     integration_context: str,
     display_name: str,
+    integration_name: str,
     stage1_analysis: str,
     scenario: str,
     dd_site: str,
@@ -338,6 +413,7 @@ def build_stage2_prompt(
     user_prompt = STAGE2_USER_PROMPT_TEMPLATE.format(
         integration_context=integration_context,
         display_name=display_name,
+        integration_name=integration_name,
         stage1_analysis=stage1_analysis,
         scenario=scenario,
         scenario_description=scenario_description,

@@ -93,6 +93,7 @@ def generate_simulator_script(
     stage2_system, stage2_user = build_stage2_prompt(
         integration_context=integration_context_str,
         display_name=context.display_name,
+        integration_name=context.name,
         stage1_analysis=stage1_analysis,
         scenario=scenario,
         dd_site=dd_site,

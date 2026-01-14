@@ -13,6 +13,7 @@ MAX_RETRIES = 3
 # Rate limiting defaults
 # Note: This is minimum per batch - script should send ALL dashboard metrics in each batch
 DEFAULT_METRICS_PER_BATCH = 100  # Target metrics per batch (should cover all dashboard metrics)
+DEFAULT_LOGS_PER_BATCH = 10  # Target logs per batch (realistic log volume)
 DEFAULT_DURATION_SECONDS = 0  # 0 = run forever (continuous mode by default)
 DEFAULT_BATCH_INTERVAL_SECONDS = 10  # Send every 10 seconds (realistic for monitoring)
 
@@ -34,6 +35,16 @@ DATADOG_SITES = {
     "datadoghq.eu": "https://api.datadoghq.eu",
     "ddog-gov.com": "https://api.ddog-gov.com",
     "ap1.datadoghq.com": "https://api.ap1.datadoghq.com",
+}
+
+# Datadog Logs intake endpoints (different from API endpoints)
+DATADOG_LOGS_SITES = {
+    "datadoghq.com": "https://http-intake.logs.datadoghq.com",
+    "us3.datadoghq.com": "https://http-intake.logs.us3.datadoghq.com",
+    "us5.datadoghq.com": "https://http-intake.logs.us5.datadoghq.com",
+    "datadoghq.eu": "https://http-intake.logs.datadoghq.eu",
+    "ddog-gov.com": "https://http-intake.logs.ddog-gov.com",
+    "ap1.datadoghq.com": "https://http-intake.logs.ap1.datadoghq.com",
 }
 
 # Output directory name
