@@ -170,6 +170,7 @@ class TestApplyOverrides:
             'name': 'skip_proxy',
             'value': {'example': False, 'type': 'boolean'},
             'description': 'foobar',
+            'fleet_configurable': True,
         }
 
     def test_list_replace(self):

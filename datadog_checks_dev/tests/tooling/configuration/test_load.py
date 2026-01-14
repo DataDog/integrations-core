@@ -2698,6 +2698,7 @@ def test_template_mapping():
         'required': False,
         'hidden': False,
         'display_priority': 0,
+        'fleet_configurable': True,
         'deprecation': {},
         'metadata_tags': [],
         'secret': False,
