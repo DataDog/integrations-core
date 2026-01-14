@@ -234,6 +234,8 @@ def _run_script(
 
         stdout_lines: list[str] = []
         try:
+            if process.stdout is None:
+                raise ExecutionError("Failed to capture stdout from subprocess")
             for line in process.stdout:
                 if on_output:
                     on_output(line.rstrip('\n'))  # Stream output via callback

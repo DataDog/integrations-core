@@ -223,6 +223,9 @@ def dynamicd(
         if scenario is None:
             app.abort("No scenario selected")
 
+    # Type narrowing: scenario is guaranteed to be str after the above check
+    assert scenario is not None
+
     app.display_info("")
     app.display_info(f"╔{'═' * 60}╗")
     app.display_info(f"║{'DynamicD - Smart Fake Data Generator':^60}║")
