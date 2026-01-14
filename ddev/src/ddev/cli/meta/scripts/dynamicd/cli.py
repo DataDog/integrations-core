@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import click
@@ -62,13 +63,9 @@ def validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, st
             org_info = org_data["orgs"][0]
 
         if org_info:
-            org_name = org_info.get("name")
-            if not org_name:
-                # Debug: name not found in org_info
-                org_name = f"Unknown (org_info keys: {list(org_info.keys())})"
+            org_name = org_info.get("name", "Unknown")
         else:
-            # Debug: show what we actually got
-            org_name = f"Unknown (response keys: {list(org_data.keys())}, data: {str(org_data)[:200]})"
+            org_name = "Unknown"
 
         is_internal = "datadog" in org_name.lower()
         return is_internal, org_name, True
@@ -162,11 +159,22 @@ def dynamicd(
     if not intg.has_metrics:
         app.abort(f"Integration '{integration}' has no metrics defined in metadata.csv")
 
+    # Validate numeric options
+    if duration < 0:
+        app.abort("Duration cannot be negative")
+    if rate <= 0:
+        app.abort("Rate must be a positive number")
+
     # Get LLM API key from config
+    # Get LLM API key from config or environment variable
     llm_api_key = app.config.raw_data.get("dynamicd", {}).get("llm_api_key")
     if not llm_api_key:
+        llm_api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not llm_api_key:
         app.display_error(
-            "LLM API key not configured. Set it with:\n  ddev config set dynamicd.llm_api_key <YOUR_ANTHROPIC_API_KEY>"
+            "LLM API key not configured. Either:\n"
+            "  1. Set env var: export ANTHROPIC_API_KEY=<your-key>\n"
+            "  2. Or run: ddev config set dynamicd.llm_api_key <your-key>"
         )
         app.abort()
 
