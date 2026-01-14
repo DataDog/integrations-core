@@ -197,7 +197,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.health.check_score{$ntnx_cluster_name,$prism_central}",
+                      "query": "avg:nutanix.cluster.health_check_score{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     }
                   ],
@@ -1483,7 +1483,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.health.check_score{$ntnx_cluster_name,$prism_central}",
+                      "query": "avg:nutanix.host.health_check_score{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     }
                   ],

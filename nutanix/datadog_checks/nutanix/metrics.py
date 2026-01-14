@@ -16,7 +16,7 @@ CLUSTER_STATS_METRICS = {
     "cpuCapacityHz": "cluster.cpu.capacity",  # hz
     "cpuUsageHz": "cluster.cpu.usage",  # hz
     "freePhysicalStorageBytes": "cluster.free.physical_storage",  # bytes
-    "healthCheckScore": "cluster.health.check_score",
+    "healthCheckScore": "cluster.health_check_score",
     "hypervisorCpuUsagePpm": "cluster.hypervisor.cpu.usage",  # ppm
     "ioBandwidthKbps": "cluster.io.bandwidth",  # kbps
     "logicalStorageUsageBytes": "cluster.logical.storage.usage",  # bytes
@@ -44,7 +44,7 @@ HOST_STATS_METRICS = {
     "cpuCapacityHz": "host.cpu.capacity",  # hz
     "cpuUsageHz": "host.cpu.usage",  # hz
     "freePhysicalStorageBytes": "host.free.physical_storage",  # bytes
-    "healthCheckScore": "host.health.check_score",
+    "healthCheckScore": "host.health_check_score",
     "hypervisorCpuUsagePpm": "host.hypervisor.cpu.usage",  # ppm
     "ioBandwidthKbps": "host.io.bandwidth",  # kbps
     "logicalStorageUsageBytes": "host.logical.storage.usage",  # bytes
