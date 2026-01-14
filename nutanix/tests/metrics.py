@@ -5,7 +5,7 @@
 HEALTH_METRICS = ["nutanix.health.up"]
 
 CLUSTER_STATS_METRICS_REQUIRED = [
-    "nutanix.cluster.aggregate_hypervisor.memory.usage",
+    "nutanix.cluster.aggregate_hypervisor.memory_usage",
     "nutanix.cluster.controller.avg.io.latency",
     "nutanix.cluster.controller.avg.read.io.latency",
     "nutanix.cluster.controller.avg.write.io.latency",
@@ -14,29 +14,29 @@ CLUSTER_STATS_METRICS_REQUIRED = [
     "nutanix.cluster.controller.num.write.iops",
     "nutanix.cluster.controller.read.io.bandwidth",
     "nutanix.cluster.controller.write.io.bandwidth",
-    "nutanix.cluster.free.physical_storage",
+    "nutanix.cluster.free_physical_storage",
     "nutanix.cluster.health_check_score",
-    "nutanix.cluster.hypervisor.cpu.usage",
+    "nutanix.cluster.hypervisor.cpu_usage",
     "nutanix.cluster.io.bandwidth",
-    "nutanix.cluster.logical.storage.usage",
-    "nutanix.cluster.storage.capacity",
-    "nutanix.cluster.storage.usage",
+    "nutanix.cluster.logical_storage_usage",
+    "nutanix.cluster.storage_capacity",
+    "nutanix.cluster.storage_usage",
 ]
 
 CLUSTER_STATS_METRICS_OPTIONAL = [
-    "nutanix.cluster.cpu.capacity",
-    "nutanix.cluster.cpu.usage",
-    "nutanix.cluster.memory.capacity",
-    "nutanix.cluster.overall.memory.usage",
+    "nutanix.cluster.cpu_capacity",
+    "nutanix.cluster.cpu_usage",
+    "nutanix.cluster.memory_capacity",
+    "nutanix.cluster.overall.memory_usage",
     "nutanix.cluster.overall.savings",
     "nutanix.cluster.overall.savings_ratio",
     "nutanix.cluster.power_consumption_instant_watt",
-    "nutanix.cluster.recycle_bin.usage",
-    "nutanix.cluster.snapshot.capacity",
+    "nutanix.cluster.recycle_bin_usage",
+    "nutanix.cluster.snapshot_capacity",
 ]
 
 HOST_STATS_METRICS_REQUIRED = [
-    "nutanix.host.aggregate_hypervisor.memory.usage",
+    "nutanix.host.aggregate_hypervisor.memory_usage",
     "nutanix.host.controller.avg.io.latency",
     "nutanix.host.controller.avg.read.io.latency",
     "nutanix.host.controller.avg.write.io.latency",
@@ -45,20 +45,20 @@ HOST_STATS_METRICS_REQUIRED = [
     "nutanix.host.controller.num.write.iops",
     "nutanix.host.controller.read.io.bandwidth",
     "nutanix.host.controller.write.io.bandwidth",
-    "nutanix.host.cpu.capacity",
-    "nutanix.host.free.physical_storage",
+    "nutanix.host.cpu_capacity",
+    "nutanix.host.free_physical_storage",
     "nutanix.host.health_check_score",
-    "nutanix.host.hypervisor.cpu.usage",
+    "nutanix.host.hypervisor.cpu_usage",
     "nutanix.host.io.bandwidth",
-    "nutanix.host.logical.storage.usage",
-    "nutanix.host.memory.capacity",
-    "nutanix.host.storage.capacity",
-    "nutanix.host.storage.usage",
+    "nutanix.host.logical_storage_usage",
+    "nutanix.host.memory_capacity",
+    "nutanix.host.storage_capacity",
+    "nutanix.host.storage_usage",
 ]
 
 HOST_STATS_METRICS_OPTIONAL = [
-    "nutanix.host.cpu.usage",
-    "nutanix.host.overall.memory.usage",
+    "nutanix.host.cpu_usage",
+    "nutanix.host.overall.memory_usage",
     "nutanix.host.power.consumption.instant_watt",
 ]
 
@@ -124,7 +124,7 @@ VM_STATS_METRICS_REQUIRED = [
     "nutanix.vm.hypervisor.total_io_time_micros",
     "nutanix.vm.hypervisor.total_read_io_size_kb",
     "nutanix.vm.hypervisor.write_io_bandwidth_kbps",
-    "nutanix.vm.memory.usage_ppm",
+    "nutanix.vm.memory_usage_ppm",
     "nutanix.vm.num_vcpus_used_ppm",
 ]
 
@@ -137,14 +137,14 @@ VM_STATS_METRICS_OPTIONAL = [
     "nutanix.vm.controller.shared_usage_bytes",
     "nutanix.vm.controller.snapshot_usage_bytes",
     "nutanix.vm.frame.buffer_usage_ppm",
-    "nutanix.vm.gpu.usage_ppm",
+    "nutanix.vm.gpu_usage_ppm",
     "nutanix.vm.hypervisor.memory_balloon_reclaim_target_bytes",
     "nutanix.vm.hypervisor.memory_balloon_reclaimed_bytes",
     "nutanix.vm.hypervisor.swap_in_rate_kbps",
     "nutanix.vm.hypervisor.swap_out_rate_kbps",
-    "nutanix.vm.memory.usage_bytes",
-    "nutanix.vm.disk.capacity_bytes",
-    "nutanix.vm.disk.usage_ppm",
+    "nutanix.vm.memory_usage_bytes",
+    "nutanix.vm.disk_capacity_bytes",
+    "nutanix.vm.disk_usage_ppm",
     "nutanix.vm.hypervisor.vm_running_time_usecs",
 ]
 

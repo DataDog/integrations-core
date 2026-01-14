@@ -92,13 +92,13 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:nutanix.cluster.storage.usage{$ntnx_cluster_name,$prism_central}",
+                      "query": "sum:nutanix.cluster.storage_usage{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:nutanix.cluster.storage.capacity{$ntnx_cluster_name,$prism_central}",
+                      "query": "sum:nutanix.cluster.storage_capacity{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     }
                   ],
@@ -316,7 +316,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.hypervisor.cpu.usage{$ntnx_cluster_name,$prism_central}",
+                      "query": "avg:nutanix.cluster.hypervisor.cpu_usage{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     }
                   ],
@@ -380,7 +380,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.aggregate_hypervisor.memory.usage{$ntnx_cluster_name,$prism_central}",
+                      "query": "avg:nutanix.cluster.aggregate_hypervisor.memory_usage{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     }
                   ],
@@ -539,7 +539,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:nutanix.host.cpu.capacity{$ntnx_cluster_name,$prism_central}",
+                      "query": "sum:nutanix.host.cpu_capacity{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     }
                   ],
@@ -586,7 +586,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:nutanix.host.memory.capacity{$ntnx_cluster_name,$prism_central}",
+                      "query": "sum:nutanix.host.memory_capacity{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     }
                   ],
@@ -633,7 +633,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:nutanix.cluster.storage.capacity{$ntnx_cluster_name,$prism_central}",
+                      "query": "sum:nutanix.cluster.storage_capacity{$ntnx_cluster_name,$prism_central}",
                       "aggregator": "last"
                     }
                   ],
@@ -727,7 +727,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.hypervisor.cpu.usage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.hypervisor.cpu_usage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -778,7 +778,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.aggregate_hypervisor.memory.usage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.aggregate_hypervisor.memory_usage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -829,7 +829,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.storage.usage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.storage_usage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -857,7 +857,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.storage.capacity{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.storage_capacity{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -908,7 +908,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.logical.storage.usage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.logical_storage_usage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1281,7 +1281,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.cluster.free.physical_storage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                      "query": "avg:nutanix.cluster.free_physical_storage{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1382,7 +1382,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.hypervisor.cpu.usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}",
+                      "query": "avg:nutanix.host.hypervisor.cpu_usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}",
                       "aggregator": "avg"
                     }
                   ],
@@ -1432,7 +1432,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.storage.usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}",
+                      "query": "avg:nutanix.host.storage_usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}",
                       "aggregator": "avg"
                     }
                   ],
@@ -1549,7 +1549,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.hypervisor.cpu.usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.hypervisor.cpu_usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [
@@ -1600,7 +1600,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.aggregate_hypervisor.memory.usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.aggregate_hypervisor.memory_usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [
@@ -1651,7 +1651,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.storage.usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.storage_usage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [
@@ -1679,7 +1679,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.host.storage.capacity{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
+                      "query": "avg:nutanix.host.storage_capacity{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {host}"
                     }
                   ],
                   "formulas": [
@@ -2084,7 +2084,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.vm.memory.usage_ppm{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
+                      "query": "avg:nutanix.vm.memory_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
                       "aggregator": "avg"
                     }
                   ],
@@ -2234,7 +2234,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:nutanix.vm.memory.usage_ppm{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}"
+                      "query": "avg:nutanix.vm.memory_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}"
                     }
                   ],
                   "formulas": [
