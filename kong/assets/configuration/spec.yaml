@@ -16,6 +16,7 @@ files:
         extra_metrics.value.example:
         - kong_memory_workers_lua_vms_bytes: memory.workers.lua.vms.bytes
     - name: kong_status_url
+      legacy: true
       display_priority: 1
       description: |
         The check collects and parses metrics from the admin /status endpoint.
