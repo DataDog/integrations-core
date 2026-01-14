@@ -213,7 +213,7 @@ MOCK_DATETIME = datetime(2025, 10, 14, 11, 15, 00, tzinfo=timezone.utc)
 LAST_EVENT_TIMESTAMP = datetime(2025, 12, 4, 15, 53, tzinfo=timezone.utc)
 
 
-@mock.patch("datadog_checks.nutanix.check.get_current_datetime")
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_events_collection(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
     """Test that events are collected and have proper structure."""
     get_current_datetime.return_value = MOCK_DATETIME
@@ -397,7 +397,7 @@ EXPECTED_EVENTS = [
 ]
 
 
-@mock.patch("datadog_checks.nutanix.check.get_current_datetime")
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_events_no_duplicates_on_subsequent_runs(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
 ):
@@ -523,7 +523,7 @@ EXPECTED_TASKS = [
 ]
 
 
-@mock.patch("datadog_checks.nutanix.check.get_current_datetime")
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_tasks_collection(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
     """Test that tasks are collected and have proper structure."""
 
@@ -543,7 +543,7 @@ def test_tasks_collection(get_current_datetime, dd_run_check, aggregator, mock_i
     assert aggregator.events == EXPECTED_TASKS, "Expected tasks to be collected"
 
 
-@mock.patch("datadog_checks.nutanix.check.get_current_datetime")
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_tasks_no_duplicates_on_subsequent_runs(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
 ):

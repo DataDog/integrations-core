@@ -51,10 +51,10 @@ INSTANCE = {
 AWS_INSTANCE = {
     "pc_ip": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com",
     "pc_port": 9440,
-    "pc_username": "dd_agent_viewer",
-    "pc_password": "DummyP4ssw0rd!",
+    "pc_username": "dd_agent",
+    "pc_password": "DummyPassw0rd!",
     "tls_verify": False,
-    "page_limit": 2,  # Use limit=2 to match paginated fixtures
+    "page_limit": 50,
 }
 
 
