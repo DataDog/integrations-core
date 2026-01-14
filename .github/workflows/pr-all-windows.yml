@@ -27,7 +27,7 @@ jobs:
 
       # Options
       context: "pr"
-      
+
     secrets: inherit
 
   save-event:

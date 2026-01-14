@@ -51,6 +51,8 @@ TESTABLE_FILE_PATTERN = re.compile(
   | pyproject\.toml
   | datadog_checks/[^/]+/data/metrics\.yaml
   | datadog_checks/snmp/data/default_profiles/.+
+  # Add templates files from dcd to the list of testeable files to ensure template formatting tests are not ignored and break on master
+  | datadog_checks/dev/tooling/templates/configuration/.+yaml
     """,
     re.VERBOSE,
 )
