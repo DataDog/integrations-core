@@ -129,12 +129,22 @@ class NutanixCheck(AgentCheck):
 
         # other errors
         elif not response.ok:
-            self.log.debug(
-                "HTTP non-2xx response: %s %s, status_code=%s, payload_length=%s",
+            error_msg = "Unknown error"
+            try:
+                error_response = response.json()
+                if error_data := error_response.get("data", {}):
+                    errors = error_data.get("error", [])
+                    if errors:
+                        error_msg = str(errors)
+            except Exception:
+                error_msg = response.text or str(status)
+
+            self.log.error(
+                "HTTP non-2xx response: %s %s, status_code=%s, error=%s",
                 method.upper(),
                 url,
                 status,
-                len(response.content) if response.content else 0,
+                error_msg,
             )
 
         return response
