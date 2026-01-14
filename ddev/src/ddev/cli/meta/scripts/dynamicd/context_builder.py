@@ -459,13 +459,14 @@ def _read_dashboard_tags(integration: Integration) -> dict[str, list[str]]:
             with dashboard_file.open(encoding='utf-8') as f:
                 content = f.read()
 
-            # Find "by {tags}" groupings
+            # Find all metrics and their "by {tags}" groupings
             for match in by_pattern.finditer(content):
                 metric_name = match.group(1)
+                # Initialize metric even without "by {}" so filter tags get captured
+                if metric_name not in metric_tags:
+                    metric_tags[metric_name] = set()
                 if match.group(2):  # Has "by {tags}"
                     tags = [t.strip() for t in match.group(2).split(',')]
-                    if metric_name not in metric_tags:
-                        metric_tags[metric_name] = set()
                     metric_tags[metric_name].update(tags)
 
             # Find tags used in filters
