@@ -165,7 +165,6 @@ def dynamicd(
     if rate <= 0:
         app.abort("Rate must be a positive number")
 
-    # Get LLM API key from config
     # Get LLM API key from config or environment variable
     llm_api_key = app.config.raw_data.get("dynamicd", {}).get("llm_api_key")
     if not llm_api_key:

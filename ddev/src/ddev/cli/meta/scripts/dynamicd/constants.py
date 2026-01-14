@@ -4,7 +4,9 @@
 """Constants for DynamicD."""
 
 # LLM Configuration
-DEFAULT_MODEL = "claude-opus-4-20250514"
+# Using Sonnet for good balance of quality and speed. For complex integrations,
+# consider using "claude-opus-4-20250514" for better reasoning.
+DEFAULT_MODEL = "claude-sonnet-4-20250514"
 MAX_TOKENS = 16000
 MAX_RETRIES = 3
 

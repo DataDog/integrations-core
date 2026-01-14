@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -73,7 +74,7 @@ def execute_script(
         executable_script = _inject_api_key(current_script, dd_api_key)
 
         # Write to temp file and execute with env var
-        result = _run_script(executable_script, timeout, env_vars=env_vars)
+        result = _run_script(executable_script, timeout, env_vars=env_vars, on_output=print)
 
         if result.return_code == 0:
             status("Script executed successfully!")
@@ -198,7 +199,12 @@ class _RunResult:
     stderr: str
 
 
-def _run_script(script: str, timeout: int | None, env_vars: dict[str, str] | None = None) -> _RunResult:
+def _run_script(
+    script: str,
+    timeout: int | None,
+    env_vars: dict[str, str] | None = None,
+    on_output: Callable[[str], None] | None = None,
+) -> _RunResult:
     """Run a script in a subprocess with real-time output streaming."""
     with tempfile.NamedTemporaryFile(
         mode="w",
@@ -228,7 +234,8 @@ def _run_script(script: str, timeout: int | None, env_vars: dict[str, str] | Non
         stdout_lines: list[str] = []
         try:
             for line in process.stdout:
-                print(line, end='', flush=True)  # Print in real-time
+                if on_output:
+                    on_output(line.rstrip('\n'))  # Stream output via callback
                 stdout_lines.append(line)
             process.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
@@ -263,10 +270,10 @@ def _inject_api_key(script: str, api_key: str) -> str:
     Replaces the placeholder API key with the actual key. The API key is also
     passed via environment variable as a fallback (see execute_script).
     """
-    # Escape any special characters in the API key to prevent injection
-    safe_api_key = api_key.replace("\\", "\\\\").replace('"', '\\"')
+    # Use json.dumps for robust escaping of all special characters
+    safe_api_key = json.dumps(api_key)  # Returns quoted string like '"key"'
 
     # Replace placeholder with actual key
-    script = script.replace('DATADOG_API_KEY = "YOUR_API_KEY"', f'DATADOG_API_KEY = "{safe_api_key}"')
+    script = script.replace('DATADOG_API_KEY = "YOUR_API_KEY"', f'DATADOG_API_KEY = {safe_api_key}')
 
     return script
