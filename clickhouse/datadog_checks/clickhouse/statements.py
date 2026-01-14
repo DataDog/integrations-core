@@ -62,6 +62,7 @@ SELECT
     normalizeQuery(any(query)) as query_text,
     any(user) as user,
     any(type) as query_type,
+    any(exception_code) as exception_code,
     any(databases) as databases,
     any(tables) as tables,
     count() as execution_count,
@@ -83,9 +84,6 @@ WHERE
     AND event_date >= toDate(fromUnixTimestamp64Micro({last_checkpoint_microseconds}))
     AND type != 'QueryStart'
     AND is_initial_query = 1
-    AND query NOT LIKE '%system.query_log%'
-    AND query NOT LIKE '%system.processes%'
-    AND query NOT LIKE '/* DDIGNORE */%'
     AND query != ''
     AND normalized_query_hash != 0
     {internal_user_filter}
@@ -437,6 +435,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                     query_text,
                     user,
                     query_type,
+                    exception_code,
                     databases,
                     tables,
                     execution_count,
@@ -469,8 +468,9 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                         'query': str(query_text) if query_text else '',
                         'user': str(user) if user else '',
                         'query_type': str(query_type) if query_type else '',
+                        'exception_code': str(exception_code) if exception_code else '',
                         'databases': str(databases[0]) if databases and len(databases) > 0 else '',
-                        'tables': tables if tables else [],
+                        'dd_tables': tables if tables else [],  # Use ClickHouse native tables column
                         'count': int(execution_count) if execution_count else 0,
                         'total_time': float(total_duration_ms) if total_duration_ms else 0.0,
                         # Mean time calculated directly (no derivative needed with checkpointing)
@@ -559,7 +559,11 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
 
             metadata = statement['metadata']
-            normalized_row['dd_tables'] = metadata.get('tables', None)
+            # Keep ClickHouse native dd_tables if present (more accurate than obfuscator)
+            # Only use obfuscator tables as fallback
+            if not normalized_row.get('dd_tables'):
+                normalized_row['dd_tables'] = metadata.get('tables', None)
+            # Add commands and comments from obfuscator (ClickHouse doesn't have native columns for these)
             normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(normalized_row)
