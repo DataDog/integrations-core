@@ -20,11 +20,14 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-def validate_org(api_key: str, site: str) -> tuple[bool, str]:
-    """Validate API key and return (is_internal_org, org_name).
+def validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, str, bool]:
+    """Validate API key and return (is_internal_org, org_name, key_valid).
 
     Checks if the API key belongs to a Datadog internal org (HQ or Staging).
+    Note: Org lookup requires an Application Key. If not provided, we can only
+    validate the API key works but cannot determine the org name.
     """
+    # First validate the API key
     try:
         resp = requests.get(
             f"https://api.{site}/api/v1/validate",
@@ -32,21 +35,48 @@ def validate_org(api_key: str, site: str) -> tuple[bool, str]:
             timeout=10,
         )
         resp.raise_for_status()
-        # The validate endpoint returns {"valid": true} on success
-        # We need to call /api/v1/org to get org details
+    except requests.RequestException as e:
+        return False, f"Unknown (API key validation failed: {e})", False
+
+    # API key is valid. Now try to get org info (requires app key)
+    if not app_key:
+        return False, "(org lookup requires app_key - set orgs.<org>.app_key)", True
+
+    try:
         org_resp = requests.get(
             f"https://api.{site}/api/v1/org",
-            headers={"DD-API-KEY": api_key},
+            headers={"DD-API-KEY": api_key, "DD-APPLICATION-KEY": app_key},
             timeout=10,
         )
         org_resp.raise_for_status()
         org_data = org_resp.json()
-        org_name = org_data.get("org", {}).get("name", "Unknown")
+
+        # The API can return either:
+        # - {"org": {"name": "..."}} for single org
+        # - {"orgs": [{"name": "..."}, ...]} for multi-org accounts
+        org_info = None
+        if "org" in org_data:
+            org_info = org_data["org"]
+        elif "orgs" in org_data and org_data["orgs"]:
+            # For multi-org, use the first (parent) org
+            org_info = org_data["orgs"][0]
+
+        if org_info:
+            org_name = org_info.get("name")
+            if not org_name:
+                # Debug: name not found in org_info
+                org_name = f"Unknown (org_info keys: {list(org_info.keys())})"
+        else:
+            # Debug: show what we actually got
+            org_name = f"Unknown (response keys: {list(org_data.keys())}, data: {str(org_data)[:200]})"
+
         is_internal = "datadog" in org_name.lower()
-        return is_internal, org_name
+        return is_internal, org_name, True
     except requests.RequestException as e:
-        # If we can't validate, return unknown but not internal
-        return False, f"Unknown (validation failed: {e})"
+        # Org lookup failed but key is valid
+        return False, f"(org lookup failed: {e})", True
+    except Exception as e:
+        return False, f"(unexpected error: {type(e).__name__}: {e})", True
 
 
 @click.command("dynamicd", short_help="Generate realistic fake telemetry data using AI")
@@ -148,12 +178,17 @@ def dynamicd(
         )
         app.abort()
 
-    # Get Datadog site
+    # Get Datadog site and app key
     dd_site = app.config.org.config.get("site", "datadoghq.com")
+    dd_app_key = app.config.org.config.get("app_key")
 
     # Validate org and warn if internal Datadog org
     app.display_info("Validating Datadog API key...")
-    is_internal_org, org_name = validate_org(dd_api_key, dd_site)
+    is_internal_org, org_name, key_valid = validate_org(dd_api_key, dd_app_key, dd_site)
+
+    if not key_valid:
+        app.display_error(f"API key validation failed: {org_name}")
+        app.abort()
 
     app.display_info(f"  Target org: {org_name}")
     app.display_info(f"  Site: {dd_site}")
