@@ -129,15 +129,15 @@ CRITICAL REQUIREMENTS:
      - dir/direction: "inbound", "outbound"
      - api_provider: "openai", "anthropic", "azure"
 
-6. METRIC CORRELATIONS (Very Important):
+5. METRIC CORRELATIONS (Very Important):
    - Metrics must tell a COHERENT STORY - related metrics should move together
    - Use shared "state" variables: base_load, error_rate, queue_depth
    - Derive multiple metrics from these shared states
    - Example: if latency increases, throughput should decrease
    - The dashboard should look like a REAL system
 
-7. Use exact metric names from the integration - do not invent new ones
-8. Respect metric types (gauge=3, count=1, rate=2)"""
+6. Use exact metric names from the integration - do not invent new ones
+7. Respect metric types (gauge=3, count=1, rate=2)"""
 
 STAGE2_USER_PROMPT_TEMPLATE = """Generate a Python script that simulates realistic telemetry data for the
 {display_name} integration.

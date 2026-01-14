@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
@@ -190,14 +191,12 @@ def _clean_script(script: str) -> str:
     """Remove markdown code blocks and clean up the script."""
     script = script.strip()
 
-    # Remove markdown code blocks
-    if script.startswith("```python"):
-        script = script[9:]
-    elif script.startswith("```"):
-        script = script[3:]
+    # Remove opening markdown code block with various formats:
+    # ```python, ``` python, ```py, ``` py, or just ```
+    script = re.sub(r'^```\s*(?:python|py)?\s*\n?', '', script, flags=re.IGNORECASE)
 
-    if script.endswith("```"):
-        script = script[:-3]
+    # Remove closing markdown code block
+    script = re.sub(r'\n?```\s*$', '', script)
 
     script = script.strip()
 

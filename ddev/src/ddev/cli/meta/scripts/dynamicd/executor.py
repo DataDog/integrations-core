@@ -244,12 +244,6 @@ def _run_script(script: str, timeout: int | None, env_vars: dict[str, str] | Non
             stdout=''.join(stdout_lines),
             stderr='',
         )
-    except subprocess.TimeoutExpired:
-        return _RunResult(
-            return_code=-1,
-            stdout="",
-            stderr=f"Script timed out after {timeout} seconds",
-        )
     except Exception as e:
         return _RunResult(
             return_code=-1,
