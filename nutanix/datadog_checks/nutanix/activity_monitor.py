@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datetime import datetime, timedelta
 
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
