@@ -675,6 +675,8 @@ integration/strimzi:
 - strimzi/**/*
 integration/supabase:
 - supabase/**/*
+integration/supabase_cloud:
+- supabase_cloud/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/supply_chain_firewall:
