@@ -37,6 +37,8 @@ tests:
               name: "nginx"
               vendor_name: "F5"
             version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
           src_endpoint:
             ip: "127.0.0.1"
           status: "Success"
