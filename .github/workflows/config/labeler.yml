@@ -121,6 +121,8 @@ integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
 - cassandra_nodetool/**/*
+integration/cato_networks:
+- cato_networks/**/*
 integration/celery:
 - celery/**/*
 integration/ceph:
@@ -739,10 +741,14 @@ integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:
 - twistlock/**/*
+integration/valence_security:
+- valence_security/**/*
 integration/varnish:
 - varnish/**/*
 integration/vault:
 - vault/**/*
+integration/vectra:
+- vectra/**/*
 integration/velero:
 - velero/**/*
 integration/versa:
