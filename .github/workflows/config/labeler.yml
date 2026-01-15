@@ -675,6 +675,8 @@ integration/strimzi:
 - strimzi/**/*
 integration/supabase:
 - supabase/**/*
+integration/supabase_cloud:
+- supabase_cloud/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/supply_chain_firewall:
@@ -741,10 +743,14 @@ integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:
 - twistlock/**/*
+integration/valence_security:
+- valence_security/**/*
 integration/varnish:
 - varnish/**/*
 integration/vault:
 - vault/**/*
+integration/vectra:
+- vectra/**/*
 integration/velero:
 - velero/**/*
 integration/versa:

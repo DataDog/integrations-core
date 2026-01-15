@@ -26,8 +26,8 @@ jobs:
       repo: core
 
       # Options
-      test-py2: true
       context: "pr"
+      
     secrets: inherit
 
   save-event:
