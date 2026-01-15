@@ -1,3 +1,1 @@
-Add completed query samples collection from system.query_log for DBM Query Samples page. This feature captures individual completed queries with performance metrics, enabling detailed query analysis in Database Monitoring.
-
-
+Add ClickHouse support for DBM with Query Metrics, Query Samples & Query Completions
