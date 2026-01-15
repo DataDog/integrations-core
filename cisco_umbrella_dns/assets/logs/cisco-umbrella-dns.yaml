@@ -549,6 +549,14 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
+            - name: ocsf.metadata
+              sources:
+                - ocsf.metadata
+              sourceType: attribute
+              target: ocsf.metadata
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: ocsf.severity_id
               categories:
                 - filter:
@@ -777,6 +785,14 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
+            - name: ocsf.metadata
+              sources:
+                - ocsf.metadata
+              sourceType: attribute
+              target: ocsf.metadata
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
