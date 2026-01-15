@@ -67,14 +67,21 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1768209644112
  -
-  sample: '{"level":"warn","message":"Permissions 0755 for n8n settings file /home/node/.n8n/config are too wide. This is ignored for now, but in the future n8n will attempt to change the permissions automatically. To automatically enforce correct permissions now set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true (recommended), or turn this check off set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false.","metadata":{"file":"instance-settings.js","function":"ensureSettingsFilePermissions","timestamp":"2026-01-12T14:54:21.727Z"}}'
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "instance-settings.js",
+        "function" : "ensureSettingsFilePermissions",
+        "timestamp" : "2026-01-12T14:54:21.727Z"
+      },
+      "level" : "warn",
+      "message" : "Permissions 0755 for n8n settings file /home/node/.n8n/config are too wide. This is ignored for now, but in the future n8n will attempt to change the permissions automatically. To automatically enforce correct permissions now set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true (recommended), or turn this check off set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false."
+    }
   result:
     custom:
       level: "warn"
       metadata:
-        file: "instance-settings.js"
-        function: "ensureSettingsFilePermissions"
-        timestamp: 1768229661727
+        timestamp: "2026-01-12T14:54:21.727Z"
       n8n:
         file: "instance-settings.js"
         function: "ensureSettingsFilePermissions"
@@ -84,14 +91,21 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1768229661727
  -
-  sample: '{"level":"debug","message":"User settings loaded from: /home/node/.n8n/config","metadata":{"file":"instance-settings.js","function":"loadOrCreate","timestamp":"2026-01-12T14:54:21.730Z"}}'
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "instance-settings.js",
+        "function" : "loadOrCreate",
+        "timestamp" : "2026-01-12T14:54:21.730Z"
+      },
+      "level" : "debug",
+      "message" : "User settings loaded from: /home/node/.n8n/config"
+    }
   result:
     custom:
       level: "debug"
       metadata:
-        file: "instance-settings.js"
-        function: "loadOrCreate"
-        timestamp: 1768229661730
+        timestamp: "2026-01-12T14:54:21.730Z"
       n8n:
         file: "instance-settings.js"
         function: "loadOrCreate"
@@ -101,14 +115,21 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1768229661730
  -
-  sample: '{"level":"info","message":"n8n ready on ::, port 5678","metadata":{"file":"abstract-server.js","function":"init","timestamp":"2026-01-12T14:54:22.248Z"}}'
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "abstract-server.js",
+        "function" : "init",
+        "timestamp" : "2026-01-12T14:54:22.248Z"
+      },
+      "level" : "info",
+      "message" : "n8n ready on ::, port 5678"
+    }
   result:
     custom:
       level: "info"
       metadata:
-        file: "abstract-server.js"
-        function: "init"
-        timestamp: 1768229662248
+        timestamp: "2026-01-12T14:54:22.248Z"
       n8n:
         file: "abstract-server.js"
         function: "init"
@@ -118,14 +139,21 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1768229662248
  -
-  sample: '{"level":"info","message":"Version: 1.117.2","metadata":{"file":"abstract-server.js","function":"start","timestamp":"2026-01-12T14:54:24.563Z"}}'
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "abstract-server.js",
+        "function" : "start",
+        "timestamp" : "2026-01-12T14:54:24.563Z"
+      },
+      "level" : "info",
+      "message" : "Version: 1.117.2"
+    }
   result:
     custom:
       level: "info"
       metadata:
-        file: "abstract-server.js"
-        function: "start"
-        timestamp: 1768229664563
+        timestamp: "2026-01-12T14:54:24.563Z"
       n8n:
         file: "abstract-server.js"
         function: "start"
@@ -135,16 +163,22 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1768229664563
  -
-  sample: '{"level":"debug","message":"[license SDK] initializing for deviceFingerprint 6e244bf5e4a2b9c616a2ef0a0948fa148ae41c4b726ae747fde112d71ae03b1b","metadata":{"file":"LicenseManager.js","function":"log","scopes":["license"],"timestamp":"2026-01-12T14:54:22.323Z"}}'
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "LicenseManager.js",
+        "function" : "log",
+        "scopes" : ["license"],
+        "timestamp" : "2026-01-12T14:54:22.323Z"
+      },
+      "level" : "debug",
+      "message" : "[license SDK] initializing for deviceFingerprint 6e244bf5e4a2b9c616a2ef0a0948fa148ae41c4b726ae747fde112d71ae03b1b"
+    }
   result:
     custom:
       level: "debug"
       metadata:
-        file: "LicenseManager.js"
-        function: "log"
-        scopes:
-          - "license"
-        timestamp: 1768229662323
+        timestamp: "2026-01-12T14:54:22.323Z"
       n8n:
         file: "LicenseManager.js"
         function: "log"
@@ -156,14 +190,21 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1768229662323
  -
-  sample: '{"level":"info","message":"\nEditor is now accessible via:\nhttp://0.0.0.0:5678","metadata":{"file":"base-command.js","function":"log","timestamp":"2026-01-12T14:54:24.570Z"}}'
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "base-command.js",
+        "function" : "log",
+        "timestamp" : "2026-01-12T14:54:24.570Z"
+      },
+      "level" : "info",
+      "message" : "\nEditor is now accessible via:\nhttp://0.0.0.0:5678"
+    }
   result:
     custom:
       level: "info"
       metadata:
-        file: "base-command.js"
-        function: "log"
-        timestamp: 1768229664570
+        timestamp: "2026-01-12T14:54:24.570Z"
       n8n:
         file: "base-command.js"
         function: "log"
