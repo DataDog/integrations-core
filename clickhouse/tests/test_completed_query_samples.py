@@ -5,9 +5,10 @@ import time
 from unittest import mock
 
 import pytest
-
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.completed_query_samples import ClickhouseCompletedQuerySamples
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
@@ -316,4 +317,3 @@ def test_default_config_values():
     assert check.completed_query_samples._config.samples_per_hour_per_query == 15
     assert check.completed_query_samples._config.seen_samples_cache_maxsize == 10000
     assert check.completed_query_samples._config.max_samples_per_collection == 1000
-

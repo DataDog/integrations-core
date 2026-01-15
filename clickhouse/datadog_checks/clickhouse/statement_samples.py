@@ -367,7 +367,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             rows = result.result_rows
 
             elapsed_ms = (time.time() - start_time) * 1000
-            self._log.debug("Retrieved %s connection aggregation rows from %s in %.2f ms", len(rows), processes_table, elapsed_ms)
+            self._log.debug(
+                "Retrieved %s connection aggregation rows from %s in %.2f ms", len(rows), processes_table, elapsed_ms
+            )
 
             # Convert to list of dicts
             connections = []

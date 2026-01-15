@@ -5,9 +5,10 @@ import time
 from unittest import mock
 
 import pytest
-
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.statement_samples import ClickhouseStatementSamples
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
