@@ -1,7 +1,14 @@
 id: "sshd"
 tests:
  -
-  sample: "pam_unix(sshd:session): session closed for user marc.szalkiewicz"
+  sample: |-
+    {
+      "journald": {
+        "_HOSTNAME": "ssh-server",
+        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
+      },
+      "message": "pam_unix(sshd:session): session closed for user marc.szalkiewicz"
+    }
   result:
     custom:
       ocsf:
@@ -11,6 +18,9 @@ tests:
         class_uid: 3002
         activity_id: 2
         activity_name: "Logoff"
+        time: 1768399940641849
+        dst_endpoint:
+          hostname: "ssh-server"
         metadata:
           product:
             name: "OpenSSH"
@@ -33,7 +43,14 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: "Accepted publickey for topdog from 172.22.179.72 port 58599 ssh2: RSA 08:fd:c7:75:ee:fbxxxx:xxxxx"
+  sample: |-
+    {
+      "journald": {
+        "_HOSTNAME": "ssh-server",
+        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
+      },
+      "message": "Accepted publickey for topdog from 172.22.179.72 port 58599 ssh2: RSA 08:fd:c7:75:ee:fbxxxx:xxxxx"
+    }
   result:
     custom:
       network:
@@ -47,6 +64,9 @@ tests:
         class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
+        time: 1768399940641849
+        dst_endpoint:
+          hostname: "ssh-server"
         metadata:
           product:
             name: "OpenSSH"
@@ -75,7 +95,14 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: "Received disconnect from 172.22.179.72: 11: disconnected by user"
+  sample: |-
+    {
+      "journald": {
+        "_HOSTNAME": "ssh-server",
+        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
+      },
+      "message": "Received disconnect from 172.22.179.72: 11: disconnected by user"
+    }
   result:
     custom:
       network:
@@ -88,7 +115,14 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: "Failed password for invalid user admin from 192.168.1.100 port 22334 ssh2"
+  sample: |-
+    {
+      "journald": {
+        "_HOSTNAME": "ssh-server",
+        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
+      },
+      "message": "Failed password for invalid user admin from 192.168.1.100 port 22334 ssh2"
+    }
   result:
     custom:
       network:
@@ -102,6 +136,9 @@ tests:
         class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
+        time: 1768399940641849
+        dst_endpoint:
+          hostname: "ssh-server"
         status: "Failure"
         status_id: 2
         metadata:
@@ -128,7 +165,14 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: "Starting session: shell on pts/0 for ubuntu from 192.168.1.100 port 49630 id 0"
+  sample: |-
+    {
+      "journald": {
+        "_HOSTNAME": "ssh-server",
+        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
+      },
+      "message": "Starting session: shell on pts/0 for ubuntu from 192.168.1.100 port 49630 id 0"
+    }
   result:
     custom:
       network:
@@ -142,6 +186,9 @@ tests:
         class_uid: 3002
         activity_id: 1
         activity_name: "Logon"
+        time: 1768399940641849
+        dst_endpoint:
+          hostname: "ssh-server"
         status: "Success"
         status_id: 1
         metadata:
@@ -170,7 +217,14 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: "Close session: user ubuntu from 192.168.1.100 port 49630 id 0"
+  sample: |-
+    {
+      "journald": {
+        "_HOSTNAME": "ssh-server",
+        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
+      },
+      "message": "Close session: user ubuntu from 192.168.1.100 port 49630 id 0"
+    }
   result:
     custom:
       network:
@@ -184,6 +238,9 @@ tests:
         class_uid: 3002
         activity_id: 2
         activity_name: "Logoff"
+        time: 1768399940641849
+        dst_endpoint:
+          hostname: "ssh-server"
         metadata:
           product:
             name: "OpenSSH"
