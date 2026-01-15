@@ -47,13 +47,13 @@ WHERE
 GROUP BY object_id
 """
 
+# Cast the column names to nvarchar(max) to avoid exceeding the max length when using STRING_AGG
 INDEX_QUERY = """
 SELECT
     i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
-    i.is_disabled, STRING_AGG(c.name, ',') AS column_names
+    i.is_disabled, STRING_AGG(CAST(COL_NAME(ic.object_id, ic.column_id) as nvarchar(max)), ',') AS column_names
 FROM
-    sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
-    AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+    sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
 WHERE i.object_id = schema_tables.table_id
 GROUP BY i.object_id, i.name, i.type,
     i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
