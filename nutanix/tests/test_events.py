@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from unittest import mock
 
 import pytest
@@ -12,7 +12,7 @@ from datadog_checks.nutanix import NutanixCheck
 pytestmark = [pytest.mark.unit]
 
 # Mock datetime to match events fixture creation times
-MOCK_DATETIME = datetime(2025, 10, 14, 11, 15, 00, tzinfo=timezone.utc)
+MOCK_DATETIME = datetime.fromisoformat("2025-10-14T11:15:00.00000Z")
 
 EXPECTED_EVENTS = [
     {
@@ -218,9 +218,7 @@ def test_events_no_duplicates_on_subsequent_runs(
 
     aggregator.reset()
 
-    # Move time forward past all events - the most recent event is at 2025-10-16T14:26:43
-    last_event_time = datetime.fromisoformat("2025-10-16T14:26:43.962603Z".replace("Z", "+00:00"))
-    get_current_datetime.return_value = last_event_time + timedelta(seconds=check.sampling_interval + 1)
+    # second check run, no new events to be collected
     dd_run_check(check)
 
     events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]

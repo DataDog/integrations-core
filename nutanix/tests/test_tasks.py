@@ -124,11 +124,7 @@ def test_tasks_no_duplicates_on_subsequent_runs(
 
     aggregator.reset()
 
-    # Move time forward past all tasks - the most recent task is at 2026-01-09T12:39:54
-    get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
-        seconds=instance.get("min_collection_interval", 120) + 30
-    )
-
+    # second check run, no new tasks to be collected
     dd_run_check(check)
 
     tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]

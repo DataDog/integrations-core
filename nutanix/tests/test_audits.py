@@ -124,3 +124,31 @@ def test_audits_collection(get_current_datetime, dd_run_check, aggregator, mock_
     assert len(audits) == 4
 
     assert audits == EXPECTED_AUDITS
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_audits_no_duplicates_on_subsequent_runs(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Test that no audits are collected when there are no new audits since last collection."""
+
+    instance = mock_instance.copy()
+    instance["collect_audits"] = True
+    get_current_datetime.return_value = MOCK_AUDIT_DATETIME + timedelta(
+        seconds=instance.get("min_collection_interval", 120)
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
+    assert len(audits) == 4, "Expected audits to be collected on first run"
+    assert audits == EXPECTED_AUDITS
+
+    aggregator.reset()
+
+    # second check run, no new audits to be collected
+    dd_run_check(check)
+
+    audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
+    assert len(audits) == 0, "Expected no audits when there are no new audits since last collection"
