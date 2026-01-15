@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 37.27.0 / 2026-01-13
+
+***Security***:
+
+* Bump urllib3 version to 2.6.3 ([#22308](https://github.com/DataDog/integrations-core/pull/22308))
+
 ## 37.26.1 / 2025-12-22
 
 ***Fixed***:
 
 * Updates perf counters to ignore case. Fixes an error with double counting in exchange.activemanager.database_mounted metric. ([#22028](https://github.com/DataDog/integrations-core/pull/22028))
 
-## 37.26.0 / 2025-12-19
+## 37.26.0 / 2025-12-19 / Agent 7.74.0
 
 ***Security***:
 
