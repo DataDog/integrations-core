@@ -12,6 +12,25 @@
                 "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 3725346712771661,
+                        "definition": {
+                            "type": "note",
+                            "content": "",
+                            "background_color": "orange",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
                         "id": 1002,
                         "definition": {
                             "type": "image",
@@ -24,9 +43,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
+                            "y": 1,
                             "width": 2,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
@@ -43,9 +62,9 @@
                         },
                         "layout": {
                             "x": 2,
-                            "y": 0,
-                            "width": 3,
-                            "height": 3
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
                         }
                     }
                 ]
@@ -53,7 +72,7 @@
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 5,
+                "width": 6,
                 "height": 6
             }
         },
@@ -81,7 +100,7 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 7,
+                            "width": 6,
                             "height": 1
                         }
                     },
@@ -227,7 +246,7 @@
                         "layout": {
                             "x": 4,
                             "y": 1,
-                            "width": 3,
+                            "width": 2,
                             "height": 2
                         }
                     },
@@ -343,16 +362,16 @@
                         "layout": {
                             "x": 3,
                             "y": 3,
-                            "width": 4,
+                            "width": 3,
                             "height": 2
                         }
                     }
                 ]
             },
             "layout": {
-                "x": 5,
+                "x": 6,
                 "y": 0,
-                "width": 7,
+                "width": 6,
                 "height": 6
             }
         },
@@ -370,11 +389,13 @@
                         "definition": {
                             "type": "note",
                             "content": "Track job queue health, throughput, and latency.",
-                            "background_color": "red",
-                            "font_size": "16",
+                            "background_color": "blue",
+                            "font_size": "14",
                             "text_align": "center",
-                            "vertical_align": "center",
+                            "vertical_align": "top",
                             "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
                             "has_padding": true
                         },
                         "layout": {
@@ -1061,9 +1082,9 @@
                             "type": "note",
                             "content": "Monitor Node.js event loop, memory, and garbage collection.",
                             "background_color": "orange",
-                            "font_size": "16",
-                            "text_align": "center",
-                            "vertical_align": "center",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
                             "show_tick": false,
                             "has_padding": true
                         },
@@ -1324,8 +1345,8 @@
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": true,
+                            "vertical_align": "top",
+                            "show_tick": false,
                             "tick_pos": "50%",
                             "tick_edge": "left",
                             "has_padding": true
@@ -1626,7 +1647,7 @@
             "id": 8001,
             "definition": {
                 "title": "Event Bus",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_orange",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1636,11 +1657,13 @@
                         "definition": {
                             "type": "note",
                             "content": "Track event bus health and throughput.",
-                            "background_color": "blue",
-                            "font_size": "16",
-                            "text_align": "center",
-                            "vertical_align": "center",
+                            "background_color": "orange",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
                             "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
                             "has_padding": true
                         },
                         "layout": {
@@ -1817,9 +1840,16 @@
             "prefix": "env",
             "available_values": [],
             "default": "*"
+        },
+        {
+            "name": "workflow",
+            "prefix": "workflow",
+            "available_values": [],
+            "default": "*"
         }
     ],
     "layout_type": "ordered",
     "notify_list": [],
+    "pause_auto_refresh": false,
     "reflow_type": "fixed"
 }
