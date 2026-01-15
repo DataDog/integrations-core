@@ -60,7 +60,7 @@ STATEMENTS_QUERY = """
 SELECT
     normalized_query_hash,
     normalizeQuery(any(query)) as query_text,
-    any(user) as user,
+    any(user) as query_user,
     any(type) as query_type,
     any(exception_code) as exception_code,
     any(databases) as databases,
@@ -88,6 +88,7 @@ WHERE
     AND normalized_query_hash != 0
     {internal_user_filter}
 GROUP BY normalized_query_hash
+LIMIT 200
 """
 
 # Query to get current timestamp from ClickHouse in microseconds
@@ -372,11 +373,11 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
         Build the SQL filter to exclude internal Cloud users.
         Returns empty string if no users are configured for exclusion.
         """
-        if not INTERNAL_CLOUD_USERS:
-            return ""
-        # Build a NOT IN clause for the internal users
-        users_list = ", ".join(f"'{user}'" for user in INTERNAL_CLOUD_USERS)
-        return f"AND user NOT IN ({users_list})"
+        filters = ["user NOT LIKE '%-internal'"]
+        if INTERNAL_CLOUD_USERS:
+            users_list = ", ".join(f"'{user}'" for user in INTERNAL_CLOUD_USERS)
+            filters.append(f"user NOT IN ({users_list})")
+        return "AND " + " AND ".join(filters)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_query_log_statements(self):
@@ -433,7 +434,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                 (
                     normalized_query_hash,
                     query_text,
-                    user,
+                    query_user,
                     query_type,
                     exception_code,
                     databases,
@@ -466,7 +467,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                     {
                         'normalized_query_hash': str(normalized_query_hash),
                         'query': str(query_text) if query_text else '',
-                        'user': str(user) if user else '',
+                        'user': str(query_user) if query_user else '',
                         'query_type': str(query_type) if query_type else '',
                         'exception_code': str(exception_code) if exception_code else '',
                         'databases': str(databases[0]) if databases and len(databases) > 0 else '',
