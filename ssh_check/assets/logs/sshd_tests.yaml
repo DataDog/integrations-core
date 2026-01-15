@@ -11,6 +11,9 @@ tests:
     }
   result:
     custom:
+      journald:
+        _HOSTNAME: "ssh-server"
+        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -53,6 +56,9 @@ tests:
     }
   result:
     custom:
+      journald:
+        _HOSTNAME: "ssh-server"
+        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       network:
         client:
           ip: "172.22.179.72"
@@ -105,6 +111,9 @@ tests:
     }
   result:
     custom:
+      journald:
+        _HOSTNAME: "ssh-server"
+        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       network:
         client:
           ip: "172.22.179.72"
@@ -125,6 +134,9 @@ tests:
     }
   result:
     custom:
+      journald:
+        _HOSTNAME: "ssh-server"
+        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       network:
         client:
           ip: "192.168.1.100"
@@ -175,6 +187,9 @@ tests:
     }
   result:
     custom:
+      journald:
+        _HOSTNAME: "ssh-server"
+        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       network:
         client:
           ip: "192.168.1.100"
@@ -227,6 +242,9 @@ tests:
     }
   result:
     custom:
+      journald:
+        _HOSTNAME: "ssh-server"
+        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       network:
         client:
           ip: "192.168.1.100"
