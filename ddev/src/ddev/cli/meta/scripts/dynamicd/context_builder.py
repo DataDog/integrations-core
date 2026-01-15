@@ -39,7 +39,7 @@ class IntegrationContext:
     dashboard_tag_values: dict[str, dict[str, list[str]]] = field(
         default_factory=dict
     )  # CRITICAL: Specific tag values required per metric
-    dashboard_log_config: dict[str, str] = field(
+    dashboard_log_config: dict[str, str | list[str]] = field(
         default_factory=dict
     )  # Log config from dashboard queries (source, service, etc.)
     supported_os: list[str] = field(default_factory=list)
@@ -155,8 +155,8 @@ class IntegrationContext:
                         "",
                     ]
                 )
-                for tag_name, values in sorted(all_tag_values.items()):
-                    values_str = ", ".join(sorted(values))
+                for tag_name, value_set in sorted(all_tag_values.items()):
+                    values_str = ", ".join(sorted(value_set))
                     lines.append(f"- **`{tag_name}`**: {values_str}")
                 lines.extend(
                     [
