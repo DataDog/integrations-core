@@ -69,9 +69,13 @@ class NutanixCheck(AgentCheck):
         self.infrastructure_monitor.cluster_names = {}
         self.infrastructure_monitor.host_names = {}
         self.infrastructure_monitor.external_tags = []
+        self.infrastructure_monitor.collection_time_window = None
 
         if not self._check_health():
             return
+
+        # init time window to sync all API calls to use the same [start_time, end_time] time window
+        self.infrastructure_monitor.init_collection_time_window()
 
         self.infrastructure_monitor.collect_cluster_metrics()
         self.infrastructure_monitor.collect_vm_metrics()

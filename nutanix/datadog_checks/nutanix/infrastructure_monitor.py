@@ -14,6 +14,7 @@ class InfrastructureMonitor:
         self.external_tags = []
         self.cluster_names = {}  # cluster_id -> cluster_name
         self.host_names = {}  # host_id -> host_name
+        self.collection_time_window = None
 
     def collect_cluster_metrics(self):
         """Collect metrics from all Nutanix clusters."""
@@ -281,7 +282,7 @@ class InfrastructureMonitor:
         For clusters, the practical floor is 120s, and newest points lag ingestion by ~1-2 minutes.
         We use a 120s window and set endTime to now - 120s to ensure data is available.
         """
-        start_time, end_time = self._calculate_stats_time_window()
+        start_time, end_time = self._get_collection_time_window()
 
         params = {
             "$startTime": start_time,
@@ -296,7 +297,7 @@ class InfrastructureMonitor:
         """
         Fetch time-series stats for a specific host.
         """
-        start_time, end_time = self._calculate_stats_time_window()
+        start_time, end_time = self._get_collection_time_window()
 
         params = {
             "$startTime": start_time,
@@ -316,7 +317,7 @@ class InfrastructureMonitor:
         Returns:
             dict: Dictionary mapping vmExtId -> stats array
         """
-        start_time, end_time = self._calculate_stats_time_window()
+        start_time, end_time = self._get_collection_time_window()
 
         params = {
             "$startTime": start_time,
@@ -338,9 +339,9 @@ class InfrastructureMonitor:
 
         return all_vm_stats_dict
 
-    def _calculate_stats_time_window(self):
+    def _calculate_collection_time_window(self):
         """
-        Calculate the time window for stats queries.
+        Calculate the time window [start_time, end_time] for Nutanix v4 API queries.
 
         Returns:
             tuple: (start_time_str, end_time_str) in ISO 8601 format
@@ -349,9 +350,16 @@ class InfrastructureMonitor:
 
         end_time = now - timedelta(seconds=self.check.sampling_interval)
 
-        # Round end_time down to the nearest minute for consistency
-        end_time = end_time.replace(second=0, microsecond=0)
-
         start_time = end_time - timedelta(seconds=self.check.sampling_interval)
 
         return start_time.isoformat(), end_time.isoformat()
+
+    def init_collection_time_window(self):
+        """Set the collection time window once per check run."""
+        self.collection_time_window = self._calculate_collection_time_window()
+
+    def _get_collection_time_window(self):
+        """Return cached collection time window for this check run."""
+        if self.collection_time_window is None:
+            self.collection_time_window = self._calculate_collection_time_window()
+        return self.collection_time_window
