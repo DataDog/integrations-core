@@ -4,7 +4,6 @@
 import mock
 import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.clickhouse import ClickhouseCheck, queries
 

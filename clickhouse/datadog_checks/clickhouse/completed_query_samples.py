@@ -3,11 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import copy
 import time
 from typing import TYPE_CHECKING
-
-from cachetools import TTLCache
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
@@ -19,7 +16,12 @@ except ImportError:
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
@@ -200,8 +202,7 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
                 self._save_checkpoint(self._current_checkpoint_microseconds)
                 self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
                 self._log.info(
-                    "Successfully advanced checkpoint to %d microseconds",
-                    self._current_checkpoint_microseconds
+                    "Successfully advanced checkpoint to %d microseconds", self._current_checkpoint_microseconds
                 )
 
         except Exception:
@@ -238,16 +239,11 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
             cached_value = self._check.read_persistent_cache(self.CHECKPOINT_CACHE_KEY)
             if cached_value:
                 checkpoint = int(cached_value)
-                self._log.debug(
-                    "Loaded checkpoint from persistent cache: %d microseconds",
-                    checkpoint
-                )
+                self._log.debug("Loaded checkpoint from persistent cache: %d microseconds", checkpoint)
                 return checkpoint
         except Exception as e:
             self._log.warning(
-                "Could not load checkpoint from persistent cache: %s. "
-                "Will use default lookback window.",
-                str(e)
+                "Could not load checkpoint from persistent cache: %s. Will use default lookback window.", str(e)
             )
 
         # First run or cache error - calculate default checkpoint
@@ -258,14 +254,12 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
                 current_time_micros = int(result[0][0])
 
                 # Lookback by collection_interval seconds
-                default_checkpoint = current_time_micros - int(
-                    self._collection_interval * 1_000_000
-                )
+                default_checkpoint = current_time_micros - int(self._collection_interval * 1_000_000)
 
                 self._log.info(
                     "Using default checkpoint (lookback %d seconds): %d microseconds",
                     int(self._collection_interval),
-                    default_checkpoint
+                    default_checkpoint,
                 )
                 return default_checkpoint
         except Exception as e:
@@ -288,19 +282,12 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
             - Next collection will retry with previous checkpoint
         """
         try:
-            self._check.write_persistent_cache(
-                self.CHECKPOINT_CACHE_KEY,
-                str(timestamp_microseconds)
-            )
-            self._log.debug(
-                "Saved checkpoint to persistent cache: %d microseconds",
-                timestamp_microseconds
-            )
+            self._check.write_persistent_cache(self.CHECKPOINT_CACHE_KEY, str(timestamp_microseconds))
+            self._log.debug("Saved checkpoint to persistent cache: %d microseconds", timestamp_microseconds)
         except Exception as e:
             self._log.error(
-                "Failed to save checkpoint to persistent cache: %s. "
-                "Next collection will retry the same time window.",
-                str(e)
+                "Failed to save checkpoint to persistent cache: %s. Next collection will retry the same time window.",
+                str(e),
             )
 
     def _get_current_checkpoint_microseconds(self) -> int:
@@ -320,10 +307,7 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
             if result and len(result) > 0:
                 return int(result[0][0])
         except Exception as e:
-            self._log.error(
-                "Failed to get current timestamp from ClickHouse: %s",
-                str(e)
-            )
+            self._log.error("Failed to get current timestamp from ClickHouse: %s", str(e))
             raise
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -366,22 +350,18 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
             rows = self._execute_query(query)
 
             # Calculate actual time window
-            window_seconds = (
-                self._current_checkpoint_microseconds -
-                self._last_checkpoint_microseconds
-            ) / 1_000_000.0
+            window_seconds = (self._current_checkpoint_microseconds - self._last_checkpoint_microseconds) / 1_000_000.0
 
             # Log with deployment type indicator
             deployment_mode = "Cloud (cluster-wide)" if self._check.is_clickhouse_cloud else "self-hosted (local)"
             self._log.info(
-                "Loaded %d completed queries from %s [%s]. "
-                "Window: [%d, %d] microseconds (%.2f seconds elapsed)",
+                "Loaded %d completed queries from %s [%s]. Window: [%d, %d] microseconds (%.2f seconds elapsed)",
                 len(rows),
                 query_log_table,
                 deployment_mode,
                 self._last_checkpoint_microseconds,
                 self._current_checkpoint_microseconds,
-                window_seconds
+                window_seconds,
             )
 
             # Step 5: Convert to list of dicts and obfuscate
@@ -436,7 +416,9 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
                     'memory_usage': int(memory_usage) if memory_usage else 0,
                     'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
                     'query_start_time_microseconds': to_microseconds(query_start_time_microseconds),
-                    'event_time_microseconds': to_microseconds(event_time_microseconds) or self._current_checkpoint_microseconds,
+                    'event_time_microseconds': (
+                        to_microseconds(event_time_microseconds) or self._current_checkpoint_microseconds
+                    ),
                     'query_id': str(query_id) if query_id else '',
                     'initial_query_id': str(initial_query_id) if initial_query_id else '',
                     'query_kind': str(query_kind) if query_kind else '',
@@ -572,5 +554,3 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
         except Exception:
             pass
         return 'unknown'
-
-
