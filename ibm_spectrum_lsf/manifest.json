@@ -39,9 +39,12 @@
       }
     },
     "monitors": {
-        "No GPU Slots Available": "assets/monitors/no_gpu_slots_available.json",
-        "High Pending Jobs": "assets/monitors/high_pending_jobs.json"
-      }
+      "No GPU Slots Available": "assets/monitors/no_gpu_slots_available.json",
+      "High Pending Jobs": "assets/monitors/high_pending_jobs.json"
+    },
+    "dashboards": {
+      "IBM Spectrum LSF Overview": "assets/dashboards/overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
