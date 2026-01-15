@@ -40,6 +40,26 @@ class TestReadDashboardMetrics:
 
         assert len(metrics) > 0, "Should extract at least some metrics from postgres dashboard"
 
+    def test_extracts_metrics_from_cassandra_dashboard(self, real_repo):
+        """Cassandra dashboard should have cassandra.* metrics extracted."""
+        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
+
+        cassandra = real_repo.integrations.get('cassandra')
+        metrics = _read_dashboard_metrics(cassandra, 'cassandra.')
+
+        assert len(metrics) > 0, "Should extract at least some metrics from cassandra dashboard"
+        assert all(m.startswith('cassandra.') for m in metrics), "All metrics should have cassandra. prefix"
+
+    def test_extracts_metrics_from_celery_dashboard(self, real_repo):
+        """Celery dashboard should have celery.* metrics extracted."""
+        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
+
+        celery = real_repo.integrations.get('celery')
+        metrics = _read_dashboard_metrics(celery, 'celery.')
+
+        assert len(metrics) > 0, "Should extract at least some metrics from celery dashboard"
+        assert all(m.startswith('celery.') for m in metrics), "All metrics should have celery. prefix"
+
     def test_returns_empty_for_integration_without_dashboard(self, tmp_path):
         """Integration without dashboards should return empty list."""
         from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
@@ -118,6 +138,28 @@ class TestBuildContext:
 
         assert context.name == 'postgres'
         assert len(context.metrics) > 0, "Postgres should have metrics"
+
+    def test_builds_context_for_cassandra(self, real_repo):
+        """Should build complete context for cassandra integration."""
+        from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
+
+        cassandra = real_repo.integrations.get('cassandra')
+        context = build_context(cassandra)
+
+        assert context.name == 'cassandra'
+        assert len(context.metrics) > 0, "Cassandra should have metrics"
+        assert context.metric_prefix == 'cassandra.'
+
+    def test_builds_context_for_celery(self, real_repo):
+        """Should build complete context for celery integration."""
+        from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
+
+        celery = real_repo.integrations.get('celery')
+        context = build_context(celery)
+
+        assert context.name == 'celery'
+        assert len(context.metrics) > 0, "Celery should have metrics"
+        assert context.metric_prefix == 'celery.'
 
     def test_all_metrics_mode(self, real_repo):
         """all_metrics mode should set the flag in context."""
