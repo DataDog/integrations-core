@@ -81,13 +81,11 @@ def test_new_integration_with_non_initial_version(repo_with_new_integration_patc
 
     # The integration "newcheck" at version 1.0.1 should be listed as a NEW integration,
     # not under "New Changes", because it didn't exist in the previous stable release
-    expected_output = (
-        """## Datadog Agent version [7.50.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7500)
+    expected_output = """## Datadog Agent version [7.50.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7500)
 
 ### New Integrations
 * newcheck [1.0.1](https://github.com/DataDog/integrations-core/blob/master/newcheck/CHANGELOG.md)
 """
-    )
     assert result.output.rstrip('\n') == expected_output.strip('\n')
     assert mock_fetch_tags.call_count == 1
 
