@@ -219,7 +219,7 @@ def mock_http_get(mocker):
             return mock_resp
 
         # Alerts endpoint - paginated
-        if 'api/monitoring/v4.0/serviceability/alerts' in url:
+        if 'api/monitoring/v4.2/serviceability/alerts' in url:
             response_data = load_fixture_page("alerts.json", page)
 
             # Apply time filter if present (e.g., "creationTime gt 2026-01-02T14:35:00Z")

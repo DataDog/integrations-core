@@ -249,7 +249,7 @@ if [ "${ONLY_ALERTS}" = "1" ]; then
     echo -e "${BLUE}=== Alerts Only ===${NC}"
     echo -e "${YELLOW}Ordering by creationTime asc${NC}"
     alerts_params="\$orderBy=creationTime%20asc"
-    fetch_paginated "api/monitoring/v4.0/serviceability/alerts?${alerts_params}" "alerts" "${PAGE_LIMIT}" "${MAX_PAGES}"
+    fetch_paginated "api/monitoring/v4.2/serviceability/alerts?${alerts_params}" "alerts" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
     echo ""
     echo -e "${GREEN}============================================${NC}"
@@ -347,12 +347,12 @@ echo -e "${YELLOW}Ordering by creationTime asc${NC}"
 audits_params="\$orderBy=creationTime%20asc"
 fetch_paginated "api/monitoring/v4.0/serviceability/audits?${audits_params}" "audits" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
-# 10. Alerts (api/monitoring/v4.0/serviceability/alerts)
+# 10. Alerts (api/monitoring/v4.2/serviceability/alerts)
 # Fetch alerts ordered by creationTime ascending (oldest first)
 echo -e "${BLUE}=== 10. Alerts ===${NC}"
 echo -e "${YELLOW}Ordering by creationTime asc${NC}"
 alerts_params="\$orderBy=creationTime%20asc"
-fetch_paginated "api/monitoring/v4.0/serviceability/alerts?${alerts_params}" "alerts" "${PAGE_LIMIT}" "${MAX_PAGES}"
+fetch_paginated "api/monitoring/v4.2/serviceability/alerts?${alerts_params}" "alerts" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
 echo ""
 echo -e "${GREEN}============================================${NC}"

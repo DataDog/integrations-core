@@ -191,7 +191,7 @@ class ActivityMonitor:
         params["$filter"] = f"creationTime gt {start_time_str}"
         params["$orderBy"] = "creationTime asc"
 
-        return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
+        return self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
 
     def _process_audit(self, audit):
         """Process and send a single audit to Datadog."""

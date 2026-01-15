@@ -42,14 +42,10 @@
         ],
         "title": "Degraded VM Recovery Point.",
         "alertType": "A130172",
-        "classifications": [
-          "DR"
-        ],
+        "classifications": ["DR"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-13T11:06:27.166178Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-13T11:06:27.171819Z",
         "message": "Recovery Point for VM {vm_name} failed to capture associated policies and categories because {reason}.",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -201,14 +197,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-06T09:24:19.032149Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-15T11:48:10.613952Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -411,14 +403,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-04T21:09:18.865966Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-06T09:07:24.740767Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -621,14 +609,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-04T19:34:18.359504Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-04T21:07:24.118424Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -831,14 +815,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-03T13:29:19.027455Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-04T19:07:24.704936Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1041,14 +1021,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-03T05:24:20.177779Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-03T13:07:24.075177Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1251,14 +1227,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-02T02:44:19.172217Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-03T05:07:24.642395Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1461,14 +1433,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-01T18:29:18.436618Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-02T02:07:24.95622Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1671,14 +1639,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-01T16:34:18.92299Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-01T18:07:24.34806Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1881,14 +1845,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-31T11:09:18.701587Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-01T16:07:24.275649Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2091,14 +2051,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-31T09:34:18.748146Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-31T11:07:24.31752Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2301,14 +2257,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-31T07:44:18.332858Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-31T09:07:24.573791Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2511,14 +2463,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-31T05:49:19.014508Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-31T07:07:24.609126Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2721,14 +2669,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-30T18:44:18.642542Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-31T02:07:24.605045Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2931,14 +2875,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-30T16:49:18.609751Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-30T18:07:24.721534Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -3141,14 +3081,10 @@
         ],
         "title": "Pulse is not enabled on cluster.",
         "alertType": "A140004",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T14:29:58.448974Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-29T16:46:05.457167Z",
         "message": "Pulse is not enabled on cluster",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -3254,14 +3190,10 @@
         ],
         "title": "IAM services are not in healthy state.",
         "alertType": "A111108",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T13:50:56.180489Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-29T14:46:05.474851Z",
         "message": "One or more IAM services have restarted within the last 15 minutes. Users may face Authentication/Authorization issues. Errors: {alert_message}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -3375,14 +3307,10 @@
         ],
         "title": "The PC is using password based ssh access.",
         "alertType": "A6220",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T13:45:33.148301Z",
-        "impactTypes": [
-          "CONFIGURATION"
-        ],
+        "impactTypes": ["CONFIGURATION"],
         "lastUpdatedTime": "2026-01-14T13:45:33.587663Z",
         "message": "{alert_msg}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -3496,14 +3424,10 @@
         ],
         "title": "Prism Central {pcvm_ip} is using default password",
         "alertType": "A111050",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T13:45:32.576365Z",
-        "impactTypes": [
-          "CONFIGURATION"
-        ],
+        "impactTypes": ["CONFIGURATION"],
         "lastUpdatedTime": "2026-01-12T13:45:32.608364Z",
         "message": "Please update the default password(s) on the PC for user(s): {users} to harden the security on the clusters. Nutanix recommends immediately changing all default passwords.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -3629,14 +3553,10 @@
         ],
         "title": "Pulse is disabled",
         "alertType": "A140002",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T13:45:00.693237Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-04T13:46:05.291468Z",
         "message": "Pulse is disabled on the paired Prism Central {cluster_uuid}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -3744,14 +3664,10 @@
         ],
         "title": "License Feature Violation",
         "alertType": "A1077",
-        "classifications": [
-          "License"
-        ],
+        "classifications": ["License"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-29T12:06:28.311173Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-29T12:12:43.466583Z",
         "message": "Features not permitted by license(s) applied are being used. Non compliant features: {feature_violation_list}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -3887,14 +3803,10 @@
         ],
         "title": "Cluster Service {services} Restarting Frequently",
         "alertType": "A3034",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-29T12:03:20.322649Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2025-12-29T13:07:24.516523Z",
         "message": "There have been multiple service restarts of {services} across all Controller VM(s). Latest crash of these services have occurred at {timestamps} respectively.",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -4038,15 +3950,15 @@
             "$fv": "v1.r0"
           },
           "$objectType": "common.v1.response.ApiLink",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.2/serviceability/alerts?$limit=50&$page=0",
           "rel": "last"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.2/serviceability/alerts?$limit=50&$page=0",
           "rel": "self"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.2/serviceability/alerts?$limit=50&$page=0",
           "rel": "first"
         }
       ],
