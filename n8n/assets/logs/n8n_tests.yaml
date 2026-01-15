@@ -74,7 +74,7 @@ tests:
       metadata:
         file: "instance-settings.js"
         function: "ensureSettingsFilePermissions"
-        timestamp: "2026-01-12T14:54:21.727Z"
+        timestamp: 1768229661727
       n8n:
         file: "instance-settings.js"
         function: "ensureSettingsFilePermissions"
@@ -91,7 +91,7 @@ tests:
       metadata:
         file: "instance-settings.js"
         function: "loadOrCreate"
-        timestamp: "2026-01-12T14:54:21.730Z"
+        timestamp: 1768229661730
       n8n:
         file: "instance-settings.js"
         function: "loadOrCreate"
@@ -108,7 +108,7 @@ tests:
       metadata:
         file: "abstract-server.js"
         function: "init"
-        timestamp: "2026-01-12T14:54:22.248Z"
+        timestamp: 1768229662248
       n8n:
         file: "abstract-server.js"
         function: "init"
@@ -125,7 +125,7 @@ tests:
       metadata:
         file: "abstract-server.js"
         function: "start"
-        timestamp: "2026-01-12T14:54:24.563Z"
+        timestamp: 1768229664563
       n8n:
         file: "abstract-server.js"
         function: "start"
@@ -144,7 +144,7 @@ tests:
         function: "log"
         scopes:
           - "license"
-        timestamp: "2026-01-12T14:54:22.323Z"
+        timestamp: 1768229662323
       n8n:
         file: "LicenseManager.js"
         function: "log"
@@ -163,7 +163,7 @@ tests:
       metadata:
         file: "base-command.js"
         function: "log"
-        timestamp: "2026-01-12T14:54:24.570Z"
+        timestamp: 1768229664570
       n8n:
         file: "base-command.js"
         function: "log"
