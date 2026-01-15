@@ -59,11 +59,8 @@ WHERE
   event_time_microseconds > fromUnixTimestamp64Micro({last_checkpoint_microseconds})
   AND event_time_microseconds <= fromUnixTimestamp64Micro({current_checkpoint_microseconds})
   AND event_date >= toDate(fromUnixTimestamp64Micro({last_checkpoint_microseconds}))
-  AND type != 'QueryStart'
+  AND type = 'QueryFinish'
   AND is_initial_query = 1
-  AND query NOT LIKE '%system.query_log%'
-  AND query NOT LIKE '%system.processes%'
-  AND query NOT LIKE '/* DDIGNORE */%'
   AND query != ''
   AND normalized_query_hash != 0
   {internal_user_filter}
@@ -217,11 +214,11 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
         Build the SQL filter to exclude internal Cloud users.
         Returns empty string if no users are configured for exclusion.
         """
-        if not INTERNAL_CLOUD_USERS:
-            return ""
-        # Build a NOT IN clause for the internal users
-        users_list = ", ".join(f"'{user}'" for user in INTERNAL_CLOUD_USERS)
-        return f"AND user NOT IN ({users_list})"
+        filters = ["user NOT LIKE '%-internal'"]
+        if INTERNAL_CLOUD_USERS:
+            users_list = ", ".join(f"'{user}'" for user in INTERNAL_CLOUD_USERS)
+            filters.append(f"user NOT IN ({users_list})")
+        return "AND " + " AND ".join(filters)
 
     def _load_checkpoint(self) -> int:
         """
