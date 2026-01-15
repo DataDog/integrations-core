@@ -1,0 +1,1 @@
+Avoid SQL Server max length with string_agg for indexes with many columns
