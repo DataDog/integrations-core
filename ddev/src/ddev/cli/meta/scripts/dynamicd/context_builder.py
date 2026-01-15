@@ -40,6 +40,7 @@ class IntegrationContext:
         default_factory=dict
     )  # CRITICAL: Specific tag values required per metric
     supported_os: list[str] = field(default_factory=list)
+    all_metrics_mode: bool = False  # If True, generate ALL metrics, not just dashboard ones
 
     def to_prompt_context(self) -> str:
         """Convert context to a string for LLM prompt."""
@@ -51,6 +52,19 @@ class IntegrationContext:
             f"Metric prefix: {self.metric_prefix}",
             "",
         ]
+
+        # Add ALL METRICS MODE instruction if enabled
+        if self.all_metrics_mode:
+            lines.extend(
+                [
+                    "## MODE: ALL METRICS (Full Coverage)",
+                    "",
+                    "IMPORTANT: You MUST generate ALL metrics listed below, not just dashboard metrics.",
+                    "This mode is used for load testing and full integration validation.",
+                    "Every metric in the metadata.csv should be generated in each batch.",
+                    "",
+                ]
+            )
 
         # Collect all unique tags from dashboard for summary
         all_dashboard_tags = set()
@@ -160,19 +174,33 @@ class IntegrationContext:
             )
 
         # All other metrics
-        lines.extend(
-            [
-                "## All Available Metrics",
-                "The following metrics are defined for this integration:",
-                "",
-            ]
-        )
+        if self.all_metrics_mode:
+            lines.extend(
+                [
+                    "## ALL METRICS (Must generate every single one!)",
+                    "",
+                    "You MUST generate ALL of the following metrics in every batch.",
+                    "This is full coverage mode - no metric should be skipped.",
+                    "",
+                ]
+            )
+            # In all_metrics mode, show ALL metrics without limit
+            metrics_to_show = self.metrics
+            max_metrics = len(self.metrics)  # No limit
+        else:
+            lines.extend(
+                [
+                    "## All Available Metrics",
+                    "The following metrics are defined for this integration:",
+                    "",
+                ]
+            )
+            # In normal mode, exclude dashboard metrics and apply limit
+            dashboard_set = set(self.dashboard_metrics)
+            metrics_to_show = [m for m in self.metrics if m.get('metric_name') not in dashboard_set]
+            max_metrics = MAX_METRICS_IN_PROMPT
 
-        # Add metrics in a structured format (excluding dashboard metrics already shown)
-        dashboard_set = set(self.dashboard_metrics)
-        other_metrics = [m for m in self.metrics if m.get('metric_name') not in dashboard_set]
-
-        for metric in other_metrics[:MAX_METRICS_IN_PROMPT]:
+        for metric in metrics_to_show[:max_metrics]:
             metric_line = f"- `{metric.get('metric_name', 'unknown')}`"
             if metric.get('metric_type'):
                 metric_line += f" (type: {metric['metric_type']})"
@@ -183,8 +211,8 @@ class IntegrationContext:
                 metric_line += f": {desc}"
             lines.append(metric_line)
 
-        if len(other_metrics) > MAX_METRICS_IN_PROMPT:
-            lines.append(f"... and {len(other_metrics) - MAX_METRICS_IN_PROMPT} more metrics")
+        if len(metrics_to_show) > max_metrics:
+            lines.append(f"... and {len(metrics_to_show) - max_metrics} more metrics")
 
         # Add config options if available
         if self.config_options:
@@ -274,8 +302,13 @@ def _get_tag_examples(tag_name: str) -> str:
     return tag_examples.get(tag_name, f'Use realistic values appropriate for "{tag_name}"')
 
 
-def build_context(integration: Integration) -> IntegrationContext:
-    """Build context from an integration."""
+def build_context(integration: Integration, all_metrics: bool = False) -> IntegrationContext:
+    """Build context from an integration.
+
+    Args:
+        integration: The integration to build context for
+        all_metrics: If True, instruct the LLM to generate ALL metrics, not just dashboard ones
+    """
     # Get basic info from manifest
     manifest = integration.manifest
 
@@ -329,6 +362,7 @@ def build_context(integration: Integration) -> IntegrationContext:
         dashboard_tags=dashboard_tags,
         dashboard_tag_values=dashboard_tag_values,
         supported_os=supported_os,
+        all_metrics_mode=all_metrics,
     )
 
 

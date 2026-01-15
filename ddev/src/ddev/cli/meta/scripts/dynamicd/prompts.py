@@ -117,8 +117,11 @@ The script must:
     - NEVER generate completely random values each batch - use state that persists
 
 CRITICAL REQUIREMENTS:
-1. EVERY BATCH MUST INCLUDE ALL DASHBOARD METRICS (marked as PRIORITY)
-   - Do NOT randomly select metrics - generate ALL dashboard metrics every batch
+1. METRIC COVERAGE DEPENDS ON MODE:
+   - NORMAL MODE: Generate ALL DASHBOARD METRICS (marked as PRIORITY) every batch
+   - ALL METRICS MODE: Generate EVERY SINGLE METRIC from the integration every batch
+   - If the context says "MODE: ALL METRICS", you MUST generate every metric listed
+   - Do NOT randomly select metrics - generate ALL required metrics every batch
    - The batch should include 1 data point per metric per entity combination
 
 2. METRICS MUST BE MATHEMATICALLY CONSISTENT (Critical!)

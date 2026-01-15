@@ -115,6 +115,11 @@ def validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, st
     default=None,
     help="Execution timeout in seconds (for testing). Default: no timeout",
 )
+@click.option(
+    "--all-metrics",
+    is_flag=True,
+    help="Generate ALL metrics from metadata.csv, not just dashboard metrics. Use for load testing.",
+)
 @click.pass_obj
 def dynamicd(
     app: Application,
@@ -125,6 +130,7 @@ def dynamicd(
     save: bool,
     show_only: bool,
     timeout: int | None,
+    all_metrics: bool,
 ):
     """Generate realistic fake telemetry data for an integration using AI.
 
@@ -243,8 +249,13 @@ def dynamicd(
 
     # Build context
     app.display_info("Building integration context...")
-    context = build_context(intg)
-    app.display_info(f"   Found {len(context.metrics)} metrics, {len(context.config_options)} config options")
+    context = build_context(intg, all_metrics=all_metrics)
+    if all_metrics:
+        app.display_info(f"   Found {len(context.metrics)} metrics (ALL will be generated)")
+    else:
+        app.display_info(
+            f"   Found {len(context.metrics)} metrics, {len(context.dashboard_metrics)} dashboard metrics (priority)"
+        )
 
     # Status callback
     def on_status(msg: str) -> None:
