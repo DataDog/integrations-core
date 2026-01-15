@@ -83,6 +83,13 @@ files:
             value:
               type: boolean
               example: true
+          - name: collect_alerts
+            description: |
+              Whether to collect alerts from Prism Central.
+              Default is true.
+            value:
+              type: boolean
+              example: true
           - template: instances/http
           - template: instances/default
             overrides:

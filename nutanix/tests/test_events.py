@@ -12,7 +12,7 @@ from datadog_checks.nutanix import NutanixCheck
 pytestmark = [pytest.mark.unit]
 
 # Mock datetime to match events fixture creation times
-MOCK_DATETIME = datetime.fromisoformat("2025-10-14T11:15:00.00000Z")
+MOCK_DATETIME = datetime.fromisoformat("2025-10-14T11:15:00.000000Z")
 
 EXPECTED_EVENTS = [
     {

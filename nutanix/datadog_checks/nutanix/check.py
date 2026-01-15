@@ -45,6 +45,7 @@ class NutanixCheck(AgentCheck):
         self.collect_events_enabled = is_affirmative(self.instance.get("collect_events", True))
         self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks", True))
         self.collect_audits_enabled = is_affirmative(self.instance.get("collect_audits", True))
+        self.collect_alerts_enabled = is_affirmative(self.instance.get("collect_alerts", True))
 
     def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
@@ -83,6 +84,9 @@ class NutanixCheck(AgentCheck):
 
         if self.collect_audits_enabled:
             self.activity_monitor.collect_audits()
+
+        if self.collect_alerts_enabled:
+            self.activity_monitor.collect_alerts()
 
         if self.infrastructure_monitor.external_tags:
             self.set_external_tags(self.infrastructure_monitor.external_tags)

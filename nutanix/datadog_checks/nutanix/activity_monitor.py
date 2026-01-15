@@ -13,6 +13,8 @@ class ActivityMonitor:
         self.last_event_collection_time = None
         self.last_task_collection_time = None
         self.last_audit_collection_time = None
+        self.last_alert_collection_time = None
+        self.last_audit_collection_time = None
 
     def collect_events(self):
         """Collect events from Nutanix Prism Central."""
@@ -152,6 +154,29 @@ class ActivityMonitor:
         except Exception as e:
             self.check.log.exception("Error collecting audits: %s", e)
 
+    def collect_alerts(self):
+        """Collect alerts from Nutanix Prism Central."""
+        try:
+            start_time = self.last_alert_collection_time
+            if not start_time:
+                now = get_current_datetime()
+                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+
+            alerts = self._list_alerts(start_time)
+            if not alerts:
+                self.check.log.debug("No alerts found")
+                return
+
+            for alert in alerts:
+                self._process_alert(alert)
+
+            most_recent_time_str = alerts[-1].get("creationTime")
+            if most_recent_time_str:
+                self.last_alert_collection_time = most_recent_time_str
+
+        except Exception as e:
+            self.check.log.exception("Error collecting alerts: %s", e)
+
     def _list_audits(self, start_time_str):
         """Fetch audits from Prism Central."""
         params = {}
@@ -159,6 +184,14 @@ class ActivityMonitor:
         params["$orderBy"] = "creationTime asc"
 
         return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/audits", params=params)
+
+    def _list_alerts(self, start_time_str):
+        """Fetch alerts from Prism Central."""
+        params = {}
+        params["$filter"] = f"creationTime gt {start_time_str}"
+        params["$orderBy"] = "creationTime asc"
+
+        return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
 
     def _process_audit(self, audit):
         """Process and send a single audit to Datadog."""
@@ -221,6 +254,64 @@ class ActivityMonitor:
                 "alert_type": "info",
                 "source_type_name": self.check.__NAMESPACE__,
                 "tags": audit_tags,
+            }
+        )
+
+    def _process_alert(self, alert):
+        """Process and send a single alert to Datadog."""
+        alert_id = alert.get("extId", "unknown")
+        title = alert.get("title", "Nutanix Alert")
+        message = alert.get("message", "")
+        created_time = alert.get("creationTime")
+        severity = alert.get("severity")
+        alert_type = alert.get("alertType")
+
+        # map severity to alert_type
+        severity_map = {
+            "CRITICAL": "error",
+            "WARNING": "warning",
+            "INFO": "info",
+        }
+        event_alert_type = severity_map.get(severity, "info")
+
+        alert_tags = self.check.base_tags.copy()
+        alert_tags.append(f"ntnx_alert_id:{alert_id}")
+        if alert_type:
+            alert_tags.append(f"ntnx_alert_type:{alert_type}")
+        if severity:
+            alert_tags.append(f"ntnx_alert_severity:{severity}")
+
+        if cluster_id := alert.get("clusterUUID"):
+            alert_tags.append(f"ntnx_cluster_id:{cluster_id}")
+            if cluster_id in self.check.cluster_names:
+                alert_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+
+        for classification in alert.get("classifications", []) or []:
+            alert_tags.append(f"ntnx_alert_classification:{classification}")
+
+        for impact in alert.get("impactTypes", []) or []:
+            alert_tags.append(f"ntnx_alert_impact:{impact}")
+
+        if source_entity := alert.get("sourceEntity"):
+            if entity_type := source_entity.get("type"):
+                if entity_id := source_entity.get("extId"):
+                    alert_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
+                if entity_name := source_entity.get("name"):
+                    alert_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
+
+        alert_tags.append("ntnx_type:alert")
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(created_time)
+                if created_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"Alert: {title}",
+                "msg_text": message,
+                "alert_type": event_alert_type,
+                "source_type_name": self.check.__NAMESPACE__,
+                "tags": alert_tags,
             }
         )
 

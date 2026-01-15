@@ -74,6 +74,12 @@ instances:
     #
     # collect_events: true
 
+    ## @param collect_alerts - boolean - optional - default: true
+    ## Whether to collect alerts from Prism Central.
+    ## Default is true.
+    #
+    # collect_alerts: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

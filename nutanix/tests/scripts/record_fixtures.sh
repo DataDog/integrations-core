@@ -16,7 +16,7 @@
 #   Automatically retries failed requests with detailed error messages
 #
 # Activity Collection:
-#   Tasks, events, and audits are fetched ordered by their time field ascending (oldest first)
+#   Tasks, events, audits, and alerts are fetched ordered by their time field ascending (oldest first)
 
 set -e
 
@@ -56,6 +56,10 @@ echo "Fixtures directory: ${FIXTURES_DIR}"
 echo "Page limit: ${PAGE_LIMIT}"
 echo "Max pages: ${MAX_PAGES}"
 echo ""
+if [ "${ONLY_ALERTS}" = "1" ]; then
+    echo -e "${BLUE}ONLY_ALERTS=1 detected; recording alerts only${NC}"
+    echo ""
+fi
 
 # Create fixtures directory if it doesn't exist
 mkdir -p "${FIXTURES_DIR}"
@@ -240,6 +244,20 @@ start_time=$(date -u -v-240S +"%Y-%m-%dT%H:%M:%S.000000Z" 2>/dev/null || date -u
 echo -e "${BLUE}Stats time window: ${start_time} to ${end_time}${NC}"
 echo ""
 
+# If ONLY_ALERTS is set, skip all other fixtures.
+if [ "${ONLY_ALERTS}" = "1" ]; then
+    echo -e "${BLUE}=== Alerts Only ===${NC}"
+    echo -e "${YELLOW}Ordering by creationTime asc${NC}"
+    alerts_params="\$orderBy=creationTime%20asc"
+    fetch_paginated "api/monitoring/v4.0/serviceability/alerts?${alerts_params}" "alerts" "${PAGE_LIMIT}" "${MAX_PAGES}"
+
+    echo ""
+    echo -e "${GREEN}============================================${NC}"
+    echo -e "${GREEN}✓ Alerts fixtures recorded successfully!${NC}"
+    echo -e "${GREEN}============================================${NC}"
+    exit 0
+fi
+
 # 1. Clusters (api/clustermgmt/v4.0/config/clusters)
 echo -e "${BLUE}=== 1. Clusters ===${NC}"
 fetch_paginated "api/clustermgmt/v4.0/config/clusters" "clusters" "${PAGE_LIMIT}" "${MAX_PAGES}"
@@ -328,6 +346,13 @@ echo -e "${BLUE}=== 9. Audits ===${NC}"
 echo -e "${YELLOW}Ordering by creationTime asc${NC}"
 audits_params="\$orderBy=creationTime%20asc"
 fetch_paginated "api/monitoring/v4.0/serviceability/audits?${audits_params}" "audits" "${PAGE_LIMIT}" "${MAX_PAGES}"
+
+# 10. Alerts (api/monitoring/v4.0/serviceability/alerts)
+# Fetch alerts ordered by creationTime ascending (oldest first)
+echo -e "${BLUE}=== 10. Alerts ===${NC}"
+echo -e "${YELLOW}Ordering by creationTime asc${NC}"
+alerts_params="\$orderBy=creationTime%20asc"
+fetch_paginated "api/monitoring/v4.0/serviceability/alerts?${alerts_params}" "alerts" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
 echo ""
 echo -e "${GREEN}============================================${NC}"
