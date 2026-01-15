@@ -16,10 +16,6 @@ pytestmark = [pytest.mark.unit]
 MOCK_TASK_DATETIME = datetime.fromisoformat("2026-01-02T15:00:00.000000Z")
 
 
-# Expected tasks sorted by createdTime ascending:
-# 1. LogCollectionFromPC (2026-01-02T15:14:09.478485Z)
-# 2. LogCollectionWithDownloadLink (2026-01-02T15:14:09.562678Z)
-# 3. update_vm_intentful (2026-01-09T12:39:54.844819Z)
 EXPECTED_TASKS = [
     {
         'alert_type': 'success',
@@ -91,8 +87,6 @@ def test_tasks_collection(get_current_datetime, dd_run_check, aggregator, mock_i
     """Test that tasks are collected and have proper structure."""
 
     instance = mock_instance.copy()
-    instance["page_limit"] = 50
-    instance["collect_events"] = False
     instance["collect_tasks"] = True
 
     get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
@@ -114,7 +108,6 @@ def test_tasks_no_duplicates_on_subsequent_runs(
 ):
     """Test that no tasks are collected when there are no new tasks since last collection."""
     instance = mock_instance.copy()
-    instance["page_limit"] = 50
     instance["collect_tasks"] = True
 
     get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
@@ -139,4 +132,5 @@ def test_tasks_no_duplicates_on_subsequent_runs(
     dd_run_check(check)
 
     tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
+
     assert len(tasks) == 0, "Expected no tasks when there are no new tasks since last collection"

@@ -113,7 +113,6 @@ EXPECTED_AUDITS = [
 def test_audits_collection(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
     instance = mock_instance.copy()
     instance["collect_audits"] = True
-
     get_current_datetime.return_value = MOCK_AUDIT_DATETIME + timedelta(
         seconds=instance.get("min_collection_interval", 120)
     )

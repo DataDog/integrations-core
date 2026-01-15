@@ -181,16 +181,16 @@ EXPECTED_EVENTS = [
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_events_collection(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
     """Test that events are collected and have proper structure."""
-    get_current_datetime.return_value = MOCK_DATETIME
+
     instance = mock_instance.copy()
     instance["collect_events"] = True
+    get_current_datetime.return_value = MOCK_DATETIME
+
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
-    events = aggregator.events
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
     assert len(events) > 0, "Expected events to be collected"
-
-    # Verify event structure
 
     assert events[0]['event_type'] == 'nutanix'
     assert events[0]['source_type_name'] == 'nutanix'
@@ -203,15 +203,16 @@ def test_events_no_duplicates_on_subsequent_runs(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
 ):
     """Test that no events are collected when there are no new events since last collection."""
-    instance = mock_instance.copy()
 
+    instance = mock_instance.copy()
     instance["collect_events"] = True
+    get_current_datetime.return_value = MOCK_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
-    get_current_datetime.return_value = MOCK_DATETIME
     dd_run_check(check)
 
     events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+
     assert len(events) == 10, "Expected events to be collected on first run"
     assert events == EXPECTED_EVENTS
 
@@ -223,4 +224,5 @@ def test_events_no_duplicates_on_subsequent_runs(
     dd_run_check(check)
 
     events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+
     assert len(events) == 0, "Expected no events when there are no new events since last collection"
