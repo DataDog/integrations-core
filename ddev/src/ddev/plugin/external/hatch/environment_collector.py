@@ -134,6 +134,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             ]
             scripts['_dd-benchmark'] = ['pytest -vv --benchmark-only --benchmark-cprofile=tottime {args:tests}']
 
+            # Ensure ddtrace is installed for all default environments to trace tests
+            dependencies = env_config.setdefault('dependencies', [])
+            dependencies.append("ddtrace")
+
             # Set defaults that will be called but allow users to override while
             # retaining access to them for reuse
             scripts.setdefault('test', '_dd-test')
