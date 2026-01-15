@@ -12,6 +12,7 @@ class ActivityMonitor:
         self.check = check
         self.last_event_collection_time = None
         self.last_task_collection_time = None
+        self.last_audit_collection_time = None
 
     def collect_events(self):
         """Collect events from Nutanix Prism Central."""
@@ -126,6 +127,102 @@ class ActivityMonitor:
 
         except Exception as e:
             self.check.log.exception("Error collecting tasks: %s", e)
+
+    def collect_audits(self):
+        """Collect audits from Nutanix Prism Central."""
+        try:
+            start_time = self.last_audit_collection_time
+            if not start_time:
+                now = get_current_datetime()
+                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+
+            audits = self._list_audits(start_time)
+            if not audits:
+                self.check.log.debug("No audits found")
+                return
+
+            for audit in audits:
+                self._process_audit(audit)
+
+            # update last time
+            most_recent_time_str = audits[-1].get("creationTime")
+            if most_recent_time_str:
+                self.last_audit_collection_time = most_recent_time_str
+
+        except Exception as e:
+            self.check.log.exception("Error collecting audits: %s", e)
+
+    def _list_audits(self, start_time_str):
+        """Fetch audits from Prism Central."""
+        params = {}
+        params["$filter"] = f"creationTime gt {start_time_str}"
+        params["$orderBy"] = "creationTime asc"
+
+        return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/audits", params=params)
+
+    def _process_audit(self, audit):
+        """Process and send a single audit to Datadog."""
+        audit_id = audit.get("extId", "unknown")
+        audit_type = audit.get("auditType", "Nutanix Audit")
+        operation_type = audit.get("operationType")
+        message = audit.get("message", "")
+        created_time = audit.get("creationTime")
+
+        audit_tags = self.check.base_tags.copy()
+        audit_tags.append(f"ntnx_audit_id:{audit_id}")
+        audit_tags.append(f"ntnx_audit_type:{audit_type}")
+        if operation_type:
+            audit_tags.append(f"ntnx_operation_type:{operation_type}")
+
+        if cluster_ref := audit.get("clusterReference"):
+            cluster_id = cluster_ref.get("extId")
+            cluster_name = cluster_ref.get("name")
+            if cluster_id:
+                audit_tags.append(f"ntnx_cluster_id:{cluster_id}")
+                if cluster_id in self.check.cluster_names:
+                    audit_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+                elif cluster_name:
+                    audit_tags.append(f"ntnx_cluster_name:{cluster_name}")
+            elif cluster_name:
+                audit_tags.append(f"ntnx_cluster_name:{cluster_name}")
+
+        if source_entity := audit.get("sourceEntity"):
+            if entity_type := source_entity.get("type"):
+                entity_id = source_entity.get("extId")
+                if entity_id:
+                    audit_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
+                entity_name = source_entity.get("name")
+                if entity_name:
+                    audit_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
+
+        if user_ref := audit.get("userReference"):
+            if user_name := user_ref.get("name"):
+                audit_tags.append(f"ntnx_user_name:{user_name}")
+
+        affected_entities = audit.get("affectedEntities", [])
+        for entity in affected_entities:
+            if entity_type := entity.get("type"):
+                audit_tags.append(f"ntnx_affected_entity_type:{entity_type}")
+            if entity_id := entity.get("extId"):
+                audit_tags.append(f"ntnx_affected_entity_id:{entity_id}")
+            if entity_name := entity.get("name"):
+                audit_tags.append(f"ntnx_affected_entity_name:{entity_name}")
+
+        audit_tags.append("ntnx_type:audit")
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(created_time)
+                if created_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"Audit: {audit_type}",
+                "msg_text": message,
+                "alert_type": "info",
+                "source_type_name": self.check.__NAMESPACE__,
+                "tags": audit_tags,
+            }
+        )
 
     def _list_tasks(self, start_time_str):
         """Fetch tasks from Prism Central.

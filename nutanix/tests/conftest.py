@@ -185,6 +185,39 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        # Audits endpoint - paginated
+        if 'api/monitoring/v4.0/serviceability/audits' in url:
+            response_data = load_fixture_page("audits.json", page)
+
+            # Apply time filter if present (e.g., "creationTime gt 2026-01-02T14:35:00Z")
+            filter_param = params.get('$filter', '') if params else ''
+            if 'creationTime gt' in filter_param:
+                from datetime import datetime
+
+                # Extract the timestamp from filter
+                filter_time_str = filter_param.split('creationTime gt ')[-1].strip()
+                filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
+
+                # Filter audits by creationTime
+                filtered_data = []
+                for audit in response_data.get('data', []):
+                    audit_time_str = audit.get('creationTime', '')
+                    if audit_time_str:
+                        audit_time = datetime.fromisoformat(audit_time_str.replace('Z', '+00:00'))
+                        if audit_time > filter_time:
+                            filtered_data.append(audit)
+
+                # Sort by creationTime asc (as specified by $orderBy param)
+                filtered_data.sort(
+                    key=lambda t: datetime.fromisoformat(t.get('creationTime', '').replace('Z', '+00:00'))
+                )
+
+                response_data = dict(response_data)
+                response_data['data'] = filtered_data
+
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
+
         # Tasks endpoint - paginated with time filtering and ordering
         if 'api/prism/v4.0/config/tasks' in url:
             response_data = load_fixture_page("tasks.json", page)

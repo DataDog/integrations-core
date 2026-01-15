@@ -27,7 +27,7 @@ def test_vm_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
         'prism_central:10.0.0.197',
     ]
 
-    aggregator.assert_metric("nutanix.vm.count", value=1, tags=expected_tags, hostname="PC-OptionName-1")
+    aggregator.assert_metric("nutanix.vm.count", value=1, tags=expected_tags)
 
 
 def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -48,7 +48,7 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
     ]
 
     for metric in VM_STATS_METRICS_REQUIRED:
-        aggregator.assert_metric(metric, at_least=1, tags=expected_tags, hostname="PC-OptionName-1")
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
 
 
 def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):

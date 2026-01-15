@@ -15,8 +15,8 @@
 #   MAX_RETRIES: 3 attempts with exponential backoff (2s, 4s, 8s)
 #   Automatically retries failed requests with detailed error messages
 #
-# Events Collection:
-#   Events are fetched ordered by creationTime ascending (oldest first)
+# Activity Collection:
+#   Tasks, events, and audits are fetched ordered by their time field ascending (oldest first)
 
 set -e
 
@@ -131,6 +131,9 @@ fetch_paginated() {
 
     echo -e "${BLUE}Fetching paginated: ${endpoint} (limit=${limit}, max_pages=${max_pages})${NC}"
 
+    # remove stale files from previous runs for this resource/limit
+    rm -f "${FIXTURES_DIR}/${base_name}_limit${limit}_page"*.json
+
     local page=0
     while [ "$page" -lt "$max_pages" ]; do
         # Use & if endpoint already has query params, otherwise use ?
@@ -212,6 +215,14 @@ fetch_paginated() {
 
         ((page++))
     done
+
+    # consolidate pages into a single fixture file (array of page responses)
+    local consolidated="${FIXTURES_DIR}/${base_name}.json"
+    if ls "${FIXTURES_DIR}/${base_name}_limit${limit}_page"*.json >/dev/null 2>&1; then
+        jq -s '.' "${FIXTURES_DIR}/${base_name}_limit${limit}_page"*.json >"${consolidated}"
+        echo -e "${GREEN}✓ Saved consolidated: ${consolidated}${NC}"
+        rm -f "${FIXTURES_DIR}/${base_name}_limit${limit}_page"*.json
+    fi
 
     if [ "$page" -eq "$max_pages" ]; then
         echo -e "${YELLOW}Reached maximum page limit${NC}"
@@ -297,12 +308,26 @@ end_time_encoded=$(printf '%s' "$end_time" | jq -sRr @uri)
 params="\$startTime=${start_time_encoded}&\$endTime=${end_time_encoded}&\$statType=AVG&\$samplingInterval=120&\$select=%2A"
 fetch_paginated "api/vmm/v4.0/ahv/stats/vms/?${params}" "vms_stats" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
-# 7. Events (api/monitoring/v4.0/serviceability/events)
+# 7. Tasks (api/prism/v4.0/config/tasks)
+# Fetch tasks ordered by createdTime ascending (oldest first)
+echo -e "${BLUE}=== 7. Tasks ===${NC}"
+echo -e "${YELLOW}Ordering by createdTime asc${NC}"
+tasks_params="\$orderBy=createdTime%20asc"
+fetch_paginated "api/prism/v4.0/config/tasks?${tasks_params}" "tasks" "${PAGE_LIMIT}" "${MAX_PAGES}"
+
+# 8. Events (api/monitoring/v4.0/serviceability/events)
 # Fetch events ordered by creationTime ascending (oldest first)
-echo -e "${BLUE}=== 7. Events ===${NC}"
+echo -e "${BLUE}=== 8. Events ===${NC}"
 echo -e "${YELLOW}Ordering by creationTime asc${NC}"
-events_params="\$orderby=creationTime%20asc"
+events_params="\$orderBy=creationTime%20asc"
 fetch_paginated "api/monitoring/v4.0/serviceability/events?${events_params}" "events" "${PAGE_LIMIT}" "${MAX_PAGES}"
+
+# 9. Audits (api/monitoring/v4.0/serviceability/audits)
+# Fetch audits ordered by creationTime ascending (oldest first)
+echo -e "${BLUE}=== 9. Audits ===${NC}"
+echo -e "${YELLOW}Ordering by creationTime asc${NC}"
+audits_params="\$orderBy=creationTime%20asc"
+fetch_paginated "api/monitoring/v4.0/serviceability/audits?${audits_params}" "audits" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
 echo ""
 echo -e "${GREEN}============================================${NC}"

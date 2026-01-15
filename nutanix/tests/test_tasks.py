@@ -102,8 +102,10 @@ def test_tasks_collection(get_current_datetime, dd_run_check, aggregator, mock_i
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
-    assert len(aggregator.events) == 3, "Expected 3 tasks to be collected on first run"
-    assert aggregator.events == EXPECTED_TASKS, "Expected tasks to be collected"
+    tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
+
+    assert len(tasks) == 3, "Expected 3 tasks to be collected on first run"
+    assert tasks == EXPECTED_TASKS, "Expected tasks to be collected"
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
