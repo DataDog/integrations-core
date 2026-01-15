@@ -36,6 +36,9 @@ class IntegrationContext:
     metric_prefix: str
     dashboard_metrics: list[str] = field(default_factory=list)  # Metrics used in dashboards
     dashboard_tags: dict[str, list[str]] = field(default_factory=dict)  # Tags required for each metric
+    dashboard_tag_values: dict[str, dict[str, list[str]]] = field(
+        default_factory=dict
+    )  # CRITICAL: Specific tag values required per metric
     supported_os: list[str] = field(default_factory=list)
 
     def to_prompt_context(self) -> str:
@@ -84,6 +87,13 @@ class IntegrationContext:
                 if metric_tags:
                     metric_line += f"\n  **REQUIRED TAGS**: `{', '.join(metric_tags)}`"
 
+                # CRITICAL: Add specific TAG VALUES that MUST be generated
+                metric_tag_vals = self.dashboard_tag_values.get(metric_name, {})
+                if metric_tag_vals:
+                    metric_line += "\n  **REQUIRED TAG VALUES (MUST generate metrics with ALL of these):**"
+                    for tag_name, values in metric_tag_vals.items():
+                        metric_line += f"\n    - `{tag_name}`: {', '.join(values)}"
+
                 if metric_info and metric_info.get('description'):
                     desc = metric_info['description'][:150]
                     metric_line += f"\n  Description: {desc}"
@@ -107,6 +117,38 @@ class IntegrationContext:
                     examples = _get_tag_examples(tag)
                     lines.append(f"- `{tag}`: {examples}")
                 lines.append("")
+
+            # CRITICAL: Summarize all required tag VALUES
+            # This tells the LLM exactly which tag:value combinations must exist
+            all_tag_values: dict[str, set[str]] = {}
+            for metric_vals in self.dashboard_tag_values.values():
+                for tag_name, values in metric_vals.items():
+                    if tag_name not in all_tag_values:
+                        all_tag_values[tag_name] = set()
+                    all_tag_values[tag_name].update(values)
+
+            if all_tag_values:
+                lines.extend(
+                    [
+                        "",
+                        "## CRITICAL: REQUIRED TAG VALUES (Dashboard filters by these exact values!)",
+                        "",
+                        "The dashboard queries FILTER by these specific tag:value combinations.",
+                        "You MUST generate metrics with ALL of these values or widgets will show 'No data':",
+                        "",
+                    ]
+                )
+                for tag_name, values in sorted(all_tag_values.items()):
+                    values_str = ", ".join(sorted(values))
+                    lines.append(f"- **`{tag_name}`**: {values_str}")
+                lines.extend(
+                    [
+                        "",
+                        "For each tag listed above, ensure you generate metrics with EVERY value shown.",
+                        "Missing even ONE value means a dashboard widget shows 'No data'.",
+                        "",
+                    ]
+                )
 
             lines.extend(
                 [
@@ -270,6 +312,10 @@ def build_context(integration: Integration) -> IntegrationContext:
     # Read dashboard tags (tells us which tags each metric needs)
     dashboard_tags = _read_dashboard_tags(integration)
 
+    # CRITICAL: Read specific tag VALUES required by dashboard queries
+    # This tells us exactly what tag:value combinations must exist
+    dashboard_tag_values = _read_dashboard_tag_values(integration)
+
     return IntegrationContext(
         name=integration.name,
         display_name=display_name,
@@ -281,6 +327,7 @@ def build_context(integration: Integration) -> IntegrationContext:
         metric_prefix=metric_prefix,
         dashboard_metrics=dashboard_metrics,
         dashboard_tags=dashboard_tags,
+        dashboard_tag_values=dashboard_tag_values,
         supported_os=supported_os,
     )
 
@@ -495,3 +542,91 @@ def _read_dashboard_tags(integration: Integration) -> dict[str, list[str]]:
 
     # Convert sets to sorted lists
     return {k: sorted(v) for k, v in metric_tags.items()}
+
+
+def _read_dashboard_tag_values(integration: Integration) -> dict[str, dict[str, list[str]]]:
+    """
+    CRITICAL: Extract specific tag:value pairs used in dashboard queries.
+
+    This is essential for ensuring all required data combinations are generated.
+    For example, if a dashboard queries:
+        sum:kuma.resources_count{resource_type:zone}
+        sum:kuma.resources_count{resource_type:mesh}
+        sum:kuma.resources_count{resource_type:dataplane}
+
+    We need to tell the LLM to generate metrics with ALL these resource_type values.
+
+    Returns: dict mapping metric names to dict of {tag_name: [list of required values]}
+    Example: {
+        "kuma.resources_count": {
+            "resource_type": ["zone", "mesh", "dataplane", "healthcheck"]
+        }
+    }
+    """
+    dashboards_dir = integration.path / "assets" / "dashboards"
+    if not dashboards_dir.exists():
+        return {}
+
+    # Structure: metric_name -> tag_name -> set of values
+    metric_tag_values: dict[str, dict[str, set[str]]] = {}
+
+    # Pattern to match metric queries with tag filters
+    # Matches: sum:metric.name{tag1:value1,tag2:value2,...}
+    # Also matches: sum:metric.name{$var AND tag:value AND $var2}
+    query_pattern = re.compile(
+        r'(?:avg|sum|max|min|count|rate|diff|derivative|integral|cumsum|top|anomalies|forecast|outliers|ewma|median|percentile|stddev|timeshift):([a-zA-Z0-9_\.]+)\{([^}]*)\}'
+    )
+
+    # Pattern to extract individual tag:value pairs (not template variables like $zone)
+    tag_value_pattern = re.compile(r'([a-zA-Z0-9_]+):([a-zA-Z0-9_\-\.\/]+)')
+
+    # Pattern for IN clauses like: code_class IN (1xx,2xx,3xx)
+    in_clause_pattern = re.compile(r'([a-zA-Z0-9_]+)\s+IN\s+\(([^)]+)\)', re.IGNORECASE)
+
+    for dashboard_file in dashboards_dir.glob("*.json"):
+        try:
+            with dashboard_file.open(encoding='utf-8') as f:
+                content = f.read()
+
+            # Find all metric queries
+            for match in query_pattern.finditer(content):
+                metric_name = match.group(1)
+                filter_str = match.group(2)
+
+                if metric_name not in metric_tag_values:
+                    metric_tag_values[metric_name] = {}
+
+                # Extract tag:value pairs from the filter
+                for tag_match in tag_value_pattern.finditer(filter_str):
+                    tag_name = tag_match.group(1)
+                    tag_value = tag_match.group(2)
+
+                    # Skip template variables (start with $) and wildcards
+                    if tag_value.startswith('$') or tag_value == '*':
+                        continue
+
+                    if tag_name not in metric_tag_values[metric_name]:
+                        metric_tag_values[metric_name][tag_name] = set()
+                    metric_tag_values[metric_name][tag_name].add(tag_value)
+
+                # Extract values from IN clauses
+                for in_match in in_clause_pattern.finditer(filter_str):
+                    tag_name = in_match.group(1)
+                    values_str = in_match.group(2)
+                    values = [v.strip() for v in values_str.split(',')]
+
+                    if tag_name not in metric_tag_values[metric_name]:
+                        metric_tag_values[metric_name][tag_name] = set()
+                    metric_tag_values[metric_name][tag_name].update(values)
+
+        except Exception:
+            logger.debug("Failed to read dashboard tag values from %s", dashboard_file, exc_info=True)
+            continue
+
+    # Convert sets to sorted lists for consistent output
+    result: dict[str, dict[str, list[str]]] = {}
+    for metric, tags in metric_tag_values.items():
+        if tags:  # Only include metrics that have specific tag values
+            result[metric] = {tag: sorted(values) for tag, values in tags.items() if values}
+
+    return result
