@@ -3,6 +3,7 @@
     The server with which to connect, defaulting to the local machine.
   value:
     type: string
+  fleet_configurable: true
 - name: username
   description: |
     The username used to connect to the `server`.

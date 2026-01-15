@@ -14,18 +14,21 @@ files:
       value:
         type: string
         example: localhost
+      fleet_configurable: true
     - name: port
       required: true
       description: Enter the port of the host to connect to.
       value:
         type: integer
         example: 6379
+      fleet_configurable: true
     - name: unix_socket_path
       description: Connect through a unix socket instead of using a `host` and `port`.
       value:
         type: string
         example: /var/run/redis/redis.sock
         display_default: null
+      fleet_configurable: true
     - name: db
       description: |
         The index of the database (keyspace) to use.
@@ -35,15 +38,18 @@ files:
       value:
         type: integer
         example: 0
+      fleet_configurable: true
     - name: username
       description: The username for the connection. Redis 6+ only.
       value:
           type: string
+      fleet_configurable: true
     - name: password
       description: The password for the connection.
       secret: true
       value:
         type: string
+      fleet_configurable: true
     - name: collect_client_metrics
       description: |
         Collects metrics using the `CLIENT` command.
@@ -51,31 +57,37 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: socket_timeout
       description: Custom timeout for the check request.
       value:
         type: integer
         example: 5
+      fleet_configurable: true
     - name: ssl
       description: Enable SSL/TLS encryption for the check.
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: ssl_keyfile
       description: The path to the client-side private keyfile.
       value:
         type: string
         example: "<CERT_KEY_PATH>"
+      fleet_configurable: true
     - name: ssl_certfile
       description: The path to the client-side certificate file.
       value:
         type: string
         example: "<CERT_PEM_PATH>"
+      fleet_configurable: true
     - name: ssl_ca_certs
       description:  The path to the ca_certs file.
       value:
         type: string
         example: "<CERT_PATH>"
+      fleet_configurable: true
     - name: ssl_cert_reqs
       description: |
         Specifies whether a certificate is required from the
@@ -86,6 +98,7 @@ files:
       value:
         type: integer
         example: 2
+      fleet_configurable: true
     - name: keys
       description: |
         Enter the list of keys to collect the lengths from.
@@ -99,6 +112,7 @@ files:
         example:
           - "<KEY_1>"
           - "<KEY_PATTERN>"
+      fleet_configurable: true
     - name: warn_on_missing_keys
       description: |
         If you provide a list of 'keys', set this to true to have the Agent log a warning
@@ -106,6 +120,7 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: true
     - name: slowlog-max-len
       description: |
         Set the maximum number of entries to fetch from the slow query log.
@@ -121,6 +136,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: disable_connection_cache
       description: |
         Enable the connections cache so the check attempts to reuse the same Redis connections
@@ -128,6 +144,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - template: instances/default
 
   - template: logs
@@ -153,9 +170,11 @@ files:
           value:
             example: '%%host%%'
             type: string
+          fleet_configurable: true
         - name: port
           required: true
           description: Enter the port of the host to connect to.
           value:
             example: 6379
             type: integer
+          fleet_configurable: true

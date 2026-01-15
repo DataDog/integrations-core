@@ -8,6 +8,7 @@
     display_default: false
     example: true
   hidden: true
+  fleet_configurable: true
 - name: metric_patterns
   description: |
     A mapping of metrics to include or exclude, with each entry being a regular expression.
@@ -29,3 +30,4 @@
         type: array
         items:
           type: string
+  fleet_configurable: true
