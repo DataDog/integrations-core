@@ -286,7 +286,7 @@ def test(
         env_vars = global_env_vars.copy()
 
         if standard_tests:
-            if ddtrace and (target.is_integration or target.name == 'datadog_checks_base'):
+            if ddtrace:
                 command.append('--ddtrace')
                 env_vars['DDEV_TRACE_ENABLED'] = 'true'
                 env_vars['DD_PROFILING_ENABLED'] = 'true'
