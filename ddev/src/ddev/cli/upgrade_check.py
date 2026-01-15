@@ -8,7 +8,15 @@ import requests
 from packaging.version import InvalidVersion, Version
 
 PACKAGE_NAME = 'ddev'
-CACHE_FILE = Path.home() / ".cache" / "ddev" / "upgrade_check.json"
+
+
+def default_cache_file() -> Path:
+    from platformdirs import user_cache_dir
+
+    return Path(user_cache_dir('ddev', appauthor=False)).expanduser() / "upgrade_check.json"
+
+
+CACHE_FILE = default_cache_file()
 PYPI_URL = "https://pypi.org/pypi/ddev/json"
 CHECK_INTERVAL = timedelta(days=7)
 
@@ -37,6 +45,8 @@ def exit_handler(app, msg):
 
 def upgrade_check(app, version, cache_file=CACHE_FILE, pypi_url=PYPI_URL, check_interval=CHECK_INTERVAL):
     current_version = Version(version)
+    if current_version.is_devrelease:
+        return
     last_version, last_date = read_last_run(cache_file)
     date_now = datetime.now()
 

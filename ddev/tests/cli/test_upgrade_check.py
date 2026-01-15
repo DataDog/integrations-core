@@ -9,6 +9,7 @@ import requests
 from packaging.version import Version
 
 from ddev.cli.upgrade_check import (
+    default_cache_file,
     read_last_run,
     upgrade_check,
     write_last_run,
@@ -62,6 +63,23 @@ class TestWriteLastRun:
 
 
 class TestUpgradeCheck:
+    def test_default_cache_file_uses_platformdirs(self, monkeypatch):
+        import platformdirs
+
+        monkeypatch.setattr(platformdirs, "user_cache_dir", lambda *args, **kwargs: "/tmp/ddev-cache")
+        assert default_cache_file().as_posix().endswith("/tmp/ddev-cache/upgrade_check.json")
+
+    def test_upgrade_skips_for_dev_versions(self, tmp_path, mocker):
+        cache_file = tmp_path / "upgrade_check.json"
+        app = MagicMock()
+        mock_get = mocker.patch("ddev.cli.upgrade_check.requests.get")
+        mock_atexit = mocker.patch("ddev.cli.upgrade_check.atexit.register")
+
+        upgrade_check(app, "14.1.1.dev91", cache_file=cache_file)
+
+        mock_get.assert_not_called()
+        mock_atexit.assert_not_called()
+
     def test_upgrade_fetches_from_pypi_and_notifies_when_upgrade_available(self, tmp_path, mocker):
         # test ability to fetch from PyPI and notify when upgrade is available
         cache_file = tmp_path / "upgrade_check.json"
