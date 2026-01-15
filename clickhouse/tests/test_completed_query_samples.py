@@ -227,11 +227,11 @@ def test_completed_queries_query_format():
     """Test that the completed queries query is properly formatted"""
     from datadog_checks.clickhouse.completed_query_samples import COMPLETED_QUERIES_QUERY
 
-    # Verify query targets system.query_log
-    assert 'system.query_log' in COMPLETED_QUERIES_QUERY
+    # Verify query uses placeholder for table (supports both local and cluster-wide queries)
+    assert '{query_log_table}' in COMPLETED_QUERIES_QUERY
 
-    # Verify it filters out QueryStart (only completed queries)
-    assert "type != 'QueryStart'" in COMPLETED_QUERIES_QUERY
+    # Verify it filters for completed queries only (QueryFinish type)
+    assert "type = 'QueryFinish'" in COMPLETED_QUERIES_QUERY
 
     # Verify it uses checkpoint-based filtering
     assert 'last_checkpoint_microseconds' in COMPLETED_QUERIES_QUERY
