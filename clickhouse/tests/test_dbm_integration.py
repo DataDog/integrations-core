@@ -7,30 +7,28 @@ from copy import deepcopy
 import clickhouse_connect
 import pytest
 from datadog_checks.clickhouse import ClickhouseCheck
-from packaging.version import Version
 
 from .common import CLICKHOUSE_VERSION
 
 # DBM features require ClickHouse 21.8+ due to normalized_query_hash, query_kind etc
-MIN_DBM_VERSION = Version('21.8')
+# Versions below 21.8: "18", "19", "20"
+UNSUPPORTED_DBM_VERSIONS = {'18', '19', '20'}
 
 
-def _get_clickhouse_version():
-    """Parse the ClickHouse version from the environment variable"""
-    try:
-        # Handle versions like "18", "19", "21.8", "22.7", "latest"
-        if CLICKHOUSE_VERSION == 'latest':
-            return Version('99.0')  # Latest is always supported
-        return Version(CLICKHOUSE_VERSION)
-    except Exception:
-        return Version('0.0')
+def _is_dbm_supported():
+    """Check if the current ClickHouse version supports DBM features"""
+    # latest is always supported
+    if CLICKHOUSE_VERSION == 'latest':
+        return True
+    # Check if version is in unsupported list
+    return CLICKHOUSE_VERSION not in UNSUPPORTED_DBM_VERSIONS
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.skipif(
-    _get_clickhouse_version() < MIN_DBM_VERSION,
-    reason=f"DBM features require ClickHouse {MIN_DBM_VERSION}+ (normalized_query_hash, query_kind, etc.)",
+    not _is_dbm_supported(),
+    reason="DBM features require ClickHouse 21.8+ (normalized_query_hash, query_kind, etc.)",
 )
 class TestDBMIntegration:
     """Integration tests for Database Monitoring (DBM) query samples"""
