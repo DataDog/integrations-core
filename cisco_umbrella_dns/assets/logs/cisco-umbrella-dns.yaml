@@ -549,7 +549,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
               sources:
                 - ocsf.metadata
               sourceType: attribute
@@ -785,7 +785,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
               sources:
                 - ocsf.metadata
               sourceType: attribute
