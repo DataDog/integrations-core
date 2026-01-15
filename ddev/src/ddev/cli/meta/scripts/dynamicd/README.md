@@ -90,7 +90,7 @@ All telemetry is tagged with `env:dynamicd` for easy filtering in Datadog.
 
 | Option | Description |
 |--------|-------------|
-| `--scenario, -s` | Scenario to simulate (healthy, degraded, incident, etc.) |
+| `--scenario`, `-s` | Scenario to simulate (healthy, degraded, incident, etc.) |
 | `--duration, -d` | Duration in seconds (0 = run forever, default) |
 | `--rate, -r` | Target metrics per batch (default: 100) |
 | `--save` | Save script to integration's fake_data/ directory |
