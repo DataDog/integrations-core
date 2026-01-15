@@ -39,6 +39,9 @@ class IntegrationContext:
     dashboard_tag_values: dict[str, dict[str, list[str]]] = field(
         default_factory=dict
     )  # CRITICAL: Specific tag values required per metric
+    dashboard_log_config: dict[str, str] = field(
+        default_factory=dict
+    )  # Log config from dashboard queries (source, service, etc.)
     supported_os: list[str] = field(default_factory=list)
     all_metrics_mode: bool = False  # If True, generate ALL metrics, not just dashboard ones
 
@@ -245,6 +248,35 @@ class IntegrationContext:
                     check_line += f": {check['description'][:100]}"
                 lines.append(check_line)
 
+        # CRITICAL: Add log configuration from dashboard
+        if self.dashboard_log_config:
+            lines.extend(
+                [
+                    "",
+                    "## LOG CONFIGURATION (CRITICAL - Use these exact values!)",
+                    "",
+                    "The dashboard has log widgets that filter by specific source and service.",
+                    "You MUST use these exact values or logs won't appear in the dashboard:",
+                    "",
+                    f"- **ddsource**: `{self.dashboard_log_config.get('source', self.name)}`",
+                    f"- **service**: `{self.dashboard_log_config.get('service', self.name)}`",
+                    "",
+                ]
+            )
+            if 'all_services' in self.dashboard_log_config:
+                lines.append(
+                    f"Note: Dashboard may also filter by these services: "
+                    f"{', '.join(self.dashboard_log_config['all_services'])}"
+                )
+            lines.extend(
+                [
+                    "",
+                    "When generating logs, use EXACTLY these values for ddsource and service.",
+                    "The dashboard queries look like: source:<source> service:<service>",
+                    "",
+                ]
+            )
+
         return "\n".join(lines)
 
 
@@ -349,6 +381,9 @@ def build_context(integration: Integration, all_metrics: bool = False) -> Integr
     # This tells us exactly what tag:value combinations must exist
     dashboard_tag_values = _read_dashboard_tag_values(integration)
 
+    # Extract log configuration from dashboard queries (source, service names)
+    dashboard_log_config = _read_dashboard_log_config(integration)
+
     return IntegrationContext(
         name=integration.name,
         display_name=display_name,
@@ -361,6 +396,7 @@ def build_context(integration: Integration, all_metrics: bool = False) -> Integr
         dashboard_metrics=dashboard_metrics,
         dashboard_tags=dashboard_tags,
         dashboard_tag_values=dashboard_tag_values,
+        dashboard_log_config=dashboard_log_config,
         supported_os=supported_os,
         all_metrics_mode=all_metrics,
     )
@@ -662,5 +698,73 @@ def _read_dashboard_tag_values(integration: Integration) -> dict[str, dict[str, 
     for metric, tags in metric_tag_values.items():
         if tags:  # Only include metrics that have specific tag values
             result[metric] = {tag: sorted(values) for tag, values in tags.items() if values}
+
+    return result
+
+
+def _read_dashboard_log_config(integration: Integration) -> dict[str, str]:
+    """
+    Extract log configuration from dashboard log queries.
+
+    Dashboards often have log widgets that filter by specific source and service values.
+    For example: "source:kuma service:kuma-control-plane"
+
+    We need to tell the LLM exactly what source and service to use for logs
+    so they appear in the dashboard.
+
+    Returns: dict with 'source' and 'service' keys (and any other log filters found)
+    """
+    dashboards_dir = integration.path / "assets" / "dashboards"
+    if not dashboards_dir.exists():
+        return {"source": integration.name, "service": integration.name}
+
+    log_config: dict[str, set[str]] = {"source": set(), "service": set()}
+
+    # Pattern to match log query strings
+    # e.g., "query_string": "source:kuma service:kuma-control-plane status:error"
+    log_query_pattern = re.compile(r'"query_string"\s*:\s*"([^"]+)"')
+
+    # Pattern to extract source:value and service:value from log queries
+    source_pattern = re.compile(r'\bsource:([a-zA-Z0-9_\-]+)')
+    service_pattern = re.compile(r'\bservice:([a-zA-Z0-9_\-]+)')
+
+    for dashboard_file in dashboards_dir.glob("*.json"):
+        try:
+            with dashboard_file.open(encoding='utf-8') as f:
+                content = f.read()
+
+            # Check if this dashboard has log widgets
+            if 'logs_pattern_stream' not in content and 'logs_stream' not in content:
+                continue
+
+            # Find all log query strings
+            for match in log_query_pattern.finditer(content):
+                query_string = match.group(1)
+
+                # Extract source values
+                for source_match in source_pattern.finditer(query_string):
+                    source_val = source_match.group(1)
+                    if not source_val.startswith('$'):  # Skip template vars
+                        log_config["source"].add(source_val)
+
+                # Extract service values
+                for service_match in service_pattern.finditer(query_string):
+                    service_val = service_match.group(1)
+                    if not service_val.startswith('$'):  # Skip template vars
+                        log_config["service"].add(service_val)
+
+        except Exception:
+            logger.debug("Failed to read log config from %s", dashboard_file, exc_info=True)
+            continue
+
+    # Convert to single values (use first found, or fallback to integration name)
+    result = {
+        "source": sorted(log_config["source"])[0] if log_config["source"] else integration.name,
+        "service": sorted(log_config["service"])[0] if log_config["service"] else integration.name,
+    }
+
+    # Also include all found services if there are multiple
+    if len(log_config["service"]) > 1:
+        result["all_services"] = sorted(log_config["service"])
 
     return result
