@@ -14,7 +14,13 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from ddev.cli.meta.scripts.dynamicd.constants import FAKE_DATA_DIR, MAX_RETRIES
+from ddev.cli.meta.scripts.dynamicd.constants import (
+    DOCKER_CPU_LIMIT,
+    DOCKER_IMAGE,
+    DOCKER_MEMORY_LIMIT,
+    FAKE_DATA_DIR,
+    MAX_RETRIES,
+)
 from ddev.cli.meta.scripts.dynamicd.generator import GeneratorError, fix_script_error
 
 
@@ -34,12 +40,27 @@ class ExecutionError(Exception):
     """Error during script execution."""
 
 
+def is_docker_available() -> bool:
+    """Check if Docker is installed and the daemon is running."""
+    try:
+        result = subprocess.run(
+            ["docker", "info"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return False
+
+
 def execute_script(
     script: str,
     dd_api_key: str,
     llm_api_key: str,
     timeout: int | None = None,
     on_status: Callable[[str], None] | None = None,
+    sandbox: bool = False,
 ) -> ExecutionResult:
     """
     Execute the generated script with automatic error correction.
@@ -50,6 +71,7 @@ def execute_script(
         llm_api_key: Anthropic API key for error correction
         timeout: Execution timeout in seconds (None = no timeout)
         on_status: Optional callback for status updates
+        sandbox: If True, run script in Docker container for isolation
 
     Returns:
         ExecutionResult with success status and output
@@ -66,6 +88,13 @@ def execute_script(
     # Pass API key as environment variable (most reliable method)
     env_vars = {"DATADOG_API_KEY": dd_api_key}
 
+    # Select execution method
+    if sandbox:
+        run_func = _run_script_in_container
+        status("Running in Docker sandbox...")
+    else:
+        run_func = _run_script
+
     while attempt < MAX_RETRIES:
         attempt += 1
         status(f"Executing script (attempt {attempt}/{MAX_RETRIES})...")
@@ -75,7 +104,7 @@ def execute_script(
 
         # Write to temp file and execute with env var
         # Use lambda to ensure flush=True for real-time output
-        result = _run_script(executable_script, timeout, env_vars=env_vars, on_output=lambda x: print(x, flush=True))
+        result = run_func(executable_script, timeout, env_vars=env_vars, on_output=lambda x: print(x, flush=True))
 
         if result.return_code == 0:
             status("Script executed successfully!")
@@ -243,6 +272,95 @@ def _run_script(
             process.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
             process.kill()
+            return _RunResult(
+                return_code=-1,
+                stdout=''.join(stdout_lines),
+                stderr=f"Script timed out after {timeout} seconds",
+            )
+
+        return _RunResult(
+            return_code=process.returncode,
+            stdout=''.join(stdout_lines),
+            stderr='',
+        )
+    except Exception as e:
+        return _RunResult(
+            return_code=-1,
+            stdout="",
+            stderr=str(e),
+        )
+    finally:
+        try:
+            Path(temp_path).unlink()
+        except OSError:
+            pass
+
+
+def _run_script_in_container(
+    script: str,
+    timeout: int | None,
+    env_vars: dict[str, str] | None = None,
+    on_output: Callable[[str], None] | None = None,
+) -> _RunResult:
+    """Run a script in a Docker container with real-time output streaming."""
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".py",
+        delete=False,
+        encoding="utf-8",
+    ) as f:
+        f.write(script)
+        temp_path = f.name
+
+    try:
+        # Build docker run command
+        docker_cmd = [
+            "docker",
+            "run",
+            "--rm",  # Auto-remove container when done
+            "--network",
+            "host",  # Allow network access for Datadog API
+            "--memory",
+            DOCKER_MEMORY_LIMIT,
+            "--cpus",
+            DOCKER_CPU_LIMIT,
+            "--read-only",  # Read-only filesystem
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=64m",  # Writable /tmp
+            "-v",
+            f"{temp_path}:/script.py:ro",  # Mount script read-only
+        ]
+
+        # Add environment variables
+        if env_vars:
+            for key, value in env_vars.items():
+                docker_cmd.extend(["-e", f"{key}={value}"])
+
+        # Add image and command
+        docker_cmd.extend([DOCKER_IMAGE, "python", "-u", "/script.py"])
+
+        # Stream output in real-time
+        process = subprocess.Popen(
+            docker_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,  # Line buffered
+        )
+
+        stdout_lines: list[str] = []
+        try:
+            if process.stdout is None:
+                raise ExecutionError("Failed to capture stdout from subprocess")
+            for line in process.stdout:
+                if on_output:
+                    on_output(line.rstrip('\n'))  # Stream output via callback
+                stdout_lines.append(line)
+            process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            # Also try to stop any running container
+            subprocess.run(["docker", "kill", "--signal=SIGKILL"], capture_output=True)
             return _RunResult(
                 return_code=-1,
                 stdout=''.join(stdout_lines),

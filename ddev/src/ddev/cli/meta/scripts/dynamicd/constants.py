@@ -49,3 +49,8 @@ DATADOG_LOGS_SITES = {
 
 # Output directory name
 FAKE_DATA_DIR = "fake_data"
+
+# Docker sandbox configuration
+DOCKER_IMAGE = "python:3.11-slim"
+DOCKER_MEMORY_LIMIT = "256m"
+DOCKER_CPU_LIMIT = "1.0"

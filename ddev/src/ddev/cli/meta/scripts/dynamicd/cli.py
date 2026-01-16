@@ -120,6 +120,11 @@ def validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, st
     is_flag=True,
     help="Generate ALL metrics from metadata.csv, not just dashboard metrics. Use for load testing.",
 )
+@click.option(
+    "--sandbox/--no-sandbox",
+    default=None,
+    help="Run script in Docker container for isolation. Default: auto-detect (use if Docker available).",
+)
 @click.pass_obj
 def dynamicd(
     app: Application,
@@ -131,6 +136,7 @@ def dynamicd(
     show_only: bool,
     timeout: int | None,
     all_metrics: bool,
+    sandbox: bool | None,
 ):
     """Generate realistic fake telemetry data for an integration using AI.
 
@@ -152,7 +158,12 @@ def dynamicd(
         ddev meta scripts dynamicd ibm_mq --show-only
     """
     from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
-    from ddev.cli.meta.scripts.dynamicd.executor import execute_script, save_script, validate_script_syntax
+    from ddev.cli.meta.scripts.dynamicd.executor import (
+        execute_script,
+        is_docker_available,
+        save_script,
+        validate_script_syntax,
+    )
     from ddev.cli.meta.scripts.dynamicd.generator import GeneratorError, generate_simulator_script
 
     # Get the integration
@@ -170,6 +181,15 @@ def dynamicd(
         app.abort("Duration cannot be negative")
     if rate <= 0:
         app.abort("Rate must be a positive number")
+
+    # Handle sandbox mode (auto-detect if not specified)
+    use_sandbox = sandbox
+    if use_sandbox is None:
+        # Auto-detect: use sandbox if Docker is available
+        use_sandbox = is_docker_available()
+    elif use_sandbox and not is_docker_available():
+        app.display_error("Docker is not available. Install Docker or use --no-sandbox.")
+        app.abort()
 
     # Get LLM API key from config or environment variable
     llm_api_key = app.config.raw_data.get("dynamicd", {}).get("llm_api_key")
@@ -245,6 +265,7 @@ def dynamicd(
         app.display_info("  Duration:    forever (Ctrl+C to stop)")
     app.display_info(f"  Rate:        {rate} metrics/batch (every 10s)")
     app.display_info(f"  Site:        {dd_site}")
+    app.display_info(f"  Sandbox:     {'Docker' if use_sandbox else 'disabled'}")
     app.display_info("")
 
     # Build context
@@ -311,6 +332,7 @@ def dynamicd(
         llm_api_key=llm_api_key,
         timeout=timeout,
         on_status=on_status,
+        sandbox=use_sandbox,
     )
 
     # Output is streamed in real-time, so we don't need to print stdout again
