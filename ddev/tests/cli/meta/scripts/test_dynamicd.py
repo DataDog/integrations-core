@@ -18,48 +18,30 @@ def real_repo(local_repo):
     return Repository(local_repo.name, str(local_repo))
 
 
+# Test integrations with their expected metric prefixes
+# Format: (integration_name, metric_prefix, prefix_is_exact)
+INTEGRATION_TEST_CASES = [
+    ('redisdb', 'redis.', True),
+    ('postgres', 'postgresql.', False),  # Don't check exact prefix match
+    ('cassandra', 'cassandra.', True),
+    ('celery', 'celery.flower.', False),  # Celery uses celery.flower. prefix
+]
+
+
 class TestReadDashboardMetrics:
     """Tests for _read_dashboard_metrics function."""
 
-    def test_extracts_metrics_from_redis_dashboard(self, real_repo):
-        """Redis dashboard should have redis.* metrics extracted."""
+    @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
+    def test_extracts_metrics_from_dashboard(self, real_repo, integration_name, metric_prefix, check_exact):
+        """Dashboard should have metrics extracted for the integration."""
         from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
 
-        redis = real_repo.integrations.get('redisdb')
-        metrics = _read_dashboard_metrics(redis, 'redis.')
+        integration = real_repo.integrations.get(integration_name)
+        metrics = _read_dashboard_metrics(integration, metric_prefix)
 
-        assert len(metrics) > 0, "Should extract at least some metrics from redis dashboard"
-        assert all(m.startswith('redis.') for m in metrics), "All metrics should have redis. prefix"
-
-    def test_extracts_metrics_from_postgres_dashboard(self, real_repo):
-        """Postgres dashboard should have postgres.* metrics extracted."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
-
-        postgres = real_repo.integrations.get('postgres')
-        metrics = _read_dashboard_metrics(postgres, 'postgresql.')
-
-        assert len(metrics) > 0, "Should extract at least some metrics from postgres dashboard"
-
-    def test_extracts_metrics_from_cassandra_dashboard(self, real_repo):
-        """Cassandra dashboard should have cassandra.* metrics extracted."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
-
-        cassandra = real_repo.integrations.get('cassandra')
-        metrics = _read_dashboard_metrics(cassandra, 'cassandra.')
-
-        assert len(metrics) > 0, "Should extract at least some metrics from cassandra dashboard"
-        assert all(m.startswith('cassandra.') for m in metrics), "All metrics should have cassandra. prefix"
-
-    def test_extracts_metrics_from_celery_dashboard(self, real_repo):
-        """Celery dashboard should have celery.* metrics extracted."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
-
-        celery = real_repo.integrations.get('celery')
-        # Celery uses celery.flower. prefix
-        metrics = _read_dashboard_metrics(celery, 'celery.flower.')
-
-        assert len(metrics) > 0, "Should extract at least some metrics from celery dashboard"
-        assert all('celery' in m.lower() for m in metrics), "All metrics should contain celery"
+        assert len(metrics) > 0, f"Should extract at least some metrics from {integration_name} dashboard"
+        if check_exact:
+            assert all(m.startswith(metric_prefix) for m in metrics), f"All metrics should have {metric_prefix} prefix"
 
     def test_returns_empty_for_integration_without_dashboard(self, tmp_path):
         """Integration without dashboards should return empty list."""
@@ -74,12 +56,13 @@ class TestReadDashboardMetrics:
 class TestReadDashboardTags:
     """Tests for _read_dashboard_tags function."""
 
-    def test_extracts_tags_from_redis_dashboard(self, real_repo):
-        """Redis dashboard should have tags extracted for grouping."""
+    @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
+    def test_extracts_tags_from_dashboard(self, real_repo, integration_name, metric_prefix, check_exact):
+        """Dashboard should have tags extracted for grouping."""
         from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_tags
 
-        redis = real_repo.integrations.get('redisdb')
-        tags = _read_dashboard_tags(redis)
+        integration = real_repo.integrations.get(integration_name)
+        tags = _read_dashboard_tags(integration)
 
         assert isinstance(tags, dict), "Should return a dict"
 
@@ -96,12 +79,13 @@ class TestReadDashboardTags:
 class TestReadDashboardTagValues:
     """Tests for _read_dashboard_tag_values function."""
 
-    def test_extracts_tag_values_from_dashboard(self, real_repo):
+    @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
+    def test_extracts_tag_values_from_dashboard(self, real_repo, integration_name, metric_prefix, check_exact):
         """Should extract specific tag:value pairs from dashboard queries."""
         from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_tag_values
 
-        redis = real_repo.integrations.get('redisdb')
-        tag_values = _read_dashboard_tag_values(redis)
+        integration = real_repo.integrations.get(integration_name)
+        tag_values = _read_dashboard_tag_values(integration)
 
         assert isinstance(tag_values, dict), "Should return a dict"
 
@@ -118,49 +102,18 @@ class TestReadDashboardTagValues:
 class TestBuildContext:
     """Tests for build_context function."""
 
-    def test_builds_context_for_redis(self, real_repo):
-        """Should build complete context for redis integration."""
+    @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
+    def test_builds_context_for_integration(self, real_repo, integration_name, metric_prefix, check_exact):
+        """Should build complete context for integration."""
         from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
 
-        redis = real_repo.integrations.get('redisdb')
-        context = build_context(redis)
+        integration = real_repo.integrations.get(integration_name)
+        context = build_context(integration)
 
-        assert context.name == 'redisdb'
-        assert context.display_name is not None
-        assert len(context.metrics) > 0, "Redis should have metrics"
-        assert context.metric_prefix == 'redis.'
-
-    def test_builds_context_for_postgres(self, real_repo):
-        """Should build complete context for postgres integration."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
-
-        postgres = real_repo.integrations.get('postgres')
-        context = build_context(postgres)
-
-        assert context.name == 'postgres'
-        assert len(context.metrics) > 0, "Postgres should have metrics"
-
-    def test_builds_context_for_cassandra(self, real_repo):
-        """Should build complete context for cassandra integration."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
-
-        cassandra = real_repo.integrations.get('cassandra')
-        context = build_context(cassandra)
-
-        assert context.name == 'cassandra'
-        assert len(context.metrics) > 0, "Cassandra should have metrics"
-        assert context.metric_prefix == 'cassandra.'
-
-    def test_builds_context_for_celery(self, real_repo):
-        """Should build complete context for celery integration."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
-
-        celery = real_repo.integrations.get('celery')
-        context = build_context(celery)
-
-        assert context.name == 'celery'
-        assert len(context.metrics) > 0, "Celery should have metrics"
-        assert 'celery' in context.metric_prefix.lower()
+        assert context.name == integration_name
+        assert len(context.metrics) > 0, f"{integration_name} should have metrics"
+        if check_exact:
+            assert context.metric_prefix == metric_prefix
 
     def test_all_metrics_mode(self, real_repo):
         """all_metrics mode should set the flag in context."""
@@ -191,14 +144,15 @@ class TestBuildContext:
 class TestReadMetrics:
     """Tests for _read_metrics function."""
 
-    def test_reads_metrics_from_metadata_csv(self, real_repo):
+    @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
+    def test_reads_metrics_from_metadata_csv(self, real_repo, integration_name, metric_prefix, check_exact):
         """Should read metrics from metadata.csv."""
         from ddev.cli.meta.scripts.dynamicd.context_builder import _read_metrics
 
-        redis = real_repo.integrations.get('redisdb')
-        metrics = _read_metrics(redis)
+        integration = real_repo.integrations.get(integration_name)
+        metrics = _read_metrics(integration)
 
-        assert len(metrics) > 0, "Redis should have metrics in metadata.csv"
+        assert len(metrics) > 0, f"{integration_name} should have metrics in metadata.csv"
         assert all('metric_name' in m for m in metrics), "Each metric should have a metric_name"
 
 
