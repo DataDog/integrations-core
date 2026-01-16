@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4139f2e2-ba87-4e17-bcda-73bdade3ed8f",
   "app_id": "cato-networks",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
