@@ -114,12 +114,8 @@ jobs:
       DD_CIVISIBILITY_ENABLED: "true"
       DD_CIVISIBILITY_AGENTLESS_ENABLED: "true"
       DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER: "github"
-      # Disable Test Impact Analysis to prevent git packfile collection that interferes with shallow clones
-      DD_CIVISIBILITY_ITR_ENABLED: "false"
       DD_PROFILING_ENABLED: "true"
       DD_APPSEC_ENABLED: "false"
-      # Disable subprocess patching to prevent interference with git operations in test fixtures
-      DD_TRACE_SUBPROCESS_ENABLED: "false"
       DD_SITE: "datadoghq.com"
       DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       # Prefix for artifact names when using minimum base package
