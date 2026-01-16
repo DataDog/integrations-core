@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+
 from datadog_checks.clickhouse.utils import ErrorSanitizer
 
 pytestmark = pytest.mark.unit

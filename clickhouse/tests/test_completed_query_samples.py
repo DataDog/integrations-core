@@ -5,6 +5,7 @@ import time
 from unittest import mock
 
 import pytest
+
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.completed_query_samples import ClickhouseCompletedQuerySamples
 

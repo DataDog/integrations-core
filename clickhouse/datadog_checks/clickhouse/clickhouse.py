@@ -6,6 +6,7 @@ from time import time
 
 import clickhouse_connect
 from cachetools import TTLCache
+
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import default_json_event_encoding

@@ -6,6 +6,7 @@ from copy import deepcopy
 
 import clickhouse_connect
 import pytest
+
 from datadog_checks.clickhouse import ClickhouseCheck
 
 from .common import CLICKHOUSE_VERSION
