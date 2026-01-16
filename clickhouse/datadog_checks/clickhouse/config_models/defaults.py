@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_clickhouse_cloud():
+    return False
+
+
 def instance_connect_timeout():
     return 10
 
