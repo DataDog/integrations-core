@@ -29,6 +29,11 @@ class ActivityMonitor:
                 self.check.log.debug("No events found")
                 return
 
+            if self.last_event_collection_time:
+                events = self._filter_after_time(events, self.last_event_collection_time, "creationTime")
+                if not events:
+                    return
+
             for event in events:
                 self._process_event(event)
 
@@ -119,6 +124,11 @@ class ActivityMonitor:
                 self.check.log.debug("No tasks found")
                 return
 
+            if self.last_task_collection_time:
+                tasks = self._filter_after_time(tasks, self.last_task_collection_time, "createdTime")
+                if not tasks:
+                    return
+
             for task in tasks:
                 self._process_task(task)
 
@@ -143,6 +153,11 @@ class ActivityMonitor:
                 self.check.log.debug("No audits found")
                 return
 
+            if self.last_audit_collection_time:
+                audits = self._filter_after_time(audits, self.last_audit_collection_time, "creationTime")
+                if not audits:
+                    return
+
             for audit in audits:
                 self._process_audit(audit)
 
@@ -166,6 +181,11 @@ class ActivityMonitor:
             if not alerts:
                 self.check.log.debug("No alerts found")
                 return
+
+            if self.last_alert_collection_time:
+                alerts = self._filter_after_time(alerts, self.last_alert_collection_time, "creationTime")
+                if not alerts:
+                    return
 
             for alert in alerts:
                 self._process_alert(alert)
@@ -396,6 +416,26 @@ class ActivityMonitor:
                 "tags": task_tags,
             }
         )
+
+    def _filter_after_time(self, items, last_time_str, field_name):
+        """Filter items to those strictly after the last submitted time."""
+        try:
+            last_time = datetime.fromisoformat(last_time_str.replace("Z", "+00:00"))
+        except (ValueError, AttributeError):
+            return items
+
+        filtered = []
+        for item in items:
+            item_time_str = item.get(field_name)
+            if not item_time_str:
+                continue
+            try:
+                item_time = datetime.fromisoformat(item_time_str.replace("Z", "+00:00"))
+            except (ValueError, AttributeError):
+                continue
+            if item_time > last_time:
+                filtered.append(item)
+        return filtered
 
     def _parse_timestamp(self, timestamp_str: str) -> int | None:
         """Parse ISO 8601 timestamp string to Unix timestamp.
