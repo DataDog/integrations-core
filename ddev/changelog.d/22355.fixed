@@ -1,0 +1,1 @@
+Ensure ddtrace is used with pytest for every package to emit CI visibility tracking
