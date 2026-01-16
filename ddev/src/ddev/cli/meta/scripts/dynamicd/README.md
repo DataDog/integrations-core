@@ -98,3 +98,5 @@ All telemetry is tagged with `env:dynamicd` for easy filtering in Datadog.
 | `--timeout` | Execution timeout in seconds (for testing) |
 | `--all-metrics` | Generate ALL metrics, not just dashboard metrics |
 | `--sandbox/--no-sandbox` | Run in Docker container for isolation (auto-detect by default) |
+
+**Note:** Sandbox mode requires Docker Desktop to be running. Start it with `open -a Docker` on macOS.
