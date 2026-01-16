@@ -108,10 +108,9 @@ jobs:
       DDEV_E2E_AGENT_PY2: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows-py2) || inputs.agent-image-py2 }}"
       # Test results for later processing
       TEST_RESULTS_BASE_DIR: "test-results"
-      # CI Visibility configuration
+      # CI Visibility configuration (matching what install_test_visibility script sets)
       DD_ENV: "ci"
       DD_SERVICE: "${{ inputs.target }}-integrations-${{ inputs.repo }}"
-      DD_TRACE_ANALYTICS_ENABLED: "true"
       DD_CIVISIBILITY_ENABLED: "true"
       DD_CIVISIBILITY_AGENTLESS_ENABLED: "true"
       DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER: "github"
