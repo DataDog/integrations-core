@@ -114,6 +114,9 @@ jobs:
       DD_TRACE_ANALYTICS_ENABLED: "true"
       DD_CIVISIBILITY_ENABLED: "true"
       DD_CIVISIBILITY_AGENTLESS_ENABLED: "true"
+      DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER: "github"
+      DD_PROFILING_ENABLED: "false"
+      DD_SITE: "datadoghq.com"
       DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       # Prefix for artifact names when using minimum base package
       MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"

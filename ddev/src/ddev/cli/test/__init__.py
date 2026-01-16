@@ -289,7 +289,7 @@ def test(
             if ddtrace:
                 command.append('--ddtrace')
                 env_vars['DDEV_TRACE_ENABLED'] = 'true'
-                env_vars['DD_PROFILING_ENABLED'] = 'true'
+                env_vars['DD_PROFILING_ENABLED'] = os.environ.get('DD_PROFILING_ENABLED', 'true')
                 env_vars['DD_SERVICE'] = os.environ.get('DD_SERVICE', 'ddev-integrations')
                 env_vars['DD_ENV'] = os.environ.get('DD_ENV', 'ddev-integrations')
 
