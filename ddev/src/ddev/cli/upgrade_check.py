@@ -16,12 +16,11 @@ def default_cache_file() -> Path:
     return Path(user_cache_dir('ddev', appauthor=False)).expanduser() / "upgrade_check.json"
 
 
-CACHE_FILE = default_cache_file()
 PYPI_URL = "https://pypi.org/pypi/ddev/json"
 CHECK_INTERVAL = timedelta(days=7)
 
 
-def read_last_run(cache_file=CACHE_FILE):
+def read_last_run(cache_file):
     # Read the last run from the cache file and return a version and a date.
     # Format: {"version": "1.6.0", "date": "2023-04-11T10:56:39.786412"}
     try:
@@ -32,7 +31,7 @@ def read_last_run(cache_file=CACHE_FILE):
         return None, None
 
 
-def write_last_run(version, date, cache_file=CACHE_FILE):
+def write_last_run(version, date, cache_file):
     # Records/overwrites the run in the cache file. If the file isn't there, it will be created
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     with open(cache_file, "w") as f:
@@ -43,7 +42,9 @@ def exit_handler(app, msg):
     return app.display_info(msg, highlight=False)
 
 
-def upgrade_check(app, version, cache_file=CACHE_FILE, pypi_url=PYPI_URL, check_interval=CHECK_INTERVAL):
+def upgrade_check(app, version, cache_file=None, pypi_url=PYPI_URL, check_interval=CHECK_INTERVAL):
+    if cache_file is None:
+        cache_file = default_cache_file()
     current_version = Version(version)
     if current_version.is_devrelease:
         return
