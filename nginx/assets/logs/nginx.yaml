@@ -409,7 +409,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `http.method` to `ocsf.metadata.event_code`.
+              name: Map `http.method` to `ocsf.metadata.event_code`
               sources:
                 - http.method
               target: ocsf.metadata.event_code
