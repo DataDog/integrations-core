@@ -235,7 +235,7 @@ jobs:
     - name: Set up CI visibility
       uses: datadog/test-visibility-github-action@f4b026bb8b8b53f323960cf86a849a0231ff93b9 # v2.5.0
       with:
-        languuages: python
+        languages: python
         api_key: "${{ secrets.DD_API_KEY }}"
 
     - name: Run Unit & Integration tests
