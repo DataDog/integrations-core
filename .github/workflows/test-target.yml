@@ -108,10 +108,13 @@ jobs:
       DDEV_E2E_AGENT_PY2: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows-py2) || inputs.agent-image-py2 }}"
       # Test results for later processing
       TEST_RESULTS_BASE_DIR: "test-results"
-      # Tracing to monitor our test suite
+      # CI Visibility configuration
       DD_ENV: "ci"
       DD_SERVICE: "${{ inputs.target }}-integrations-${{ inputs.repo }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
+      DD_CIVISIBILITY_ENABLED: "true"
+      DD_CIVISIBILITY_AGENTLESS_ENABLED: "true"
+      DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       # Prefix for artifact names when using minimum base package
       MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"
 
@@ -226,21 +229,6 @@ jobs:
     - name: Prepare for testing
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
-
-    - name: Get ddtrace version from datadog_checks_base
-      # This is used to ensure that the version of ddtrace we use with the ci visibility action is the same one we have in datadog_checks_base
-      id: get-ddtrace-version
-      run: |
-        DDTRACE_VERSION=$(grep 'ddtrace==' datadog_checks_base/pyproject.toml | sed 's/.*ddtrace==\([0-9.]*\).*/\1/')
-        echo "version=$DDTRACE_VERSION" >> "$GITHUB_OUTPUT"
-
-    - name: Set up CI visibility
-      uses: datadog/test-visibility-github-action@f4b026bb8b8b53f323960cf86a849a0231ff93b9 # v2.5.0
-      with:
-        languages: python
-        api_key: "${{ secrets.DD_API_KEY }}"
-        print-github-step-summary: false
-        python-tracer-version: ${{ steps.get-ddtrace-version.outputs.version }}
 
     - name: Run Unit & Integration tests
       if: inputs.latest != true && inputs.minimum-base-package != true

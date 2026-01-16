@@ -28,3 +28,5 @@ def test_get_datadog_wheels():
     # Verify all package names have underscores (dashes should be converted)
     for pkg in packages:
         assert "-" not in pkg
+
+    assert False
