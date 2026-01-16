@@ -769,6 +769,9 @@ def _deserialize_protobuf(message, schema_info, uses_schema_registry):
     try:
         if uses_schema_registry:
             message_indices, message = _read_protobuf_message_indices(message)
+            # Empty indices array means use the first message type (index 0)
+            if not message_indices:
+                message_indices = [0]
         else:
             message_indices = [0]
 
