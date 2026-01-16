@@ -3,6 +3,7 @@ import json
 from contextlib import suppress
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Optional, Tuple
 
 import requests
 from packaging.version import InvalidVersion, Version
@@ -20,7 +21,7 @@ PYPI_URL = "https://pypi.org/pypi/ddev/json"
 CHECK_INTERVAL = timedelta(days=7)
 
 
-def read_last_run(cache_file):
+def read_last_run(cache_file: Path) -> Tuple[Optional[Version], Optional[datetime]]:
     # Read the last run from the cache file and return a version and a date.
     # Format: {"version": "1.6.0", "date": "2023-04-11T10:56:39.786412"}
     try:
@@ -31,22 +32,28 @@ def read_last_run(cache_file):
         return None, None
 
 
-def write_last_run(version, date, cache_file):
+def write_last_run(version: Version, date: datetime, cache_file: Path) -> None:
     # Records/overwrites the run in the cache file. If the file isn't there, it will be created
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     with open(cache_file, "w") as f:
         json.dump({"version": str(version), "date": date.isoformat()}, f)
 
 
-def exit_handler(app, latest_version, current_version):
+def exit_handler(app, latest_version: Version, current_version: Version) -> None:
     msg = (
         f'An upgrade to version {latest_version} is available for {PACKAGE_NAME}. '
         f'Your current version is {current_version}'
     )
-    return app.display_warning(msg, highlight=False)
+    app.display_warning(msg, highlight=False)
 
 
-def upgrade_check(app, version, cache_file=None, pypi_url=PYPI_URL, check_interval=CHECK_INTERVAL):
+def upgrade_check(
+    app,
+    version: str,
+    cache_file: Optional[Path] = None,
+    pypi_url: str = PYPI_URL,
+    check_interval: timedelta = CHECK_INTERVAL,
+) -> None:
     if cache_file is None:
         cache_file = default_cache_file()
     current_version = Version(version)
