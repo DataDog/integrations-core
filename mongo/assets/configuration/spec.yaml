@@ -361,6 +361,38 @@ files:
           value:
             type: boolean
             example: false
+    - name: query_metrics
+      description: |
+        Configure collection of MongoDB query metrics using $queryStats aggregation pipeline.
+        This feature requires MongoDB 8.0+ and the clusterMonitor role.
+        Query metrics provide aggregated performance statistics for normalized queries,
+        similar to pg_stat_statements for PostgreSQL.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query metrics. Requires `dbm: true` and MongoDB 8.0+.
+            Unlike other DBM features, query_metrics must be explicitly enabled.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the query metrics collection interval in seconds.
+          value:
+            type: number
+            example: 10
+        - name: full_statement_text_cache_max_size
+          description: |
+            Maximum size of the cache for full query text events.
+          value:
+            type: number
+            example: 10000
+        - name: full_statement_text_samples_per_hour_per_query
+          description: |
+            Maximum number of full query text events per query per hour.
+          value:
+            type: number
+            example: 1
     - name: replica_check
       description: |
         Whether or not to read from available replicas.

@@ -206,3 +206,49 @@ class OperationActivityEvent(TypedDict, total=False):
     ddtags: str
     timestamp: int
     mongodb_activity: List[OperationSampleActivityRecord]
+
+
+# Query Metrics types for $queryStats (MongoDB 8.0+)
+class QueryMetricsStatsSummary(TypedDict, total=False):
+    """Statistics summary for a metric (sum, max, min, sumOfSquares)"""
+
+    sum: int
+    max: int
+    min: int
+    sum_of_squares: int
+
+
+class QueryMetricsRow(TypedDict, total=False):
+    """Normalized row for query metrics processing"""
+
+    query_signature: str
+    db_name: str
+    collection: str
+    obfuscated_command: str
+    command_type: str
+    key_hash: str
+    query_shape_hash: str
+    # Metrics (for derivative calculation)
+    exec_count: int
+    total_exec_micros_sum: int
+    first_response_exec_micros_sum: int
+    keys_examined_sum: int
+    docs_examined_sum: int
+    docs_returned_sum: int
+    # Timestamps
+    first_seen_timestamp: str | None
+    latest_seen_timestamp: str | None
+
+
+class QueryMetricsEvent(TypedDict, total=False):
+    """Query metrics payload event"""
+
+    host: str
+    timestamp: int
+    min_collection_interval: int
+    tags: List[str]
+    cloud_metadata: Optional[Dict]
+    mongo_version: str
+    ddagentversion: str
+    service: Optional[str]
+    mongo_rows: List[QueryMetricsRow]
