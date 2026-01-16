@@ -10,6 +10,7 @@ from packaging.version import Version
 
 from ddev.cli.upgrade_check import (
     default_cache_file,
+    exit_handler,
     read_last_run,
     upgrade_check,
     write_last_run,
@@ -104,7 +105,7 @@ class TestUpgradeCheck:
         upgrade_check(app, "1.0.0", cache_file=cache_file)
 
         mock_get.assert_called_once_with("https://pypi.org/pypi/ddev/json", timeout=5)
-        mock_atexit.assert_called_once()
+        mock_atexit.assert_called_once_with(exit_handler, app, Version("2.0.0"), Version("1.0.0"))
         # Verify cache was written
         data = json.loads(cache_file.read_text())
         assert data["version"] == "2.0.0"
@@ -122,7 +123,7 @@ class TestUpgradeCheck:
         upgrade_check(app, "1.0.0", cache_file=cache_file)
 
         mock_get.assert_not_called()
-        mock_atexit.assert_called_once()
+        mock_atexit.assert_called_once_with(exit_handler, app, Version("2.0.0"), Version("1.0.0"))
 
     def test_upgrade_no_notification_when_up_to_date(self, tmp_path, mocker):
         # test ability to not notify when up to date

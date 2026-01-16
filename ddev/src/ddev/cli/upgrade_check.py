@@ -38,8 +38,12 @@ def write_last_run(version, date, cache_file):
         json.dump({"version": str(version), "date": date.isoformat()}, f)
 
 
-def exit_handler(app, msg):
-    return app.display_info(msg, highlight=False)
+def exit_handler(app, latest_version, current_version):
+    msg = (
+        f'An upgrade to version {latest_version} is available for {PACKAGE_NAME}. '
+        f'Your current version is {current_version}'
+    )
+    return app.display_warning(msg, highlight=False)
 
 
 def upgrade_check(app, version, cache_file=None, pypi_url=PYPI_URL, check_interval=CHECK_INTERVAL):
@@ -59,11 +63,7 @@ def upgrade_check(app, version, cache_file=None, pypi_url=PYPI_URL, check_interv
             latest_version = Version(resp.json()["info"]["version"])
             write_last_run(latest_version, date_now, cache_file)
             if latest_version > current_version:
-                msg = (
-                    f'\n\u001b[31mAn upgrade to version {latest_version} is available for {PACKAGE_NAME}. '
-                    f'Your current version is {current_version}\u001b[0m'
-                )
-                atexit.register(exit_handler, app, msg)
+                atexit.register(exit_handler, app, latest_version, current_version)
         except (requests.RequestException, OSError, json.JSONDecodeError, KeyError, InvalidVersion) as e:
             app.display_debug(f'Upgrade check failed: {e}')
             # Record the attempt to prevent even if failed
@@ -72,8 +72,4 @@ def upgrade_check(app, version, cache_file=None, pypi_url=PYPI_URL, check_interv
                 write_last_run(version_to_cache, date_now, cache_file)
     else:
         if last_version > current_version:
-            msg = (
-                f'\n\u001b[31mAn upgrade to version {last_version} is available for {PACKAGE_NAME}. '
-                f'Your current version is {current_version}\u001b[0m'
-            )
-            atexit.register(exit_handler, app, msg)
+            atexit.register(exit_handler, app, last_version, current_version)
