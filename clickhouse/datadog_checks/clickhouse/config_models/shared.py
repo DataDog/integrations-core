@@ -26,8 +26,8 @@ class SharedConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    global_custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
-    service: Optional[str] = None
+    global_custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]]
+    service: Optional[str]
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
