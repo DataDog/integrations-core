@@ -28,7 +28,7 @@ The Zscaler Private Access check is included in the [Datadog Agent][1] package. 
 
 ### Network placement 
 
-For security, place the Datadog Agent on the same subnet as the Zscaler App Connector to keep log traffic on a trusted network.
+Place the Datadog Agent in the same subnet as the Zscaler App Connector so that log traffic stays on a trusted network segment.
 
 ### Configuration
 
