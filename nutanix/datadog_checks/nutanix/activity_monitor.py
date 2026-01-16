@@ -4,6 +4,8 @@
 
 from datetime import datetime, timedelta
 
+from requests.exceptions import HTTPError
+
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 
 
@@ -28,11 +30,6 @@ class ActivityMonitor:
             if not events:
                 self.check.log.debug("No events found")
                 return
-
-            if self.last_event_collection_time:
-                events = self._filter_after_time(events, self.last_event_collection_time, "creationTime")
-                if not events:
-                    return
 
             for event in events:
                 self._process_event(event)
@@ -124,11 +121,6 @@ class ActivityMonitor:
                 self.check.log.debug("No tasks found")
                 return
 
-            if self.last_task_collection_time:
-                tasks = self._filter_after_time(tasks, self.last_task_collection_time, "createdTime")
-                if not tasks:
-                    return
-
             for task in tasks:
                 self._process_task(task)
 
@@ -152,11 +144,6 @@ class ActivityMonitor:
             if not audits:
                 self.check.log.debug("No audits found")
                 return
-
-            if self.last_audit_collection_time:
-                audits = self._filter_after_time(audits, self.last_audit_collection_time, "creationTime")
-                if not audits:
-                    return
 
             for audit in audits:
                 self._process_audit(audit)
@@ -182,11 +169,6 @@ class ActivityMonitor:
                 self.check.log.debug("No alerts found")
                 return
 
-            if self.last_alert_collection_time:
-                alerts = self._filter_after_time(alerts, self.last_alert_collection_time, "creationTime")
-                if not alerts:
-                    return
-
             for alert in alerts:
                 self._process_alert(alert)
 
@@ -211,7 +193,18 @@ class ActivityMonitor:
         params["$filter"] = f"creationTime gt {start_time_str}"
         params["$orderBy"] = "creationTime asc"
 
-        return self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
+        try:
+            return self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
+        except HTTPError as e:
+            self.log.debug("Monitoring v4.2 API is not available, falling back to Monitoring v4.0")
+            # $filter by creationTime is only available in v4.2+
+            del params["$filter"]
+            if e.response is not None and e.response.status_code == 404:
+                return self.check._get_paginated_request_data(
+                    "api/monitoring/v4.0/serviceability/alerts",
+                    params=params,
+                )
+            raise
 
     def _process_audit(self, audit):
         """Process and send a single audit to Datadog."""
@@ -416,26 +409,6 @@ class ActivityMonitor:
                 "tags": task_tags,
             }
         )
-
-    def _filter_after_time(self, items, last_time_str, field_name):
-        """Filter items to those strictly after the last submitted time."""
-        try:
-            last_time = datetime.fromisoformat(last_time_str.replace("Z", "+00:00"))
-        except (ValueError, AttributeError):
-            return items
-
-        filtered = []
-        for item in items:
-            item_time_str = item.get(field_name)
-            if not item_time_str:
-                continue
-            try:
-                item_time = datetime.fromisoformat(item_time_str.replace("Z", "+00:00"))
-            except (ValueError, AttributeError):
-                continue
-            if item_time > last_time:
-                filtered.append(item)
-        return filtered
 
     def _parse_timestamp(self, timestamp_str: str) -> int | None:
         """Parse ISO 8601 timestamp string to Unix timestamp.
