@@ -1,7 +1,7 @@
 # This is a copy of the test target workflow created for testing updates on the workflow without impacting the on used in our PRs.
 # Since this workflow is used through workflow dispatch, it needs to be in master to be able tot be executed. This means that we cannot
 # easily update it to test someth8ing without impacting onging runs.
-name: Test target
+name: ZZ - Test Target
 
 on:
   workflow_call:
