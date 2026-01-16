@@ -154,9 +154,57 @@ def isolation() -> Generator[Path, None, None]:
 def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     cloned_repo_path = isolation / local_repo.name
 
+    # Debug: Write environment and git info to a file for artifact upload
+    import os
+    import subprocess
+    debug_file = Path(os.environ.get('GITHUB_WORKSPACE', '.')) / 'local_clone_debug.txt'
+    debug_lines = []
+    debug_lines.append('=== DEBUG local_clone fixture ===')
+    debug_lines.append(f'PYTHONPATH: {os.environ.get("PYTHONPATH", "not set")}')
+    debug_lines.append(f'DD_TRACE_SUBPROCESS_ENABLED: {os.environ.get("DD_TRACE_SUBPROCESS_ENABLED", "not set")}')
+    debug_lines.append(f'DDEV_TRACE_ENABLED: {os.environ.get("DDEV_TRACE_ENABLED", "not set")}')
+    debug_lines.append(f'DD_CIVISIBILITY_ITR_ENABLED: {os.environ.get("DD_CIVISIBILITY_ITR_ENABLED", "not set")}')
+    debug_lines.append(f'local_repo: {local_repo}')
+    debug_lines.append(f'cloned_repo_path: {cloned_repo_path}')
+
+    # Check if subprocess module is patched
+    debug_lines.append(f'subprocess.Popen: {subprocess.Popen}')
+    debug_lines.append(f'subprocess module file: {subprocess.__file__}')
+
+    # Check for any git lock files
+    git_dir = local_repo / '.git'
+    if git_dir.exists():
+        lock_files = list(git_dir.glob('*.lock')) + list(git_dir.glob('**/*.lock'))
+        debug_lines.append(f'Git lock files found: {lock_files}')
+
+    # Check if repo is shallow
+    with local_repo.as_cwd():
+        try:
+            is_shallow = PLATFORM.check_command_output(['git', 'rev-parse', '--is-shallow-repository']).strip()
+            debug_lines.append(f'Is shallow repository: {is_shallow}')
+
+            # Check for partial clone / promisor remote
+            promisor = PLATFORM.check_command_output(['git', 'config', '--get', 'remote.origin.promisor']).strip()
+            debug_lines.append(f'Promisor remote configured: {promisor}')
+        except Exception as e:
+            debug_lines.append(f'Error checking git config: {e}')
+
     # Get the current origin remote url
     with local_repo.as_cwd():
         origin_url = PLATFORM.check_command_output(['git', 'remote', 'get-url', 'origin']).strip()
+        debug_lines.append(f'origin_url: {origin_url}')
+
+    debug_lines.append(f'Running: git clone --local --shared --no-tags {local_repo} {cloned_repo_path}')
+
+    # Write debug info to file
+    try:
+        debug_file.write_text('\n'.join(debug_lines))
+        debug_lines.append(f'Debug file written to: {debug_file}')
+    except Exception as e:
+        debug_lines.append(f'Failed to write debug file: {e}')
+
+    # Also print to stdout (will show if test fails)
+    print('\n'.join(debug_lines))
 
     PLATFORM.check_command_output(
         ['git', 'clone', '--local', '--shared', '--no-tags', str(local_repo), str(cloned_repo_path)]
