@@ -203,9 +203,6 @@ class LRUConnectionPoolManager:
         self.sqlascii_encodings = sqlascii_encodings
         self.token_provider = token_provider
 
-        # SDBM-2278: num_workers=1 reduces background threads that cause memory overhead
-        # Default num_workers=3 creates 3 worker threads + scheduler per pool, ~1MB each
-        # Setting to 1 (minimum allowed) reduces thread count significantly
         self.pool_config = {
             **(pool_config or {}),
             "min_size": 0,

@@ -1368,7 +1368,7 @@ def test_profile_memory_when_enabled(should_profile_value, expected_calls):
 
 
 class TestDegeneraliseTagCaching:
-    """Tests for SDBM-2278: LRU caching of degeneralise_tag to reduce memory allocations."""
+    """Tests for LRU caching of degeneralise_tag."""
 
     def test_degeneralise_tag_caching_returns_same_result(self):
         """Verify cached function returns identical results to original behavior."""

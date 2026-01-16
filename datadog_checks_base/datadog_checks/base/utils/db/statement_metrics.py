@@ -5,8 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# SDBM-2278: Large string columns to exclude from _previous_statements cache
-# These columns can be several KB each and are not needed for derivative calculations
+# Large string columns to exclude from _previous_statements cache (not needed for derivative calculations)
 _STATEMENT_METRICS_EXCLUDED_COLUMNS = frozenset({'query', 'statement', 'query_text', 'sql_text', 'digest_text'})
 
 
@@ -109,8 +108,6 @@ class StatementMetrics:
 
             result.append(diffed_row)
 
-        # SDBM-2278: Strip large string columns before storing in _previous_statements
-        # This reduces memory by not caching query text that isn't needed for derivative calculations
         self._previous_statements.clear()
         self._previous_statements = _strip_statement_columns(merged_rows, metrics)
 
@@ -145,19 +142,9 @@ def _merge_duplicate_rows(rows, metrics, key):
 
 
 def _strip_statement_columns(merged_rows, metrics):
-    """
-    SDBM-2278: Strip large string columns from rows before caching in _previous_statements.
-
-    This dramatically reduces memory usage by not storing query text strings that can be
-    several KB each. With 10,000+ statements, this can save 20+ MB per check instance.
-
-    :param merged_rows: Dictionary of {row_key: row_dict}
-    :param metrics: Set of metric column names that need to be preserved
-    :return: Dictionary with same keys but stripped row values
-    """
+    """Strip large string columns from rows before caching to reduce memory usage."""
     stripped = {}
     for row_key, row in merged_rows.items():
-        # Keep metric columns and any column not in the exclusion list
         stripped_row = {k: v for k, v in row.items() if k in metrics or k not in _STATEMENT_METRICS_EXCLUDED_COLUMNS}
         stripped[row_key] = stripped_row
     return stripped

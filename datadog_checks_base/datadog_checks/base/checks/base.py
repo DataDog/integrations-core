@@ -75,20 +75,9 @@ ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MO
 TYPO_SIMILARITY_THRESHOLD = 0.95
 
 
-# SDBM-2278: LRU cache for degeneralise_tag to reduce memory allocations
-# Profiler data showed degeneralise_tag consuming ~890 MiB due to repeated string operations
 @functools.lru_cache(maxsize=50000)
 def _cached_degeneralise_tag(check_name, tag):
-    """
-    Cached implementation of tag degeneralization.
-
-    Args:
-        check_name: The name of the check (e.g., 'postgres')
-        tag: The tag to process
-
-    Returns:
-        The degeneralised tag string
-    """
+    """Cached implementation of tag degeneralization to reduce memory allocations."""
     split_tag = tag.split(':', 1)
     if len(split_tag) > 1:
         tag_name, value = split_tag
@@ -1461,7 +1450,6 @@ class AgentCheck(object):
         return normalized_tags
 
     def degeneralise_tag(self, tag):
-        # SDBM-2278: Use module-level cached implementation to reduce memory allocations
         return _cached_degeneralise_tag(self.name, tag)
 
     def get_debug_metric_tags(self):
