@@ -235,6 +235,14 @@ class QueryMetricsRow(TypedDict, total=False):
     keys_examined_sum: int
     docs_examined_sum: int
     docs_returned_sum: int
+    # P1 metrics
+    bytes_read_sum: int
+    cpu_nanos_sum: int
+    used_disk_count: int
+    has_sort_stage_count: int
+    # P2 metrics
+    read_time_micros_sum: int
+    working_time_millis_sum: int
     # Timestamps
     first_seen_timestamp: str | None
     latest_seen_timestamp: str | None

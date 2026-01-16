@@ -42,6 +42,14 @@ QUERY_METRICS_COLUMNS = frozenset(
         'keys_examined_sum',
         'docs_examined_sum',
         'docs_returned_sum',
+        # P1 metrics
+        'bytes_read_sum',
+        'cpu_nanos_sum',
+        'used_disk_count',
+        'has_sort_stage_count',
+        # P2 metrics
+        'read_time_micros_sum',
+        'working_time_millis_sum',
     }
 )
 
@@ -256,6 +264,14 @@ class MongoQueryMetrics(DBMAsyncJob):
                 keys_examined = metrics.get('keysExamined', {})
                 docs_examined = metrics.get('docsExamined', {})
                 docs_returned = metrics.get('docsReturned', {})
+                # P1 metrics
+                bytes_read = metrics.get('bytesRead', {})
+                cpu_nanos = metrics.get('cpuNanos', {})
+                used_disk = metrics.get('usedDisk', {})
+                has_sort_stage = metrics.get('hasSortStage', {})
+                # P2 metrics
+                read_time_micros = metrics.get('readTimeMicros', {})
+                working_time_millis = metrics.get('workingTimeMillis', {})
 
                 row: QueryMetricsRow = {
                     'query_signature': query_signature,
@@ -272,6 +288,14 @@ class MongoQueryMetrics(DBMAsyncJob):
                     'keys_examined_sum': keys_examined.get('sum', 0),
                     'docs_examined_sum': docs_examined.get('sum', 0),
                     'docs_returned_sum': docs_returned.get('sum', 0),
+                    # P1 metrics
+                    'bytes_read_sum': bytes_read.get('sum', 0),
+                    'cpu_nanos_sum': cpu_nanos.get('sum', 0),
+                    'used_disk_count': used_disk.get('true', 0),
+                    'has_sort_stage_count': has_sort_stage.get('true', 0),
+                    # P2 metrics
+                    'read_time_micros_sum': read_time_micros.get('sum', 0),
+                    'working_time_millis_sum': working_time_millis.get('sum', 0),
                     # Timestamps
                     'first_seen_timestamp': self._format_timestamp(metrics.get('firstSeenTimestamp')),
                     'latest_seen_timestamp': self._format_timestamp(metrics.get('latestSeenTimestamp')),
