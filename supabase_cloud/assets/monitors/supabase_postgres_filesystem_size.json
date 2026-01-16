@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2026-01-08",
+  "last_updated_at": "2026-01-08",
+  "title": "Postgres Server Filesystem Size Exceeds Alert Threshold",
+  "description": "The Postgres server filesystem usage is above the alert threshold.",
+  "definition": {
+	"id": 232499493,
+	"name": "[Supabase] Postgres Server Filesystem Size Alert",
+	"type": "query alert",
+	"query": "avg(last_5m):100 - ((avg:supabase.cloud.node.filesystem.avail.bytes{*} by {mountpoint,supabase_project_ref} * 100) / avg:supabase.cloud.node.filesystem.size.bytes{*} by {mountpoint,supabase_project_ref}) > 85",
+	"message": "The Postgres server filesystem {{mountpoint.name}} for project {{supabase_project_ref.name}} {{#is_alert}}is over 85% utilized{{/is_alert}}{{#is_alert_recovery}} is back under 85% utilization{{/is_alert_recovery}}. @example@example.com",
+	"tags": [
+		"source:supabase-cloud"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 85
+		},
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"require_full_window": true,
+		"new_group_delay": 0
+	},
+	"priority": null,
+	"draft_status": "published"
+  },
+  "tags": [
+    "integration:supabase-cloud"
+  ]
+}

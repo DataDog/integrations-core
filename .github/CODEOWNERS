@@ -448,6 +448,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /squid/manifest.json                                                 @DataDog/agent-integrations @DataDog/documentation
 /squid/assets/logs/                                                  @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/supabase_cloud/                                                     @DataDog/saas-integrations
+/supabase_cloud/*.md                                                 @DataDog/saas-integrations @DataDog/documentation
+/supabase_cloud/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
+/supabase_cloud/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /ping_one/                                                           @DataDog/saas-integrations
 /ping_one/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
 /ping_one/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation

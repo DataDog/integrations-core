@@ -41,8 +41,19 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
-    "monitors": {},
+    "dashboards": {
+      "Supabase Cloud Overview": "assets/dashboards/supabase_cloud_overview.json"
+    },
+    "logs": {
+        "source": "supabase-cloud"
+    },
+    "monitors": {
+      "Supabase Postgres Filesystem Utilization" : "assets/monitors/supabase_postgres_filesystem_size.json",
+      "Supabase Postgres Server Load" : "assets/monitors/supabase_postgres_server_high_load.json",
+      "Supabase Postgres Server Offline" : "assets/monitors/supabase_postgres_server_offline.json",
+      "Supabase Storage Errors" : "assets/monitors/supabase_storage_errors.json",
+      "Supabase Storage Warnings" : "assets/monitors/supabase_storage_warnings.json"
+    },
     "saved_views": {}
   },
   "author": {

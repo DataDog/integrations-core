@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2026-01-08",
+  "last_updated_at": "2026-01-08",
+  "title": "Postgres Server is Offline",
+  "description": "The Postgres server is offline.",
+  "definition": {
+	"id": 230824842,
+	"name": "[Supabase] Postgres server is offline",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:supabase.cloud.pg.up{*} by {supabase_project_ref} < 1",
+	"message": "The Postgres server for project {{supabase_project_ref.name}} is {{#is_alert}}offline{{/is_alert}}{{#is_alert_recovery}}back online{{/is_alert_recovery}}. @example@example.com",
+	"tags": [
+		"source:supabase-cloud"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 1
+		},
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"require_full_window": true,
+		"new_group_delay": 0
+	},
+	"priority": null,
+	"draft_status": "published"
+  },
+  "tags": [
+    "integration:supabase-cloud"
+  ]
+}

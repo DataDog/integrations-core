@@ -1,0 +1,182 @@
+id: supabase-cloud
+metric_id: supabase-cloud
+backend_only: false
+facets:
+  - description: The Supabase project's Postgres instance identifier.
+    facetType: list
+    groups:
+      - Supabase Cloud
+    name: Supabase Postgres Instance Identifier
+    path: data.identifier
+    source: log
+    type: string
+  - description: Postgres statement duration in milliseconds, available when
+      `log_min_duration_statement` is configured.
+    facetType: range
+    groups:
+      - Supabase Cloud
+    name: Supabase Postgres Statement Duration
+    path: supabase.pg_duration
+    source: log
+    type: double
+    unit:
+      family: time
+      name: millisecond
+  - description: Supabase Project Reference
+    facetType: list
+    groups:
+      - Supabase Cloud
+    name: Supabase Project
+    path: data.project
+    source: log
+    type: string
+  - description: SQL Statement referenced in Postgres log message.
+    facetType: list
+    groups:
+      - Supabase Cloud
+    name: Supabase SQL Statement
+    path: supabase.sql_statement
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Supabase Cloud
+  enabled: true
+  filter:
+    query: source:supabase-cloud
+  processors:
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: status-remapper
+      name: Define `metadata.parsed.error_severity`, `metadata.level` as the official
+        status of the log
+      enabled: true
+      sources:
+        - metadata.parsed.error_severity
+        - metadata.level
+    - type: arithmetic-processor
+      name: Convert `data.timestamp` from microsecond to millisecond in
+        `supabase.event_timestamp`
+      enabled: true
+      expression: data.timestamp / 1000
+      target: supabase.event_timestamp
+      replaceMissing: true
+    - type: date-remapper
+      name: Define `supabase.event_timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - supabase.event_timestamp
+    - type: pipeline
+      name: Connection authorized postgres_logs messages
+      enabled: true
+      filter:
+        query: service:postgres_logs @data.event_message:connection?authorized*
+      processors:
+        - type: grok-parser
+          name: Parse connection authorized messages into `supabase.pg_authorization`
+          enabled: true
+          source: data.event_message
+          samples:
+            - "connection authorized: user=supabase_admin database=postgres
+              application_name=psql SSL enabled (protocol=TLSv1.3,
+              cipher=TLS_AES_256_GCM_SHA384, bits=256)"
+            - "connection authorized: user=supabase_admin database=postgres
+              application_name=postgres_exporter"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              connection_authorized_with_ssl connection authorized:
+              %{regex("user=[^ ]+ database=[^ ]+ application_name=[^
+              ]+"):supabase.pg_authorization} SSL enabled.*
+
+              connection_authorized connection authorized: %{data:supabase.pg_authorization}
+    - type: pipeline
+      name: Postgres log_min_duration_statement messages
+      enabled: true
+      filter:
+        query: service:postgres_logs @data.event_message:duration*
+      processors:
+        - type: grok-parser
+          name: Parse duration milliseconds
+          enabled: true
+          source: data.event_message
+          samples:
+            - "duration: 1.135 ms  execute 4: COMMIT"
+            - "duration: 415.220 ms  statement: insert into tenant (name,
+              active, subdomain) values ('testing31', true, 'testing31');"
+            - >-
+              duration: 10734.114 ms  plan:
+
+              Query Text: select * from word_or_phrase order by val asc;
+
+              Sort  (cost=4796.92..4919.83 rows=49165 width=46)
+                Sort Key: val
+                ->  Seq Scan on word_or_phrase  (cost=0.00..965.65 rows=49165 width=46)
+            - "duration: 1.723 ms  bind <unnamed>:
+              /*dddbs='orders-app',ddps='orders-app',traceparent='00-0000000000\
+              0000002d1fa8ee98363c22-2d1fa8ee98363c22-00'*/ SELECT COUNT(*) FROM
+              order_jobs"
+            - "duration: 1.716 ms"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              durationParsing duration: %{number:supabase.pg_duration}
+              ms\s+[^:]*:\s*%{data:supabase.sql_statement}
+
+              durationParsingNoSqlStatement duration: %{number:supabase.pg_duration} ms
+    - type: pipeline
+      name: Logs with metadata.payload JSON
+      enabled: true
+      filter:
+        query: "@data.metadata.payload:*"
+      processors:
+        - type: grok-parser
+          name: Parse `data.metadata.payload` JSON into `supabase.payload`
+          enabled: true
+          source: data.metadata.payload
+          samples:
+            - '{"name":"SoccerIQ-Card-Front.png-4d53ad35-38b2-4b0a-9a2b-f17cbdcb0f7f","reqId":"9974b6c316a6083f-IAD","tenant":{"ref":"olhhkaxwbugmyoapfigo","host":"olhhkaxwbugmyoapfigo.supabase.co"},"version":"06d1d212-ba98-422d-9017-0393c0329d33","bucketId":"images","metadata":{"eTag":"\"9116bdc8d623fed190ca20409048da38\"","size":123384,"mimetype":"image/png","cacheControl":"max-age=3600","lastModified":"2025-10-31T17:01:22.000Z","contentLength":123384,"httpStatusCode":200},"uploadType":"standard"}'
+          grok:
+            supportRules: ""
+            matchRules: ParsePayloadJSON %{data:supabase.payload:json}
+    - type: pipeline
+      name: Realtime messages received
+      enabled: true
+      filter:
+        query: service:realtime_logs @data.event_message:Received?message?on?realtime*
+      processors:
+        - type: grok-parser
+          name: Parse `data.event_message` message name into
+            `supabase.realtime.message_name`
+          enabled: true
+          source: data.event_message
+          samples:
+            - >-
+              Received message on
+              realtime:room:ff6bed44-a05b-4afe-b210-e22dfec26588:messages with
+              payload: %Phoenix.Socket.Broadcast{
+                topic: "olhhkaxwbugmyoapfigo:room:ff6bed44-a05b-4afe-b210-e22dfec26588:messages",
+                event: "presence_diff",
+                payload: %{
+                  joins: %{
+                    "921a0104-b97a-11f0-966f-0a58a9feac02" => %{
+                      metas: [
+                        %{
+                          :phx_ref => "GHTN0Xazh2rNaF7H",
+                          "name" => "service_role_48",
+                          "t" => 23177747
+                        }
+                      ]
+                    }
+                  },
+                  leaves: %{}
+                }
+              }
+          grok:
+            supportRules: ""
+            matchRules: ParseMessageName   Received message on
+              realtime:%{data:supabase.realtime.message_name} with
+              payload%{data}

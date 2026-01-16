@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "created_at": "2026-01-08",
+  "last_updated_at": "2026-01-08",
+  "title": "Spike in Supabase Storage Errors",
+  "description": "The number of Supabase storage errors exceeds the alert threshold.",
+  "definition": {
+	"id": 236365885,
+	"name": "[Supabase] Spike in Storage Errors",
+	"type": "log alert",
+	"query": "logs(\"source:supabase service:storage_logs @data.metadata.level:error\").index(\"*\").rollup(\"count\").by(\"@data.project\").last(\"10m\") > 20",
+	"message": "{{#is_alert}}\n  Please check project {{[data.project].name}} as more than {{threshold}} storage errors have occurred.\n{{/is_alert}}\n\n{{#is_recovery}}\n  Storage errors for project {{[data.project].name}} are back below {{threshold}}. \n{{/is_recovery}} @example@example.com",
+	"tags": [
+		"source:supabase-cloud"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 20
+		},
+		"enable_logs_sample": true,
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": true,
+		"new_group_delay": 60,
+		"groupby_simple_monitor": false
+	},
+	"priority": null,
+	"draft_status": "published"
+  },
+  "tags": [
+    "integration:supabase-cloud"
+  ]
+}

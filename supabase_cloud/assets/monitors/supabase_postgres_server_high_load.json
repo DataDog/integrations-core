@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2026-01-08",
+  "last_updated_at": "2026-01-08",
+  "title": "Postgres Server CPU Usage Exceeds Alert Threshold",
+  "description": "The Postgres server cpu usage is above the alert threshold.",
+  "definition": {
+	"id": 232765495,
+	"name": "[Supabase] Postgres server cpu usage is high",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:supabase.cloud.node.load15{*} by {supabase_project_ref} > 120",
+	"message": "The Postgres server for project {{supabase_project_ref.name}} is {{#is_alert}}under high load{{/is_alert}}{{#is_alert_recovery}}back within acceptable load{{/is_alert_recovery}}. @example@example.com",
+	"tags": [
+		"source:supabase-cloud"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 120
+		},
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"require_full_window": true,
+		"new_group_delay": 0
+	},
+	"priority": null,
+	"draft_status": "published"
+  },
+  "tags": [
+    "integration:supabase-cloud"
+  ]
+}
