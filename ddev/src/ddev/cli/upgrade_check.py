@@ -1,6 +1,7 @@
 import atexit
 import json
 import logging
+from contextlib import suppress
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -67,11 +68,9 @@ def upgrade_check(app, version, cache_file=None, pypi_url=PYPI_URL, check_interv
         except (requests.RequestException, OSError, json.JSONDecodeError, KeyError, InvalidVersion) as e:
             logging.debug("Upgrade check failed: %s", e)
             # Record the attempt to prevent even if failed
-            try:
+            with suppress(OSError):
                 version_to_cache = last_version if last_version else current_version
                 write_last_run(version_to_cache, date_now, cache_file)
-            except OSError:
-                pass
     else:
         if last_version > current_version:
             msg = (
