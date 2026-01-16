@@ -702,7 +702,7 @@ def _read_dashboard_tag_values(integration: Integration) -> dict[str, dict[str, 
     return result
 
 
-def _read_dashboard_log_config(integration: Integration) -> dict[str, str]:
+def _read_dashboard_log_config(integration: Integration) -> dict[str, str | list[str]]:
     """
     Extract log configuration from dashboard log queries.
 
@@ -758,7 +758,7 @@ def _read_dashboard_log_config(integration: Integration) -> dict[str, str]:
             continue
 
     # Convert to single values (use first found, or fallback to integration name)
-    result = {
+    result: dict[str, str | list[str]] = {
         "source": sorted(log_config["source"])[0] if log_config["source"] else integration.name,
         "service": sorted(log_config["service"])[0] if log_config["service"] else integration.name,
     }
