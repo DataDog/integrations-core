@@ -111,11 +111,11 @@ jobs:
       # CI Visibility configuration (matching what install_test_visibility script sets)
       DD_ENV: "ci"
       DD_SERVICE: "${{ inputs.target }}-integrations-${{ inputs.repo }}"
+      DD_TRACE_ANALYTICS_ENABLED: "true"
       DD_CIVISIBILITY_ENABLED: "true"
       DD_CIVISIBILITY_AGENTLESS_ENABLED: "true"
       DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER: "github"
       DD_PROFILING_ENABLED: "true"
-      DD_APPSEC_ENABLED: "false"
       DD_SITE: "datadoghq.com"
       DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       # Prefix for artifact names when using minimum base package
