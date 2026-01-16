@@ -157,6 +157,7 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     # Debug: Write environment and git info to a file for artifact upload
     import os
     import subprocess
+
     debug_file = Path(os.environ.get('GITHUB_WORKSPACE', '.')) / 'local_clone_debug.txt'
     debug_lines = []
     debug_lines.append('=== DEBUG local_clone fixture ===')
