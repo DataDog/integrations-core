@@ -40,7 +40,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
 
-    uses: ./.github/workflows/test-target.yml
+    uses: ./.github/workflows/zz-test-target.yml
     with:
       job-name: "${{ matrix.name }}"
       target: "${{ matrix.target }}"
@@ -70,7 +70,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
 
-    uses: ./.github/workflows/test-target.yml
+    uses: ./.github/workflows/zz-test-target.yml
     with:
       job-name: "minimum-base-package-${{ matrix.name }}"
       target: "${{ matrix.target }}"
@@ -101,14 +101,14 @@ jobs:
 
     uses: ./.github/workflows/save-event.yml
 
-  submit-traces:
-    needs:
-    - test
-    - test-minimum-base-package
-    if: inputs.repo == 'core' && (success() || failure()) && github.event.pull_request.head.repo.full_name == github.repository
+  # submit-traces:
+  #   needs:
+  #   - test
+  #   - test-minimum-base-package
+  #   if: inputs.repo == 'core' && (success() || failure()) && github.event.pull_request.head.repo.full_name == github.repository
 
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit
+  #   uses: ./.github/workflows/submit-traces.yml
+  #   secrets: inherit
 
   upload-coverage:
     needs:
