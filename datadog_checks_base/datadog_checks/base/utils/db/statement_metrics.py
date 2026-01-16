@@ -158,9 +158,6 @@ def _strip_statement_columns(merged_rows, metrics):
     stripped = {}
     for row_key, row in merged_rows.items():
         # Keep metric columns and any column not in the exclusion list
-        stripped_row = {
-            k: v for k, v in row.items()
-            if k in metrics or k not in _STATEMENT_METRICS_EXCLUDED_COLUMNS
-        }
+        stripped_row = {k: v for k, v in row.items() if k in metrics or k not in _STATEMENT_METRICS_EXCLUDED_COLUMNS}
         stripped[row_key] = stripped_row
     return stripped
