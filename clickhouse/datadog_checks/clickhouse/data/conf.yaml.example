@@ -103,16 +103,6 @@ instances:
     ## For self-hosted ClickHouse, leave this as `false` (default). Each self-hosted node
     ## should be monitored by its own agent instance connecting directly to that node's
     ## local system tables.
-    ##
-    ## Example for ClickHouse Cloud:
-    ##   instances:
-    ##     - dbm: true
-    ##       server: my-cloud-instance.clickhouse.cloud
-    ##       port: 8443
-    ##       username: datadog
-    ##       password: <PASSWORD>
-    ##       tls_verify: true
-    ##       clickhouse_cloud: true
     #
     # clickhouse_cloud: false
 
@@ -184,22 +174,11 @@ instances:
         #
         # collection_interval: 10
 
-        ## @param samples_per_hour_per_query - integer - optional - default: 15
+        ## @param samples_per_hour_per_query - number - optional - default: 15
         ## Set the maximum number of samples to collect per hour per unique query signature.
         ## This rate limiting prevents excessive data collection for frequently executed queries.
         #
         # samples_per_hour_per_query: 15
-
-        ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
-        ## Set the max size of the cache used for rate limiting samples.
-        #
-        # seen_samples_cache_maxsize: 10000
-
-        ## @param max_samples_per_collection - integer - optional - default: 1000
-        ## Maximum number of samples to collect in a single run.
-        ## Prevents overwhelming the agent with too many samples at once.
-        #
-        # max_samples_per_collection: 1000
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
