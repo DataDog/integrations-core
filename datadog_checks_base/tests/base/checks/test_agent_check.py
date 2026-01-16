@@ -1365,3 +1365,64 @@ def test_profile_memory_when_enabled(should_profile_value, expected_calls):
 
     assert check.should_profile_memory.call_count == 1
     assert check.profile_memory.call_count == expected_calls
+
+
+class TestDegeneraliseTagCaching:
+    """Tests for SDBM-2278: LRU caching of degeneralise_tag to reduce memory allocations."""
+
+    def test_degeneralise_tag_caching_returns_same_result(self):
+        """Verify cached function returns identical results to original behavior."""
+        check = AgentCheck('myintegration', {}, [{'disable_generic_tags': True}])
+
+        # Test with generic tag (should be transformed)
+        result1 = check.degeneralise_tag('cluster:my_cluster')
+        result2 = check.degeneralise_tag('cluster:my_cluster')
+        assert result1 == result2 == 'myintegration_cluster:my_cluster'
+
+        # Test with non-generic tag (should pass through)
+        result3 = check.degeneralise_tag('custom:value')
+        result4 = check.degeneralise_tag('custom:value')
+        assert result3 == result4 == 'custom:value'
+
+    def test_degeneralise_tag_cache_uses_check_name(self):
+        """Verify cache key includes check name so different checks don't collide."""
+        check1 = AgentCheck('check_one', {}, [{'disable_generic_tags': True}])
+        check2 = AgentCheck('check_two', {}, [{'disable_generic_tags': True}])
+
+        result1 = check1.degeneralise_tag('cluster:test')
+        result2 = check2.degeneralise_tag('cluster:test')
+
+        assert result1 == 'check_one_cluster:test'
+        assert result2 == 'check_two_cluster:test'
+        assert result1 != result2
+
+    def test_degeneralise_tag_without_value(self):
+        """Verify tags without colon are handled correctly."""
+        check = AgentCheck('myintegration', {}, [{'disable_generic_tags': True}])
+
+        # Generic tag without value
+        result = check.degeneralise_tag('version')
+        assert result == 'myintegration_version'
+
+        # Non-generic tag without value
+        result2 = check.degeneralise_tag('custom')
+        assert result2 == 'custom'
+
+    def test_degeneralise_tag_cache_info_available(self):
+        """Verify the cache is functioning and can report statistics."""
+        from datadog_checks.base.checks.base import _cached_degeneralise_tag
+
+        # Clear the cache to get clean stats
+        _cached_degeneralise_tag.cache_clear()
+
+        check = AgentCheck('test_cache', {}, [{'disable_generic_tags': True}])
+
+        # Make some calls
+        check.degeneralise_tag('cluster:a')
+        check.degeneralise_tag('cluster:a')  # Should be cache hit
+        check.degeneralise_tag('cluster:b')
+
+        info = _cached_degeneralise_tag.cache_info()
+        assert info.hits >= 1
+        assert info.misses >= 2
+        assert info.currsize >= 2
