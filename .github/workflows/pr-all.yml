@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   test:
-    uses: ./.github/workflows/test-all.yml
+    uses: ./.github/workflows/zz-test-all.yml
 
     permissions:
        # needed for compute-matrix in test-target.yml
