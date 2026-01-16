@@ -388,10 +388,6 @@ jobs:
           ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- all -k "not fips"' }}
         fi
 
-    - name: View trace log
-      if: inputs.repo == 'core' && always()
-      run: cat "${{ env.TRACE_CAPTURE_LOG }}"
-
     - name: Finalize test results
       if: always()
       run: |-
