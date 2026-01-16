@@ -260,7 +260,7 @@ tests:
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1506436610000
-  - sample: '127.0.0.1 - - [19/Feb/2015:15:50:36 -0500] "GET /big.pdf HTTP/1.1" 206 33973115 0.202 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"'
+  - sample: '127.0.0.1 - - [19/Feb/2015:15:50:36 -0500] "GET /big.pdf HTTP/1.1" 206 33973115 0.202 "-" "Mozilla/5.0 (Unknown OS 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"'
     result:
       custom:
         date_access: 1424379036000
@@ -273,7 +273,7 @@ tests:
           url: "/big.pdf"
           url_details:
             path: "/big.pdf"
-          useragent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"
+          useragent: "Mozilla/5.0 (Unknown OS 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"
           useragent_details:
             browser:
               family: "Chrome"
@@ -287,10 +287,10 @@ tests:
               family: "Mac"
               model: "Mac"
             os:
-              family: "Mac OS X"
-              major: "10"
-              minor: "10"
-              patch: "1"
+              family: "Unknown OS"
+              major: "1"
+              minor: "0"
+              patch: "0"
           version: "1.1"
         network:
           bytes_written: 33973115
@@ -309,7 +309,7 @@ tests:
             referrer: "-"
             url:
               path: "/big.pdf"
-            user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"
+            user_agent: "Mozilla/5.0 (Unknown OS 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"
           http_response:
             code: 206
             status: "OK"
@@ -324,9 +324,9 @@ tests:
           src_endpoint:
             ip: "127.0.0.1"
             os:
-              name: "Mac OS X"
-              type: "macOS"
-              type_id: 300
+              name: "Unknown OS"
+              type: "Other"
+              type_id: 99
           status: "Success"
           status_code: "206"
           status_id: 1
