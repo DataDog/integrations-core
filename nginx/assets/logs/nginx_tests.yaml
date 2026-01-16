@@ -260,7 +260,7 @@ tests:
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1506436610000
-  - sample: '127.0.0.1 - - [19/Feb/2015:15:50:36 -0500] "GET /big.pdf HTTP/1.1" 206 33973115 0.202 "-" "Mozilla/5.0 (Unknown OS 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"'
+  - sample: '127.0.0.1 - - [19/Feb/2015:15:50:36 -0500] "GET /big.pdf HTTP/1.1" 206 33973115 0.202 "-" "Mozilla/5.0 (OCSF_TEST_OS_TYPE_ID_99 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"'
     result:
       custom:
         date_access: 1424379036000
@@ -273,7 +273,7 @@ tests:
           url: "/big.pdf"
           url_details:
             path: "/big.pdf"
-          useragent: "Mozilla/5.0 (Unknown OS 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"
+          useragent: "Mozilla/5.0 (OCSF_TEST_OS_TYPE_ID_99 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"
           useragent_details:
             browser:
               family: "Chrome"
@@ -287,7 +287,7 @@ tests:
               family: "Mac"
               model: "Mac"
             os:
-              family: "Unknown OS"
+              family: "OCSF_TEST_OS_TYPE_ID_99"
               major: "1"
               minor: "0"
               patch: "0"
@@ -309,7 +309,7 @@ tests:
             referrer: "-"
             url:
               path: "/big.pdf"
-            user_agent: "Mozilla/5.0 (Unknown OS 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"
+            user_agent: "Mozilla/5.0 (OCSF_TEST_OS_TYPE_ID_99 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"
           http_response:
             code: 206
             status: "OK"
@@ -324,7 +324,7 @@ tests:
           src_endpoint:
             ip: "127.0.0.1"
             os:
-              name: "Unknown OS"
+              name: "OCSF_TEST_OS_TYPE_ID_99"
               type: "Other"
               type_id: 99
           status: "Success"
