@@ -190,12 +190,16 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
             debug_lines.append(f'Is shallow repository: {is_shallow}')
 
             # Check for partial clone / promisor remote (this config may not exist)
-            result = subprocess.run(['git', 'config', '--get', 'remote.origin.promisor'], capture_output=True, text=True)
+            result = subprocess.run(
+                ['git', 'config', '--get', 'remote.origin.promisor'], capture_output=True, text=True
+            )
             promisor = result.stdout.strip() if result.returncode == 0 else 'not configured'
             debug_lines.append(f'Promisor remote configured: {promisor}')
 
             # Also check for partial clone filter
-            result = subprocess.run(['git', 'config', '--get', 'remote.origin.partialclonefilter'], capture_output=True, text=True)
+            result = subprocess.run(
+                ['git', 'config', '--get', 'remote.origin.partialclonefilter'], capture_output=True, text=True
+            )
             partial_filter = result.stdout.strip() if result.returncode == 0 else 'not configured'
             debug_lines.append(f'Partial clone filter: {partial_filter}')
         except Exception as e:
