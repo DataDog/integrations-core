@@ -331,48 +331,39 @@
                                     "formulas": [
                                         {
                                             "alias": "cpu factor",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1"
+                                            "formula": "max(query1, 0)"
                                         },
                                         {
                                             "alias": "is server?",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query2"
+                                            "formula": "max(query2, 0)"
                                         },
                                         {
                                             "alias": "max mem",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query3"
+                                            "formula": "max(query3, 0)"
                                         },
                                         {
                                             "alias": "max temp",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query4"
+                                            "formula": "max(query4, 0)"
                                         },
                                         {
                                             "alias": "max swap",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query5"
+                                            "formula": "max(query5, 0)"
                                         },
                                         {
                                             "alias": "num cores",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query6"
+                                            "formula": "max(query6, 0)"
                                         },
                                         {
                                             "alias": "num procs",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query7"
+                                            "formula": "max(query7, 0)"
                                         },
                                         {
                                             "alias": "num cpus",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query8"
+                                            "formula": "max(query8, 0)"
                                         },
                                         {
                                             "alias": "num threads",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query9"
+                                            "formula": "max(query9, 0)"
                                         }
                                     ],
                                     "queries": [
@@ -469,7 +460,7 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
-                                    "display_type": "area",
+                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -575,7 +566,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ibm_spectrum_lsf.load.mem.available_ram{$lsf_cluster_name,$lsf_host}"
+                                            "query": "avg:ibm_spectrum_lsf.load.mem.available_ram{$lsf_cluster_name,$lsf_host} by {lsf_host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -616,12 +607,15 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "15m",
                                             "formula": "query1"
                                         },
                                         {
+                                            "alias": "15s",
                                             "formula": "query2"
                                         },
                                         {
+                                            "alias": "1m",
                                             "formula": "query3"
                                         }
                                     ],
@@ -735,7 +729,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ibm_spectrum_lsf.load.mem.available_swap{$lsf_cluster_name,$lsf_host}"
+                                            "query": "avg:ibm_spectrum_lsf.load.mem.available_swap{$lsf_cluster_name,$lsf_host} by {lsf_host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -869,7 +863,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "avg:ibm_spectrum_lsf.perfmon.jobs.dispatched.total{$lsf_cluster_name}"
@@ -906,14 +900,15 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "alias": "slot utilization",
+                                            "formula": "max(query1, 0)"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.perfmon.slots.utilization.current{$lsf_cluster_name}"
+                                            "query": "avg:ibm_spectrum_lsf.perfmon.slots.utilization.current{$lsf_cluster_name} by {lsf_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -926,7 +921,8 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Slot utilization",
+                            "time": {},
+                            "title": "Current slot utilization",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1022,7 +1018,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "avg:ibm_spectrum_lsf.perfmon.jobs.submitted.total{$lsf_cluster_name}"
@@ -1059,14 +1055,15 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "alias": "slot utilization",
+                                            "formula": "max(query1, 0)"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.perfmon.memory.utilization.current{$lsf_cluster_name}"
+                                            "query": "avg:ibm_spectrum_lsf.perfmon.memory.utilization.current{$lsf_cluster_name} by {lsf_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1079,7 +1076,8 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Memory utilization",
+                            "time": {},
+                            "title": "Current memory utilization",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1175,7 +1173,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "avg:ibm_spectrum_lsf.perfmon.jobs.completed.total{$lsf_cluster_name}"
@@ -1320,7 +1318,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.server.running{$lsf_cluster_name,$lsf_host} by {lsf_cluster_name,lsf_host}"
+                                            "query": "sum:ibm_spectrum_lsf.server.running{$lsf_cluster_name,$lsf_host} by {lsf_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1368,7 +1366,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.queue.pending{$lsf_cluster_name,$lsf_host} by {queue_name}"
+                                            "query": "sum:ibm_spectrum_lsf.queue.pending{$lsf_cluster_name,$lsf_host} by {queue_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1478,43 +1476,35 @@
                                     "formulas": [
                                         {
                                             "alias": "num jobs",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1"
+                                            "formula": "max(0, query1)"
                                         },
                                         {
                                             "alias": "reserved",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query2"
+                                            "formula": "max(0, query2)"
                                         },
                                         {
                                             "alias": "max jobs",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query3"
+                                            "formula": "max(0, query3)"
                                         },
                                         {
                                             "alias": "running",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query4"
+                                            "formula": "max(0, query4)"
                                         },
                                         {
                                             "alias": "slots per user",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query5"
+                                            "formula": "max(0, query5)"
                                         },
                                         {
                                             "alias": "suspended",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query6"
+                                            "formula": "max(0, query6)"
                                         },
                                         {
                                             "alias": "user suspended",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query7"
+                                            "formula": "max(0, query7)"
                                         },
                                         {
                                             "alias": "status",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query8"
+                                            "formula": "max(0, query8)"
                                         }
                                     ],
                                     "queries": [
@@ -1633,7 +1623,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.run_time{status:run,$lsf_cluster_name} by {job_id}"
+                                            "query": "sum:ibm_spectrum_lsf.job.run_time{status:run,$lsf_cluster_name} by {job_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1714,39 +1704,32 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "MEMORY",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1"
+                                            "alias": "memory",
+                                            "formula": "max(0, query1)"
                                         },
                                         {
-                                            "alias": "RUN TIME",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query2"
+                                            "alias": "run time",
+                                            "formula": "max(0, query2)"
                                         },
                                         {
-                                            "alias": "CPU",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query3"
+                                            "alias": "cpu",
+                                            "formula": "max(0, query3)"
                                         },
                                         {
-                                            "alias": "TIME LEFT",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query4"
+                                            "alias": "time left",
+                                            "formula": "max(0, query4)"
                                         },
                                         {
-                                            "alias": "% Complete",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query5"
+                                            "alias": "% complete",
+                                            "formula": "max(0, query5)"
                                         },
                                         {
-                                            "alias": "IDLE FACTOR",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query6"
+                                            "alias": "idle factor",
+                                            "formula": "max(0, query6)"
                                         },
                                         {
-                                            "alias": "SWAP",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query7"
+                                            "alias": "swap",
+                                            "formula": "max(0, query7)"
                                         }
                                     ],
                                     "queries": [
@@ -1825,7 +1808,6 @@
                                     ]
                                 }
                             ],
-                            "time": {},
                             "title": "Running and pending jobs ",
                             "title_align": "left",
                             "title_size": "16",
