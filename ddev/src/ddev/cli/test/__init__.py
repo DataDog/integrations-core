@@ -286,7 +286,7 @@ def test(
         env_vars = global_env_vars.copy()
 
         if standard_tests:
-            if ddtrace and (target.is_integration or target.name == 'datadog_checks_base'):
+            if ddtrace:
                 command.append('--ddtrace')
                 env_vars['DDEV_TRACE_ENABLED'] = 'true'
                 env_vars['DD_PROFILING_ENABLED'] = 'true'
@@ -297,10 +297,14 @@ def test(
                 # In order to handle multiple environments the report files must contain the environment name.
                 # Hatch injects the `HATCH_ENV_ACTIVE` environment variable, see:
                 # https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars
-                command.extend(('--junit-xml', f'junit/test-{"e2e" if e2e else "unit"}-$HATCH_ENV_ACTIVE.xml'))
-                # Test results class prefix
-                command.extend(('--junit-prefix', target.name))
-
+                command.extend(
+                    (
+                        '--junit-xml',
+                        f'junit/test-{"e2e" if e2e else "unit"}-$HATCH_ENV_ACTIVE.xml',
+                        '--junit-prefix',
+                        target.name,
+                    )
+                )
             if (
                 compat
                 and target.is_package

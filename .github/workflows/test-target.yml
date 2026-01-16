@@ -1,6 +1,7 @@
-# "target" refers to the integration (a.k.a. check) that we want to test.
-# This action is a template that we reuse in other actions such as test-all or pr-test.
-name: Test target
+# This is a copy of the test target workflow created for testing updates on the workflow without impacting the on used in our PRs.
+# Since this workflow is used through workflow dispatch, it needs to be in master to be able tot be executed. This means that we cannot
+# easily update it to test someth8ing without impacting onging runs.
+name: ZZ - Test Target
 
 on:
   workflow_call:
@@ -69,14 +70,6 @@ on:
         required: false
         default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
-      traces-artifact-name:
-        required: false
-        default: "traces"
-        type: string
-      trace-agent-port:
-        required: false
-        default: "8126"
-        type: string
       setup-env-vars:
         required: false
         default: ""
@@ -87,7 +80,7 @@ on:
         type: string
         default: ""
       context:
-        description: "Context where the test is run"
+        description: "Context where the test is run. This is used for CI visibility descovery."
         required: false
         default: "standard"
         type: string
@@ -119,9 +112,6 @@ jobs:
       DD_ENV: "ci"
       DD_SERVICE: "${{ inputs.target }}-integrations-${{ inputs.repo }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
-      # Capture traces for a separate job to do the submission
-      TRACE_CAPTURE_BASE_DIR: "trace-captures"
-      TRACE_CAPTURE_LOG: "trace-captures/output.log"
       # Prefix for artifact names when using minimum base package
       MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"
 
@@ -136,7 +126,6 @@ jobs:
         JOB_NAME=$(echo "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}" | sed 's/^\./Dot/')
 
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
-        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
         echo "DD_TAGS=team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }},agent_image:$DDEV_E2E_AGENT,context:${{ inputs.context }}" >> $GITHUB_ENV
 
     - name: Set up Windows
@@ -209,35 +198,49 @@ jobs:
           exit 1
         }
 
+    - name: Set up environment variables for testing
+      run: |
+        # Set defaults first
+        {
+          echo "PYTHONUNBUFFERED=1"
+          echo "DOCKER_USERNAME=$DOCKER_USERNAME"
+          echo "DOCKER_ACCESS_TOKEN=$DOCKER_ACCESS_TOKEN"
+          echo "ORACLE_DOCKER_USERNAME=$ORACLE_DOCKER_USERNAME"
+          echo "ORACLE_DOCKER_PASSWORD=$ORACLE_DOCKER_PASSWORD"
+          echo "DD_GITHUB_USER=$DD_GITHUB_USER"
+          echo "DD_GITHUB_TOKEN=$DD_GITHUB_TOKEN"
+        } >> "$GITHUB_ENV"
+        # Override with custom vars if provided
+        if [ -n "$SETUP_ENV_VARS" ]; then
+          echo "$SETUP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
+        fi
+      env:
+        SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+        ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
+        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
+        DD_GITHUB_USER: ${{ github.actor }}
+        DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Prepare for testing
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
-      env: >-
-        ${{ fromJson(inputs.setup-env-vars || format(
-          '{{
-            "PYTHONUNBUFFERED": "1",
-            "DOCKER_USERNAME": "{0}",
-            "DOCKER_ACCESS_TOKEN": "{1}",
-            "ORACLE_DOCKER_USERNAME": "{2}",
-            "ORACLE_DOCKER_PASSWORD": "{3}",
-            "DD_GITHUB_USER": "{4}",
-            "DD_GITHUB_TOKEN": "{5}"
-          }}',
-          secrets.DOCKER_USERNAME,
-          secrets.DOCKER_ACCESS_TOKEN,
-          secrets.ORACLE_DOCKER_USERNAME,
-          secrets.ORACLE_DOCKER_PASSWORD,
-          github.actor,
-          secrets.GITHUB_TOKEN
-        ))}}
       run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
-    - name: Set up trace capturing
-      if: inputs.repo == 'core'
-      env:
-        PYTHONUNBUFFERED: "1"
-      run: |-
-        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
-        python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
+    - name: Get ddtrace version from datadog_checks_base
+      # This is used to ensure that the version of ddtrace we use with the ci visibility action is the same one we have in datadog_checks_base
+      id: get-ddtrace-version
+      run: |
+        DDTRACE_VERSION=$(grep 'ddtrace==' datadog_checks_base/pyproject.toml | sed 's/.*ddtrace==\([0-9.]*\).*/\1/')
+        echo "version=$DDTRACE_VERSION" >> "$GITHUB_OUTPUT"
+
+    - name: Set up CI visibility
+      uses: datadog/test-visibility-github-action@f4b026bb8b8b53f323960cf86a849a0231ff93b9 # v2.5.0
+      with:
+        languages: python
+        api_key: "${{ secrets.DD_API_KEY }}"
+        print-github-step-summary: false
+        python-tracer-version: ${{ steps.get-ddtrace-version.outputs.version }}
 
     - name: Run Unit & Integration tests
       if: inputs.latest != true && inputs.minimum-base-package != true
@@ -388,17 +391,6 @@ jobs:
         else
           ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- all -k "not fips"' }}
         fi
-
-    - name: View trace log
-      if: inputs.repo == 'core' && always()
-      run: cat "${{ env.TRACE_CAPTURE_LOG }}"
-
-    - name: Upload captured traces
-      if: inputs.repo == 'core' && always()
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}${{ inputs.traces-artifact-name }}-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
-        path: "${{ env.TRACE_CAPTURE_FILE }}"
 
     - name: Finalize test results
       if: always()

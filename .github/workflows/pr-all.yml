@@ -64,11 +64,3 @@ jobs:
         use_oidc: true
         directory: coverage-reports
         fail_ci_if_error: false
-
-  # submit-traces:
-  #   needs:
-  #   - test
-  #   if: success() || failure()
-
-  #   uses: ./.github/workflows/submit-traces.yml
-  #   secrets: inherit
