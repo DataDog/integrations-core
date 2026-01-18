@@ -31,11 +31,17 @@ class ActivityMonitor:
                 self.check.log.debug("No events found")
                 return
 
+            # Filter out events with timestamps older than or equal to last collection time
+            events = self._filter_after_time(events, self.last_event_collection_time, "creationTime")
+            if not events:
+                self.check.log.debug("No new events after filtering")
+                return
+
             for event in events:
                 self._process_event(event)
 
-            # update last time
-            most_recent_time_str = events[-1].get("creationTime")
+            # update last time to the maximum creationTime seen
+            most_recent_time_str = self._find_max_timestamp(events, "creationTime")
             if most_recent_time_str:
                 self.last_event_collection_time = most_recent_time_str
 
@@ -121,11 +127,17 @@ class ActivityMonitor:
                 self.check.log.debug("No tasks found")
                 return
 
+            # Filter out tasks with timestamps older than or equal to last collection time
+            tasks = self._filter_after_time(tasks, self.last_task_collection_time, "createdTime")
+            if not tasks:
+                self.check.log.debug("No new tasks after filtering")
+                return
+
             for task in tasks:
                 self._process_task(task)
 
-            # update last time
-            most_recent_time_str = tasks[-1].get("createdTime")
+            # update last time to the maximum createdTime seen
+            most_recent_time_str = self._find_max_timestamp(tasks, "createdTime")
             if most_recent_time_str:
                 self.last_task_collection_time = most_recent_time_str
 
@@ -145,11 +157,17 @@ class ActivityMonitor:
                 self.check.log.debug("No audits found")
                 return
 
+            # Filter out audits with timestamps older than or equal to last collection time
+            audits = self._filter_after_time(audits, self.last_audit_collection_time, "creationTime")
+            if not audits:
+                self.check.log.debug("No new audits after filtering")
+                return
+
             for audit in audits:
                 self._process_audit(audit)
 
-            # update last time
-            most_recent_time_str = audits[-1].get("creationTime")
+            # update last time to the maximum creationTime seen
+            most_recent_time_str = self._find_max_timestamp(audits, "creationTime")
             if most_recent_time_str:
                 self.last_audit_collection_time = most_recent_time_str
 
@@ -169,10 +187,17 @@ class ActivityMonitor:
                 self.check.log.debug("No alerts found")
                 return
 
+            # Filter out alerts with timestamps older than or equal to last collection time
+            alerts = self._filter_after_time(alerts, self.last_alert_collection_time, "creationTime")
+            if not alerts:
+                self.check.log.debug("No new alerts after filtering")
+                return
+
             for alert in alerts:
                 self._process_alert(alert)
 
-            most_recent_time_str = alerts[-1].get("creationTime")
+            # update last time to the maximum creationTime seen
+            most_recent_time_str = self._find_max_timestamp(alerts, "creationTime")
             if most_recent_time_str:
                 self.last_alert_collection_time = most_recent_time_str
 
@@ -196,10 +221,10 @@ class ActivityMonitor:
         try:
             return self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
         except HTTPError as e:
-            self.log.debug("Monitoring v4.2 API is not available, falling back to Monitoring v4.0")
-            # $filter by creationTime is only available in v4.2+
-            del params["$filter"]
             if e.response is not None and e.response.status_code == 404:
+                self.check.log.debug("Monitoring v4.2 API is not available, falling back to Monitoring v4.0")
+                # $filter by creationTime is only available in v4.2+
+                del params["$filter"]
                 return self.check._get_paginated_request_data(
                     "api/monitoring/v4.0/serviceability/alerts",
                     params=params,
@@ -209,6 +234,14 @@ class ActivityMonitor:
     def _process_audit(self, audit):
         """Process and send a single audit to Datadog."""
         audit_id = audit.get("extId", "unknown")
+
+        # Log audit submission for duplicate debugging
+        self.check.log.info(
+            "Submitting audit - ID: %s, CreationTime: %s",
+            audit_id,
+            audit.get("creationTime", "unknown"),
+        )
+
         audit_type = audit.get("auditType", "Nutanix Audit")
         operation_type = audit.get("operationType")
         message = audit.get("message", "")
@@ -425,3 +458,72 @@ class ActivityMonitor:
         except (ValueError, AttributeError):
             self.check.log.warning("Failed to parse timestamp: %s", timestamp_str)
             return None
+
+    def _filter_after_time(self, items, last_time_str, field_name):
+        """Filter items to those strictly after the last submitted time.
+
+        This provides client-side filtering as a safeguard against API edge cases
+        where items might be returned with timestamps equal to or before the last collection time.
+
+        Args:
+            items: List of items to filter
+            last_time_str: ISO 8601 formatted timestamp string of the last collection
+            field_name: Name of the timestamp field in the items
+
+        Returns:
+            List of items with timestamps strictly after last_time_str
+        """
+        if not last_time_str:
+            return items
+
+        try:
+            last_time = datetime.fromisoformat(last_time_str.replace("Z", "+00:00"))
+        except (ValueError, AttributeError):
+            self.check.log.warning("Failed to parse last collection time: %s", last_time_str)
+            return items
+
+        filtered = []
+        for item in items:
+            item_time_str = item.get(field_name)
+            if not item_time_str:
+                continue
+            try:
+                item_time = datetime.fromisoformat(item_time_str.replace("Z", "+00:00"))
+            except (ValueError, AttributeError):
+                self.check.log.warning("Failed to parse item timestamp: %s", item_time_str)
+                continue
+            if item_time > last_time:
+                filtered.append(item)
+
+        return filtered
+
+    def _find_max_timestamp(self, items, field_name):
+        """Find the maximum timestamp among all items.
+
+        The Nutanix API may not return items sorted by timestamp despite the $orderBy parameter,
+        so we need to explicitly find the maximum timestamp to track the last collection time.
+
+        Args:
+            items: List of items to search
+            field_name: Name of the timestamp field in the items
+
+        Returns:
+            The maximum timestamp string, or None if no valid timestamps found
+        """
+        max_time = None
+        max_time_str = None
+
+        for item in items:
+            item_time_str = item.get(field_name)
+            if not item_time_str:
+                continue
+            try:
+                item_time = datetime.fromisoformat(item_time_str.replace("Z", "+00:00"))
+                if max_time is None or item_time > max_time:
+                    max_time = item_time
+                    max_time_str = item_time_str
+            except (ValueError, AttributeError):
+                self.check.log.warning("Failed to parse item timestamp: %s", item_time_str)
+                continue
+
+        return max_time_str
