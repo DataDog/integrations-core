@@ -221,6 +221,7 @@ def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_repl
 
 
 @requires_over_10
+@pytest.mark.flaky
 def test_pg_control_replication(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.run()

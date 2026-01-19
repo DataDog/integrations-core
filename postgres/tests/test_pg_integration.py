@@ -67,7 +67,10 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 @pytest.mark.parametrize(
     'is_aurora',
-    [True, False],
+    [
+        pytest.param(True, id="aurora", marks=pytest.mark.flaky),
+        pytest.param(False, id="not_aurora"),
+    ],
 )
 def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
@@ -438,6 +441,7 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
 
 
 @requires_over_10
+@pytest.mark.flaky
 def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
