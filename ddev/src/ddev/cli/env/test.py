@@ -141,7 +141,7 @@ def test_command(
 
             with EnvVars(env_vars):
                 # Pass through DDEV_TEST_ENABLE_TRACING since ctx.invoke bypasses envvar parsing
-                ddtrace_env = os.environ.get(AppEnvVars.TRACE_ENABLED, '')
+                ddtrace_env = os.environ.get(AppEnvVars.TEST_ENABLE_TRACING, '')
                 ddtrace = ddtrace_env.lower() in ('1', 'true', 'yes')
                 ctx.invoke(
                     test,
