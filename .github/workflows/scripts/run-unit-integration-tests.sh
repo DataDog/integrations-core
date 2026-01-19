@@ -27,10 +27,17 @@ else
   VERBOSE_FLAG="-v"
 fi
 
+# Parse INPUT_PYTEST_ARGS with proper quote handling using eval
+# This allows passing args like '-m "not flaky"' correctly
+if [[ -n "$INPUT_PYTEST_ARGS" ]]; then
+  eval "set -- $INPUT_PYTEST_ARGS"
+else
+  set --
+fi
+
 set +e
 set -x
-# INPUT_PYTEST_ARGS is intentionally unquoted to allow multiple arguments
-ddev $VERBOSE_FLAG test $EXTRA_FLAGS $COV_FLAG --junit "$INPUT_TARGET_STR" -- $INPUT_PYTEST_ARGS -k "not fips"
+ddev $VERBOSE_FLAG test $EXTRA_FLAGS $COV_FLAG --junit "$INPUT_TARGET_STR" -- "$@" -k "not fips"
 exit_code=$?
 set +x
 
