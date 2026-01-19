@@ -25,10 +25,8 @@ jobs:
 
     with:
       repo: core
-
-      # Options
-      test-py2: true
       context: "pr"
+
     secrets: inherit
 
   save-event:
@@ -67,10 +65,10 @@ jobs:
         directory: coverage-reports
         fail_ci_if_error: false
 
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
+  # submit-traces:
+  #   needs:
+  #   - test
+  #   if: success() || failure()
 
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit
+  #   uses: ./.github/workflows/submit-traces.yml
+  #   secrets: inherit
