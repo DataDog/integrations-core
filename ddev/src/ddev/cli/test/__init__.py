@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 
 import click
 
+from ddev.config.constants import AppEnvVars
+
 if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.integration.core import Integration
@@ -87,7 +89,7 @@ def on_error_fmt_callback(app: Application) -> Callable[[int, str], None]:
 @click.option(
     '--compat', is_flag=True, help='Check compatibility with the minimum allowed Agent version. Implies --recreate.'
 )
-@click.option('--ddtrace', is_flag=True, envvar='DDEV_TEST_ENABLE_TRACING', help='Enable tracing during test execution')
+@click.option('--ddtrace', is_flag=True, envvar=AppEnvVars.TRACE_ENABLED, help='Enable tracing during test execution')
 @click.option('--memray', is_flag=True, help='Measure memory usage during test execution')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate environments from scratch')
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='Show available test environments')
