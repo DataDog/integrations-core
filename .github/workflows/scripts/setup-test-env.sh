@@ -66,7 +66,7 @@ JOB_NAME=$(echo "$INPUT_JOB_NAME" | sed 's/^\./Dot/')
 TEST_RESULTS_DIR="${TEST_RESULTS_BASE_DIR}/${JOB_NAME}"
 
 # DD_TAGS
-DD_TAGS="team:agent-integrations,platform:${INPUT_PLATFORM},integration:${INPUT_TARGET},agent_image:${DDEV_E2E_AGENT},context:${INPUT_CONTEXT}"
+DD_TAGS="team:agent-integrations,platform:${INPUT_PLATFORM},target:${INPUT_TARGET},agent_image:${DDEV_E2E_AGENT},context:${INPUT_CONTEXT}"
 
 # =============================================================================
 # Export all variables to GITHUB_ENV
