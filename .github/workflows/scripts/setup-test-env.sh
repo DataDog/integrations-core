@@ -16,10 +16,12 @@ set -euo pipefail
 # Define all variables as bash variables first for readability
 # =============================================================================
 
+DEFAULT_PYTHON_VERSION="3.13"
+
 # Static variables
 FORCE_COLOR="1"
 TEST_RESULTS_BASE_DIR="test-results"
-PYTHON_VERSION="${INPUT_PYTHON_VERSION:-3.13}"
+PYTHON_VERSION="${INPUT_PYTHON_VERSION:-$DEFAULT_PYTHON_VERSION}"
 PYTHONUNBUFFERED="1"
 
 # SKIP_ENV_NAME logic

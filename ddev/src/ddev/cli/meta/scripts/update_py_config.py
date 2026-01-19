@@ -59,10 +59,17 @@ def integrations(app):
 
 
 def update_ci_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
-    for file in (app.repo.path / ".github" / "workflows").glob("*.yml"):
+    files_to_update = [
+        *(app.repo.path / ".github" / "workflows").glob("*.yml"),
+        *(app.repo.path / ".github" / "workflows" / "scripts").glob("*.sh"),
+    ]
+
+    python_version_patterns = ("python-version: '{}'", 'PYTHON_VERSION: "{}"', "'{}'", "DEFAULT_PYTHON_VERSION: '{}'")
+
+    for file in files_to_update:
         old_content = new_content = file.read_text()
 
-        for pattern in ("python-version: '{}'", 'PYTHON_VERSION: "{}"', "'{}'"):
+        for pattern in python_version_patterns:
             if pattern.format(old_version) in new_content:
                 new_content = new_content.replace(pattern.format(old_version), pattern.format(new_version))
 
