@@ -55,7 +55,12 @@ from datadog_checks.sqlserver.health import SqlServerHealth
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
-from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_year
+from datadog_checks.sqlserver.utils import (
+    Database,
+    construct_use_statement,
+    parse_sqlserver_major_version,
+    parse_sqlserver_year,
+)
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
 from .config import sanitize
@@ -95,7 +100,6 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
     STATIC_INFO_YEAR,
-    SWITCH_DB_STATEMENT,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
@@ -423,10 +427,15 @@ class SQLServer(DatabaseCheck):
                     if STATIC_INFO_MAJOR_VERSION not in self.static_info_cache:
                         cursor.execute("SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion")
                         result = cursor.fetchone()
-                        if result:
-                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
+                        if result and result[0] is not None:
+                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = int(result[0])
                         else:
                             self.log.warning("failed to load version static information due to empty results")
+                            # Fallback to trying to parse the major version from the version string
+                            if self.static_info_cache[STATIC_INFO_VERSION]:
+                                self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = parse_sqlserver_major_version(
+                                    self.static_info_cache[STATIC_INFO_VERSION]
+                                )
                     if STATIC_INFO_SERVERNAME not in self.static_info_cache:
                         cursor.execute("select CAST(ServerProperty('ServerName') AS VARCHAR) AS ServerName")
                         result = cursor.fetchone()
@@ -828,7 +837,8 @@ class SQLServer(DatabaseCheck):
                 for db in self.databases:
                     check_err_message = "Database {} connection service check failed: {}"
                     try:
-                        cursor.execute(SWITCH_DB_STATEMENT.format(db.name))
+                        switch_db_statement = construct_use_statement(db.name)
+                        cursor.execute(switch_db_statement)
                         cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
                         cursor.fetchall()
                         self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
@@ -843,7 +853,8 @@ class SQLServer(DatabaseCheck):
                         )
                         continue
                 # Switch DB back to MASTER
-                cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
+                switch_db_statement = construct_use_statement(self.connection.DEFAULT_DATABASE)
+                cursor.execute(switch_db_statement)
 
     def get_databases(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)

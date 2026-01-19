@@ -3,12 +3,14 @@
   description: JMX hostname to connect to.
   value:
     type: string
+  fleet_configurable: true
 
 - name: port
   required: true
   description: JMX port to connect to.
   value:
     type: integer
+  fleet_configurable: true
 
 - name: is_jmx
   description: |
@@ -18,22 +20,27 @@
   value:
     example: false
     type: boolean
+  fleet_configurable: true
 
 - name: jmx_url
   description: JMX URL to connect to. Can be used instead of host/port configs.
   hidden: true
   value:
     type: string
+  fleet_configurable: true
 
 - name: user
   description: User to use when connecting to JMX.
   value:
     type: string
+  fleet_configurable: true
 
 - name: password
   description: Password to use when connecting to JMX.
+  secret: true
   value:
     type: string
+  fleet_configurable: true
 
 - name: process_name_regex
   description: |
@@ -62,29 +69,32 @@
   value:
     type: string
 
+  fleet_configurable: true
 - name: java_bin_path
   description: "`java_bin_path` should be set if the Agent cannot find your java executable."
   value:
     type: string
-
+  
 - name: java_options
   description: 'A list of Java JVM options, for example: "-Xmx200m -Xms50m".'
   value:
     type: string
-
+  
 - name: trust_store_path
   description: |
     The path to your trusted store.
     `trust_store_path` should be set if SSL is enabled.
   value:
     type: string
-
+  fleet_configurable: true
 - name: trust_store_password
   description: |
     The password for your TrustStore.jks file.
     `trust_store_password` should be set if SSL is enabled.
+  secret: true
   value:
     type: string
+  fleet_configurable: true
 
 - name: key_store_path
   description: |
@@ -92,26 +102,29 @@
     `key_store_path` should be set if client authentication is enabled on the target JVM.
   value:
     type: string
+  fleet_configurable: true
 
 - name: key_store_password
   description: |
     The password to your key store.
     `key_store_password` should be set if client authentication is enabled on the target JVM.
+  secret: true
   value:
     type: string
+  fleet_configurable: true
 
 - name: rmi_registry_ssl
   description: Whether or not the Agent should connect to the RMI registry using SSL.
   value:
     example: false
     type: boolean
-
+  
 - name: rmi_connection_timeout
   description: The connection timeout, in milliseconds, when connecting to a remote JVM.
   value:
     example: 20000
     type: number
-
+  
 - name: rmi_client_timeout
   description: |
     The timeout to consider a remote connection, already successfully established, as lost.
@@ -126,5 +139,6 @@
   value:
     example: true
     type: boolean
+  fleet_configurable: true
 
 - template: instances/all_integrations

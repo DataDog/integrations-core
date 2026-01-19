@@ -92,8 +92,17 @@ def set_default_driver_conf():
         os.environ.setdefault('TDSVER', '8.0')
 
 
+# helper function ensures database name is correctly escaped
+# anywhere a `USE` statement is needed
 def construct_use_statement(database):
-    return 'use [{}]'.format(database)
+    # use bracket-quoting to handle non-regular identifiers
+    switch_db_tmpl = """USE [{}];"""
+
+    # doubling right-bracket is the only special handling needed
+    # for strings within bracket-quoting in SQL Server
+    database_escaped = database.replace(']', ']]')
+
+    return switch_db_tmpl.format(database_escaped)
 
 
 def is_statement_proc(text):
@@ -167,6 +176,18 @@ def parse_sqlserver_year(version):
     :return: integer representation of SQL Server year (i.e. 2012, 2019)
     """
     match = re.search(r"Microsoft SQL Server (\d+)", version)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def parse_sqlserver_major_version(version):
+    """
+    Parses the SQL Server major version out of the full version
+    :param version: String representation of full SQL Server version (from @@version)
+    :return: integer representation of SQL Server major version (i.e. 12, 13)
+    """
+    match = re.search(r"(\d+)\.\d+\.\d+\.\d+", version)
     if not match:
         return None
     return int(match.group(1))

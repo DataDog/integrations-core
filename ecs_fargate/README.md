@@ -438,8 +438,6 @@ Datadog recommends using AWS FireLens for the following reasons:
 - You can configure Fluent Bit directly in your Fargate tasks.
 - The Datadog Fluent Bit output plugin provides additional tagging on logs. The [ECS Explorer][75] uses the tags to correlate logs with ECS resources.
 
-**Note**: Log collection with Fluent Bit and FireLens is not supported for AWS Batch on ECS Fargate.
-
 #### Fluent Bit and FireLens
 
 Configure the AWS FireLens integration built on Datadog's Fluent Bit output plugin to connect your FireLens monitored log data to Datadog Logs. You can find a full [sample task definition for this configuration here][19].
@@ -493,7 +491,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -515,7 +513,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -537,7 +535,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -559,7 +557,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -581,7 +579,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -603,7 +601,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       }
@@ -612,6 +610,8 @@ partial -->
   ```
 {{< /site-region >}}
 partial -->
+
+**Note**: Separate tags with commas in the `dd_tags` field.
 
 {{% collapse-content title="Example using secretOptions to avoid exposing the API Key in plain text" level="h4" %}}
 <!-- partial
@@ -626,7 +626,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -653,7 +653,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -680,7 +680,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -707,7 +707,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -734,7 +734,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },
@@ -761,7 +761,7 @@ partial -->
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",
-        "dd_tags": "project:fluentbit",
+        "dd_tags": "region:us-west-2,project:fluentbit",
         "TLS": "on",
         "provider": "ecs"
       },

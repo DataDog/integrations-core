@@ -52,7 +52,7 @@ class LSFClient:
         return self._run_command(
             'bjobs',
             '-o',
-            "jobid stat queue from_host:80 exec_host:80 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
+            "jobid stat queue user:80 proj:80 from_host:80 exec_host:80 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
             "-u",
             "all",
         )
@@ -88,4 +88,14 @@ class LSFClient:
             "badmin",
             "perfmon",
             "stop",
+        )
+
+    def bhist(self, start_time: str, end_time: str) -> tuple[str, str, int]:
+        return self._run_command(
+            "bhist",
+            "-C",
+            f"{start_time},{end_time}",
+            "-w",
+            "-u",
+            "all",
         )
