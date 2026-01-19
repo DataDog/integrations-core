@@ -73,14 +73,17 @@ class TestUpgradeCheck:
     def test_upgrade_uses_default_cache_file_when_cache_file_is_none(self, mocker):
         app = MagicMock()
         mock_default_cache_file = mocker.patch("ddev.cli.upgrade_check.default_cache_file")
-        mock_read_last_run = mocker.patch("ddev.cli.upgrade_check.read_last_run", return_value=(None, None))
+        mock_read_last_run = mocker.patch(
+            "ddev.cli.upgrade_check.read_last_run",
+            return_value=(Version("1.0.0"), datetime.now()),
+        )
         mock_get = mocker.patch("ddev.cli.upgrade_check.requests.get")
 
         upgrade_check(app, "1.0.0", cache_file=None)
 
         mock_default_cache_file.assert_called_once()
         mock_read_last_run.assert_called_once_with(mock_default_cache_file.return_value)
-        mock_get.assert_called_once()
+        mock_get.assert_not_called()
 
     def test_upgrade_skips_for_dev_versions(self, tmp_path, mocker):
         cache_file = tmp_path / "upgrade_check.json"
