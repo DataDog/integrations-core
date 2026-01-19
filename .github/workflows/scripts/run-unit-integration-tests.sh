@@ -29,8 +29,10 @@ fi
 
 if [ "$INPUT_PYTEST_ARGS" = '-m flaky' ]; then
   set +e # Disable immediate exit
+  set -x # Print command
   ddev $VERBOSE_FLAG test $EXTRA_FLAGS $COV_FLAG --junit "$INPUT_TARGET_STR" -- $INPUT_PYTEST_ARGS -k "not fips"
   exit_code=$?
+  set +x
   if [ $exit_code -eq 5 ]; then
     # Flaky test count can be zero, this is done to avoid pipeline failure
     echo "No tests were collected."
@@ -40,8 +42,12 @@ if [ "$INPUT_PYTEST_ARGS" = '-m flaky' ]; then
   fi
 elif [ -n "$INPUT_PYTEST_ARGS" ]; then
   # Has pytest args: include them with fips filter
+  set -x
   ddev $VERBOSE_FLAG test $EXTRA_FLAGS $COV_FLAG --junit "$INPUT_TARGET_STR" -- $INPUT_PYTEST_ARGS -k "not fips"
+  set +x
 else
   # Default: just fips filter
+  set -x
   ddev $VERBOSE_FLAG test $EXTRA_FLAGS $COV_FLAG --junit "$INPUT_TARGET_STR" -- -k "not fips"
+  set +x
 fi

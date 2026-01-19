@@ -45,16 +45,22 @@ set +e # Disable immediate exit
 
 if [ -n "$INPUT_PYTEST_ARGS" ]; then
   # Has pytest args: include them with fips filter
+  set -x
   ddev env test $E2E_FLAGS --junit $TARGET_ARGS -- $INPUT_PYTEST_ARGS -k "not fips"
   exit_code=$?
+  set +x
 elif [ "$INPUT_IS_LATEST" = 'true' ]; then
   # Latest version without pytest args: include 'all' explicitly
+  set -x
   ddev env test $E2E_FLAGS --junit $TARGET_ARGS -- all -k "not fips"
   exit_code=$?
+  set +x
 else
   # Default: just fips filter
+  set -x
   ddev env test $E2E_FLAGS --junit $TARGET_ARGS -- -k "not fips"
   exit_code=$?
+  set +x
 fi
 
 if [ "$exit_code" -eq 5 ]; then
