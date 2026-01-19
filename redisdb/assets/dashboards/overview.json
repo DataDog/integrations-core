@@ -504,10 +504,11 @@
           {
             "id": 3029111733155793,
             "definition": {
-              "title": "Average replication delay",
+              "title": "Average replication delay (offset)",
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -788,12 +789,12 @@
               },
               "markers": [
                 {
-                  "label": " Max memory reached ",
+                  "label": " Max memory reached ",
                   "value": "y = 100",
                   "display_type": "error dashed"
                 },
                 {
-                  "label": " 80% memory usage ",
+                  "label": " 80% memory usage ",
                   "value": "y = 80",
                   "display_type": "warning dashed"
                 }
@@ -1203,13 +1204,14 @@
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
                       "alias": "Rejected connections",
-                      "formula": "query1"
+                      "formula": "diff(query1)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1506,42 +1508,40 @@
           {
             "id": 7861051565277545,
             "definition": {
-              "title": "Key length",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "title": "Key length distribution",
+              "show_legend": false,
               "time": {},
-              "type": "timeseries",
+              "type": "distribution",
+              "xaxis": {
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto",
+                "include_zero": true
+              },
+              "yaxis": {
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto",
+                "include_zero": true
+              },
               "requests": [
                 {
                   "formulas": [
                     {
-                      "alias": "Total key length",
-                      "formula": "top(query1, 10, 'mean', 'desc')"
+                      "formula": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:redis.key.length{$host,$key,$scope} by {key}",
+                      "query": "sum:redis.key.length{$scope, $host, $key} by {key}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "aggregator": "avg"
                     }
                   ],
-                  "style": {
-                    "palette": "cool"
-                  },
-                  "display_type": "area"
+                  "response_format": "scalar"
                 }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
+              ]
             },
             "layout": {
               "x": 8,
