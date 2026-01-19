@@ -112,6 +112,32 @@ jobs:
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+    # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
+    #   FORCE_COLOR
+    #   TEST_RESULTS_BASE_DIR
+    #   PYTHON_VERSION
+    #   PYTHONUNBUFFERED
+    #   SKIP_ENV_NAME
+    #   DDEV_E2E_AGENT
+    #   DDEV_E2E_AGENT_PY2
+    #   DD_ENV
+    #   DD_SERVICE
+    #   DD_TRACE_ANALYTICS_ENABLED
+    #   DD_CIVISIBILITY_ENABLED
+    #   DD_CIVISIBILITY_AGENTLESS_ENABLED
+    #   DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER
+    #   DD_PROFILING_ENABLED
+    #   DD_SITE
+    #   DD_API_KEY
+    #   MINIMUM_BASE_PACKAGE_PREFIX
+    #   TEST_RESULTS_DIR
+    #   DD_TAGS
+    #   DOCKER_USERNAME
+    #   DOCKER_ACCESS_TOKEN
+    #   ORACLE_DOCKER_USERNAME
+    #   ORACLE_DOCKER_PASSWORD
+    #   DD_GITHUB_USER
+    #   DD_GITHUB_TOKEN
     - name: Set environment variables
       run: bash .github/workflows/scripts/setup-test-env.sh
       env:
