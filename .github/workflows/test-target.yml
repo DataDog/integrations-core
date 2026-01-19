@@ -258,6 +258,7 @@ jobs:
 
     - name: Run Unit & Integration tests with minimum version of base package
       env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "minimum-base-package-tests"
       if: inputs.minimum-base-package
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
@@ -281,6 +282,7 @@ jobs:
       if: inputs.repo == 'core' && !inputs.minimum-base-package
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "e2e-tests"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
@@ -309,8 +311,6 @@ jobs:
     - name: Run E2E tests
       if: inputs.repo != 'core'
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
-      env:
-        DD_TEST_SESSION_NAME: "e2e-tests"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
@@ -339,6 +339,7 @@ jobs:
       if: inputs.benchmark
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "benchmarks"
       run: ddev test --bench --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
@@ -346,6 +347,7 @@ jobs:
       if: inputs.latest
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "latest-tests"
       run: ddev test --latest --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
