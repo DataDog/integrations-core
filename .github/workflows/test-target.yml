@@ -134,6 +134,30 @@ jobs:
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
         echo "DD_TAGS=team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }},agent_image:$DDEV_E2E_AGENT,context:${{ inputs.context }}" >> $GITHUB_ENV
 
+        # Set defaults first
+        {
+          echo "PYTHONUNBUFFERED=1"
+          echo "DOCKER_USERNAME=$DOCKER_USERNAME"
+          echo "DOCKER_ACCESS_TOKEN=$DOCKER_ACCESS_TOKEN"
+          echo "ORACLE_DOCKER_USERNAME=$ORACLE_DOCKER_USERNAME"
+          echo "ORACLE_DOCKER_PASSWORD=$ORACLE_DOCKER_PASSWORD"
+          echo "DD_GITHUB_USER=$DD_GITHUB_USER"
+          echo "DD_GITHUB_TOKEN=$DD_GITHUB_TOKEN"
+        } >> "$GITHUB_ENV"
+
+        # Override with custom vars if provided
+        if [ -n "$SETUP_ENV_VARS" ]; then
+          echo "$SETUP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
+        fi
+      env:
+        SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+        ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
+        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
+        DD_GITHUB_USER: ${{ github.actor }}
+        DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Set up Windows
       if: runner.os == 'Windows'
       run: |-
@@ -203,31 +227,6 @@ jobs:
           echo "::error::Please update to the latest version of ddev to ensure you are using the latest linting rules and then run 'ddev test --fmt ${{ inputs.target }}' to fix formatting issues."
           exit 1
         }
-
-    - name: Set up environment variables for testing
-      run: |
-        # Set defaults first
-        {
-          echo "PYTHONUNBUFFERED=1"
-          echo "DOCKER_USERNAME=$DOCKER_USERNAME"
-          echo "DOCKER_ACCESS_TOKEN=$DOCKER_ACCESS_TOKEN"
-          echo "ORACLE_DOCKER_USERNAME=$ORACLE_DOCKER_USERNAME"
-          echo "ORACLE_DOCKER_PASSWORD=$ORACLE_DOCKER_PASSWORD"
-          echo "DD_GITHUB_USER=$DD_GITHUB_USER"
-          echo "DD_GITHUB_TOKEN=$DD_GITHUB_TOKEN"
-        } >> "$GITHUB_ENV"
-        # Override with custom vars if provided
-        if [ -n "$SETUP_ENV_VARS" ]; then
-          echo "$SETUP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
-        fi
-      env:
-        SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-        ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
-        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
-        DD_GITHUB_USER: ${{ github.actor }}
-        DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Prepare for testing
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
