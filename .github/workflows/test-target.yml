@@ -150,6 +150,7 @@ jobs:
         INPUT_AGENT_IMAGE_WINDOWS: ${{ inputs.agent-image-windows }}
         INPUT_AGENT_IMAGE_WINDOWS_PY2: ${{ inputs.agent-image-windows-py2 }}
         INPUT_TARGET: ${{ inputs.target }}
+        INPUT_TARGET_ENV: ${{ inputs.target-env }}
         INPUT_REPO: ${{ inputs.repo }}
         INPUT_CONTEXT: ${{ inputs.context }}
         INPUT_MINIMUM_BASE_PACKAGE: ${{ inputs.minimum-base-package }}
