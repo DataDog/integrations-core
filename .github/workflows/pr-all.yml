@@ -26,6 +26,10 @@ jobs:
     with:
       repo: core
       context: "pr"
+      # Avoid running flaky tests since the intention of running everything in these
+      # prs is to ensure that tests can be run sucessfully. Reporting failed flaky tests
+      # does not provide much value.
+      pytest-args: '-m "not flaky"'
 
     secrets: inherit
 
