@@ -154,7 +154,7 @@ RUN Get-RemoteFile `
     RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.16.0"
+ENV CURL_VERSION="8.18.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
