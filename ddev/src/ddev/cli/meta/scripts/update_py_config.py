@@ -64,7 +64,14 @@ def update_ci_files(app: Application, new_version: str, old_version: str, tracke
         *(app.repo.path / ".github" / "workflows" / "scripts").glob("*.sh"),
     ]
 
-    python_version_patterns = ("python-version: '{}'", 'PYTHON_VERSION: "{}"', "'{}'", "DEFAULT_PYTHON_VERSION: '{}'")
+    python_version_patterns = (
+        "python-version: '{}'",
+        'PYTHON_VERSION="{}"',
+        'PYTHON_VERSION: "{}"',
+        "DEFAULT_PYTHON_VERSION='{}'",
+        "DEFAULT_PYTHON_VERSION: '{}'",
+        "'{}'",
+    )
 
     for file in files_to_update:
         old_content = new_content = file.read_text()
