@@ -22,6 +22,9 @@ Datadog uses its built-in log pipelines to parse and enrich these logs, facilita
 
 ## Setup
 
+### Prerequisites
+- Ensure that `syslog-ng` is installed.
+
 ### Installation
 
 The Zscaler Private Access check is included in the [Datadog Agent][1] package. No additional installation is needed on your server. 
@@ -151,7 +154,6 @@ For Zscaler Private Access integration, specific custom log formats must be conf
 
 #### Certificate Setup Guide
 > Note:
->- The steps below are performed on RHEL 8.
 >- Complete these steps only if **TLS Encryption** is enabled in **Configure log receiver from Zscaler Private Access**.
 
 1. Generate a custom root CA and its private key:
@@ -183,24 +185,6 @@ For Zscaler Private Access integration, specific custom log formats must be conf
 6. Deploy your App Connector using the signed certificate from the previous step. See [here][7] for platform-specific instructions.
    - Download the App Connector package
    - Install `zpa_enrollment_signed.crt` and select the Enrollment Key if applicable.
-7. Install `syslog-ng` log shipper
-   - On RHEL 8: Enable the `supplementary` repository
-      ```
-      subscription-manager repos --enable rhel-8-for-x86_64-supplementary-rpms
-      ```
-   -  The Extra Packages for Enterprise Linux (EPEL) repository provides many useful packages not included in RHEL. Some syslog-ng dependencies are available from this repo. You can enable it by installing the EPEL RPM (replace 8 with 7 for EPEL 7):
-      ```
-      wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-      rpm -Uvh epel-release-latest-8.noarch.rpm
-      ```
-   - Add the repository containing the latest unofficial syslog-ng build (version 4.10 at the time of writing), available via the Copr build service. Download the repo file to `/etc/yum.repos.d/` to install and enable syslog-ng (replace 8 with 7 for EPEL 7):
-      ```
-      cd /etc/yum.repos.d/
-      wget https://copr.fedorainfracloud.org/coprs/czanik/syslog-ng410/repo/epel-8/czanik-syslog-ng410-epel-8.repo
-      yum install syslog-ng
-      systemctl enable syslog-ng
-      systemctl start syslog-ng
-      ```
 8. Create a server TLS Certificate for syslog-ng
    - Generate private key using openssl
    - Generate CSR
