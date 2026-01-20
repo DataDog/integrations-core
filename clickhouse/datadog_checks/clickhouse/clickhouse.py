@@ -44,9 +44,9 @@ class ClickhouseCheck(AgentCheck):
         self._verify = self.instance.get('verify', True)
         self._tags = self.instance.get('tags', [])
 
-        # ClickHouse Cloud configuration
+        # Single endpoint mode configuration
         # When true, uses clusterAllReplicas() to query system tables across all nodes
-        self._clickhouse_cloud = is_affirmative(self.instance.get('clickhouse_cloud', False))
+        self._single_endpoint_mode = is_affirmative(self.instance.get('single_endpoint_mode', False))
 
         # DBM-related properties
         self._resolved_hostname = None
@@ -252,22 +252,22 @@ class ClickhouseCheck(AgentCheck):
         return self._database_identifier
 
     @property
-    def is_clickhouse_cloud(self):
+    def is_single_endpoint_mode(self):
         """
-        Returns True if this is a ClickHouse Cloud instance.
+        Returns True if single endpoint mode is enabled.
 
         When True, DBM components should use clusterAllReplicas() to query system tables
-        across all nodes in the cluster, since ClickHouse Cloud abstracts replicas behind
-        a managed service endpoint.
+        across all nodes in the cluster, since replicas are abstracted behind a single
+        endpoint (e.g., load balancer or managed service like ClickHouse Cloud).
         """
-        return self._clickhouse_cloud
+        return self._single_endpoint_mode
 
     def get_system_table(self, table_name):
         """
         Get the appropriate system table reference based on deployment type.
 
-        For ClickHouse Cloud: Returns clusterAllReplicas('default', system.<table>)
-        For self-hosted: Returns system.<table>
+        For single endpoint mode: Returns clusterAllReplicas('default', system.<table>)
+        For direct connection: Returns system.<table>
 
         Args:
             table_name: The system table name (e.g., 'query_log', 'processes')
@@ -277,16 +277,16 @@ class ClickhouseCheck(AgentCheck):
 
         Example:
             >>> self.get_system_table('query_log')
-            "clusterAllReplicas('default', system.query_log)"  # Cloud
+            "clusterAllReplicas('default', system.query_log)"  # Single endpoint mode
             >>> self.get_system_table('query_log')
-            "system.query_log"  # Self-hosted
+            "system.query_log"  # Direct connection
         """
-        if self._clickhouse_cloud:
-            # ClickHouse Cloud: Use clusterAllReplicas to query all nodes
-            # The cluster name in ClickHouse Cloud is always 'default'
+        if self._single_endpoint_mode:
+            # Single endpoint mode: Use clusterAllReplicas to query all nodes
+            # The cluster name is 'default' for ClickHouse Cloud and most setups
             return f"clusterAllReplicas('default', system.{table_name})"
         else:
-            # Self-hosted: Query the local system table directly
+            # Direct connection: Query the local system table directly
             return f"system.{table_name}"
 
     def validate_config(self):
