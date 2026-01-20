@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 from requests.exceptions import HTTPError
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 
 
@@ -17,6 +18,7 @@ class ActivityMonitor:
         self.last_audit_collection_time = None
         self.last_alert_collection_time = None
         self.last_audit_collection_time = None
+        self.alerts_v42_supported = is_affirmative(self.check.read_persistent_cache("alerts_v42_supported"))
 
     def collect_events(self):
         """Collect events from Nutanix Prism Central."""
@@ -218,16 +220,23 @@ class ActivityMonitor:
         params["$filter"] = f"creationTime gt {start_time_str}"
         params["$orderBy"] = "creationTime asc"
 
+        if self.alerts_v42_supported is False:
+            del params["$filter"]
+            return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
+
         try:
-            return self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
+            result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
+            if self.alerts_v42_supported is None:
+                self.alerts_v42_supported = True
+                self.check.write_persistent_cache("alerts_v42_supported", True)
+            return result
         except HTTPError as e:
             if e.response is not None and e.response.status_code == 404:
-                self.check.log.debug("Monitoring v4.2 API is not available, falling back to Monitoring v4.0")
-                # $filter by creationTime is only available in v4.2+
+                self.alerts_v42_supported = False
+                self.check.write_persistent_cache("alerts_v42_supported", False)
                 del params["$filter"]
                 return self.check._get_paginated_request_data(
-                    "api/monitoring/v4.0/serviceability/alerts",
-                    params=params,
+                    "api/monitoring/v4.0/serviceability/alerts", params=params
                 )
             raise
 
