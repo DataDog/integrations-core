@@ -417,7 +417,9 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             rows = self._execute_query(query)
 
             # Log with deployment type indicator
-            deployment_mode = "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
+            deployment_mode = (
+                "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
+            )
             self._log.info(
                 "Loaded %d rows from %s [%s] (window=%.2fs, last=%d, current=%d)",
                 len(rows),
