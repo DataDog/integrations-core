@@ -260,11 +260,11 @@ tests:
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1506436610000
-  - sample: '127.0.0.1 - - [19/Feb/2015:15:50:36 -0500] "GET /big.pdf HTTP/1.1" 206 33973115 0.202 "-" "Mozilla/5.0 (OCSF_TEST_OS_TYPE_ID_99 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"'
+  - sample: '127.0.0.1 - - [19/Feb/2015:15:50:36 -0500] "GET /big.pdf HTTP/1.1" 206 33973115 0.000000123456 "-" "Mozilla/5.0 (OCSF_TEST_OS_TYPE_ID_99 1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36"'
     result:
       custom:
         date_access: 1424379036000
-        duration: 2.02E8
+        duration: 1.23e-4
         http:
           method: "GET"
           referer: "-"
@@ -303,7 +303,7 @@ tests:
           category_uid: 4
           class_name: "HTTP Activity"
           class_uid: 4002
-          duration: 2.02E8
+          duration: 1.23e-4
           http_request:
             http_method: "GET"
             referrer: "-"
