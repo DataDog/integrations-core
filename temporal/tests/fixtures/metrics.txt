@@ -13355,17 +13355,17 @@ history_workflow_execution_cache_lock_hold_duration_milliseconds_count{operation
 
 # HELP memory_gc_pause_ms_milliseconds memory_gc_pause_ms histogram
 # TYPE memory_gc_pause_ms_milliseconds histogram
-memory_gc_pause_ms_milliseconds_bucket{service_name="frontend",le="10"} 100
-memory_gc_pause_ms_milliseconds_bucket{service_name="frontend",le="+Inf"} 100
-memory_gc_pause_ms_milliseconds_sum{service_name="frontend"} 50
-memory_gc_pause_ms_milliseconds_count{service_name="frontend"} 100
+memory_gc_pause_ms_milliseconds_bucket{service_name="internal",le="10"} 100
+memory_gc_pause_ms_milliseconds_bucket{service_name="internal",le="+Inf"} 100
+memory_gc_pause_ms_milliseconds_sum{service_name="internal"} 50
+memory_gc_pause_ms_milliseconds_count{service_name="internal"} 100
 
 # HELP memory_num_gc_bytes memory_num_gc histogram
 # TYPE memory_num_gc_bytes histogram
-memory_num_gc_bytes_bucket{service_name="frontend",le="1024"} 100
-memory_num_gc_bytes_bucket{service_name="frontend",le="+Inf"} 100
-memory_num_gc_bytes_sum{service_name="frontend"} 500
-memory_num_gc_bytes_count{service_name="frontend"} 100
+memory_num_gc_bytes_bucket{service_name="internal",le="1024"} 100
+memory_num_gc_bytes_bucket{service_name="internal",le="+Inf"} 100
+memory_num_gc_bytes_sum{service_name="internal"} 500
+memory_num_gc_bytes_count{service_name="internal"} 100
 
 # HELP namespace_registry_refresh_latency_milliseconds namespace_registry_refresh_latency histogram
 # TYPE namespace_registry_refresh_latency_milliseconds histogram
