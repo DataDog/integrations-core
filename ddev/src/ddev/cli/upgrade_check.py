@@ -65,11 +65,17 @@ def upgrade_check(
     if current_version.is_devrelease:
         return
     last_run = read_last_run(cache_file)
-    last_version, last_date = last_run if last_run is not None else (None, None)
     date_now = datetime.now()
 
     # If cache does not exist or is older than check_interval, fetch from PyPI
-    if last_run is None or (date_now - last_date >= check_interval):
+    if last_run is None:
+        should_check = True
+        last_version = None
+    else:
+        last_version, last_date = last_run
+        should_check = date_now - last_date >= check_interval
+
+    if should_check:
         try:
             resp = requests.get(pypi_url, timeout=5)
             resp.raise_for_status()
@@ -84,5 +90,6 @@ def upgrade_check(
                 version_to_cache = last_version if last_run is not None else current_version
                 write_last_run(version_to_cache, date_now, cache_file)
     else:
+        last_version, _last_date = last_run
         if last_version > current_version:
             atexit.register(exit_handler, app, last_version, current_version)
