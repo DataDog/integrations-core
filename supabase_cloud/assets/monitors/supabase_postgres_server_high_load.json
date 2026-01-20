@@ -8,7 +8,7 @@
 	"id": 232765495,
 	"name": "[Supabase] Postgres server cpu usage is high",
 	"type": "query alert",
-	"query": "avg(last_5m):avg:supabase.cloud.node.load15{*} by {supabase_project_ref} > 120",
+	"query": "avg(last_5m):(avg:supabase.cloud.node.load15{*} by {supabase_project_ref,supabase_identifier} * 100) / sum:supabase.cloud.node.cpu.online{*} by {supabase_project_ref,supabase_identifier} > 120",
 	"message": "The Postgres server for project {{supabase_project_ref.name}} is {{#is_alert}}under high load{{/is_alert}}{{#is_alert_recovery}}back within acceptable load{{/is_alert_recovery}}. @example@example.com",
 	"tags": [
 		"source:supabase-cloud"
