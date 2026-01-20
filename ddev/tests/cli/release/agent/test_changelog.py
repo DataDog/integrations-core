@@ -56,7 +56,7 @@ def test_changelog_since_to(fake_changelog, ddev, mocker):
     expected_output = (
         """## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
 
-### New Changes
+### Integration Updates
 * bar [2.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md) **BREAKING CHANGE**
 """
         "* datadog_checks_base [3.0.0]"
@@ -80,7 +80,7 @@ def test_new_integration_with_non_initial_version(repo_with_new_integration_patc
     assert result.exit_code == 0
 
     # The integration "newcheck" at version 1.0.1 should be listed as a NEW integration,
-    # not under "New Changes", because it didn't exist in the previous stable release
+    # not under "Integration Updates", because it didn't exist in the previous stable release
     expected_output = """## Datadog Agent version [7.50.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7500)
 
 ### New Integrations
@@ -109,7 +109,7 @@ def repo_with_fake_changelog(repo_with_history, config_file):
 
 ## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
 
-### New Changes
+### Integration Updates
 * bar [2.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md) **BREAKING CHANGE**
 """
         "* datadog_checks_base [3.0.0]"
@@ -122,7 +122,7 @@ def repo_with_fake_changelog(repo_with_history, config_file):
 ### New Integrations
 * bar [1.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md)
 * datadog_checks_base [2.1.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
-### New Changes
+### Integration Updates
 * foo [1.5.0](https://github.com/DataDog/integrations-core/blob/master/foo/CHANGELOG.md)
 """
     )
