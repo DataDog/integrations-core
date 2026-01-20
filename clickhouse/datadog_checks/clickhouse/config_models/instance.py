@@ -87,7 +87,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    clickhouse_cloud: Optional[bool] = None
+    single_endpoint_mode: Optional[bool] = None
     completed_query_samples: Optional[CompletedQuerySamples] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None

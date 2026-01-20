@@ -8,7 +8,7 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
-def instance_clickhouse_cloud():
+def instance_single_endpoint_mode():
     return False
 
 
