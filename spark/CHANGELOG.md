@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 7.2.1 / 2025-10-31
+## 7.3.1 / 2025-12-22
+
+***Fixed***:
+
+* Debounce false-positive connection errors ([#21922](https://github.com/DataDog/integrations-core/pull/21922))
+* Remove unused code and improve test coverage for connection error handling. ([#22128](https://github.com/DataDog/integrations-core/pull/22128))
+
+## 7.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 7.2.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

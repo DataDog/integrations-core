@@ -85,11 +85,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.13.9"
+ENV PYTHON_VERSION="3.13.11"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '200ddff856bbff949d2cc1be42e8807c07538abd6b6966d5113a094cf628c5c5'; `
+      -Hash '30d4654b3eac7ddfdf2682db4c8dcb490f3055f4f33c6906d6b828f680152101'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -154,7 +154,7 @@ RUN Get-RemoteFile `
     RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.16.0"
+ENV CURL_VERSION="8.18.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
