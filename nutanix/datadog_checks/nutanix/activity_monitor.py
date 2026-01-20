@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 from requests.exceptions import HTTPError
 
-from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 
 
@@ -18,34 +17,44 @@ class ActivityMonitor:
         self.last_audit_collection_time = None
         self.last_alert_collection_time = None
         self.last_audit_collection_time = None
-        self.alerts_v42_supported = is_affirmative(self.check.read_persistent_cache("alerts_v42_supported"))
+        self.alerts_v42_supported = self.check.read_persistent_cache("alerts_v42_supported")
 
     def collect_events(self):
         """Collect events from Nutanix Prism Central."""
         try:
+            self.check.log.debug("Starting events collection")
+
             start_time = self.last_event_collection_time
             if not start_time:
                 now = get_current_datetime()
                 start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+                self.check.log.debug("First events collection, using start_time: %s", start_time)
+            else:
+                self.check.log.debug("Collecting events since: %s", start_time)
 
             events = self._list_events(start_time)
             if not events:
                 self.check.log.debug("No events found")
                 return
 
-            # Filter out events with timestamps older than or equal to last collection time
+            self.check.log.debug("Fetched %d events from API", len(events))
+
             events = self._filter_after_time(events, self.last_event_collection_time, "creationTime")
             if not events:
                 self.check.log.debug("No new events after filtering")
                 return
 
+            self.check.log.debug("Processing %d events after filtering", len(events))
+
             for event in events:
                 self._process_event(event)
 
-            # update last time to the maximum creationTime seen
             most_recent_time_str = self._find_max_timestamp(events, "creationTime")
             if most_recent_time_str:
                 self.last_event_collection_time = most_recent_time_str
+                self.check.log.debug("Updated last_event_collection_time to: %s", most_recent_time_str)
+
+            self.check.log.debug("Completed events collection")
 
         except Exception as e:
             self.check.log.exception("Error collecting events: %s", e)
@@ -119,29 +128,39 @@ class ActivityMonitor:
     def collect_tasks(self):
         """Collect tasks from Nutanix Prism Central."""
         try:
+            self.check.log.debug("Starting tasks collection")
+
             start_time = self.last_task_collection_time
             if not start_time:
                 now = get_current_datetime()
                 start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+                self.check.log.debug("First tasks collection, using start_time: %s", start_time)
+            else:
+                self.check.log.debug("Collecting tasks since: %s", start_time)
 
             tasks = self._list_tasks(start_time)
             if not tasks:
                 self.check.log.debug("No tasks found")
                 return
 
-            # Filter out tasks with timestamps older than or equal to last collection time
+            self.check.log.debug("Fetched %d tasks from API", len(tasks))
+
             tasks = self._filter_after_time(tasks, self.last_task_collection_time, "createdTime")
             if not tasks:
                 self.check.log.debug("No new tasks after filtering")
                 return
 
+            self.check.log.debug("Processing %d tasks after filtering", len(tasks))
+
             for task in tasks:
                 self._process_task(task)
 
-            # update last time to the maximum createdTime seen
             most_recent_time_str = self._find_max_timestamp(tasks, "createdTime")
             if most_recent_time_str:
                 self.last_task_collection_time = most_recent_time_str
+                self.check.log.debug("Updated last_task_collection_time to: %s", most_recent_time_str)
+
+            self.check.log.debug("Completed tasks collection")
 
         except Exception as e:
             self.check.log.exception("Error collecting tasks: %s", e)
@@ -149,29 +168,39 @@ class ActivityMonitor:
     def collect_audits(self):
         """Collect audits from Nutanix Prism Central."""
         try:
+            self.check.log.debug("Starting audits collection")
+
             start_time = self.last_audit_collection_time
             if not start_time:
                 now = get_current_datetime()
                 start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+                self.check.log.debug("First audits collection, using start_time: %s", start_time)
+            else:
+                self.check.log.debug("Collecting audits since: %s", start_time)
 
             audits = self._list_audits(start_time)
             if not audits:
                 self.check.log.debug("No audits found")
                 return
 
-            # Filter out audits with timestamps older than or equal to last collection time
+            self.check.log.debug("Fetched %d audits from API", len(audits))
+
             audits = self._filter_after_time(audits, self.last_audit_collection_time, "creationTime")
             if not audits:
                 self.check.log.debug("No new audits after filtering")
                 return
 
+            self.check.log.debug("Processing %d audits after filtering", len(audits))
+
             for audit in audits:
                 self._process_audit(audit)
 
-            # update last time to the maximum creationTime seen
             most_recent_time_str = self._find_max_timestamp(audits, "creationTime")
             if most_recent_time_str:
                 self.last_audit_collection_time = most_recent_time_str
+                self.check.log.debug("Updated last_audit_collection_time to: %s", most_recent_time_str)
+
+            self.check.log.debug("Completed audits collection")
 
         except Exception as e:
             self.check.log.exception("Error collecting audits: %s", e)
@@ -179,29 +208,39 @@ class ActivityMonitor:
     def collect_alerts(self):
         """Collect alerts from Nutanix Prism Central."""
         try:
+            self.check.log.debug("Starting alerts collection")
+
             start_time = self.last_alert_collection_time
             if not start_time:
                 now = get_current_datetime()
                 start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+                self.check.log.debug("First alerts collection, using start_time: %s", start_time)
+            else:
+                self.check.log.debug("Collecting alerts since: %s", start_time)
 
             alerts = self._list_alerts(start_time)
             if not alerts:
                 self.check.log.debug("No alerts found")
                 return
 
-            # Filter out alerts with timestamps older than or equal to last collection time
+            self.check.log.debug("Fetched %d alerts from API", len(alerts))
+
             alerts = self._filter_after_time(alerts, self.last_alert_collection_time, "creationTime")
             if not alerts:
                 self.check.log.debug("No new alerts after filtering")
                 return
 
+            self.check.log.debug("Processing %d alerts after filtering", len(alerts))
+
             for alert in alerts:
                 self._process_alert(alert)
 
-            # update last time to the maximum creationTime seen
             most_recent_time_str = self._find_max_timestamp(alerts, "creationTime")
             if most_recent_time_str:
                 self.last_alert_collection_time = most_recent_time_str
+                self.check.log.debug("Updated last_alert_collection_time to: %s", most_recent_time_str)
+
+            self.check.log.debug("Completed alerts collection")
 
         except Exception as e:
             self.check.log.exception("Error collecting alerts: %s", e)
@@ -221,17 +260,21 @@ class ActivityMonitor:
         params["$orderBy"] = "creationTime asc"
 
         if self.alerts_v42_supported is False:
+            self.check.log.debug("Using alerts API v4.0 (v4.2 not supported)")
             del params["$filter"]
             return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
 
         try:
+            self.check.log.debug("Attempting to use alerts API v4.2")
             result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
             if self.alerts_v42_supported is None:
+                self.check.log.info("Alerts API v4.2 is supported, caching for future use")
                 self.alerts_v42_supported = True
                 self.check.write_persistent_cache("alerts_v42_supported", True)
             return result
         except HTTPError as e:
             if e.response is not None and e.response.status_code == 404:
+                self.check.log.info("Alerts API v4.2 not supported, falling back to v4.0 permanently")
                 self.alerts_v42_supported = False
                 self.check.write_persistent_cache("alerts_v42_supported", False)
                 del params["$filter"]

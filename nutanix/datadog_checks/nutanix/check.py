@@ -78,7 +78,6 @@ class NutanixCheck(AgentCheck):
         self.infrastructure_monitor.init_collection_time_window()
 
         self.infrastructure_monitor.collect_cluster_metrics()
-        self.infrastructure_monitor.collect_vm_metrics()
 
         if self.collect_events_enabled:
             self.activity_monitor.collect_events()
