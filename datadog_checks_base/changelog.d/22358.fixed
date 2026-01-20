@@ -1,1 +1,0 @@
-Optimize StatementMetrics cache to only store fields we need to compute statement metrics
