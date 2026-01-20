@@ -11,7 +11,7 @@ files:
       overrides:
         openmetrics_endpoint.value.example: http://%%host%%:5680/metrics
         openmetrics_endpoint.description: |
-          Set this to the endpoint that Kuma exposes.
+          Set this to the endpoint that Kuma exposes. -- Dummy change
   - template: logs
     example:
     - type: docker
