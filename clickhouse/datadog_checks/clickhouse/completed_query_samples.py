@@ -353,7 +353,9 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
             window_seconds = (self._current_checkpoint_microseconds - self._last_checkpoint_microseconds) / 1_000_000.0
 
             # Log with deployment type indicator
-            deployment_mode = "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
+            deployment_mode = (
+                "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
+            )
             self._log.info(
                 "Loaded %d completed queries from %s [%s]. Window: [%d, %d] microseconds (%.2f seconds elapsed)",
                 len(rows),
