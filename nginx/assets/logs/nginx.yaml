@@ -353,7 +353,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `http.method` to `ocsf.http_request.http_method`.
+              name: Map `http.method` to `ocsf.http_request.http_method`
               sources:
                 - http.method
               target: ocsf.http_request.http_method
