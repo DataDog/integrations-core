@@ -324,9 +324,6 @@ def _run_script_in_container(
             DOCKER_MEMORY_LIMIT,
             "--cpus",
             DOCKER_CPU_LIMIT,
-            "--read-only",  # Read-only filesystem
-            "--tmpfs",
-            "/tmp:rw,noexec,nosuid,size=64m",  # Writable /tmp
             "-v",
             f"{temp_path}:/script.py:ro",  # Mount script read-only
         ]
@@ -336,8 +333,15 @@ def _run_script_in_container(
             for key, value in env_vars.items():
                 docker_cmd.extend(["-e", f"{key}={value}"])
 
-        # Add image and command
-        docker_cmd.extend([DOCKER_IMAGE, "python", "-u", "/script.py"])
+        # Add image and command - install dependencies via shell then run script
+        docker_cmd.extend(
+            [
+                DOCKER_IMAGE,
+                "sh",
+                "-c",
+                "pip install -q requests && python -u /script.py",
+            ]
+        )
 
         # Stream output in real-time
         process = subprocess.Popen(
