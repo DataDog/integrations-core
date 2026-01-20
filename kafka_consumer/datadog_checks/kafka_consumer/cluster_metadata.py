@@ -316,6 +316,8 @@ class ClusterMetadataCollector:
                     fetched_broker_configs[str(broker_id)] = {
                         'event_text': event_text,
                         'tags': tags,
+                        'broker_host': broker_host,
+                        'broker_port': broker_port,
                     }
 
             except Exception as e:
@@ -339,6 +341,21 @@ class ClusterMetadataCollector:
                     'aggregation_key': f'kafka_broker_config_{broker_id}',
                     'alert_type': 'info',
                 }
+            )
+
+            self.check.event_platform_event(
+                json.dumps(
+                    {
+                        'collection_timestamp': int(time.time() * 1000),
+                        'kafka_cluster_id': cluster_id,
+                        'broker_id': str(broker_id),
+                        'broker_host': info['broker_host'],
+                        'broker_port': info['broker_port'],
+                        'config_type': 'broker',
+                        'config': json.loads(info['event_text']),
+                    }
+                ),
+                "data-streams-message",
             )
 
     def _collect_topic_metadata(self, metadata, highwater_offsets):
@@ -536,6 +553,19 @@ class ClusterMetadataCollector:
                 }
             )
 
+            self.check.event_platform_event(
+                json.dumps(
+                    {
+                        'collection_timestamp': int(time.time() * 1000),
+                        'kafka_cluster_id': cluster_id,
+                        'topic': topic_name,
+                        'config_type': 'topic',
+                        'config': json.loads(info['event_text']),
+                    }
+                ),
+                "data-streams-message",
+            )
+
         try:
             snapshot = {'ts': float(now_ts), 'partitions': current_partition_offsets}
             self.check.write_persistent_cache(self.TOPIC_HWM_SUM_CACHE_KEY, json.dumps(snapshot))
@@ -671,6 +701,8 @@ class ClusterMetadataCollector:
                     'topic_name': topic_name,
                     'schema_for': schema_for,
                     'schema_version': schema_version,
+                    'schema_id': schema_id,
+                    'schema_type': schema_type,
                     'event_tags': event_tags,
                 }
 
@@ -695,6 +727,24 @@ class ClusterMetadataCollector:
                     'aggregation_key': f'kafka_schema_{subject}_{info["schema_version"]}',
                     'alert_type': 'info',
                 }
+            )
+
+            self.check.event_platform_event(
+                json.dumps(
+                    {
+                        'collection_timestamp': int(time.time() * 1000),
+                        'kafka_cluster_id': cluster_id,
+                        'subject': subject,
+                        'topic': info['topic_name'],
+                        'schema_for': info['schema_for'],
+                        'schema_id': info['schema_id'],
+                        'schema_version': info['schema_version'],
+                        'schema_type': info['schema_type'],
+                        'config_type': 'schema',
+                        'schema': info['schema_content'],
+                    }
+                ),
+                "data-streams-message",
             )
 
     def _truncate_config_for_event(self, config_data, max_configs=50):
