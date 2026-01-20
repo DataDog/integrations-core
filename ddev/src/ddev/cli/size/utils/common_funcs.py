@@ -1004,7 +1004,11 @@ def get_last_dependency_sizes_artifact(
     dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
     if not dep_sizes_json:
         app.display_debug("No dependency sizes in current commit, searching ancestors")
-        base_commit = app.repo.git.merge_base(commit, "origin/master")
+        try:
+            base_commit = app.repo.git.merge_base(commit, "origin/master")
+        except Exception as e:
+            app.display_error(f"Failed to find merge base for {commit}: {e}")
+            return None
         if base_commit != commit:
             app.display_debug(f"Found base commit: {base_commit}")
             previous_commit = base_commit
