@@ -5,6 +5,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Large string columns to exclude from _previous_statements cache (not needed for derivative calculations)
+_STATEMENT_METRICS_EXCLUDED_COLUMNS = frozenset({'query', 'statement', 'query_text', 'sql_text', 'digest_text'})
+
 
 class StatementMetrics:
     """
@@ -106,7 +109,7 @@ class StatementMetrics:
             result.append(diffed_row)
 
         self._previous_statements.clear()
-        self._previous_statements = merged_rows
+        self._previous_statements = _strip_statement_columns(merged_rows, metrics)
 
         return result
 
@@ -136,3 +139,12 @@ def _merge_duplicate_rows(rows, metrics, key):
             queries_by_key[query_key] = row
 
     return queries_by_key, dropped_metrics
+
+
+def _strip_statement_columns(merged_rows, metrics):
+    """Strip large string columns from rows before caching to reduce memory usage."""
+    stripped = {}
+    for row_key, row in merged_rows.items():
+        stripped_row = {k: v for k, v in row.items() if k in metrics or k not in _STATEMENT_METRICS_EXCLUDED_COLUMNS}
+        stripped[row_key] = stripped_row
+    return stripped

@@ -1,0 +1,1 @@
+Reduce memory usage by caching degeneralise_tag results and stripping large string columns from statement metrics cache

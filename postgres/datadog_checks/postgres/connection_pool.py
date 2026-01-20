@@ -208,6 +208,7 @@ class LRUConnectionPoolManager:
             "min_size": 0,
             "max_size": 2,
             "open": True,
+            "num_workers": 1,
         }
 
         self.lock = threading.Lock()
