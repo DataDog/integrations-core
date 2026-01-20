@@ -8,10 +8,6 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
-def instance_single_endpoint_mode():
-    return False
-
-
 def instance_connect_timeout():
     return 10
 
@@ -50,6 +46,10 @@ def instance_port():
 
 def instance_read_timeout():
     return 10
+
+
+def instance_single_endpoint_mode():
+    return False
 
 
 def instance_tls_verify():

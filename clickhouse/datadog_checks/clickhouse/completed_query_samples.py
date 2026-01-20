@@ -435,16 +435,16 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
         except Exception as e:
             self._log.exception("Failed to load completed queries from system.query_log: %s", e)
 
-            # IMPORTANT: Don't update checkpoint on error
-            # Next collection will retry the same window
-
             self._check.count(
                 "dd.clickhouse.completed_query_samples.error",
                 1,
                 tags=self.tags + ["error:query_log_load_failed"],
                 raw=True,
             )
-            return []
+
+            # Re-raise to let outer handler skip checkpoint advancement
+            # This ensures the failed time window will be retried
+            raise
 
     def _normalize_query(self, row):
         """
