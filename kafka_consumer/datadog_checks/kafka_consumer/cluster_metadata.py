@@ -201,11 +201,10 @@ class ClusterMetadataCollector:
                 or current_time >= cached_entry.get('expire_at', 0)
             ):
                 events_to_send.append(item_key)
-
-            cache_dict[item_key] = {
-                'hash': current_hash,
-                'expire_at': current_time + self.EVENT_CACHE_TTL,
-            }
+                cache_dict[item_key] = {
+                    'hash': current_hash,
+                    'expire_at': current_time + self.EVENT_CACHE_TTL,
+                }
 
         try:
             self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))

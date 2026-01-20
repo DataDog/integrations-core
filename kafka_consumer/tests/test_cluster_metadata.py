@@ -700,3 +700,59 @@ def test_throughput_with_partition_unavailable(check, dd_run_check, aggregator):
     for metric in metrics:
         if 'topic:test-topic' in metric.tags:
             assert metric.value >= 0, f"Message rate should be non-negative, got {metric.value}"
+
+
+def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
+    """Test that cache TTL is only updated when events are sent, not on every call.
+
+    This validates the fix for the bug where cache TTL was being reset on every check run,
+    preventing events from ever being sent again unless content changed.
+    """
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    collector = kafka_consumer_check.metadata_collector
+
+    cache_key = 'test_event_cache'
+    items = {'item1': 'content1'}
+
+    # Mock the check's cache methods
+    cache_storage = {}
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    collector.check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    collector.check.write_persistent_cache = mock.Mock(side_effect=mock_write)
+
+    # First call at t=1000: no cache, event should be sent
+    with mock.patch('time.time', return_value=1000.0):
+        events_to_send = collector._get_events_to_send(cache_key, items)
+        assert 'item1' in events_to_send, "First call should send event (no cache)"
+
+    # Get the expire_at from first call (should be 1000 + 600 = 1600)
+    cache_dict = json.loads(cache_storage[cache_key])
+    first_expire_at = cache_dict['item1']['expire_at']
+    assert first_expire_at == 1600.0, f"Expected expire_at=1600.0, got {first_expire_at}"
+
+    # Second call at t=1100: cache exists and valid (1100 < 1600), event should NOT be sent
+    with mock.patch('time.time', return_value=1100.0):
+        events_to_send = collector._get_events_to_send(cache_key, items)
+        assert 'item1' not in events_to_send, "Second call should NOT send event (cache valid)"
+
+    # Verify expire_at was NOT updated (this is the bug fix!)
+    cache_dict = json.loads(cache_storage[cache_key])
+    second_expire_at = cache_dict['item1']['expire_at']
+    assert second_expire_at == 1600.0, f"Cache TTL should NOT be reset when no event is sent, got {second_expire_at}"
+
+    # Third call at t=1601: cache expired (1601 >= 1600), event should be sent
+    with mock.patch('time.time', return_value=1601.0):
+        events_to_send = collector._get_events_to_send(cache_key, items)
+        assert 'item1' in events_to_send, "Third call should send event (cache expired)"
+
+    # Verify expire_at WAS updated after sending event (should be 1601 + 600 = 2201)
+    cache_dict = json.loads(cache_storage[cache_key])
+    third_expire_at = cache_dict['item1']['expire_at']
+    assert third_expire_at == 2201.0, f"Cache TTL should be updated when event is sent, got {third_expire_at}"
