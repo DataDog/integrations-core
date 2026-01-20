@@ -122,8 +122,8 @@ def validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, st
 )
 @click.option(
     "--sandbox/--no-sandbox",
-    default=None,
-    help="Run script in Docker container for isolation. Default: auto-detect (use if Docker available).",
+    default=True,
+    help="Run script in Docker container for isolation (default: enabled). Use --no-sandbox to run directly.",
 )
 @click.pass_obj
 def dynamicd(
@@ -136,7 +136,7 @@ def dynamicd(
     show_only: bool,
     timeout: int | None,
     all_metrics: bool,
-    sandbox: bool | None,
+    sandbox: bool,
 ):
     """Generate realistic fake telemetry data for an integration using AI.
 
@@ -182,12 +182,9 @@ def dynamicd(
     if rate <= 0:
         app.abort("Rate must be a positive number")
 
-    # Handle sandbox mode (auto-detect if not specified)
+    # Handle sandbox mode (default: enabled)
     use_sandbox = sandbox
-    if use_sandbox is None:
-        # Auto-detect: use sandbox if Docker is available
-        use_sandbox = is_docker_available()
-    elif use_sandbox and not is_docker_available():
+    if use_sandbox and not is_docker_available():
         app.display_error("Docker is not available. Install Docker or use --no-sandbox.")
         app.abort()
 
