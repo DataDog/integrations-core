@@ -1,0 +1,1 @@
+Handle missing merge base commits in `ddev size status` by falling back to local lockfiles.
