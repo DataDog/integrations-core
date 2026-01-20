@@ -1,0 +1,1 @@
+Fix STRING_AGG truncation error for tables with many columns by casting to NVARCHAR(MAX)
