@@ -24,7 +24,7 @@ def mock_get(mocker):
 
 
 @pytest.fixture
-def mock_atexit_register(mocker):
+def mock_atexit_call(mocker):
     return mocker.patch("ddev.cli.upgrade_check.atexit.register")
 
 
@@ -91,16 +91,16 @@ def test_upgrade_uses_default_cache_file_when_cache_file_is_none(app, mock_get, 
     mock_get.assert_not_called()
 
 
-def test_upgrade_skips_for_dev_versions(app, tmp_path, mock_get, mock_atexit_register):
+def test_upgrade_skips_for_dev_versions(app, tmp_path, mock_get, mock_atexit_call):
     cache_file = tmp_path / "upgrade_check.json"
 
     upgrade_check(app, "14.1.1.dev91", cache_file=cache_file)
 
     mock_get.assert_not_called()
-    mock_atexit_register.assert_not_called()
+    mock_atexit_call.assert_not_called()
 
 
-def test_upgrade_fetches_from_pypi_and_notifies_when_upgrade_available(app, tmp_path, mock_get, mock_atexit_register):
+def test_upgrade_fetches_from_pypi_and_notifies_when_upgrade_available(app, tmp_path, mock_get, mock_atexit_call):
     # test ability to fetch from PyPI and notify when upgrade is available
     cache_file = tmp_path / "upgrade_check.json"
     mock_response = MagicMock()
@@ -110,13 +110,13 @@ def test_upgrade_fetches_from_pypi_and_notifies_when_upgrade_available(app, tmp_
     upgrade_check(app, "1.0.0", cache_file=cache_file)
 
     mock_get.assert_called_once_with("https://pypi.org/pypi/ddev/json", timeout=5)
-    mock_atexit_register.assert_called_once_with(exit_handler, app, Version("2.0.0"), Version("1.0.0"))
+    mock_atexit_call.assert_called_once_with(exit_handler, app, Version("2.0.0"), Version("1.0.0"))
     # Verify cache was written
     data = json.loads(cache_file.read_text())
     assert data["version"] == "2.0.0"
 
 
-def test_upgrade_uses_cache_when_fresh(app, tmp_path, mock_get, mock_atexit_register):
+def test_upgrade_uses_cache_when_fresh(app, tmp_path, mock_get, mock_atexit_call):
     # test ability to use cache when fresh
     cache_file = tmp_path / "upgrade_check.json"
     recent_date = datetime.now() - timedelta(days=1)
@@ -125,10 +125,10 @@ def test_upgrade_uses_cache_when_fresh(app, tmp_path, mock_get, mock_atexit_regi
     upgrade_check(app, "1.0.0", cache_file=cache_file)
 
     mock_get.assert_not_called()
-    mock_atexit_register.assert_called_once_with(exit_handler, app, Version("2.0.0"), Version("1.0.0"))
+    mock_atexit_call.assert_called_once_with(exit_handler, app, Version("2.0.0"), Version("1.0.0"))
 
 
-def test_upgrade_no_notification_when_up_to_date(app, tmp_path, mock_get, mock_atexit_register):
+def test_upgrade_no_notification_when_up_to_date(app, tmp_path, mock_get, mock_atexit_call):
     # test ability to not notify when up to date
     cache_file = tmp_path / "upgrade_check.json"
     mock_response = MagicMock()
@@ -137,10 +137,10 @@ def test_upgrade_no_notification_when_up_to_date(app, tmp_path, mock_get, mock_a
 
     upgrade_check(app, "1.0.0", cache_file=cache_file)
 
-    mock_atexit_register.assert_not_called()
+    mock_atexit_call.assert_not_called()
 
 
-def test_upgrade_handles_request_exception_gracefully(app, tmp_path, mock_atexit_register, mocker):
+def test_upgrade_handles_request_exception_gracefully(app, tmp_path, mock_atexit_call, mocker):
     # test ability to handle request exception gracefully
     # and still write to cache to prevent repeated failures
     cache_file = tmp_path / "upgrade_check.json"
@@ -148,6 +148,6 @@ def test_upgrade_handles_request_exception_gracefully(app, tmp_path, mock_atexit
 
     upgrade_check(app, "1.0.0", cache_file=cache_file)
 
-    mock_atexit_register.assert_not_called()
+    mock_atexit_call.assert_not_called()
     # Cache was still written to prevent repeated failures
     assert cache_file.exists()
