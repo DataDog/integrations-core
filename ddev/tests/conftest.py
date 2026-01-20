@@ -154,74 +154,9 @@ def isolation() -> Generator[Path, None, None]:
 def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     cloned_repo_path = isolation / local_repo.name
 
-    # Debug: Write environment and git info to a file for artifact upload
-    import os
-    import subprocess
-
-    # Write to multiple locations to ensure we capture the debug info
-    workspace = os.environ.get('GITHUB_WORKSPACE', os.getcwd())
-    debug_file = Path(workspace) / 'local_clone_debug.txt'
-    # Also try writing to the repo root (3 levels up from conftest.py)
-    repo_root_debug = Path(__file__).resolve().parent.parent.parent.parent / 'local_clone_debug.txt'
-    debug_lines = []
-    debug_lines.append('=== DEBUG local_clone fixture ===')
-    debug_lines.append(f'PYTHONPATH: {os.environ.get("PYTHONPATH", "not set")}')
-    debug_lines.append(f'DD_TRACE_SUBPROCESS_ENABLED: {os.environ.get("DD_TRACE_SUBPROCESS_ENABLED", "not set")}')
-    debug_lines.append(f'DDEV_TRACE_ENABLED: {os.environ.get("DDEV_TRACE_ENABLED", "not set")}')
-    debug_lines.append(f'DD_CIVISIBILITY_ITR_ENABLED: {os.environ.get("DD_CIVISIBILITY_ITR_ENABLED", "not set")}')
-    debug_lines.append(f'local_repo: {local_repo}')
-    debug_lines.append(f'cloned_repo_path: {cloned_repo_path}')
-
-    # Check if subprocess module is patched
-    debug_lines.append(f'subprocess.Popen: {subprocess.Popen}')
-    debug_lines.append(f'subprocess module file: {subprocess.__file__}')
-
-    # Check for any git lock files
-    git_dir = local_repo / '.git'
-    if git_dir.exists():
-        lock_files = list(git_dir.glob('*.lock')) + list(git_dir.glob('**/*.lock'))
-        debug_lines.append(f'Git lock files found: {lock_files}')
-
-    # Check if repo is shallow (use subprocess directly to avoid exit on failure)
-    with local_repo.as_cwd():
-        try:
-            result = subprocess.run(['git', 'rev-parse', '--is-shallow-repository'], capture_output=True, text=True)
-            is_shallow = result.stdout.strip() if result.returncode == 0 else f'error: {result.stderr}'
-            debug_lines.append(f'Is shallow repository: {is_shallow}')
-
-            # Check for partial clone / promisor remote (this config may not exist)
-            result = subprocess.run(
-                ['git', 'config', '--get', 'remote.origin.promisor'], capture_output=True, text=True
-            )
-            promisor = result.stdout.strip() if result.returncode == 0 else 'not configured'
-            debug_lines.append(f'Promisor remote configured: {promisor}')
-
-            # Also check for partial clone filter
-            result = subprocess.run(
-                ['git', 'config', '--get', 'remote.origin.partialclonefilter'], capture_output=True, text=True
-            )
-            partial_filter = result.stdout.strip() if result.returncode == 0 else 'not configured'
-            debug_lines.append(f'Partial clone filter: {partial_filter}')
-        except Exception as e:
-            debug_lines.append(f'Error checking git config: {e}')
-
     # Get the current origin remote url
     with local_repo.as_cwd():
         origin_url = PLATFORM.check_command_output(['git', 'remote', 'get-url', 'origin']).strip()
-        debug_lines.append(f'origin_url: {origin_url}')
-
-    debug_lines.append(f'Running: git clone --local --shared --no-tags {local_repo} {cloned_repo_path}')
-
-    # Write debug info to file (try multiple locations)
-    for path in [debug_file, repo_root_debug]:
-        try:
-            path.write_text('\n'.join(debug_lines))
-            debug_lines.append(f'Debug file written to: {path}')
-        except Exception as e:
-            debug_lines.append(f'Failed to write debug file to {path}: {e}')
-
-    # Also print to stdout (will show if test fails)
-    print('\n'.join(debug_lines))
 
     PLATFORM.check_command_output(
         ['git', 'clone', '--local', '--shared', '--no-tags', str(local_repo), str(cloned_repo_path)]
