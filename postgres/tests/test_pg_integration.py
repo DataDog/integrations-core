@@ -68,10 +68,11 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     'is_aurora',
     [
-        pytest.param(True, id="aurora", marks=pytest.mark.flaky),
+        pytest.param(True, id="aurora"),
         pytest.param(False, id="not_aurora"),
     ],
 )
+@pytest.mark.flaky
 def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
     check.is_aurora = is_aurora
