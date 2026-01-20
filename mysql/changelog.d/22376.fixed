@@ -1,0 +1,2 @@
+Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+Optimize StatementMetrics cache to only store fields we need to compute statement metrics. ([#22358](https://github.com/DataDog/integrations-core/pull/22358))
