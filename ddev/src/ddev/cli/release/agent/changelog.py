@@ -86,7 +86,7 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
 
             new_change = any(not ver[1] for ver in version_changes.values())
             if new_change:
-                changelog_contents.write("### New Changes\n")
+                changelog_contents.write("### Integration Updates\n")
                 for name, ver in version_changes.items():
                     if not ver[1]:
                         display_name = get_display_name(app, name)
