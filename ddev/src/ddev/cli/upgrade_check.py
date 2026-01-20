@@ -90,6 +90,7 @@ def upgrade_check(
                 version_to_cache = last_version if last_run is not None else current_version
                 write_last_run(version_to_cache, date_now, cache_file)
     else:
+        assert last_run is not None
         last_version, _last_date = last_run
         if last_version > current_version:
             atexit.register(exit_handler, app, last_version, current_version)
