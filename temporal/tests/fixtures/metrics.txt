@@ -13213,3 +13213,345 @@ workflow_task_attempt_count{namespace="temporal_system",operation="WorkflowConte
 # HELP workflow_task_timeout_overrides workflow_task_timeout_overrides counter
 # TYPE workflow_task_timeout_overrides counter
 workflow_task_timeout_overrides{namespace="temporal_system",operation="StartWorkflowExecution",service_name="history"} 3
+# HELP activity_schedule_to_close_latency_milliseconds activity_schedule_to_close_latency histogram
+# TYPE activity_schedule_to_close_latency_milliseconds histogram
+activity_schedule_to_close_latency_milliseconds_bucket{namespace="default",operation="Activity",service_name="history",le="100"} 5
+activity_schedule_to_close_latency_milliseconds_bucket{namespace="default",operation="Activity",service_name="history",le="+Inf"} 5
+activity_schedule_to_close_latency_milliseconds_sum{namespace="default",operation="Activity",service_name="history"} 50
+activity_schedule_to_close_latency_milliseconds_count{namespace="default",operation="Activity",service_name="history"} 5
+
+# HELP activity_start_to_close_latency_milliseconds activity_start_to_close_latency histogram
+# TYPE activity_start_to_close_latency_milliseconds histogram
+activity_start_to_close_latency_milliseconds_bucket{namespace="default",operation="Activity",service_name="history",le="100"} 5
+activity_start_to_close_latency_milliseconds_bucket{namespace="default",operation="Activity",service_name="history",le="+Inf"} 5
+activity_start_to_close_latency_milliseconds_sum{namespace="default",operation="Activity",service_name="history"} 25
+activity_start_to_close_latency_milliseconds_count{namespace="default",operation="Activity",service_name="history"} 5
+
+# HELP cache_entry_age_on_eviction_milliseconds cache_entry_age_on_eviction histogram
+# TYPE cache_entry_age_on_eviction_milliseconds histogram
+cache_entry_age_on_eviction_milliseconds_bucket{operation="Cache",service_name="history",le="1000"} 10
+cache_entry_age_on_eviction_milliseconds_bucket{operation="Cache",service_name="history",le="+Inf"} 10
+cache_entry_age_on_eviction_milliseconds_sum{operation="Cache",service_name="history"} 500
+cache_entry_age_on_eviction_milliseconds_count{operation="Cache",service_name="history"} 10
+
+# HELP cache_entry_age_on_get_milliseconds cache_entry_age_on_get histogram
+# TYPE cache_entry_age_on_get_milliseconds histogram
+cache_entry_age_on_get_milliseconds_bucket{operation="Cache",service_name="history",le="1000"} 20
+cache_entry_age_on_get_milliseconds_bucket{operation="Cache",service_name="history",le="+Inf"} 20
+cache_entry_age_on_get_milliseconds_sum{operation="Cache",service_name="history"} 200
+cache_entry_age_on_get_milliseconds_count{operation="Cache",service_name="history"} 20
+
+# HELP cache_ttl_milliseconds cache_ttl histogram
+# TYPE cache_ttl_milliseconds histogram
+cache_ttl_milliseconds_bucket{operation="Cache",service_name="history",le="60000"} 10
+cache_ttl_milliseconds_bucket{operation="Cache",service_name="history",le="+Inf"} 10
+cache_ttl_milliseconds_sum{operation="Cache",service_name="history"} 30000
+cache_ttl_milliseconds_count{operation="Cache",service_name="history"} 10
+
+# HELP cassandra_init_session_latency_milliseconds cassandra_init_session_latency histogram
+# TYPE cassandra_init_session_latency_milliseconds histogram
+cassandra_init_session_latency_milliseconds_bucket{operation="Cassandra",service_name="history",le="1000"} 1
+cassandra_init_session_latency_milliseconds_bucket{operation="Cassandra",service_name="history",le="+Inf"} 1
+cassandra_init_session_latency_milliseconds_sum{operation="Cassandra",service_name="history"} 100
+cassandra_init_session_latency_milliseconds_count{operation="Cassandra",service_name="history"} 1
+
+# HELP chasm_total_size_bytes chasm_total_size histogram
+# TYPE chasm_total_size_bytes histogram
+chasm_total_size_bytes_bucket{operation="Chasm",service_name="history",le="1024"} 5
+chasm_total_size_bytes_bucket{operation="Chasm",service_name="history",le="+Inf"} 5
+chasm_total_size_bytes_sum{operation="Chasm",service_name="history"} 2048
+chasm_total_size_bytes_count{operation="Chasm",service_name="history"} 5
+
+# HELP dd_cluster_metadata_callback_lock_latency_milliseconds dd_cluster_metadata_callback_lock_latency histogram
+# TYPE dd_cluster_metadata_callback_lock_latency_milliseconds histogram
+dd_cluster_metadata_callback_lock_latency_milliseconds_bucket{operation="ClusterMetadata",service_name="history",le="10"} 5
+dd_cluster_metadata_callback_lock_latency_milliseconds_bucket{operation="ClusterMetadata",service_name="history",le="+Inf"} 5
+dd_cluster_metadata_callback_lock_latency_milliseconds_sum{operation="ClusterMetadata",service_name="history"} 5
+dd_cluster_metadata_callback_lock_latency_milliseconds_count{operation="ClusterMetadata",service_name="history"} 5
+
+# HELP dd_cluster_metadata_lock_latency_milliseconds dd_cluster_metadata_lock_latency histogram
+# TYPE dd_cluster_metadata_lock_latency_milliseconds histogram
+dd_cluster_metadata_lock_latency_milliseconds_bucket{operation="ClusterMetadata",service_name="history",le="10"} 5
+dd_cluster_metadata_lock_latency_milliseconds_bucket{operation="ClusterMetadata",service_name="history",le="+Inf"} 5
+dd_cluster_metadata_lock_latency_milliseconds_sum{operation="ClusterMetadata",service_name="history"} 5
+dd_cluster_metadata_lock_latency_milliseconds_count{operation="ClusterMetadata",service_name="history"} 5
+
+# HELP dd_namespace_registry_lock_latency_milliseconds dd_namespace_registry_lock_latency histogram
+# TYPE dd_namespace_registry_lock_latency_milliseconds histogram
+dd_namespace_registry_lock_latency_milliseconds_bucket{operation="NamespaceRegistry",service_name="history",le="10"} 5
+dd_namespace_registry_lock_latency_milliseconds_bucket{operation="NamespaceRegistry",service_name="history",le="+Inf"} 5
+dd_namespace_registry_lock_latency_milliseconds_sum{operation="NamespaceRegistry",service_name="history"} 5
+dd_namespace_registry_lock_latency_milliseconds_count{operation="NamespaceRegistry",service_name="history"} 5
+
+# HELP dd_shard_io_semaphore_latency_milliseconds dd_shard_io_semaphore_latency histogram
+# TYPE dd_shard_io_semaphore_latency_milliseconds histogram
+dd_shard_io_semaphore_latency_milliseconds_bucket{operation="Shard",service_name="history",le="10"} 5
+dd_shard_io_semaphore_latency_milliseconds_bucket{operation="Shard",service_name="history",le="+Inf"} 5
+dd_shard_io_semaphore_latency_milliseconds_sum{operation="Shard",service_name="history"} 5
+dd_shard_io_semaphore_latency_milliseconds_count{operation="Shard",service_name="history"} 5
+
+# HELP dd_shard_lock_latency_milliseconds dd_shard_lock_latency histogram
+# TYPE dd_shard_lock_latency_milliseconds histogram
+dd_shard_lock_latency_milliseconds_bucket{operation="Shard",service_name="history",le="10"} 5
+dd_shard_lock_latency_milliseconds_bucket{operation="Shard",service_name="history",le="+Inf"} 5
+dd_shard_lock_latency_milliseconds_sum{operation="Shard",service_name="history"} 5
+dd_shard_lock_latency_milliseconds_count{operation="Shard",service_name="history"} 5
+
+# HELP dd_shard_controller_lock_latency_milliseconds dd_shard_controller_lock_latency histogram
+# TYPE dd_shard_controller_lock_latency_milliseconds histogram
+dd_shard_controller_lock_latency_milliseconds_bucket{operation="ShardController",service_name="history",le="10"} 5
+dd_shard_controller_lock_latency_milliseconds_bucket{operation="ShardController",service_name="history",le="+Inf"} 5
+dd_shard_controller_lock_latency_milliseconds_sum{operation="ShardController",service_name="history"} 5
+dd_shard_controller_lock_latency_milliseconds_count{operation="ShardController",service_name="history"} 5
+
+# HELP elasticsearch_bulk_processor_bulk_request_took_latency_milliseconds elasticsearch_bulk_processor_bulk_request_took_latency histogram
+# TYPE elasticsearch_bulk_processor_bulk_request_took_latency_milliseconds histogram
+elasticsearch_bulk_processor_bulk_request_took_latency_milliseconds_bucket{operation="BulkProcessor",service_name="worker",le="100"} 5
+elasticsearch_bulk_processor_bulk_request_took_latency_milliseconds_bucket{operation="BulkProcessor",service_name="worker",le="+Inf"} 5
+elasticsearch_bulk_processor_bulk_request_took_latency_milliseconds_sum{operation="BulkProcessor",service_name="worker"} 50
+elasticsearch_bulk_processor_bulk_request_took_latency_milliseconds_count{operation="BulkProcessor",service_name="worker"} 5
+
+# HELP external_payload_upload_size_bytes external_payload_upload_size histogram
+# TYPE external_payload_upload_size_bytes histogram
+external_payload_upload_size_bytes_bucket{operation="Payload",service_name="frontend",le="1024"} 5
+external_payload_upload_size_bytes_bucket{operation="Payload",service_name="frontend",le="+Inf"} 5
+external_payload_upload_size_bytes_sum{operation="Payload",service_name="frontend"} 2048
+external_payload_upload_size_bytes_count{operation="Payload",service_name="frontend"} 5
+
+# HELP finalizer_latency_milliseconds finalizer_latency histogram
+# TYPE finalizer_latency_milliseconds histogram
+finalizer_latency_milliseconds_bucket{operation="Finalizer",service_name="history",le="100"} 5
+finalizer_latency_milliseconds_bucket{operation="Finalizer",service_name="history",le="+Inf"} 5
+finalizer_latency_milliseconds_sum{operation="Finalizer",service_name="history"} 50
+finalizer_latency_milliseconds_count{operation="Finalizer",service_name="history"} 5
+
+# HELP generate_replication_tasks_latency_milliseconds generate_replication_tasks_latency histogram
+# TYPE generate_replication_tasks_latency_milliseconds histogram
+generate_replication_tasks_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+generate_replication_tasks_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+generate_replication_tasks_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+generate_replication_tasks_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP handover_wait_latency_milliseconds handover_wait_latency histogram
+# TYPE handover_wait_latency_milliseconds histogram
+handover_wait_latency_milliseconds_bucket{operation="Handover",service_name="history",le="100"} 5
+handover_wait_latency_milliseconds_bucket{operation="Handover",service_name="history",le="+Inf"} 5
+handover_wait_latency_milliseconds_sum{operation="Handover",service_name="history"} 50
+handover_wait_latency_milliseconds_count{operation="Handover",service_name="history"} 5
+
+# HELP header_size_bytes header_size histogram
+# TYPE header_size_bytes histogram
+header_size_bytes_bucket{operation="Header",service_name="frontend",le="1024"} 10
+header_size_bytes_bucket{operation="Header",service_name="frontend",le="+Inf"} 10
+header_size_bytes_sum{operation="Header",service_name="frontend"} 512
+header_size_bytes_count{operation="Header",service_name="frontend"} 10
+
+# HELP history_workflow_execution_cache_lock_hold_duration_milliseconds history_workflow_execution_cache_lock_hold_duration histogram
+# TYPE history_workflow_execution_cache_lock_hold_duration_milliseconds histogram
+history_workflow_execution_cache_lock_hold_duration_milliseconds_bucket{operation="WorkflowCache",service_name="history",le="10"} 10
+history_workflow_execution_cache_lock_hold_duration_milliseconds_bucket{operation="WorkflowCache",service_name="history",le="+Inf"} 10
+history_workflow_execution_cache_lock_hold_duration_milliseconds_sum{operation="WorkflowCache",service_name="history"} 5
+history_workflow_execution_cache_lock_hold_duration_milliseconds_count{operation="WorkflowCache",service_name="history"} 10
+
+# HELP memory_gc_pause_ms_milliseconds memory_gc_pause_ms histogram
+# TYPE memory_gc_pause_ms_milliseconds histogram
+memory_gc_pause_ms_milliseconds_bucket{service_name="history",le="10"} 100
+memory_gc_pause_ms_milliseconds_bucket{service_name="history",le="+Inf"} 100
+memory_gc_pause_ms_milliseconds_sum{service_name="history"} 50
+memory_gc_pause_ms_milliseconds_count{service_name="history"} 100
+
+# HELP memory_num_gc_bytes memory_num_gc histogram
+# TYPE memory_num_gc_bytes histogram
+memory_num_gc_bytes_bucket{service_name="history",le="1024"} 100
+memory_num_gc_bytes_bucket{service_name="history",le="+Inf"} 100
+memory_num_gc_bytes_sum{service_name="history"} 500
+memory_num_gc_bytes_count{service_name="history"} 100
+
+# HELP namespace_registry_refresh_latency_milliseconds namespace_registry_refresh_latency histogram
+# TYPE namespace_registry_refresh_latency_milliseconds histogram
+namespace_registry_refresh_latency_milliseconds_bucket{operation="NamespaceRegistry",service_name="history",le="100"} 5
+namespace_registry_refresh_latency_milliseconds_bucket{operation="NamespaceRegistry",service_name="history",le="+Inf"} 5
+namespace_registry_refresh_latency_milliseconds_sum{operation="NamespaceRegistry",service_name="history"} 50
+namespace_registry_refresh_latency_milliseconds_count{operation="NamespaceRegistry",service_name="history"} 5
+
+# HELP nexus_completion_latency_milliseconds nexus_completion_latency histogram
+# TYPE nexus_completion_latency_milliseconds histogram
+nexus_completion_latency_milliseconds_bucket{operation="Nexus",service_name="frontend",le="100"} 5
+nexus_completion_latency_milliseconds_bucket{operation="Nexus",service_name="frontend",le="+Inf"} 5
+nexus_completion_latency_milliseconds_sum{operation="Nexus",service_name="frontend"} 50
+nexus_completion_latency_milliseconds_count{operation="Nexus",service_name="frontend"} 5
+
+# HELP nexus_latency_milliseconds nexus_latency histogram
+# TYPE nexus_latency_milliseconds histogram
+nexus_latency_milliseconds_bucket{operation="Nexus",service_name="frontend",le="100"} 10
+nexus_latency_milliseconds_bucket{operation="Nexus",service_name="frontend",le="+Inf"} 10
+nexus_latency_milliseconds_sum{operation="Nexus",service_name="frontend"} 100
+nexus_latency_milliseconds_count{operation="Nexus",service_name="frontend"} 10
+
+# HELP persisted_mutable_state_size_bytes persisted_mutable_state_size histogram
+# TYPE persisted_mutable_state_size_bytes histogram
+persisted_mutable_state_size_bytes_bucket{namespace="default",operation="MutableState",service_name="history",le="10240"} 10
+persisted_mutable_state_size_bytes_bucket{namespace="default",operation="MutableState",service_name="history",le="+Inf"} 10
+persisted_mutable_state_size_bytes_sum{namespace="default",operation="MutableState",service_name="history"} 5120
+persisted_mutable_state_size_bytes_count{namespace="default",operation="MutableState",service_name="history"} 10
+
+# HELP poll_latency_milliseconds poll_latency histogram
+# TYPE poll_latency_milliseconds histogram
+poll_latency_milliseconds_bucket{operation="Poll",service_name="matching",le="1000"} 10
+poll_latency_milliseconds_bucket{operation="Poll",service_name="matching",le="+Inf"} 10
+poll_latency_milliseconds_sum{operation="Poll",service_name="matching"} 500
+poll_latency_milliseconds_count{operation="Poll",service_name="matching"} 10
+
+# HELP rate_limited_task_runnable_wait_time_milliseconds rate_limited_task_runnable_wait_time histogram
+# TYPE rate_limited_task_runnable_wait_time_milliseconds histogram
+rate_limited_task_runnable_wait_time_milliseconds_bucket{operation="RateLimiter",service_name="history",le="100"} 5
+rate_limited_task_runnable_wait_time_milliseconds_bucket{operation="RateLimiter",service_name="history",le="+Inf"} 5
+rate_limited_task_runnable_wait_time_milliseconds_sum{operation="RateLimiter",service_name="history"} 50
+rate_limited_task_runnable_wait_time_milliseconds_count{operation="RateLimiter",service_name="history"} 5
+
+# HELP replication_sender_rate_limit_latency_milliseconds replication_sender_rate_limit_latency histogram
+# TYPE replication_sender_rate_limit_latency_milliseconds histogram
+replication_sender_rate_limit_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+replication_sender_rate_limit_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+replication_sender_rate_limit_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+replication_sender_rate_limit_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP replication_task_generation_latency_milliseconds replication_task_generation_latency histogram
+# TYPE replication_task_generation_latency_milliseconds histogram
+replication_task_generation_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+replication_task_generation_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+replication_task_generation_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+replication_task_generation_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP replication_task_load_latency_milliseconds replication_task_load_latency histogram
+# TYPE replication_task_load_latency_milliseconds histogram
+replication_task_load_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+replication_task_load_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+replication_task_load_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+replication_task_load_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP replication_task_processing_latency_milliseconds replication_task_processing_latency histogram
+# TYPE replication_task_processing_latency_milliseconds histogram
+replication_task_processing_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+replication_task_processing_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+replication_task_processing_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+replication_task_processing_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP replication_task_queue_latency_milliseconds replication_task_queue_latency histogram
+# TYPE replication_task_queue_latency_milliseconds histogram
+replication_task_queue_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+replication_task_queue_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+replication_task_queue_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+replication_task_queue_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP replication_task_send_latency_milliseconds replication_task_send_latency histogram
+# TYPE replication_task_send_latency_milliseconds histogram
+replication_task_send_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+replication_task_send_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+replication_task_send_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+replication_task_send_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP replication_task_transmission_latency_milliseconds replication_task_transmission_latency histogram
+# TYPE replication_task_transmission_latency_milliseconds histogram
+replication_task_transmission_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+replication_task_transmission_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+replication_task_transmission_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+replication_task_transmission_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP replication_tasks_back_fill_latency_milliseconds replication_tasks_back_fill_latency histogram
+# TYPE replication_tasks_back_fill_latency_milliseconds histogram
+replication_tasks_back_fill_latency_milliseconds_bucket{operation="Replication",service_name="history",le="100"} 5
+replication_tasks_back_fill_latency_milliseconds_bucket{operation="Replication",service_name="history",le="+Inf"} 5
+replication_tasks_back_fill_latency_milliseconds_sum{operation="Replication",service_name="history"} 50
+replication_tasks_back_fill_latency_milliseconds_count{operation="Replication",service_name="history"} 5
+
+# HELP schedule_action_delay_milliseconds schedule_action_delay histogram
+# TYPE schedule_action_delay_milliseconds histogram
+schedule_action_delay_milliseconds_bucket{namespace="default",operation="Schedule",service_name="worker",le="1000"} 5
+schedule_action_delay_milliseconds_bucket{namespace="default",operation="Schedule",service_name="worker",le="+Inf"} 5
+schedule_action_delay_milliseconds_sum{namespace="default",operation="Schedule",service_name="worker"} 500
+schedule_action_delay_milliseconds_count{namespace="default",operation="Schedule",service_name="worker"} 5
+
+# HELP semaphore_latency_milliseconds semaphore_latency histogram
+# TYPE semaphore_latency_milliseconds histogram
+semaphore_latency_milliseconds_bucket{operation="Semaphore",service_name="history",le="10"} 10
+semaphore_latency_milliseconds_bucket{operation="Semaphore",service_name="history",le="+Inf"} 10
+semaphore_latency_milliseconds_sum{operation="Semaphore",service_name="history"} 5
+semaphore_latency_milliseconds_count{operation="Semaphore",service_name="history"} 10
+
+# HELP service_dial_latency_milliseconds service_dial_latency histogram
+# TYPE service_dial_latency_milliseconds histogram
+service_dial_latency_milliseconds_bucket{operation="ServiceDial",service_name="frontend",le="100"} 5
+service_dial_latency_milliseconds_bucket{operation="ServiceDial",service_name="frontend",le="+Inf"} 5
+service_dial_latency_milliseconds_sum{operation="ServiceDial",service_name="frontend"} 50
+service_dial_latency_milliseconds_count{operation="ServiceDial",service_name="frontend"} 5
+
+# HELP shard_linger_success_milliseconds shard_linger_success histogram
+# TYPE shard_linger_success_milliseconds histogram
+shard_linger_success_milliseconds_bucket{operation="Shard",service_name="history",le="1000"} 5
+shard_linger_success_milliseconds_bucket{operation="Shard",service_name="history",le="+Inf"} 5
+shard_linger_success_milliseconds_sum{operation="Shard",service_name="history"} 500
+shard_linger_success_milliseconds_count{operation="Shard",service_name="history"} 5
+
+# HELP signal_request_id_size_bytes signal_request_id_size histogram
+# TYPE signal_request_id_size_bytes histogram
+signal_request_id_size_bytes_bucket{namespace="default",operation="Signal",service_name="history",le="256"} 10
+signal_request_id_size_bytes_bucket{namespace="default",operation="Signal",service_name="history",le="+Inf"} 10
+signal_request_id_size_bytes_sum{namespace="default",operation="Signal",service_name="history"} 128
+signal_request_id_size_bytes_count{namespace="default",operation="Signal",service_name="history"} 10
+
+# HELP task_dispatch_latency_milliseconds task_dispatch_latency histogram
+# TYPE task_dispatch_latency_milliseconds histogram
+task_dispatch_latency_milliseconds_bucket{operation="TaskDispatch",service_name="matching",le="100"} 10
+task_dispatch_latency_milliseconds_bucket{operation="TaskDispatch",service_name="matching",le="+Inf"} 10
+task_dispatch_latency_milliseconds_sum{operation="TaskDispatch",service_name="matching"} 50
+task_dispatch_latency_milliseconds_count{operation="TaskDispatch",service_name="matching"} 10
+
+# HELP task_dlq_latency_milliseconds task_dlq_latency histogram
+# TYPE task_dlq_latency_milliseconds histogram
+task_dlq_latency_milliseconds_bucket{operation="TaskDLQ",service_name="history",le="100"} 5
+task_dlq_latency_milliseconds_bucket{operation="TaskDLQ",service_name="history",le="+Inf"} 5
+task_dlq_latency_milliseconds_sum{operation="TaskDLQ",service_name="history"} 50
+task_dlq_latency_milliseconds_count{operation="TaskDLQ",service_name="history"} 5
+
+# HELP time_between_shardinfo_update_milliseconds time_between_shardinfo_update histogram
+# TYPE time_between_shardinfo_update_milliseconds histogram
+time_between_shardinfo_update_milliseconds_bucket{operation="Shard",service_name="history",le="1000"} 10
+time_between_shardinfo_update_milliseconds_bucket{operation="Shard",service_name="history",le="+Inf"} 10
+time_between_shardinfo_update_milliseconds_sum{operation="Shard",service_name="history"} 500
+time_between_shardinfo_update_milliseconds_count{operation="Shard",service_name="history"} 10
+
+# HELP verify_describe_mutable_state_latency_milliseconds verify_describe_mutable_state_latency histogram
+# TYPE verify_describe_mutable_state_latency_milliseconds histogram
+verify_describe_mutable_state_latency_milliseconds_bucket{operation="Verify",service_name="history",le="100"} 5
+verify_describe_mutable_state_latency_milliseconds_bucket{operation="Verify",service_name="history",le="+Inf"} 5
+verify_describe_mutable_state_latency_milliseconds_sum{operation="Verify",service_name="history"} 50
+verify_describe_mutable_state_latency_milliseconds_count{operation="Verify",service_name="history"} 5
+
+# HELP verify_replication_tasks_latency_milliseconds verify_replication_tasks_latency histogram
+# TYPE verify_replication_tasks_latency_milliseconds histogram
+verify_replication_tasks_latency_milliseconds_bucket{operation="Verify",service_name="history",le="100"} 5
+verify_replication_tasks_latency_milliseconds_bucket{operation="Verify",service_name="history",le="+Inf"} 5
+verify_replication_tasks_latency_milliseconds_sum{operation="Verify",service_name="history"} 50
+verify_replication_tasks_latency_milliseconds_count{operation="Verify",service_name="history"} 5
+
+# HELP versioning_data_propagation_latency_milliseconds versioning_data_propagation_latency histogram
+# TYPE versioning_data_propagation_latency_milliseconds histogram
+versioning_data_propagation_latency_milliseconds_bucket{operation="Versioning",service_name="history",le="100"} 5
+versioning_data_propagation_latency_milliseconds_bucket{operation="Versioning",service_name="history",le="+Inf"} 5
+versioning_data_propagation_latency_milliseconds_sum{operation="Versioning",service_name="history"} 50
+versioning_data_propagation_latency_milliseconds_count{operation="Versioning",service_name="history"} 5
+
+# HELP workflow_schedule_to_close_latency_milliseconds workflow_schedule_to_close_latency histogram
+# TYPE workflow_schedule_to_close_latency_milliseconds histogram
+workflow_schedule_to_close_latency_milliseconds_bucket{namespace="default",operation="Workflow",service_name="history",le="10000"} 5
+workflow_schedule_to_close_latency_milliseconds_bucket{namespace="default",operation="Workflow",service_name="history",le="+Inf"} 5
+workflow_schedule_to_close_latency_milliseconds_sum{namespace="default",operation="Workflow",service_name="history"} 5000
+workflow_schedule_to_close_latency_milliseconds_count{namespace="default",operation="Workflow",service_name="history"} 5
+
+# HELP workflow_update_registry_size_bytes workflow_update_registry_size histogram
+# TYPE workflow_update_registry_size_bytes histogram
+workflow_update_registry_size_bytes_bucket{namespace="default",operation="WorkflowUpdate",service_name="history",le="1024"} 10
+workflow_update_registry_size_bytes_bucket{namespace="default",operation="WorkflowUpdate",service_name="history",le="+Inf"} 10
+workflow_update_registry_size_bytes_sum{namespace="default",operation="WorkflowUpdate",service_name="history"} 512
+workflow_update_registry_size_bytes_count{namespace="default",operation="WorkflowUpdate",service_name="history"} 10
