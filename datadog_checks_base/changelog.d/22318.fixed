@@ -1,1 +1,0 @@
-Fix KeyError in statement metrics when available metric columns change between collection cycles.
