@@ -99,4 +99,4 @@ All telemetry is tagged with `env:dynamicd` for easy filtering in Datadog.
 | `--all-metrics` | Generate ALL metrics, not just dashboard metrics |
 | `--sandbox/--no-sandbox` | Run in Docker container for isolation (default: enabled) |
 
-**Note:** Sandbox mode is enabled by default and requires Docker Desktop to be running. Start it with `open -a Docker` on macOS. Use `--no-sandbox` to run directly on host.
+**Note**: Sandbox mode is enabled by default and requires Docker Desktop to be running. Start Docker with `open -a Docker` on macOS. Use `--no-sandbox` to run directly on host.
