@@ -26,7 +26,7 @@ PYPI_URL = "https://pypi.org/pypi/ddev/json"
 CHECK_INTERVAL = timedelta(days=7)
 
 
-def read_last_run(cache_file: Path) -> tuple[Version | None, datetime | None]:
+def read_last_run(cache_file: Path) -> tuple[Version, datetime] | None:
     # Read the last run from the cache file and return a version and a date.
     # Format: {"version": "1.6.0", "date": "2023-04-11T10:56:39.786412"}
     try:
@@ -34,7 +34,7 @@ def read_last_run(cache_file: Path) -> tuple[Version | None, datetime | None]:
             data = json.load(f)
             return Version(data["version"]), datetime.fromisoformat(data["date"])
     except (FileNotFoundError, json.JSONDecodeError, KeyError, InvalidVersion, ValueError):
-        return None, None
+        return None
 
 
 def write_last_run(version: Version, date: datetime, cache_file: Path):
@@ -64,11 +64,12 @@ def upgrade_check(
     current_version = Version(version)
     if current_version.is_devrelease:
         return
-    last_version, last_date = read_last_run(cache_file)
+    last_run = read_last_run(cache_file)
+    last_version, last_date = last_run if last_run is not None else (None, None)
     date_now = datetime.now()
 
     # If cache does not exist or is older than check_interval, fetch from PyPI
-    if not last_version or not last_date or (date_now - last_date >= check_interval):
+    if last_run is None or (date_now - last_date >= check_interval):
         try:
             resp = requests.get(pypi_url, timeout=5)
             resp.raise_for_status()
@@ -80,7 +81,7 @@ def upgrade_check(
             app.display_debug(f'Upgrade check failed: {e}')
             # Record the attempt to prevent even if failed
             with suppress(OSError):
-                version_to_cache = last_version if last_version else current_version
+                version_to_cache = last_version if last_run is not None else current_version
                 write_last_run(version_to_cache, date_now, cache_file)
     else:
         if last_version > current_version:
