@@ -87,7 +87,6 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    single_endpoint_mode: Optional[bool] = None
     completed_query_samples: Optional[CompletedQuerySamples] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
@@ -108,6 +107,7 @@ class InstanceConfig(BaseModel):
     read_timeout: Optional[int] = None
     server: str
     service: Optional[str] = None
+    single_endpoint_mode: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_verify: Optional[bool] = None

@@ -502,7 +502,9 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                 tags=self.tags + ["error:query_log_load_failed"],
                 raw=True,
             )
-            return []
+            # Re-raise to let outer handler skip checkpoint advancement
+            # This ensures the failed time window will be retried
+            raise
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
