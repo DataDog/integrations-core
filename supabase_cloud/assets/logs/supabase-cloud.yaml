@@ -1,6 +1,8 @@
 id: supabase-cloud
 metric_id: supabase-cloud
 backend_only: false
+installation_sources:
+  - supabase
 facets:
   - description: The Supabase project's Postgres instance identifier.
     facetType: list
@@ -43,7 +45,7 @@ pipeline:
   name: Supabase Cloud
   enabled: true
   filter:
-    query: source:supabase-cloud
+    query: source:supabase
   processors:
     - type: service-remapper
       name: Define `service` as the official service of the log

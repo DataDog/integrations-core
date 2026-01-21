@@ -45,7 +45,7 @@
       "Supabase Cloud Overview": "assets/dashboards/supabase_cloud_overview.json"
     },
     "logs": {
-        "source": "supabase-cloud"
+        "source": "supabase"
     },
     "monitors": {
       "Supabase Postgres Filesystem Utilization" : "assets/monitors/supabase_postgres_filesystem_size.json",

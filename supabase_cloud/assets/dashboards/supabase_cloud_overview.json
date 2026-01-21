@@ -336,7 +336,7 @@
               "hide_zero_counts": true,
               "show_status": true,
               "last_triggered_format": "relative",
-              "query": "tag:source:supabase-cloud",
+              "query": "tag:source:supabase",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
@@ -1551,7 +1551,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:edge_logs @data.metadata.response.status_code:* -@data.metadata.request.path:\"/customer/v1/privileged/metrics\" @data.project:$project.value"
+                        "query": "source:supabase service:edge_logs @data.metadata.response.status_code:* -@data.metadata.request.path:\"/customer/v1/privileged/metrics\" @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -1604,7 +1604,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:edge_logs @data.metadata.request.path:* -@data.metadata.request.path:\"/customer/v1/privileged/metrics\" @data.project:$project.value"
+                        "query": "source:supabase service:edge_logs @data.metadata.request.path:* -@data.metadata.request.path:\"/customer/v1/privileged/metrics\" @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -1672,7 +1672,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:edge_function_logs @data.metadata.boot_time:* @data.project:$project.value"
+                        "query": "source:supabase service:edge_function_logs @data.metadata.boot_time:* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -1754,7 +1754,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:edge_function_logs @data.metadata.event_type:Log @data.project:$project.value"
+                        "query": "source:supabase service:edge_function_logs @data.metadata.event_type:Log @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -1839,7 +1839,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:edge_function_logs @data.metadata.boot_time:* @data.project:$project.value"
+                        "query": "source:supabase service:edge_function_logs @data.metadata.boot_time:* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -1945,7 +1945,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:edge_function_invocation_logs @data.metadata.execution_time_ms:* @data.project:$project.value"
+                        "query": "source:supabase service:edge_function_invocation_logs @data.metadata.execution_time_ms:* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2037,7 +2037,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:auth_logs @data.metadata.auth_event.action:login @data.metadata.status:* @data.project:$project.value"
+                        "query": "source:supabase service:auth_logs @data.metadata.auth_event.action:login @data.metadata.status:* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2110,7 +2110,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:auth_logs @data.metadata.error:* @data.project:$project.value"
+                        "query": "source:supabase service:auth_logs @data.metadata.error:* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2192,7 +2192,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:auth_logs @data.metadata.auth_event.action:user_signedup @data.metadata.status:200 @data.project:$project.value"
+                        "query": "source:supabase service:auth_logs @data.metadata.auth_event.action:user_signedup @data.metadata.status:200 @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2207,7 +2207,7 @@
                       "name": "query2",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:auth_logs @data.metadata.auth_event.action:user_deleted @data.metadata.status:200 @data.project:$project.value"
+                        "query": "source:supabase service:auth_logs @data.metadata.auth_event.action:user_deleted @data.metadata.status:200 @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2269,7 +2269,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:auth_logs @data.metadata.auth_event.action:user_invited @data.metadata.status:* @data.project:$project.value"
+                        "query": "source:supabase service:auth_logs @data.metadata.auth_event.action:user_invited @data.metadata.status:* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2369,7 +2369,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:storage_logs @data.metadata.event:ObjectRemoved?Delete @data.project:$project.value"
+                        "query": "source:supabase service:storage_logs @data.metadata.event:ObjectRemoved?Delete @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2384,7 +2384,7 @@
                       "name": "query2",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:storage_logs @data.metadata.event:ObjectCreated?Post @data.project:$project.value"
+                        "query": "source:supabase service:storage_logs @data.metadata.event:ObjectCreated?Post @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2464,7 +2464,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:storage_logs @data.metadata.event:ObjectRemoved?Delete @data.project:$project.value"
+                        "query": "source:supabase service:storage_logs @data.metadata.event:ObjectRemoved?Delete @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2480,7 +2480,7 @@
                       "name": "query2",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:storage_logs @data.metadata.event:ObjectCreated?Post @data.project:$project.value"
+                        "query": "source:supabase service:storage_logs @data.metadata.event:ObjectCreated?Post @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2496,7 +2496,7 @@
                       "name": "query3",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:storage_logs @data.metadata.operation:storage.object.get* @data.project:$project.value"
+                        "query": "source:supabase service:storage_logs @data.metadata.operation:storage.object.get* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2586,7 +2586,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:realtime_logs @data.metadata.measurements.sum:* @data.event_message:Billing?metrics????realtime,??rate_counter,??channel,??events? @data.project:$project.value"
+                        "query": "source:supabase service:realtime_logs @data.metadata.measurements.sum:* @data.event_message:Billing?metrics????realtime,??rate_counter,??channel,??events? @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2602,7 +2602,7 @@
                       "name": "query2",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:realtime_logs @data.metadata.measurements.connected:* @data.event_message:Billing?metrics????realtime,??connections? @data.project:$project.value"
+                        "query": "source:supabase service:realtime_logs @data.metadata.measurements.connected:* @data.event_message:Billing?metrics????realtime,??connections? @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2645,7 +2645,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:realtime_logs @data.metadata.level:error @data.event_message:* @data.project:$project.value"
+                        "query": "source:supabase service:realtime_logs @data.metadata.level:error @data.event_message:* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2713,7 +2713,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:realtime_logs @supabase.realtime.message_name:* @data.project:$project.value"
+                        "query": "source:supabase service:realtime_logs @supabase.realtime.message_name:* @data.project:$project.value"
                       },
                       "indexes": [
                         "*"
@@ -2842,7 +2842,7 @@
                   "query": {
                     "data_source": "logs_stream",
                     "indexes": [],
-                    "query_string": "source:supabase-cloud service:mgmt_api_logs @data.project:$project.value",
+                    "query_string": "source:supabase service:mgmt_api_logs @data.project:$project.value",
                     "sort": {
                       "column": "timestamp",
                       "order": "desc"
@@ -2912,7 +2912,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:postgres_logs @supabase.pg_duration:* @data.project:$project.value @data.identifier:$identifier.value"
+                        "query": "source:supabase service:postgres_logs @supabase.pg_duration:* @data.project:$project.value @data.identifier:$identifier.value"
                       },
                       "indexes": [
                         "*"
@@ -2985,7 +2985,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud service:postgres_logs @supabase.pg_duration:* @supabase.sql_statement:* @data.project:$project.value @data.identifier:$identifier.value"
+                        "query": "source:supabase service:postgres_logs @supabase.pg_duration:* @supabase.sql_statement:* @data.project:$project.value @data.identifier:$identifier.value"
                       },
                       "indexes": [
                         "*"
@@ -3048,7 +3048,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:supabase-cloud @data.event_message:connection?authorized* @data.project:$project.value @data.identifier:$identifier.value"
+                        "query": "source:supabase @data.event_message:connection?authorized* @data.project:$project.value @data.identifier:$identifier.value"
                       },
                       "indexes": [
                         "*"
@@ -3137,7 +3137,7 @@
                   "query": {
                     "data_source": "logs_stream",
                     "indexes": [],
-                    "query_string": "source:supabase-cloud @data.project:$project.value",
+                    "query_string": "source:supabase @data.project:$project.value",
                     "sort": {
                       "column": "timestamp",
                       "order": "desc"
