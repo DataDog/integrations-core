@@ -9,7 +9,7 @@ from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.utils import default_json_event_encoding
+from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
 
 from . import queries
 from .__about__ import __version__
@@ -42,7 +42,6 @@ class ClickhouseCheck(AgentCheck):
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._tls_ca_cert = self.instance.get('tls_ca_cert', None)
         self._verify = self.instance.get('verify', True)
-        self._tags = self.instance.get('tags', [])
 
         # Single endpoint mode configuration
         # When true, uses clusterAllReplicas() to query system tables across all nodes
@@ -64,10 +63,10 @@ class ClickhouseCheck(AgentCheck):
             ttl=self._database_instance_collection_interval,
         )
 
-        # Add global tags
-        self._tags.append('server:{}'.format(self._server))
-        self._tags.append('port:{}'.format(self._port))
-        self._tags.append('db:{}'.format(self._db))
+        # Initialize TagManager for tag management (similar to MySQL)
+        self.tag_manager = TagManager()
+        self.tag_manager.set_tags_from_list(self.instance.get('tags', []), replace=True)
+        self._add_core_tags()
 
         self._error_sanitizer = ErrorSanitizer(self._password)
         self.check_initializations.append(self.validate_config)
@@ -87,7 +86,7 @@ class ClickhouseCheck(AgentCheck):
                 queries.SystemReplicas,
                 queries.SystemDictionaries,
             ],
-            tags=self._tags,
+            tags=self.tags,
             error_handler=self._error_sanitizer.clean,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
@@ -154,6 +153,22 @@ class ClickhouseCheck(AgentCheck):
         else:
             self.completed_query_samples = None
 
+    @property
+    def tags(self):
+        """Return the current list of tags from the TagManager."""
+        return list(self.tag_manager.get_tags())
+
+    def _add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event.
+        These are core identification tags for the ClickHouse instance.
+        """
+        self.tag_manager.set_tag("server", self._server, replace=True)
+        self.tag_manager.set_tag("port", str(self._port), replace=True)
+        self.tag_manager.set_tag("db", self._db, replace=True)
+        self.tag_manager.set_tag("database_hostname", self.reported_hostname, replace=True)
+        self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
+
     def _send_database_instance_metadata(self):
         """Send database instance metadata to the metadata intake."""
         if self.database_identifier not in self._database_instance_emitted:
@@ -165,6 +180,9 @@ class ClickhouseCheck(AgentCheck):
             except Exception as e:
                 self.log.debug("Unable to fetch version for metadata: %s", e)
                 version = "unknown"
+
+            # Get tags without db: prefix for metadata
+            tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
             event = {
                 "host": self.reported_hostname,
@@ -178,7 +196,7 @@ class ClickhouseCheck(AgentCheck):
                 "collection_interval": self._database_instance_collection_interval,
                 "dbms_version": version,
                 "integration_version": __version__,
-                "tags": [t for t in self._tags if not t.startswith('db:')],
+                "tags": tags_no_db,
                 "timestamp": time() * 1000,
                 "metadata": {
                     "dbm": self._dbm_enabled,
@@ -199,15 +217,15 @@ class ClickhouseCheck(AgentCheck):
 
         # Run query metrics collection if DBM is enabled (from system.query_log)
         if self.statement_metrics:
-            self.statement_metrics.run_job_loop(self._tags)
+            self.statement_metrics.run_job_loop(self.tags)
 
         # Run statement samples if DBM is enabled (from system.processes)
         if self.statement_samples:
-            self.statement_samples.run_job_loop(self._tags)
+            self.statement_samples.run_job_loop(self.tags)
 
         # Run completed query samples if DBM is enabled (from system.query_log)
         if self.completed_query_samples:
-            self.completed_query_samples.run_job_loop(self._tags)
+            self.completed_query_samples.run_job_loop(self.tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):
@@ -309,7 +327,7 @@ class ClickhouseCheck(AgentCheck):
             self.log.debug('Clickhouse client already exists. Pinging Clickhouse Server.')
             try:
                 if self.ping_clickhouse():
-                    self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+                    self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags)
                     return
                 else:
                     self.log.debug('Clickhouse connection ping failed. Attempting to reconnect')
@@ -343,10 +361,10 @@ class ClickhouseCheck(AgentCheck):
             error = 'Unable to connect to ClickHouse: {}'.format(
                 self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
             )
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self.tags)
             raise type(e)(error) from None
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags)
             self._client = client
 
     def create_dbm_client(self):
