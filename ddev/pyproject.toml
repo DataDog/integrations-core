@@ -42,7 +42,6 @@ dependencies = [
     "tomli-w",
     "tomlkit",
     "tqdm",
-    "textual>=0.47.0",
     "requests",
     "matplotlib",
     "squarify",
