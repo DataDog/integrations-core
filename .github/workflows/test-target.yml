@@ -124,6 +124,7 @@ jobs:
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
       # Prefix for artifact names when using minimum base package
       MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"
+      INTEGRATION_CACHE_FILE: "${{ inputs.target }}/.github-cache.yml"
 
     permissions:
        # needed for compute-matrix in test-target.yml
@@ -145,7 +146,122 @@ jobs:
         # Enable disk performance counters
         diskperf -y
 
+    - name: Install integration cache tools
+      if: runner.os == 'Windows'
+      run: choco install yq -y
+
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    # Files can be cached for CI by creating an .github-cache.yml file in the integration directory.
+    # The file should be a YAML list of objects with the following fields:
+    # - path: the path to the file relative to the integration directory
+    # - url: the URL to the file
+    # - sha256: the SHA256 checksum of the file
+    # Example:
+    # - path: tests/docker/file.tgz
+    #   url: https://example.com/file.tgz
+    #   sha256: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+    - name: Read integration cache config
+      id: integration-cache
+      run: |
+        if [ ! -f "$INTEGRATION_CACHE_FILE" ]; then
+          echo "has-cache=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        echo "has-cache=true" >> $GITHUB_OUTPUT
+        
+        # Extract paths and prefix with integration directory
+        # Example: tests/docker/file.tgz -> hudi/tests/docker/file.tgz
+        paths=$(yq -r '.[] | "${{ inputs.target }}/\(.path)"' "$INTEGRATION_CACHE_FILE")
+        echo "paths<<EOF" >> $GITHUB_OUTPUT
+        echo "$paths" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+        # Generate cache key from URLs
+        # Hash URLs to keep key under 512 char limit.
+        urls=$(yq -r '[.[].url] | join("|")' "$INTEGRATION_CACHE_FILE")
+        key_hash=$(echo -n "$urls" | openssl dgst -sha256 | cut -d' ' -f2)
+        echo "key=integration-${{ inputs.target }}-$key_hash" >> $GITHUB_OUTPUT
+
+    - name: Validate integration cache config
+      if: steps.integration-cache.outputs.has-cache == 'true'
+      run: |
+        has_errors=false
+        
+        for field in path url sha256; do
+          missing=$(yq -r ".[] | select(.$field == null or .$field == \"\") | .path // \"(unknown)\"" "$INTEGRATION_CACHE_FILE")
+          if [ -n "$missing" ]; then
+            echo "::error::The following cache fields are missing '$field' field: $missing"
+            has_errors=true
+          fi
+        done
+        
+        if [ "$has_errors" = true ]; then
+          exit 1
+        fi
+        
+        echo "All cache fields are present"
+
+    - name: Restore integration cache
+      if: steps.integration-cache.outputs.has-cache == 'true'
+      id: cache-restore
+      uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: ${{ steps.integration-cache.outputs.paths }}
+        key: ${{ steps.integration-cache.outputs.key }}
+
+    - name: Download cached files
+      if: steps.integration-cache.outputs.has-cache == 'true' && steps.cache-restore.outputs.cache-hit != 'true'
+      run: |
+        # Extract path and URL from each entry as tab-separated values
+        entries=$(yq -r '.[] | [.path, .url] | @tsv' "$INTEGRATION_CACHE_FILE")
+        
+        echo "$entries" | while IFS=$'\t' read -r rel_path download_url; do
+          full_path="${{ inputs.target }}/$rel_path"
+          
+          # Download file if it doesn't exist
+          if [ ! -f "$full_path" ]; then
+            echo "Downloading $download_url..."
+            curl -fsSL --create-dirs -o "$full_path" "$download_url"
+          fi
+        done
+
+    - name: Verify cached files checksums
+      if: steps.integration-cache.outputs.has-cache == 'true'
+      run: |
+        has_errors=false
+        
+        # Extract path and sha256 from each entry as tab-separated values
+        entries=$(yq -r '.[] | [.path, .sha256] | @tsv' "$INTEGRATION_CACHE_FILE")
+        
+        while IFS=$'\t' read -r rel_path expected_sha256; do
+          full_path="${{ inputs.target }}/$rel_path"
+          
+          echo "Verifying $full_path..."
+          actual_sha256=$(openssl dgst -sha256 "$full_path" | cut -d' ' -f2)
+          
+          if [ "$actual_sha256" != "$expected_sha256" ]; then
+            echo "::error::SHA256 mismatch for $full_path"
+            echo "::error::Expected: $expected_sha256"
+            echo "::error::Got: $actual_sha256"
+            rm -f "$full_path"
+            has_errors=true
+          fi
+        done <<< "$entries"
+        
+        if [ "$has_errors" = true ]; then
+          exit 1
+        fi
+        
+        echo "All checksums verified successfully"
+
+    - name: Save integration cache
+      if: steps.integration-cache.outputs.has-cache == 'true' && steps.cache-restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: ${{ steps.integration-cache.outputs.paths }}
+        key: ${{ steps.integration-cache.outputs.key }}
 
     - name: Set up Python 2.7
       if: inputs.test-py2
@@ -168,7 +284,7 @@ jobs:
         python-version: "${{ env.PYTHON_VERSION }}"
         cache: 'pip'
 
-    - name: Restore cache
+    - name: Restore pip cache
       if: inputs.repo == 'core'
       uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
