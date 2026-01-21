@@ -26,7 +26,7 @@
       "auto_install": true,
       "source_type_id": 68269943,
       "metrics": {
-        "prefix": "system.battery",
+        "prefix": "system.battery.",
         "check": "system.battery.current_charge_pct",
         "metadata_path": "metadata.csv"
       }
