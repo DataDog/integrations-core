@@ -20,6 +20,7 @@ from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
+from .common import E2E_METADATA
 from .endpoints import IRONIC_ENDPOINTS, NOVA_ENDPOINTS
 from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
@@ -72,7 +73,7 @@ def dd_environment():
             ) as socks:
                 socks_ip, socks_port = socks
                 agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
-                yield instance, agent_config
+                yield instance, agent_config, E2E_METADATA
     else:
         compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
         conditions = [
@@ -91,7 +92,7 @@ def dd_environment():
                 'ssl_verify': False,
                 'use_legacy_check_version': False,
             }
-            yield instance
+            yield instance, E2E_METADATA
 
 
 @pytest.fixture

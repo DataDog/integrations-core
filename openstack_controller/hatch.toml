@@ -22,3 +22,6 @@ matrix.setup.env-vars = [
 
 [envs.default]
 e2e-env = false
+dependencies = [
+  "openstacksdk==4.7.0",
+]
