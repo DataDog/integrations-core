@@ -18,6 +18,7 @@ class BaseMessage:
 
     All messages must include an id to identify the particular message instance.
     """
+
     id: str
 
 
