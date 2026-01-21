@@ -15,7 +15,7 @@ from enum import Enum, auto
 from ipaddress import IPv4Address
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
 
-from cachetools import TTLCache
+from cachetools import LRUCache, TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
@@ -42,6 +42,21 @@ SUBMISSION_METHODS = {
     'service_check': '__service_check',
     'send_log': '__send_log',
 }
+
+# LRU cache for SQL obfuscation results to reduce expensive CGO calls to the Go obfuscator.
+# Key: (query_str, options_str, replace_null_character)
+# Value: dict with 'query' and 'metadata' keys
+# Size: 50000 entries should handle high-volume DBM deployments with many unique queries
+_obfuscation_cache = LRUCache(maxsize=50000)
+_obfuscation_cache_lock = threading.Lock()
+
+
+def clear_obfuscation_cache():
+    """
+    Clear the SQL obfuscation cache. Primarily used for testing.
+    """
+    with _obfuscation_cache_lock:
+        _obfuscation_cache.clear()
 
 
 def _traced_dbm_async_job_method(f):
@@ -250,6 +265,17 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
         # replace embedded null characters \x00 before obfuscating
         query = query.replace('\x00', '')
 
+    # Use the full query string as part of the cache key to avoid hash collisions.
+    # Python's hash() can produce the same hash for different strings, leading to incorrect cache hits.
+    cache_key = (query, options or '', replace_null_character)
+
+    # Check cache first to avoid expensive CGO call to Go obfuscator
+    with _obfuscation_cache_lock:
+        cached_result = _obfuscation_cache.get(cache_key)
+        if cached_result is not None:
+            return cached_result
+
+    # Cache miss - call the Go obfuscator
     statement = datadog_agent.obfuscate_sql(query, options)
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
@@ -261,14 +287,20 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     # to parse these strings which are not valid json. Note, this condition is only relevant for integrations
     # running on agent versions < 7.34
     if not statement.startswith('{'):
-        return {'query': statement, 'metadata': {}}
+        result = {'query': statement, 'metadata': {}}
+    else:
+        statement_with_metadata = json.decode(statement)
+        metadata = statement_with_metadata.get('metadata', {})
+        tables = metadata.pop('tables_csv', None)
+        tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
+        statement_with_metadata['metadata']['tables'] = tables
+        result = statement_with_metadata
 
-    statement_with_metadata = json.decode(statement)
-    metadata = statement_with_metadata.get('metadata', {})
-    tables = metadata.pop('tables_csv', None)
-    tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
-    statement_with_metadata['metadata']['tables'] = tables
-    return statement_with_metadata
+    # Store result in cache
+    with _obfuscation_cache_lock:
+        _obfuscation_cache[cache_key] = result
+
+    return result
 
 
 class DBMAsyncJob(object):

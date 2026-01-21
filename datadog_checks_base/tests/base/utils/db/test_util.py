@@ -20,6 +20,7 @@ from datadog_checks.base.utils.db.utils import (
     RateLimitingTTLCache,
     TagManager,
     TagType,
+    clear_obfuscation_cache,
     default_json_event_encoding,
     get_agent_host_tags,
     obfuscate_sql_with_metadata,
@@ -261,6 +262,9 @@ def test_dbm_async_job_unknown_error(aggregator, exception_expected, enable_heal
     ],
 )
 def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
+    # Clear cache to ensure test isolation
+    clear_obfuscation_cache()
+
     def _mock_obfuscate_sql(query, options=None):
         return obfuscator_return_value
 
@@ -273,6 +277,8 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
     statement = obfuscate_sql_with_metadata(None)
     assert statement['query'] == ''
     assert statement['metadata'] == {}
+
+    clear_obfuscation_cache()
 
 
 @pytest.mark.parametrize(
@@ -291,6 +297,9 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
     ],
 )
 def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expected_query, replace_null_character):
+    # Clear cache to ensure test isolation
+    clear_obfuscation_cache()
+
     def _mock_obfuscate_sql(query, options=None):
         return json.encode({'query': query, 'metadata': {}})
 
@@ -299,6 +308,42 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
         mock_agent.side_effect = _mock_obfuscate_sql
         statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
         assert statement['query'] == expected_query
+
+    clear_obfuscation_cache()
+
+
+def test_obfuscate_sql_with_metadata_caching():
+    """Test that repeated calls with the same query use cached results and skip CGO calls."""
+    clear_obfuscation_cache()
+
+    call_count = [0]
+
+    def _mock_obfuscate_sql(query, options=None):
+        call_count[0] += 1
+        return json.encode({'query': 'obfuscated: ' + query, 'metadata': {'tables_csv': 'test_table'}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_obfuscate_sql
+
+        # First call - should call the obfuscator
+        result1 = obfuscate_sql_with_metadata('SELECT * FROM users', None)
+        assert call_count[0] == 1
+        assert result1['query'] == 'obfuscated: SELECT * FROM users'
+
+        # Second call with same query - should use cache
+        result2 = obfuscate_sql_with_metadata('SELECT * FROM users', None)
+        assert call_count[0] == 1  # Should not have called obfuscator again
+        assert result2 == result1
+
+        # Different query - should call the obfuscator
+        obfuscate_sql_with_metadata('SELECT * FROM orders', None)
+        assert call_count[0] == 2
+
+        # Same query but different options - should call the obfuscator
+        obfuscate_sql_with_metadata('SELECT * FROM users', '{"keep_comments": true}')
+        assert call_count[0] == 3
+
+    clear_obfuscation_cache()
 
 
 class JobForTesting(DBMAsyncJob):
