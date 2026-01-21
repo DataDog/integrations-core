@@ -39,8 +39,7 @@ class DatadogAgentStub(object):
         self._process_start_time = 0
         self._external_tags = []
         self._host_tags = "{}"
-        # Clear the SQL obfuscation cache to ensure test isolation when mocking obfuscate_sql.
-        # Import lazily to avoid circular import (stubs -> utils -> agent -> stubs).
+        # Lazy import to avoid circular import
         from datadog_checks.base.utils.db.utils import clear_obfuscation_cache
 
         clear_obfuscation_cache()
