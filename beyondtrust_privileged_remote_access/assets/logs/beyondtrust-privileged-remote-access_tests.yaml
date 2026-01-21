@@ -396,6 +396,53 @@ tests:
   sample: "<133>Dec 26 03:45:47 pf60fc91 BG[36689] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766742347;who=John Carter IT (john.carter@crestdata.ai);who_ip=64.252.100.173;event=jumpoint_cluster_added;allows_multiple_nodes=0;code_name=jumpoint_3;comments=test;disabled=0;external_jump_item_network_id=;id=3;jzp_allow_http_get=0;jzp_client_address_restrictions_type=0;jzp_enabled=0;jzp_proxy_hostname=;jzp_proxy_port=9555;jzp_restricted_ips=;managed_ip_ranges=[];name=test;network_tunnel=0;platform=windows-x86;rdp_service_account_id=;shelljump=0;allows_multiple_nodes=1;disabled=1;network_tunnel=0"
   result:
     custom:
+      allows_multiple_nodes:
+       - 0
+       - 1
+      code_name: "jumpoint_3"
+      comments: "test"
+      disabled:
+       - 0
+       - 1
+      event_category: "jumpoint-and-remote-access-management"
+      evt:
+        name: "jumpoint_cluster_added"
+      hostname: "pf60fc91"
+      id: 3
+      jzp_allow_http_get: 0
+      jzp_client_address_restrictions_type: 0
+      jzp_enabled: 0
+      jzp_proxy_port: 9555
+      managed_ip_ranges: "[]"
+      name: "test"
+      network:
+        client:
+          geoip: {}
+          ip: "64.252.100.173"
+      network_tunnel:
+       - 0
+       - 0
+      platform: "windows-x86"
+      process_id: 36689.0
+      shelljump: 0
+      site: "pf60fc91.beyondtrustcloud.com"
+      site_id: 1427.0
+      syslog_priority: 133.0
+      system_id: "BG"
+      usr:
+        email: "john.carter@crestdata.ai"
+        name: "John Carter IT"
+      when: 1.766742347E12
+      who: "John Carter IT (john.carter@crestdata.ai)"
+    message: "<133>Dec 26 03:45:47 pf60fc91 BG[36689] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766742347;who=John Carter IT (john.carter@crestdata.ai);who_ip=64.252.100.173;event=jumpoint_cluster_added;allows_multiple_nodes=0;code_name=jumpoint_3;comments=test;disabled=0;external_jump_item_network_id=;id=3;jzp_allow_http_get=0;jzp_client_address_restrictions_type=0;jzp_enabled=0;jzp_proxy_hostname=;jzp_proxy_port=9555;jzp_restricted_ips=;managed_ip_ranges=[];name=test;network_tunnel=0;platform=windows-x86;rdp_service_account_id=;shelljump=0;allows_multiple_nodes=1;disabled=1;network_tunnel=0"
+    service: "jumpoint-and-remote-access-management"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1766742347000
+ -
+  sample: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@crestdata.ai);who_ip=64.252.101.244;event=support_session_report_generated;match_any=;only_completed=1;api=0;row_start=0;row_count=15;api=0;only_completed=0;primary_rep=0"
+  result:
+    custom:
       api:
        - 0
        - 0
@@ -429,13 +476,6 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1766399525000
- -
-  sample: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@crestdata.ai);who_ip=64.252.101.244;event=support_session_report_generated;match_any=;only_completed=1;api=0;row_start=0;row_count=15;api=0;only_completed=0;primary_rep=0"
-  result:
-    custom: {}
-    message: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@crestdata.ai);who_ip=64.252.101.244;event=support_session_report_generated;match_any=;only_completed=1;api=0;row_start=0;row_count=15;api=0;only_completed=0;primary_rep=0"
-    tags:
-     - "source:LOGS_SOURCE"
  -
   sample: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@crestdata.ai);who_ip=64.252.101.244;event=network_address_added;enabled=1;interface=intf1;ip=10.10.10.10"
   result:
