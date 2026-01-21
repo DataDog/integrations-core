@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+if [ "$GITHUB_EVENT_NAME" == "pull_request" ] || [ "$GITHUB_EVENT_NAME" == "pull_request_target" ]; then
   prev_sha=$PR_BASE_SHA
   curr_sha=$PR_HEAD_SHA
 else
