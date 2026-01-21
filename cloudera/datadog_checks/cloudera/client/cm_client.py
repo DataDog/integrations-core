@@ -3,6 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import timezone
 
+# Monkey patch urllib3.HTTPResponse to restore getheaders/getheader methods
+import urllib3
+
+if not hasattr(urllib3.HTTPResponse, 'getheaders'):
+    urllib3.HTTPResponse.getheaders = lambda self: dict(self.headers)
+
+if not hasattr(urllib3.HTTPResponse, 'getheader'):
+    urllib3.HTTPResponse.getheader = lambda self, name, default=None: self.headers.get(name, default)
+
 import cm_client
 from cm_client.rest import RESTClientObject
 from dateutil import parser
