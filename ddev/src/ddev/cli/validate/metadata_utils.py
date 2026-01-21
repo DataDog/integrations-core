@@ -404,6 +404,9 @@ VALID_UNIT_NAMES = {
     'unix second',
     'unix millisecond',
     'permille',
+    'milliwatt-hour',
+    'watt-hour',
+    'kilowatt-hour',
 }
 
 ALLOWED_PREFIXES = ('system.', 'jvm.', 'http.', 'datadog.', 'sftp.', 'process.', 'runtime.', 'otelcol_')

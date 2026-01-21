@@ -2858,11 +2858,6 @@
                                     "response_format": "event_list"
                                 }
                             ],
-                            "time": {
-                                "from": 1752476549755,
-                                "to": 1752476560995,
-                                "type": "fixed"
-                            },
                             "title": "",
                             "title_align": "left",
                             "title_size": "16",

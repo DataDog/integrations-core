@@ -733,6 +733,26 @@ plaid/assets/logs/                                                  @DataDog/saa
 /guarddog/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /guarddog/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/vectra/                                                             @DataDog/saas-integrations
+/vectra/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/vectra/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/vectra/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/valence_security/                                                   @DataDog/saas-integrations
+/valence_security/*.md                                               @DataDog/saas-integrations @DataDog/documentation
+/valence_security/manifest.json                                      @DataDog/saas-integrations @DataDog/documentation
+/valence_security/assets/logs/                                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/cato_networks/                                                      @DataDog/saas-integrations
+/cato_networks/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
+/cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
+/cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/cisco_asa/                                                           @DataDog/agent-integrations
+/cisco_asa/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/cisco_asa/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/cisco_asa/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
