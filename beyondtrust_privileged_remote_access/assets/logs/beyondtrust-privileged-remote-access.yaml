@@ -66,12 +66,7 @@ pipeline:
       samples:
         - <133>Dec 24 00:14:20 pf60fc91 BG[51036]
           1427:01:02:site=pf60fc91.beyondtrustcloud.com;when=1766556860;who=John
-          Carter
-          (john.carter@test.com);who_ip=64.252.100.129;event=jump_policy_added;authorization:allowed_approvers=0;authorization:allowed_to=1;authorization:approver_name=;authorization:email_addresses=;authorization:enabled=0;authorization:locale_code=en-us;authorization:max_duration=28800;authorization:approver_teams=;authorization:approvers=;code_name=jump_policy_3;description=Datadog
-          Security Integration Setup Analysis For
-          SIEM  CY25Q4;display_name=Datadog Security Integration Setup Analysis
-          For
-          SIEM  CY25Q4;external_tools_rdp_allowed=1;external_tools_shell_allowed=1;id=3;notification:email_addresses=;notification:locale_code=en-us;notification:recipient_name=;notify_on_customer_leave=0;notify_on_session_start=0;schedule:enabled=1;schedule:force_end=0;session_recordings_disabled=0;simultaneous_jump_behavior_applies_to_copi
+          Carter (john.carter@test.com);who_ip=64.252.100.129;event=jump_policy_added;authorization:allowed_approvers=0;authorization:allowed_to=1;authorization:approver_name=;authorization:email_addresses=;authorization:enabled=0
         - Jan  5 01:17:57 pf60fc91 BG[70499]
           1427:01:02:site=pf60fc91.beyondtrustcloud.com;when=1767597477;who=Sam
           Carter
