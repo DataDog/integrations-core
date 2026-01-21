@@ -748,6 +748,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/cisco_asa/                                                           @DataDog/agent-integrations
+/cisco_asa/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/cisco_asa/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/cisco_asa/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
