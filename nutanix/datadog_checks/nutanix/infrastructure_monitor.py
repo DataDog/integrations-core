@@ -34,7 +34,7 @@ class InfrastructureMonitor:
         self.host_metrics_count = 0
         self.vm_metrics_count = 0
 
-    def collect_cluster_metrics(self):
+    def collect_cluster_metrics(self) -> None:
         """Collect metrics from all Nutanix clusters."""
         pc_label = f"PC:{self.check.pc_ip}"
 
@@ -81,13 +81,25 @@ class InfrastructureMonitor:
         except Exception as e:
             self.check.log.exception("[%s] Failed to collect cluster metrics: %s", pc_label, e)
 
-    def _is_prism_central_cluster(self, cluster):
-        """Check if cluster is a Prism Central cluster (should be skipped)."""
+    def _is_prism_central_cluster(self, cluster: dict) -> bool:
+        """Check if cluster is a Prism Central cluster (should be skipped).
+
+        Args:
+            cluster: Cluster object from API
+
+        Returns:
+            True if this is a Prism Central cluster
+        """
         cluster_function = cluster.get("config", {}).get("clusterFunction", [])
         return len(cluster_function) == 1 and cluster_function[0] == "PRISM_CENTRAL"
 
-    def _process_cluster(self, cluster, pc_label):
-        """Process and report metrics for a single cluster."""
+    def _process_cluster(self, cluster: dict, pc_label: str) -> None:
+        """Process and report metrics for a single cluster.
+
+        Args:
+            cluster: Cluster object from API
+            pc_label: Prism Central label for logging
+        """
         cluster_id = cluster.get("extId", "unknown")
         cluster_name = cluster.get("name", "unknown")
         cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
@@ -95,8 +107,15 @@ class InfrastructureMonitor:
         self._report_cluster_basic_metrics(cluster, cluster_tags)
         self._report_cluster_stats(cluster_name, cluster_id, cluster_tags, pc_label)
 
-    def _process_vm(self, vm, vm_stats_dict, cluster_name, pc_label):
-        """Process and report metrics for a single vm."""
+    def _process_vm(self, vm: dict, vm_stats_dict: dict, cluster_name: str, pc_label: str) -> None:
+        """Process and report metrics for a single VM.
+
+        Args:
+            vm: VM object from API
+            vm_stats_dict: Dictionary mapping VM IDs to their stats
+            cluster_name: Name of the cluster
+            pc_label: Prism Central label for logging
+        """
         vm_id = vm.get("extId", "unknown")
         hostname = vm.get("name")
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
@@ -105,12 +124,23 @@ class InfrastructureMonitor:
         self._report_vm_basic_metrics(vm, hostname, vm_tags)
         self._report_vm_stats(vm_id, hostname, vm_tags, vm_stats_dict, cluster_name, pc_label)
 
-    def _report_vm_basic_metrics(self, vm, hostname, vm_tags):
-        """Report basic vm metrics (counts)."""
+    def _report_vm_basic_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:
+        """Report basic VM metrics (counts).
+
+        Args:
+            vm: VM object from API
+            hostname: VM hostname
+            vm_tags: Tags to apply to metrics
+        """
         self.check.gauge("vm.count", 1, hostname=hostname, tags=vm_tags)
 
-    def _report_cluster_basic_metrics(self, cluster, cluster_tags):
-        """Report basic cluster metrics (counts)."""
+    def _report_cluster_basic_metrics(self, cluster: dict, cluster_tags: list[str]) -> None:
+        """Report basic cluster metrics (counts).
+
+        Args:
+            cluster: Cluster object from API
+            cluster_tags: Tags to apply to metrics
+        """
         nbr_nodes = int(cluster.get("nodes", {}).get("numberOfNodes", 0))
         vm_count = int(cluster.get("vmCount", 0))
         inefficient_vm_count = int(cluster.get("inefficientVmCount", 0))
@@ -181,11 +211,20 @@ class InfrastructureMonitor:
             self.check.log.warning("%s - No metrics submitted. API keys: %s", entity_name, list(actual_keys)[:5])
             self.check.log.trace("%s - Full stats payload: %s", entity_name, stats)
 
-    def _submit_stats_metrics(self, stats, metrics_map, tags, hostname, is_list):
+    def _submit_stats_metrics(
+        self, stats: dict | list, metrics_map: dict[str, str], tags: list[str], hostname: str | None, is_list: bool
+    ) -> int:
         """Submit metrics from stats payload.
 
+        Args:
+            stats: Stats dict or list from API
+            metrics_map: Dict mapping stat keys to metric names
+            tags: Tags to apply to metrics
+            hostname: Optional hostname for VM metrics
+            is_list: Whether stats is a list (True) or dict (False)
+
         Returns:
-            int: Number of metrics submitted
+            Number of metrics submitted
         """
         metrics_submitted = 0
 
@@ -208,8 +247,15 @@ class InfrastructureMonitor:
 
         return metrics_submitted
 
-    def _report_cluster_stats(self, cluster_name, cluster_id, cluster_tags, pc_label):
-        """Report time-series stats for a cluster."""
+    def _report_cluster_stats(self, cluster_name: str, cluster_id: str, cluster_tags: list[str], pc_label: str) -> None:
+        """Report time-series stats for a cluster.
+
+        Args:
+            cluster_name: Name of the cluster
+            cluster_id: Cluster ID
+            cluster_tags: Tags to apply to metrics
+            pc_label: Prism Central label for logging
+        """
         stats = self._get_cluster_stats(cluster_id)
         self._report_stats(
             f"[{pc_label}][{cluster_name}] Cluster",
@@ -220,8 +266,19 @@ class InfrastructureMonitor:
             entity_type="cluster",
         )
 
-    def _report_vm_stats(self, vm_id, hostname, vm_tags, vm_stats_dict, cluster_name, pc_label):
-        """Report time-series stats for a vm."""
+    def _report_vm_stats(
+        self, vm_id: str, hostname: str, vm_tags: list[str], vm_stats_dict: dict, cluster_name: str, pc_label: str
+    ) -> None:
+        """Report time-series stats for a VM.
+
+        Args:
+            vm_id: VM ID
+            hostname: VM hostname
+            vm_tags: Tags to apply to metrics
+            vm_stats_dict: Dictionary mapping VM IDs to their stats
+            cluster_name: Name of the cluster
+            pc_label: Prism Central label for logging
+        """
         stats = vm_stats_dict.get(vm_id)
         if stats:
             self._report_stats(
@@ -234,8 +291,15 @@ class InfrastructureMonitor:
                 entity_type="vm",
             )
 
-    def _process_hosts(self, cluster, cluster_vm_stats_dict, cluster_name, pc_label):
-        """Process and report metrics for all hosts in a cluster."""
+    def _process_hosts(self, cluster: dict, cluster_vm_stats_dict: dict, cluster_name: str, pc_label: str) -> None:
+        """Process and report metrics for all hosts in a cluster.
+
+        Args:
+            cluster: Cluster object from API
+            cluster_vm_stats_dict: Dictionary mapping VM IDs to their stats
+            cluster_name: Name of the cluster
+            pc_label: Prism Central label for logging
+        """
         cluster_id = cluster.get("extId", "unknown")
         cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
 
@@ -301,8 +365,15 @@ class InfrastructureMonitor:
 
         return len(vms)
 
-    def _extract_host_tags(self, host):
-        """Extract tags from a host object."""
+    def _extract_host_tags(self, host: dict) -> list[str]:
+        """Extract tags from a host object.
+
+        Args:
+            host: Host object from API
+
+        Returns:
+            List of tags
+        """
         tags = []
 
         tags.append("ntnx_type:host")
@@ -328,9 +399,15 @@ class InfrastructureMonitor:
 
         return tags
 
-    def _extract_cluster_tags(self, cluster):
-        """Extract tags from a cluster object."""
+    def _extract_cluster_tags(self, cluster: dict) -> list[str]:
+        """Extract tags from a cluster object.
 
+        Args:
+            cluster: Cluster object from API
+
+        Returns:
+            List of tags
+        """
         tags = []
 
         cluster_id = cluster.get("extId")
@@ -349,8 +426,15 @@ class InfrastructureMonitor:
 
         return tags
 
-    def _extract_vm_tags(self, vm):
-        """Extract tags from a VM object."""
+    def _extract_vm_tags(self, vm: dict) -> list[str]:
+        """Extract tags from a VM object.
+
+        Args:
+            vm: VM object from API
+
+        Returns:
+            List of tags
+        """
         tags = []
 
         tags.append("ntnx_type:vm")
@@ -401,7 +485,13 @@ class InfrastructureMonitor:
 
         return tags
 
-    def _set_external_tags_for_host(self, hostname: str, tags: list[str]):
+    def _set_external_tags_for_host(self, hostname: str, tags: list[str]) -> None:
+        """Set or update external tags for a host.
+
+        Args:
+            hostname: Host hostname
+            tags: List of tags to apply
+        """
         for i, entry in enumerate(self.external_tags):
             if entry[0] == hostname:
                 self.external_tags[i] = (hostname, {self.check.__NAMESPACE__: tags})
@@ -409,29 +499,53 @@ class InfrastructureMonitor:
 
         self.external_tags.append((hostname, {self.check.__NAMESPACE__: tags}))
 
-    def _list_clusters(self):
-        """Fetch all clusters from Prism Central."""
+    def _list_clusters(self) -> list[dict]:
+        """Fetch all clusters from Prism Central.
+
+        Returns:
+            List of cluster objects
+        """
         clusters = self.check._get_paginated_request_data("api/clustermgmt/v4.0/config/clusters")
         return clusters
 
-    def _list_vms_by_host(self, host_id: str):
+    def _list_vms_by_host(self, host_id: str) -> list[dict]:
+        """Fetch all VMs for a specific host.
+
+        Args:
+            host_id: Host ID
+
+        Returns:
+            List of VM objects
+        """
         params = {"$filter": f"host/extId eq '{host_id}'"}
         vms = self.check._get_paginated_request_data("api/vmm/v4.0/ahv/config/vms", params=params)
         return vms
 
-    def _list_hosts_by_cluster(self, cluster_id: str):
-        """Fetch all hosts for a specific cluster."""
+    def _list_hosts_by_cluster(self, cluster_id: str) -> list[dict]:
+        """Fetch all hosts for a specific cluster.
+
+        Args:
+            cluster_id: Cluster ID
+
+        Returns:
+            List of host objects
+        """
         hosts = self.check._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
         return hosts
 
-    def _get_cluster_stats(self, cluster_id: str):
-        """
-        Fetch time-series stats for a specific cluster.
+    def _get_cluster_stats(self, cluster_id: str) -> dict:
+        """Fetch time-series stats for a specific cluster.
 
         Prism v4 only emits cluster-level time series at discrete rollups
         and the freshest rollup isn't available immediately.
         For clusters, the practical floor is 120s, and newest points lag ingestion by ~1-2 minutes.
         We use a 120s window and set endTime to now - 120s to ensure data is available.
+
+        Args:
+            cluster_id: Cluster ID
+
+        Returns:
+            Dict of stats from a single time period
         """
         start_time, end_time = self._get_collection_time_window()
 
@@ -445,9 +559,15 @@ class InfrastructureMonitor:
         result = self.check._get_request_data(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}", params=params)
         return result
 
-    def _get_host_stats(self, cluster_id: str, host_id: str):
-        """
-        Fetch time-series stats for a specific host.
+    def _get_host_stats(self, cluster_id: str, host_id: str) -> dict:
+        """Fetch time-series stats for a specific host.
+
+        Args:
+            cluster_id: Cluster ID
+            host_id: Host ID
+
+        Returns:
+            Dict of stats from a single time period
         """
         start_time, end_time = self._get_collection_time_window()
 
@@ -463,8 +583,17 @@ class InfrastructureMonitor:
         )
         return result
 
-    def _get_vm_stats_by_cluster_id(self, cluster_id: str, pc_label: str, cluster_name: str):
-        """Fetch time-series stats for all VMs in a cluster."""
+    def _get_vm_stats_by_cluster_id(self, cluster_id: str, pc_label: str, cluster_name: str) -> dict[str, list]:
+        """Fetch time-series stats for all VMs in a cluster.
+
+        Args:
+            cluster_id: Cluster ID
+            pc_label: Prism Central label for logging
+            cluster_name: Name of the cluster
+
+        Returns:
+            Dictionary mapping VM IDs to their stats lists
+        """
         start_time, end_time = self._get_collection_time_window()
 
         params = {
@@ -494,12 +623,11 @@ class InfrastructureMonitor:
         )
         return vm_stats_dict
 
-    def _calculate_collection_time_window(self):
-        """
-        Calculate the time window [start_time, end_time] for Nutanix v4 API queries.
+    def _calculate_collection_time_window(self) -> tuple[str, str]:
+        """Calculate the time window [start_time, end_time] for Nutanix v4 API queries.
 
         Returns:
-            tuple: (start_time_str, end_time_str) in ISO 8601 format
+            Tuple of (start_time_str, end_time_str) in ISO 8601 format
         """
         now = datetime.now(timezone.utc)
         end_time = now - timedelta(seconds=self.check.sampling_interval)
@@ -507,12 +635,16 @@ class InfrastructureMonitor:
 
         return start_time.isoformat(), end_time.isoformat()
 
-    def init_collection_time_window(self):
+    def init_collection_time_window(self) -> None:
         """Set the collection time window once per check run."""
         self.collection_time_window = self._calculate_collection_time_window()
 
-    def _get_collection_time_window(self):
-        """Return cached collection time window for this check run."""
+    def _get_collection_time_window(self) -> tuple[str, str]:
+        """Return cached collection time window for this check run.
+
+        Returns:
+            Tuple of (start_time_str, end_time_str) in ISO 8601 format
+        """
         if self.collection_time_window is None:
             self.collection_time_window = self._calculate_collection_time_window()
         return self.collection_time_window
