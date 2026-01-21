@@ -7,13 +7,14 @@ from time import time
 import clickhouse_connect
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
 
 from . import queries
 from .__about__ import __version__
 from .completed_query_samples import ClickhouseCompletedQuerySamples
+from .config import build_config
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
@@ -31,44 +32,32 @@ class ClickhouseCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(ClickhouseCheck, self).__init__(name, init_config, instances)
 
-        self._server = self.instance.get('server', '')
-        self._port = self.instance.get('port')
-        self._db = self.instance.get('db', 'default')
-        self._user = self.instance.get('username', self.instance.get('user', 'default'))
-        self._password = self.instance.get('password', '')
-        self._connect_timeout = float(self.instance.get('connect_timeout', 10))
-        self._read_timeout = float(self.instance.get('read_timeout', 10))
-        self._compression = self.instance.get('compression', False)
-        self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
-        self._tls_ca_cert = self.instance.get('tls_ca_cert', None)
-        self._verify = self.instance.get('verify', True)
+        # Build typed configuration
+        config, validation_result = build_config(self)
+        self._config = config
+        self._validation_result = validation_result
 
-        # Single endpoint mode configuration
-        # When true, uses clusterAllReplicas() to query system tables across all nodes
-        self._single_endpoint_mode = is_affirmative(self.instance.get('single_endpoint_mode', False))
+        # Log validation warnings (errors will be raised in validate_config)
+        for warning in validation_result.warnings:
+            self.log.warning(warning)
 
-        # DBM-related properties
+        # DBM-related properties (computed lazily)
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
 
-        # Database instance metadata collection interval
-        self._database_instance_collection_interval = float(
-            self.instance.get('database_instance_collection_interval', 300)
-        )
-
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
-            ttl=self._database_instance_collection_interval,
+            ttl=self._config.database_instance_collection_interval,
         )
 
         # Initialize TagManager for tag management (similar to MySQL)
         self.tag_manager = TagManager()
-        self.tag_manager.set_tags_from_list(self.instance.get('tags', []), replace=True)
+        self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
         self._add_core_tags()
 
-        self._error_sanitizer = ErrorSanitizer(self._password)
+        self._error_sanitizer = ErrorSanitizer(self._config.password)
         self.check_initializations.append(self.validate_config)
 
         # We'll connect on the first check run
@@ -92,64 +81,25 @@ class ClickhouseCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
         # Initialize DBM components if enabled
-        self._dbm_enabled = is_affirmative(self.instance.get('dbm', False))
+        self._init_dbm_components()
 
+    def _init_dbm_components(self):
+        """Initialize DBM components based on typed configuration."""
         # Initialize query metrics (from system.query_log - analogous to pg_stat_statements)
-        self._query_metrics_config = self.instance.get('query_metrics', {})
-        if self._dbm_enabled and self._query_metrics_config.get('enabled', True):
-            # Create a simple config object for query metrics
-            class QueryMetricsConfig:
-                def __init__(self, config_dict):
-                    self.enabled = config_dict.get('enabled', True)
-                    self.collection_interval = config_dict.get('collection_interval', 10)
-                    self.run_sync = config_dict.get('run_sync', False)
-                    self.full_statement_text_cache_max_size = config_dict.get(
-                        'full_statement_text_cache_max_size', 10000
-                    )
-                    self.full_statement_text_samples_per_hour_per_query = config_dict.get(
-                        'full_statement_text_samples_per_hour_per_query', 1
-                    )
-
-            self.statement_metrics = ClickhouseStatementMetrics(self, QueryMetricsConfig(self._query_metrics_config))
+        if self._config.dbm and self._config.query_metrics.enabled:
+            self.statement_metrics = ClickhouseStatementMetrics(self, self._config.query_metrics)
         else:
             self.statement_metrics = None
 
         # Initialize query samples (from system.processes - analogous to pg_stat_activity)
-        self._query_samples_config = self.instance.get('query_samples', {})
-        if self._dbm_enabled and self._query_samples_config.get('enabled', True):
-            # Create a simple config object for statement samples
-            class QuerySamplesConfig:
-                def __init__(self, config_dict):
-                    self.enabled = config_dict.get('enabled', True)
-                    self.collection_interval = config_dict.get('collection_interval', 1)
-                    self.run_sync = config_dict.get('run_sync', False)
-                    self.samples_per_hour_per_query = config_dict.get('samples_per_hour_per_query', 15)
-                    self.seen_samples_cache_maxsize = config_dict.get('seen_samples_cache_maxsize', 10000)
-                    # Activity snapshot configuration
-                    self.activity_enabled = config_dict.get('activity_enabled', True)
-                    self.activity_collection_interval = config_dict.get('activity_collection_interval', 10)
-                    self.activity_max_rows = config_dict.get('activity_max_rows', 1000)
-
-            self.statement_samples = ClickhouseStatementSamples(self, QuerySamplesConfig(self._query_samples_config))
+        if self._config.dbm and self._config.query_samples.enabled:
+            self.statement_samples = ClickhouseStatementSamples(self, self._config.query_samples)
         else:
             self.statement_samples = None
 
         # Initialize completed query samples (from system.query_log - completed queries)
-        self._completed_query_samples_config = self.instance.get('completed_query_samples', {})
-        if self._dbm_enabled and self._completed_query_samples_config.get('enabled', True):
-            # Create a simple config object for completed query samples
-            class CompletedQuerySamplesConfig:
-                def __init__(self, config_dict):
-                    self.enabled = config_dict.get('enabled', True)
-                    self.collection_interval = config_dict.get('collection_interval', 10)
-                    self.run_sync = config_dict.get('run_sync', False)
-                    self.samples_per_hour_per_query = config_dict.get('samples_per_hour_per_query', 15)
-                    self.seen_samples_cache_maxsize = config_dict.get('seen_samples_cache_maxsize', 10000)
-                    self.max_samples_per_collection = config_dict.get('max_samples_per_collection', 1000)
-
-            self.completed_query_samples = ClickhouseCompletedQuerySamples(
-                self, CompletedQuerySamplesConfig(self._completed_query_samples_config)
-            )
+        if self._config.dbm and self._config.completed_query_samples.enabled:
+            self.completed_query_samples = ClickhouseCompletedQuerySamples(self, self._config.completed_query_samples)
         else:
             self.completed_query_samples = None
 
@@ -163,11 +113,24 @@ class ClickhouseCheck(AgentCheck):
         Add tags that should be attached to every metric/event.
         These are core identification tags for the ClickHouse instance.
         """
-        self.tag_manager.set_tag("server", self._server, replace=True)
-        self.tag_manager.set_tag("port", str(self._port), replace=True)
-        self.tag_manager.set_tag("db", self._db, replace=True)
+        self.tag_manager.set_tag("server", self._config.server, replace=True)
+        self.tag_manager.set_tag("port", str(self._config.port), replace=True)
+        self.tag_manager.set_tag("db", self._config.db, replace=True)
         self.tag_manager.set_tag("database_hostname", self.reported_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
+
+    def validate_config(self):
+        """
+        Validate the configuration and raise an error if invalid.
+        This is called during check initialization.
+        """
+        from datadog_checks.base import ConfigurationError
+
+        if not self._validation_result.valid:
+            for error in self._validation_result.errors:
+                self.log.error(str(error))
+            if self._validation_result.errors:
+                raise ConfigurationError(str(self._validation_result.errors[0]))
 
     def _send_database_instance_metadata(self):
         """Send database instance metadata to the metadata intake."""
@@ -186,21 +149,21 @@ class ClickhouseCheck(AgentCheck):
 
             event = {
                 "host": self.reported_hostname,
-                "port": self._port,
+                "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.reported_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
                 "dbms": "clickhouse",
                 "kind": "database_instance",
-                "collection_interval": self._database_instance_collection_interval,
+                "collection_interval": self._config.database_instance_collection_interval,
                 "dbms_version": version,
                 "integration_version": __version__,
                 "tags": tags_no_db,
                 "timestamp": time() * 1000,
                 "metadata": {
-                    "dbm": self._dbm_enabled,
-                    "connection_host": self._server,
+                    "dbm": self._config.dbm,
+                    "connection_host": self._config.server,
                 },
             }
 
@@ -241,7 +204,7 @@ class ClickhouseCheck(AgentCheck):
 
     def _get_debug_tags(self):
         """Return debug tags for metrics"""
-        return ['server:{}'.format(self._server)]
+        return ['server:{}'.format(self._config.server)]
 
     @property
     def reported_hostname(self):
@@ -249,7 +212,7 @@ class ClickhouseCheck(AgentCheck):
         Get the hostname to be reported in metrics and events.
         """
         if self._resolved_hostname is None:
-            self._resolved_hostname = self._server
+            self._resolved_hostname = self._config.server
         return self._resolved_hostname
 
     @property
@@ -266,7 +229,7 @@ class ClickhouseCheck(AgentCheck):
         """
         if self._database_identifier is None:
             # Create a unique identifier based on server, port, and database name
-            self._database_identifier = "{}:{}:{}".format(self._server, self._port, self._db)
+            self._database_identifier = "{}:{}:{}".format(self._config.server, self._config.port, self._config.db)
         return self._database_identifier
 
     @property
@@ -278,7 +241,7 @@ class ClickhouseCheck(AgentCheck):
         across all nodes in the cluster, since replicas are abstracted behind a single
         endpoint (e.g., load balancer or managed service like ClickHouse Cloud).
         """
-        return self._single_endpoint_mode
+        return self._config.single_endpoint_mode
 
     def get_system_table(self, table_name):
         """
@@ -299,23 +262,13 @@ class ClickhouseCheck(AgentCheck):
             >>> self.get_system_table('query_log')
             "system.query_log"  # Direct connection
         """
-        if self._single_endpoint_mode:
+        if self._config.single_endpoint_mode:
             # Single endpoint mode: Use clusterAllReplicas to query all nodes
             # The cluster name is 'default' for ClickHouse Cloud and most setups
             return f"clusterAllReplicas('default', system.{table_name})"
         else:
             # Direct connection: Query the local system table directly
             return f"system.{table_name}"
-
-    def validate_config(self):
-        if not self._server:
-            raise ConfigurationError('the `server` setting is required')
-
-        # Validate compression type
-        if self._compression and self._compression not in ['lz4', 'zstd', 'br', 'gzip']:
-            raise ConfigurationError(
-                f'Invalid compression type "{self._compression}". Valid values are: lz4, zstd, br, gzip'
-            )
 
     def ping_clickhouse(self):
         return self._client.ping()
@@ -338,20 +291,22 @@ class ClickhouseCheck(AgentCheck):
                 self._client = None
 
         try:
+            # Convert compression None to False for get_client
+            compress = self._config.compression if self._config.compression else False
             client = clickhouse_connect.get_client(
                 # https://clickhouse.com/docs/integrations/python#connection-arguments
-                host=self._server,
-                port=self._port,
-                username=self._user,
-                password=self._password,
-                database=self._db,
-                secure=self._tls_verify,
-                connect_timeout=self._connect_timeout,
-                send_receive_timeout=self._read_timeout,
+                host=self._config.server,
+                port=self._config.port,
+                username=self._config.username,
+                password=self._config.password,
+                database=self._config.db,
+                connect_timeout=self._config.connect_timeout,
+                send_receive_timeout=self._config.read_timeout,
+                secure=self._config.tls_verify,
+                ca_cert=self._config.tls_ca_cert,
+                verify=self._config.verify,
                 client_name=f'datadog-{self.check_id}',
-                compress=self._compression,
-                ca_cert=self._tls_ca_cert,
-                verify=self._verify,
+                compress=compress,
                 # https://clickhouse.com/docs/integrations/language-clients/python/driver-api#multi-threaded-applications
                 autogenerate_session_id=False,
                 # https://clickhouse.com/docs/integrations/python#settings-argument
@@ -373,19 +328,21 @@ class ClickhouseCheck(AgentCheck):
         This prevents concurrent query errors when multiple jobs run simultaneously.
         """
         try:
+            # Convert compression None to False for get_client
+            compress = self._config.compression if self._config.compression else False
             client = clickhouse_connect.get_client(
-                host=self._server,
-                port=self._port,
-                username=self._user,
-                password=self._password,
-                database=self._db,
-                secure=self._tls_verify,
-                connect_timeout=self._connect_timeout,
-                send_receive_timeout=self._read_timeout,
+                host=self._config.server,
+                port=self._config.port,
+                username=self._config.username,
+                password=self._config.password,
+                database=self._config.db,
+                secure=self._config.tls_verify,
+                connect_timeout=self._config.connect_timeout,
+                send_receive_timeout=self._config.read_timeout,
                 client_name=f'datadog-dbm-{self.check_id}',
-                compress=self._compression,
-                ca_cert=self._tls_ca_cert,
-                verify=self._verify,
+                compress=compress,
+                ca_cert=self._config.tls_ca_cert,
+                verify=self._config.verify,
                 settings={},
             )
             return client

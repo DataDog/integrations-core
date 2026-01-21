@@ -150,9 +150,9 @@ class TestDBMIntegration:
 
         assert hostname is not None, "reported_hostname should not be None"
         assert db_id is not None, "database_identifier should not be None"
-        assert check._server in hostname, "hostname should contain server name"
-        assert str(check._port) in db_id, "database_identifier should contain port"
-        assert check._db in db_id, "database_identifier should contain database name"
+        assert check._config.server in hostname, "hostname should contain server name"
+        assert str(check._config.port) in db_id, "database_identifier should contain port"
+        assert check._config.db in db_id, "database_identifier should contain database name"
 
         print(f"reported_hostname: {hostname}")
         print(f"database_identifier: {db_id}")
