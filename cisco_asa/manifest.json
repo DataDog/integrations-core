@@ -1,0 +1,92 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "da5f5eb9-8c7d-4c21-9d88-8dbf174a3933",
+  "app_id": "cisco-asa",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Cisco ASA logs",
+    "title": "Cisco ASA",
+    "media": [
+      {
+        "caption": "Cisco ASA Overview",
+        "image_url": "images/cisco_asa_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco ASA Overview",
+        "image_url": "images/cisco_asa_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco ASA User Activity",
+        "image_url": "images/cisco_asa_user_activity_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco ASA User Activity",
+        "image_url": "images/cisco_asa_user_activity_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco ASA Firewall Details",
+        "image_url": "images/cisco_asa_firewall_details_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco ASA Firewall Details",
+        "image_url": "images/cisco_asa_firewall_details_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco ASA Network Activity",
+        "image_url": "images/cisco_asa_network_activity_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco ASA Threat Detection",
+        "image_url": "images/cisco_asa_threat_detection_light.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Security",
+      "Category::Network",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 64141705,
+      "source_type_name": "Cisco ASA",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      }
+    },
+    "dashboards": {
+      "Cisco ASA Firewall Details": "assets/dashboards/cisco_asa_firewall_details.json",
+      "Cisco ASA Network Activity": "assets/dashboards/cisco_asa_network_activity.json",
+      "Cisco ASA Overview": "assets/dashboards/cisco_asa_overview.json",
+      "Cisco ASA Threat Detection": "assets/dashboards/cisco_asa_threat_detection.json",
+      "Cisco ASA User Activity": "assets/dashboards/cisco_asa_user_activity.json"
+    },
+    "logs": {
+      "source": "cisco-asa"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
