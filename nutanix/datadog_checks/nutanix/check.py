@@ -65,50 +65,100 @@ class NutanixCheck(AgentCheck):
         return self.infrastructure_monitor.cluster_names
 
     def check(self, _):
-        # clear caches
-        self.infrastructure_monitor.cluster_names = {}
-        self.infrastructure_monitor.host_names = {}
-        self.infrastructure_monitor.external_tags = []
-        self.infrastructure_monitor.collection_time_window = None
+        self.log.info("[PC:%s:%s] Starting check...", self.pc_ip, self.pc_port)
+
+        # Reset all state for new collection run
+        self.infrastructure_monitor.reset_state()
 
         if not self._check_health():
+            self.log.warning("[PC:%s:%s] Health check failed, aborting", self.pc_ip, self.pc_port)
             return
 
         # init time window to sync all API calls to use the same [start_time, end_time] time window
         self.infrastructure_monitor.init_collection_time_window()
+        start_time, end_time = self.infrastructure_monitor.collection_time_window
 
+        # Calculate window duration for logging
+        from datetime import datetime
+
+        start_dt = datetime.fromisoformat(start_time)
+        end_dt = datetime.fromisoformat(end_time)
+        window_seconds = (end_dt - start_dt).total_seconds()
+
+        self.log.info(
+            "[PC:%s:%s] Collecting metrics for %ds time window (from %s to %s)",
+            self.pc_ip,
+            self.pc_port,
+            int(window_seconds),
+            start_time,
+            end_time,
+        )
+
+        self.log.info("[PC:%s:%s] Collecting infrastructure metrics...", self.pc_ip, self.pc_port)
         self.infrastructure_monitor.collect_cluster_metrics()
+        self.log.info(
+            "[PC:%s:%s] Collected %d cluster metrics, %d host metrics, and %d VM metrics",
+            self.pc_ip,
+            self.pc_port,
+            self.infrastructure_monitor.cluster_metrics_count,
+            self.infrastructure_monitor.host_metrics_count,
+            self.infrastructure_monitor.vm_metrics_count,
+        )
 
         if self.collect_events_enabled:
-            self.activity_monitor.collect_events()
+            self.log.info("[PC:%s:%s] Collecting events...", self.pc_ip, self.pc_port)
+            events_count = self.activity_monitor.collect_events()
+            self.log.info("[PC:%s:%s] Collected %d events", self.pc_ip, self.pc_port, events_count)
+        else:
+            self.log.debug("[PC:%s:%s] Events collection disabled", self.pc_ip, self.pc_port)
 
         if self.collect_tasks_enabled:
-            self.activity_monitor.collect_tasks()
+            self.log.info("[PC:%s:%s] Collecting tasks...", self.pc_ip, self.pc_port)
+            tasks_count = self.activity_monitor.collect_tasks()
+            self.log.info("[PC:%s:%s] Collected %d tasks", self.pc_ip, self.pc_port, tasks_count)
+        else:
+            self.log.debug("[PC:%s:%s] Tasks collection disabled", self.pc_ip, self.pc_port)
 
         if self.collect_audits_enabled:
-            self.activity_monitor.collect_audits()
+            self.log.info("[PC:%s:%s] Collecting audits...", self.pc_ip, self.pc_port)
+            audits_count = self.activity_monitor.collect_audits()
+            self.log.info("[PC:%s:%s] Collected %d audits", self.pc_ip, self.pc_port, audits_count)
+        else:
+            self.log.debug("[PC:%s:%s] Audits collection disabled", self.pc_ip, self.pc_port)
 
         if self.collect_alerts_enabled:
-            self.activity_monitor.collect_alerts()
+            self.log.info("[PC:%s:%s] Collecting alerts...", self.pc_ip, self.pc_port)
+            alerts_count = self.activity_monitor.collect_alerts()
+            self.log.info("[PC:%s:%s] Collected %d alerts", self.pc_ip, self.pc_port, alerts_count)
+        else:
+            self.log.debug("[PC:%s:%s] Alerts collection disabled", self.pc_ip, self.pc_port)
 
         if self.infrastructure_monitor.external_tags:
+            self.log.info(
+                "[PC:%s:%s] Applied %d external tags",
+                self.pc_ip,
+                self.pc_port,
+                len(self.infrastructure_monitor.external_tags),
+            )
             self.set_external_tags(self.infrastructure_monitor.external_tags)
+
+        self.log.info("[PC:%s:%s] Check completed successfully", self.pc_ip, self.pc_port)
 
     def _check_health(self):
         try:
             response = self._make_request_with_retry(self.health_check_url, method='get')
             response.raise_for_status()
             self.gauge("health.up", 1, tags=self.base_tags)
-            self.log.debug("Health check passed for Prism Central at %s:%s", self.pc_ip, self.pc_port)
+            self.log.debug("[PC:%s:%s] Health check passed", self.pc_ip, self.pc_port)
             return True
 
         except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
-            self.log.error("Cannot connect to Prism Central at %s:%s : %s", self.pc_ip, self.pc_port, str(e))
+            self.log.error("[PC:%s:%s] Failed to connect: %s", self.pc_ip, self.pc_port, str(e))
             self.gauge("health.up", 0, tags=self.base_tags)
             return False
 
         except Exception as e:
-            self.log.exception("Unexpected error when connecting to Prism Central: %s", e)
+            self.log.exception("[PC:%s:%s] Unexpected connection error: %s", self.pc_ip, self.pc_port, e)
             self.gauge("health.up", 0, tags=self.base_tags)
             return False
 
@@ -124,7 +174,9 @@ class NutanixCheck(AgentCheck):
         Returns:
             The response object from the request
         """
-        self.log.debug("HTTP request: %s %s, kwargs=%s", method.upper(), url, kwargs)
+        self.log.debug(
+            "[PC:%s:%s] HTTP request: %s %s, kwargs=%s", self.pc_ip, self.pc_port, method.upper(), url, kwargs
+        )
         http_method = getattr(self.http, method.lower())
         response = http_method(url, **kwargs)
         status = response.status_code
@@ -132,7 +184,9 @@ class NutanixCheck(AgentCheck):
         # rate limits
         if status == 429:
             self.log.debug(
-                "HTTP 429 rate limited: %s %s, payload_length=%s",
+                "[PC:%s:%s] HTTP 429 rate limited: %s %s, payload_length=%s",
+                self.pc_ip,
+                self.pc_port,
                 method.upper(),
                 url,
                 len(response.content) if response.content else 0,
@@ -151,12 +205,37 @@ class NutanixCheck(AgentCheck):
                 error_msg = response.text or str(status)
 
             self.log.error(
-                "HTTP non-2xx response: %s %s, status_code=%s, error=%s",
+                "[PC:%s:%s] HTTP non-2xx response: %s %s, status_code=%s, error=%s",
+                self.pc_ip,
+                self.pc_port,
                 method.upper(),
                 url,
                 status,
                 error_msg,
             )
+        else:
+            # Success - log at trace level with payload
+            try:
+                payload = response.json()
+                self.log.trace(
+                    "[PC:%s:%s] HTTP response: %s %s, status=%s, payload=%s",
+                    self.pc_ip,
+                    self.pc_port,
+                    method.upper(),
+                    url,
+                    status,
+                    payload,
+                )
+            except Exception:
+                self.log.trace(
+                    "[PC:%s:%s] HTTP response: %s %s, status=%s, content_length=%s",
+                    self.pc_ip,
+                    self.pc_port,
+                    method.upper(),
+                    url,
+                    status,
+                    len(response.content) if response.content else 0,
+                )
 
         return response
 
@@ -184,7 +263,6 @@ class NutanixCheck(AgentCheck):
 
             data = payload.get("data", [])
             if not data:
-                self.log.debug("Stopping pagination for %s: no data returned on page %d", endpoint, page)
                 break
 
             all_items.extend(data)
@@ -199,7 +277,14 @@ class NutanixCheck(AgentCheck):
             page += 1
             req_params["$page"] = page
 
-        self.log.debug("Fetched %d items from %s (%d pages)", len(all_items), endpoint, page + 1)
+        self.log.debug(
+            "[PC:%s:%s] Fetched %d items from %s (%d pages)",
+            self.pc_ip,
+            self.pc_port,
+            len(all_items),
+            endpoint,
+            page + 1,
+        )
         return all_items
 
     def _get_request_data(self, endpoint, params=None):

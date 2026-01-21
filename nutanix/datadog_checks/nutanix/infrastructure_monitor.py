@@ -3,9 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datetime import datetime, timedelta, timezone
+from typing import Literal
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
+
+# Entity types for metrics counting
+EntityType = Literal['cluster', 'host', 'vm']
 
 
 class InfrastructureMonitor:
@@ -15,73 +19,91 @@ class InfrastructureMonitor:
         self.cluster_names = {}  # cluster_id -> cluster_name
         self.host_names = {}  # host_id -> host_name
         self.collection_time_window = None
+        # Metrics counters
+        self.cluster_metrics_count = 0
+        self.host_metrics_count = 0
+        self.vm_metrics_count = 0
+
+    def reset_state(self) -> None:
+        """Reset all caches and counters for a new collection run."""
+        self.cluster_names = {}
+        self.host_names = {}
+        self.external_tags = []
+        self.collection_time_window = None
+        self.cluster_metrics_count = 0
+        self.host_metrics_count = 0
+        self.vm_metrics_count = 0
 
     def collect_cluster_metrics(self):
         """Collect metrics from all Nutanix clusters."""
-        try:
-            self.check.log.info("Starting cluster metrics collection for prism central: %s", self.check.pc_ip)
+        pc_label = f"PC:{self.check.pc_ip}"
 
+        try:
             clusters = self._list_clusters()
             if not clusters:
-                self.check.log.warning("No clusters found for prism central: %s", self.check.pc_ip)
+                self.check.log.warning("[%s] No clusters found", pc_label)
                 return
 
-            self.check.log.info("Found %d clusters", len(clusters))
+            self.check.log.info("[%s] Found %d clusters", pc_label, len(clusters))
 
+            # Cache cluster names for VM/audit tagging
             for cluster in clusters:
-                cluster_id = cluster.get("extId")
-                cluster_name = cluster.get("name")
+                cluster_id, cluster_name = cluster.get("extId"), cluster.get("name")
                 if cluster_id and cluster_name:
                     self.cluster_names[cluster_id] = cluster_name
 
+            # Process each cluster
+            processed, skipped = 0, 0
+            for cluster in clusters:
+                cluster_name = cluster.get("name", "unknown")
+
                 if self._is_prism_central_cluster(cluster):
-                    self.check.log.debug("Skipping Prism Central cluster: %s", cluster_name)
+                    self.check.log.info("[%s] Skipping Prism Central cluster: %s", pc_label, cluster_name)
+                    skipped += 1
                     continue
 
-                self.check.log.info("Processing cluster: %s (id: %s)", cluster_name, cluster_id)
-                self._process_cluster(cluster)
+                self.check.log.info("[%s][%s] Processing cluster", pc_label, cluster_name)
+                self._process_cluster(cluster, pc_label)
 
-                self.check.log.debug("Fetching VM stats for cluster: %s (id: %s)", cluster_name, cluster_id)
-                cluster_vms_stats = self._get_vm_stats_by_cluster_id(cluster_id)
-                self.check.log.info(
-                    "Fetched %d VM stats for cluster: %s (id: %s)", len(cluster_vms_stats), cluster_name, cluster_id
-                )
+                # Fetch VM stats for entire cluster in one call
+                cluster_id = cluster.get("extId")
+                vm_stats = self._get_vm_stats_by_cluster_id(cluster_id, pc_label, cluster_name)
+                self.check.log.debug("[%s][%s] Fetched stats for %d VMs", pc_label, cluster_name, len(vm_stats))
 
-                self._process_hosts(cluster, cluster_vms_stats)
+                self._process_hosts(cluster, vm_stats, cluster_name, pc_label)
+                processed += 1
 
-            self.check.log.debug(
-                "Completed cluster metrics collection for cluster: %s (id: %s)", cluster_name, cluster_id
-            )
+            if skipped > 0:
+                self.check.log.info("[%s] Processed %d clusters (%d skipped)", pc_label, processed, skipped)
+            else:
+                self.check.log.info("[%s] Processed %d clusters", pc_label, processed)
 
         except Exception as e:
-            self.check.log.exception("Error collecting cluster metrics: %s", e)
+            self.check.log.exception("[%s] Failed to collect cluster metrics: %s", pc_label, e)
 
     def _is_prism_central_cluster(self, cluster):
         """Check if cluster is a Prism Central cluster (should be skipped)."""
         cluster_function = cluster.get("config", {}).get("clusterFunction", [])
         return len(cluster_function) == 1 and cluster_function[0] == "PRISM_CENTRAL"
 
-    def _process_cluster(self, cluster):
+    def _process_cluster(self, cluster, pc_label):
         """Process and report metrics for a single cluster."""
         cluster_id = cluster.get("extId", "unknown")
         cluster_name = cluster.get("name", "unknown")
         cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
 
-        self.check.log.info("Reporting metrics for cluster: %s (id: %s)", cluster_name, cluster_id)
         self._report_cluster_basic_metrics(cluster, cluster_tags)
-        self._report_cluster_stats(cluster_name, cluster_id, cluster_tags)
+        self._report_cluster_stats(cluster_name, cluster_id, cluster_tags, pc_label)
 
-    def _process_vm(self, vm, vm_stats_dict):
+    def _process_vm(self, vm, vm_stats_dict, cluster_name, pc_label):
         """Process and report metrics for a single vm."""
         vm_id = vm.get("extId", "unknown")
         hostname = vm.get("name")
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
 
-        self.check.log.debug("Processing VM: %s (id: %s)", hostname, vm_id)
-
         self._set_external_tags_for_host(hostname, vm_tags)
         self._report_vm_basic_metrics(vm, hostname, vm_tags)
-        self._report_vm_stats(vm_id, hostname, vm_tags, vm_stats_dict)
+        self._report_vm_stats(vm_id, hostname, vm_tags, vm_stats_dict, cluster_name, pc_label)
 
     def _report_vm_basic_metrics(self, vm, hostname, vm_tags):
         """Report basic vm metrics (counts)."""
@@ -98,77 +120,186 @@ class InfrastructureMonitor:
         self.check.gauge("cluster.vm.count", vm_count, tags=cluster_tags)
         self.check.gauge("cluster.vm.inefficient_count", inefficient_vm_count, tags=cluster_tags)
 
-    def _report_cluster_stats(self, cluster_name, cluster_id, cluster_tags):
-        """Report time-series stats for a cluster."""
-        stats = self._get_cluster_stats(cluster_id)
+    def _report_stats(
+        self,
+        entity_name: str,
+        stats: dict | list,
+        metrics_map: dict[str, str],
+        tags: list[str],
+        log_level: str = "info",
+        hostname: str | None = None,
+        entity_type: EntityType | None = None,
+    ) -> None:
+        """Generic stats reporter for any entity type (cluster/host/VM).
+
+        Args:
+            entity_name: Name of the entity for logging
+            stats: Stats dict or list from API
+            metrics_map: Dict mapping stat keys to metric names
+            tags: Tags for the metrics
+            log_level: Logging level for summary (info/debug)
+            hostname: Optional hostname for VM metrics
+            entity_type: Type of entity ('cluster', 'host', 'vm') for counting
+        """
         if not stats:
-            self.check.log.debug("No cluster stats returned for cluster: %s (id: %s)", cluster_name, cluster_id)
+            self.check.log.warning("No stats returned for %s", entity_name)
             return
 
-        for key, metric_name in CLUSTER_STATS_METRICS.items():
-            entries = stats.get(key, [])
-            for entry in entries:
-                value = entry.get("value")
-                if value is not None:
-                    self.check.gauge(metric_name, value, tags=cluster_tags)
+        # Handle list vs dict stats (VMs return list, others return dict)
+        is_list_stats = isinstance(stats, list)
+        sample_stats = stats[0] if is_list_stats else stats
 
-    def _report_vm_stats(self, vm_id, hostname, vm_tags, vm_stats_dict):
-        """Report time-series stats for a vm."""
-        stats = vm_stats_dict.get(vm_id)
-        if not stats:
-            self.check.log.error("No vm stats found for vm: %s", vm_id)
-            return
+        actual_keys = set(sample_stats.keys())
+        expected_keys = set(metrics_map.keys())
+        matching_keys = actual_keys & expected_keys
+        missing_keys = expected_keys - actual_keys
 
-        self.check.log.debug("Submitting vm stats metrics for vm: %s", vm_id)
-        for key, metric_name in VM_STATS_METRICS.items():
-            for s in stats:
-                value = s.get(key)
-                if value is not None:
-                    self.check.gauge(metric_name, value, hostname=hostname, tags=vm_tags)
+        # Submit metrics
+        metrics_submitted = self._submit_stats_metrics(stats, metrics_map, tags, hostname, is_list_stats)
 
-    def _process_hosts(self, cluster, cluster_vm_stats_dict):
-        """Process and report metrics for all hosts in a cluster."""
-        cluster_id = cluster.get("extId", "unknown")
-        cluster_name = cluster.get("name", "unknown")
-        cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
+        # Track metrics by type
+        if entity_type == 'cluster':
+            self.cluster_metrics_count += metrics_submitted
+        elif entity_type == 'host':
+            self.host_metrics_count += metrics_submitted
+        elif entity_type == 'vm':
+            self.vm_metrics_count += metrics_submitted
 
-        self.check.log.info("Fetching hosts for cluster: %s (id: %s)", cluster_name, cluster_id)
-        hosts = self._list_hosts_by_cluster(cluster_id)
-        self.check.log.debug("Found %d hosts in cluster: %s (id: %s)", len(hosts), cluster_name, cluster_id)
+        # Log summary
+        log_fn = getattr(self.check.log, log_level)
+        log_fn(
+            "%s - returned_keys=%d, expected_keys=%d, matching=%d, missing=%d, metrics_submitted=%d",
+            entity_name,
+            len(actual_keys),
+            len(expected_keys),
+            len(matching_keys),
+            len(missing_keys),
+            metrics_submitted,
+        )
 
-        for host in hosts:
-            host_id = host.get("extId")
-            host_name = host.get("hostName")
+        if metrics_submitted == 0:
+            self.check.log.warning("%s - No metrics submitted. API keys: %s", entity_name, list(actual_keys)[:5])
+            self.check.log.trace("%s - Full stats payload: %s", entity_name, stats)
 
-            if host_id and host_name:
-                self.host_names[host_id] = host_name
+    def _submit_stats_metrics(self, stats, metrics_map, tags, hostname, is_list):
+        """Submit metrics from stats payload.
 
-            self.check.log.debug("Processing host: %s (id: %s)", host_name, host_id)
+        Returns:
+            int: Number of metrics submitted
+        """
+        metrics_submitted = 0
 
-            host_tags = cluster_tags + self._extract_host_tags(host)
-            self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
-
-            self._set_external_tags_for_host(host_name, host_tags)
-
-            stats = self._get_host_stats(cluster_id, host_id)
-            if not stats:
-                self.check.log.error("No host stats returned for host: %s", host_name)
-                continue
-
-            for key, metric_name in HOST_STATS_METRICS.items():
+        for key, metric_name in metrics_map.items():
+            if is_list:
+                # VM stats: list of stat entries
+                for entry in stats:
+                    value = entry.get(key)
+                    if value is not None:
+                        self.check.gauge(metric_name, value, hostname=hostname, tags=tags)
+                        metrics_submitted += 1
+            else:
+                # Cluster/Host stats: dict with arrays of values
                 entries = stats.get(key, [])
                 for entry in entries:
                     value = entry.get("value")
                     if value is not None:
-                        self.check.gauge(metric_name, value, hostname=host_name, tags=host_tags)
+                        self.check.gauge(metric_name, value, hostname=hostname, tags=tags)
+                        metrics_submitted += 1
 
-            if host_id:
-                self.check.log.info("Fetching VM list for host: %s", host_name)
-                vms = self._list_vms_by_host(host_id)
-                self.check.log.info("Found %d VMs on host: %s", len(vms), host_name)
+        return metrics_submitted
 
-                for vm in vms:
-                    self._process_vm(vm, cluster_vm_stats_dict)
+    def _report_cluster_stats(self, cluster_name, cluster_id, cluster_tags, pc_label):
+        """Report time-series stats for a cluster."""
+        stats = self._get_cluster_stats(cluster_id)
+        self._report_stats(
+            f"[{pc_label}][{cluster_name}] Cluster",
+            stats,
+            CLUSTER_STATS_METRICS,
+            cluster_tags,
+            log_level="info",
+            entity_type="cluster",
+        )
+
+    def _report_vm_stats(self, vm_id, hostname, vm_tags, vm_stats_dict, cluster_name, pc_label):
+        """Report time-series stats for a vm."""
+        stats = vm_stats_dict.get(vm_id)
+        if stats:
+            self._report_stats(
+                f"[{pc_label}][{cluster_name}] VM {hostname}",
+                stats,
+                VM_STATS_METRICS,
+                vm_tags,
+                log_level="debug",
+                hostname=hostname,
+                entity_type="vm",
+            )
+
+    def _process_hosts(self, cluster, cluster_vm_stats_dict, cluster_name, pc_label):
+        """Process and report metrics for all hosts in a cluster."""
+        cluster_id = cluster.get("extId", "unknown")
+        cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
+
+        hosts = self._list_hosts_by_cluster(cluster_id)
+        self.check.log.info("[%s][%s] Processing %d hosts", pc_label, cluster_name, len(hosts))
+
+        total_vms = sum(
+            self._process_single_host(host, cluster_id, cluster_tags, cluster_vm_stats_dict, cluster_name, pc_label)
+            for host in hosts
+        )
+
+        self.check.log.info("[%s][%s] Processed %d hosts and %d VMs", pc_label, cluster_name, len(hosts), total_vms)
+
+    def _process_single_host(
+        self,
+        host: dict,
+        cluster_id: str,
+        cluster_tags: list[str],
+        cluster_vm_stats_dict: dict,
+        cluster_name: str,
+        pc_label: str,
+    ) -> int:
+        """Process a single host and its VMs.
+
+        Returns:
+            Number of VMs processed on this host
+        """
+        host_id = host.get("extId")
+        host_name = host.get("hostName")
+
+        if not host_id:
+            self.check.log.warning("[%s][%s] Host %s has no extId, skipping", pc_label, cluster_name, host_name)
+            return 0
+
+        # Cache host name for VM tagging
+        if host_name:
+            self.host_names[host_id] = host_name
+
+        # Report host metrics
+        host_tags = cluster_tags + self._extract_host_tags(host)
+        self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
+        self._set_external_tags_for_host(host_name, host_tags)
+
+        # Report host stats
+        stats = self._get_host_stats(cluster_id, host_id)
+        if stats:
+            self._report_stats(
+                f"[{pc_label}][{cluster_name}] Host {host_name}",
+                stats,
+                HOST_STATS_METRICS,
+                host_tags,
+                log_level="info",
+                hostname=host_name,
+                entity_type="host",
+            )
+
+        # Process VMs on this host
+        vms = self._list_vms_by_host(host_id)
+        self.check.log.debug("[%s][%s] Host %s has %d VMs", pc_label, cluster_name, host_name, len(vms))
+
+        for vm in vms:
+            self._process_vm(vm, cluster_vm_stats_dict, cluster_name, pc_label)
+
+        return len(vms)
 
     def _extract_host_tags(self, host):
         """Extract tags from a host object."""
@@ -280,15 +411,18 @@ class InfrastructureMonitor:
 
     def _list_clusters(self):
         """Fetch all clusters from Prism Central."""
-        return self.check._get_paginated_request_data("api/clustermgmt/v4.0/config/clusters")
+        clusters = self.check._get_paginated_request_data("api/clustermgmt/v4.0/config/clusters")
+        return clusters
 
     def _list_vms_by_host(self, host_id: str):
         params = {"$filter": f"host/extId eq '{host_id}'"}
-        return self.check._get_paginated_request_data("api/vmm/v4.0/ahv/config/vms", params=params)
+        vms = self.check._get_paginated_request_data("api/vmm/v4.0/ahv/config/vms", params=params)
+        return vms
 
     def _list_hosts_by_cluster(self, cluster_id: str):
-        """Fetch all hosts/hosts for a specific cluster."""
-        return self.check._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
+        """Fetch all hosts for a specific cluster."""
+        hosts = self.check._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
+        return hosts
 
     def _get_cluster_stats(self, cluster_id: str):
         """
@@ -308,7 +442,8 @@ class InfrastructureMonitor:
             "$samplingInterval": self.check.sampling_interval,
         }
 
-        return self.check._get_request_data(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}", params=params)
+        result = self.check._get_request_data(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}", params=params)
+        return result
 
     def _get_host_stats(self, cluster_id: str, host_id: str):
         """
@@ -323,12 +458,13 @@ class InfrastructureMonitor:
             "$samplingInterval": self.check.sampling_interval,
         }
 
-        return self.check._get_request_data(
+        result = self.check._get_request_data(
             f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}", params=params
         )
+        return result
 
-    def _get_vm_stats_by_cluster_id(self, cluster_id: str):
-        """Fetch time-series stats for all VMs globally."""
+    def _get_vm_stats_by_cluster_id(self, cluster_id: str, pc_label: str, cluster_name: str):
+        """Fetch time-series stats for all VMs in a cluster."""
         start_time, end_time = self._get_collection_time_window()
 
         params = {
@@ -349,6 +485,13 @@ class InfrastructureMonitor:
             if vm_id:
                 vm_stats_dict[vm_id] = stats
 
+        self.check.log.debug(
+            "[%s][%s] Retrieved %d VM stats from API for cluster_id=%s",
+            pc_label,
+            cluster_name,
+            len(vm_stats_dict),
+            cluster_id,
+        )
         return vm_stats_dict
 
     def _calculate_collection_time_window(self):
@@ -359,9 +502,7 @@ class InfrastructureMonitor:
             tuple: (start_time_str, end_time_str) in ISO 8601 format
         """
         now = datetime.now(timezone.utc)
-
         end_time = now - timedelta(seconds=self.check.sampling_interval)
-
         start_time = end_time - timedelta(seconds=self.check.sampling_interval)
 
         return start_time.isoformat(), end_time.isoformat()
