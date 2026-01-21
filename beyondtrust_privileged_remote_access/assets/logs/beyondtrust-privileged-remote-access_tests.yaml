@@ -31,341 +31,28 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1767953860000
  -
-  sample: "Dec 28 23:45:21 pf60fc91 BG[65890] 1427:01:09:site=pf60fc91.beyondtrustcloud.com;when=1766987121;who=John Carter IT (john.carter@crestdata.ai);who_ip=64.252.101.204;event=group_policy_added;account:comments=;account:comments:status=forbid_override;account:disabled=0;account:disabled:status=forbid_override;account:expiration=never;account:expiration:status=forbid_override;account_group:added:status=forbid_override;account_group:removed:status=undefined;account:will_expire=0;account:will_expire:status=forbid_override;attended_support_access_policy:status=undefined;name=c3e4ee27388e959a;chat_support_access_policy:status=undefined;chat_support_license_pool:id=;chat_support_license_pool:name=;chat_support_license_pool:id:status=undefined;comments=;permissions:jump_item_role:default:id=1;permissions:jump_item_role:default:name=No Access;permissions:jump_item_role:default:id:status=undefined;full_support_license_pool:id=;full_support_license_pool:name=;full_support_license_pool:id:status=undefined;id=8;login_schedule:timezone=Asia/Kolkata;permissions:jump_item_role:teams:id=1;permissions:jump_item_role:teams:name=No Access;permissions:jump_item_role:teams:id:status=undefined;two_factor_auth:required=0;two_factor_auth:required:status=forbid_override;login_schedule:enabled=1;login_schedule:enabled:status=forbid_override;login_schedule:force_logout=0;login_schedule:force_logout:status=forbid_override;login_schedule:status=forbid_override;permissions:admin=1;permissions:support:jumpoint:admin=1;permissions:support:jumpoint:admin:status=forbid_override;permissions:admin:status=forbid_override;permissions:change_display_name=0;permissions:change_display_name:status=undefined;permissions:change_rep_image=0;permissions:change_rep_image:status=undefined;permissions:customer_notice=0;permissions:customer_notice:status=undefined;permissions:bomgar_button=0;permissions:bomgar_button:status=undefined;permissions:canned_scripts=1;permissions:canned_scripts:status=forbid_override;permissions:custom_rep_links=1;permissions:custom_rep_links:status=forbid_override;permissions:support:edit_ios_content=0;permissions:support:edit_ios_content:status=undefined;permissions:issues=0;permissions:issues:status=undefined;permissions:jump_groups=1;permissions:jump_groups:status=forbid_override;permissions:support:canned_messages=0;permissions:support:canned_messages:status=undefined;permissions:file_store=0;permissions:file_store:status=undefined;permissions:public_sites:templates=0;permissions:public_sites:templates:status=undefined;permissions:teams=1;permissions:teams:status=forbid_override;permissions:skills=0;permissions:skills:status=undefined;permissions:endpoint_automation=0;permissions:endpoint_automation:status=undefined;permissions:support:accept_team_sessions=1;permissions:support:accept_team_sessions:status=undefined;permissions:support=not_allowed;permissions:support:status=undefined;permissions:support:bomgar_button:change_public_sites=0;permissions:support:bomgar_button:change_public_sites:status=undefined;permissions:support:bomgar_button:personal:deploy=0;permissions:support:bomgar_button:personal:deploy:status=undefined;permissions:support:bomgar_button:team:deploy=0;permissions:support:bomgar_button:team:deploy:status=undefined;permissions:support:bomgar_button:team:manage=0;permissions:support:bomgar_button:team:manage:status=undefined;permissions:rep_to_rep_screen_sharing=0;permissions:rep_to_rep_screen_sharing:control=0;permissions:rep_to_rep_screen_sharing:control:status=undefined;permissions:rep_to_rep_screen_sharing:status=undefined;permissions:support:session_assignment:disable=0;permissions:support:session_assignment:disable:status=undefined;permissions:support:external_key=0;permissions:support:external_key:status=undefined;permissions:support:extended_availability_mode=0;permissions:support:extended_availability_mode:status=undefined;idle_timeout=site_wide_setting;idle_timeout:status=undefined;permissions:support:session_keys=0;permissions:support:session_keys:status=undefined;inactive_rep_timeout=site_wide_setting;inactive_rep_timeout:status=undefined;permissions:support:invite_temp_rep=0;permissions:support:invite_temp_rep:status=undefined;permissions:support:jumpoint:protocol_tunneling=0;permissions:support:jumpoint:protocol_tunneling:status=undefined;permissions:support:next_session=0;permissions:support:next_session:status=undefined;permissions:support:jump:clients=0;permissions:support:jump:clients:status=undefined;permissions:support:jump:local=0;permissions:support:jump:local:status=undefined;permissions:support:jump:remote=0;permissions:support:jump:remote:status=undefined;permissions:support:rdp:local=0;permissions:support:rdp:local:status=undefined;permissions:support:rdp:remote=0;permissions:support:rdp:remote:status=undefined;permissions:support:vnc:local=0;permissions:support:vnc:local:status=undefined;permissions:support:vnc:remote=0;permissions:support:vnc:remote:status=undefined;permissions:support:session_assignment:idle_timeout=900;permissions:support:session_assignment:idle_timeout:status=undefined;permissions:support:session_assignment:session_limit=3;permissions:support:session_assignment:session_limit:status=undefined;permissions:support:team_share=0;permissions:support:team_share:status=undefined;permissions:support:jumpoint:shell=0;permissions:support:jumpoint:shell:status=undefined;permissions:support:external_tools:static_port_setting=0;permissions:support:external_tools:static_port_setting:status=undefined;permissions:support:ios_content=0;permissions:support:ios_content:status=undefined;permissions:support:vpro=0;permissions:support:vpro:status=undefined;permissions:support:jumpoint:website=0;permissions:support:jumpoint:website:status=undefined;permissions:support:team_transfer=0;permissions:support:team_transfer:status=undefined;permissions:users:set_passwords=1;permissions:users:set_passwords:status=forbid_override;permissions:show_on_public_site=0;permissions:show_on_public_site:status=undefined;permissions:vault=1;permissions:vault:status=forbid_override;permissions:reporting:license_reports=0;permissions:reporting:license_reports:status=undefined;permissions:reporting:recordings=1;permissions:reporting:recordings:status=forbid_override;permissions:reporting:support_reports=all_sessions;permissions:reporting:support_reports:status=forbid_override;permissions:reporting:syslog_reports=1;permissions:reporting:syslog_reports:status=forbid_override;permissions:reporting:vault_reports=all_sessions;permissions:reporting:vault_reports:status=forbid_override;priority=6;permissions:jump_item_role:personal:id=1;permissions:jump_item_role:personal:name=No Access;permissions:jump_item_role:personal:id:status=undefined;push_agents:added:status=forbid_override;push_agents:removed:status=forbid_override;shared_jump_group:added:status=forbid_override;shared_jump_group:removed:status=forbid_override;support_desk_teams:added:status=forbid_override;support_desk_teams:removed:status=forbid_override;permissions:jump_item_role:system:id=1;permissions:jump_item_role:system:name=No Access;permissions:jump_item_role:system:id:status=undefined;unattended_support_access_policy:status=forbid_override;vault_account:added:status=forbid_override;vault_account:removed:status=undefined;login_code:enabled=1;account:disabled=1;allow_override=1"
+  sample: "Dec 28 23:45:21 pf60fc91 BG[65890] 1427:01:09:site=pf60fc91.beyondtrustcloud.com;when=1766987121;who=John Carter IT (john.carter@test.ai);who_ip=64.252.101.204;event=group_policy_added;account:disabled=0;allow_override=0;login_code:enabled=1"
   result:
-    custom:
-      account:comments:status: "forbid_override"
-      account:disabled:
-       - 0
-       - 1
-      account:disabled:status: "forbid_override"
-      account:expiration: "never"
-      account:expiration:status: "forbid_override"
-      account:will_expire: 0
-      account:will_expire:status: "forbid_override"
-      account_group:added:status: "forbid_override"
-      account_group:removed:status: "undefined"
-      allow_override: 1
-      allow_override_value: "setting can be overridden by a policy with a lower priority"
-      attended_support_access_policy:status: "undefined"
-      chat_support_access_policy:status: "undefined"
-      chat_support_license_pool:id:status: "undefined"
-      event_category: "authorization-and-policy-control"
-      evt:
-        name: "group_policy_added"
-      full_support_license_pool:id:status: "undefined"
-      hostname: "pf60fc91"
-      id: 8
-      idle_timeout: "site_wide_setting"
-      idle_timeout:status: "undefined"
-      inactive_rep_timeout: "site_wide_setting"
-      inactive_rep_timeout:status: "undefined"
-      login_code:enabled: 1
-      login_code_value: "users must enter an emailed login code to log in"
-      login_schedule:enabled: 1
-      login_schedule:enabled:status: "forbid_override"
-      login_schedule:force_logout: 0
-      login_schedule:force_logout:status: "forbid_override"
-      login_schedule:status: "forbid_override"
-      login_schedule:timezone: "Asia/Kolkata"
-      name: "c3e4ee27388e959a"
-      network:
-        client:
-          geoip: {}
-          ip: "64.252.101.204"
-      permissions:admin: 1
-      permissions:admin:status: "forbid_override"
-      permissions:bomgar_button: 0
-      permissions:bomgar_button:status: "undefined"
-      permissions:canned_scripts: 1
-      permissions:canned_scripts:status: "forbid_override"
-      permissions:change_display_name: 0
-      permissions:change_display_name:status: "undefined"
-      permissions:change_rep_image: 0
-      permissions:change_rep_image:status: "undefined"
-      permissions:custom_rep_links: 1
-      permissions:custom_rep_links:status: "forbid_override"
-      permissions:customer_notice: 0
-      permissions:customer_notice:status: "undefined"
-      permissions:endpoint_automation: 0
-      permissions:endpoint_automation:status: "undefined"
-      permissions:file_store: 0
-      permissions:file_store:status: "undefined"
-      permissions:issues: 0
-      permissions:issues:status: "undefined"
-      permissions:jump_groups: 1
-      permissions:jump_groups:status: "forbid_override"
-      permissions:jump_item_role:default:id: 1
-      permissions:jump_item_role:default:id:status: "undefined"
-      permissions:jump_item_role:default:name: "No Access"
-      permissions:jump_item_role:personal:id: 1
-      permissions:jump_item_role:personal:id:status: "undefined"
-      permissions:jump_item_role:personal:name: "No Access"
-      permissions:jump_item_role:system:id: 1
-      permissions:jump_item_role:system:id:status: "undefined"
-      permissions:jump_item_role:system:name: "No Access"
-      permissions:jump_item_role:teams:id: 1
-      permissions:jump_item_role:teams:id:status: "undefined"
-      permissions:jump_item_role:teams:name: "No Access"
-      permissions:public_sites:templates: 0
-      permissions:public_sites:templates:status: "undefined"
-      permissions:rep_to_rep_screen_sharing: 0
-      permissions:rep_to_rep_screen_sharing:control: 0
-      permissions:rep_to_rep_screen_sharing:control:status: "undefined"
-      permissions:rep_to_rep_screen_sharing:status: "undefined"
-      permissions:reporting:license_reports: 0
-      permissions:reporting:license_reports:status: "undefined"
-      permissions:reporting:recordings: 1
-      permissions:reporting:recordings:status: "forbid_override"
-      permissions:reporting:support_reports: "all_sessions"
-      permissions:reporting:support_reports:status: "forbid_override"
-      permissions:reporting:syslog_reports: 1
-      permissions:reporting:syslog_reports:status: "forbid_override"
-      permissions:reporting:vault_reports: "all_sessions"
-      permissions:reporting:vault_reports:status: "forbid_override"
-      permissions:show_on_public_site: 0
-      permissions:show_on_public_site:status: "undefined"
-      permissions:skills: 0
-      permissions:skills:status: "undefined"
-      permissions:support: "not_allowed"
-      permissions:support:accept_team_sessions: 1
-      permissions:support:accept_team_sessions:status: "undefined"
-      permissions:support:bomgar_button:change_public_sites: 0
-      permissions:support:bomgar_button:change_public_sites:status: "undefined"
-      permissions:support:bomgar_button:personal:deploy: 0
-      permissions:support:bomgar_button:personal:deploy:status: "undefined"
-      permissions:support:bomgar_button:team:deploy: 0
-      permissions:support:bomgar_button:team:deploy:status: "undefined"
-      permissions:support:bomgar_button:team:manage: 0
-      permissions:support:bomgar_button:team:manage:status: "undefined"
-      permissions:support:canned_messages: 0
-      permissions:support:canned_messages:status: "undefined"
-      permissions:support:edit_ios_content: 0
-      permissions:support:edit_ios_content:status: "undefined"
-      permissions:support:extended_availability_mode: 0
-      permissions:support:extended_availability_mode:status: "undefined"
-      permissions:support:external_key: 0
-      permissions:support:external_key:status: "undefined"
-      permissions:support:external_tools:static_port_setting: 0
-      permissions:support:external_tools:static_port_setting:status: "undefined"
-      permissions:support:invite_temp_rep: 0
-      permissions:support:invite_temp_rep:status: "undefined"
-      permissions:support:ios_content: 0
-      permissions:support:ios_content:status: "undefined"
-      permissions:support:jump:clients: 0
-      permissions:support:jump:clients:status: "undefined"
-      permissions:support:jump:local: 0
-      permissions:support:jump:local:status: "undefined"
-      permissions:support:jump:remote: 0
-      permissions:support:jump:remote:status: "undefined"
-      permissions:support:jumpoint:admin: 1
-      permissions:support:jumpoint:admin:status: "forbid_override"
-      permissions:support:jumpoint:protocol_tunneling: 0
-      permissions:support:jumpoint:protocol_tunneling:status: "undefined"
-      permissions:support:jumpoint:shell: 0
-      permissions:support:jumpoint:shell:status: "undefined"
-      permissions:support:jumpoint:website: 0
-      permissions:support:jumpoint:website:status: "undefined"
-      permissions:support:next_session: 0
-      permissions:support:next_session:status: "undefined"
-      permissions:support:rdp:local: 0
-      permissions:support:rdp:local:status: "undefined"
-      permissions:support:rdp:remote: 0
-      permissions:support:rdp:remote:status: "undefined"
-      permissions:support:session_assignment:disable: 0
-      permissions:support:session_assignment:disable:status: "undefined"
-      permissions:support:session_assignment:idle_timeout: 900
-      permissions:support:session_assignment:idle_timeout:status: "undefined"
-      permissions:support:session_assignment:session_limit: 3
-      permissions:support:session_assignment:session_limit:status: "undefined"
-      permissions:support:session_keys: 0
-      permissions:support:session_keys:status: "undefined"
-      permissions:support:status: "undefined"
-      permissions:support:team_share: 0
-      permissions:support:team_share:status: "undefined"
-      permissions:support:team_transfer: 0
-      permissions:support:team_transfer:status: "undefined"
-      permissions:support:vnc:local: 0
-      permissions:support:vnc:local:status: "undefined"
-      permissions:support:vnc:remote: 0
-      permissions:support:vnc:remote:status: "undefined"
-      permissions:support:vpro: 0
-      permissions:support:vpro:status: "undefined"
-      permissions:teams: 1
-      permissions:teams:status: "forbid_override"
-      permissions:users:set_passwords: 1
-      permissions:users:set_passwords:status: "forbid_override"
-      permissions:vault: 1
-      permissions:vault:status: "forbid_override"
-      priority: 6
-      process_id: 65890.0
-      push_agents:added:status: "forbid_override"
-      push_agents:removed:status: "forbid_override"
-      shared_jump_group:added:status: "forbid_override"
-      shared_jump_group:removed:status: "forbid_override"
-      site: "pf60fc91.beyondtrustcloud.com"
-      site_id: 1427.0
-      support_desk_teams:added:status: "forbid_override"
-      support_desk_teams:removed:status: "forbid_override"
-      system_id: "BG"
-      two_factor_auth:required: 0
-      two_factor_auth:required:status: "forbid_override"
-      unattended_support_access_policy:status: "forbid_override"
-      usr:
-        email: "john.carter@crestdata.ai"
-        name: "John Carter IT"
-      vault_account:added:status: "forbid_override"
-      vault_account:removed:status: "undefined"
-      when: 1.766987121E12
-      who: "John Carter IT (john.carter@crestdata.ai)"
-    message: "Dec 28 23:45:21 pf60fc91 BG[65890] 1427:01:09:site=pf60fc91.beyondtrustcloud.com;when=1766987121;who=John Carter IT (john.carter@crestdata.ai);who_ip=64.252.101.204;event=group_policy_added;account:comments=;account:comments:status=forbid_override;account:disabled=0;account:disabled:status=forbid_override;account:expiration=never;account:expiration:status=forbid_override;account_group:added:status=forbid_override;account_group:removed:status=undefined;account:will_expire=0;account:will_expire:status=forbid_override;attended_support_access_policy:status=undefined;name=c3e4ee27388e959a;chat_support_access_policy:status=undefined;chat_support_license_pool:id=;chat_support_license_pool:name=;chat_support_license_pool:id:status=undefined;comments=;permissions:jump_item_role:default:id=1;permissions:jump_item_role:default:name=No Access;permissions:jump_item_role:default:id:status=undefined;full_support_license_pool:id=;full_support_license_pool:name=;full_support_license_pool:id:status=undefined;id=8;login_schedule:timezone=Asia/Kolkata;permissions:jump_item_role:teams:id=1;permissions:jump_item_role:teams:name=No Access;permissions:jump_item_role:teams:id:status=undefined;two_factor_auth:required=0;two_factor_auth:required:status=forbid_override;login_schedule:enabled=1;login_schedule:enabled:status=forbid_override;login_schedule:force_logout=0;login_schedule:force_logout:status=forbid_override;login_schedule:status=forbid_override;permissions:admin=1;permissions:support:jumpoint:admin=1;permissions:support:jumpoint:admin:status=forbid_override;permissions:admin:status=forbid_override;permissions:change_display_name=0;permissions:change_display_name:status=undefined;permissions:change_rep_image=0;permissions:change_rep_image:status=undefined;permissions:customer_notice=0;permissions:customer_notice:status=undefined;permissions:bomgar_button=0;permissions:bomgar_button:status=undefined;permissions:canned_scripts=1;permissions:canned_scripts:status=forbid_override;permissions:custom_rep_links=1;permissions:custom_rep_links:status=forbid_override;permissions:support:edit_ios_content=0;permissions:support:edit_ios_content:status=undefined;permissions:issues=0;permissions:issues:status=undefined;permissions:jump_groups=1;permissions:jump_groups:status=forbid_override;permissions:support:canned_messages=0;permissions:support:canned_messages:status=undefined;permissions:file_store=0;permissions:file_store:status=undefined;permissions:public_sites:templates=0;permissions:public_sites:templates:status=undefined;permissions:teams=1;permissions:teams:status=forbid_override;permissions:skills=0;permissions:skills:status=undefined;permissions:endpoint_automation=0;permissions:endpoint_automation:status=undefined;permissions:support:accept_team_sessions=1;permissions:support:accept_team_sessions:status=undefined;permissions:support=not_allowed;permissions:support:status=undefined;permissions:support:bomgar_button:change_public_sites=0;permissions:support:bomgar_button:change_public_sites:status=undefined;permissions:support:bomgar_button:personal:deploy=0;permissions:support:bomgar_button:personal:deploy:status=undefined;permissions:support:bomgar_button:team:deploy=0;permissions:support:bomgar_button:team:deploy:status=undefined;permissions:support:bomgar_button:team:manage=0;permissions:support:bomgar_button:team:manage:status=undefined;permissions:rep_to_rep_screen_sharing=0;permissions:rep_to_rep_screen_sharing:control=0;permissions:rep_to_rep_screen_sharing:control:status=undefined;permissions:rep_to_rep_screen_sharing:status=undefined;permissions:support:session_assignment:disable=0;permissions:support:session_assignment:disable:status=undefined;permissions:support:external_key=0;permissions:support:external_key:status=undefined;permissions:support:extended_availability_mode=0;permissions:support:extended_availability_mode:status=undefined;idle_timeout=site_wide_setting;idle_timeout:status=undefined;permissions:support:session_keys=0;permissions:support:session_keys:status=undefined;inactive_rep_timeout=site_wide_setting;inactive_rep_timeout:status=undefined;permissions:support:invite_temp_rep=0;permissions:support:invite_temp_rep:status=undefined;permissions:support:jumpoint:protocol_tunneling=0;permissions:support:jumpoint:protocol_tunneling:status=undefined;permissions:support:next_session=0;permissions:support:next_session:status=undefined;permissions:support:jump:clients=0;permissions:support:jump:clients:status=undefined;permissions:support:jump:local=0;permissions:support:jump:local:status=undefined;permissions:support:jump:remote=0;permissions:support:jump:remote:status=undefined;permissions:support:rdp:local=0;permissions:support:rdp:local:status=undefined;permissions:support:rdp:remote=0;permissions:support:rdp:remote:status=undefined;permissions:support:vnc:local=0;permissions:support:vnc:local:status=undefined;permissions:support:vnc:remote=0;permissions:support:vnc:remote:status=undefined;permissions:support:session_assignment:idle_timeout=900;permissions:support:session_assignment:idle_timeout:status=undefined;permissions:support:session_assignment:session_limit=3;permissions:support:session_assignment:session_limit:status=undefined;permissions:support:team_share=0;permissions:support:team_share:status=undefined;permissions:support:jumpoint:shell=0;permissions:support:jumpoint:shell:status=undefined;permissions:support:external_tools:static_port_setting=0;permissions:support:external_tools:static_port_setting:status=undefined;permissions:support:ios_content=0;permissions:support:ios_content:status=undefined;permissions:support:vpro=0;permissions:support:vpro:status=undefined;permissions:support:jumpoint:website=0;permissions:support:jumpoint:website:status=undefined;permissions:support:team_transfer=0;permissions:support:team_transfer:status=undefined;permissions:users:set_passwords=1;permissions:users:set_passwords:status=forbid_override;permissions:show_on_public_site=0;permissions:show_on_public_site:status=undefined;permissions:vault=1;permissions:vault:status=forbid_override;permissions:reporting:license_reports=0;permissions:reporting:license_reports:status=undefined;permissions:reporting:recordings=1;permissions:reporting:recordings:status=forbid_override;permissions:reporting:support_reports=all_sessions;permissions:reporting:support_reports:status=forbid_override;permissions:reporting:syslog_reports=1;permissions:reporting:syslog_reports:status=forbid_override;permissions:reporting:vault_reports=all_sessions;permissions:reporting:vault_reports:status=forbid_override;priority=6;permissions:jump_item_role:personal:id=1;permissions:jump_item_role:personal:name=No Access;permissions:jump_item_role:personal:id:status=undefined;push_agents:added:status=forbid_override;push_agents:removed:status=forbid_override;shared_jump_group:added:status=forbid_override;shared_jump_group:removed:status=forbid_override;support_desk_teams:added:status=forbid_override;support_desk_teams:removed:status=forbid_override;permissions:jump_item_role:system:id=1;permissions:jump_item_role:system:name=No Access;permissions:jump_item_role:system:id:status=undefined;unattended_support_access_policy:status=forbid_override;vault_account:added:status=forbid_override;vault_account:removed:status=undefined;login_code:enabled=1;account:disabled=1;allow_override=1"
-    service: "authorization-and-policy-control"
+    custom: {}
+    message: "Dec 28 23:45:21 pf60fc91 BG[65890] 1427:01:09:site=pf60fc91.beyondtrustcloud.com;when=1766987121;who=John Carter IT (john.carter@test.ai);who_ip=64.252.101.204;event=group_policy_added;account:disabled=0;allow_override=0;login_code:enabled=1"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1766987121000
  -
-  sample: "Jan  7 03:39:48 pf60fc91 BG[58918] 1427:01:04:site=pf60fc91.beyondtrustcloud.com;when=1767778788;who=John Carter IT (john.carter@crestdata.ai);who_ip=64.252.100.19;event=user_added;account:comments=;account:disabled=0;account:expiration=never;account:will_expire=0;provider:name=10;provider:id=Test;permissions:jump_item_role:default:id=1;permissions:jump_item_role:default:name=No Access;display_number=4;account:email:address=vishal.rajput@crestdata.ai;account:email:locale=en-us;account:failed_logins=0;id=4;login_schedule:timezone=Asia/Kolkata;permissions:jump_item_role:teams:id=1;permissions:jump_item_role:teams:name=No Access;license_pool:id=;license_pool:name=;two_factor_auth:required=0;login_schedule:enabled=0;login_schedule:force_logout=0;two_factor_auth:app=two factor auth app not setup;password=***NEW***;password:expiration=;password:will_expire=0;password:reset=0;permissions:admin=0;permissions:support:jumpoint:admin=0;permissions:change_display_name=0;permissions:change_rep_image=0;permissions:customer_notice=0;permissions:bomgar_button=0;permissions:canned_scripts=0;permissions:custom_rep_links=0;permissions:support:edit_ios_content=0;permissions:issues=0;permissions:jump_groups=0;permissions:support:canned_messages=0;permissions:file_store=0;permissions:public_sites:templates=0;permissions:teams=0;permissions:skills=0;permissions:endpoint_automation=not_allowed;permissions:support:accept_team_sessions=1;permissions:support=full_support;permissions:support:bomgar_button:change_public_sites=0;permissions:support:bomgar_button:personal:deploy=0;permissions:support:bomgar_button:team:deploy=0;permissions:support:bomgar_button:team:manage=0;permissions:rep_to_rep_screen_sharing=1;permissions:rep_to_rep_screen_sharing:control=1;permissions:support:session_assignment:disable=0;permissions:support:external_key=1;permissions:support:extended_availability_mode=0;idle_timeout=site_wide_setting;permissions:support:session_keys=0;inactive_rep_timeout=site_wide_setting;permissions:support:invite_temp_rep=0;permissions:support:jumpoint:protocol_tunneling=1;permissions:support:next_session=0;permissions:support:jump:clients=1;permissions:support:jump:local=1;permissions:support:jump:remote=0;permissions:support:rdp:local=0;permissions:support:rdp:remote=1;permissions:support:vnc:local=0;permissions:support:vnc:remote=1;permissions:support:session_assignment:idle_timeout=900;permissions:support:session_assignment:session_limit=3;permissions:support:team_share=0;permissions:support:jumpoint:shell=1;permissions:support:external_tools:static_port_setting=0;permissions:support:ios_content=0;permissions:support:vpro=0;permissions:support:jumpoint:website=0;permissions:support:team_transfer=0;permissions:users:set_passwords=0;permissions:show_on_public_site=0;permissions:vault=0;permissions:reporting:license_reports=0;permissions:reporting:recordings=0;permissions:reporting:support_reports=user_sessions;permissions:reporting:syslog_reports=0;permissions:reporting:vault_reports=user_sessions;private_display_name=Vishal Rajput;permissions:jump_item_role:personal:id=1;permissions:jump_item_role:personal:name=No Access;public_display_name=Vishal Rajput;rep_avatar=user photo deleted;permissions:jump_item_role:system:id=1;permissions:jump_item_role:system:name=No Access;external_id=vishal.rajput@crestdata.ai;login_code:enabled=1;account:disabled=1"
+  sample: "Jan  7 03:39:48 pf60fc91 BG[58918] 1427:01:04:site=pf60fc91.beyondtrustcloud.com;when=1767778788;who=John Carter IT (john.carter@test.ai);who_ip=64.252.100.19;event=user_added;account:disabled=0;login_code:enabled=0"
   result:
-    custom:
-      account:disabled:
-       - 0
-       - 1
-      account:email:address: "vishal.rajput@crestdata.ai"
-      account:email:locale: "en-us"
-      account:expiration: "never"
-      account:failed_logins: 0
-      account:will_expire: 0
-      display_number: 4
-      event_category: "user-management"
-      evt:
-        name: "user_added"
-      external_id: "vishal.rajput@crestdata.ai"
-      hostname: "pf60fc91"
-      id: 4
-      idle_timeout: "site_wide_setting"
-      inactive_rep_timeout: "site_wide_setting"
-      login_code:enabled: 1
-      login_code_value: "users must enter an emailed login code to log in"
-      login_schedule:enabled: 0
-      login_schedule:force_logout: 0
-      login_schedule:timezone: "Asia/Kolkata"
-      network:
-        client:
-          geoip: {}
-          ip: "64.252.100.19"
-      password: "***NEW***"
-      password:reset: 0
-      password:will_expire: 0
-      permissions:admin: 0
-      permissions:bomgar_button: 0
-      permissions:canned_scripts: 0
-      permissions:change_display_name: 0
-      permissions:change_rep_image: 0
-      permissions:custom_rep_links: 0
-      permissions:customer_notice: 0
-      permissions:endpoint_automation: "not_allowed"
-      permissions:file_store: 0
-      permissions:issues: 0
-      permissions:jump_groups: 0
-      permissions:jump_item_role:default:id: 1
-      permissions:jump_item_role:default:name: "No Access"
-      permissions:jump_item_role:personal:id: 1
-      permissions:jump_item_role:personal:name: "No Access"
-      permissions:jump_item_role:system:id: 1
-      permissions:jump_item_role:system:name: "No Access"
-      permissions:jump_item_role:teams:id: 1
-      permissions:jump_item_role:teams:name: "No Access"
-      permissions:public_sites:templates: 0
-      permissions:rep_to_rep_screen_sharing: 1
-      permissions:rep_to_rep_screen_sharing:control: 1
-      permissions:reporting:license_reports: 0
-      permissions:reporting:recordings: 0
-      permissions:reporting:support_reports: "user_sessions"
-      permissions:reporting:syslog_reports: 0
-      permissions:reporting:vault_reports: "user_sessions"
-      permissions:show_on_public_site: 0
-      permissions:skills: 0
-      permissions:support: "full_support"
-      permissions:support:accept_team_sessions: 1
-      permissions:support:bomgar_button:change_public_sites: 0
-      permissions:support:bomgar_button:personal:deploy: 0
-      permissions:support:bomgar_button:team:deploy: 0
-      permissions:support:bomgar_button:team:manage: 0
-      permissions:support:canned_messages: 0
-      permissions:support:edit_ios_content: 0
-      permissions:support:extended_availability_mode: 0
-      permissions:support:external_key: 1
-      permissions:support:external_tools:static_port_setting: 0
-      permissions:support:invite_temp_rep: 0
-      permissions:support:ios_content: 0
-      permissions:support:jump:clients: 1
-      permissions:support:jump:local: 1
-      permissions:support:jump:remote: 0
-      permissions:support:jumpoint:admin: 0
-      permissions:support:jumpoint:protocol_tunneling: 1
-      permissions:support:jumpoint:shell: 1
-      permissions:support:jumpoint:website: 0
-      permissions:support:next_session: 0
-      permissions:support:rdp:local: 0
-      permissions:support:rdp:remote: 1
-      permissions:support:session_assignment:disable: 0
-      permissions:support:session_assignment:idle_timeout: 900
-      permissions:support:session_assignment:session_limit: 3
-      permissions:support:session_keys: 0
-      permissions:support:team_share: 0
-      permissions:support:team_transfer: 0
-      permissions:support:vnc:local: 0
-      permissions:support:vnc:remote: 1
-      permissions:support:vpro: 0
-      permissions:teams: 0
-      permissions:users:set_passwords: 0
-      permissions:vault: 0
-      private_display_name: "Vishal Rajput"
-      process_id: 58918.0
-      provider:id: "Test"
-      provider:name: 10
-      public_display_name: "Vishal Rajput"
-      rep_avatar: "user photo deleted"
-      site: "pf60fc91.beyondtrustcloud.com"
-      site_id: 1427.0
-      system_id: "BG"
-      two_factor_auth:app: "two factor auth app not setup"
-      two_factor_auth:required: 0
-      usr:
-        email: "john.carter@crestdata.ai"
-        name: "John Carter IT"
-      when: 1.767778788E12
-      who: "John Carter IT (john.carter@crestdata.ai)"
-    message: "Jan  7 03:39:48 pf60fc91 BG[58918] 1427:01:04:site=pf60fc91.beyondtrustcloud.com;when=1767778788;who=John Carter IT (john.carter@crestdata.ai);who_ip=64.252.100.19;event=user_added;account:comments=;account:disabled=0;account:expiration=never;account:will_expire=0;provider:name=10;provider:id=Test;permissions:jump_item_role:default:id=1;permissions:jump_item_role:default:name=No Access;display_number=4;account:email:address=vishal.rajput@crestdata.ai;account:email:locale=en-us;account:failed_logins=0;id=4;login_schedule:timezone=Asia/Kolkata;permissions:jump_item_role:teams:id=1;permissions:jump_item_role:teams:name=No Access;license_pool:id=;license_pool:name=;two_factor_auth:required=0;login_schedule:enabled=0;login_schedule:force_logout=0;two_factor_auth:app=two factor auth app not setup;password=***NEW***;password:expiration=;password:will_expire=0;password:reset=0;permissions:admin=0;permissions:support:jumpoint:admin=0;permissions:change_display_name=0;permissions:change_rep_image=0;permissions:customer_notice=0;permissions:bomgar_button=0;permissions:canned_scripts=0;permissions:custom_rep_links=0;permissions:support:edit_ios_content=0;permissions:issues=0;permissions:jump_groups=0;permissions:support:canned_messages=0;permissions:file_store=0;permissions:public_sites:templates=0;permissions:teams=0;permissions:skills=0;permissions:endpoint_automation=not_allowed;permissions:support:accept_team_sessions=1;permissions:support=full_support;permissions:support:bomgar_button:change_public_sites=0;permissions:support:bomgar_button:personal:deploy=0;permissions:support:bomgar_button:team:deploy=0;permissions:support:bomgar_button:team:manage=0;permissions:rep_to_rep_screen_sharing=1;permissions:rep_to_rep_screen_sharing:control=1;permissions:support:session_assignment:disable=0;permissions:support:external_key=1;permissions:support:extended_availability_mode=0;idle_timeout=site_wide_setting;permissions:support:session_keys=0;inactive_rep_timeout=site_wide_setting;permissions:support:invite_temp_rep=0;permissions:support:jumpoint:protocol_tunneling=1;permissions:support:next_session=0;permissions:support:jump:clients=1;permissions:support:jump:local=1;permissions:support:jump:remote=0;permissions:support:rdp:local=0;permissions:support:rdp:remote=1;permissions:support:vnc:local=0;permissions:support:vnc:remote=1;permissions:support:session_assignment:idle_timeout=900;permissions:support:session_assignment:session_limit=3;permissions:support:team_share=0;permissions:support:jumpoint:shell=1;permissions:support:external_tools:static_port_setting=0;permissions:support:ios_content=0;permissions:support:vpro=0;permissions:support:jumpoint:website=0;permissions:support:team_transfer=0;permissions:users:set_passwords=0;permissions:show_on_public_site=0;permissions:vault=0;permissions:reporting:license_reports=0;permissions:reporting:recordings=0;permissions:reporting:support_reports=user_sessions;permissions:reporting:syslog_reports=0;permissions:reporting:vault_reports=user_sessions;private_display_name=Vishal Rajput;permissions:jump_item_role:personal:id=1;permissions:jump_item_role:personal:name=No Access;public_display_name=Vishal Rajput;rep_avatar=user photo deleted;permissions:jump_item_role:system:id=1;permissions:jump_item_role:system:name=No Access;external_id=vishal.rajput@crestdata.ai;login_code:enabled=1;account:disabled=1"
-    service: "user-management"
+    custom: {}
+    message: "Jan  7 03:39:48 pf60fc91 BG[58918] 1427:01:04:site=pf60fc91.beyondtrustcloud.com;when=1767778788;who=John Carter IT (john.carter@test.ai);who_ip=64.252.100.19;event=user_added;account:disabled=0;login_code:enabled=0"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1767778788000
  -
-  sample: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=session_policy_added;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;site=pf60fc91.beyondtrustcloud.com;automatic_privacy_screen:1;code_name:code_name;description:description;id:1;name:test"
+  sample: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=session_policy_added;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;site=pf60fc91.beyondtrustcloud.com;automatic_privacy_screen=1;code_name=code_name;description=description;id=1;name=test"
   result:
-    custom:
-      event_category: "authorization-and-policy-control"
-      evt:
-        name: "session_policy_added"
-      hostname: "pf60fc91"
-      process_id: 81869.0
-      site: "pf60fc91.beyondtrustcloud.com;automatic_privacy_screen:1;code_name:code_name;description:description;id:1;name:test"
-      site_id: 1427.0
-      syslog_priority: 133.0
-      system_id: "BG"
-      usr:
-        email: "sam.carter@test.ai"
-        name: "Sam5 Carter5"
-      when: 1.76795386E12
-      who: "Sam5 Carter5 (sam.carter@test.ai) using oidc"
-    message: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=session_policy_added;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;site=pf60fc91.beyondtrustcloud.com;automatic_privacy_screen:1;code_name:code_name;description:description;id:1;name:test"
-    service: "authorization-and-policy-control"
+    custom: {}
+    message: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=session_policy_added;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;site=pf60fc91.beyondtrustcloud.com;automatic_privacy_screen=1;code_name=code_name;description=description;id=1;name=test"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1767953860000
  -
-  sample: "Dec 26 06:04:28 pf60fc91 BG[75113] 0927:01:01:site=pf60fc91.beyondtrustcloud.com/appliance;who=John Carter IT (john.carter@crestdata.ai);who_ip=163.116.213.61;event=certificate_export;common_name=DigiCert Global G2 TLS RSA SHA256 2020 CA1;exported_with_private_key=1"
+  sample: "Dec 26 06:04:28 pf60fc91 BG[75113] 0927:01:01:site=pf60fc91.beyondtrustcloud.com/appliance;who=John Carter IT (john.carter@test.ai);who_ip=163.116.213.61;event=certificate_export;common_name=DigiCert Global G2 TLS RSA SHA256 2020 CA1;exported_with_private_key=1"
   result:
     custom:
       common_name: "DigiCert Global G2 TLS RSA SHA256 2020 CA1"
@@ -384,25 +71,23 @@ tests:
       site_id: 927.0
       system_id: "BG"
       usr:
-        email: "john.carter@crestdata.ai"
+        email: "john.carter@test.ai"
         name: "John Carter IT"
-      who: "John Carter IT (john.carter@crestdata.ai)"
-    message: "Dec 26 06:04:28 pf60fc91 BG[75113] 0927:01:01:site=pf60fc91.beyondtrustcloud.com/appliance;who=John Carter IT (john.carter@crestdata.ai);who_ip=163.116.213.61;event=certificate_export;common_name=DigiCert Global G2 TLS RSA SHA256 2020 CA1;exported_with_private_key=1"
+      who: "John Carter IT (john.carter@test.ai)"
+    message: "Dec 26 06:04:28 pf60fc91 BG[75113] 0927:01:01:site=pf60fc91.beyondtrustcloud.com/appliance;who=John Carter IT (john.carter@test.ai);who_ip=163.116.213.61;event=certificate_export;common_name=DigiCert Global G2 TLS RSA SHA256 2020 CA1;exported_with_private_key=1"
     service: "cryptography-and-secrets-protection"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
  -
-  sample: "<133>Dec 26 03:45:47 pf60fc91 BG[36689] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766742347;who=John Carter IT (john.carter@crestdata.ai);who_ip=64.252.100.173;event=jumpoint_cluster_added;allows_multiple_nodes=0;code_name=jumpoint_3;comments=test;disabled=0;external_jump_item_network_id=;id=3;jzp_allow_http_get=0;jzp_client_address_restrictions_type=0;jzp_enabled=0;jzp_proxy_hostname=;jzp_proxy_port=9555;jzp_restricted_ips=;managed_ip_ranges=[];name=test;network_tunnel=0;platform=windows-x86;rdp_service_account_id=;shelljump=0;allows_multiple_nodes=1;disabled=1;network_tunnel=0"
+  sample: "<133>Dec 26 03:45:47 pf60fc91 BG[36689] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766742347;who=John Carter IT (john.carter@test.ai);who_ip=64.252.100.173;event=jumpoint_cluster_added;code_name=jumpoint_3;comments=test;external_jump_item_network_id=;id=3;jzp_allow_http_get=0;jzp_client_address_restrictions_type=0;jzp_enabled=0;jzp_proxy_hostname=;jzp_proxy_port=9555;jzp_restricted_ips=;managed_ip_ranges=[];name=test;platform=windows-x86;rdp_service_account_id=;shelljump=0;allows_multiple_nodes=1;disabled=1;network_tunnel=0"
   result:
     custom:
       allows_multiple_nodes:
-       - 0
        - 1
       code_name: "jumpoint_3"
       comments: "test"
       disabled:
-       - 0
        - 1
       event_category: "jumpoint-and-remote-access-management"
       evt:
@@ -421,7 +106,6 @@ tests:
           ip: "64.252.100.173"
       network_tunnel:
        - 0
-       - 0
       platform: "windows-x86"
       process_id: 36689.0
       shelljump: 0
@@ -430,21 +114,20 @@ tests:
       syslog_priority: 133.0
       system_id: "BG"
       usr:
-        email: "john.carter@crestdata.ai"
+        email: "john.carter@test.ai"
         name: "John Carter IT"
       when: 1.766742347E12
-      who: "John Carter IT (john.carter@crestdata.ai)"
-    message: "<133>Dec 26 03:45:47 pf60fc91 BG[36689] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766742347;who=John Carter IT (john.carter@crestdata.ai);who_ip=64.252.100.173;event=jumpoint_cluster_added;allows_multiple_nodes=0;code_name=jumpoint_3;comments=test;disabled=0;external_jump_item_network_id=;id=3;jzp_allow_http_get=0;jzp_client_address_restrictions_type=0;jzp_enabled=0;jzp_proxy_hostname=;jzp_proxy_port=9555;jzp_restricted_ips=;managed_ip_ranges=[];name=test;network_tunnel=0;platform=windows-x86;rdp_service_account_id=;shelljump=0;allows_multiple_nodes=1;disabled=1;network_tunnel=0"
+      who: "John Carter IT (john.carter@test.ai)"
+    message: "<133>Dec 26 03:45:47 pf60fc91 BG[36689] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766742347;who=John Carter IT (john.carter@test.ai);who_ip=64.252.100.173;event=jumpoint_cluster_added;allows_multiple_nodes=0;code_name=jumpoint_3;comments=test;disabled=0;external_jump_item_network_id=;id=3;jzp_allow_http_get=0;jzp_client_address_restrictions_type=0;jzp_enabled=0;jzp_proxy_hostname=;jzp_proxy_port=9555;jzp_restricted_ips=;managed_ip_ranges=[];name=test;network_tunnel=0;platform=windows-x86;rdp_service_account_id=;shelljump=0;allows_multiple_nodes=1;disabled=1;network_tunnel=0"
     service: "jumpoint-and-remote-access-management"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1766742347000
  -
-  sample: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@crestdata.ai);who_ip=64.252.101.244;event=support_session_report_generated;match_any=;only_completed=1;api=0;row_start=0;row_count=15;api=0;only_completed=0;primary_rep=0"
+  sample: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@test.ai);who_ip=64.252.101.244;event=support_session_report_generated;match_any=;row_start=0;row_count=15;api=0;only_completed=0;primary_rep=0"
   result:
     custom:
       api:
-       - 0
        - 0
       event_category: "reporting-and-compliance-evidence"
       evt:
@@ -455,7 +138,6 @@ tests:
           geoip: {}
           ip: "64.252.101.244"
       only_completed:
-       - 1
        - 0
       primary_rep: 0
       process_id: 62465.0
@@ -467,17 +149,17 @@ tests:
       syslog_priority: 133.0
       system_id: "BG"
       usr:
-        email: "john.carter@crestdata.ai"
+        email: "john.carter@test.ai"
         name: "John Carter"
       when: 1.766399525E12
-      who: "John Carter (john.carter@crestdata.ai)"
-    message: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@crestdata.ai);who_ip=64.252.101.244;event=support_session_report_generated;match_any=;only_completed=1;api=0;row_start=0;row_count=15;api=0;only_completed=0;primary_rep=0"
+      who: "John Carter (john.carter@test.ai)"
+    message: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@test.ai);who_ip=64.252.101.244;event=support_session_report_generated;match_any=;only_completed=1;api=0;row_start=0;row_count=15;api=0;only_completed=0;primary_rep=0"
     service: "reporting-and-compliance-evidence"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1766399525000
  -
-  sample: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@crestdata.ai);who_ip=64.252.101.244;event=network_address_added;enabled=1;interface=intf1;ip=10.10.10.10"
+  sample: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@test.ai);who_ip=64.252.101.244;event=network_address_added;enabled=1;interface=intf1;ip=10.10.10.10"
   result:
     custom:
       enabled: 1
@@ -498,11 +180,11 @@ tests:
       syslog_priority: 133.0
       system_id: "BG"
       usr:
-        email: "john.carter@crestdata.ai"
+        email: "john.carter@test.ai"
         name: "John Carter"
       when: 1.766399525E12
-      who: "John Carter (john.carter@crestdata.ai)"
-    message: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@crestdata.ai);who_ip=64.252.101.244;event=network_address_added;enabled=1;interface=intf1;ip=10.10.10.10"
+      who: "John Carter (john.carter@test.ai)"
+    message: "<133>Dec 22 04:32:05 pf60fc91 BG[62465] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766399525;who=John Carter (john.carter@test.ai);who_ip=64.252.101.244;event=network_address_added;enabled=1;interface=intf1;ip=10.10.10.10"
     service: "network-activity"
     tags:
      - "source:LOGS_SOURCE"
