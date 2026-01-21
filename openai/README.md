@@ -493,8 +493,6 @@ To validate that the APM PHP library can communicate with your Agent, examine th
 
 Without an admin-scoped API key, these metrics and CCM cost data are not ingested.
 
-**Note**: The `openai.api.usage.*` metrics are collected when a project-scoped API key is provided. Project-scoped API key support will be deprecated in the near future and does not support CCM data collection.
-
 All remaining metrics below are collected with the APM setup methods.
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
