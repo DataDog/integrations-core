@@ -470,7 +470,7 @@ To validate that the APM PHP library can communicate with your Agent, examine th
 
 ### Metrics
 
-The `openai.api.usage.*` metrics are collected when a project-scoped API key is provided. Project-scoped API key support will be deprecated in the near future.
+As of December 2025, the `openai.api.usage.*` metrics have been deprecated, along with support for project-scoped API keys. Please use an organization-level Admin API key.
 
 The `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics are collected when an admin-scoped API key is provided.
 
