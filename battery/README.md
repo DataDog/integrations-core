@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors battery health of MacOS and Windows laptops.
+This check monitors battery health on MacOS and Windows laptops.
 
 **Minimum Agent version:** 7.75.0
 
@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-The configuration is located in the `battery.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][1]. See the [sample battery.d/conf.yaml][4] for all available configuration options. When you are done editing the configuration file, [restart the Agent][5] to load the new configuration.
+The configuration is located in the `battery.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][1]. See the [sample `battery.d/conf.yaml`][4] for all available configuration options. When you are done editing the configuration file, [restart the Agent][5] to load the new configuration.
 
 ### Validation
 
@@ -31,12 +31,12 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Tags
 The metric `system.battery.power_state` can report any of the following tags:
-- `power_state:battery_charging`: Indicates that the battery is charging.
-- `power_state:battery_discharging`: Inidicates that the battery is discharging.
-- `power_state:battery_power_on_line`: Indicates that the battery is connected to AC power.
+- `power_state:battery_charging`: Indicates that the battery is charging
+- `power_state:battery_discharging`: Indicates that the battery is discharging
+- `power_state:battery_power_on_line`: Indicates that the battery is connected to AC power
 
-In Windows the metric can also report the following tag:
-- `power_state:battery_critical`: Indicates that battery failure is imminent.
+In Windows, the metric can also report the following tag:
+- `power_state:battery_critical`: Indicates that battery failure is imminent
 
 ### Events
 
