@@ -1,0 +1,91 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b8fc3cea-9653-4852-905e-e6d340070b9f",
+  "app_id": "beyondtrust-privileged-remote-access",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into BeyondTrust Privileged Remote Access logs.",
+    "title": "BeyondTrust Privileged Remote Access",
+    "media": [
+      {
+        "caption": "BeyondTrust PRA Overview",
+        "image_url": "images/beyondTrust_pra_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust PRA Overview",
+        "image_url": "images/beyondTrust_pra_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust PRA Authentication and Access Management",
+        "image_url": "images/beyondTrust_pra_authentication_and_access_management_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust PRA Authentication and Access Management",
+        "image_url": "images/beyondTrust_pra_authentication_and_access_management_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust PRA Network & Platform Security",
+        "image_url": "images/beyondTrust_pra_network_and_platform_security_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust PRA Network & Platform Security",
+        "image_url": "images/beyondTrust_pra_network_and_platform_security_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust PRA Identity and User Activity",
+        "image_url": "images/beyondTrust_pra_identity_and_user_activity_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust PRA Identity and User Activity",
+        "image_url": "images/beyondTrust_pra_identity_and_user_activity_dark.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs",
+      "Category::Network"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 67604620,
+      "source_type_name": "BeyondTrust Privileged Remote Access",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "BeyondTrust PRA Overview": "assets/dashboards/beyondTrust_pra_overview.json",
+      "BeyondTrust PRA Authentication and Access Management": "assets/dashboards/beyondTrust_pra_authentication_and_access_management.json",
+      "BeyondTrust PRA Network & Platform Security": "assets/dashboards/beyondTrust_pra_network_and_platform_security.json",
+      "BeyondTrust PRA Identity and User Activity": "assets/dashboards/beyondTrust_pra_identity_and_user_activity.json"
+    },
+    "logs": {
+      "source": "beyondtrust-privileged-remote-access"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

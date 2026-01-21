@@ -97,6 +97,8 @@ integration/beyondtrust_identity_security_insights:
 - beyondtrust_identity_security_insights/**/*
 integration/beyondtrust_password_safe:
 - beyondtrust_password_safe/**/*
+integration/beyondtrust_privileged_remote_access:
+- beyondtrust_privileged_remote_access/**/*
 integration/bitdefender:
 - bitdefender/**/*
 integration/bitwarden:

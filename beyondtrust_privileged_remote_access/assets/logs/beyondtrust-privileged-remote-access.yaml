@@ -1,0 +1,341 @@
+id: beyondtrust-priviledge-remote-access
+metric_id: beyondtrust-priviledge-remote-access
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+pipeline:
+  type: pipeline
+  name: BeyondTrust Privileged Remote Access
+  enabled: true
+  filter:
+    query: source:beyondtrust-privileged-remote-access
+  processors:
+    - type: grok-parser
+      name: Parsing BeyondTrust PRA logs
+      enabled: true
+      source: message
+      samples:
+        - <133>Dec 24 00:14:20 pf60fc91 BG[51036]
+          1427:01:02:site=pf60fc91.beyondtrustcloud.com;when=1766556860;who=John
+          Carter
+          (john.carter@test.com);who_ip=64.252.100.129;event=jump_policy_added;authorization:allowed_approvers=0;authorization:allowed_to=1;authorization:approver_name=;authorization:email_addresses=;authorization:enabled=0;authorization:locale_code=en-us;authorization:max_duration=28800;authorization:approver_teams=;authorization:approvers=;code_name=jump_policy_3;description=Datadog
+          Security Integration Setup Analysis For
+          SIEM  CY25Q4;display_name=Datadog Security Integration Setup Analysis
+          For
+          SIEM  CY25Q4;external_tools_rdp_allowed=1;external_tools_shell_allowed=1;id=3;notification:email_addresses=;notification:locale_code=en-us;notification:recipient_name=;notify_on_customer_leave=0;notify_on_session_start=0;schedule:enabled=1;schedule:force_end=0;session_recordings_disabled=0;simultaneous_jump_behavior_applies_to_copi
+        - Jan  5 01:17:57 pf60fc91 BG[70499]
+          1427:01:02:site=pf60fc91.beyondtrustcloud.com;when=1767597477;who=Sam
+          Carter
+          (sam.carter@test.com);who_ip=64.252.100.129;event=jump_policy_changed;old_authorization:allowed_approvers=0;old_authorization:allowed_to=1;old_authorization:approver_name=;old_authorization:email_addresses=;old_authorization:enabled=0;old_authorization:locale_code=en-us;old_authorization:max_duration=28800;old_authorization:approver_teams=;old_authorization:approvers=;old_code_name=jump_policy_3;old_description=;old_display_name=test73;new_display_name=test75;old_external_tools_rdp_allowed=0;old_external_tools_shell_allowed=0;old_id=8;old_notification:email_addresses=;old_notification:locale_code=en-us;old_notification:recipient_name=;old_notify_on_customer_leave=0;old_notify_on_session_start=0;old_schedule:enabled=1;old_schedule:force_end=1;old_session_recordings_disabled=0;old_simultaneous_jump_behavior_applies_to_copies=0;old_simultaneous_jumps=0;old_simultaneous_rdp_jumps=0;old_authorization:ticket_system_enabled=0;old_two_factor_challenge_required=0
+      grok:
+        supportRules: parse_header (<%{number:syslog_priority}>)?(%{date("MMM  d
+          HH:mm:ss")}|%{date("MMM d HH:mm:ss")}) %{notSpace:hostname}
+          %{notSpace:system_id}\[%{number:process_id}\]
+          %{number:site_id}:%{integer}:%{integer}
+        matchRules: rule %{parse_header}:%{data::keyvalue("=","\\]\\[{}\"
+          \\n:;,/!''\\(\\)*~#&$%^?+\\\\",";")}
+    - type: grok-parser
+      name: Parse `who` attribute
+      enabled: true
+      source: who
+      samples:
+        - Sam Carter (sam.carter@test.com) using oidc
+        - John Carter IT (john.carter@test.com)
+      grok:
+        supportRules: ""
+        matchRules: rule %{regex(".*?(?= \\(|$)"):usr.name}(
+          \(%{regex(".*?(?=\\))"):usr.email}\))?.*
+    - type: arithmetic-processor
+      name: Convert seconds to milliseconds epoch time
+      enabled: true
+      expression: when*1000
+      target: when
+      replaceMissing: false
+    - type: date-remapper
+      name: Define `when` as the official date of the log
+      enabled: true
+      sources:
+        - when
+    - type: attribute-remapper
+      name: Map `event` to `evt.name`
+      enabled: true
+      sources:
+        - event
+      sourceType: attribute
+      target: evt.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `who_ip` to `network.client.ip`
+      enabled: true
+      sources:
+        - who_ip
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `user:id` to `usr.id`
+      enabled: true
+      sources:
+        - user:id
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: category-processor
+      name: Categorize `event_category` based on `evt.name` attribute
+      enabled: true
+      categories:
+        - filter:
+            query: "@evt.name:(login OR change_password OR change_username OR
+              admin_password_reset_to_factory_default OR fido2_credential_added
+              OR fido2_credential_changed OR fido2_credential_removed)"
+          name: identity-access
+        - filter:
+            query: "@evt.name:(group_policy_added OR group_policy_changed OR
+              group_policy_removed OR group_policy_member_added OR
+              group_policy_member_removed OR session_policy_added OR
+              session_policy_changed OR session_policy_removed OR
+              user_session_policy_added OR user_session_policy_removed)"
+          name: authorization-and-policy-control
+        - filter:
+            query: "@evt.name:(certificate_export OR kerberos_keytab_added OR
+              kerberos_keytab_removed OR vault_account_password_rotation)"
+          name: cryptography-and-secrets-protection
+        - filter:
+            query: "@evt.name:(jumpoint_cluster_added OR jumpoint_cluster_changed OR
+              jumpoint_cluster_removed OR jumpoint_user_added OR
+              jumpoint_user_removed OR network_tunnel_jump_item_added OR
+              network_tunnel_jump_item_changed OR
+              network_tunnel_jump_item_removed OR remote_rfb_jump_item_added OR
+              remote_rfb_jump_item_removed)"
+          name: jumpoint-and-remote-access-management
+        - filter:
+            query: "@evt.name:(user_added OR user_changed OR user_removed OR
+              pending_user_added OR pending_user_changed OR pending_user_removed
+              OR pending_vendor_user_added OR pending_vendor_user_deleted)"
+          name: user-management
+        - filter:
+            query: "@evt.name:(support_session_detail_generated OR
+              support_session_report_generated OR
+              support_session_summary_report_generated OR
+              team_activity_report_generated OR user_account_report_generated OR
+              vendor_activity_report_generated OR reporting_erasure OR
+              backup_created)"
+          name: reporting-and-compliance-evidence
+        - filter:
+            query: "@evt.name:(network_changed OR network_address_added OR
+              network_address_changed OR network_address_removed OR
+              network_route_changed OR syslog_server_changed OR SNMP_changed)"
+          name: network-activity
+        - filter:
+            query: "@evt.name:(api_account_added OR api_account_changed OR
+              api_account_removed OR security_provider_added OR
+              security_provider_changed OR security_provider_removed OR
+              security_provider_setting_added OR
+              security_provider_setting_changed OR
+              security_provider_setting_removed)"
+          name: api-and-integration-risk
+      target: event_category
+    - type: service-remapper
+      name: Define `event_category` as the official service of the log
+      enabled: true
+      sources:
+        - event_category
+    - type: pipeline
+      name: Parse FIDO2  logs
+      enabled: true
+      filter:
+        query: "@evt.name:(fido2_credential_added OR fido2_credential_removed)"
+      processors:
+        - name: Lookup on `roaming` attribute
+          enabled: true
+          source: roaming
+          target: roaming_value
+          lookupTable: |-
+            1,the credential is cross-platform
+            0,the credential is not cross-platform
+          type: lookup-processor
+    - type: pipeline
+      name: Parse Group Policy logs
+      enabled: true
+      filter:
+        query: "@evt.name:(group_policy_added OR group_policy_removed)"
+      processors:
+        - name: Lookup on `account:disabled` attribute
+          enabled: true
+          source: account:disabled
+          target: account_status_value
+          lookupTable: |-
+            1,disabled
+            0,enabled
+          type: lookup-processor
+        - name: Lookup on `allow_override` attribute
+          enabled: true
+          source: allow_override
+          target: allow_override_value
+          lookupTable: |-
+            1,setting can be overridden by a policy with a lower priority
+            0,setting cannot be overridden by a policy with a lower priority
+          type: lookup-processor
+        - name: Lookup on `login_code:enabled` attribute
+          enabled: true
+          source: login_code:enabled
+          target: login_code_value
+          lookupTable: |-
+            1,users must enter an emailed login code to log in
+            0,users may log in without an emailed login code
+          type: lookup-processor
+    - type: pipeline
+      name: Parse Network Address logs
+      enabled: true
+      filter:
+        query: "@evt.name:(network_address_added OR network_address_changed OR
+          network_address_removed)"
+      processors:
+        - name: Lookup on `enabled` attribute
+          enabled: true
+          source: enabled
+          target: ip_status_value
+          lookupTable: |-
+            1,enabled
+            0,disabled
+          type: lookup-processor
+    - type: pipeline
+      name: Parse Login User logs
+      enabled: true
+      filter:
+        query: "@evt.name:(user_added OR user_removed)"
+      processors:
+        - name: Lookup on `account:disabled` attribute
+          enabled: true
+          source: account:disabled
+          target: account_status_value
+          lookupTable: |-
+            1,disabled
+            0,enabled
+          type: lookup-processor
+        - name: Lookup on `login_code:enabled` attribute
+          enabled: true
+          source: login_code:enabled
+          target: login_code_value
+          lookupTable: |-
+            1,users must enter an emailed login code to log in
+            0,users may log in without an emailed login code
+          type: lookup-processor
+    - type: pipeline
+      name: Parse Session Policy logs
+      enabled: true
+      filter:
+        query: "@evt.name:(session_policy_added OR session_policy_removed)"
+      processors:
+        - name: Lookup on `automatic_privacy_screen` attribute
+          enabled: true
+          source: automatic_privacy_screen
+          target: automatic_privacy_screen_value
+          lookupTable: |-
+            1,enabled
+            0,disabled
+          type: lookup-processor
+    - type: pipeline
+      name: Parse Certificate Export logs
+      enabled: true
+      filter:
+        query: "@evt.name:certificate_export"
+      processors:
+        - name: Lookup on `exported_with_private_key` attribute
+          enabled: true
+          source: exported_with_private_key
+          target: exported_with_private_key_value
+          lookupTable: |-
+            1,included
+            0,not included
+          type: lookup-processor
+    - type: pipeline
+      name: Parse Jumpoint Cluster logs
+      enabled: true
+      filter:
+        query: "@evt.name:(jumpoint_cluster_added OR jumpoint_cluster_removed)"
+      processors:
+        - name: Lookup on `allows_multiple_nodes` attribute
+          enabled: true
+          source: allows_multiple_nodes
+          target: jumpoint_type_value
+          lookupTable: |-
+            1,cluster Jumpoint
+            0,standalone Jumpoint
+          type: lookup-processor
+        - name: Lookup on `disabled` attribute
+          enabled: true
+          source: disabled
+          target: jumpoint_status_value
+          lookupTable: |-
+            1,disabled
+            0,enabled
+          type: lookup-processor
+        - name: Lookup on `network_tunnel` attribute
+          enabled: true
+          source: network_tunnel
+          target: network_tunnel_value
+          lookupTable: |-
+            1,allow protocol tunnel jumps
+            0,block protocol tunnel jumps
+          type: lookup-processor
+    - type: pipeline
+      name: Parse Report logs
+      enabled: true
+      filter:
+        query: "@evt.name:(support_session_report_generated OR
+          support_session_detail_generated OR
+          support_session_summary_report_generated OR
+          team_activity_report_generated)"
+      processors:
+        - name: Lookup on `api` attribute
+          enabled: true
+          source: api
+          target: api_value
+          lookupTable: |-
+            1,the report query was made via the API
+            0,the report query was not made via the API
+          type: lookup-processor
+        - name: Lookup on `only_completed` attribute
+          enabled: true
+          source: only_completed
+          target: is_only_completed
+          lookupTable: |-
+            1,completed sessions
+            0,both (completed and uncompleted sessions)
+          type: lookup-processor
+        - name: Lookup on `primary_rep` attribute
+          enabled: true
+          source: primary_rep
+          target: session_role_value
+          lookupTable: |-
+            1,primary
+            0,participant
+          type: lookup-processor
+    - type: geo-ip-parser
+      name: Parsing geo-location information from source
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
