@@ -4,8 +4,11 @@ on:
   pull_request:
     paths:
     - datadog_checks_base/datadog_checks/**
+    - datadog_checks_base/pyproject.toml
     - datadog_checks_dev/datadog_checks/dev/*.py
+    - datadog_checks_dev/pyproject.toml
     - ddev/src/**
+    - ddev/pyproject.toml
     - "!agent_requirements.in"
 
 concurrency:
@@ -22,10 +25,8 @@ jobs:
 
     with:
       repo: core
-
-      # Options
-      test-py2: true
       context: "pr"
+
     secrets: inherit
 
   save-event:
@@ -64,10 +65,10 @@ jobs:
         directory: coverage-reports
         fail_ci_if_error: false
 
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
+  # submit-traces:
+  #   needs:
+  #   - test
+  #   if: success() || failure()
 
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit
+  #   uses: ./.github/workflows/submit-traces.yml
+  #   secrets: inherit

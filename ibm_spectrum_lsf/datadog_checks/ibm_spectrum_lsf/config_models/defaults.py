@@ -8,12 +8,20 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_badmin_perfmon_auto():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 
 
 def instance_empty_default_hostname():
     return False
+
+
+def instance_metric_sources():
+    return ['lsclusters', 'lshosts', 'bhosts', 'lsload', 'bqueues', 'bslots', 'bjobs']
 
 
 def instance_min_collection_interval():

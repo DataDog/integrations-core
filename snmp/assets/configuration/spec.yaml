@@ -21,6 +21,7 @@ files:
           example: core
           type: string
           display_default: python
+        fleet_configurable: true
       - name: use_device_id_as_hostname
         enabled: true
         description: |
@@ -32,6 +33,7 @@ files:
           example: true
           type: boolean
           display_default: false
+        fleet_configurable: true
       - name: oid_batch_size
         description: |
             The number of OIDs handled by each batch. Increasing this number improves performance but
@@ -207,6 +209,7 @@ files:
           Either `ip_address` or `network_address` must be provided.
         value:
           type: string
+        fleet_configurable: true
       - name: port
         description: |
           Default SNMP port.
@@ -221,6 +224,7 @@ files:
         secret: true
         value:
           type: string
+        fleet_configurable: true
       - name: snmp_version
         description: |
           If you are using SNMP v1 set snmp_version to 1
@@ -228,6 +232,7 @@ files:
         value:
           type: integer
           example: 2
+        fleet_configurable: true
       - name: timeout
         description: |
           Amount of second before timing out. Default of 5 for Python version of this check.
@@ -289,6 +294,7 @@ files:
         value:
           type: string
           example: <AUTHENTICATION_PROTOCOL>
+        fleet_configurable: true
       - name: authKey
         description: |
           Authentication key to use with your Authentication type.
@@ -297,6 +303,7 @@ files:
         value:
           type: string
           example: <AUTHENTICATION_TYPE_KEY>
+        fleet_configurable: true
       - name: privProtocol
         description: |
           Privacy type to use when connecting to your SNMP devices.
@@ -307,6 +314,7 @@ files:
         value:
           type: string
           example: <PRIVACY_TYPE>
+        fleet_configurable: true
       - name: privKey
         description: |
           Privacy type key to use with your Privacy type.
@@ -315,6 +323,7 @@ files:
         value:
           type: string
           example: <PRIVACY_TYPE_KEY>
+        fleet_configurable: true
       - name: context_engine_id
         description: |
           (Optional SNMP v3-only parameter)
@@ -484,8 +493,8 @@ files:
           interface_configs:
             - match_field: "name"  # (required) the field to match, can be `name` (interface name) or `index` (ifIndex)
               match_value: "eth0"  # (required, case sensitive) the value to match
-              in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
-              out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
+              in_speed: 50         # (optional) inbound speed value in bytes per sec, no value or 0 means no override
+              out_speed: 25        # (optional) outbound speed value in bytes per sec, no value or 0 means no override
               tags:                # (optional) interface level tags
                 - "testTagKey:testTagValue"
                 - "tagKey2:tagValue2"
@@ -512,6 +521,7 @@ files:
               match_value: eth5
               disabled: true
       - name: ping
+        fleet_configurable: true
         description: |
           Configure ICMP pings for all hosts in SNMP autodiscovery
           Each device is pinged with these settings each time the SNMP
@@ -535,17 +545,20 @@ files:
         options:
         - name: enabled
           description: Enables/Disables pinging devices
+          fleet_configurable: true
           value:
             type: boolean
             example: true
             display_default: false
         - name: count
           description: Number of pings to send per check run
+          fleet_configurable: true
           value:
             type: integer
             example: 2
         - name: timeout
           description: Timeout for all pings to execute in milliseconds
+          fleet_configurable: true
           value:
             type: integer
             example: 3000
@@ -564,11 +577,13 @@ files:
               If `use_raw_socket` is set to true, you MUST also enable the
               system-probe which has elevated privileges, see system-probe.yaml.example
               to enable it.
+            fleet_configurable: true
             value:
               type: boolean
               example: true
               display_default: false
 
+          fleet_configurable: true
       - template: instances/default
         overrides:
           service.hidden: true
