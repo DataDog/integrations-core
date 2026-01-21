@@ -2,6 +2,15 @@
 
 <!-- towncrier release notes start -->
 
+## 22.12.3 / 2026-01-21
+
+***Fixed***:
+
+* Improve SQL Server USE stmt identifier escaping ([#22277](https://github.com/DataDog/integrations-core/pull/22277))
+* Fix STRING_AGG truncation error for tables with many columns by casting to NVARCHAR(MAX) ([#22338](https://github.com/DataDog/integrations-core/pull/22338))
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+  Optimize StatementMetrics cache to only store fields we need to compute statement metrics. ([#22358](https://github.com/DataDog/integrations-core/pull/22358)) ([#22376](https://github.com/DataDog/integrations-core/pull/22376))
+
 ## 22.12.2 / 2026-01-09 / Agent 7.75.0
 
 ***Fixed***:
