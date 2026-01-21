@@ -1,1 +1,0 @@
-Fixes a performance issue when collecting `mysql.performance.errors_raised` metric by switching to a global aggregation instead of a per-user aggregation that we aggregated manually.
