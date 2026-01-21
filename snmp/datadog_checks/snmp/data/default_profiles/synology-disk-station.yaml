@@ -218,7 +218,7 @@ metrics:
         tag: synology_storage_io_device
   - MIB: SYNOLOGY-SPACEIO-MIB
     table:
-      name:
+      name: spaceIOTable
       OID: 1.3.6.1.4.1.6574.102.1
     symbols:
       - name: synology.spaceIOReads
