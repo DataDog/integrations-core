@@ -88,11 +88,14 @@ class ActivityMonitor:
             self.check.log.exception("[PC:%s:%s] Error collecting events: %s", self.check.pc_ip, self.check.pc_port, e)
             return 0
 
-    def _list_events(self, start_time_str):
+    def _list_events(self, start_time_str: str) -> list[dict]:
         """Fetch events from Prism Central.
 
-        Returns a list of events since the last collection.
-        On the first run, collects events from the last collection interval.
+        Args:
+            start_time_str: ISO 8601 formatted start time
+
+        Returns:
+            List of event objects
         """
         params = {}
         params["$filter"] = f"creationTime gt {start_time_str}"
@@ -100,8 +103,12 @@ class ActivityMonitor:
 
         return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/events", params=params)
 
-    def _process_event(self, event):
-        """Process and send a single event to Datadog."""
+    def _process_event(self, event: dict) -> None:
+        """Process and send a single event to Datadog.
+
+        Args:
+            event: Event object from API
+        """
         event_id = event.get("extId", "unknown")
         event_title = event.get("eventType", "Nutanix Event")
         event_message = event.get("message", "")
@@ -340,16 +347,30 @@ class ActivityMonitor:
             self.check.log.exception("[PC:%s:%s] Error collecting alerts: %s", self.check.pc_ip, self.check.pc_port, e)
             return 0
 
-    def _list_audits(self, start_time_str):
-        """Fetch audits from Prism Central."""
+    def _list_audits(self, start_time_str: str) -> list[dict]:
+        """Fetch audits from Prism Central.
+
+        Args:
+            start_time_str: ISO 8601 formatted start time
+
+        Returns:
+            List of audit objects
+        """
         params = {}
         params["$filter"] = f"creationTime gt {start_time_str}"
         params["$orderBy"] = "creationTime asc"
 
         return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/audits", params=params)
 
-    def _list_alerts(self, start_time_str):
-        """Fetch alerts from Prism Central."""
+    def _list_alerts(self, start_time_str: str) -> list[dict]:
+        """Fetch alerts from Prism Central.
+
+        Args:
+            start_time_str: ISO 8601 formatted start time
+
+        Returns:
+            List of alert objects
+        """
         params = {}
         params["$filter"] = f"creationTime gt {start_time_str}"
         params["$orderBy"] = "creationTime asc"
@@ -388,8 +409,12 @@ class ActivityMonitor:
                 )
             raise
 
-    def _process_audit(self, audit):
-        """Process and send a single audit to Datadog."""
+    def _process_audit(self, audit: dict) -> None:
+        """Process and send a single audit to Datadog.
+
+        Args:
+            audit: Audit object from API
+        """
         audit_id = audit.get("extId", "unknown")
 
         # Get cluster context for logging
@@ -470,8 +495,12 @@ class ActivityMonitor:
             }
         )
 
-    def _process_alert(self, alert):
-        """Process and send a single alert to Datadog."""
+    def _process_alert(self, alert: dict) -> None:
+        """Process and send a single alert to Datadog.
+
+        Args:
+            alert: Alert object from API
+        """
         alert_id = alert.get("extId", "unknown")
         title = alert.get("title", "Nutanix Alert")
         message = alert.get("message", "")
@@ -528,11 +557,14 @@ class ActivityMonitor:
             }
         )
 
-    def _list_tasks(self, start_time_str):
+    def _list_tasks(self, start_time_str: str) -> list[dict]:
         """Fetch tasks from Prism Central.
 
-        Returns a list of tasks since the last collection.
-        Uses last_task_collection_time if available, otherwise uses now - sampling_interval.
+        Args:
+            start_time_str: ISO 8601 formatted start time
+
+        Returns:
+            List of task objects
         """
         params = {}
         params["$filter"] = f"createdTime gt {start_time_str}"
@@ -540,8 +572,12 @@ class ActivityMonitor:
 
         return self.check._get_paginated_request_data("api/prism/v4.0/config/tasks", params=params)
 
-    def _process_task(self, task):
-        """Process and send a single task to Datadog as an event."""
+    def _process_task(self, task: dict) -> None:
+        """Process and send a single task to Datadog as an event.
+
+        Args:
+            task: Task object from API
+        """
         task_id = task.get("extId", "unknown")
         task_operation = task.get("operation", "Nutanix Task")
         task_description = task.get("operationDescription", "")
@@ -628,7 +664,7 @@ class ActivityMonitor:
             )
             return None
 
-    def _filter_after_time(self, items, last_time_str, field_name):
+    def _filter_after_time(self, items: list[dict], last_time_str: str | None, field_name: str) -> list[dict]:
         """Filter items to those strictly after the last submitted time.
 
         This provides client-side filtering as a safeguard against API edge cases
@@ -636,7 +672,7 @@ class ActivityMonitor:
 
         Args:
             items: List of items to filter
-            last_time_str: ISO 8601 formatted timestamp string of the last collection
+            last_time_str: ISO 8601 formatted timestamp string of the last collection (or None)
             field_name: Name of the timestamp field in the items
 
         Returns:
@@ -673,7 +709,7 @@ class ActivityMonitor:
 
         return filtered
 
-    def _find_max_timestamp(self, items, field_name):
+    def _find_max_timestamp(self, items: list[dict], field_name: str) -> str | None:
         """Find the maximum timestamp among all items.
 
         The Nutanix API may not return items sorted by timestamp despite the $orderBy parameter,
