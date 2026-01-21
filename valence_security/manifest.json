@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a9265d8a-1531-4f1a-9719-54b03a1f0634",
   "app_id": "valence-security",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
