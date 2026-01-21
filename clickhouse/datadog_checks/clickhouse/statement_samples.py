@@ -532,7 +532,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         are disabled for ClickHouse. Kept for test compatibility.
         """
         # Use current_database from the query if available, fallback to check's default db
-        db = row.get('current_database') or self._check._db
+        db = row.get('current_database') or self._check._config.db
 
         event = {
             "host": self._check.reported_hostname,
@@ -568,8 +568,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         """
         Main job execution method called by DBMAsyncJob
         """
-        # Filter out internal tags
-        self.tags = [t for t in self._check._tags if not t.startswith('dd.internal')]
+        # Filter out internal tags (self._tags comes from DBMAsyncJob via run_job_loop)
+        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
         # Check if we should collect activity snapshots
