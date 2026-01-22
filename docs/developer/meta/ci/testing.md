@@ -44,13 +44,11 @@ This [workflow](https://github.com/DataDog/integrations-core/blob/master/.github
 - [Restore](https://github.com/actions/cache/tree/main/restore) dependencies from [the cache](#caching)
 - Install & configure [ddev](https://github.com/DataDog/integrations-core/tree/master/ddev)
 - Run any [setup scripts](#target-setup) the target requires
-- Start an [HTTP server](https://github.com/DataDog/integrations-core/blob/master/.ddev/ci/scripts/traces.py) to capture [traces](#tracing)
-- Run unit & integration tests
+- Run unit & integration tests (with [tracing](#tracing) enabled via CI Visibility)
 - Run [E2E](../../e2e.md#testing) tests
 - Run [benchmarks](../../ddev/test.md#benchmarks)
-- [Upload](https://github.com/actions/upload-artifact) captured [traces](#tracing)
 - [Upload](https://github.com/actions/upload-artifact) collected [test results](#test-results)
-- [Submit](https://github.com/codecov/codecov-action) coverage statistics to [Codecov](https://codecov.io)
+- [Upload](https://github.com/actions/upload-artifact) coverage data
 
 ## Target setup
 
@@ -150,9 +148,14 @@ This reusable workflow is called by workflows that need to test everything.
 
 ## Tracing
 
-During testing we use [ddtrace](https://github.com/DataDog/dd-trace-py) to submit [APM data](https://docs.datadoghq.com/tracing/) to the [Datadog Agent](https://docs.datadoghq.com/agent/). To avoid every job pulling the Agent, these HTTP trace requests are captured and saved to a [newline-delimited JSON](https://en.wikipedia.org/wiki/JSON_streaming#Newline-Delimited_JSON) file.
+During testing we use [ddtrace](https://github.com/DataDog/dd-trace-py) with [Datadog CI Visibility](https://docs.datadoghq.com/tests/) in an agentless configuration. Data is submitted directly to Datadog via the CI Visibility API without requiring a local Datadog Agent.
 
-A [workflow](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/submit-traces.yml) then runs after all jobs are finished and [replays](https://github.com/DataDog/integrations-core/blob/master/.ddev/ci/scripts/traces.py) the requests to the Agent. At the end the artifact is [deleted](https://github.com/geekyeggo/delete-artifact) to avoid needless storage persistence and also so if individual jobs are rerun that only the new traces will be submitted.
+We collect two types of data:
+
+- **Test results**: Pass/fail status, duration, and metadata for each test case
+- **Tracing information**: APM traces generated when integrations execute during tests, providing visibility into the check's behavior
+
+For more details on Python test instrumentation, see the [Test Optimization setup guide for Python](https://docs.datadoghq.com/tests/setup/python/).
 
 We maintain a [public dashboard](https://p.datadoghq.com/sb/yB5yjZ-e9572aadd5162263629114009c09dce1) for monitoring our CI.
 
