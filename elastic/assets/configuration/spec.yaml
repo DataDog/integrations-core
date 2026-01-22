@@ -1,4 +1,5 @@
 name: Elasticsearch
+fleet_configurable: true
 files:
 - name: elastic.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: url
+      fleet_configurable: true
       required: true
       description: |
         The URL where Elasticsearch accepts HTTP requests. This is used to
@@ -22,6 +24,7 @@ files:
         want to set each Elasticsearch `node.name` to the machine hostname. You may
         then set `node_name_as_host` to `true` to avoid duplicate hostnames.
         See: https://www.elastic.co/guide/en/elasticsearch/reference/current/node.name.html
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -32,6 +35,7 @@ files:
         submits metrics of the local node.
         This parameter was also called `is_external` and you can still use it but it
         is removed in Agent version 6+.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -40,11 +44,13 @@ files:
         If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
         Without this flag you only get stats from `_all`.
         Do not use it if you are pointing to localhost.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
     - name: index_stats
       description: Set `index_stats` to true to collect metrics for individual indices.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -57,6 +63,7 @@ files:
         `elasticsearch.primaries.docs.count` gives you the total number of
         documents in your indexes WITHOUT counting duplicates due to the existence
         of replica shards in your ES cluster.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
