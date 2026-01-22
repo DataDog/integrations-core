@@ -5,6 +5,10 @@ on:
     paths-ignore:
     - datadog_checks_base/datadog_checks/**
     - datadog_checks_dev/datadog_checks/dev/*.py
+    # Also run if we modify the workflow files
+    - '.github/workflows/pr.yml'
+    - '.github/workflows/pr-test.yml'
+    - '.github/workflows/test-target.yml'
   merge_group:
     # We require this workflow to pass in order to merge a PR to master.
     # This means Github's Merge Queue also requires it to pass.

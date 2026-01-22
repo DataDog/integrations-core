@@ -10,6 +10,10 @@ on:
     - ddev/src/**
     - ddev/pyproject.toml
     - "!agent_requirements.in"
+    # Also run if we modify the workflow files
+    - '.github/workflows/pr-all.yml'
+    - '.github/workflows/test-target.yml'
+    - '.github/workflows/test-all.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}

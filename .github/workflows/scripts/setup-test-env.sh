@@ -8,6 +8,7 @@ set -euo pipefail
 # INPUT_PYTHON_VERSION, INPUT_TEST_PY2, INPUT_TEST_PY3, INPUT_PLATFORM
 # INPUT_AGENT_IMAGE, INPUT_AGENT_IMAGE_PY2, INPUT_AGENT_IMAGE_WINDOWS, INPUT_AGENT_IMAGE_WINDOWS_PY2
 # INPUT_TARGET, INPUT_TARGET_ENV, INPUT_REPO, INPUT_CONTEXT, INPUT_MINIMUM_BASE_PACKAGE, INPUT_JOB_NAME
+# INPUT_PYTEST_ARGS, INPUT_IS_FORK
 # DD_API_KEY_SECRET, SETUP_ENV_VARS
 # DOCKER_USERNAME, DOCKER_ACCESS_TOKEN, ORACLE_DOCKER_USERNAME, ORACLE_DOCKER_PASSWORD
 # DD_GITHUB_USER, DD_GITHUB_TOKEN
@@ -68,6 +69,13 @@ TEST_RESULTS_DIR="${TEST_RESULTS_BASE_DIR}/${JOB_NAME}"
 # DD_TAGS
 DD_TAGS="team:agent-integrations,platform:${INPUT_PLATFORM},target:${INPUT_TARGET},target_env:${INPUT_TARGET_ENV:-all},agent_image:${DDEV_E2E_AGENT},context:${INPUT_CONTEXT}"
 
+# Compute INPUT_TARGET_STR from INPUT_TARGET and INPUT_TARGET_ENV
+if [[ -n "${INPUT_TARGET_ENV:-}" ]]; then
+  INPUT_TARGET_STR="${INPUT_TARGET}:${INPUT_TARGET_ENV}"
+else
+  INPUT_TARGET_STR="${INPUT_TARGET}"
+fi
+
 # =============================================================================
 # Export all variables to GITHUB_ENV
 # =============================================================================
@@ -97,6 +105,16 @@ DD_TAGS="team:agent-integrations,platform:${INPUT_PLATFORM},target:${INPUT_TARGE
   echo "ORACLE_DOCKER_PASSWORD=${ORACLE_DOCKER_PASSWORD}"
   echo "DD_GITHUB_USER=${DD_GITHUB_USER}"
   echo "DD_GITHUB_TOKEN=${DD_GITHUB_TOKEN}"
+  # Variables used by test scripts (run-unit-integration-tests.sh, run-e2e-tests.sh)
+  # Define once here to avoid overloading the action object map
+  echo "INPUT_REPO=${INPUT_REPO}"
+  echo "INPUT_TARGET=${INPUT_TARGET}"
+  echo "INPUT_TARGET_ENV=${INPUT_TARGET_ENV:-}"
+  echo "INPUT_TARGET_STR=${INPUT_TARGET_STR}"
+  echo "INPUT_PLATFORM=${INPUT_PLATFORM}"
+  echo "INPUT_MINIMUM_BASE_PACKAGE=${INPUT_MINIMUM_BASE_PACKAGE:-false}"
+  echo "INPUT_PYTEST_ARGS=${INPUT_PYTEST_ARGS:-}"
+  echo "INPUT_IS_FORK=${INPUT_IS_FORK:-false}"
 } >> "$GITHUB_ENV"
 
 # Override with custom vars if provided

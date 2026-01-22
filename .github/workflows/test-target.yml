@@ -139,6 +139,14 @@ jobs:
       #   ORACLE_DOCKER_PASSWORD
       #   DD_GITHUB_USER
       #   DD_GITHUB_TOKEN
+      #   INPUT_REPO
+      #   INPUT_TARGET
+      #   INPUT_TARGET_ENV
+      #   INPUT_TARGET_STR
+      #   INPUT_PLATFORM
+      #   INPUT_MINIMUM_BASE_PACKAGE
+      #   INPUT_PYTEST_ARGS
+      #   INPUT_IS_FORK
       run: bash .github/workflows/scripts/setup-test-env.sh
       env:
         INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
@@ -155,6 +163,8 @@ jobs:
         INPUT_CONTEXT: ${{ inputs.context }}
         INPUT_MINIMUM_BASE_PACKAGE: ${{ inputs.minimum-base-package }}
         INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
+        INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
+        INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
         DD_API_KEY_SECRET: ${{ secrets.DD_API_KEY }}
         SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -165,6 +175,8 @@ jobs:
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Tag job for CI Visibility
+      # Skip on fork PRs since secrets won't be available
+      if: env.INPUT_IS_FORK != 'true'
       uses: ./.github/actions/tag-job
       with:
         tags: ${{ env.DD_TAGS }}
@@ -241,31 +253,19 @@ jobs:
       if: inputs.latest != true
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: bash .github/workflows/scripts/run-unit-integration-tests.sh
-      env:
-        INPUT_REPO: ${{ inputs.repo }}
-        INPUT_TARGET: ${{ inputs.target }}
-        INPUT_PLATFORM: ${{ inputs.platform }}
-        INPUT_MINIMUM_BASE_PACKAGE: ${{ inputs.minimum-base-package }}
-        INPUT_TARGET_STR: ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
-        INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
 
     - name: Run E2E tests
       if: (inputs.repo == 'core' && !inputs.minimum-base-package) || inputs.repo != 'core'
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: bash .github/workflows/scripts/run-e2e-tests.sh
       env:
-        INPUT_REPO: ${{ inputs.repo }}
-        INPUT_TARGET: ${{ inputs.target }}
-        INPUT_PLATFORM: ${{ inputs.platform }}
-        INPUT_TARGET_ENV: ${{ inputs.target-env || 'all' }}
-        INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
         INPUT_SESSION_NAME: "e2e-tests"
 
     - name: Run benchmarks
       if: inputs.benchmark
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && env.INPUT_IS_FORK != 'true' && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "benchmarks"
       run: ddev test --bench --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
@@ -273,7 +273,7 @@ jobs:
       if: inputs.latest
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && env.INPUT_IS_FORK != 'true' && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "latest-tests"
       run: ddev test --latest --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
@@ -282,10 +282,8 @@ jobs:
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: bash .github/workflows/scripts/run-e2e-tests.sh
       env:
-        INPUT_REPO: ${{ inputs.repo }}
+        # Override INPUT_TARGET to include :latest suffix
         INPUT_TARGET: "${{ inputs.target }}:latest"
-        INPUT_PLATFORM: ${{ inputs.platform }}
-        INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
         INPUT_SESSION_NAME: "latest-e2e-tests"
         INPUT_IS_LATEST: "true"
 
