@@ -2,13 +2,14 @@
 # Run Unit & Integration tests for test-target workflow
 # This script is called from test-target.yml to reduce YAML size
 
-# Required environment variables:
+# Environment variables (set via GITHUB_ENV by setup-test-env.sh):
 # INPUT_REPO, INPUT_TARGET, INPUT_PLATFORM, INPUT_MINIMUM_BASE_PACKAGE
-# INPUT_TARGET_STR, INPUT_PYTEST_ARGS
+# INPUT_TARGET_STR, INPUT_PYTEST_ARGS, INPUT_IS_FORK
 
 # Set tracing flag
 # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
-if [[ "$INPUT_REPO" == 'core' && ( "$INPUT_TARGET" != 'sqlserver' || "$INPUT_PLATFORM" != 'windows' ) ]]; then
+# Disable tracing on forks since they don't have access to DD_API_KEY
+if [[ "$INPUT_REPO" == 'core' && ( "$INPUT_TARGET" != 'sqlserver' || "$INPUT_PLATFORM" != 'windows' ) && "$INPUT_IS_FORK" != 'true' ]]; then
   export DDEV_TEST_ENABLE_TRACING="1"
 else
   export DDEV_TEST_ENABLE_TRACING="0"

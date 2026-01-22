@@ -2,17 +2,20 @@
 # Run E2E tests for test-target workflow
 # This script is called from test-target.yml to reduce YAML size
 
-# Required environment variables:
-# INPUT_REPO, INPUT_TARGET, INPUT_PLATFORM, INPUT_PYTEST_ARGS
-# INPUT_TARGET_ENV (optional) - environment to run tests against
+# Environment variables (set via GITHUB_ENV by setup-test-env.sh):
+# INPUT_REPO, INPUT_TARGET, INPUT_PLATFORM, INPUT_PYTEST_ARGS, INPUT_TARGET_ENV, INPUT_IS_FORK
+#
+# Step-specific environment variables (passed directly from workflow step):
+# INPUT_SESSION_NAME (optional) - custom session name, defaults to "e2e-tests"
 # INPUT_IS_LATEST (optional) - set to "true" for latest version tests
-# INPUT_SESSION_NAME (optional) - custom session name
+# INPUT_TARGET (override) - for latest tests, set to "target:latest"
 
 export DD_TEST_SESSION_NAME="${INPUT_SESSION_NAME:-e2e-tests}"
 
 # Set tracing flag
 # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
-if [[ "$INPUT_REPO" == 'core' && ( "$INPUT_TARGET" != 'sqlserver' || "$INPUT_PLATFORM" != 'windows' ) ]]; then
+# Disable tracing on forks since they don't have access to DD_API_KEY
+if [[ "$INPUT_REPO" == 'core' && ( "$INPUT_TARGET" != 'sqlserver' || "$INPUT_PLATFORM" != 'windows' ) && "$INPUT_IS_FORK" != 'true' ]]; then
   export DDEV_TEST_ENABLE_TRACING="1"
 else
   export DDEV_TEST_ENABLE_TRACING="0"
