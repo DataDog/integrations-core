@@ -398,7 +398,6 @@ files:
         type: boolean
         example: true
     - name: data_directory
-      fleet_configurable: true
       description: |
         The data directory of your postgres installation
         Required when collecting WAL metrics on Postgres 9.6.
@@ -524,7 +523,6 @@ files:
         example: false
         display_default: false
     - name: pg_stat_statements_view
-      fleet_configurable: true
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the
         `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
@@ -534,7 +532,6 @@ files:
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
     - name: pg_stat_activity_view
-      fleet_configurable: true
       hidden: true
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the

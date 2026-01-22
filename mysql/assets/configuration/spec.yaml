@@ -1,4 +1,5 @@
 name: MySQL
+fleet_configurable: true
 files:
   - name: mysql.yaml
     options:
@@ -8,6 +9,7 @@ files:
             description: |
               Set to `true` to propagate the tags from `datadog.yaml` to the check.
               When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+            fleet_configurable: true
             value:
               example: false
               type: boolean
@@ -26,6 +28,7 @@ files:
               MySQL host to connect to.
               NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
               provide a value for the sock key (below).
+            fleet_configurable: true
             enabled: true
             value:
               type: string
@@ -35,6 +38,7 @@ files:
           - name: username
             description: |
               Username used to connect to MySQL.
+            fleet_configurable: true
             enabled: true
             value:
               type: string
@@ -44,6 +48,7 @@ files:
           - name: password
             description: |
               Password associated to the MySQL user.
+            fleet_configurable: true
             enabled: true
             secret: true
             value:
@@ -52,6 +57,7 @@ files:
           - name: port
             description: |
               Port to use when connecting to MySQL.
+            fleet_configurable: true
             enabled: true
             value:
               type: number
@@ -69,6 +75,7 @@ files:
             description: |
               Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
               and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+            fleet_configurable: true
             value:
               type: string
           - name: exclude_hostname
@@ -107,10 +114,12 @@ files:
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
               If you specify a socket you dont need to specify a host.
+            fleet_configurable: true
             value:
               type: string
           - name: charset
             description: Charset you want to use.
+            fleet_configurable: true
             value:
               type: string
               example: utf8
@@ -126,6 +135,7 @@ files:
             description: |
               Maximum number of seconds to wait before timing out when connecting to MySQL.
               The default connection timeout is 10 seconds.
+            fleet_configurable: true
             value:
               type: number
               example: 10
@@ -134,6 +144,7 @@ files:
             description: |
               The timeout for reading from the connection in seconds.
               By default, no read timeout is set.
+            fleet_configurable: true
             value:
               type: number
               example: 10
@@ -188,6 +199,7 @@ files:
               name : MySQL status name on "SHOW GLOBAL STATUS"
               metric_name : metric name
               type : gauge | rate | count | ...
+            fleet_configurable: true
             value:
               type: array
               items:
@@ -383,6 +395,7 @@ files:
                   example: false
 
           - name: dbm
+            fleet_configurable: true
             description: |
               Set to `true` enable Database Monitoring.
             enabled: false
@@ -460,6 +473,7 @@ files:
                   example: 60
           - name: query_metrics
             description: Configure collection of query metrics
+            fleet_configurable: true
             options:
               - name: enabled
                 description: |
@@ -496,6 +510,7 @@ files:
 
           - name: query_samples
             description: Configure collection of query samples
+            fleet_configurable: true
             options:
               - name: enabled
                 description: |
