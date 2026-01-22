@@ -6,6 +6,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+from clickhouse_connect.driver.exceptions import OperationalError
+
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
 
@@ -134,6 +136,20 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
         self._last_checkpoint_microseconds = None
         self._current_checkpoint_microseconds = None
 
+    def cancel(self):
+        """Cancel the job and clean up the dedicated client."""
+        super(ClickhouseCompletedQuerySamples, self).cancel()
+        self._close_db_client()
+
+    def _close_db_client(self):
+        """Close the dedicated database client if it exists."""
+        if self._db_client:
+            try:
+                self._db_client.close()
+            except Exception as e:
+                self._log.debug("Error closing DBM client: %s", e)
+            self._db_client = None
+
     def _execute_query(self, query):
         """Execute a query and return the results using the dedicated client"""
         if self._cancel_event.is_set():
@@ -144,11 +160,15 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
                 self._db_client = self._check.create_dbm_client()
             result = self._db_client.query(query)
             return result.result_rows
+        except OperationalError as e:
+            # Connection-related error - reset client to force reconnect
+            self._log.warning("Connection error, will reconnect: %s", e)
+            self._close_db_client()
+            raise
         except Exception as e:
-            self._log.warning("Failed to run query: %s", e)
-            # Reset client on error to force reconnect
-            self._db_client = None
-            raise e
+            # Query error (syntax, timeout, etc.) - don't reset connection
+            self._log.warning("Query error: %s", e)
+            raise
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code

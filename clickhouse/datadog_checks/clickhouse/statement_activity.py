@@ -12,6 +12,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+from clickhouse_connect.driver.exceptions import OperationalError
+
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
     from datadog_checks.clickhouse.config_models.instance import QueryActivity
@@ -115,7 +117,7 @@ class ClickhouseStatementActivity(DBMAsyncJob):
         self._tags_no_db = None
         self.tags = None
 
-        # Create a separate client for this DBM job to avoid concurrent query errors
+        # Dedicated client for this job (uses shared connection pool)
         self._db_client = None
 
         # Obfuscator options for SQL statements
@@ -129,6 +131,20 @@ class ClickhouseStatementActivity(DBMAsyncJob):
 
         self._collection_interval = collection_interval
         self._payload_row_limit = config.payload_row_limit
+
+    def cancel(self):
+        """Cancel the job and clean up the dedicated client."""
+        super(ClickhouseStatementActivity, self).cancel()
+        self._close_db_client()
+
+    def _close_db_client(self):
+        """Close the dedicated database client if it exists."""
+        if self._db_client:
+            try:
+                self._db_client.close()
+            except Exception as e:
+                self._log.debug("Error closing DBM client: %s", e)
+            self._db_client = None
 
     def _get_debug_tags(self):
         """Get debug tags for metrics."""
@@ -169,10 +185,20 @@ class ClickhouseStatementActivity(DBMAsyncJob):
             self._log.debug("Loaded %s rows from %s in %.2f ms", len(rows), processes_table, elapsed_ms)
 
             return rows
+        except OperationalError as e:
+            # Connection-related error - reset client to force reconnect
+            self._log.warning("Connection error in active queries, will reconnect: %s", e)
+            self._close_db_client()
+            self._check.count(
+                "dd.clickhouse.activity.error",
+                1,
+                tags=self.tags + ["error:get-active-queries", "error_type:connection"] + self._get_debug_tags(),
+                raw=True,
+            )
+            return []
         except Exception as e:
+            # Query error - don't reset connection
             self._log.exception("Failed to collect active queries: %s", str(e))
-            # Reset client on error to force reconnect
-            self._db_client = None
             self._check.count(
                 "dd.clickhouse.activity.error",
                 1,
@@ -326,10 +352,14 @@ class ClickhouseStatementActivity(DBMAsyncJob):
 
             return connections
 
+        except OperationalError as e:
+            # Connection-related error - reset client to force reconnect
+            self._log.warning("Connection error in active connections, will reconnect: %s", e)
+            self._close_db_client()
+            return []
         except Exception as e:
+            # Query error - don't reset connection
             self._log.warning("Failed to get active connections: %s", e)
-            # Reset client on error to force reconnect
-            self._db_client = None
             return []
 
     def _create_active_sessions(self, rows):

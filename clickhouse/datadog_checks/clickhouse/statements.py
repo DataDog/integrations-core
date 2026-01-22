@@ -8,6 +8,7 @@ import time
 from typing import TYPE_CHECKING
 
 from cachetools import TTLCache
+from clickhouse_connect.driver.exceptions import OperationalError
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
@@ -138,7 +139,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
         self.tags = None
         self._state = StatementMetrics()
 
-        # Create a separate client for this DBM job to avoid concurrent query errors
+        # Dedicated client for this job (uses shared connection pool)
         self._db_client = None
 
         # Track the current checkpoint for this collection cycle
@@ -160,21 +161,38 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / getattr(config, 'full_statement_text_samples_per_hour_per_query', 1),
         )
 
+    def cancel(self):
+        """Cancel the job and clean up the dedicated client."""
+        super(ClickhouseStatementMetrics, self).cancel()
+        self._close_db_client()
+
+    def _close_db_client(self):
+        """Close the dedicated database client if it exists."""
+        if self._db_client:
+            try:
+                self._db_client.close()
+            except Exception as e:
+                self._log.debug("Error closing DBM client: %s", e)
+            self._db_client = None
+
     def _execute_query(self, query):
-        """Execute a query and return the results using the dedicated client"""
+        """Execute a query using the dedicated client (with shared connection pool)."""
         if self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
         try:
-            # Use the dedicated client for this job
             if self._db_client is None:
                 self._db_client = self._check.create_dbm_client()
             result = self._db_client.query(query)
             return result.result_rows
+        except OperationalError as e:
+            # Connection-related error - reset client to force reconnect
+            self._log.warning("Connection error, will reconnect: %s", e)
+            self._close_db_client()
+            raise
         except Exception as e:
-            self._log.warning("Failed to run query: %s", e)
-            # Reset client on error to force reconnect
-            self._db_client = None
-            raise e
+            # Query error (syntax, timeout, etc.) - don't reset connection
+            self._log.warning("Query error: %s", e)
+            raise
 
     def _get_current_checkpoint_from_db(self) -> int:
         """

@@ -94,16 +94,7 @@ files:
         type: boolean
         example: false
     - name: single_endpoint_mode
-      description: |
-        Set to `true` when connecting through a single endpoint that load-balances across multiple nodes.
-
-        When enabled, the agent uses `clusterAllReplicas('default', system.<table>)` to query
-        system tables across all nodes in the cluster. This is required when connecting through
-        a load balancer or managed service endpoint (such as ClickHouse Cloud) where replicas
-        cannot be connected to individually.
-
-        For deployments where each node is monitored by its own agent instance connecting
-        directly to that node's local system tables, leave this as `false` (default).
+      description: Set to `true` when connecting through a single endpoint for ClickHouse Cloud.
       value:
         type: boolean
         example: false
@@ -223,15 +214,6 @@ files:
           value:
             type: boolean
             example: false
-    - name: database_instance_collection_interval
-      hidden: true
-      description: |
-        Set the database instance collection interval (in seconds). The database instance collection sends
-        basic information about the database instance along with a signal that it still exists.
-        This collection does not involve any additional queries to the database.
-      value:
-        type: number
-        default: 300
     - template: instances/db
       overrides:
         custom_queries.value.example:
