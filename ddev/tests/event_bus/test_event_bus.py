@@ -87,12 +87,12 @@ class MailServer(AsyncTask[EmailMessage]):
         self.sent_emails.append(message)
 
     async def on_success(self, message: EmailMessage) -> None:
-        if isinstance(message, EmailMessage) and message.body == "fail_success_hook":
+        if message.body == "fail_success_hook":
             raise RuntimeError("Success hook failed intentionally")
         self.delivery_confirmations.append(message)
 
     async def on_error(self, message: EmailMessage, error: Exception) -> None:
-        if isinstance(message, EmailMessage) and message.body == "fail_processing_and_error":
+        if message.body == "fail_processing_and_error":
             raise RuntimeError("Error hook failed intentionally")
         self.failed_deliveries.append((message, error))
 
@@ -115,11 +115,10 @@ class WorkflowManager(AsyncTask[EmailMessage]):
 
     async def process_message(self, message: EmailMessage) -> None:
         self.processed_messages.append(message)
-        if isinstance(message, EmailMessage):
-            if message.subject == "register_user":
-                self.submit_message(SystemEvent(id="register_user", urgent=False, event_type="RegisterUserEmail"))
-            else:
-                self.submit_message(GenerateReport(id="chained_report", priority=100, report_type="ChainedReport"))
+        if message.subject == "register_user":
+            self.submit_message(SystemEvent(id="register_user", urgent=False, event_type="RegisterUserEmail"))
+        else:
+            self.submit_message(GenerateReport(id="chained_report", priority=100, report_type="ChainedReport"))
 
 
 class MockOrchestrator(EventBusOrchestrator):
