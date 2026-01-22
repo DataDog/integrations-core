@@ -1,4 +1,5 @@
 name: ClickHouse
+fleet_configurable: true
 files:
 - name: clickhouse.yaml
   options:
@@ -14,37 +15,44 @@ files:
   - template: instances
     options:
     - name: server
+      fleet_configurable: true
       required: true
       description: The hostname used to connect to the system.
       value:
         type: string
     - name: port
       description: The port used to connect to the system.
+      fleet_configurable: true
       value:
         type: integer
         example: 9000
     - name: username
       description: The database user to authenticate as.
+      fleet_configurable: true
       value:
           type: string
           example: default
     - name: password
       description: The password of `username`.
+      fleet_configurable: true
       secret: true
       value:
         type: string
     - name: db
       description: The database to connect to.
+      fleet_configurable: true
       value:
         type: string
         display_default: default
     - name: connect_timeout
       description: The timeout for connecting to the `server`.
+      fleet_configurable: true
       value:
         type: integer
         example: 10
     - name: read_timeout
       description: The timeout for reading from the `server`.
+      fleet_configurable: true
       value:
         type: integer
         example: 10
@@ -58,6 +66,7 @@ files:
           - zstd
           - br
           - gzip
+      fleet_configurable: true
       value:
         type: string
     - name: tls_ca_cert
