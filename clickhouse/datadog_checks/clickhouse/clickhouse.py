@@ -15,7 +15,7 @@ from . import queries
 from .__about__ import __version__
 from .completed_query_samples import ClickhouseCompletedQuerySamples
 from .config import build_config
-from .statement_samples import ClickhouseStatementSamples
+from .statement_activity import ClickhouseStatementActivity
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
 
@@ -91,11 +91,11 @@ class ClickhouseCheck(AgentCheck):
         else:
             self.statement_metrics = None
 
-        # Initialize query samples (from system.processes - analogous to pg_stat_activity)
-        if self._config.dbm and self._config.query_samples.enabled:
-            self.statement_samples = ClickhouseStatementSamples(self, self._config.query_samples)
+        # Initialize query activity (from system.processes - analogous to pg_stat_activity)
+        if self._config.dbm and self._config.query_activity.enabled:
+            self.statement_activity = ClickhouseStatementActivity(self, self._config.query_activity)
         else:
-            self.statement_samples = None
+            self.statement_activity = None
 
         # Initialize completed query samples (from system.query_log - completed queries)
         if self._config.dbm and self._config.completed_query_samples.enabled:
@@ -182,9 +182,9 @@ class ClickhouseCheck(AgentCheck):
         if self.statement_metrics:
             self.statement_metrics.run_job_loop(self.tags)
 
-        # Run statement samples if DBM is enabled (from system.processes)
-        if self.statement_samples:
-            self.statement_samples.run_job_loop(self.tags)
+        # Run query activity collection if DBM is enabled (from system.processes)
+        if self.statement_activity:
+            self.statement_activity.run_job_loop(self.tags)
 
         # Run completed query samples if DBM is enabled (from system.query_log)
         if self.completed_query_samples:
