@@ -93,15 +93,7 @@ instances:
     # dbm: false
 
     ## @param single_endpoint_mode - boolean - optional - default: false
-    ## Set to `true` when connecting through a single endpoint that load-balances across multiple nodes.
-    ##
-    ## When enabled, the agent uses `clusterAllReplicas('default', system.<table>)` to query
-    ## system tables across all nodes in the cluster. This is required when connecting through
-    ## a load balancer or managed service endpoint (such as ClickHouse Cloud) where replicas
-    ## cannot be connected to individually.
-    ##
-    ## For deployments where each node is monitored by its own agent instance connecting
-    ## directly to that node's local system tables, leave this as `false` (default).
+    ## Set to `true` when connecting through a single endpoint for ClickHouse Cloud.
     #
     # single_endpoint_mode: false
 

@@ -1,13 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 from time import time
+
+from datadog_checks.base.utils.serialization import json
 
 import clickhouse_connect
 from cachetools import TTLCache
+from clickhouse_connect.driver import httputil
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
 
@@ -25,7 +28,11 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
-class ClickhouseCheck(AgentCheck):
+# Database instance collection interval in seconds (not user-configurable)
+DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
+
+
+class ClickhouseCheck(DatabaseCheck):
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'
 
@@ -45,11 +52,12 @@ class ClickhouseCheck(AgentCheck):
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
+        self._dbms_version = None
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
-            ttl=self._config.database_instance_collection_interval,
+            ttl=DATABASE_INSTANCE_COLLECTION_INTERVAL,
         )
 
         # Initialize TagManager for tag management (similar to MySQL)
@@ -62,6 +70,11 @@ class ClickhouseCheck(AgentCheck):
 
         # We'll connect on the first check run
         self._client = None
+
+        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs)
+        # This reduces connection overhead while maintaining client isolation
+        # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
+        self._pool_manager = httputil.get_pool_manager(maxsize=8, num_pools=4)
 
         self._query_manager = QueryManager(
             self,
@@ -104,7 +117,7 @@ class ClickhouseCheck(AgentCheck):
             self.completed_query_samples = None
 
     @property
-    def tags(self):
+    def tags(self) -> list[str]:
         """Return the current list of tags from the TagManager."""
         return list(self.tag_manager.get_tags())
 
@@ -135,14 +148,13 @@ class ClickhouseCheck(AgentCheck):
     def _send_database_instance_metadata(self):
         """Send database instance metadata to the metadata intake."""
         if self.database_identifier not in self._database_instance_emitted:
-            # Get the version for the metadata
-            version = None
+            # Get the version for the metadata (and cache it)
             try:
                 version_result = list(self.execute_query_raw('SELECT version()'))[0][0]
-                version = version_result
+                self._dbms_version = version_result
             except Exception as e:
                 self.log.debug("Unable to fetch version for metadata: %s", e)
-                version = "unknown"
+                self._dbms_version = "unknown"
 
             # Get tags without db: prefix for metadata
             tags_no_db = [t for t in self.tags if not t.startswith('db:')]
@@ -156,8 +168,8 @@ class ClickhouseCheck(AgentCheck):
                 "ddagenthostname": self.agent_hostname,
                 "dbms": "clickhouse",
                 "kind": "database_instance",
-                "collection_interval": self._config.database_instance_collection_interval,
-                "dbms_version": version,
+                "collection_interval": DATABASE_INSTANCE_COLLECTION_INTERVAL,
+                "dbms_version": self._dbms_version,
                 "integration_version": __version__,
                 "tags": tags_no_db,
                 "timestamp": time() * 1000,
@@ -207,7 +219,7 @@ class ClickhouseCheck(AgentCheck):
         return ['server:{}'.format(self._config.server)]
 
     @property
-    def reported_hostname(self):
+    def reported_hostname(self) -> str | None:
         """
         Get the hostname to be reported in metrics and events.
         """
@@ -223,7 +235,7 @@ class ClickhouseCheck(AgentCheck):
         return self._agent_hostname
 
     @property
-    def database_identifier(self):
+    def database_identifier(self) -> str:
         """
         Get a unique identifier for this database instance.
         """
@@ -231,6 +243,19 @@ class ClickhouseCheck(AgentCheck):
             # Create a unique identifier based on server, port, and database name
             self._database_identifier = "{}:{}:{}".format(self._config.server, self._config.port, self._config.db)
         return self._database_identifier
+
+    @property
+    def dbms_version(self) -> str:
+        """Get the ClickHouse server version."""
+        if self._dbms_version is None:
+            return "unknown"
+        return self._dbms_version
+
+    @property
+    def cloud_metadata(self) -> dict:
+        """Get cloud provider metadata if available."""
+        # TODO: Populate with cloud metadata when available (e.g., ClickHouse Cloud)
+        return {}
 
     @property
     def is_single_endpoint_mode(self):
@@ -311,6 +336,8 @@ class ClickhouseCheck(AgentCheck):
                 autogenerate_session_id=False,
                 # https://clickhouse.com/docs/integrations/python#settings-argument
                 settings={},
+                # Use shared connection pool for efficiency
+                pool_mgr=self._pool_manager,
             )
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
@@ -324,8 +351,12 @@ class ClickhouseCheck(AgentCheck):
 
     def create_dbm_client(self):
         """
-        Create a separate ClickHouse client for DBM async jobs.
-        This prevents concurrent query errors when multiple jobs run simultaneously.
+        Create a ClickHouse client for DBM async jobs.
+
+        Each DBM job gets its own client for isolation, but all clients share
+        the same HTTP connection pool for efficiency.
+
+        See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
         """
         try:
             # Convert compression None to False for get_client
@@ -344,6 +375,8 @@ class ClickhouseCheck(AgentCheck):
                 ca_cert=self._config.tls_ca_cert,
                 verify=self._config.verify,
                 settings={},
+                # Use shared connection pool for efficiency
+                pool_mgr=self._pool_manager,
             )
             return client
         except Exception as e:
@@ -352,3 +385,38 @@ class ClickhouseCheck(AgentCheck):
             )
             self.log.warning(error)
             raise
+
+    def cancel(self):
+        """
+        Cancel DBM async jobs and clean up connections.
+        This is called when the check is being shut down.
+        """
+        self.log.debug("Cancelling ClickHouse check and cleaning up connections")
+
+        # Cancel DBM async jobs
+        if self.statement_metrics:
+            self.statement_metrics.cancel()
+        if self.statement_activity:
+            self.statement_activity.cancel()
+        if self.completed_query_samples:
+            self.completed_query_samples.cancel()
+
+        # Wait for job loops to finish
+        if self.statement_metrics and self.statement_metrics._job_loop_future:
+            self.statement_metrics._job_loop_future.result()
+        if self.statement_activity and self.statement_activity._job_loop_future:
+            self.statement_activity._job_loop_future.result()
+        if self.completed_query_samples and self.completed_query_samples._job_loop_future:
+            self.completed_query_samples._job_loop_future.result()
+
+        # Close main client
+        if self._client:
+            try:
+                self._client.close()
+            except Exception as e:
+                self.log.debug("Error closing main client: %s", e)
+            self._client = None
+
+        # Clear the shared pool manager
+        # Note: urllib3 pool connections are automatically closed when idle
+        self._pool_manager = None
