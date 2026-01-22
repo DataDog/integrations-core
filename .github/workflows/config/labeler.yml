@@ -141,6 +141,8 @@ integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
 - cisco_aci/**/*
+integration/cisco_asa:
+- cisco_asa/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
 integration/cisco_sdwan:

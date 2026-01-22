@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 6.10.2 / 2026-01-06
+## 6.11.0 / 2026-01-21
+
+***Added***:
+
+* Collect kafka configuration events. ([#22378](https://github.com/DataDog/integrations-core/pull/22378))
+
+***Fixed***:
+
+* Fix caching logic when collecting cluster monitoring events ([#22375](https://github.com/DataDog/integrations-core/pull/22375))
+
+## 6.10.2 / 2026-01-06 / Agent 7.75.0
 
 ***Fixed***:
 

@@ -59,7 +59,9 @@ files:
               type: string
 
           - name: add_missing_keys
-            description: Automatically add host key to known hosts when it is missing.
+            description: |
+              Automatically add host key to known hosts when it is missing.
+              Warning: only enable this if you trust your host's key.
             value:
               example: false
               type: boolean
