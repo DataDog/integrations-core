@@ -176,7 +176,7 @@ jobs:
 
     - name: Tag job for CI Visibility
       # Skip on fork PRs since secrets won't be available
-      if: !github.event.pull_request.head.repo.fork
+      if: env.INPUT_IS_FORK != 'true'
       uses: ./.github/actions/tag-job
       with:
         tags: ${{ env.DD_TAGS }}
@@ -265,7 +265,7 @@ jobs:
       if: inputs.benchmark
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && !github.event.pull_request.head.repo.fork && '1' || '0' }}"
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && env.INPUT_IS_FORK != 'true' && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "benchmarks"
       run: ddev test --bench --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
@@ -273,7 +273,7 @@ jobs:
       if: inputs.latest
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && !github.event.pull_request.head.repo.fork && '1' || '0' }}"
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && env.INPUT_IS_FORK != 'true' && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "latest-tests"
       run: ddev test --latest --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
