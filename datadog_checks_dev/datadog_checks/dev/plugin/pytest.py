@@ -304,11 +304,15 @@ def mock_http_response_per_endpoint(mocker):
 
     def _mock(responses_by_endpoint: Dict[str, Any], method: str = 'requests.Session.get', strict: bool = True):
         """
-        responses_by_endpoint: dict of { url_substring: (args, kwargs_for_MockResponse) }
+        responses_by_endpoint: dict of { url: (args, kwargs_for_MockResponse) }
         e.g. { 'http://example.com/api/v1': (['{"status": "ok"}'], {'status_code': 200}) }
         """
 
-        def side_effect(url, *args, **kwargs):
+        def side_effect(*args, **kwargs):
+            if args:
+                url = args[0] if isinstance(args[0], str) else args[1]
+            else:
+                url = kwargs.get('url')
             if url not in responses_by_endpoint:
                 if strict:
                     raise ValueError(f"Endpoint {url} not found in mocked responses")
