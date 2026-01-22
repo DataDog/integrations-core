@@ -1,4 +1,5 @@
 name: Postgres
+fleet_configurable: true
 files:
 - name: postgres.yaml
   options:
@@ -8,6 +9,7 @@ files:
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+      fleet_configurable: true
       value:
         example: false
         type: boolean
@@ -19,21 +21,25 @@ files:
       description: |
         The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
         e.g. `/var/run/postgresql`.
+      fleet_configurable: true
       value:
         type: string
         display_default: "localhost"
     - name: port
       description: The port to use when connecting to PostgreSQL.
+      fleet_configurable: true
       value:
         type: integer
         display_default: 5432
     - name: username
       description: The Datadog username created to connect to PostgreSQL.
+      fleet_configurable: true
       value:
         type: string
         display_default: "datadog"
     - name: password
       description: The password associated with the Datadog user.
+      fleet_configurable: true
       secret: true
       value:
         type: string
@@ -41,6 +47,7 @@ files:
       description: |
         The name of the PostgresSQL database to monitor.
         Note: If omitted, the default system Postgres database is queried.
+      fleet_configurable: true
       value:
         type: string
         display_default: postgres
@@ -48,6 +55,7 @@ files:
       description: |
         Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
         and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+      fleet_configurable: true
       value:
         type: string
         default: null
@@ -81,6 +89,7 @@ files:
             - port: The port number of the instance.
             In addition, you can use any key from the `tags` section of the configuration.
     - name: dbstrict
+      fleet_configurable: true
       description: |
         Whether to restrict the scope of the check to just the database in question.
         Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
@@ -89,6 +98,7 @@ files:
         display_default: false
         example: false
     - name: ignore_databases
+      fleet_configurable: true
       description: |
         A list of database to ignore. No metrics or statement samples will be collected for these databases.
         Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
@@ -115,6 +125,7 @@ files:
           - alloydbadmin
           - alloydbmetadata
     - name: ignore_schemas_owned_by
+      fleet_configurable: true
       description: |
         A list of database users which own schemas to ignore.
         No metrics will be collected for these schemas.
@@ -146,6 +157,7 @@ files:
                          trusted CA and that the requested server host name matches the one in the certificate.
 
         For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
+      fleet_configurable: true
       value:
         type: string
         example: 'allow'
@@ -155,6 +167,7 @@ files:
         The path to the ssl root certificate.
 
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      fleet_configurable: true
       value:
         type: string
         default: null
@@ -163,6 +176,7 @@ files:
         The path to the ssl certificate.
 
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      fleet_configurable: true
       value:
         type: string
         default: null
@@ -184,6 +198,7 @@ files:
         type: string
         default: null
     - name: query_timeout
+      fleet_configurable: true
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
         to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
@@ -193,6 +208,7 @@ files:
         type: integer
         example: 5000
     - name: idle_connection_timeout
+      fleet_configurable: true
       description: |
         Sets the timeout (in ms) a connection used in the connection pool will be idle until it is closed by the pooler.
         This value should be configured to a lower value if you are observing connection buildup on the Postgres server,
@@ -214,6 +230,7 @@ files:
         example: 30
         display_default: 30
     - name: relations
+      fleet_configurable: true
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
         If enabled, `dbname` should be specified to collect database-specific relations metrics.
@@ -272,17 +289,20 @@ files:
               - r
               - p
     - name: max_relations
+      fleet_configurable: true
       description: Determines the maximum number of relations to fetch.
       value:
         type: integer
         example: 300
     - name: collect_function_metrics
+      fleet_configurable: true
       description: |
         If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
       value:
         type: boolean
         example: false
     - name: collect_count_metrics
+      fleet_configurable: true
       description: Collect count of user tables from pg_class.
       value:
         type: boolean
@@ -313,11 +333,13 @@ files:
             display_default: 100
           hidden: true
     - name: collect_checksum_metrics
+      fleet_configurable: true
       description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
         type: boolean
         example: false
     - name: collect_activity_metrics
+      fleet_configurable: true
       description: |
         Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
         has sufficient privileges to read from pg_stat_activity before enabling this option.
@@ -339,6 +361,7 @@ files:
           - application_name
         default: []
     - name: collect_buffercache_metrics
+      fleet_configurable: true
       description: |
         If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
         pg_buffercache extension must be installed.
@@ -346,22 +369,26 @@ files:
         type: boolean
         example: false
     - name: collect_database_size_metrics
+      fleet_configurable: true
       description: Collect database size metrics.
       value:
         type: boolean
         example: true
     - name: collect_default_database
+      fleet_configurable: true
       description: Include statistics from the default database 'postgres' in the check metrics.
       value:
         type: boolean
         example: true
     - name: collect_bloat_metrics
+      fleet_configurable: true
       description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
       enabled: true
       value:
         type: boolean
         example: false
     - name: collect_wal_metrics
+      fleet_configurable: true
       description: |
         Collect metrics about WAL file age.
         NOTE:
@@ -371,6 +398,7 @@ files:
         type: boolean
         example: true
     - name: data_directory
+      fleet_configurable: true
       description: |
         The data directory of your postgres installation
         Required when collecting WAL metrics on Postgres 9.6.
@@ -385,6 +413,7 @@ files:
         type: boolean
         example: true
     - name: table_count_limit
+      fleet_configurable: true
       description: The maximum number of tables to collect metrics from.
       value:
         type: integer
@@ -478,6 +507,7 @@ files:
             example: 600
             display_default: 600
     - name: application_name
+      fleet_configurable: true
       description: |
         The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
         It is typically set by an application upon connection to the server.
@@ -486,6 +516,7 @@ files:
         type: string
         example: "datadog-agent"
     - name: dbm
+      fleet_configurable: true
       description: |
         Set to `true` to enable Database Monitoring.
       value:
@@ -493,6 +524,7 @@ files:
         example: false
         display_default: false
     - name: pg_stat_statements_view
+      fleet_configurable: true
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the
         `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
@@ -502,6 +534,7 @@ files:
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
     - name: pg_stat_activity_view
+      fleet_configurable: true
       hidden: true
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the
@@ -528,6 +561,7 @@ files:
         display_default:
           - utf8
     - name: query_metrics
+      fleet_configurable: true
       description: Configure collection of query metrics
       options:
         - name: enabled
@@ -601,15 +635,18 @@ files:
             type: integer
             example: 20_000_000
     - name: query_samples
+      fleet_configurable: true
       description: Configure collection of explain plan samples
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of explain plans. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the explain plan collection interval (in seconds). Each collection involves a single query to
             `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
@@ -617,6 +654,7 @@ files:
             type: number
             example: 1
         - name: explain_function
+          fleet_configurable: true
           description: |
             Override the default function used to collect explain plans for queries.
           value:
@@ -651,6 +689,7 @@ files:
             type: integer
             example: 10000
         - name: explain_parameterized_queries
+          fleet_configurable: true
           description: |
             This option will enable the ability to explain parameterized queries.
             This is useful if your SQL clients are using the extended query protocol or prepared statements.
@@ -683,12 +722,14 @@ files:
       description: Configure collection of in-flight query samples
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of in-flight query samples. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the in-flight query sample collection interval (in seconds). This number cannot be smaller than
             the `query_samples` configured collection_interval.
@@ -707,12 +748,14 @@ files:
       description: Configure collection of pg_settings.
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of pg_settings. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to
             `pg_settings`.
@@ -746,12 +789,14 @@ files:
         the schema for that database.
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of database schemas. Requires `dbm: true`.
           value:
             type: boolean
             example: false
         - name: max_tables
+          fleet_configurable: true
           description: |
             Maximum amount of tables the Agent collects from the instance.
           value:
@@ -772,6 +817,7 @@ files:
             example: 50
             display_default: 50
         - name: collection_interval
+          fleet_configurable: true
           description: |
             The database schema collection interval (in seconds).
           value:
@@ -1020,6 +1066,7 @@ files:
             type: boolean
             example: true
         - name: collect_tables
+          fleet_configurable: true
           description: |
             Set to `false` to disable the collection of tables in your SQL statements.
             Requires `collect_metadata: true`.
@@ -1027,6 +1074,7 @@ files:
             type: boolean
             example: true
         - name: collect_commands
+          fleet_configurable: true
           description: |
             Set to `false` to disable the collection of commands in your SQL statements.
             Requires `collect_metadata: true`.
@@ -1036,6 +1084,7 @@ files:
             type: boolean
             example: true
         - name: collect_comments
+          fleet_configurable: true
           description: |
             Set to `false` to disable the collection of comments in your SQL statements.
             Requires `collect_metadata: true`.
@@ -1160,6 +1209,7 @@ files:
         type: number
         default: 300
     - name: propagate_agent_tags
+      fleet_configurable: true
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
