@@ -27,15 +27,16 @@ def test_config(instance):
             username=instance['username'],
             password=instance['password'],
             database='default',
-            connect_timeout=10.0,
-            send_receive_timeout=10.0,
+            connect_timeout=10,
+            send_receive_timeout=10,
             secure=False,
             ca_cert=None,
             verify=True,
             client_name='datadog-test-clickhouse',
             compress=False,
-            settings={},
             autogenerate_session_id=False,
+            settings={},
+            pool_mgr=mock.ANY,
         )
 
 
