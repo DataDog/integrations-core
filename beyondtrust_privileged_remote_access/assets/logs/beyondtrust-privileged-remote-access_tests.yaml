@@ -2,6 +2,8 @@ id: "beyondtrust-privileged-remote-access"
 tests:
  -
   sample: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=fido2_credential_added;credential_owner_id=123;name=credential_name;roaming=1;registration_date=09-01-2026;last_used_date=09-01-2026;last_signature_count=1;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;who_ip=64.252.101.204;site=pf60fc91.beyondtrustcloud.com"
+  -
+  sample: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=fido2_credential_added;credential_owner_id=123;name=credential_name;roaming=1;registration_date=09-01-2026;last_used_date=09-01-2026;last_signature_count=1;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;who_ip=64.252.101.204;site=pf60fc91.beyondtrustcloud.com"
   result:
     custom:
       credential_owner_id: 123
@@ -15,7 +17,7 @@ tests:
       network:
         client:
           geoip: {}
-          ip: "64.252.100.173"
+          ip: "64.252.101.204"
       process_id: 81869.0
       registration_date: "09-01-2026"
       roaming: 1
@@ -113,7 +115,7 @@ tests:
       network:
         client:
           geoip: {}
-          ip: "64.252.100.173"
+          ip: "64.252.101.204"
       process_id: 81869.0
       site: "pf60fc91.beyondtrustcloud.com"
       site_id: 1427.0
