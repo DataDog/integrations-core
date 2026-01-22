@@ -5,7 +5,7 @@
 [Network Device Monitoring][11] for Cisco ACI provides visibility into the health and performance of application-centric data center networks. By collecting metrics from Cisco ACI fabrics, controllers, and network devices, this integration helps teams monitor fabric health, track endpoint and interface behavior, and identify issues that may impact application connectivity within the data center.
 Datadog brings ACI network telemetry into a unified observability platform, enabling teams to correlate network behavior with application and infrastructure signals.
 
-### Fabric and Device Health Monitoring
+### Fabric and device health monitoring
 
 This integration surfaces key health indicators from ACI components, including device availability, resource utilization, and interface status. Teams can quickly identify failing nodes, degraded interfaces, or abnormal resource usage that may affect fabric stability.
 
