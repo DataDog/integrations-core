@@ -9,7 +9,7 @@ Datadog brings ACI network telemetry into a unified observability platform, enab
 
 This integration surfaces key health indicators from ACI components, including device availability, resource utilization, and interface status. Teams can quickly identify failing nodes, degraded interfaces, or abnormal resource usage that may affect fabric stability.
 
-### Interface and Traffic Analysis
+### Interface and traffic analysis
 
 Cisco ACI environments handle large volumes of east-west and north-south traffic. Datadog tracks interface throughput, packet rates, errors, and utilization, helping teams detect congestion, packet loss, or misconfigurations that could impact application performance.
 
