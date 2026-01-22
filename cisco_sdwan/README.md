@@ -6,7 +6,7 @@
 
 With automatic discovery of SD-WAN components and consistent tagging across sites and devices, Datadog helps teams manage complex, large-scale WAN deployments more effectively.
 
-### WAN Edge and Control Plane Monitoring
+### WAN edge and control plane monitoring
 
 This integration tracks the availability and resource utilization of Cisco SD-WAN edge devices and controllers, helping teams quickly identify outages, overloaded devices, or control-plane issues that could disrupt connectivity or routing decisions.
 
