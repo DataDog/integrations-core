@@ -6,7 +6,9 @@ from __future__ import annotations
 import asyncio
 import logging
 from abc import ABC, abstractmethod
+from concurrent.futures import Executor, ThreadPoolExecutor
 from dataclasses import dataclass
+from typing import assert_never
 
 from .exceptions import TaskProcessingError, TaskQueueError, TaskSuccessHookError
 
@@ -22,24 +24,34 @@ class BaseMessage:
     id: str
 
 
-class BaseTask(ABC):
+class BaseTask[T: BaseMessage]:
     def __init__(self, name: str):
         self.name = name
         self.event_bus: EventBusOrchestrator | None = None
 
-    @abstractmethod
-    async def process_message(self, message: BaseMessage) -> None: ...
-
-    async def on_success(self, message: BaseMessage) -> None:
+    async def on_success(self, message: T) -> None:
         pass
 
-    async def on_error(self, message: BaseMessage, error: Exception) -> None:
+    async def on_error(self, message: T, error: Exception) -> None:
         pass
 
     def submit_message(self, message: BaseMessage) -> None:
         if self.event_bus is None:
             raise TaskQueueError("This task has not been added to an active event bus")
         self.event_bus.submit(message)
+
+
+class AsyncTask[T: BaseMessage](BaseTask[T], ABC):
+    @abstractmethod
+    async def process_message(self, message: T) -> None: ...
+
+
+class SyncTask[T: BaseMessage](BaseTask[T], ABC):
+    @abstractmethod
+    def process_message(self, message: T) -> None: ...
+
+
+type ValidTask[T: BaseMessage] = AsyncTask[T] | SyncTask[T]
 
 
 class EventBusOrchestrator(ABC):
@@ -52,7 +64,7 @@ class EventBusOrchestrator(ABC):
         logger: logging.Logger,
         max_timeout: float = 300,
         grace_period: float = 10,
-        loop: asyncio.AbstractEventLoop | None = None,
+        executor: Executor | None = None,
     ):
         """
         Args:
@@ -60,14 +72,15 @@ class EventBusOrchestrator(ABC):
             max_timeout: The maximum time in seconds to wait for the orchestrator to complete.
             grace_period: The timeout in seconds to wait for a new message to be submitted after all
                 messages have been processed.
-            loop: The event loop to use for the orchestrator. If not supplied, a new event loop will be created.
+            executor: The executor to use for running sync tasks.
+                      The default will be a ThreadpoolExecutor with 4 workers.
         """
         self.__validate_parameters(max_timeout, grace_period)
         self._logger = logger
         self._max_timeout = max_timeout
         self._grace_period = grace_period
-        self._loop = loop
-        self._subscribers: dict[type[BaseMessage], list[BaseTask]] = {}
+        self._executor = executor or ThreadPoolExecutor(max_workers=4)
+        self._subscribers: dict[type[BaseMessage], list[ValidTask]] = {}
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
@@ -83,10 +96,7 @@ class EventBusOrchestrator(ABC):
         if max_timeout <= grace_period:
             raise ValueError("max_timeout must be greater than grace_period")
 
-    def _loop_factory(self) -> asyncio.AbstractEventLoop:
-        return asyncio.new_event_loop() if self._loop is None else self._loop
-
-    def register_task(self, task: BaseTask, message_types: list[type[BaseMessage]]):
+    def register_task[T: BaseMessage](self, task: ValidTask[T], message_types: list[type[T]]):
         """Registers a task to receive specific message types."""
         task.event_bus = self
         for msg_type in message_types:
@@ -112,7 +122,7 @@ class EventBusOrchestrator(ABC):
         - finalize()
           - [hook] on_finalize(exc_info)
         """
-        asyncio.run(self._entry_point(), loop_factory=self._loop_factory)
+        asyncio.run(self._entry_point())
 
     async def _entry_point(self):
         exception = None
@@ -286,12 +296,18 @@ class EventBusOrchestrator(ABC):
             asyncio.create_task(self._task_wrapper(task, msg)) for task in self._subscribers.get(type(msg), [])
         )
 
-    async def _task_wrapper(self, task: BaseTask, message: BaseMessage):
+    async def _task_wrapper(self, task: ValidTask, message: BaseMessage):
         """
         Processes a message by the given task.
         """
         try:
-            await task.process_message(message)
+            match task:
+                case AsyncTask():
+                    await task.process_message(message)
+                case SyncTask():
+                    await asyncio.get_running_loop().run_in_executor(self._executor, task.process_message, message)
+                case _:
+                    assert_never(task)
         except Exception as e:
             try:
                 await task.on_error(message, e)

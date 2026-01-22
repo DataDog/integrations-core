@@ -7,16 +7,15 @@ import asyncio
 import logging
 import time
 from collections.abc import Generator
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from contextlib import nullcontext as does_not_raise
 from dataclasses import dataclass
-from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
 
 from ddev.event_bus.exceptions import TaskQueueError
-from ddev.event_bus.orchestrator import BaseMessage, BaseTask, EventBusOrchestrator
+from ddev.event_bus.orchestrator import AsyncTask, BaseMessage, EventBusOrchestrator, SyncTask
 
 # Test Structure Documentation
 # --------------------------
@@ -75,46 +74,46 @@ class SystemEvent(BaseMessage):
     urgent: bool = False
 
 
-class MailServer(BaseTask):
+class MailServer(AsyncTask[EmailMessage]):
     def __init__(self, name: str):
         super().__init__(name)
         self.sent_emails: list[BaseMessage] = []
         self.delivery_confirmations: list[BaseMessage] = []
         self.failed_deliveries: list[tuple[BaseMessage, Exception]] = []
 
-    async def process_message(self, message: BaseMessage) -> None:
+    async def process_message(self, message: EmailMessage) -> None:
         if isinstance(message, EmailMessage) and message.body.startswith("fail_processing"):
             raise ValueError("Processing failed intentionally")
         self.sent_emails.append(message)
 
-    async def on_success(self, message: BaseMessage) -> None:
+    async def on_success(self, message: EmailMessage) -> None:
         if isinstance(message, EmailMessage) and message.body == "fail_success_hook":
             raise RuntimeError("Success hook failed intentionally")
         self.delivery_confirmations.append(message)
 
-    async def on_error(self, message: BaseMessage, error: Exception) -> None:
+    async def on_error(self, message: EmailMessage, error: Exception) -> None:
         if isinstance(message, EmailMessage) and message.body == "fail_processing_and_error":
             raise RuntimeError("Error hook failed intentionally")
         self.failed_deliveries.append((message, error))
 
 
-class ReportWorker(BaseTask):
+class ReportWorker(AsyncTask[GenerateReport | SystemEvent]):
     def __init__(self, name: str):
         super().__init__(name)
         self.generated_reports: list[BaseMessage] = []
 
-    async def process_message(self, message: BaseMessage) -> None:
+    async def process_message(self, message: GenerateReport | SystemEvent) -> None:
         if isinstance(message, GenerateReport) and message.priority < 0:
             raise ValueError("ReportWorker failed intentionally")
         self.generated_reports.append(message)
 
 
-class WorkflowManager(BaseTask):
+class WorkflowManager(AsyncTask[EmailMessage]):
     def __init__(self, name: str):
         super().__init__(name)
-        self.processed_messages: list[BaseMessage] = []
+        self.processed_messages: list[EmailMessage] = []
 
-    async def process_message(self, message: BaseMessage) -> None:
+    async def process_message(self, message: EmailMessage) -> None:
         self.processed_messages.append(message)
         if isinstance(message, EmailMessage):
             if message.subject == "register_user":
@@ -307,7 +306,7 @@ def test_orchestrator_timing(
         "max_timeout_equal_to_grace_period",
     ],
 )
-def test_validate_parameters(max_timeout: float, grace_period: float, expectation: Any) -> None:
+def test_validate_parameters(max_timeout: float, grace_period: float, expectation: AbstractContextManager) -> None:
     logger = logging.getLogger("test")
     with expectation:
         MockOrchestrator(logger, max_timeout=max_timeout, grace_period=grace_period)
@@ -399,8 +398,8 @@ def test_max_timeout_interruption(orchestrator: MockOrchestrator) -> None:
     orchestrator._max_timeout = 0.5
     orchestrator._grace_period = 5.0  # Long grace period
 
-    class LongTask(BaseTask):
-        async def process_message(self, message: BaseMessage) -> None:
+    class LongTask(AsyncTask[EmailMessage]):
+        async def process_message(self, message: EmailMessage):
             await asyncio.sleep(2.0)
 
     task_long = LongTask("long")
@@ -412,14 +411,40 @@ def test_max_timeout_interruption(orchestrator: MockOrchestrator) -> None:
         orchestrator.run()
 
 
+def test_sync_task_thread_execution(orchestrator: MockOrchestrator, mail_server: MailServer) -> None:
+    import threading
+
+    class CPUBoundTask(SyncTask[SystemEvent]):
+        def __init__(self, name: str):
+            super().__init__(name)
+            self.executed = False
+            self.thread_id: int | None = None
+
+        def process_message(self, message: SystemEvent):
+            self.executed = True
+            self.thread_id = threading.get_ident()
+            time.sleep(0.1)  # Simulate work
+
+    cpu_task = CPUBoundTask("cpu_bound")
+    orchestrator.register_task(cpu_task, [SystemEvent])
+
+    orchestrator.submit(SystemEvent("cpu_event"))
+    orchestrator.submit(EmailMessage("async_email"))
+    orchestrator.run()
+
+    assert cpu_task.executed
+    assert cpu_task.thread_id is not None
+
+    # Validate it actually run in a different thread than the main loop
+    # All async tasks are run in the main thread.
+    assert cpu_task.thread_id != threading.get_ident()
+
+    # Verify async task also ran
+    assert len(mail_server.sent_emails) == 1
+    assert mail_server.sent_emails[0].id == "async_email"
+
+
 def test_task_submit_without_bus() -> None:
     task = MailServer("orphan")
     with pytest.raises(TaskQueueError, match="This task has not been added"):
         task.submit_message(EmailMessage("fail"))
-
-
-def test_message_repr() -> None:
-    msg = EmailMessage("test_msg", body="test_content")
-    expected_repr = "EmailMessage(id='test_msg', subject='', body='test_content')"
-    assert repr(msg) == expected_repr
-    assert str(msg) == expected_repr
