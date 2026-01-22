@@ -15,7 +15,7 @@ Cisco ACI environments handle large volumes of east-west and north-south traffic
 
 ### Correlating Network and Application Impact
 
-By integrating ACI metrics with Datadog’s infrastructure and application monitoring, teams gain a clearer picture of how network issues propagate to application behavior. This end-to-end visibility helps reduce mean time to resolution when troubleshooting complex data center incidents.
+By integrating ACI metrics with Datadog's infrastructure and application monitoring, teams gain a clearer picture of how network issues propagate to application behavior. This end-to-end visibility helps reduce mean time to resolution when troubleshooting complex data center incidents.
 
 **Minimum Agent version:** 6.3.2
 
