@@ -555,7 +555,7 @@
                         "id": 5234904368995564,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates the **BeyondTrust Privileged Remote Access** logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security/overview).",
+                            "content": "Datadog Cloud SIEM analyzes and correlates the **BeyondTrust Privileged Remote Access** logs to detect threats to your environment in real time. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security/overview).",
                             "background_color": "orange",
                             "font_size": "14",
                             "text_align": "center",

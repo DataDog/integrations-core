@@ -13,42 +13,42 @@
     "media": [
       {
         "caption": "BeyondTrust PRA Overview",
-        "image_url": "images/beyondTrust_pra_overview_light.png",
+        "image_url": "images/beyondtrust_pra_overview_light.png",
         "media_type": "image"
       },
       {
         "caption": "BeyondTrust PRA Overview",
-        "image_url": "images/beyondTrust_pra_overview_dark.png",
+        "image_url": "images/beyondtrust_pra_overview_dark.png",
         "media_type": "image"
       },
       {
         "caption": "BeyondTrust PRA Authentication and Access Management",
-        "image_url": "images/beyondTrust_pra_authentication_and_access_management_light.png",
+        "image_url": "images/beyondtrust_pra_authentication_and_access_management_light.png",
         "media_type": "image"
       },
       {
         "caption": "BeyondTrust PRA Authentication and Access Management",
-        "image_url": "images/beyondTrust_pra_authentication_and_access_management_dark.png",
+        "image_url": "images/beyondtrust_pra_authentication_and_access_management_dark.png",
         "media_type": "image"
       },
       {
         "caption": "BeyondTrust PRA Network & Platform Security",
-        "image_url": "images/beyondTrust_pra_network_and_platform_security_light.png",
+        "image_url": "images/beyondtrust_pra_network_and_platform_security_light.png",
         "media_type": "image"
       },
       {
         "caption": "BeyondTrust PRA Network & Platform Security",
-        "image_url": "images/beyondTrust_pra_network_and_platform_security_dark.png",
+        "image_url": "images/beyondtrust_pra_network_and_platform_security_dark.png",
         "media_type": "image"
       },
       {
         "caption": "BeyondTrust PRA Identity and User Activity",
-        "image_url": "images/beyondTrust_pra_identity_and_user_activity_light.png",
+        "image_url": "images/beyondtrust_pra_identity_and_user_activity_light.png",
         "media_type": "image"
       },
       {
         "caption": "BeyondTrust PRA Identity and User Activity",
-        "image_url": "images/beyondTrust_pra_identity_and_user_activity_dark.png",
+        "image_url": "images/beyondtrust_pra_identity_and_user_activity_dark.png",
         "media_type": "image"
       }
     ],
@@ -73,10 +73,10 @@
       }
     },
     "dashboards": {
-      "BeyondTrust PRA Overview": "assets/dashboards/beyondTrust_pra_overview.json",
-      "BeyondTrust PRA Authentication and Access Management": "assets/dashboards/beyondTrust_pra_authentication_and_access_management.json",
-      "BeyondTrust PRA Network & Platform Security": "assets/dashboards/beyondTrust_pra_network_and_platform_security.json",
-      "BeyondTrust PRA Identity and User Activity": "assets/dashboards/beyondTrust_pra_identity_and_user_activity.json"
+      "BeyondTrust PRA Overview": "assets/dashboards/beyondtrust_pra_overview.json",
+      "BeyondTrust PRA Authentication and Access Management": "assets/dashboards/beyondtrust_pra_authentication_and_access_management.json",
+      "BeyondTrust PRA Network & Platform Security": "assets/dashboards/beyondtrust_pra_network_and_platform_security.json",
+      "BeyondTrust PRA Identity and User Activity": "assets/dashboards/beyondtrust_pra_identity_and_user_activity.json"
     },
     "logs": {
       "source": "beyondtrust-privileged-remote-access"

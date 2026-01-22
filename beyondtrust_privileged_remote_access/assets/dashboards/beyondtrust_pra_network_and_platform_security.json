@@ -26,7 +26,7 @@
             "id": 797702432985848,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provide comprehensive insights into  configuration changes across network objects, routing, syslog destinations, SNMP settings, API accounts, and external security providers to support change management, audit trails, and drift detection.\n\nFor more information, see the [BeyondTrust Privileged Remote Access Integration Documentation](https://docs.datadoghq.com/integrations/beyondtrust_privileged_remote_access/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard provides comprehensive insights into configuration changes across network objects, routing, syslog destinations, SNMP settings, API accounts, and external security providers to support change management, audit trails, and drift detection.\n\nFor more information, see the [BeyondTrust Privileged Remote Access Integration Documentation](https://docs.datadoghq.com/integrations/beyondtrust_privileged_remote_access/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "16",
                 "text_align": "left",
@@ -845,7 +845,7 @@
                     {
                         "id": 2805558255072441,
                         "definition": {
-                            "title": "Top Hosts by network address action",
+                            "title": "Top hosts by network address action",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1397,7 +1397,7 @@
                     {
                         "id": 6112640160888389,
                         "definition": {
-                            "title": "Events details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [

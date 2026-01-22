@@ -1,7 +1,7 @@
 id: "beyondtrust-privileged-remote-access"
 tests:
  -
-  sample: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=fido2_credential_added;credential_owner_id=123;name=credential_name;roaming=1;registration_date=09-01-2026;last_used_date=09-01-2026;last_signature_count=1;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;site=pf60fc91.beyondtrustcloud.com"
+  sample: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=fido2_credential_added;credential_owner_id=123;name=credential_name;roaming=1;registration_date=09-01-2026;last_used_date=09-01-2026;last_signature_count=1;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;who_ip=64.252.101.204;site=pf60fc91.beyondtrustcloud.com"
   result:
     custom:
       credential_owner_id: 123
@@ -12,6 +12,10 @@ tests:
       last_signature_count: 1
       last_used_date: "09-01-2026"
       name: "credential_name"
+      network:
+        client:
+          geoip: {}
+          ip: "64.252.100.173"
       process_id: 81869.0
       registration_date: "09-01-2026"
       roaming: 1
@@ -25,7 +29,7 @@ tests:
         name: "Sam5 Carter5"
       when: 1.76795386E12
       who: "Sam5 Carter5 (sam.carter@test.ai) using oidc"
-    message: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=fido2_credential_added;credential_owner_id=123;name=credential_name;roaming=1;registration_date=09-01-2026;last_used_date=09-01-2026;last_signature_count=1;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;site=pf60fc91.beyondtrustcloud.com"
+    message: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=fido2_credential_added;credential_owner_id=123;name=credential_name;roaming=1;registration_date=09-01-2026;last_used_date=09-01-2026;last_signature_count=1;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;who_ip=64.252.101.204;site=pf60fc91.beyondtrustcloud.com"
     service: "identity-access"
     tags:
      - "source:LOGS_SOURCE"
@@ -93,7 +97,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1767778788000
  -
-  sample: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=session_policy_added;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;site=pf60fc91.beyondtrustcloud.com;automatic_privacy_screen=1;code_name=code_name;description=description;id=1;name=test"
+  sample: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=session_policy_added;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;who_ip=64.252.101.204;site=pf60fc91.beyondtrustcloud.com;automatic_privacy_screen=1;code_name=code_name;description=description;id=1;name=test"
   result:
     custom:
       automatic_privacy_screen: 1
@@ -106,6 +110,10 @@ tests:
       hostname: "pf60fc91"
       id: 1
       name: "test"
+      network:
+        client:
+          geoip: {}
+          ip: "64.252.100.173"
       process_id: 81869.0
       site: "pf60fc91.beyondtrustcloud.com"
       site_id: 1427.0
@@ -116,13 +124,13 @@ tests:
         name: "Sam5 Carter5"
       when: 1.76795386E12
       who: "Sam5 Carter5 (sam.carter@test.ai) using oidc"
-    message: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=session_policy_added;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;site=pf60fc91.beyondtrustcloud.com;automatic_privacy_screen=1;code_name=code_name;description=description;id=1;name=test"
+    message: "<133>Jan 9 03:47:40 pf60fc91 BG[81869] 1427:01:01:event=session_policy_added;when=1767953860;who=Sam5 Carter5 (sam.carter@test.ai) using oidc;who_ip=64.252.101.204;site=pf60fc91.beyondtrustcloud.com;automatic_privacy_screen=1;code_name=code_name;description=description;id=1;name=test"
     service: "authorization-and-policy-control"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1767953860000
  -
-  sample: "Dec 26 06:04:28 pf60fc91 BG[75113] 0927:01:01:site=pf60fc91.beyondtrustcloud.com/appliance;who=John Carter IT (john.carter@test.ai);who_ip=163.116.213.61;event=certificate_export;common_name=DigiCert Global G2 TLS RSA SHA256 2020 CA1;exported_with_private_key=1"
+  sample: "Dec 26 06:04:28 pf60fc91 BG[75113] 0927:01:01:site=pf60fc91.beyondtrustcloud.com/appliance;when=1767953860;who=John Carter IT (john.carter@test.ai);who_ip=163.116.213.61;event=certificate_export;common_name=DigiCert Global G2 TLS RSA SHA256 2020 CA1;exported_with_private_key=1"
   result:
     custom:
       common_name: "DigiCert Global G2 TLS RSA SHA256 2020 CA1"
@@ -143,12 +151,13 @@ tests:
       usr:
         email: "john.carter@test.ai"
         name: "John Carter IT"
+      when: 1.76795386E12
       who: "John Carter IT (john.carter@test.ai)"
-    message: "Dec 26 06:04:28 pf60fc91 BG[75113] 0927:01:01:site=pf60fc91.beyondtrustcloud.com/appliance;who=John Carter IT (john.carter@test.ai);who_ip=163.116.213.61;event=certificate_export;common_name=DigiCert Global G2 TLS RSA SHA256 2020 CA1;exported_with_private_key=1"
+    message: "Dec 26 06:04:28 pf60fc91 BG[75113] 0927:01:01:site=pf60fc91.beyondtrustcloud.com/appliance;when=1767953860;who=John Carter IT (john.carter@test.ai);who_ip=163.116.213.61;event=certificate_export;common_name=DigiCert Global G2 TLS RSA SHA256 2020 CA1;exported_with_private_key=1"
     service: "cryptography-and-secrets-protection"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1
+    timestamp: 1767953860000
  -
   sample: "<133>Dec 26 03:45:47 pf60fc91 BG[36689] 1427:01:01:site=pf60fc91.beyondtrustcloud.com;when=1766742347;who=John Carter IT (john.carter@test.ai);who_ip=64.252.100.173;event=jumpoint_cluster_added;code_name=jumpoint_3;comments=test;external_jump_item_network_id=;id=3;jzp_allow_http_get=0;jzp_client_address_restrictions_type=0;jzp_enabled=0;jzp_proxy_hostname=;jzp_proxy_port=9555;jzp_restricted_ips=;managed_ip_ranges=[];name=test;platform=windows-x86;rdp_service_account_id=;shelljump=0;allows_multiple_nodes=1;disabled=1;network_tunnel=0"
   result:
