@@ -54,6 +54,17 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class QueryActivity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    payload_row_limit: Optional[int] = None
+    run_sync: Optional[bool] = None
+
+
 class QueryMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -64,21 +75,6 @@ class QueryMetrics(BaseModel):
     full_statement_text_cache_max_size: Optional[float] = None
     full_statement_text_samples_per_hour_per_query: Optional[float] = None
     run_sync: Optional[bool] = None
-
-
-class QuerySamples(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    activity_collection_interval: Optional[float] = None
-    activity_enabled: Optional[bool] = None
-    activity_max_rows: Optional[int] = None
-    collection_interval: Optional[float] = None
-    enabled: Optional[bool] = None
-    run_sync: Optional[bool] = None
-    samples_per_hour_per_query: Optional[int] = None
-    seen_samples_cache_maxsize: Optional[int] = None
 
 
 class InstanceConfig(BaseModel):
@@ -102,8 +98,8 @@ class InstanceConfig(BaseModel):
     only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
     port: Optional[int] = None
+    query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
-    query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
     server: str
     service: Optional[str] = None

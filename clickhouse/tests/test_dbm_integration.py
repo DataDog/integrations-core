@@ -32,28 +32,25 @@ def _is_dbm_supported():
     reason="DBM features require ClickHouse 21.8+ (normalized_query_hash, query_kind, etc.)",
 )
 class TestDBMIntegration:
-    """Integration tests for Database Monitoring (DBM) query samples"""
+    """Integration tests for Database Monitoring (DBM) query activity"""
 
-    def test_query_samples_are_collected(self, aggregator, instance, dd_run_check):
+    def test_query_activity_collected(self, aggregator, instance, dd_run_check):
         """
-        Test that query samples are actually collected and submitted when DBM is enabled.
+        Test that query activity is collected and submitted when DBM is enabled.
         The implementation uses system.processes to capture currently running queries.
         """
         # Configure instance with DBM enabled
         instance_config = deepcopy(instance)
         instance_config['dbm'] = True
-        instance_config['query_samples'] = {
+        instance_config['query_activity'] = {
             'enabled': True,
-            'collection_interval': 1,  # Collect every second for testing
-            'samples_per_hour_per_query': 100,  # Allow many samples for testing
-            'activity_enabled': True,
-            'activity_collection_interval': 1,
+            'collection_interval': 1,
         }
 
         # Create check
         check = ClickhouseCheck('clickhouse', {}, [instance_config])
 
-        # Run the check - this should collect samples from system.processes
+        # Run the check - this should collect activity from system.processes
         dd_run_check(check)
 
         # Wait for async job to complete
@@ -63,13 +60,12 @@ class TestDBMIntegration:
         dd_run_check(check)
 
         # Verify activity snapshots are being collected
-        # The implementation collects from system.processes and submits activity events
         activity_events = aggregator.get_event_platform_events("dbm-activity")
         print(f"Found {len(activity_events)} activity events")
 
-    def test_query_samples_disabled(self, aggregator, instance):
+    def test_query_activity_disabled(self, aggregator, instance):
         """
-        Test that query samples are NOT collected when DBM is disabled
+        Test that query activity is NOT collected when DBM is disabled
         """
         # Configure instance with DBM disabled
         instance_config = deepcopy(instance)
@@ -78,24 +74,22 @@ class TestDBMIntegration:
         # Create check
         check = ClickhouseCheck('clickhouse', {}, [instance_config])
 
-        # Verify statement_samples is None
-        assert check.statement_samples is None, "statement_samples should be None when DBM is disabled"
+        # Verify statement_activity is None
+        assert check.statement_activity is None, "statement_activity should be None when DBM is disabled"
 
         # Run the check
         check.check(None)
 
-    def test_query_samples_with_activity(self, aggregator, instance, dd_run_check):
+    def test_query_activity_with_connections(self, aggregator, instance, dd_run_check):
         """
         Test that activity snapshots capture active connections/processes
         """
         # Configure instance with DBM enabled
         instance_config = deepcopy(instance)
         instance_config['dbm'] = True
-        instance_config['query_samples'] = {
+        instance_config['query_activity'] = {
             'enabled': True,
             'collection_interval': 1,
-            'activity_enabled': True,
-            'activity_collection_interval': 1,
         }
 
         # Create check
@@ -126,14 +120,14 @@ class TestDBMIntegration:
         activity_events = aggregator.get_event_platform_events("dbm-activity")
         print(f"Found {len(activity_events)} activity events")
 
-    def test_query_samples_properties(self, instance):
+    def test_dbm_properties(self, instance):
         """
         Test that required DBM properties are correctly set on the check
         """
         # Configure instance with DBM enabled
         instance_config = deepcopy(instance)
         instance_config['dbm'] = True
-        instance_config['query_samples'] = {
+        instance_config['query_activity'] = {
             'enabled': True,
         }
 
@@ -157,41 +151,49 @@ class TestDBMIntegration:
         print(f"reported_hostname: {hostname}")
         print(f"database_identifier: {db_id}")
 
-    def test_statement_samples_event_structure(self, instance):
+    def test_activity_event_structure(self, instance):
         """
-        Test that the event structure for query samples is correct
+        Test that the event structure for activity snapshots is correct
         """
+        from unittest import mock
+
         # Configure instance with DBM enabled
         instance_config = deepcopy(instance)
         instance_config['dbm'] = True
-        instance_config['query_samples'] = {
+        instance_config['query_activity'] = {
             'enabled': True,
         }
 
         # Create check
         check = ClickhouseCheck('clickhouse', {}, [instance_config])
 
-        # Create a mock row to test event creation (matching system.processes output)
-        mock_row = {
-            'elapsed': 0.1,  # seconds
-            'query_id': 'test-query-id',
-            'query': 'SELECT * FROM system.tables WHERE name = ?',
-            'statement': 'SELECT * FROM system.tables WHERE name = ?',
-            'query_signature': 'test-signature',
-            'user': 'datadog',
-            'read_rows': 10,
-            'read_bytes': 1024,
-            'written_rows': 0,
-            'written_bytes': 0,
-            'memory_usage': 2048,
-            'dd_tables': ['system.tables'],
-            'dd_commands': ['SELECT'],
-            'dd_comments': [],
-            'current_database': 'default',
-        }
+        # Set up activity collector
+        activity = check.statement_activity
+        activity._tags_no_db = ['test:clickhouse', 'server:localhost']
+
+        # Create mock rows
+        rows = [
+            {
+                'elapsed': 0.1,
+                'query_id': 'test-query-id',
+                'query': 'SELECT * FROM system.tables',
+                'statement': 'SELECT * FROM system.tables',
+                'query_signature': 'test-signature',
+                'user': 'datadog',
+                'read_rows': 10,
+                'memory_usage': 2048,
+                'current_database': 'default',
+            }
+        ]
+
+        active_connections = [
+            {'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 1}
+        ]
 
         # Create event
-        event = check.statement_samples._create_sample_event(mock_row)
+        with mock.patch('datadog_checks.clickhouse.statement_activity.datadog_agent') as mock_agent:
+            mock_agent.get_version.return_value = '7.64.0'
+            event = activity._create_activity_event(rows, active_connections)
 
         # Verify event structure
         assert 'host' in event, "Event should have host field"
@@ -200,28 +202,13 @@ class TestDBMIntegration:
         assert 'ddsource' in event, "Event should have ddsource field"
         assert event['ddsource'] == 'clickhouse', "ddsource should be clickhouse"
         assert 'dbm_type' in event, "Event should have dbm_type field"
-        assert event['dbm_type'] == 'plan', "dbm_type should be plan"
+        assert event['dbm_type'] == 'activity', "dbm_type should be activity"
         assert 'timestamp' in event, "Event should have timestamp field"
-        assert 'db' in event, "Event should have db field"
-        assert 'clickhouse' in event, "Event should have clickhouse field"
+        assert 'collection_interval' in event, "Event should have collection_interval field"
 
-        # Verify db section
-        db_section = event['db']
-        assert 'instance' in db_section
-        assert 'query_signature' in db_section
-        assert 'statement' in db_section
-        assert 'user' in db_section
-        assert 'metadata' in db_section
-
-        # Verify clickhouse section contains fields not excluded by system_processes_sample_exclude_keys
-        ch_section = event['clickhouse']
-        # query_id is excluded from clickhouse section as per system_processes_sample_exclude_keys
-        assert 'read_rows' in ch_section
-        assert 'memory_usage' in ch_section
-
-        # Verify duration is in nanoseconds (elapsed is in seconds)
-        assert 'duration' in event
-        assert event['duration'] == int(0.1 * 1e9)  # 0.1 seconds = 100ms in nanoseconds
+        # Verify activity payload
+        assert 'clickhouse_activity' in event, "Event should have clickhouse_activity field"
+        assert 'clickhouse_connections' in event, "Event should have clickhouse_connections field"
 
         print("Event structure is valid!")
         print(f"Event keys: {list(event.keys())}")

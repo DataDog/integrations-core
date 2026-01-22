@@ -4,93 +4,13 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING, Tuple
 
-from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base import ConfigurationError
+from datadog_checks.clickhouse.config_models import InstanceConfig, defaults, dict_defaults
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
-
-
-@dataclass
-class QueryMetricsConfig:
-    """Typed configuration for query metrics collection."""
-
-    enabled: bool = True
-    collection_interval: float = 10
-    run_sync: bool = False
-    full_statement_text_cache_max_size: int = 10000
-    full_statement_text_samples_per_hour_per_query: int = 1
-
-
-@dataclass
-class QuerySamplesConfig:
-    """Typed configuration for query samples (activity) collection."""
-
-    enabled: bool = True
-    collection_interval: float = 1
-    run_sync: bool = False
-    samples_per_hour_per_query: int = 15
-    seen_samples_cache_maxsize: int = 10000
-    activity_enabled: bool = True
-    activity_collection_interval: float = 10
-    activity_max_rows: int = 1000
-
-
-@dataclass
-class CompletedQuerySamplesConfig:
-    """Typed configuration for completed query samples collection."""
-
-    enabled: bool = True
-    collection_interval: float = 10
-    run_sync: bool = False
-    samples_per_hour_per_query: int = 15
-    seen_samples_cache_maxsize: int = 10000
-    max_samples_per_collection: int = 1000
-
-
-@dataclass
-class ClickhouseConfig:
-    """
-    Typed configuration for the ClickHouse check.
-    All values have proper defaults that match the spec.yaml.
-    """
-
-    # Connection settings
-    server: str = ''
-    port: int = 9000
-    db: str = 'default'
-    username: str = 'default'
-    password: str = ''
-    connect_timeout: float = 10
-    read_timeout: float = 10
-    compression: Optional[str] = None
-    tls_verify: bool = False
-    tls_ca_cert: Optional[str] = None
-    verify: bool = True
-
-    # Mode settings
-    single_endpoint_mode: bool = False
-    dbm: bool = False
-
-    # Collection intervals
-    database_instance_collection_interval: float = 300
-    min_collection_interval: float = 15
-
-    # Tag settings
-    tags: List[str] = field(default_factory=list)
-    disable_generic_tags: bool = False
-
-    # DBM configurations
-    query_metrics: QueryMetricsConfig = field(default_factory=QueryMetricsConfig)
-    query_samples: QuerySamplesConfig = field(default_factory=QuerySamplesConfig)
-    completed_query_samples: CompletedQuerySamplesConfig = field(default_factory=CompletedQuerySamplesConfig)
-
-    # Other settings
-    service: Optional[str] = None
-    only_custom_queries: bool = False
-    custom_queries: List[dict] = field(default_factory=list)
 
 
 class ValidationResult:
@@ -124,141 +44,152 @@ class ValidationResult:
         self.warnings.append(warning)
 
 
-def build_config(check: ClickhouseCheck) -> Tuple[ClickhouseConfig, ValidationResult]:
+def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResult]:
     """
     Build the ClickHouse configuration from the check instance.
 
     :param check: The check instance.
-    :return: Tuple of (ClickhouseConfig, ValidationResult)
+    :return: Tuple of (InstanceConfig, ValidationResult)
     """
     instance = check.instance
     init_config = check.init_config
 
     validation_result = ValidationResult()
 
-    # Build nested DBM configs
-    query_metrics_config = _build_query_metrics_config(instance.get('query_metrics', {}))
-    query_samples_config = _build_query_samples_config(instance.get('query_samples', {}))
-    completed_query_samples_config = _build_completed_query_samples_config(instance.get('completed_query_samples', {}))
+    args = {}
 
-    # Build main config
-    config = ClickhouseConfig(
-        # Connection settings
-        server=instance.get('server', ''),
-        port=instance.get('port', 9000),
-        db=instance.get('db', 'default'),
-        username=instance.get('username', instance.get('user', 'default')),
-        password=instance.get('password', ''),
-        connect_timeout=float(instance.get('connect_timeout', 10)),
-        read_timeout=float(instance.get('read_timeout', 10)),
-        compression=instance.get('compression', None),
-        tls_verify=is_affirmative(instance.get('tls_verify', False)),
-        tls_ca_cert=instance.get('tls_ca_cert', None),
-        verify=instance.get('verify', True),
-        # Mode settings
-        single_endpoint_mode=is_affirmative(instance.get('single_endpoint_mode', False)),
-        dbm=is_affirmative(instance.get('dbm', False)),
-        # Collection intervals
-        database_instance_collection_interval=float(instance.get('database_instance_collection_interval', 300)),
-        min_collection_interval=float(instance.get('min_collection_interval', 15)),
-        # Tag settings
-        tags=list(instance.get('tags', [])),
-        disable_generic_tags=is_affirmative(instance.get('disable_generic_tags', False)),
-        # DBM configurations
-        query_metrics=query_metrics_config,
-        query_samples=query_samples_config,
-        completed_query_samples=completed_query_samples_config,
-        # Other settings
-        service=instance.get('service', init_config.get('service', None)),
-        only_custom_queries=is_affirmative(instance.get('only_custom_queries', False)),
-        custom_queries=instance.get('custom_queries', []),
+    # Automatically set values that support defaults or that have simple values in the instance
+    instance_config_fields = set(InstanceConfig.__annotations__.keys())
+
+    for f in instance_config_fields:
+        try:
+            args[f] = getattr(defaults, f"instance_{f}")()
+        except AttributeError:
+            args[f] = None
+        if f in instance:
+            args[f] = instance[f]
+
+    # Handle deprecated 'user' option
+    if 'user' in instance and 'username' not in instance:
+        args['username'] = instance['user']
+
+    # Set values for args that have dict defaults or other complexities
+    # If you change a literal value here, make sure to update spec.yaml
+    args.update(
+        {
+            # DBM configurations - merge defaults with user config
+            "query_activity": {
+                **dict_defaults.instance_query_activity().model_dump(),
+                **(instance.get('query_activity', {})),
+            },
+            "query_metrics": {
+                **dict_defaults.instance_query_metrics().model_dump(),
+                **(instance.get('query_metrics', {})),
+            },
+            "completed_query_samples": {
+                **dict_defaults.instance_completed_query_samples().model_dump(),
+                **(instance.get('completed_query_samples', {})),
+            },
+            # Tags - ensure we have a list, not None
+            "tags": list(instance.get('tags', [])),
+            # Other settings
+            "service": instance.get('service', init_config.get('service', None)),
+        }
     )
 
-    # Validate configuration
-    _validate_config(config, instance, validation_result)
+    # Apply various validations and fallbacks
+    _apply_validated_defaults(args, instance, validation_result)
+    _apply_deprecation_warnings(instance, validation_result)
 
-    # Log deprecation warnings
-    if instance.get('user'):
-        validation_result.add_warning("The 'user' option is deprecated. Use 'username' instead.")
+    # Validate that the keys of args match the fields of InstanceConfig
+    args_keys = set(args.keys())
+    missing_fields = instance_config_fields - args_keys
+    extra_fields = args_keys - instance_config_fields
+    if missing_fields or extra_fields:
+        # This should get caught at test time and never execute at runtime
+        raise ConfigurationError(
+            f"build_config: args keys do not match InstanceConfig fields. "
+            f"Missing: {missing_fields}, Extra: {extra_fields}"
+        )
+
+    # Instantiate InstanceConfig using pydantic model_validate
+    config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
+
+    _validate_config(config, instance, validation_result)
 
     return config, validation_result
 
 
-def _build_query_metrics_config(config_dict: dict) -> QueryMetricsConfig:
-    """Build query_metrics config with defaults."""
-    return QueryMetricsConfig(
-        enabled=config_dict.get('enabled', True),
-        collection_interval=float(config_dict.get('collection_interval', 10)),
-        run_sync=config_dict.get('run_sync', False),
-        full_statement_text_cache_max_size=int(config_dict.get('full_statement_text_cache_max_size', 10000)),
-        full_statement_text_samples_per_hour_per_query=int(
-            config_dict.get('full_statement_text_samples_per_hour_per_query', 1)
-        ),
-    )
+def _apply_validated_defaults(args: dict, instance: dict, validation_result: ValidationResult):
+    """Check provided values and revert to defaults if they are invalid."""
+    # Validate compression type
+    if args.get('compression') and args['compression'] not in ['lz4', 'zstd', 'br', 'gzip']:
+        validation_result.add_error(
+            f'Invalid compression type "{args["compression"]}". Valid values are: lz4, zstd, br, gzip'
+        )
+
+    # Validate collection intervals are positive
+    if _safefloat(args.get('query_metrics', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_query_metrics().collection_interval
+        args['query_metrics']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"query_metrics.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if _safefloat(args.get('query_activity', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_query_activity().collection_interval
+        args['query_activity']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"query_activity.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if _safefloat(args.get('completed_query_samples', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_completed_query_samples().collection_interval
+        args['completed_query_samples']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"completed_query_samples.collection_interval must be greater than 0, "
+            f"defaulting to {default_value} seconds."
+        )
 
 
-def _build_query_samples_config(config_dict: dict) -> QuerySamplesConfig:
-    """Build query_samples config with defaults."""
-    return QuerySamplesConfig(
-        enabled=config_dict.get('enabled', True),
-        collection_interval=float(config_dict.get('collection_interval', 1)),
-        run_sync=config_dict.get('run_sync', False),
-        samples_per_hour_per_query=int(config_dict.get('samples_per_hour_per_query', 15)),
-        seen_samples_cache_maxsize=int(config_dict.get('seen_samples_cache_maxsize', 10000)),
-        activity_enabled=config_dict.get('activity_enabled', True),
-        activity_collection_interval=float(config_dict.get('activity_collection_interval', 10)),
-        activity_max_rows=int(config_dict.get('activity_max_rows', 1000)),
-    )
+def _apply_deprecation_warnings(instance: dict, validation_result: ValidationResult):
+    """Apply deprecation warnings for deprecated options."""
+    deprecations = [
+        ['user', 'username'],
+    ]
+
+    for deprecation in deprecations:
+        if deprecation[0] in instance:
+            validation_result.add_warning(
+                f'The `{deprecation[0]}` option is deprecated. Use `{deprecation[1]}` instead.'
+            )
 
 
-def _build_completed_query_samples_config(config_dict: dict) -> CompletedQuerySamplesConfig:
-    """Build completed_query_samples config with defaults."""
-    return CompletedQuerySamplesConfig(
-        enabled=config_dict.get('enabled', True),
-        collection_interval=float(config_dict.get('collection_interval', 10)),
-        run_sync=config_dict.get('run_sync', False),
-        samples_per_hour_per_query=int(config_dict.get('samples_per_hour_per_query', 15)),
-        seen_samples_cache_maxsize=int(config_dict.get('seen_samples_cache_maxsize', 10000)),
-        max_samples_per_collection=int(config_dict.get('max_samples_per_collection', 1000)),
-    )
-
-
-def _validate_config(config: ClickhouseConfig, instance: dict, validation_result: ValidationResult):
+def _validate_config(config: InstanceConfig, instance: dict, validation_result: ValidationResult):
     """Validate the configuration and add warnings/errors."""
     # Validate server is provided
     if not config.server:
         validation_result.add_error('the `server` setting is required')
 
-    # Validate compression type
-    if config.compression and config.compression not in ['lz4', 'zstd', 'br', 'gzip']:
-        validation_result.add_error(
-            f'Invalid compression type "{config.compression}". Valid values are: lz4, zstd, br, gzip'
-        )
-
-    # Validate collection intervals are positive
-    if config.query_metrics.collection_interval <= 0:
-        validation_result.add_warning(
-            'query_metrics.collection_interval must be greater than 0, defaulting to 10 seconds.'
-        )
-        # Note: dataclass is frozen by default, would need to handle this differently
-        # For now, just warn - the config object is built with the user's value
-
-    if config.query_samples.collection_interval <= 0:
-        validation_result.add_warning(
-            'query_samples.collection_interval must be greater than 0, defaulting to 1 second.'
-        )
-
-    if config.completed_query_samples.collection_interval <= 0:
-        validation_result.add_warning(
-            'completed_query_samples.collection_interval must be greater than 0, defaulting to 10 seconds.'
-        )
-
     # Warn if DBM features are enabled without dbm flag
     dbm_features = [
-        ('query_metrics', config.query_metrics.enabled),
-        ('query_samples', config.query_samples.enabled),
-        ('completed_query_samples', config.completed_query_samples.enabled),
+        ('query_metrics', config.query_metrics.enabled if config.query_metrics else False),
+        ('query_activity', config.query_activity.enabled if config.query_activity else False),
+        (
+            'completed_query_samples',
+            config.completed_query_samples.enabled if config.completed_query_samples else False,
+        ),
     ]
     for feature_name, _is_enabled in dbm_features:
         if instance.get(feature_name, {}).get('enabled') and not config.dbm:
             validation_result.add_warning(f'The `{feature_name}` feature requires the `dbm` option to be enabled.')
+
+
+def _safefloat(value) -> float:
+    """Safely convert a value to float, returning 0.0 on failure."""
+    if value is None:
+        return 0.0
+    try:
+        return float(value)
+    except Exception:
+        return 0.0
