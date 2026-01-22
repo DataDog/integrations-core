@@ -14,7 +14,7 @@ This integration tracks the availability and resource utilization of Cisco SD-WA
 
 Cisco SD-WAN environments depend on continuous evaluation of link quality across transports such as MPLS, broadband, and LTE. Datadog monitors latency, jitter, packet loss, throughput, and utilization per transport and path, making it easier to troubleshoot degraded links and validate SLA-driven routing behavior.
 
-### Traffic and Application Visibility
+### Traffic and application visibility
 
 By surfacing traffic and throughput metrics at the device and interface level, this integration helps teams understand where bandwidth is being consumed and identify hotspots or oversubscribed links. Combined with Datadog’s broader observability platform, network data can be correlated with application and service performance for faster root cause analysis.
 
