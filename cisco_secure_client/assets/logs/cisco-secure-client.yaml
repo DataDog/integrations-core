@@ -156,8 +156,6 @@ pipeline:
       samples:
         - "<190>2025-11-20T07:37:58Z: %FTD-6-113039: Group group User test-user
           IP 10.10.10.10 AnyConnect_parent session started."
-        - "<190>2025-11-20T07:37:58Z: %FTD-6-113039: Group group User test-user
-          IP 10.10.10.10 AnyConnect_parent session started."
         - <134>1 1639132851.416656563 TCP9001 events anyconnect_vpn_disconnect
           user id 'user.name1' local ip 1.1.1.1 connected from 1.1.1.1
         - "<134>1 1720045578.340434385 labs_appliance events
@@ -210,7 +208,7 @@ pipeline:
           rule_113035  %{parse_group_user_ip} Session terminated: AnyConnect not
           enabled or invalid AnyConnect image on the %{greedyData:device_name}
 
-          rule_716059 Group %{regex(".*(?= User )"):group} User %{notSpace:usr.name} IP %{ip:source_ip} AnyConnect session resumed connection from IP %{ip:network.client.ip}(.)?
+          rule_716059 Group %{regex(".*(?= User )"):group} User %{notSpace:usr.name} IP %{ip:network.source.ip} AnyConnect session resumed connection from IP %{ip:network.client.ip}(.)?
 
           rule_722056 Unsupported AnyConnect client connection rejected from %{ip:network.client.ip}. Client info:\s*%{regex(".*(?=. Reason: )"):http.useragent}. Reason:\s*%{greedyData:reason}
 

@@ -93,8 +93,9 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
+        source:
+          ip: "10.10.10.11"
       severity: 6
-      source_ip: "10.10.10.11"
       timestamp: 1764932053000
       usr:
         name: "olivia.martin"
