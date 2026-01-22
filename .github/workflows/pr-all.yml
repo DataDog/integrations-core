@@ -1,7 +1,7 @@
 name: PR All
 
 on:
-  pull_request:
+  pull_request_target:
     paths:
     - datadog_checks_base/datadog_checks/**
     - datadog_checks_base/pyproject.toml

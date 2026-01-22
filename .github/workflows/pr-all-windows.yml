@@ -3,7 +3,7 @@ name: PR All Windows
 # We will remove this once we have a better solution
 
 on:
-  pull_request:
+  pull_request_target:
     paths:
     - datadog_checks_base/datadog_checks/**
     - datadog_checks_dev/datadog_checks/dev/*.py
