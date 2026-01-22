@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from time import time
 
-from datadog_checks.base.utils.serialization import json
-
 import clickhouse_connect
 from cachetools import TTLCache
 from clickhouse_connect.driver import httputil
@@ -13,6 +11,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
+from datadog_checks.base.utils.serialization import json
 
 from . import queries
 from .__about__ import __version__
