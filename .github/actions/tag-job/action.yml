@@ -1,0 +1,41 @@
+name: 'Tag Job with Datadog CI'
+description: 'Tags the current job with custom tags for CI Visibility in Datadog'
+
+inputs:
+  tags:
+    description: 'Comma-separated list of tags to add (e.g., "custom_tag:value,another_tag:value2")'
+    required: true
+  dd_api_key:
+    description: 'Datadog API key'
+    required: true
+  dd_site:
+    description: 'Datadog site (e.g., datadoghq.com, datad0g.com)'
+    required: false
+    default: 'datadoghq.com'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+      with:
+        node-version: '20'
+
+    - name: Install datadog-ci and tag job
+      shell: bash
+      env:
+        DATADOG_API_KEY: ${{ inputs.dd_api_key }}
+        DATADOG_SITE: ${{ inputs.dd_site }}
+        TAGS: ${{ inputs.tags }}
+      run: |
+        npm install -g @datadog/datadog-ci
+
+        # Convert comma-separated tags to --tags flag format
+        # e.g., "tag1:value1,tag2:value2" becomes "--tags tag1:value1 --tags tag2:value2"
+        TAGS_ARGS=""
+        IFS=',' read -ra TAG_ARRAY <<< "$TAGS"
+        for tag in "${TAG_ARRAY[@]}"; do
+          TAGS_ARGS="$TAGS_ARGS --tags $tag"
+        done
+
+        datadog-ci tag --level job $TAGS_ARGS

@@ -1,9 +1,5 @@
 # Agent Check: Fly.io
 
-<div class="alert alert-warning">
-This integration is in public beta. Use caution if enabling it on production workloads.
-</div>
-
 ## Overview
 
 This check monitors [Fly.io][1] metrics through the Datadog Agent.

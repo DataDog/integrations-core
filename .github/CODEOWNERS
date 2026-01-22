@@ -192,6 +192,9 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /aspdotnet/                                                          @DataDog/windows-products @DataDog/agent-integrations
 /aspdotnet/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /aspdotnet/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/battery/                                                            @DataDog/windows-products @DataDog/agent-integrations
+/battery/*.md                                                        @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/battery/manifest.json                                               @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /dotnetclr/                                                          @DataDog/windows-products @DataDog/agent-integrations
 /dotnetclr/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /dotnetclr/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
