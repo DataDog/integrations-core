@@ -9,7 +9,7 @@ import re
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
-from typing import Dict, List, Optional, Tuple  # noqa: F401
+from typing import Any, Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
 
@@ -294,6 +294,39 @@ def mock_http_response(mocker):
     yield lambda *args, **kwargs: mocker.patch(
         kwargs.pop('method', 'requests.Session.get'), return_value=MockResponse(*args, **kwargs)
     )
+
+
+@pytest.fixture
+def mock_http_response_per_endpoint(mocker):
+    global MockResponse
+    if MockResponse is None:
+        from datadog_checks.dev.http import MockResponse
+
+    def _mock(responses_by_endpoint: Dict[str, Any], method: str = 'requests.Session.get', strict: bool = True):
+        """
+        responses_by_endpoint: dict of { url_substring: (args, kwargs_for_MockResponse) }
+        e.g. { 'http://example.com/api/v1': (['{"status": "ok"}'], {'status_code': 200}) }
+        """
+
+        def side_effect(url, *args, **kwargs):
+            if url not in responses_by_endpoint:
+                if strict:
+                    raise ValueError(f"Endpoint {url} not found in mocked responses")
+                else:
+                    return MockResponse(status_code=404)
+            else:
+                response_data = responses_by_endpoint[url]
+                if isinstance(response_data, tuple):
+                    res_args = response_data[0]
+                    res_kwargs = response_data[1]
+                else:
+                    res_args = [response_data]
+                    res_kwargs = {}
+                return MockResponse(*res_args, **res_kwargs)
+
+        return mocker.patch(method, side_effect=side_effect)
+
+    yield _mock
 
 
 @pytest.fixture
