@@ -25,12 +25,12 @@ class CompletedQuerySamples(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-    max_samples_per_collection: Optional[float]
-    run_sync: Optional[bool]
-    samples_per_hour_per_query: Optional[float]
-    seen_samples_cache_maxsize: Optional[float]
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_samples_per_collection: Optional[float] = None
+    run_sync: Optional[bool] = None
+    samples_per_hour_per_query: Optional[float] = None
+    seen_samples_cache_maxsize: Optional[float] = None
 
 
 class CustomQuery(BaseModel):
@@ -38,11 +38,11 @@ class CustomQuery(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[int]
-    columns: Optional[tuple[MappingProxyType[str, Any], ...]]
-    metric_prefix: Optional[str]
-    query: Optional[str]
-    tags: Optional[tuple[str, ...]]
+    collection_interval: Optional[int] = None
+    columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    metric_prefix: Optional[str] = None
+    query: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
 
 
 class MetricPatterns(BaseModel):
@@ -50,8 +50,8 @@ class MetricPatterns(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[tuple[str, ...]]
-    include: Optional[tuple[str, ...]]
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class QueryActivity(BaseModel):
@@ -59,10 +59,10 @@ class QueryActivity(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-    payload_row_limit: Optional[int]
-    run_sync: Optional[bool]
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    payload_row_limit: Optional[int] = None
+    run_sync: Optional[bool] = None
 
 
 class QueryMetrics(BaseModel):
@@ -70,11 +70,11 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-    full_statement_text_cache_max_size: Optional[float]
-    full_statement_text_samples_per_hour_per_query: Optional[float]
-    run_sync: Optional[bool]
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[float] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
+    run_sync: Optional[bool] = None
 
 
 class InstanceConfig(BaseModel):
@@ -102,14 +102,14 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics] = None
     read_timeout: Optional[int] = None
     server: str
-    service: Optional[str]
-    single_endpoint_mode: Optional[bool]
-    tags: Optional[tuple[str, ...]]
-    tls_ca_cert: Optional[str]
-    tls_verify: Optional[bool]
-    use_global_custom_queries: Optional[str]
-    username: Optional[str]
-    verify: Optional[bool]
+    service: Optional[str] = None
+    single_endpoint_mode: Optional[bool] = None
+    tags: Optional[tuple[str, ...]] = None
+    tls_ca_cert: Optional[str] = None
+    tls_verify: Optional[bool] = None
+    use_global_custom_queries: Optional[str] = None
+    username: Optional[str] = None
+    verify: Optional[bool] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

@@ -17,7 +17,7 @@ from datadog_checks.dev.tooling.configuration.consumers.model.model_info import 
 from datadog_checks.dev.tooling.configuration.consumers.openapi_document import build_openapi_document
 from datadog_checks.dev.tooling.constants import get_root
 
-PYTHON_VERSION = PythonVersion.PY_310
+PYTHON_VERSION = PythonVersion.PY_39
 
 VALIDATORS_DOCUMENTATION = '''# Here you can include additional config validators or transformers
 #
