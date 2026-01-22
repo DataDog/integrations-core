@@ -82,7 +82,7 @@ class MailServer(AsyncTask[EmailMessage]):
         self.failed_deliveries: list[tuple[BaseMessage, Exception]] = []
 
     async def process_message(self, message: EmailMessage) -> None:
-        if isinstance(message, EmailMessage) and message.body.startswith("fail_processing"):
+        if message.body.startswith("fail_processing"):
             raise ValueError("Processing failed intentionally")
         self.sent_emails.append(message)
 
