@@ -13,7 +13,7 @@ This integration surfaces key health indicators from ACI components, including d
 
 Cisco ACI environments handle large volumes of east-west and north-south traffic. Datadog tracks interface throughput, packet rates, errors, and utilization, helping teams detect congestion, packet loss, or misconfigurations that could impact application performance.
 
-### Correlating Network and Application Impact
+### Correlating network and application impact
 
 By integrating ACI metrics with Datadog's infrastructure and application monitoring, teams gain a clearer picture of how network issues propagate to application behavior. This end-to-end visibility helps reduce mean time to resolution when troubleshooting complex data center incidents.
 
