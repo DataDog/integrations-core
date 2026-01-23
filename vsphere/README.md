@@ -119,7 +119,7 @@ The Datadog vSphere integration collects metrics and events from your [TKG][13] 
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/
-[9]: https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.monitoring.doc/GUID-25800DE4-68E5-41CC-82D9-8811E27924BC.html
+[9]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-monitoring-a[…]e/monitoring-inventory-objects/data-collection-levels.html
 [10]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
 [11]: https://www.vmware.com/pdf/vi_architecture_wp.pdf
 [12]: https://github.com/DataDog/integrations-core/blob/master/vsphere/assets/service_checks.json
