@@ -170,7 +170,7 @@ facets:
   - facetType: range
     groups:
       - Web Access
-    name: Packets Recieved
+    name: Packets Received
     path: pkts_received
     source: log
     type: double
