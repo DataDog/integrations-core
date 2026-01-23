@@ -304,12 +304,18 @@ def mock_http_response(mocker, mock_response):
 @pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]], method: str = 'requests.Session.get', strict: bool = True
+        responses_by_endpoint: Dict[str, list[MockResponse]],
+        method: str = 'requests.Session.get',
+        url_arg_index: int = 1,
+        url_kwarg_name: str = "url",
+        strict: bool = True,
     ):
         """
         Mocks HTTP responses for specific endpoints. When multiple responses are given per endpoint, they are returned
         cyclically.
-        If strict is True, an error is raised if the endpoint is not found. Otherwise, a 404 response is returned.
+        url_arg_index: The index of the URL argument in the args tuple. e.g. for requests.get(url), url_arg_index=0
+        url_kwarg_name: The name of the URL key in the kwargs dict. e.g. for requests.get(url=url), url_kwarg_name="url"
+        strict: If True, an error is raised if the endpoint is not found. Otherwise, a 404 response is returned.
         """
         from itertools import cycle
 
@@ -318,9 +324,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         }
 
         def side_effect(*args, **kwargs):
-            # Determine the URL by looking for the explicit kwarg or the first string arg
-            # This automatically skips 'self' if it's present.
-            url = kwargs.get('url') or next((a for a in args if isinstance(a, str)), None)
+            url = kwargs.get(url_kwarg_name) or args[url_arg_index]
             if url not in queues:
                 if strict:
                     raise ValueError(f"Endpoint {url} not found in mocked responses")
