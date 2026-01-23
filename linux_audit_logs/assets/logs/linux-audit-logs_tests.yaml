@@ -986,6 +986,10 @@ tests:
       ocsf:
         activity_id: 2
         activity_name: "Read"
+        actor:
+          user:
+            name: "root"
+            uid: "0"
         category_name: "System Activity"
         category_uid: 1
         class_name: "File System Activity"
@@ -995,6 +999,7 @@ tests:
           type_id: 0
           uid: "fd:03"
         file:
+          name: "shadow"
           path: "/etc/shadow"
           type: "Unknown"
           type_id: 0
@@ -1046,6 +1051,10 @@ tests:
       ocsf:
         activity_id: 4
         activity_name: "Delete"
+        actor:
+          user:
+            name: "root"
+            uid: "0"
         category_name: "System Activity"
         category_uid: 1
         class_name: "File System Activity"
@@ -1056,6 +1065,7 @@ tests:
           uid: "fd:03"
         file:
           ext: "so"
+          name: "libcrypt.so.1"
           path: "/lib/x86_64-linux-gnu/libcrypt.so.1"
           type: "Unknown"
           type_id: 0
@@ -1107,6 +1117,10 @@ tests:
       ocsf:
         activity_id: 2
         activity_name: "Read"
+        actor:
+          user:
+            name: "root"
+            uid: "0"
         category_name: "System Activity"
         category_uid: 1
         class_name: "File System Activity"
@@ -1116,6 +1130,7 @@ tests:
           type_id: 0
           uid: "fd:03"
         file:
+          name: "lib"
           path: "/lib/"
           type: "Folder"
           type_id: 2
@@ -1167,6 +1182,10 @@ tests:
       ocsf:
         activity_id: 1
         activity_name: "Create"
+        actor:
+          user:
+            name: "root"
+            uid: "0"
         category_name: "System Activity"
         category_uid: 1
         class_name: "File System Activity"
@@ -1177,6 +1196,7 @@ tests:
           uid: "fd:03"
         file:
           ext: "pid"
+          name: "nginx.pid"
           path: "/run/nginx.pid"
           type: "Unknown"
           type_id: 0

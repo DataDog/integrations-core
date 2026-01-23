@@ -1545,7 +1545,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid``
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
               sources:
                 - ocsf.actor.process.user.uid
               sourceType: attribute
@@ -1987,7 +1987,7 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.file.uid` to `ocsf.actor.process.user.uid`
+            - name: Map `ocsf.file.uid` to `ocsf.file.uid`
               sources:
                 - ocsf.file.uid
               sourceType: attribute
