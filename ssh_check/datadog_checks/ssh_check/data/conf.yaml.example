@@ -54,6 +54,7 @@ instances:
 
     ## @param add_missing_keys - boolean - optional - default: false
     ## Automatically add host key to known hosts when it is missing.
+    ## Warning: only enable this if you trust your host's key.
     #
     # add_missing_keys: false
 

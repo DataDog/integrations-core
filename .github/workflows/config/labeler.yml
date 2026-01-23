@@ -89,6 +89,10 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/barracuda_secure_edge:
+- barracuda_secure_edge/**/*
+integration/battery:
+- battery/**/*
 integration/bentoml:
 - bentoml/**/*
 integration/beyondtrust_identity_security_insights:
@@ -119,6 +123,8 @@ integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
 - cassandra_nodetool/**/*
+integration/cato_networks:
+- cato_networks/**/*
 integration/celery:
 - celery/**/*
 integration/ceph:
@@ -135,6 +141,8 @@ integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
 - cisco_aci/**/*
+integration/cisco_asa:
+- cisco_asa/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
 integration/cisco_sdwan:
@@ -157,6 +165,8 @@ integration/cloud_foundry_api:
 - cloud_foundry_api/**/*
 integration/cloudera:
 - cloudera/**/*
+integration/cloudgen_firewall:
+- cloudgen_firewall/**/*
 integration/cockroachdb:
 - cockroachdb/**/*
 integration/cofense_triage:
@@ -363,12 +373,14 @@ integration/juniper_srx_firewall:
 - juniper_srx_firewall/**/*
 integration/kafka:
 - kafka/**/*
+integration/kafka_actions:
+- kafka_actions/**/*
 integration/kafka_consumer:
 - kafka_consumer/**/*
-integration/karpenter:
-- karpenter/**/*
 integration/kandji:
 - kandji/**/*
+integration/karpenter:
+- karpenter/**/*
 integration/keda:
 - keda/**/*
 integration/keeper:
@@ -583,6 +595,8 @@ integration/ray:
 - ray/**/*
 integration/redisdb:
 - redisdb/**/*
+integration/resend:
+- resend/**/*
 integration/rethinkdb:
 - rethinkdb/**/*
 integration/riak:
@@ -665,6 +679,8 @@ integration/strimzi:
 - strimzi/**/*
 integration/supabase:
 - supabase/**/*
+integration/supabase_cloud:
+- supabase_cloud/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/supply_chain_firewall:
@@ -731,10 +747,14 @@ integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:
 - twistlock/**/*
+integration/valence_security:
+- valence_security/**/*
 integration/varnish:
 - varnish/**/*
 integration/vault:
 - vault/**/*
+integration/vectra:
+- vectra/**/*
 integration/velero:
 - velero/**/*
 integration/versa:
@@ -787,10 +807,6 @@ integration/zerofox_cloud_platform:
 - zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
-integration/barracuda_secure_edge:
-- barracuda_secure_edge/**/*
-integration/cloudgen_firewall:
-- cloudgen_firewall/**/*
 integration/zscaler_private_access:
 - zscaler_private_access/**/*
 qa/skip-qa:

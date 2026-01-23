@@ -2,7 +2,31 @@
 
 <!-- towncrier release notes start -->
 
-## 22.12.0 / 2025-11-26
+## 22.12.3 / 2026-01-21
+
+***Fixed***:
+
+* Improve SQL Server USE stmt identifier escaping ([#22277](https://github.com/DataDog/integrations-core/pull/22277))
+* Fix STRING_AGG truncation error for tables with many columns by casting to NVARCHAR(MAX) ([#22338](https://github.com/DataDog/integrations-core/pull/22338))
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+  Optimize StatementMetrics cache to only store fields we need to compute statement metrics. ([#22358](https://github.com/DataDog/integrations-core/pull/22358)) ([#22376](https://github.com/DataDog/integrations-core/pull/22376))
+
+## 22.12.2 / 2026-01-09 / Agent 7.75.0
+
+***Fixed***:
+
+* Replace SQLServer checks for year with checks for major version. ([#22285](https://github.com/DataDog/integrations-core/pull/22285))
+* Fix default check in SQL Server major version ([#22291](https://github.com/DataDog/integrations-core/pull/22291))
+
+## 22.12.1 / 2025-12-22
+
+***Fixed***:
+
+* Fix table row count calculation for sqlserver.table.row_count. Previously, we joined with indexes which produced one row per table-index combination before grouping. This resulted in inflated row count values when grouping by table because the multiple index rows were summed together.
+
+  The fix is to conditionally sum the row count: only when the index_id is in (0, 1), which translates to heap and clustered index partitions. Both of these contain the true row count for the given partition, whereas other partition types (e.g. non-clustered indexes) should not be considered in the row count calculation. This leads to the expected value being calcualted. ([#22055](https://github.com/DataDog/integrations-core/pull/22055))
+
+## 22.12.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
@@ -14,7 +38,7 @@
 
 * Support `only_custom_queries` configuration option in the SQL Server integration ([#21304](https://github.com/DataDog/integrations-core/pull/21304))
 
-## 22.11.0 / 2025-10-31
+## 22.11.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

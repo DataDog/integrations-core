@@ -124,9 +124,10 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /snmp_*/                                                           @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/*.md                                                       @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/manifest.json                                              @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
-/network_path/                                                     @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations
-/network_path/*.md                                                 @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
-/network_path/manifest.json                                        @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
+/network_path/                                                     @DataDog/network-path @DataDog/Networks @DataDog/agent-integrations
+/network_path/*.md                                                 @DataDog/network-path @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
+/network_path/assets                                               @DataDog/network-path @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
+/network_path/manifest.json                                        @DataDog/network-path @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
 /versa/                                                            @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 
 /datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/ndm-core @DataDog/agent-integrations
@@ -171,6 +172,11 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /mongo/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mongo/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
+# Data Streams Monitoring
+/kafka_actions/                                     @DataDog/data-streams-monitoring @DataDog/agent-integrations
+/kafka_actions/*.md                                 @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
+/kafka_actions/manifest.json                        @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
+
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
 /openai/            @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
@@ -186,6 +192,9 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /aspdotnet/                                                          @DataDog/windows-products @DataDog/agent-integrations
 /aspdotnet/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /aspdotnet/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/battery/                                                            @DataDog/windows-products @DataDog/agent-integrations
+/battery/*.md                                                        @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/battery/manifest.json                                               @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /dotnetclr/                                                          @DataDog/windows-products @DataDog/agent-integrations
 /dotnetclr/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /dotnetclr/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
@@ -355,6 +364,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /microsoft_dns/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
 /microsoft_dns/assets/logs/                                         @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/microsoft_copilot/                                                 @DataDog/saas-integrations
+/microsoft_copilot/*.md                                             @DataDog/saas-integrations @DataDog/documentation
+/microsoft_copilot/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
+/microsoft_copilot/assets/logs/                                     @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /microsoft_sysmon/                                                  @DataDog/agent-integrations
 /microsoft_sysmon/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /microsoft_sysmon/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
@@ -399,6 +413,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /proofpoint_on_demand/*.md                                          @DataDog/saas-integrations @DataDog/documentation
 /proofpoint_on_demand/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
 /proofpoint_on_demand/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/resend/                                                            @DataDog/saas-integrations
+/resend/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+/resend/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+/resend/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /sanity/                                                            @DataDog/saas-integrations
 /sanity/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
@@ -716,6 +735,26 @@ plaid/assets/logs/                                                  @DataDog/saa
 /guarddog/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
 /guarddog/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /guarddog/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/vectra/                                                             @DataDog/saas-integrations
+/vectra/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/vectra/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/vectra/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/valence_security/                                                   @DataDog/saas-integrations
+/valence_security/*.md                                               @DataDog/saas-integrations @DataDog/documentation
+/valence_security/manifest.json                                      @DataDog/saas-integrations @DataDog/documentation
+/valence_security/assets/logs/                                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/cato_networks/                                                      @DataDog/saas-integrations
+/cato_networks/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
+/cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
+/cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/cisco_asa/                                                           @DataDog/agent-integrations
+/cisco_asa/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/cisco_asa/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/cisco_asa/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
