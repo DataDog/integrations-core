@@ -148,6 +148,8 @@ def run_one_check(check: AgentCheck, cancel=True):
         check.statement_metrics._job_loop_future.result()
     if check.metadata_samples._job_loop_future is not None:
         check.metadata_samples._job_loop_future.result()
+    if check.migration_collector is not None and check.migration_collector._job_loop_future is not None:
+        check.migration_collector._job_loop_future.result()
 
 
 def normalize_object(obj):

@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.postgres.migration_utils import SUPPORTED_MIGRATION_TOOLS, get_migration_version_only
 from datadog_checks.postgres.version_utils import V10, V11, VersionUtils
 
 
@@ -188,6 +189,8 @@ class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
     include_tables: list[str]
     max_columns: int
     max_query_duration: int
+    collect_migrations_enabled: bool
+    migration_tools: list[str]
 
 
 class PostgresSchemaCollector(SchemaCollector):
@@ -206,7 +209,17 @@ class PostgresSchemaCollector(SchemaCollector):
         config.include_tables = check._config.collect_schemas.include_tables
         config.max_columns = int(check._config.collect_schemas.max_columns)
         config.max_query_duration = int(check._config.collect_schemas.max_query_duration)
+        config.collect_migrations_enabled = (
+            check._config.collect_migrations is not None and check._config.collect_migrations.enabled
+        )
+        # Auto-detect all supported tools by default, or use specified filter
+        config.migration_tools = (
+            list(check._config.collect_migrations.migration_tools or SUPPORTED_MIGRATION_TOOLS)
+            if check._config.collect_migrations
+            else []
+        )
         super().__init__(check, config)
+        self._migration_context_cache = {}
 
     @property
     def kind(self):
@@ -231,15 +244,6 @@ class PostgresSchemaCollector(SchemaCollector):
 
                 cursor.execute(query)
                 return cursor.fetchall()
-
-    @contextlib.contextmanager
-    def _get_cursor(self, database_name):
-        with self._check.db_pool.get_connection(database_name) as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                query = self.get_rows_query()
-                cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s';")
-                cursor.execute(query)
-                yield cursor
 
     def _get_schemas_query(self):
         query = SCHEMA_QUERY
@@ -362,10 +366,40 @@ class PostgresSchemaCollector(SchemaCollector):
     def _get_all(self, cursor):
         return cursor.fetchall()
 
+    def _get_migration_context(self, database_name: str, cursor) -> dict:
+        if not self._config.collect_migrations_enabled:
+            return {}
+
+        migration_context = {}
+        tool_key_map = {
+            "alembic": "alembic",
+            "golang-migrate": "golang_migrate",
+            "prisma": "prisma",
+            "typeorm": "typeorm",
+        }
+
+        for tool in self._config.migration_tools:
+            version = get_migration_version_only(cursor, tool, self._log)
+            if version is not None:
+                key = tool_key_map.get(tool, tool)
+                migration_context[key] = {"version": version}
+
+        return migration_context
+
+    @contextlib.contextmanager
+    def _get_cursor(self, database_name):
+        with self._check.db_pool.get_connection(database_name) as conn:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s';")
+                if self._config.collect_migrations_enabled:
+                    self._migration_context_cache[database_name] = self._get_migration_context(database_name, cursor)
+                query = self.get_rows_query()
+                cursor.execute(query)
+                yield cursor
+
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
-        object = super()._map_row(database, cursor_row)
-        # Map the cursor row to the expected schema, and strip out None values
-        object["schemas"] = [
+        obj = super()._map_row(database, cursor_row)
+        obj["schemas"] = [
             {
                 k: v
                 for k, v in {
@@ -379,7 +413,6 @@ class PostgresSchemaCollector(SchemaCollector):
                                 "id": str(cursor_row.get("table_id")),
                                 "name": cursor_row.get("table_name"),
                                 "owner": cursor_row.get("table_owner"),
-                                # The query can create duplicates of the joined tables
                                 "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values())[
                                     : self._config.max_columns
                                 ],
@@ -400,4 +433,9 @@ class PostgresSchemaCollector(SchemaCollector):
                 if v is not None
             }
         ]
-        return object
+        database_name = database.get("name")
+        if database_name and database_name in self._migration_context_cache:
+            migration_context = self._migration_context_cache[database_name]
+            if migration_context:
+                obj["migration_context"] = migration_context
+        return obj

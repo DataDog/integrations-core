@@ -163,3 +163,65 @@ def test_collect_schemas(dbm_instance, integration_check):
     collector = PostgresSchemaCollector(check)
 
     collector.collect_schemas()
+
+
+def test_migration_context_disabled_when_no_collect_migrations(dbm_instance, integration_check):
+    check = integration_check(dbm_instance)
+    check.version = VersionUtils().parse_version(POSTGRES_VERSION)
+    collector = PostgresSchemaCollector(check)
+
+    assert collector._config.collect_migrations_enabled is False
+    assert collector._config.migration_tools == []
+
+
+def test_migration_context_enabled_when_collect_migrations(dbm_instance, integration_check):
+    dbm_instance['collect_migrations'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 0.1,
+        'ddl_tracking_enabled': False,
+        'migration_tools': ['alembic', 'golang-migrate'],
+    }
+    check = integration_check(dbm_instance)
+    check.version = VersionUtils().parse_version(POSTGRES_VERSION)
+    collector = PostgresSchemaCollector(check)
+
+    assert collector._config.collect_migrations_enabled is True
+    assert collector._config.migration_tools == ['alembic', 'golang-migrate']
+
+
+def test_get_migration_context_returns_empty_when_disabled(dbm_instance, integration_check):
+    check = integration_check(dbm_instance)
+    check.version = VersionUtils().parse_version(POSTGRES_VERSION)
+    collector = PostgresSchemaCollector(check)
+
+    with check.db_pool.get_connection('datadog_test') as conn:
+        from psycopg.rows import dict_row
+
+        with conn.cursor(row_factory=dict_row) as cursor:
+            migration_context = collector._get_migration_context('datadog_test', cursor)
+
+    assert migration_context == {}
+
+
+def test_migration_context_only_includes_detected_tools(dbm_instance, integration_check):
+    # Without creating any migration tables, no tools should be detected
+    dbm_instance['collect_migrations'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 0.1,
+        'ddl_tracking_enabled': False,
+        'migration_tools': ['alembic', 'golang-migrate', 'prisma', 'typeorm'],
+    }
+    check = integration_check(dbm_instance)
+    check.version = VersionUtils().parse_version(POSTGRES_VERSION)
+    collector = PostgresSchemaCollector(check)
+
+    with check.db_pool.get_connection('datadog_test') as conn:
+        from psycopg.rows import dict_row
+
+        with conn.cursor(row_factory=dict_row) as cursor:
+            migration_context = collector._get_migration_context('datadog_test', cursor)
+
+    # No tools should be detected since we haven't created any migration tables
+    assert migration_context == {}

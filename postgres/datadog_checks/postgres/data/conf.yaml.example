@@ -623,12 +623,68 @@ instances:
         #   - users.*
 
         ## @param exclude_tables - list of strings - optional
-        ## A list of regex patterns to exclude tables. 
+        ## A list of regex patterns to exclude tables.
         ## Any table whose name matches any one of these patterns will be excluded.
         ## If empty, all tables matching other filters are included.
         #
         # exclude_tables:
         #   - customer.*
+
+    ## Enable collection of schema migrations and DDL changes. This feature captures DDL events
+    ## (CREATE, ALTER, DROP) using PostgreSQL event triggers and tracks migration tool versions
+    ## for Alembic (Python), golang-migrate (Go), Prisma, and TypeORM (TypeScript).
+    #
+    # collect_migrations:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of schema migrations. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 300
+        ## The migration collection interval (in seconds).
+        #
+        # collection_interval: 300
+
+        ## @param ddl_tracking_enabled - boolean - optional - default: true
+        ## Enable DDL event tracking via PostgreSQL event triggers. When enabled, the Agent
+        ## creates a table and event trigger to capture DDL changes (CREATE, ALTER, DROP).
+        ## Requires superuser or appropriate privileges to create event triggers.
+        #
+        # ddl_tracking_enabled: true
+
+        ## @param migration_tools - list of strings - optional
+        ## Optional filter to limit which migration tools are tracked.
+        ## By default, all supported tools are auto-detected: alembic (Python),
+        ## golang-migrate (Go), prisma (TypeScript/JavaScript), typeorm (TypeScript/JavaScript).
+        ## If specified, only the listed tools will be checked.
+        #
+        # migration_tools:
+        #   - alembic
+        #   - golang-migrate
+
+        ## @param include_databases - list of strings - optional
+        ## A list of regex patterns to include databases.
+        ## Any database whose name matches any one of these patterns will be included.
+        ## If empty, all databases matching other filters are included.
+        #
+        # include_databases:
+        #   - mydb
+
+        ## @param exclude_databases - list of strings - optional
+        ## A list of regex patterns to exclude databases.
+        ## Any database whose name matches any one of these patterns will be excluded.
+        ## If empty, all databases matching other filters are included.
+        #
+        # exclude_databases:
+        #   - privatedb.*
+
+        ## @param ddl_events_ttl - number - optional - default: 7
+        ## Number of days to retain processed DDL events before pruning.
+        ## After events are collected and marked as processed, they will be deleted
+        ## after this many days. Set to 0 to disable pruning.
+        #
+        # ddl_events_ttl: 7
 
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##

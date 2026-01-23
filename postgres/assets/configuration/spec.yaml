@@ -834,7 +834,7 @@ files:
               - "users.*"
         - name: exclude_tables
           description: |
-            A list of regex patterns to exclude tables. 
+            A list of regex patterns to exclude tables.
             Any table whose name matches any one of these patterns will be excluded.
             If empty, all tables matching other filters are included.
           value:
@@ -843,6 +843,87 @@ files:
               type: string
             example:
               - "customer.*"
+
+    - name: collect_migrations
+      description: |
+        Enable collection of schema migrations and DDL changes. This feature captures DDL events
+        (CREATE, ALTER, DROP) using PostgreSQL event triggers and tracks migration tool versions
+        for Alembic (Python), golang-migrate (Go), Prisma, and TypeORM (TypeScript).
+      options:
+        - name: enabled
+          description: |
+            Enable collection of schema migrations. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: collection_interval
+          description: |
+            The migration collection interval (in seconds).
+          value:
+            type: number
+            example: 300
+            display_default: 300
+        - name: ddl_tracking_enabled
+          description: |
+            Enable DDL event tracking via PostgreSQL event triggers. When enabled, the Agent
+            creates a table and event trigger to capture DDL changes (CREATE, ALTER, DROP).
+            Requires superuser or appropriate privileges to create event triggers.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+        - name: migration_tools
+          description: |
+            Optional filter to limit which migration tools are tracked.
+            By default, all supported tools are auto-detected: alembic (Python),
+            golang-migrate (Go), prisma (TypeScript/JavaScript), typeorm (TypeScript/JavaScript).
+            If specified, only the listed tools will be checked.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - alembic
+              - golang-migrate
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the migration collection synchronously. This is useful for testing purposes.
+          value:
+            type: boolean
+            example: false
+        - name: include_databases
+          description: |
+            A list of regex patterns to include databases.
+            Any database whose name matches any one of these patterns will be included.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydb"
+        - name: exclude_databases
+          description: |
+            A list of regex patterns to exclude databases.
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+        - name: ddl_events_ttl
+          description: |
+            Number of days to retain processed DDL events before pruning.
+            After events are collected and marked as processed, they will be deleted
+            after this many days. Set to 0 to disable pruning.
+          value:
+            type: number
+            example: 7
+            display_default: 7
 
     - name: aws
       description: |

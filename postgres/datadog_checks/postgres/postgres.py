@@ -34,6 +34,7 @@ from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.health import PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
+from datadog_checks.postgres.migrations import PostgresMigrationCollector
 from datadog_checks.postgres.relationsmanager import (
     DYNAMIC_RELATION_QUERIES,
     INDEX_BLOAT,
@@ -165,6 +166,9 @@ class PostgreSql(DatabaseCheck):
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
+        self.migration_collector = None
+        if self._config.collect_migrations is not None:
+            self.migration_collector = PostgresMigrationCollector(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
@@ -475,6 +479,10 @@ class PostgreSql(DatabaseCheck):
                 self.statement_samples._job_loop_future.result()
             if self.metadata_samples._job_loop_future:
                 self.metadata_samples._job_loop_future.result()
+        if self._config.collect_migrations is not None and self._config.collect_migrations.enabled:
+            self.migration_collector.cancel()
+            if self.migration_collector._job_loop_future:
+                self.migration_collector._job_loop_future.result()
         self._close_db_pool()
 
     def _clean_state(self):
@@ -1137,6 +1145,8 @@ class PostgreSql(DatabaseCheck):
                     self.statement_metrics.run_job_loop(tags)
                     self.statement_samples.run_job_loop(tags)
                     self.metadata_samples.run_job_loop(tags)
+                if self._config.collect_migrations is not None and self._config.collect_migrations.enabled:
+                    self.migration_collector.run_job_loop(tags)
                 if self._config.collect_wal_metrics:
                     # collect wal metrics for pg < 10, disabled by enabled
                     self._collect_wal_metrics()
