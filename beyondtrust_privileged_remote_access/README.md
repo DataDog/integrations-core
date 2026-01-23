@@ -4,7 +4,7 @@
 
 Integrate BeyondTrust Privileged Remote Access with Datadog to gain insights into BeyondTrust Privileged Remote Access logs using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. The integration can also be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
-**Minimum Agent version:** 7.76.0
+**Minimum Agent version:** 7.77.0
 
 ## Setup
 
