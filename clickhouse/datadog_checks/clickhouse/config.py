@@ -69,14 +69,22 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
         if f in instance:
             args[f] = instance[f]
 
-    # Handle deprecated 'user' option
-    if 'user' in instance and 'username' not in instance:
-        args['username'] = instance['user']
+    # Add deprecation warnings for options that are silently migrated in validators.py
+    # Note: The actual migration happens in config_models/validators.py initialize_instance()
+    if 'user' in instance:
+        validation_result.add_warning('The `user` option is deprecated. Use `username` instead.')
+    if 'host' in instance:
+        validation_result.add_warning('The `host` option is deprecated. Use `server` instead.')
 
     # Set values for args that have dict defaults or other complexities
     # If you change a literal value here, make sure to update spec.yaml
     args.update(
         {
+            # Database identifier configuration
+            "database_identifier": {
+                **dict_defaults.instance_database_identifier().model_dump(),
+                **(instance.get('database_identifier', {})),
+            },
             # DBM configurations - merge defaults with user config
             "query_activity": {
                 **dict_defaults.instance_query_activity().model_dump(),
@@ -99,7 +107,6 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
 
     # Apply various validations and fallbacks
     _apply_validated_defaults(args, instance, validation_result)
-    _apply_deprecation_warnings(instance, validation_result)
 
     # Validate that the keys of args match the fields of InstanceConfig
     args_keys = set(args.keys())
@@ -150,19 +157,6 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"completed_query_samples.collection_interval must be greater than 0, "
             f"defaulting to {default_value} seconds."
         )
-
-
-def _apply_deprecation_warnings(instance: dict, validation_result: ValidationResult):
-    """Apply deprecation warnings for deprecated options."""
-    deprecations = [
-        ['user', 'username'],
-    ]
-
-    for deprecation in deprecations:
-        if deprecation[0] in instance:
-            validation_result.add_warning(
-                f'The `{deprecation[0]}` option is deprecated. Use `{deprecation[1]}` instead.'
-            )
 
 
 def _validate_config(config: InstanceConfig, instance: dict, validation_result: ValidationResult):

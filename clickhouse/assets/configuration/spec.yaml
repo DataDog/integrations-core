@@ -93,6 +93,26 @@ files:
       value:
         type: boolean
         example: false
+    - name: database_identifier
+      description: |
+        Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+        billable instance.
+
+        The default value is "$server:$port:$db" which uniquely identifies a ClickHouse database by its server, port,
+        and database name.
+
+        This value will be used as-is for the display name of the instance but will be normalized
+        when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+        for more details on Datadog tag normalization.
+      options:
+        - name: template
+          description: |
+            The template string for the database identifier. Supports variable substitution using $variable syntax.
+            Available variables: $server, $port, $db, plus any custom tags (e.g., $env, $region).
+          value:
+            type: string
+            display_default: "$server:$port:$db"
+            example: "$env-$server:$port:$db"
     - name: single_endpoint_mode
       description: Set to `true` when connecting through a single endpoint for ClickHouse Cloud.
       value:
