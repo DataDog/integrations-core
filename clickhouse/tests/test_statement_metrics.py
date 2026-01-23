@@ -268,7 +268,7 @@ def test_get_query_metrics_payloads_single_payload(check_with_dbm):
 
     payload_wrapper = {
         'host': 'localhost',
-        'database_instance': 'localhost:9000:default',
+        'database_instance': 'localhost:8128:default',
         'timestamp': 1234567890000,
         'min_collection_interval': 10,
         'tags': ['test:clickhouse'],

@@ -11,22 +11,3 @@
 #         raise ValueError('my_number max value is 10, got %s' % str(values.get('my_number')))
 #
 #     return values
-
-
-def initialize_instance(values, **kwargs):
-    """
-    Initialize and validate instance configuration.
-    Handles silent value transformations for backwards compatibility.
-
-    Note: Deprecation warnings should be added in config.py's build_config(),
-    not here, as validators don't have access to ValidationResult.
-    """
-    # Map deprecated 'user' to 'username' for backwards compatibility
-    if 'username' not in values and 'user' in values:
-        values['username'] = values['user']
-
-    # Map 'host' to 'server' for backwards compatibility
-    if 'server' not in values and 'host' in values:
-        values['server'] = values['host']
-
-    return values

@@ -37,7 +37,7 @@ def instance_only_custom_queries():
 
 
 def instance_port():
-    return 9000
+    return 8123
 
 
 def instance_read_timeout():
