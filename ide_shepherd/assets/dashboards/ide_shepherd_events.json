@@ -1,0 +1,1736 @@
+{
+  "title": "IDE-SHEPHERD",
+  "description": "This dashboard provides insights into IDE-SHEPHERD events.",
+  "widgets": [
+    {
+      "id": 2220119315921113,
+      "definition": {
+        "type": "image",
+        "url": "/api/v2/images/5a55f76e-a062-4aa1-9f9c-b757fdaa0a00",
+        "sizing": "cover",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 3
+      }
+    },
+    {
+      "id": 5508499080175210,
+      "definition": {
+        "type": "note",
+        "content": "[IDE-SHEPHERD](https://github.com/DataDog/IDE-SHEPHERD-extension) is an VS Code/Cursor security extension designed to monitor extensions and workspaces in real-time for malicious activity. \n\nThis dashboard offers a comprehensive overview of IDE activities, extensions lifecycles and reported security events.\n\nFor more information, see IDE-SHEPHERD [documentation](https://docs.datadoghq.com/integrations/ide-shepherd/).\n\n**Tips**\n\n-   Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n-   Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 7,
+        "height": 3
+      }
+    },
+    {
+      "id": 460485869799882,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4572636652214262,
+            "definition": {
+              "title": "Total Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7524882610072293,
+            "definition": {
+              "title": "Events over Time per IDE",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        }
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 5307838178612178,
+            "definition": {
+              "title": "Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5274794848843904,
+            "definition": {
+              "title": "Alerts over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        }
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 885148924503039,
+            "definition": {
+              "title": "Top IDE by Event",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@metadata.environment.ide_flavor"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2811330359988619,
+            "definition": {
+              "title": "Top IDE by Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@metadata.environment.ide_flavor"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 4670164379541213,
+            "definition": {
+              "title": "Top Hostnames by Event",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "host"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 6,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2743978019231034,
+            "definition": {
+              "title": "Top Hostnames by Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "host"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 9,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 6205372682695730,
+            "definition": {
+              "title": "Event Details",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:ide-shepherd",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 12,
+        "height": 14
+      }
+    },
+    {
+      "id": 7799134926838103,
+      "definition": {
+        "title": "VS Code Insights",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 60954810830097,
+            "definition": {
+              "title": "VS Code Users",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:vscode"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "host"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5678244821408961,
+            "definition": {
+              "title": "VS Code Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:vscode"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 1979540460751976,
+            "definition": {
+              "title": "VS Code Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5210112511513546,
+            "definition": {
+              "title": "VS Code Top Installed Extensions",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @class_uid:2007 @metadata.environment.ide_flavor:vscode"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@application.name"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 2424054370906899,
+            "definition": {
+              "title": "VS Code Alerts Per Source",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@resources.uid"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 3583084928600876,
+            "definition": {
+              "title": "VS Code Alerts Per Flagged Technique",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@observables.name"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 4479806550039959,
+            "definition": {
+              "title": "VS Code Top Hostnames by Alert Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "host"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 113287169213223,
+            "definition": {
+              "title": "VS Code Extensions Lifecycle Events over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:vscode @class_uid:2007"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@activity_id"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        }
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 6383557535010495,
+            "definition": {
+              "title": "VS Code Alerts over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 17,
+        "width": 12,
+        "height": 20
+      }
+    },
+    {
+      "id": 3409082079123841,
+      "definition": {
+        "title": "Cursor Insights",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8063383723341325,
+            "definition": {
+              "title": "Cursor Users",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:cursor"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "host"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8159766168566065,
+            "definition": {
+              "title": "Cursor Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:cursor"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 911867848937686,
+            "definition": {
+              "title": "Cursor Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 2627879343542465,
+            "definition": {
+              "title": "Cursor Top Installed Extensions",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @class_uid:2007 @metadata.environment.ide_flavor:cursor"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@application.name"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 947029553715585,
+            "definition": {
+              "title": "Cursor Alerts Per Source",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@resources.uid"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 5100104823512704,
+            "definition": {
+              "title": "Cursor Alerts Per Flagged Technique",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@observables.name"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 4801537233676271,
+            "definition": {
+              "title": "Cursor Top Hostnames by Alert Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "host"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 6121718934973758,
+            "definition": {
+              "title": "Cursor Extensions Lifecycle Events over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:cursor @class_uid:2007"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@activity_id"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        }
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 5651730691328844,
+            "definition": {
+              "title": "Cursor Alerts over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 37,
+        "width": 12,
+        "height": 20
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "pause_auto_refresh": false,
+  "reflow_type": "fixed"
+}

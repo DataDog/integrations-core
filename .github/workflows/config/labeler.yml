@@ -343,6 +343,8 @@ integration/ibm_was:
 - ibm_was/**/*
 integration/iboss:
 - iboss/**/*
+integration/ide_shepherd:
+- ide_shepherd/**/*
 integration/ignite:
 - ignite/**/*
 integration/iis:
