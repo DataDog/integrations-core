@@ -25,7 +25,7 @@ lz4==4.4.4
 mmh3==5.2.0
 oauthlib==3.3.1
 openstacksdk==4.7.0
-orjson==3.11.3
+orjson==3.11.5
 packaging==25.0
 paramiko==3.5.1
 prometheus-client==0.22.1

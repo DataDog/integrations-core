@@ -65,7 +65,7 @@ http = [
     "requests-oauthlib==2.0.0",
 ]
 json = [
-    "orjson==3.11.3",
+    "orjson==3.11.5",
 ]
 kube = [
     "kubernetes==33.1.0",

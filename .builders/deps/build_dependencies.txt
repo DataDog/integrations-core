@@ -1,7 +1,7 @@
 hatchling==1.21.1
 hatch-requirements-txt
-setuptools==75.6.0
-wheel==0.38.4
+setuptools==80.10.1
+wheel==0.46.2
 setuptools-scm
 setuptools-rust>=1.7.0
 maturin
