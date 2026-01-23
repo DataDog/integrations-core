@@ -1,7 +1,7 @@
 id: "linux-audit-logs"
 tests:
  -
-  sample: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=? addr=? terminal=? res=success'UID=\"root\" AUID=\"root\""
+  sample: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"root\""
   result:
     custom:
       AUID: "root"
@@ -25,23 +25,6 @@ tests:
           geoip:
             invalidAddress: "?"
           ip: "?"
-      ocsf:
-        activity_id: 99
-        activity_name: "Other"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
-        metadata:
-          event_code: "USER_MAC_CONFIG_CHANGE"
-          product:
-            name: "Linux Audit"
-            vendor_name: "Linux"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        status: "Success"
-        status_id: 1
-        time: 1736329118112
       pid: 381980
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -53,7 +36,7 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=? addr=? terminal=? res=success'UID=\"root\" AUID=\"root\""
+    message: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"root\""
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
@@ -82,42 +65,6 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
-      ocsf:
-        activity_id: 1
-        activity_name: "Logon"
-        actor:
-          process:
-            path: "/usr/sbin/sshd"
-            pid: 155615
-            user:
-              name: "root"
-              uid: "0"
-          session:
-            terminal: "ssh"
-            uid: "4294967295"
-          user:
-            name: "unset"
-            uid: "4294967295"
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        dst_endpoint:
-          hostname: "10.10.10.10"
-          ip: "10.10.10.10"
-        metadata:
-          event_code: "USER_AUTH"
-          product:
-            name: "Linux Audit"
-            vendor_name: "Linux"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        status: "Success"
-        status_id: 1
-        time: 1740139921923
-        user:
-          name: "devuser"
       pid: 155615
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -145,23 +92,6 @@ tests:
       msg:
         res: "success"
       msg_raw: ""
-      ocsf:
-        activity_id: 99
-        activity_name: "Other"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
-        metadata:
-          event_code: "MAC_STATUS"
-          product:
-            name: "Linux Audit"
-            vendor_name: "Linux"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        status: "Success"
-        status_id: 1
-        time: 1740386730535
       old-enabled: 1
       old_enforcing: 1
       post_msg_kv: ""
@@ -189,21 +119,6 @@ tests:
       ino: 1
       msg_raw: ""
       name: "/"
-      ocsf:
-        activity_id: 99
-        activity_name: "Other"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
-        metadata:
-          event_code: "AVC"
-          product:
-            name: "Linux Audit"
-            vendor_name: "Linux"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        time: 1669185724533
       operation: "getattr"
       outcome: "DENIED"
       permissive: 0
@@ -220,7 +135,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1669185724533
  -
-  sample: "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=? addr=? terminal=?'UID=\"root\" AUID=\"unset\" SAUID=\"root\""
+  sample: "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh'UID=\"root\" AUID=\"unset\" SAUID=\"root\""
   result:
     custom:
       AUID: "unset"
@@ -239,21 +154,6 @@ tests:
           geoip:
             invalidAddress: "?"
           ip: "?"
-      ocsf:
-        activity_id: 99
-        activity_name: "Other"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
-        metadata:
-          event_code: "USER_SELINUX_ERR"
-          product:
-            name: "Linux Audit"
-            vendor_name: "Linux"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        time: 1669714331555
       pid: 1
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -264,7 +164,7 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=? addr=? terminal=?'UID=\"root\" AUID=\"unset\" SAUID=\"root\""
+    message: "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh'UID=\"root\" AUID=\"unset\" SAUID=\"root\""
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1669714331555
@@ -287,23 +187,6 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
-      ocsf:
-        activity_id: 99
-        activity_name: "Other"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
-        metadata:
-          event_code: "USER_ROLE_CHANGE"
-          product:
-            name: "Linux Audit"
-            vendor_name: "Linux"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        status: "Success"
-        status_id: 1
-        time: 1741000050325
       pid: 60958
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -328,21 +211,6 @@ tests:
       linux_audit_logs:
         bool: "virt_use_nfs"
       msg_raw: ""
-      ocsf:
-        activity_id: 99
-        activity_name: "Other"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
-        metadata:
-          event_code: "MAC_CONFIG_CHANGE"
-          product:
-            name: "Linux Audit"
-            vendor_name: "Linux"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        time: 1678360880644
       old_val: 0
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -358,7 +226,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1678360880644
  -
-  sample: "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=? terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
+  sample: "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=10.10.10.10 terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
   result:
     custom:
       AUID: "serviceuser"
@@ -379,42 +247,6 @@ tests:
           geoip:
             invalidAddress: "?"
           ip: "?"
-      ocsf:
-        activity_id: 6
-        activity_name: "Create"
-        actor:
-          process:
-            path: "/usr/sbin/groupadd"
-            pid: 12258
-            user:
-              name: "root"
-              uid: "0"
-          session:
-            terminal: "pts/3"
-            uid: "535"
-          user:
-            name: "serviceuser"
-            uid: "1001"
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Group Management"
-        class_uid: 3006
-        group:
-          uid: "1004"
-        metadata:
-          event_code: "ADD_GROUP"
-          product:
-            name: "Linux Audit"
-            vendor_name: "Linux"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          hostname: "ub10-10-10-10"
-          ip: "?"
-        status: "Success"
-        status_id: 1
-        time: 1.740980591704E12
       pid: 12258
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -426,13 +258,13 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=? terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
+    message: "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=10.10.10.10 terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740980591704
  -
-  sample: "type=DEL_GROUP msg=audit(1765794074.279:2333): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-group grp=\"testuser\" acct=\"testuser\" exe=\"/usr/sbin/userdel\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\""
+  sample: "type=DEL_GROUP msg=audit(1765794074.279:2333): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-group grp=\"testuser\" acct=\"testuser\" exe=\"/usr/sbin/userdel\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\""
   result:
     custom:
       AUID: "serviceuser"
@@ -500,13 +332,13 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=DEL_GROUP msg=audit(1765794074.279:2333): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-group grp=\"testuser\" acct=\"testuser\" exe=\"/usr/sbin/userdel\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\""
+    message: "type=DEL_GROUP msg=audit(1765794074.279:2333): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-group grp=\"testuser\" acct=\"testuser\" exe=\"/usr/sbin/userdel\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\""
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1765794074279
  -
-  sample: "type=ADD_USER msg=audit(1635509157.089:345): pid=73290 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=add-user acct=\"serviceuser\" exe=\"/usr/sbin/useradd\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+  sample: "type=ADD_USER msg=audit(1635509157.089:345): pid=73290 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=add-user acct=\"serviceuser\" exe=\"/usr/sbin/useradd\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
   result:
     custom:
       AUID: "root"
@@ -573,13 +405,13 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=ADD_USER msg=audit(1635509157.089:345): pid=73290 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=add-user acct=\"serviceuser\" exe=\"/usr/sbin/useradd\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+    message: "type=ADD_USER msg=audit(1635509157.089:345): pid=73290 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=add-user acct=\"serviceuser\" exe=\"/usr/sbin/useradd\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1635509157089
  -
-  sample: "type=DEL_USER msg=audit(1740379094.277:2332): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-user id=1003 exe=\"/usr/sbin/userdel\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"testuser\""
+  sample: "type=DEL_USER msg=audit(1740379094.277:2332): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-user id=1003 exe=\"/usr/sbin/userdel\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"testuser\""
   result:
     custom:
       AUID: "serviceuser"
@@ -647,13 +479,13 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=DEL_USER msg=audit(1740379094.277:2332): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-user id=1003 exe=\"/usr/sbin/userdel\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"testuser\""
+    message: "type=DEL_USER msg=audit(1740379094.277:2332): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-user id=1003 exe=\"/usr/sbin/userdel\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"testuser\""
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740379094277
  -
-  sample: "type=USER_CHAUTHTOK msg=audit(1635509189.860:347): pid=73297 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023 msg='op=PAM:chauthtok grantors=pam_pwquality,pam_unix acct=\"serviceuser\" exe=\"/usr/bin/passwd\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+  sample: "type=USER_CHAUTHTOK msg=audit(1635509189.860:347): pid=73297 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023 msg='op=PAM:chauthtok grantors=pam_pwquality,pam_unix acct=\"serviceuser\" exe=\"/usr/bin/passwd\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
   result:
     custom:
       AUID: "root"
@@ -723,13 +555,13 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=USER_CHAUTHTOK msg=audit(1635509189.860:347): pid=73297 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023 msg='op=PAM:chauthtok grantors=pam_pwquality,pam_unix acct=\"serviceuser\" exe=\"/usr/bin/passwd\" hostname=localhost addr=? terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+    message: "type=USER_CHAUTHTOK msg=audit(1635509189.860:347): pid=73297 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023 msg='op=PAM:chauthtok grantors=pam_pwquality,pam_unix acct=\"serviceuser\" exe=\"/usr/bin/passwd\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1635509189860
  -
-  sample: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
+  sample: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=s0 exe=/sbin/semanage hostname=localhost addr=10.10.10.10 terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
   result:
     custom:
       AUID: "serviceuser"
@@ -809,13 +641,13 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
+    message: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=s0 exe=/sbin/semanage hostname=localhost addr=10.10.10.10 terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740720945670
  -
-  sample: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=? new-role=? new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
+  sample: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=user_u new-role=user_r new-range=s0 exe=/sbin/semanage hostname=localhost addr=10.10.10.10 terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
   result:
     custom:
       AUID: "devuser"
@@ -894,7 +726,7 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=? new-role=? new-range=? exe=/sbin/semanage hostname=localhost addr=? terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
+    message: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=user_u new-role=user_r new-range=s0 exe=/sbin/semanage hostname=localhost addr=10.10.10.10 terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
@@ -1149,3 +981,15 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740378301873
+ -
+  sample: "type=DAEMON_CONFIG msg=audit(1740139921.923:946): op=reconfigure state=changed auid=1001 pid=12258 subj=unconfined_u:unconfined_r:rpm_script_t:s0-s0:c0.c1023 res=success AUID=\"serviceuser\""
+  result: null
+ -
+  sample: "type=DAEMON_ABORT msg=audit(1740139921.923:1849): op=set-pid auid=1001 pid=12258 uid=0 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 res=failed AUID=\"serviceuser\" UID=\"root\""
+  result: null
+ -
+  sample: "type=MAC_POLICY_LOAD msg=audit(1740139921.923:235): auid=1001 ses=535 lsm=selinux res=1 AUID=\"serviceuser\""
+  result: null
+ -
+  sample: "type=CONFIG_CHANGE msg=audit(1740139921.923:2361): auid=1001 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 op=add_rule key=\"account_mgmt\" list=4 res=1 AUID=\"serviceuser\""
+  result: null
