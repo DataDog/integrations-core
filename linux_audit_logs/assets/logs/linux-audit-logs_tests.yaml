@@ -4,13 +4,10 @@ tests:
   sample: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"root\""
   result:
     custom:
-      AUID: "root"
       auid: 0
       event_id: 6532
       msg:
         comm: "semanage"
-        exe: "/usr/libexec/platform-python3.6"
-        hostname: "?"
         lport: 3307
         op:
          - "add"
@@ -18,14 +15,47 @@ tests:
         res: "success"
         resrc: "port"
         tcontext: "system_u:object_r:mysqld_port_t:s0"
-        terminal: "?"
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
-      pid: 381980
+          geoip: {}
+      ocsf:
+        activity_id: 1
+        activity_name: "Log"
+        actor:
+          process:
+            path: "/usr/libexec/platform-python3.6"
+            pid: 381980
+            user:
+              name: "root"
+          session:
+            terminal: "ssh"
+            uid: "138"
+          user:
+            name: "root"
+            uid: "0"
+        category_name: "Discovery"
+        category_uid: 5
+        class_name: "Device Config State Change"
+        class_uid: 5019
+        device:
+          hostname: "10.10.10.10"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
+        metadata:
+          event_code: "USER_MAC_CONFIG_CHANGE"
+          original_time: "1.736329118112E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Success"
+        status_id: 1
+        time: 1736329118112
+      original_timestamp: 1.736329118112E9
       post_msg_kv: ""
       pre_msg_kv: ""
       ses: 138
@@ -35,7 +65,6 @@ tests:
       type: "USER_MAC_CONFIG_CHANGE"
       usr:
         id: 0
-        name: "root"
     message: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"root\""
     status: "ok"
     tags:
@@ -65,6 +94,51 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          process:
+            path: "/usr/sbin/sshd"
+            pid: 155615
+            user:
+              name: "root"
+              uid: "0"
+          session:
+            terminal: "ssh"
+            uid: "4294967295"
+          user:
+            name: "unset"
+            uid: "4294967295"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        device:
+          hostname: "10.10.10.10"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
+        dst_endpoint:
+          hostname: "10.10.10.10"
+          ip: "10.10.10.10"
+        metadata:
+          event_code: "USER_AUTH"
+          original_time: "1.740139921923E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          profiles:
+           - "host"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Success"
+        status_id: 1
+        time: 1740139921923
+        user:
+          name: "devuser"
+      original_timestamp: 1.740139921923E9
       pid: 155615
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -92,8 +166,27 @@ tests:
       msg:
         res: "success"
       msg_raw: ""
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "MAC_STATUS"
+          original_time: "1.740386730535E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Success"
+        status_id: 1
+        time: 1740386730535
       old-enabled: 1
       old_enforcing: 1
+      original_timestamp: 1.740386730535E9
       post_msg_kv: ""
       pre_msg_kv: ""
       res: 1
@@ -119,7 +212,24 @@ tests:
       ino: 1
       msg_raw: ""
       name: "/"
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "AVC"
+          original_time: "1.669185724533E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        time: 1669185724533
       operation: "getattr"
+      original_timestamp: 1.669185724533E9
       outcome: "DENIED"
       permissive: 0
       pid: 16660
@@ -145,15 +255,31 @@ tests:
       event_id: 198
       exe: "/usr/lib/systemd/systemd"
       msg:
-        hostname: "?"
+        hostname: "10.10.10.10"
         sauid: 0
-        terminal: "?"
+        terminal: "ssh"
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
+          geoip: {}
+          ip: "10.10.10.10"
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "USER_SELINUX_ERR"
+          original_time: "1.669714331555E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        time: 1669714331555
+      original_timestamp: 1.669714331555E9
       pid: 1
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -187,6 +313,25 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "USER_ROLE_CHANGE"
+          original_time: "1.741000050325E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Success"
+        status_id: 1
+        time: 1741000050325
+      original_timestamp: 1.741000050325E9
       pid: 60958
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -211,7 +356,24 @@ tests:
       linux_audit_logs:
         bool: "virt_use_nfs"
       msg_raw: ""
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "MAC_CONFIG_CHANGE"
+          original_time: "1.678360880644E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        time: 1678360880644
       old_val: 0
+      original_timestamp: 1.678360880644E9
       post_msg_kv: ""
       pre_msg_kv: ""
       ses: 1
@@ -244,9 +406,50 @@ tests:
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
+          geoip: {}
+          ip: "10.10.10.10"
+      ocsf:
+        activity_id: 6
+        activity_name: "Create"
+        actor:
+          process:
+            path: "/usr/sbin/groupadd"
+            pid: 12258
+            user:
+              name: "root"
+              uid: "0"
+          session:
+            terminal: "pts/3"
+            uid: "535"
+          user:
+            name: "serviceuser"
+            uid: "1001"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Group Management"
+        class_uid: 3006
+        device:
+          hostname: "ub10-10-10-10"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
+        group:
+          uid: "1004"
+        metadata:
+          event_code: "ADD_GROUP"
+          original_time: "1.740980591704E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          profiles:
+           - "host"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Success"
+        status_id: 1
+        time: 1740980591704
+      original_timestamp: 1.740980591704E9
       pid: 12258
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -282,9 +485,8 @@ tests:
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
+          geoip: {}
+          ip: "10.10.10.10"
       ocsf:
         activity_id: 5
         activity_name: "Delete"
@@ -305,22 +507,28 @@ tests:
         category_uid: 3
         class_name: "Group Management"
         class_uid: 3006
+        device:
+          hostname: "localhost"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
         group:
           name: "testuser"
         metadata:
           event_code: "DEL_GROUP"
+          original_time: "1.765794074279E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          hostname: "localhost"
-          ip: "?"
+        severity: "Unknown"
+        severity_id: 0
         status: "Success"
         status_id: 1
-        time: 1.765794074279E12
+        time: 1765794074279
+      original_timestamp: 1.765794074279E9
       pid: 161731
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -355,9 +563,8 @@ tests:
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
+          geoip: {}
+          ip: "10.10.10.10"
       ocsf:
         activity_id: 1
         activity_name: "Create"
@@ -378,22 +585,28 @@ tests:
         category_uid: 3
         class_name: "Account Change"
         class_uid: 3001
+        device:
+          hostname: "localhost"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "ADD_USER"
+          original_time: "1.635509157089E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          hostname: "localhost"
-          ip: "?"
+        severity: "Unknown"
+        severity_id: 0
         status: "Success"
         status_id: 1
-        time: 1.635509157089E12
+        time: 1635509157089
         user:
           name: "serviceuser"
+      original_timestamp: 1.635509157089E9
       pid: 73290
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -429,9 +642,8 @@ tests:
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
+          geoip: {}
+          ip: "10.10.10.10"
       ocsf:
         activity_id: 6
         activity_name: "Delete"
@@ -452,22 +664,29 @@ tests:
         category_uid: 3
         class_name: "Account Change"
         class_uid: 3001
+        device:
+          hostname: "localhost"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "DEL_USER"
+          original_time: "1.740379094277E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          hostname: "localhost"
-          ip: "?"
+        severity: "Unknown"
+        severity_id: 0
         status: "Success"
         status_id: 1
-        time: 1.740379094277E12
+        time: 1740379094277
         user:
+          name: "testuser"
           uid: "1003"
+      original_timestamp: 1.740379094277E9
       pid: 161731
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -505,9 +724,8 @@ tests:
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
+          geoip: {}
+          ip: "10.10.10.10"
       ocsf:
         activity_id: 3
         activity_name: "Password Change"
@@ -528,22 +746,28 @@ tests:
         category_uid: 3
         class_name: "Account Change"
         class_uid: 3001
+        device:
+          hostname: "localhost"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "USER_CHAUTHTOK"
+          original_time: "1.63550918986E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          hostname: "localhost"
-          ip: "?"
+        severity: "Unknown"
+        severity_id: 0
         status: "Success"
         status_id: 1
-        time: 1.63550918986E12
+        time: 1635509189860
         user:
           name: "serviceuser"
+      original_timestamp: 1.63550918986E9
       pid: 73297
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -571,8 +795,7 @@ tests:
       msg:
         exe: "/sbin/semanage"
         hostname: "localhost"
-        id: 0
-        new-range: "?"
+        new-range: "s0"
         new-role: "staff_r"
         new-seuser: "user_u"
         old-range: "s0"
@@ -586,9 +809,8 @@ tests:
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
+          geoip: {}
+          ip: "10.10.10.10"
       ocsf:
         activity_id: 1
         activity_name: "Assign Privileges"
@@ -609,33 +831,39 @@ tests:
         category_uid: 3
         class_name: "User Access Management"
         class_uid: 3005
+        device:
+          hostname: "localhost"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "ROLE_ASSIGN"
+          original_time: "1.74072094567E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         privileges:
-          - "staff_r"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          hostname: "localhost"
-          ip: "?"
+         - "staff_r"
+        severity: "Unknown"
+        severity_id: 0
         status: "Success"
         status_id: 1
         time: 1740720945670
         user:
-          name: "user_u"
+          name: "root"
+          uid: "0"
+      original_timestamp: 1.74072094567E9
       pid: 11107
       post_msg_kv: ""
       pre_msg_kv: ""
       privileges:
-          - "staff_r"
+       - "staff_r"
       ses: 21
       status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
-      target_user_name: "user_u"
       timestamp: 1.74072094567E12
       type: "ROLE_ASSIGN"
       usr:
@@ -657,10 +885,9 @@ tests:
       msg:
         exe: "/sbin/semanage"
         hostname: "localhost"
-        id: 0
-        new-range: "?"
-        new-role: "?"
-        new-seuser: "?"
+        new-range: "s0"
+        new-role: "user_r"
+        new-seuser: "user_u"
         old-range: "s0"
         old-role: "user_r"
         old-seuser: "test1"
@@ -671,9 +898,8 @@ tests:
       msg_raw: ""
       network:
         client:
-          geoip:
-            invalidAddress: "?"
-          ip: "?"
+          geoip: {}
+          ip: "10.10.10.10"
       ocsf:
         activity_id: 2
         activity_name: "Revoke Privileges"
@@ -694,24 +920,31 @@ tests:
         category_uid: 3
         class_name: "User Access Management"
         class_uid: 3005
+        device:
+          hostname: "localhost"
+          ip: "10.10.10.10"
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "ROLE_REMOVE"
+          original_time: "1.740130059788E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         privileges:
          - "user_r"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          hostname: "localhost"
-          ip: "?"
+        severity: "Unknown"
+        severity_id: 0
         status: "Success"
         status_id: 1
         time: 1740130059788
         user:
-          name: "test1"
+          name: "root"
+          uid: "0"
+      original_timestamp: 1.740130059788E9
       pid: 49119
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -720,7 +953,6 @@ tests:
       ses: 17
       status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
-      target_user_name: "test1"
       timestamp: 1.740130059788E12
       type: "ROLE_REMOVE"
       usr:
@@ -754,10 +986,6 @@ tests:
       ocsf:
         activity_id: 2
         activity_name: "Read"
-        actor:
-          user:
-            name: "root"
-            uid: "0"
         category_name: "System Activity"
         category_uid: 1
         class_name: "File System Activity"
@@ -767,20 +995,22 @@ tests:
           type_id: 0
           uid: "fd:03"
         file:
-          name: "shadow"
           path: "/etc/shadow"
-          type: "Regular File"
-          type_id: 1
+          type: "Unknown"
+          type_id: 0
+          uid: "50314523"
         metadata:
           event_code: "PATH"
+          original_time: "1.740378301873E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
+        severity: "Unknown"
+        severity_id: 0
         time: 1740378301873
       ogid: 0
+      original_timestamp: 1.740378301873E9
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -816,10 +1046,6 @@ tests:
       ocsf:
         activity_id: 4
         activity_name: "Delete"
-        actor:
-          user:
-            name: "root"
-            uid: "0"
         category_name: "System Activity"
         category_uid: 1
         class_name: "File System Activity"
@@ -830,20 +1056,22 @@ tests:
           uid: "fd:03"
         file:
           ext: "so"
-          name: "libcrypt.so.1"
           path: "/lib/x86_64-linux-gnu/libcrypt.so.1"
-          type: "Regular File"
-          type_id: 1
+          type: "Unknown"
+          type_id: 0
+          uid: "50314523"
         metadata:
           event_code: "PATH"
+          original_time: "1.740378301873E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
+        severity: "Unknown"
+        severity_id: 0
         time: 1740378301873
       ogid: 0
+      original_timestamp: 1.740378301873E9
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -879,10 +1107,6 @@ tests:
       ocsf:
         activity_id: 2
         activity_name: "Read"
-        actor:
-          user:
-            name: "root"
-            uid: "0"
         category_name: "System Activity"
         category_uid: 1
         class_name: "File System Activity"
@@ -892,20 +1116,22 @@ tests:
           type_id: 0
           uid: "fd:03"
         file:
-          name: "lib"
           path: "/lib/"
           type: "Folder"
           type_id: 2
+          uid: "50314523"
         metadata:
           event_code: "PATH"
+          original_time: "1.740378301873E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
+        severity: "Unknown"
+        severity_id: 0
         time: 1740378301873
       ogid: 0
+      original_timestamp: 1.740378301873E9
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -941,10 +1167,6 @@ tests:
       ocsf:
         activity_id: 1
         activity_name: "Create"
-        actor:
-          user:
-            name: "root"
-            uid: "0"
         category_name: "System Activity"
         category_uid: 1
         class_name: "File System Activity"
@@ -955,20 +1177,22 @@ tests:
           uid: "fd:03"
         file:
           ext: "pid"
-          name: "nginx.pid"
           path: "/run/nginx.pid"
-          type: "Regular File"
-          type_id: 1
+          type: "Unknown"
+          type_id: 0
+          uid: "50314523"
         metadata:
           event_code: "PATH"
+          original_time: "1.740378301873E9"
           product:
             name: "Linux Audit"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
+        severity: "Unknown"
+        severity_id: 0
         time: 1740378301873
       ogid: 0
+      original_timestamp: 1.740378301873E9
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -983,13 +1207,182 @@ tests:
     timestamp: 1740378301873
  -
   sample: "type=DAEMON_CONFIG msg=audit(1740139921.923:946): op=reconfigure state=changed auid=1001 pid=12258 subj=unconfined_u:unconfined_r:rpm_script_t:s0-s0:c0.c1023 res=success AUID=\"serviceuser\""
-  result: null
+  result:
+    custom:
+      event_id: 946
+      msg:
+        res: "success"
+      msg_raw: ""
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "DAEMON_CONFIG"
+          original_time: "1.740139921923E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Success"
+        status_id: 1
+        time: 1740139921923
+      op: "reconfigure"
+      original_timestamp: 1.740139921923E9
+      pid: 12258
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      res: "success"
+      state: "changed"
+      status: "ok"
+      subj: "unconfined_u:unconfined_r:rpm_script_t:s0-s0:c0.c1023"
+      timestamp: 1.740139921923E12
+      type: "DAEMON_CONFIG"
+      usr:
+        id: 1001
+        name: "serviceuser"
+    message: "type=DAEMON_CONFIG msg=audit(1740139921.923:946): op=reconfigure state=changed auid=1001 pid=12258 subj=unconfined_u:unconfined_r:rpm_script_t:s0-s0:c0.c1023 res=success AUID=\"serviceuser\""
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740139921923
  -
   sample: "type=DAEMON_ABORT msg=audit(1740139921.923:1849): op=set-pid auid=1001 pid=12258 uid=0 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 res=failed AUID=\"serviceuser\" UID=\"root\""
-  result: null
+  result:
+    custom:
+      AUID: "serviceuser"
+      auid: 1001
+      event_id: 1849
+      msg:
+        res: "failed"
+      msg_raw: ""
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "DAEMON_ABORT"
+          original_time: "1.740139921923E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Failure"
+        status_id: 2
+        time: 1740139921923
+      op: "set-pid"
+      original_timestamp: 1.740139921923E9
+      pid: 12258
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      res: "failed"
+      ses: 535
+      status: "error"
+      subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      timestamp: 1.740139921923E12
+      type: "DAEMON_ABORT"
+      usr:
+        id: 0
+        name: "root"
+    message: "type=DAEMON_ABORT msg=audit(1740139921.923:1849): op=set-pid auid=1001 pid=12258 uid=0 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 res=failed AUID=\"serviceuser\" UID=\"root\""
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740139921923
  -
   sample: "type=MAC_POLICY_LOAD msg=audit(1740139921.923:235): auid=1001 ses=535 lsm=selinux res=1 AUID=\"serviceuser\""
-  result: null
+  result:
+    custom:
+      event_id: 235
+      lsm: "selinux"
+      msg:
+        res: "success"
+      msg_raw: ""
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "MAC_POLICY_LOAD"
+          original_time: "1.740139921923E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Success"
+        status_id: 1
+        time: 1740139921923
+      original_timestamp: 1.740139921923E9
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      res: 1
+      ses: 535
+      status: "ok"
+      timestamp: 1.740139921923E12
+      type: "MAC_POLICY_LOAD"
+      usr:
+        id: 1001
+        name: "serviceuser"
+    message: "type=MAC_POLICY_LOAD msg=audit(1740139921.923:235): auid=1001 ses=535 lsm=selinux res=1 AUID=\"serviceuser\""
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740139921923
  -
   sample: "type=CONFIG_CHANGE msg=audit(1740139921.923:2361): auid=1001 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 op=add_rule key=\"account_mgmt\" list=4 res=1 AUID=\"serviceuser\""
-  result: null
+  result:
+    custom:
+      event_id: 2361
+      key: "account_mgmt"
+      list: 4
+      msg:
+        res: "success"
+      msg_raw: ""
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "CONFIG_CHANGE"
+          original_time: "1.740139921923E9"
+          product:
+            name: "Linux Audit"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        status: "Success"
+        status_id: 1
+        time: 1740139921923
+      op: "add_rule"
+      original_timestamp: 1.740139921923E9
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      res: 1
+      ses: 535
+      status: "ok"
+      subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      timestamp: 1.740139921923E12
+      type: "CONFIG_CHANGE"
+      usr:
+        id: 1001
+        name: "serviceuser"
+    message: "type=CONFIG_CHANGE msg=audit(1740139921.923:2361): auid=1001 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 op=add_rule key=\"account_mgmt\" list=4 res=1 AUID=\"serviceuser\""
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740139921923
