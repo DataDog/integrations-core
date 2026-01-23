@@ -1545,9 +1545,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `uid` to `ocsf.actor.process.user.uid`
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid``
               sources:
-                - uid
+                - ocsf.actor.process.user.uid
               sourceType: attribute
               target: ocsf.actor.process.user.uid
               targetFormat: string
@@ -1764,7 +1764,7 @@ pipeline:
           enabled: true
           template: "%{folder_name}%{file_name}"
           target: ocsf.file.name
-          replaceMissing: false
+          replaceMissing: true
         - type: string-builder-processor
           name: Set ocsf.file.uid attribute
           enabled: true
@@ -1772,11 +1772,11 @@ pipeline:
           target: ocsf.file.uid
           replaceMissing: false
         - type: string-builder-processor
-          name: Set ocsf.file.owner.uid attribute
+          name: Set ocsf.actor.user.uid attribute
           enabled: true
-          template: "%{user.id}"
-          target: ocsf.file.owner.uid
-          replaceMissing: false
+          template: "%{usr.id}"
+          target: ocsf.actor.user.uid
+          replaceMissing: true
         - type: schema-processor
           name: Apply OCSF schema for 1001
           enabled: true
@@ -1987,31 +1987,31 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.file.owner.uid` to `ocsf.file.owner.uid`
-              sources:
-                - ocsf.file.owner.uid
-              sourceType: attribute
-              target: ocsf.file.owner.uid
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `user.name` to `ocsf.file.owner.name`
-              sources:
-                - user.name
-              sourceType: attribute
-              target: ocsf.file.owner.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.file.uid` to `ocsf.file.uid`
+            - name: Map `ocsf.file.uid` to `ocsf.actor.process.user.uid`
               sources:
                 - ocsf.file.uid
               sourceType: attribute
               target: ocsf.file.uid
               targetFormat: string
               preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+              sources:
+                - ocsf.actor.user.uid
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `usr.name` to `ocsf.actor.user.name`
+              sources:
+                - usr.name
+              sourceType: attribute
+              target: ocsf.actor.user.name
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
     - type: pipeline
