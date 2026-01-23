@@ -69,12 +69,19 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
         if f in instance:
             args[f] = instance[f]
 
-    # Add deprecation warnings for options that are silently migrated in validators.py
-    # Note: The actual migration happens in config_models/validators.py initialize_instance()
+    # Handle deprecated 'user' option
+    # If both 'user' and 'username' are present, 'username' takes precedence
     if 'user' in instance:
         validation_result.add_warning('The `user` option is deprecated. Use `username` instead.')
+        if 'username' not in instance:
+            args['username'] = instance['user']
+
+    # Handle deprecated 'host' option
+    # If both 'host' and 'server' are present, 'server' takes precedence
     if 'host' in instance:
         validation_result.add_warning('The `host` option is deprecated. Use `server` instead.')
+        if 'server' not in instance:
+            args['server'] = instance['host']
 
     # Set values for args that have dict defaults or other complexities
     # If you change a literal value here, make sure to update spec.yaml
@@ -120,7 +127,16 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
         )
 
     # Instantiate InstanceConfig using pydantic model_validate
-    config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
+    try:
+        config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
+    except Exception as e:
+        # Catch Pydantic validation errors and convert to ValidationResult errors
+        validation_result.add_error(str(e))
+        # Return a config with minimal valid values so the check can still be instantiated
+        # We'll use defaults for required fields that are missing
+        if 'server' not in args or args['server'] is None:
+            args['server'] = 'localhost'
+        config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
 
     _validate_config(config, instance, validation_result)
 

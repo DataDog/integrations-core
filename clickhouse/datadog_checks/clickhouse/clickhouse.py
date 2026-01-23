@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from string import Template
 from time import time
 
 import clickhouse_connect
-from cachetools import TTLCache
 from clickhouse_connect.driver import httputil
 
 from datadog_checks.base import AgentCheck
@@ -53,11 +53,8 @@ class ClickhouseCheck(DatabaseCheck):
         self._agent_hostname = None
         self._dbms_version = None
 
-        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
-        self._database_instance_emitted = TTLCache(
-            maxsize=1,
-            ttl=DATABASE_INSTANCE_COLLECTION_INTERVAL,
-        )
+        # Track last emission time for database instance metadata (rate limiting)
+        self._database_instance_last_emitted = 0
 
         # Initialize TagManager for tag management (similar to MySQL)
         self.tag_manager = TagManager()
@@ -146,7 +143,8 @@ class ClickhouseCheck(DatabaseCheck):
 
     def _send_database_instance_metadata(self):
         """Send database instance metadata to the metadata intake."""
-        if self.database_identifier not in self._database_instance_emitted:
+        current_time = time()
+        if current_time - self._database_instance_last_emitted >= DATABASE_INSTANCE_COLLECTION_INTERVAL:
             # Get the version for the metadata (and cache it)
             try:
                 version_result = list(self.execute_query_raw('SELECT version()'))[0][0]
@@ -171,14 +169,14 @@ class ClickhouseCheck(DatabaseCheck):
                 "dbms_version": self._dbms_version,
                 "integration_version": __version__,
                 "tags": tags_no_db,
-                "timestamp": time() * 1000,
+                "timestamp": current_time * 1000,
                 "metadata": {
                     "dbm": self._config.dbm,
                     "connection_host": self._config.server,
                 },
             }
 
-            self._database_instance_emitted[self.database_identifier] = event
+            self._database_instance_last_emitted = current_time
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def check(self, _):
@@ -240,8 +238,6 @@ class ClickhouseCheck(DatabaseCheck):
         Uses the database_identifier template from config, defaulting to "$server:$port:$db".
         """
         if self._database_identifier is None:
-            from string import Template
-
             template = Template(self._config.database_identifier.template)
             tag_dict = {}
             tags = self.tags.copy()
@@ -391,6 +387,9 @@ class ClickhouseCheck(DatabaseCheck):
                 compress=compress,
                 ca_cert=self._config.tls_ca_cert,
                 verify=self._config.verify,
+                # Disable session IDs for multi-threaded safety
+                # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#managing-clickhouse-session-ids
+                autogenerate_session_id=False,
                 settings={},
                 # Use shared connection pool for efficiency
                 pool_mgr=self._pool_manager,

@@ -15,20 +15,20 @@ files:
   - template: instances
     options:
     - name: server
-<<<<<<< HEAD
       fleet_configurable: true
-=======
->>>>>>> 94ec4700cd (Cleanup cloud metadata)
       required: true
       description: The hostname used to connect to the system.
       value:
         type: string
     - name: port
-      description: The port used to connect to the system.
+      description: |
+        The port used to connect to the system.
+        This integration uses the HTTP interface, so the default is 8123 (HTTP port).
+        Note: Port 9000 is for ClickHouse's native TCP protocol, which is not used by this integration.
       fleet_configurable: true
       value:
         type: integer
-        example: 9000
+        example: 8123
     - name: username
       description: The database user to authenticate as.
       fleet_configurable: true

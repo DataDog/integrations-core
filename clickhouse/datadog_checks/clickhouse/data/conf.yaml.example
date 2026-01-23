@@ -29,10 +29,12 @@ instances:
     #
   - server: <SERVER>
 
-    ## @param port - integer - optional - default: 9000
+    ## @param port - integer - optional - default: 8123
     ## The port used to connect to the system.
+    ## This integration uses the HTTP interface, so the default is 8123 (HTTP port).
+    ## Note: Port 9000 is for ClickHouse's native TCP protocol, which is not used by this integration.
     #
-    # port: 9000
+    # port: 8123
 
     ## @param username - string - optional - default: default
     ## The database user to authenticate as.
@@ -95,7 +97,7 @@ instances:
     ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
     ## billable instance.
     ##
-    ## The default value is "$server:$port:$db" which uniquely identifies a ClickHouse database by its server, port, 
+    ## The default value is "$server:$port:$db" which uniquely identifies a ClickHouse database by its server, port,
     ## and database name.
     ##
     ## This value will be used as-is for the display name of the instance but will be normalized
