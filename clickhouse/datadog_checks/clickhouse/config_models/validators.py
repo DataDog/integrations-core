@@ -16,14 +16,17 @@
 def initialize_instance(values, **kwargs):
     """
     Initialize and validate instance configuration.
-    Maps 'host' to 'server' for backwards compatibility.
+    Handles silent value transformations for backwards compatibility.
+
+    Note: Deprecation warnings should be added in config.py's build_config(),
+    not here, as validators don't have access to ValidationResult.
     """
+    # Map deprecated 'user' to 'username' for backwards compatibility
+    if 'username' not in values and 'user' in values:
+        values['username'] = values['user']
+
     # Map 'host' to 'server' for backwards compatibility
     if 'server' not in values and 'host' in values:
         values['server'] = values['host']
-
-    # Validate that either server or host was provided
-    if 'server' not in values:
-        raise ValueError("Either 'server' or 'host' must be specified in the configuration")
 
     return values

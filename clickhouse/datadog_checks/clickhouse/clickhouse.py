@@ -237,10 +237,28 @@ class ClickhouseCheck(DatabaseCheck):
     def database_identifier(self) -> str:
         """
         Get a unique identifier for this database instance.
+        Uses the database_identifier template from config, defaulting to "$server:$port:$db".
         """
         if self._database_identifier is None:
-            # Create a unique identifier based on server, port, and database name
-            self._database_identifier = "{}:{}:{}".format(self._config.server, self._config.port, self._config.db)
+            from string import Template
+
+            template = Template(self._config.database_identifier.template)
+            tag_dict = {}
+            tags = self.tags.copy()
+            # Sort tags to ensure consistent ordering
+            tags.sort()
+            for t in tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            # Add connection parameters to the template variables
+            tag_dict['server'] = str(self._config.server)
+            tag_dict['port'] = str(self._config.port)
+            tag_dict['db'] = str(self._config.db)
+            self._database_identifier = template.safe_substitute(**tag_dict)
         return self._database_identifier
 
     @property

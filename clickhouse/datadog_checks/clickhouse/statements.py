@@ -312,7 +312,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
                 'ddagentversion': datadog_agent.get_version(),
-                'clickhouse_version': self._get_clickhouse_version(),
+                'clickhouse_version': self._check.dbms_version,
             }
 
             # Get query metrics payloads (may be split into multiple if too large)
@@ -342,16 +342,6 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             self._log.exception('Unable to collect statement metrics due to an error')
             # Do NOT save checkpoint on error - this ensures we retry the same window
             return []
-
-    def _get_clickhouse_version(self):
-        """Get ClickHouse version string"""
-        try:
-            version_rows = self._check.execute_query_raw('SELECT version()')
-            if version_rows:
-                return str(version_rows[0][0])
-        except Exception:
-            pass
-        return 'unknown'
 
     def _get_query_metrics_payloads(self, payload_wrapper, rows):
         """

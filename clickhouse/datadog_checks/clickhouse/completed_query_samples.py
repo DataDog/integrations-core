@@ -560,19 +560,9 @@ class ClickhouseCompletedQuerySamples(DBMAsyncJob):
             'collection_interval': self._collection_interval,
             'ddtags': self._tags_no_db,
             'timestamp': time.time() * 1000,
-            'clickhouse_version': self._get_clickhouse_version(),
+            'clickhouse_version': self._check.dbms_version,
             'service': getattr(self._check, 'service', None),
             'clickhouse_query_completions': query_completions,
         }
 
         return payload
-
-    def _get_clickhouse_version(self):
-        """Get ClickHouse version string"""
-        try:
-            version_rows = self._check.execute_query_raw('SELECT version()')
-            if version_rows:
-                return str(version_rows[0][0])
-        except Exception:
-            pass
-        return 'unknown'

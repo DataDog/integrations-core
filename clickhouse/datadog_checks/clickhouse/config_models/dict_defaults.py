@@ -8,6 +8,12 @@
 from . import instance
 
 
+def instance_database_identifier():
+    return instance.DatabaseIdentifier(
+        template="$server:$port:$db",
+    )
+
+
 def instance_query_activity():
     return instance.QueryActivity(
         enabled=True,
