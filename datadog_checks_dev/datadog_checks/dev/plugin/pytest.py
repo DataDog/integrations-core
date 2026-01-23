@@ -285,50 +285,51 @@ def dd_default_hostname():
 
 
 @pytest.fixture
-def mock_http_response(mocker):
+def mock_response():
     # Lazily import `requests` as it may be costly under certain conditions
     global MockResponse
     if MockResponse is None:
         from datadog_checks.dev.http import MockResponse
 
+    yield MockResponse
+
+
+@pytest.fixture
+def mock_http_response(mocker, mock_response):
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.Session.get'), return_value=MockResponse(*args, **kwargs)
+        kwargs.pop('method', 'requests.Session.get'), return_value=mock_response(*args, **kwargs)
     )
 
 
 @pytest.fixture
-def mock_http_response_per_endpoint(mocker):
-    global MockResponse
-    if MockResponse is None:
-        from datadog_checks.dev.http import MockResponse
+def mock_http_response_per_endpoint(mocker, mock_response):
+    def _mock(
+        responses_by_endpoint: Dict[str, list[MockResponse]], method: str = 'requests.Session.get', strict: bool = True
+    ):
+        """
+        Mocks HTTP responses for specific endpoints. When multiple responses are given per endpoint, they are returned
+        cyclically.
+        If strict is True, an error is raised if the endpoint is not found. Otherwise, a 404 response is returned.
+        """
+        from itertools import cycle
 
-    def _mock(responses_by_endpoint: Dict[str, Any], method: str = 'requests.Session.get', strict: bool = True):
-        """
-        responses_by_endpoint: dict of { url: (args, kwargs_for_MockResponse) }
-        e.g. { 'http://example.com/api/v1': (['{"status": "ok"}'], {'status_code': 200}) }
-        """
+        queues = {
+            url: cycle(resps if isinstance(resps, list) else [resps]) for url, resps in responses_by_endpoint.items()
+        }
 
         def side_effect(*args, **kwargs):
-            if args:
-                url = args[0] if isinstance(args[0], str) else args[1]
-            else:
-                url = kwargs.get('url')
-            if url not in responses_by_endpoint:
+            # Determine the URL by looking for the explicit kwarg or the first string arg
+            # This automatically skips 'self' if it's present.
+            url = kwargs.get('url') or next((a for a in args if isinstance(a, str)), None)
+            if url not in queues:
                 if strict:
                     raise ValueError(f"Endpoint {url} not found in mocked responses")
                 else:
                     return MockResponse(status_code=404)
             else:
-                response_data = responses_by_endpoint[url]
-                if isinstance(response_data, tuple):
-                    res_args = response_data[0]
-                    res_kwargs = response_data[1]
-                else:
-                    res_args = [response_data]
-                    res_kwargs = {}
-                return MockResponse(*res_args, **res_kwargs)
+                return next(queues[url])
 
-        return mocker.patch(method, side_effect=side_effect)
+        return mocker.patch(method, autospec=True, side_effect=side_effect)
 
     yield _mock
 
