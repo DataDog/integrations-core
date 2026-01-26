@@ -1,11 +1,13 @@
 - name: prometheus_url
   required: true
   description: The URL where your application metrics are exposed by Prometheus.
+  fleet_configurable: true
   value:
     type: string
 - name: namespace
   hidden: true
   description: The namespace to be prepended to all metrics.
+  fleet_configurable: true
   value:
     type: string
     example: service
@@ -14,6 +16,7 @@
   description: |
     List of metrics to be fetched from the prometheus endpoint, if there's a
     value it'll be renamed. This list should contain at least one metric.
+  fleet_configurable: true
   value:
     type: array
     example:
@@ -91,6 +94,7 @@
     Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
 
     Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -109,11 +113,13 @@
     type: boolean
 - name: send_distribution_counts_as_monotonic
   description: If set to true, sends histograms and summary counters as monotonic counters (instead of gauges).
+  fleet_configurable: true
   value:
     example: false
     type: boolean
 - name: send_distribution_sums_as_monotonic
   description: If set to true, sends histograms and summary sums as monotonic counters (instead of gauges).
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -123,6 +129,7 @@
     the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
     initial value can be assumed for counters. This requires keeping metrics in memory until the entire
     response is received.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -130,6 +137,7 @@
   description: |
     A list of labels to be excluded. May be used in conjunction with `include_labels`.
     Labels defined in `excluded labels` will take precedence in case of overlap.
+  fleet_configurable: true
   value:
     example:
       - timestamp
@@ -140,6 +148,7 @@
   description: |
     A list of labels to include. May be used in conjunction with `exclude_labels`.
     Labels defined in `excluded labels` will take precedence in case of overlap.
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -171,6 +180,7 @@
   description: |
     A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
     The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
+  fleet_configurable: true
   value:
     type: array
     items:
