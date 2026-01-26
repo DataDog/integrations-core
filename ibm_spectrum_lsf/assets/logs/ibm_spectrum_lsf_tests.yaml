@@ -70,10 +70,8 @@ tests:
   sample: "Sender: LSF System <test-user@ip-11-21-111-198.ec2.internal>"
   tags:
    - "log_type:job"
-  filename: "745.out"
   result:
-    custom:
-      filename: "745.out"
+    custom: {}
     message: "Sender: LSF System <test-user@ip-11-21-111-198.ec2.internal>"
     tags:
      - "source:LOGS_SOURCE"

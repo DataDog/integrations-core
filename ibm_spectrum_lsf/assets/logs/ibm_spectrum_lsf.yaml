@@ -26,6 +26,16 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: grok-parser
+          name: Remapping log message
+          enabled: true
+          source: message
+          samples:
+            - |
+              Sender: LSF System
+          grok:
+            supportRules: ""
+            matchRules: ibm_spectrum_lsf_job_logs %{data:message}
+        - type: grok-parser
           name: Remapping `filename` to job ID
           enabled: true
           source: message
@@ -68,6 +78,11 @@ pipeline:
           enabled: true
           sources:
             - timestamp
+        - type: message-remapper
+          name: Define `message` as the official message of the log
+          enabled: true
+          sources:
+            - message
     - type: pipeline
       name: IBM Spectrum LSF system logs
       enabled: true
