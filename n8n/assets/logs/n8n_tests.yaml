@@ -1,0 +1,216 @@
+id: "n8n"
+tests:
+ -
+  sample: "2026-01-12T09:15:03.214Z | info  | n8n ready on 0.0.0.0, port 5678"
+  result:
+    custom:
+      level: "info"
+      timestamp: 1768209303214
+    message: "n8n ready on 0.0.0.0, port 5678"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768209303214
+ -
+  sample: "2026-01-12T09:15:03.219Z | info  | Version: 1.25.2"
+  result:
+    custom:
+      level: "info"
+      timestamp: 1768209303219
+    message: "Version: 1.25.2"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768209303219
+ -
+  sample: "2026-01-12T09:15:03.225Z | info  | Database: PostgreSQL"
+  result:
+    custom:
+      level: "info"
+      timestamp: 1768209303225
+    message: "Database: PostgreSQL"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768209303225
+ -
+  sample: "2026-01-12T09:16:11.402Z | debug | Executing workflow \"Order Webhook\""
+  result:
+    custom:
+      level: "debug"
+      timestamp: 1768209371402
+    message: "Executing workflow \"Order Webhook\""
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768209371402
+ -
+  sample: "2026-01-12T09:18:22.981Z | info  | Webhook call received"
+  result:
+    custom:
+      level: "info"
+      timestamp: 1768209502981
+    message: "Webhook call received"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768209502981
+ -
+  sample: "2026-01-12T09:20:44.112Z | error | Node \"HTTP Request\" failed Error: Request failed with status code 401"
+  result:
+    custom:
+      level: "error"
+      timestamp: 1768209644112
+    message: "Node \"HTTP Request\" failed Error: Request failed with status code 401"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768209644112
+ -
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "instance-settings.js",
+        "function" : "ensureSettingsFilePermissions",
+        "timestamp" : "2026-01-12T14:54:21.727Z"
+      },
+      "level" : "warn",
+      "message" : "Permissions 0755 for n8n settings file /home/node/.n8n/config are too wide. This is ignored for now, but in the future n8n will attempt to change the permissions automatically. To automatically enforce correct permissions now set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true (recommended), or turn this check off set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false."
+    }
+  result:
+    custom:
+      level: "warn"
+      metadata:
+        timestamp: "2026-01-12T14:54:21.727Z"
+      n8n:
+        file: "instance-settings.js"
+        function: "ensureSettingsFilePermissions"
+    message: "Permissions 0755 for n8n settings file /home/node/.n8n/config are too wide. This is ignored for now, but in the future n8n will attempt to change the permissions automatically. To automatically enforce correct permissions now set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true (recommended), or turn this check off set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false."
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768229661727
+ -
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "instance-settings.js",
+        "function" : "loadOrCreate",
+        "timestamp" : "2026-01-12T14:54:21.730Z"
+      },
+      "level" : "debug",
+      "message" : "User settings loaded from: /home/node/.n8n/config"
+    }
+  result:
+    custom:
+      level: "debug"
+      metadata:
+        timestamp: "2026-01-12T14:54:21.730Z"
+      n8n:
+        file: "instance-settings.js"
+        function: "loadOrCreate"
+    message: "User settings loaded from: /home/node/.n8n/config"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768229661730
+ -
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "abstract-server.js",
+        "function" : "init",
+        "timestamp" : "2026-01-12T14:54:22.248Z"
+      },
+      "level" : "info",
+      "message" : "n8n ready on ::, port 5678"
+    }
+  result:
+    custom:
+      level: "info"
+      metadata:
+        timestamp: "2026-01-12T14:54:22.248Z"
+      n8n:
+        file: "abstract-server.js"
+        function: "init"
+    message: "n8n ready on ::, port 5678"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768229662248
+ -
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "abstract-server.js",
+        "function" : "start",
+        "timestamp" : "2026-01-12T14:54:24.563Z"
+      },
+      "level" : "info",
+      "message" : "Version: 1.117.2"
+    }
+  result:
+    custom:
+      level: "info"
+      metadata:
+        timestamp: "2026-01-12T14:54:24.563Z"
+      n8n:
+        file: "abstract-server.js"
+        function: "start"
+    message: "Version: 1.117.2"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768229664563
+ -
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "LicenseManager.js",
+        "function" : "log",
+        "scopes" : ["license"],
+        "timestamp" : "2026-01-12T14:54:22.323Z"
+      },
+      "level" : "debug",
+      "message" : "[license SDK] initializing for deviceFingerprint 6e244bf5e4a2b9c616a2ef0a0948fa148ae41c4b726ae747fde112d71ae03b1b"
+    }
+  result:
+    custom:
+      level: "debug"
+      metadata:
+        timestamp: "2026-01-12T14:54:22.323Z"
+      n8n:
+        file: "LicenseManager.js"
+        function: "log"
+        scopes:
+          - "license"
+    message: "[license SDK] initializing for deviceFingerprint 6e244bf5e4a2b9c616a2ef0a0948fa148ae41c4b726ae747fde112d71ae03b1b"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768229662323
+ -
+  sample: |-
+    {
+      "metadata" : {
+        "file" : "base-command.js",
+        "function" : "log",
+        "timestamp" : "2026-01-12T14:54:24.570Z"
+      },
+      "level" : "info",
+      "message" : "\nEditor is now accessible via:\nhttp://0.0.0.0:5678"
+    }
+  result:
+    custom:
+      level: "info"
+      metadata:
+        timestamp: "2026-01-12T14:54:24.570Z"
+      n8n:
+        file: "base-command.js"
+        function: "log"
+    message: "\nEditor is now accessible via:\nhttp://0.0.0.0:5678"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1768229664570
+

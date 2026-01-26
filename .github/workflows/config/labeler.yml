@@ -485,6 +485,8 @@ integration/mux:
 - mux/**/*
 integration/mysql:
 - mysql/**/*
+integration/n8n:
+- n8n/**/*
 integration/nagios:
 - nagios/**/*
 integration/network:
