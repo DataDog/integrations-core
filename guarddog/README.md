@@ -7,7 +7,7 @@
 This integration monitors configured dependency files using GuardDog scans and sends the scan output to Datadog for analysis, providing visual insights through out-of-the-box dashboards and the Log Explorer. It also helps monitor and respond to security threats with ready-to-use Cloud SIEM detection rules.
 
 **Note:**
-- **Minimum Agent version:** 7.73.0
+- **Minimum Agent version:** 7.74.0
 
 ## Setup
 
