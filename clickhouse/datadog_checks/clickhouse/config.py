@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Tuple
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.clickhouse.config_models import InstanceConfig, defaults, dict_defaults
+from datadog_checks.clickhouse.features import Feature, FeatureKey, FeatureNames
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
@@ -24,9 +25,22 @@ class ValidationResult:
         :param valid: Whether the validation passed.
         """
         self.valid = valid
+        self.features: list[Feature] = []
         self.errors: list[ConfigurationError] = []
         self.warnings: list[str] = []
         self.created_at: int = int(time.time() * 1000)
+
+    def add_feature(self, feature: FeatureKey, enabled: bool = True, description: str | None = None):
+        """
+        Add a feature to the validation result.
+
+        :param feature: The feature key to add.
+        :param enabled: Whether the feature is enabled.
+        :param description: Optional description (e.g., why it's disabled).
+        """
+        self.features.append(
+            {"key": feature.value, "name": FeatureNames[feature], "enabled": enabled, "description": description}
+        )
 
     def add_error(self, error: str | ConfigurationError):
         """
@@ -193,6 +207,34 @@ def _validate_config(config: InstanceConfig, instance: dict, validation_result: 
     for feature_name, _is_enabled in dbm_features:
         if instance.get(feature_name, {}).get('enabled') and not config.dbm:
             validation_result.add_warning(f'The `{feature_name}` feature requires the `dbm` option to be enabled.')
+
+    # Apply features to validation result for health reporting
+    _apply_features(config, validation_result)
+
+
+def _apply_features(config: InstanceConfig, validation_result: ValidationResult):
+    """
+    Apply feature flags to the validation result for health event reporting.
+
+    This follows the Postgres pattern for consistent feature tracking across DBM integrations.
+    """
+    validation_result.add_feature(FeatureKey.DBM, config.dbm)
+    validation_result.add_feature(
+        FeatureKey.QUERY_METRICS,
+        config.query_metrics.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(
+        FeatureKey.QUERY_SAMPLES,
+        config.query_samples.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(
+        FeatureKey.COMPLETED_QUERY_SAMPLES,
+        config.completed_query_samples.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
 
 
 def _safefloat(value) -> float:

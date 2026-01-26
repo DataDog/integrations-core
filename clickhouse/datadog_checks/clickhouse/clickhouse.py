@@ -177,13 +177,7 @@ class ClickhouseCheck(DatabaseCheck):
                     "errors": [str(error) for error in self._validation_result.errors],
                     "warnings": self._validation_result.warnings,
                     "initialized_at": self._validation_result.created_at,
-                    "dbm_enabled": self._config.dbm,
-                    "query_metrics_enabled": self._config.query_metrics.enabled if self._config.dbm else False,
-                    "query_samples_enabled": self._config.query_samples.enabled if self._config.dbm else False,
-                    "completed_query_samples_enabled": (
-                        self._config.completed_query_samples.enabled if self._config.dbm else False
-                    ),
-                    "single_endpoint_mode": self._config.single_endpoint_mode,
+                    "features": self._validation_result.features,
                 },
             )
         except Exception as e:
