@@ -42,4 +42,3 @@ class Feature(TypedDict):
     name: str
     enabled: bool
     description: str | None
-
