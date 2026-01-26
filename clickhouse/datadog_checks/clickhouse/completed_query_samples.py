@@ -102,8 +102,7 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
             if not rows:
                 # No new queries, but still advance checkpoint
                 if self._current_checkpoint_microseconds:
-                    self._save_checkpoint(self._current_checkpoint_microseconds)
-                    self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
+                    self._advance_checkpoint()
                     self._log.debug("Advanced checkpoint (no new completed queries)")
                 return
 
@@ -113,9 +112,7 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
             if not payload or not payload.get('clickhouse_query_completions'):
                 self._log.debug("No query completions after rate limiting")
                 # Still advance checkpoint even if all were rate-limited
-                if self._current_checkpoint_microseconds:
-                    self._save_checkpoint(self._current_checkpoint_microseconds)
-                    self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
+                self._advance_checkpoint()
                 return
 
             # Step 3: Submit payload
@@ -129,9 +126,8 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
             self._check.database_monitoring_query_activity(payload_data)
 
             # Step 4: CRITICAL - Only save checkpoint AFTER successful submission
+            self._advance_checkpoint()
             if self._current_checkpoint_microseconds:
-                self._save_checkpoint(self._current_checkpoint_microseconds)
-                self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
                 self._log.info(
                     "Successfully advanced checkpoint to %d microseconds", self._current_checkpoint_microseconds
                 )
@@ -176,15 +172,11 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
             )
             rows = self._execute_query(query)
 
-            # Log with deployment type indicator
-            deployment_mode = (
-                "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
-            )
             self._log.info(
                 "Loaded %d completed queries from %s [%s] (last_checkpoint=%d)",
                 len(rows),
                 query_log_table,
-                deployment_mode,
+                self.deployment_mode,
                 self._last_checkpoint_microseconds,
             )
 
@@ -254,14 +246,7 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
                     result_rows.append(obfuscated_row)
 
             # Step 4: Set checkpoint from results, or fetch current time if no rows (idle period)
-            if max_event_time > 0:
-                self._current_checkpoint_microseconds = max_event_time
-                self._log.debug("Checkpoint from results: %d", max_event_time)
-            else:
-                # No rows returned - fetch current time to advance checkpoint
-                # This prevents re-querying the same empty window indefinitely
-                self._current_checkpoint_microseconds = self._get_current_time_from_db()
-                self._log.debug("No rows, fetched checkpoint from DB: %d", self._current_checkpoint_microseconds)
+            self._set_checkpoint_from_event_time(max_event_time)
 
             return result_rows
 
