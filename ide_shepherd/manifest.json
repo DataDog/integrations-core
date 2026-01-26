@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "a86f7f3f-148b-4a66-838b-fb4c8678be59",
-  "app_id": "supply-chain-firewall",
+  "app_uuid": "5d9de6e0-fb16-4a1b-b195-4d6c08a082c7",
+  "app_id": "ide-shepherd",
   "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
@@ -9,25 +9,16 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into your Supply Chain Firewall logs.",
-    "title": "Supply Chain Firewall",
-    "media": [
-      {
-        "media_type": "image",
-        "caption": "Supply Chain Firewall - Events",
-        "image_url": "images/supply_chain_firewall_events_1.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Supply Chain Firewall - Events",
-        "image_url": "images/supply_chain_firewall_events_2.png"
-      }
-    ],
+    "description": "IDE Shepherd is a real-time security monitoring and protection tool for IDE environments. It monitors extension and workspace task activities in VS Code and Cursor, actively blocking malicious behaviors to protect developer endpoints from supply chain attacks and compromised extensions. IDE Shepherd hence enables security teams to detect and respond to threats in real-time by providing observability into security and extension lifecycle events (installation, updates, and uninstallation).",
+    "title": "IDE Shepherd",
+    "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
+      "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Log Collection",
       "Category::Security",
+      "Category::Developer Tools",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]
@@ -35,17 +26,17 @@
   "assets": {
     "integration": {
       "auto_install": false,
-      "source_type_id": 54882269,
-      "source_type_name": "Supply Chain Firewall",
+      "source_type_id": 69427021,
+      "source_type_name": "IDE Shepherd",
       "events": {
         "creates_events": false
       }
     },
     "dashboards": {
-      "Supply Chain Firewall - Events": "assets/dashboards/supply_chain_firewall_events.json"
+        "ide-shepherd-events": "assets/dashboards/ide_shepherd_events.json"
     },
     "logs": {
-      "source": "scfw"
+      "source": "ide-shepherd"
     }
   },
   "author": {
