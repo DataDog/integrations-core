@@ -17,6 +17,7 @@ from . import queries
 from .__about__ import __version__
 from .completed_query_samples import ClickhouseCompletedQuerySamples
 from .config import build_config
+from .health import ClickhouseHealth, HealthEvent, HealthStatus
 from .statement_activity import ClickhouseStatementActivity
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
@@ -43,6 +44,9 @@ class ClickhouseCheck(DatabaseCheck):
         self._config = config
         self._validation_result = validation_result
 
+        # Initialize health event handler for DBM
+        self.health = ClickhouseHealth(self)
+
         # Log validation warnings (errors will be raised in validate_config)
         for warning in validation_result.warnings:
             self.log.warning(warning)
@@ -63,6 +67,10 @@ class ClickhouseCheck(DatabaseCheck):
 
         self._error_sanitizer = ErrorSanitizer(self._config.password)
         self.check_initializations.append(self.validate_config)
+
+        # Submit health event with config validation result
+        # Tags are now available so health events will include them
+        self._submit_config_health_event()
 
         # We'll connect on the first check run
         self._client = None
@@ -140,6 +148,47 @@ class ClickhouseCheck(DatabaseCheck):
                 self.log.error(str(error))
             if self._validation_result.errors:
                 raise ConfigurationError(str(self._validation_result.errors[0]))
+
+    def _submit_config_health_event(self):
+        """
+        Submit a health event with the configuration validation result.
+
+        This event reports the initialization status to DBM, including:
+        - Configuration errors (if any)
+        - Configuration warnings (if any)
+        - DBM feature enablement status
+
+        Uses a 6-hour cooldown to avoid spamming health events.
+        """
+        try:
+            # Determine health status based on validation result
+            if not self._validation_result.valid:
+                status = HealthStatus.ERROR
+            elif self._validation_result.warnings:
+                status = HealthStatus.WARNING
+            else:
+                status = HealthStatus.OK
+
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=status,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={
+                    "errors": [str(error) for error in self._validation_result.errors],
+                    "warnings": self._validation_result.warnings,
+                    "initialized_at": self._validation_result.created_at,
+                    "dbm_enabled": self._config.dbm,
+                    "query_metrics_enabled": self._config.query_metrics.enabled if self._config.dbm else False,
+                    "query_activity_enabled": self._config.query_activity.enabled if self._config.dbm else False,
+                    "completed_query_samples_enabled": (
+                        self._config.completed_query_samples.enabled if self._config.dbm else False
+                    ),
+                    "single_endpoint_mode": self._config.single_endpoint_mode,
+                },
+            )
+        except Exception as e:
+            # Health event submission should not break the check initialization
+            self.log.debug("Failed to submit config health event: %s", e)
 
     def _send_database_instance_metadata(self):
         """Send database instance metadata to the metadata intake."""
