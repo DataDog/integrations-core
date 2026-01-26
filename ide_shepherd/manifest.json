@@ -9,9 +9,20 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "IDE Shepherd is a real-time security monitoring and protection tool for IDE environments. It monitors extension and workspace task activities in VS Code and Cursor, actively blocking malicious behaviors to protect developer endpoints from supply chain attacks and compromised extensions. IDE Shepherd hence enables security teams to detect and respond to threats in real-time by providing observability into security and extension lifecycle events (installation, updates, and uninstallation).",
+    "description": "Monitor and protect IDE extensions and workspace tasks in VS Code and Cursor from malicious activities in real-time.",
     "title": "IDE Shepherd",
-    "media": [],
+    "media": [
+        {
+            "media_type": "image",
+            "caption": "IDE Shepherd - Icon",
+            "image_url": "images/ide-shepherd-icon.png"
+        },
+        {
+            "media_type": "image",
+            "caption": "IDE Shepherd - Dashboard",
+            "image_url": "images/ide-shepherd-dashboard.png"
+        }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
