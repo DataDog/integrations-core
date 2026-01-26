@@ -52,10 +52,6 @@ def instance_collect_function_metrics():
     return False
 
 
-def instance_collect_wal_metrics():
-    return True
-
-
 def instance_data_directory():
     return '/usr/local/pgsql/data'
 

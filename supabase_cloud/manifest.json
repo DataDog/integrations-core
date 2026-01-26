@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "76054e37-5919-442f-a7a6-5a77ed5e7b0e",
   "app_id": "supabase-cloud",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

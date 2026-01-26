@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.1.0 / 2025-12-22
+## 1.2.0 / 2026-01-21
+
+***Added***:
+
+* Add project tag to in progress jobs metrics. ([#22083](https://github.com/DataDog/integrations-core/pull/22083))
+
+## 1.1.0 / 2025-12-22 / Agent 7.75.0
 
 ***Added***:
 
