@@ -547,21 +547,15 @@ tests:
         sessionId: "19:PcPQbnhjChEKut9De2_xFmsGbXQNYDtM33W6OAlBkJU1@thread.v2"
       message: |-
         {
+          "conversationType" : "bizchat",
           "attachments" : [ {
             "attachmentId" : "12d22eb4041d44ce8514ebacaa20ea47",
             "contentType" : "application/vnd.microsoft.card.adaptive",
             "content" : "{\r\n  \"type\": \"AdaptiveCard\",\r\n  \"version\": \"1.0\",\r\n  \"body\": [\r\n    {\r\n      \"type\": \"TextBlock\",\r\n      \"text\": \"I can't help with that. If you're having trouble accessing something you need for work, I recommend reaching out to your IT or security team—they'll be able to guide you through the proper channels. Let me know if you'd like help drafting a message or finding the right contact.\",\r\n      \"wrap\": true\r\n    }\r\n  ]\r\n}"
           } ],
-          "createdDateTime" : "2025-08-29T11:51:11.355Z",
-          "sessionId" : "19:PcPQbnhjChEKut9De2_xFmsGbXQNYDtM33W6OAlBkJU1@thread.v2",
-          "locale" : "en-us",
-          "body" : {
-            "contentType" : "html",
-            "content" : "<attachment id=\"12d22eb4041d44ce8514ebacaa20ea47\"></attachment>"
-          },
-          "conversationType" : "bizchat",
           "interactionType" : "aiResponse",
           "requestId" : "CDDDEE59-FE2A-46A1-BC00-F7630E0B6847",
+          "createdDateTime" : "2025-08-29T11:51:11.355Z",
           "appClass" : "IPM.SkypeTeams.Message.Copilot.BizChat",
           "etag" : "1756468271355",
           "from" : {
@@ -577,7 +571,13 @@ tests:
               "type" : "#microsoft.graph.chatMessageFromIdentitySet"
             }
           },
-          "id" : "1756468271355"
+          "sessionId" : "19:PcPQbnhjChEKut9De2_xFmsGbXQNYDtM33W6OAlBkJU1@thread.v2",
+          "id" : "1756468271355",
+          "locale" : "en-us",
+          "body" : {
+            "contentType" : "html",
+            "content" : "<attachment id=\"12d22eb4041d44ce8514ebacaa20ea47\"></attachment>"
+          }
         }
       tags:
         - "source:LOGS_SOURCE"
