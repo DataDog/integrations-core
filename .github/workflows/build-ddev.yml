@@ -117,7 +117,7 @@ jobs:
       run: pip install -e . --no-deps
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@772c4490b37ea1c65caf6a53089a38ea1510cf4a # 1.93.0 Latest rust stable version as of 2026-01-22 (https://forge.rust-lang.org/)
+      uses: dtolnay/rust-toolchain@stable # Stable to abide by enterprise policy
       with:
         targets: ${{ matrix.job.target }}
 
