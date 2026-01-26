@@ -3,7 +3,7 @@
   "created_at": "2026-01-08",
   "last_updated_at": "2026-01-08",
   "title": "Postgres server filesystem size exceeds alert threshold",
-  "description": "The Postgres server filesystem usage is above the alert threshold.",
+  "description": "The amount of free disk space on a filesystem of the Postgres server has become low.",
   "definition": {
 	"id": 232499493,
 	"name": "[Supabase] Postgres Server Filesystem Size Alert",

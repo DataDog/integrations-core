@@ -3,7 +3,7 @@
   "created_at": "2026-01-08",
   "last_updated_at": "2026-01-08",
   "title": "Postgres Server is offline",
-  "description": "The Postgres server is offline.",
+  "description": "The Postgres server is either offline or unreachable.",
   "definition": {
 	"id": 230824842,
 	"name": "[Supabase] Postgres server is offline",
