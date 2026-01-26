@@ -1,6 +1,4 @@
-# Datadog Backend Listener for Apache : JMeter
-
-![screenshot](images/screenshot.png)
+# Datadog Backend Listener for Apache JMeter
 
 ## Overview
 
