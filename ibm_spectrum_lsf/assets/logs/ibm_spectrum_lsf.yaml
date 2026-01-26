@@ -63,6 +63,11 @@ pipeline:
           enabled: true
           sources:
             - level
+        - type: date-remapper
+          name: Date Remapper
+          enabled: true
+          sources:
+            - timestamp
     - type: pipeline
       name: IBM Spectrum LSF system logs
       enabled: true
