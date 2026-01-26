@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import copy
 import time
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING, Tuple, Union
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.clickhouse.config_models import InstanceConfig, defaults, dict_defaults
@@ -245,3 +246,20 @@ def _safefloat(value) -> float:
         return float(value)
     except Exception:
         return 0.0
+
+
+def sanitize(config: Union[InstanceConfig, dict]) -> dict:
+    """
+    Sanitize a configuration object or dict for safe logging/health event submission.
+    """
+    if isinstance(config, InstanceConfig):
+        # Convert InstanceConfig to dict
+        config = config.model_dump()
+
+    sanitized = copy.deepcopy(config)
+
+    # Mask sensitive fields (matching Postgres pattern: '***' if present, else None)
+    # Note: tls_ca_cert is just a file path, not sensitive data, so we don't mask it
+    sanitized['password'] = '***' if sanitized.get('password') else None
+
+    return sanitized
