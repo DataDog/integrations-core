@@ -18,7 +18,7 @@ from .__about__ import __version__
 from .completed_query_samples import ClickhouseCompletedQuerySamples
 from .config import build_config
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
-from .statement_activity import ClickhouseStatementActivity
+from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
 
@@ -108,11 +108,11 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             self.statement_metrics = None
 
-        # Initialize query activity (from system.processes - analogous to pg_stat_activity)
-        if self._config.dbm and self._config.query_activity.enabled:
-            self.statement_activity = ClickhouseStatementActivity(self, self._config.query_activity)
+        # Initialize query samples (from system.processes - analogous to pg_stat_activity)
+        if self._config.dbm and self._config.query_samples.enabled:
+            self.statement_samples = ClickhouseStatementSamples(self, self._config.query_samples)
         else:
-            self.statement_activity = None
+            self.statement_samples = None
 
         # Initialize completed query samples (from system.query_log - completed queries)
         if self._config.dbm and self._config.completed_query_samples.enabled:
@@ -179,7 +179,7 @@ class ClickhouseCheck(DatabaseCheck):
                     "initialized_at": self._validation_result.created_at,
                     "dbm_enabled": self._config.dbm,
                     "query_metrics_enabled": self._config.query_metrics.enabled if self._config.dbm else False,
-                    "query_activity_enabled": self._config.query_activity.enabled if self._config.dbm else False,
+                    "query_samples_enabled": self._config.query_samples.enabled if self._config.dbm else False,
                     "completed_query_samples_enabled": (
                         self._config.completed_query_samples.enabled if self._config.dbm else False
                     ),
@@ -240,9 +240,9 @@ class ClickhouseCheck(DatabaseCheck):
         if self.statement_metrics:
             self.statement_metrics.run_job_loop(self.tags)
 
-        # Run query activity collection if DBM is enabled (from system.processes)
-        if self.statement_activity:
-            self.statement_activity.run_job_loop(self.tags)
+        # Run query samples collection if DBM is enabled (from system.processes)
+        if self.statement_samples:
+            self.statement_samples.run_job_loop(self.tags)
 
         # Run completed query samples if DBM is enabled (from system.query_log)
         if self.completed_query_samples:
@@ -461,16 +461,16 @@ class ClickhouseCheck(DatabaseCheck):
         # Cancel DBM async jobs
         if self.statement_metrics:
             self.statement_metrics.cancel()
-        if self.statement_activity:
-            self.statement_activity.cancel()
+        if self.statement_samples:
+            self.statement_samples.cancel()
         if self.completed_query_samples:
             self.completed_query_samples.cancel()
 
         # Wait for job loops to finish
         if self.statement_metrics and self.statement_metrics._job_loop_future:
             self.statement_metrics._job_loop_future.result()
-        if self.statement_activity and self.statement_activity._job_loop_future:
-            self.statement_activity._job_loop_future.result()
+        if self.statement_samples and self.statement_samples._job_loop_future:
+            self.statement_samples._job_loop_future.result()
         if self.completed_query_samples and self.completed_query_samples._job_loop_future:
             self.completed_query_samples._job_loop_future.result()
 

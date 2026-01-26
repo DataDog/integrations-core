@@ -93,9 +93,9 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **(instance.get('database_identifier', {})),
             },
             # DBM configurations - merge defaults with user config
-            "query_activity": {
-                **dict_defaults.instance_query_activity().model_dump(),
-                **(instance.get('query_activity', {})),
+            "query_samples": {
+                **dict_defaults.instance_query_samples().model_dump(),
+                **(instance.get('query_samples', {})),
             },
             "query_metrics": {
                 **dict_defaults.instance_query_metrics().model_dump(),
@@ -159,11 +159,11 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"query_metrics.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
-    if _safefloat(args.get('query_activity', {}).get('collection_interval')) <= 0:
-        default_value = dict_defaults.instance_query_activity().collection_interval
-        args['query_activity']['collection_interval'] = default_value
+    if _safefloat(args.get('query_samples', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_query_samples().collection_interval
+        args['query_samples']['collection_interval'] = default_value
         validation_result.add_warning(
-            f"query_activity.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+            f"query_samples.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
     if _safefloat(args.get('completed_query_samples', {}).get('collection_interval')) <= 0:
@@ -184,7 +184,7 @@ def _validate_config(config: InstanceConfig, instance: dict, validation_result: 
     # Warn if DBM features are enabled without dbm flag
     dbm_features = [
         ('query_metrics', config.query_metrics.enabled if config.query_metrics else False),
-        ('query_activity', config.query_activity.enabled if config.query_activity else False),
+        ('query_samples', config.query_samples.enabled if config.query_samples else False),
         (
             'completed_query_samples',
             config.completed_query_samples.enabled if config.completed_query_samples else False,

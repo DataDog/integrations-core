@@ -89,7 +89,7 @@ instances:
     # verify: true
 
     ## @param dbm - boolean - optional - default: false
-    ## Enable Database Monitoring (DBM) to collect query activity, metrics, and samples.
+    ## Enable Database Monitoring (DBM) to collect query samples, metrics, and completions.
     ## This feature provides deep observability into query performance.
     #
     # dbm: false
@@ -117,24 +117,24 @@ instances:
     #
     # single_endpoint_mode: false
 
-    ## Configure collection of database activity snapshots from system.processes
+    ## Configure collection of database samples snapshots from system.processes
     #
-    # query_activity:
+    # query_samples:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of database activity snapshots. Requires `dbm: true`.
-        ## Activity snapshots show currently executing queries and connection counts.
+        ## Enable collection of database samples snapshots. Requires `dbm: true`.
+        ## Samples snapshots show currently executing queries and connection counts.
         #
         # enabled: true
 
         ## @param collection_interval - number - optional - default: 1
-        ## Set the activity snapshot collection interval (in seconds). Each collection involves a single query to
+        ## Set the samples snapshot collection interval (in seconds). Each collection involves a single query to
         ## `system.processes` to capture currently executing queries.
         #
         # collection_interval: 1
 
         ## @param payload_row_limit - integer - optional - default: 1000
-        ## Set the maximum number of active sessions to include in each activity snapshot.
+        ## Set the maximum number of active sessions to include in each samples snapshot.
         #
         # payload_row_limit: 1000
 
