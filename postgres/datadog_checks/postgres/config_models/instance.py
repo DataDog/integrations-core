@@ -59,6 +59,21 @@ class Azure(BaseModel):
     managed_authentication: Optional[ManagedAuthentication1] = None
 
 
+class CollectMigrations(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    ddl_events_ttl: Optional[float] = None
+    ddl_tracking_enabled: Optional[bool] = None
+    enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    migration_tools: Optional[tuple[str, ...]] = None
+    run_sync: Optional[bool] = None
+
+
 class CollectRawQueryStatement(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -253,6 +268,7 @@ class InstanceConfig(BaseModel):
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None
     collect_function_metrics: Optional[bool] = None
+    collect_migrations: Optional[CollectMigrations] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
