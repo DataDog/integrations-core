@@ -42,13 +42,14 @@ tests:
     custom:
       level: 4
       pid: 30133
+      timestamp: 1768357937000
       version: "3.4.0"
     message: "collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
     status: "warn"
     tags:
      - "source:LOGS_SOURCE"
      - "log_type:system"
-    timestamp: 1
+    timestamp: 1768357937000
  -
   sample: "Jan 15 22:02:12 2025 7288 4 10.1 write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
   tags:
@@ -69,8 +70,10 @@ tests:
   sample: "Sender: LSF System <test-user@ip-11-21-111-198.ec2.internal>"
   tags:
    - "log_type:job"
+  filename: "745.out"
   result:
-    custom: {}
+    custom:
+      filename: "745.out"
     message: "Sender: LSF System <test-user@ip-11-21-111-198.ec2.internal>"
     tags:
      - "source:LOGS_SOURCE"
