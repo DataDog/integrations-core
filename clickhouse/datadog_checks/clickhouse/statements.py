@@ -120,8 +120,8 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
         1. FQT events (dbm_type: fqt) - for query text catalog
         2. Query metrics payload - for time-series metrics
 
-        Uses checkpoint-based collection to ensure no queries are missed or double-counted.
-        Checkpoint is only saved after successful submission to handle errors gracefully.
+        Uses checkpoint-based collection to ensure no queries are double-counted.
+        Checkpoint is always advanced after collection to prefer dropped data over duplicates.
         """
         try:
             # Reset pending checkpoint at the start of each collection
@@ -163,16 +163,15 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 )
                 self._check.database_monitoring_query_metrics(payload)
 
-            # Only save checkpoint after ALL payloads are successfully submitted
-            # This ensures we don't lose data if submission fails partway through
-            self._advance_checkpoint()
             if self._current_checkpoint_microseconds:
                 self._log.info("Collection complete. Checkpoint saved: %d", self._current_checkpoint_microseconds)
 
         except Exception:
             self._log.exception('Unable to collect statement metrics due to an error')
-            # Do NOT save checkpoint on error - this ensures we retry the same window
-            return []
+        finally:
+            # Always advance checkpoint to avoid duplicates on retry.
+            # Dropped payloads are preferable to duplicate metrics which can skew aggregations.
+            self._advance_checkpoint()
 
     def _get_query_metrics_payloads(self, payload_wrapper, rows):
         """
@@ -334,8 +333,8 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 tags=self.tags + ["error:query_log_load_failed"],
                 raw=True,
             )
-            # Re-raise to let outer handler skip checkpoint advancement
-            # This ensures the failed time window will be retried
+            # Re-raise to let outer handler log the error.
+            # Checkpoint will still advance to avoid duplicates on retry.
             raise
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
