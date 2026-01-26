@@ -16,7 +16,7 @@ from datadog_checks.base.utils.serialization import json
 from . import queries
 from .__about__ import __version__
 from .completed_query_samples import ClickhouseCompletedQuerySamples
-from .config import build_config
+from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
@@ -177,6 +177,8 @@ class ClickhouseCheck(DatabaseCheck):
                     "errors": [str(error) for error in self._validation_result.errors],
                     "warnings": self._validation_result.warnings,
                     "initialized_at": self._validation_result.created_at,
+                    "config": sanitize(self._config),
+                    "instance": sanitize(self.instance),
                     "features": self._validation_result.features,
                 },
             )
