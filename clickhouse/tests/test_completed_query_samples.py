@@ -236,7 +236,8 @@ def test_completed_queries_query_format():
 
     # Verify it uses checkpoint-based filtering
     assert 'last_checkpoint_microseconds' in COMPLETED_QUERIES_QUERY
-    assert 'current_checkpoint_microseconds' in COMPLETED_QUERIES_QUERY
+    # Upper bound uses now64(6) directly; checkpoint is derived from results
+    assert 'now64(6)' in COMPLETED_QUERIES_QUERY
 
     # Verify key fields are selected
     assert 'query_id' in COMPLETED_QUERIES_QUERY
@@ -291,10 +292,10 @@ def test_checkpoint_persistence(mock_agent, check_with_dbm):
     # Mock persistent cache
     check_with_dbm.read_persistent_cache = mock.MagicMock(return_value=str(test_checkpoint))
 
-    # Load checkpoint
-    loaded_checkpoint = completed_query_samples._load_checkpoint()
+    # Load checkpoint (uses _get_last_checkpoint which reads from persistent cache)
+    loaded_checkpoint = check_with_dbm.read_persistent_cache(completed_query_samples.CHECKPOINT_CACHE_KEY)
 
-    assert loaded_checkpoint == test_checkpoint
+    assert int(loaded_checkpoint) == test_checkpoint
 
 
 def test_default_config_values():

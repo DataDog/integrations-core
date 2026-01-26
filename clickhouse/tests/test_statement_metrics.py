@@ -321,7 +321,7 @@ def test_collection_interval_custom():
     check = ClickhouseCheck('clickhouse', {}, [instance])
 
     assert check.statement_metrics._config.collection_interval == 30
-    assert check.statement_metrics._metrics_collection_interval == 30.0
+    assert check.statement_metrics._collection_interval == 30.0
 
 
 def test_full_statement_text_cache_config():
