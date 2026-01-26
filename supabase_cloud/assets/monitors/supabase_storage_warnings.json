@@ -2,7 +2,7 @@
   "version": 2,
   "created_at": "2026-01-08",
   "last_updated_at": "2026-01-08",
-  "title": "Spike in Supabase Storage Warnings",
+  "title": "Spike in Supabase storage warnings",
   "description": "The number of Supabase storage warnings exceeds the alert threshold.",
   "definition": {
 	"id": 236366189,
