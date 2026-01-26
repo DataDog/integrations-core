@@ -2,13 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 6.11.0 / 2026-01-21
+
+***Added***:
+
+* Collect kafka configuration events. ([#22378](https://github.com/DataDog/integrations-core/pull/22378))
+
+***Fixed***:
+
+* Fix caching logic when collecting cluster monitoring events ([#22375](https://github.com/DataDog/integrations-core/pull/22375))
+
+## 6.10.2 / 2026-01-06 / Agent 7.75.0
+
+***Fixed***:
+
+* Fix Kafka message decoding when using Protobuf with schema registry. ([#22265](https://github.com/DataDog/integrations-core/pull/22265))
+
 ## 6.10.1 / 2025-12-19
 
 ***Fixed***:
 
 * Support Protobuf messages with schema registry ([#22020](https://github.com/DataDog/integrations-core/pull/22020))
 
-## 6.10.0 / 2025-11-26
+## 6.10.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
