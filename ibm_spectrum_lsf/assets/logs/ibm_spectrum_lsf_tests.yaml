@@ -24,41 +24,55 @@ tests:
    - "log_type:system"
   result:
     custom:
-      date: 1612886482540
-      level: "INFO"
-    message: "Jan 15 19:18:46 2026 30170 3 10.1 successExitJob: Job <2566[10]> exit with error code <42>"
+      level: 3
+      pid: 30170
+      timestamp: 1768504726000
+      version: "10.1"
+    message: "successExitJob: Job <2566[10]> exit with error code <42>"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
+     - "log_type:system"
+    timestamp: 1768504726000
  -
-  sample: "Nov 14 02:32:17 2025 30133 4 3.4.0 collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
+  sample: "Jan 14 02:32:17 2026 30133 4 3.4.0 collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
   tags:
    - "log_type:system"
   result:
     custom:
-      date: 1612886482540
-      level: "INFO"
-    message: "Nov 14 02:32:17 2025 30133 4 3.4.0 collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
+      level: 4
+      pid: 30133
+      version: "3.4.0"
+    message: "collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+     - "log_type:system"
+    timestamp: 1
  -
   sample: "Jan 15 22:02:12 2025 7288 4 10.1 write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
   tags:
    - "log_type:system"
   result:
     custom:
-      date: 1612886482540
-      level: "INFO"
-    message: "Jan 15 22:02:12 2025 7288 4 10.1 write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
+      level: 4
+      pid: 7288
+      timestamp: 1736978532000
+      version: "10.1"
+    message: "write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
+     - "log_type:system"
+    timestamp: 1736978532000
  -
   sample: "Sender: LSF System <test-user@ip-11-21-111-198.ec2.internal>"
   tags:
    - "log_type:job"
   result:
-    custom:
-      date: 1612886482540
-      level: "INFO"
+    custom: {}
     message: "Sender: LSF System <test-user@ip-11-21-111-198.ec2.internal>"
     tags:
      - "source:LOGS_SOURCE"
+     - "log_type:job"
+    timestamp: 1
