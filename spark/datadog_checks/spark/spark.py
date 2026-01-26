@@ -446,7 +446,7 @@ class SparkCheck(AgentCheck):
                 self.log.debug("Got an error collecting %s", property, exc_info=True)
                 continue
             try:
-                yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
+                yield (response.json(), [f'app_name:{app_name}', f'app_id:{app_id}'] + addl_tags)
             except JSONDecodeError:
                 self.log.debug(
                     'Skipping metrics for %s from app %s due to unparsable JSON payload.', property, app_name
@@ -543,7 +543,7 @@ class SparkCheck(AgentCheck):
         - `SET spark.sql.streaming.metricsEnabled=true` in the app
         """
 
-        for app_name, tracking_url in running_apps.values():
+        for app_id, (app_name, tracking_url) in running_apps.items():
             try:
                 base_url = self._get_request_url(tracking_url)
                 response = self._rest_request_to_json(
@@ -568,7 +568,7 @@ class SparkCheck(AgentCheck):
                         self.log.debug("Unknown metric_name encountered: '%s'", str(metric_name))
                         continue
                     metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
-                    tags = ['app_name:%s' % str(app_name)]
+                    tags = ['app_name:%s' % str(app_name), 'app_id:%s' % str(app_id)]
                     tags.extend(addl_tags)
 
                     if self._enable_query_name_tag:

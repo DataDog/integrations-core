@@ -56,6 +56,9 @@ STANDALONE_SERVICE_CHECK = 'spark.standalone_master.can_connect'
 TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
 
+YARN_APP_ID_TAG = ['app_id:' + SPARK_APP_ID]
+SPARK_APP_ID_TAG = ['app_id:' + SPARK_APP_ID]
+SPARK_APP_ID_TAG_PRE20 = ['app_id:' + APP_NAME]
 CUSTOM_TAGS = ['optional:tag1']
 COMMON_TAGS = [
     'app_name:' + APP_NAME,
@@ -697,32 +700,32 @@ def test_yarn(aggregator, dd_run_check):
             aggregator,
             [
                 # Check the succeeded job metrics
-                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the running stage metrics
-                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the complete stage metrics
-                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the driver metrics
-                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the optional driver metrics
-                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the executor level metrics
-                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the optional executor level metrics
                 (
                     SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
-                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG,
                 ),
                 # Check the summary executor metrics
-                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the optional summary executor metrics
-                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the RDD metrics
-                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the streaming statistics metrics
-                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
                 # Check the structured streaming metrics
-                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
             ],
         )
         tags = ['url:http://localhost:8088'] + CLUSTER_TAGS + CUSTOM_TAGS
@@ -767,38 +770,39 @@ def test_mesos(aggregator, dd_run_check):
     with mock.patch('requests.Session.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_CONFIG])
         dd_run_check(c)
+
         _assert(
             aggregator,
             [
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the succeeded job metrics
-                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the running stage metrics
-                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the complete stage metrics
-                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the driver metrics
-                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional driver metrics
-                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the executor level metrics
-                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional executor level metrics
                 (
                     SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
-                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG,
                 ),
                 # Check the summary executor metrics
-                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional summary executor metrics
-                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the RDD metrics
-                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the streaming statistics metrics,
-                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the structured streaming metrics
-                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
             ],
         )
         # Check the service tests
@@ -844,34 +848,34 @@ def test_driver_unit(aggregator, dd_run_check):
             aggregator,
             [
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the succeeded job metrics
-                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the running stage metrics
-                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the complete stage metrics
-                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the driver metrics
-                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional driver metrics
-                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the executor level metrics
-                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional executor level metrics
                 (
                     SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
-                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG,
                 ),
                 # Check the summary executor metrics
-                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional summary executor metrics
-                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the RDD metrics
-                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the streaming statistics metrics
-                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
                 # Check the structured streaming metrics
-                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
             ],
         )
         # Check the service tests
@@ -904,33 +908,36 @@ def test_standalone_unit(aggregator, dd_run_check):
             aggregator,
             [
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the succeeded job metrics
-                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS),
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the running stage metrics
-                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS),
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the complete stage metrics
-                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS),
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the driver metrics
-                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional driver metrics
-                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the executor level metrics
-                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional executor level metrics
-                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                (
+                    SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + SPARK_APP_ID_TAG,
+                ),
                 # Check the executor metrics
-                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional summary executor metrics
-                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the RDD metrics
-                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the streaming statistics metrics
-                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the structured streaming metrics
-                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
             ],
         )
         # Check the service tests
@@ -956,29 +963,32 @@ def test_standalone_stage_disabled_unit(aggregator, dd_run_check):
             aggregator,
             [
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the succeeded job metrics
-                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_NO_STAGE_METRIC_TAGS),
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_NO_STAGE_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the driver metrics
-                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional driver metrics
-                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the executor level metrics
-                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional executor level metrics
-                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                (
+                    SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + SPARK_APP_ID_TAG,
+                ),
                 # Check the executor metrics
-                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional summary executor metrics
-                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the RDD metrics
-                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the streaming statistics metrics
-                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the structured streaming metrics
-                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
             ],
         )
         # Check the service tests
@@ -1004,33 +1014,36 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
             aggregator,
             [
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the succeeded job metrics
-                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS),
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the running stage metrics
-                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS),
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the complete stage metrics
-                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS),
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the driver metrics
-                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional driver metrics
-                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the executor level metrics
-                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional executor level metrics
-                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                (
+                    SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + SPARK_APP_ID_TAG,
+                ),
                 # Check the summary executor metrics
-                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the optional summary executor metrics
-                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the RDD metrics
-                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the streaming statistics metrics
-                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
                 # Check the structured streaming metrics
-                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG),
             ],
         )
 
@@ -1057,33 +1070,36 @@ def test_standalone_pre20(aggregator, dd_run_check):
             aggregator,
             [
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the running job metrics
-                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the succeeded job metrics
-                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS),
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the running stage metrics
-                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS),
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the complete stage metrics
-                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS),
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the driver metrics
-                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the optional driver metrics
-                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the executor level metrics
-                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the optional executor level metrics
-                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                (
+                    SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + SPARK_APP_ID_TAG_PRE20,
+                ),
                 # Check the summary executor metrics
-                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the optional summary executor metrics
-                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the RDD metrics
-                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the streaming statistics metrics
-                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG_PRE20),
                 # Check the structured streaming metrics
-                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + SPARK_APP_ID_TAG_PRE20),
             ],
         )
 
@@ -1144,11 +1160,11 @@ def test_disable_legacy_cluster_tags(aggregator, dd_run_check):
 @pytest.mark.parametrize(
     "instance, requests_get_mock, base_tags",
     [
-        (DRIVER_CONFIG, driver_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
-        (YARN_CONFIG, yarn_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
-        (MESOS_CONFIG, mesos_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
-        (STANDALONE_CONFIG, standalone_requests_get_mock, COMMON_TAGS),
-        (STANDALONE_CONFIG_PRE_20, standalone_requests_pre20_get_mock, COMMON_TAGS),
+        (DRIVER_CONFIG, driver_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
+        (YARN_CONFIG, yarn_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS + YARN_APP_ID_TAG),
+        (MESOS_CONFIG, mesos_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS + SPARK_APP_ID_TAG),
+        (STANDALONE_CONFIG, standalone_requests_get_mock, COMMON_TAGS + SPARK_APP_ID_TAG),
+        (STANDALONE_CONFIG_PRE_20, standalone_requests_pre20_get_mock, COMMON_TAGS + SPARK_APP_ID_TAG_PRE20),
     ],
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
