@@ -206,7 +206,7 @@ instances:
     ##           This can also be set to the following `tag` types to tag each metric in the row with the name
     ##           and value of the item in this column:
     ##             1. tag - This is the default tag type
-    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example:
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
     ##                 ```
     ##                 query = {
     ##                   "name": "example",
