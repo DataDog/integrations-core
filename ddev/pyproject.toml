@@ -73,7 +73,7 @@ version-file = "src/ddev/_version.py"
 [tool.hatch.build.targets.sdist]
 include = ["src"]
 
-[tool.hatch.build.targets.app]
+[tool.hatch.build.targets.binary]
 scripts = ["ddev"]
 
 # Keep Black configuration to generate models through validate
