@@ -117,7 +117,7 @@ jobs:
       run: pip install -e . --no-deps
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@b56f20b9f22943bc548a7945b40601028db81a31 # 1.86.0 Latest rust stable version as of 2025-05-08 (https://forge.rust-lang.org/)
+      uses: dtolnay/rust-toolchain@772c4490b37ea1c65caf6a53089a38ea1510cf4a # 1.93.0 Latest rust stable version as of 2026-01-22 (https://forge.rust-lang.org/)
       with:
         targets: ${{ matrix.job.target }}
 
@@ -172,7 +172,7 @@ jobs:
       run: |-
         cat <<"OUTER" >> $GITHUB_OUTPUT
         script<<INNER
-        cd dist/app
+        cd dist/binary
         old_binary="$(ls)"
         binary="${old_binary/${{ steps.version.outputs.raw-version }}/${{ steps.version.outputs.version }}}"
         mv "$old_binary" "$binary"
@@ -185,7 +185,7 @@ jobs:
         cat <<"OUTER" >> $GITHUB_OUTPUT
         script<<INNER
         mkdir packaging
-        cd dist/app
+        cd dist/binary
 
         binary="$(ls)"
 
@@ -201,7 +201,7 @@ jobs:
     - name: Build managed binary
       env:
         PYAPP_SELF_COMMAND: "none"
-      run: hatch build --target app
+      run: hatch build --target binary
 
     - name: Correct binary version
       if: steps.version.outputs.version != steps.version.outputs.raw-version
@@ -219,10 +219,10 @@ jobs:
         if-no-files-found: error
 
     - name: Reset artifact directories
-      run: rm -rf dist/app packaging
+      run: rm -rf dist/binary packaging
 
     - name: Build standalone binary
-      run: hatch build --target app
+      run: hatch build --target binary
 
     - name: Correct binary version
       if: steps.version.outputs.version != steps.version.outputs.raw-version
