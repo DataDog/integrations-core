@@ -6,15 +6,17 @@
 
 Datadog offers several Databricks monitoring capabilities.
 
-[Data Jobs Monitoring][25] provides monitoring for your Databricks jobs and clusters. You can detect problematic Databricks jobs and workflows anywhere in your data pipelines, remediate failed and long-running-jobs faster, and optimize cluster resources to reduce costs.
+[Data Observability: Jobs Monitoring][25] provides monitoring for your Databricks jobs and clusters. You can detect problematic Databricks jobs and workflows anywhere in your data pipelines, remediate failed and long-running-jobs faster, and optimize cluster resources to reduce costs.
 
 [Cloud Cost Management][26] gives you a view to analyze all your Databricks DBU costs alongside the associated cloud spend.
 
-[Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Jobs Monitoring][25].
+[Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Observability: Jobs Monitoring][25].
 
-[Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
+[Infrastructure Monitoring][28] gives you a limited subset of the Data Observability: Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
 
 [Reference Tables][32] allow you to import metadata from your Databricks workspace into Datadog. These tables enrich your Datadog telemetry with critical context like workspace names, job definitions, cluster configurations, and user roles.
+
+[Data Observability][36] helps data teams detect, resolve, and prevent issues affecting data quality, performance, and cost. It monitors anomalies in volume, freshness, null rates, and distributions, and integrates with pipelines to correlate issues with job runs, data streams, and infrastructure events.
 
 Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
@@ -89,6 +91,12 @@ First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspa
 
 5. Click **Save**.
 
+#### Data Observability
+
+1. Connect a workspace in Datadog's Databricks integration tile.
+2. In the **Select products to set up integration** section, set **Data Observability** to **Enabled** to monitor data quality, freshness, and volume anomalies.
+3. See [the docs for Data Observability][36] for more details on configuration and features.
+
 #### Permissions
 For Datadog to access your Databricks cost data in Data Jobs Monitoring or [Cloud Cost Management][34], the user or service principal used to query [system tables][35] must have the following permissions:
    - `CAN USE` permission on the SQL Warehouse.
@@ -133,5 +141,6 @@ You can troubleshoot issues yourself by enabling the [Databricks web terminal][1
 [33]: https://docs.datadoghq.com/data_jobs/databricks
 [34]: https://docs.datadoghq.com/cloud_cost_management/
 [35]: https://docs.databricks.com/aws/en/admin/system-tables/
+[36]: https://docs.datadoghq.com/data_observability/
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks

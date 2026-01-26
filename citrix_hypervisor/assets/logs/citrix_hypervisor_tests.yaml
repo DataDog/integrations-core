@@ -1,3 +1,4 @@
+# bypass-global-timestamp-format-in-sample-checks
 id: "citrix_hypervisor"
 tests:
  -

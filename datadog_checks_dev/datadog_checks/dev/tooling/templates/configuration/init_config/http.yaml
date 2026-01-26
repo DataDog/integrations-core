@@ -30,6 +30,7 @@
     the client or proxy. If you want to resolve the domains on the proxy
     server, use `socks5h` as the scheme.
 - name: skip_proxy
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -37,6 +38,7 @@
     If set to `true`, this makes the check bypass any proxy
     settings enabled and attempt to reach services directly.
 - name: timeout
+  fleet_configurable: true
   value:
     example: 10
     type: number
