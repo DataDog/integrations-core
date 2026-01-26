@@ -1,4 +1,4 @@
-# Datadog Backend Listener for Apache JMeter
+# Datadog Plugin for Apache JMeter
 
 ## Overview
 
