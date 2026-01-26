@@ -1,4 +1,5 @@
 name: OpenMetrics
+fleet_configurable: true
 files:
   - name: openmetrics.yaml
     options:
