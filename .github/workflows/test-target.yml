@@ -112,7 +112,7 @@ jobs:
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - name: Download workflow scripts from integrations-core
+    - name: Download workflow scripts
       if: inputs.repo != 'core'
       run: |
         mkdir -p .github/workflows/scripts
@@ -185,7 +185,7 @@ jobs:
 
     - name: Tag job for CI Visibility
       # Skip on fork PRs and non-core repos since secrets won't be available
-      if: env.INPUT_IS_FORK != 'true' && env.INPUT_REPO == 'core'
+      if: env.INPUT_IS_FORK != 'true' || env.INPUT_REPO == 'core'
       uses: ./.github/actions/tag-job
       with:
         tags: ${{ env.DD_TAGS }}
