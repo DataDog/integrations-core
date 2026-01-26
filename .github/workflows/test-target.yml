@@ -156,6 +156,7 @@ jobs:
       #   INPUT_MINIMUM_BASE_PACKAGE
       #   INPUT_PYTEST_ARGS
       #   INPUT_IS_FORK
+      #   JOB_ID
       run: bash .github/workflows/scripts/setup-test-env.sh
       env:
         INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
@@ -174,6 +175,7 @@ jobs:
         INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
         INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
         INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
+        INPUT_JOB_ID: ${{ job.check_run_id }}
         DD_API_KEY_SECRET: ${{ secrets.DD_API_KEY }}
         SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
