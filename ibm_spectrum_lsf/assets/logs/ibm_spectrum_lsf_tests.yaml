@@ -3,6 +3,8 @@ tests:
  -
   sample: |
     Jan 15 21:46:34 2025 30196:30196 3 10.1 mbdReConf: start
+  tags: 
+    - "log_type:system"
   result:
     custom:
       date: 1612886482540
