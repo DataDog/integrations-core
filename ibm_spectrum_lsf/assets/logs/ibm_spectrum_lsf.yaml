@@ -90,7 +90,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: ibm_spectrum_lsf_system %{date("MMM DD HH:mm:ss
-              yyyy"):timestamp}\s+%{number:pid}(:%{number:tid})?\s+%{number:level}\s+%{data:version}\s+%{data:message}
+              yyyy"):timestamp}\s+%{integer:pid}(:%{integer:tid})?\s+%{integer:level}\s+%{data:version}\s+%{data:message}
         - type: message-remapper
           name: Define `message` as the official message of the log
           enabled: true

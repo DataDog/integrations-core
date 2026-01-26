@@ -3,18 +3,25 @@ tests:
  -
   sample: |
     Jan 15 21:46:34 2025 30196:30196 3 10.1 mbdReConf: start
-  tags: 
-    - "log_type:system"
+  tags:
+   - "log_type:system"
   result:
     custom:
-      date: 1612886482540
-      level: "INFO"
-    message: |
-      Jan 15 21:46:34 2025 30196:30196 3 10.1 mbdReConf: start
+      level: 3.0
+      pid: 30196
+      tid: 30196
+      timestamp: 1736977594000
+      version: "10.1"
+    message: "mbdReConf: start"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
+     - "log_type:system"
+    timestamp: 1736977594000
  -
   sample: "Jan 15 19:18:46 2026 30170 3 10.1 successExitJob: Job <2566[10]> exit with error code <42>"
+  tags:
+   - "log_type:system"
   result:
     custom:
       date: 1612886482540
@@ -24,6 +31,8 @@ tests:
      - "source:LOGS_SOURCE"
  -
   sample: "Nov 14 02:32:17 2025 30133 4 3.4.0 collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
+  tags:
+   - "log_type:system"
   result:
     custom:
       date: 1612886482540
@@ -33,6 +42,8 @@ tests:
      - "source:LOGS_SOURCE"
  -
   sample: "Jan 15 22:02:12 2025 7288 4 10.1 write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
+  tags:
+   - "log_type:system"
   result:
     custom:
       date: 1612886482540
@@ -42,6 +53,8 @@ tests:
      - "source:LOGS_SOURCE"
  -
   sample: "Sender: LSF System <test-user@ip-11-21-111-198.ec2.internal>"
+  tags:
+   - "log_type:job"
   result:
     custom:
       date: 1612886482540
