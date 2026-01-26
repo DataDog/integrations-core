@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """
-Collects database activity snapshots from ClickHouse system.processes.
+Collects database samples snapshots from ClickHouse system.processes.
 
 This module provides real-time visibility into currently executing queries,
 """
@@ -16,7 +16,7 @@ from clickhouse_connect.driver.exceptions import OperationalError
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
-    from datadog_checks.clickhouse.config_models.instance import QueryActivity
+    from datadog_checks.clickhouse.config_models.instance import QuerySamples
 
 try:
     import datadog_agent
@@ -91,18 +91,18 @@ def agent_check_getter(self):
     return self._check
 
 
-class ClickhouseStatementActivity(DBMAsyncJob):
+class ClickhouseStatementSamples(DBMAsyncJob):
     """
-    Collects database activity snapshots from ClickHouse system.processes.
+    Collects database samples snapshots from ClickHouse system.processes.
 
     This job queries system.processes to capture currently executing queries
-    and emits activity events for the DBM Activity page.
+    and emits samples events for the DBM Samples page.
     """
 
-    def __init__(self, check: ClickhouseCheck, config: QueryActivity):
+    def __init__(self, check: ClickhouseCheck, config: QuerySamples):
         collection_interval = config.collection_interval
 
-        super(ClickhouseStatementActivity, self).__init__(
+        super(ClickhouseStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
             run_sync=config.run_sync,
@@ -110,7 +110,7 @@ class ClickhouseStatementActivity(DBMAsyncJob):
             dbms="clickhouse",
             min_collection_interval=check.check_interval if hasattr(check, 'check_interval') else 15,
             expected_db_exceptions=(Exception,),
-            job_name="query-activity",
+            job_name="query-samples",
         )
         self._check = check
         self._config = config
@@ -134,7 +134,7 @@ class ClickhouseStatementActivity(DBMAsyncJob):
 
     def cancel(self):
         """Cancel the job and clean up the dedicated client."""
-        super(ClickhouseStatementActivity, self).cancel()
+        super(ClickhouseStatementSamples, self).cancel()
         self._close_db_client()
 
     def _close_db_client(self):
@@ -177,7 +177,7 @@ class ClickhouseStatementActivity(DBMAsyncJob):
 
             elapsed_ms = (time.time() - start_time) * 1000
             self._check.histogram(
-                "dd.clickhouse.activity.get_active_queries.time",
+                "dd.clickhouse.samples.get_active_queries.time",
                 elapsed_ms,
                 tags=self.tags + self._get_debug_tags(),
                 raw=True,
@@ -190,7 +190,7 @@ class ClickhouseStatementActivity(DBMAsyncJob):
             self._log.warning("Connection error in active queries, will reconnect: %s", e)
             self._close_db_client()
             self._check.count(
-                "dd.clickhouse.activity.error",
+                "dd.clickhouse.samples.error",
                 1,
                 tags=self.tags + ["error:get-active-queries", "error_type:connection"] + self._get_debug_tags(),
                 raw=True,
@@ -200,7 +200,7 @@ class ClickhouseStatementActivity(DBMAsyncJob):
             # Query error - don't reset connection
             self._log.exception("Failed to collect active queries: %s", str(e))
             self._check.count(
-                "dd.clickhouse.activity.error",
+                "dd.clickhouse.samples.error",
                 1,
                 tags=self.tags + ["error:get-active-queries"] + self._get_debug_tags(),
                 raw=True,
@@ -381,9 +381,9 @@ class ClickhouseStatementActivity(DBMAsyncJob):
             if session_count >= self._payload_row_limit:
                 break
 
-    def _create_activity_event(self, rows, active_connections):
+    def _create_samples_event(self, rows, active_connections):
         """
-        Create a database monitoring activity event payload.
+        Create a database monitoring samples event payload.
         """
         active_sessions = list(self._create_active_sessions(rows))
 
@@ -403,9 +403,9 @@ class ClickhouseStatementActivity(DBMAsyncJob):
         return event
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_activity(self):
+    def _collect_samples(self):
         """
-        Main method to collect and submit activity snapshots.
+        Main method to collect and submit samples snapshots.
         """
         start_time = time.time()
 
@@ -420,23 +420,23 @@ class ClickhouseStatementActivity(DBMAsyncJob):
         # Get active connections aggregation
         active_connections = self._get_active_connections()
 
-        # Create and submit activity event
-        activity_event = self._create_activity_event(rows, active_connections)
+        # Create and submit samples event
+        samples_event = self._create_samples_event(rows, active_connections)
 
-        self._check.database_monitoring_query_activity(json.dumps(activity_event, default=default_json_event_encoding))
+        self._check.database_monitoring_query_activity(json.dumps(samples_event, default=default_json_event_encoding))
 
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
-            "dd.clickhouse.collect_activity_snapshot.time",
+            "dd.clickhouse.collect_samples_snapshot.time",
             elapsed_ms,
             tags=self.tags + self._get_debug_tags(),
             raw=True,
         )
 
         self._log.debug(
-            "Activity snapshot collected: sessions=%s, connections=%s, elapsed_ms=%.2f",
-            len(activity_event.get('clickhouse_activity', [])),
-            len(activity_event.get('clickhouse_connections', [])),
+            "Samples snapshot collected: sessions=%s, connections=%s, elapsed_ms=%.2f",
+            len(samples_event.get('clickhouse_activity', [])),
+            len(samples_event.get('clickhouse_connections', [])),
             elapsed_ms,
         )
 
@@ -449,12 +449,12 @@ class ClickhouseStatementActivity(DBMAsyncJob):
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
         try:
-            self._collect_activity()
+            self._collect_samples()
         except Exception as e:
-            self._log.exception("Failed to collect activity snapshot: %s", e)
+            self._log.exception("Failed to collect samples snapshot: %s", e)
             self._check.count(
-                "dd.clickhouse.activity.error",
+                "dd.clickhouse.samples.error",
                 1,
-                tags=self.tags + ["error:collect-activity"] + self._get_debug_tags(),
+                tags=self.tags + ["error:collect-samples"] + self._get_debug_tags(),
                 raw=True,
             )

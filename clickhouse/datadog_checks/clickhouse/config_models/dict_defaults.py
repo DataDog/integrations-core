@@ -14,8 +14,8 @@ def instance_database_identifier():
     )
 
 
-def instance_query_activity():
-    return instance.QueryActivity(
+def instance_query_samples():
+    return instance.QuerySamples(
         enabled=True,
         collection_interval=1,
         payload_row_limit=1000,

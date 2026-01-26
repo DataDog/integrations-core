@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.statement_activity import ClickhouseStatementActivity
+from datadog_checks.clickhouse.statement_samples import ClickhouseStatementSamples
 
 pytestmark = pytest.mark.unit
 
@@ -21,7 +21,7 @@ def instance_with_dbm():
         'password': '',
         'db': 'default',
         'dbm': True,
-        'query_activity': {
+        'query_samples': {
             'enabled': True,
             'collection_interval': 10,
             'payload_row_limit': 1000,
@@ -38,17 +38,17 @@ def check_with_dbm(instance_with_dbm):
     return check
 
 
-def test_statement_activity_initialization(check_with_dbm):
-    """Test that statement activity is properly initialized when DBM is enabled"""
-    assert check_with_dbm.statement_activity is not None
-    assert isinstance(check_with_dbm.statement_activity, ClickhouseStatementActivity)
-    assert check_with_dbm.statement_activity._config.enabled is True
-    assert check_with_dbm.statement_activity._config.collection_interval == 10
-    assert check_with_dbm.statement_activity._config.payload_row_limit == 1000
+def test_statement_samples_initialization(check_with_dbm):
+    """Test that statement samples is properly initialized when DBM is enabled"""
+    assert check_with_dbm.statement_samples is not None
+    assert isinstance(check_with_dbm.statement_samples, ClickhouseStatementSamples)
+    assert check_with_dbm.statement_samples._config.enabled is True
+    assert check_with_dbm.statement_samples._config.collection_interval == 10
+    assert check_with_dbm.statement_samples._config.payload_row_limit == 1000
 
 
-def test_statement_activity_disabled():
-    """Test that statement activity is not initialized when DBM is disabled"""
+def test_statement_samples_disabled():
+    """Test that statement samples is not initialized when DBM is disabled"""
     instance = {
         'server': 'localhost',
         'port': 9000,
@@ -59,11 +59,11 @@ def test_statement_activity_disabled():
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    assert check.statement_activity is None
+    assert check.statement_samples is None
 
 
-def test_query_activity_disabled():
-    """Test that statement activity is not initialized when query_activity is disabled"""
+def test_query_samples_disabled():
+    """Test that statement samples is not initialized when query_samples is disabled"""
     instance = {
         'server': 'localhost',
         'port': 9000,
@@ -71,18 +71,18 @@ def test_query_activity_disabled():
         'password': '',
         'db': 'default',
         'dbm': True,
-        'query_activity': {
+        'query_samples': {
             'enabled': False,
         },
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    assert check.statement_activity is None
+    assert check.statement_samples is None
 
 
 def test_obfuscate_query(check_with_dbm):
     """Test query obfuscation"""
-    activity = check_with_dbm.statement_activity
+    samples = check_with_dbm.statement_samples
 
     row = {
         'query': 'SELECT * FROM users WHERE user_id = 12345',
@@ -90,7 +90,7 @@ def test_obfuscate_query(check_with_dbm):
         'query_id': 'test-query-id-123',
     }
 
-    normalized_row = activity._obfuscate_query(row)
+    normalized_row = samples._obfuscate_query(row)
 
     # Verify that statement and query_signature are set
     assert normalized_row['statement'] is not None
@@ -102,10 +102,10 @@ def test_obfuscate_query(check_with_dbm):
     assert 'dd_comments' in normalized_row
 
 
-def test_create_activity_event(check_with_dbm):
-    """Test creation of activity event payload"""
-    activity = check_with_dbm.statement_activity
-    activity._tags_no_db = ['test:clickhouse', 'server:localhost']
+def test_create_samples_event(check_with_dbm):
+    """Test creation of samples event payload"""
+    samples = check_with_dbm.statement_samples
+    samples._tags_no_db = ['test:clickhouse', 'server:localhost']
 
     rows = [
         {
@@ -123,9 +123,9 @@ def test_create_activity_event(check_with_dbm):
 
     active_connections = [{'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 5}]
 
-    with mock.patch('datadog_checks.clickhouse.statement_activity.datadog_agent') as mock_agent:
+    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        event = activity._create_activity_event(rows, active_connections)
+        event = samples._create_samples_event(rows, active_connections)
 
     # Verify event structure
     assert event['ddsource'] == 'clickhouse'
@@ -134,7 +134,7 @@ def test_create_activity_event(check_with_dbm):
     assert 'collection_interval' in event
     assert event['collection_interval'] == 10
 
-    # Verify activity payload
+    # Verify samples payload
     assert 'clickhouse_activity' in event
     assert len(event['clickhouse_activity']) == 1
 
@@ -145,7 +145,7 @@ def test_create_activity_event(check_with_dbm):
 
 def test_active_queries_query_format():
     """Test that the active queries query is properly formatted"""
-    from datadog_checks.clickhouse.statement_activity import ACTIVE_QUERIES_QUERY
+    from datadog_checks.clickhouse.statement_samples import ACTIVE_QUERIES_QUERY
 
     # Verify query uses placeholder for table (supports both local and cluster-wide queries)
     assert '{processes_table}' in ACTIVE_QUERIES_QUERY
@@ -171,7 +171,7 @@ def test_active_queries_query_format():
 
 def test_active_connections_query_format():
     """Test that the active connections query is properly formatted"""
-    from datadog_checks.clickhouse.statement_activity import ACTIVE_CONNECTIONS_QUERY
+    from datadog_checks.clickhouse.statement_samples import ACTIVE_CONNECTIONS_QUERY
 
     # Verify query uses placeholder for table
     assert '{processes_table}' in ACTIVE_CONNECTIONS_QUERY
@@ -183,9 +183,9 @@ def test_active_connections_query_format():
 
 def test_get_debug_tags(check_with_dbm):
     """Test that debug tags are properly generated"""
-    activity = check_with_dbm.statement_activity
-    activity._tags_no_db = ['server:localhost', 'port:9000', 'test:clickhouse']
-    debug_tags = activity._get_debug_tags()
+    samples = check_with_dbm.statement_samples
+    samples._tags_no_db = ['server:localhost', 'port:9000', 'test:clickhouse']
+    debug_tags = samples._get_debug_tags()
 
     assert isinstance(debug_tags, list)
     assert 'server:localhost' in debug_tags
@@ -193,7 +193,7 @@ def test_get_debug_tags(check_with_dbm):
 
 def test_normalize_row_with_all_fields(check_with_dbm):
     """Test that all fields are properly normalized from system.processes"""
-    activity = check_with_dbm.statement_activity
+    samples = check_with_dbm.statement_samples
 
     # Create a mock row with all 26 fields from ACTIVE_QUERIES_QUERY
     mock_row = (
@@ -225,7 +225,7 @@ def test_normalize_row_with_all_fields(check_with_dbm):
         'python-requests/2.28.0',  # http_user_agent
     )
 
-    normalized_row = activity._normalize_row(mock_row)
+    normalized_row = samples._normalize_row(mock_row)
 
     # Verify original fields
     assert normalized_row['elapsed'] == 1.234
@@ -269,8 +269,8 @@ def test_normalize_row_with_all_fields(check_with_dbm):
 
 def test_create_active_sessions_respects_limit(check_with_dbm):
     """Test that active sessions are limited by payload_row_limit"""
-    activity = check_with_dbm.statement_activity
-    activity._payload_row_limit = 2
+    samples = check_with_dbm.statement_samples
+    samples._payload_row_limit = 2
 
     rows = [
         {'statement': 'SELECT 1', 'query_signature': 'sig1', 'user': 'default'},
@@ -278,13 +278,13 @@ def test_create_active_sessions_respects_limit(check_with_dbm):
         {'statement': 'SELECT 3', 'query_signature': 'sig3', 'user': 'default'},
     ]
 
-    sessions = list(activity._create_active_sessions(rows))
+    sessions = list(samples._create_active_sessions(rows))
     assert len(sessions) == 2
 
 
 def test_create_active_sessions_filters_null_statements(check_with_dbm):
     """Test that rows without statements are filtered out"""
-    activity = check_with_dbm.statement_activity
+    samples = check_with_dbm.statement_samples
 
     rows = [
         {'statement': 'SELECT 1', 'query_signature': 'sig1', 'user': 'default'},
@@ -292,7 +292,7 @@ def test_create_active_sessions_filters_null_statements(check_with_dbm):
         {'statement': 'SELECT 3', 'query_signature': 'sig3', 'user': 'default'},
     ]
 
-    sessions = list(activity._create_active_sessions(rows))
+    sessions = list(samples._create_active_sessions(rows))
     assert len(sessions) == 2
 
 
@@ -305,7 +305,7 @@ def test_defaults_applied():
         'password': '',
         'db': 'default',
         'dbm': True,
-        'query_activity': {
+        'query_samples': {
             'enabled': True,
         },
         'tags': ['test:clickhouse'],
@@ -313,6 +313,6 @@ def test_defaults_applied():
     check = ClickhouseCheck('clickhouse', {}, [instance])
 
     # Verify defaults are applied
-    assert check.statement_activity._config.collection_interval == 1
-    assert check.statement_activity._config.payload_row_limit == 1000
-    assert check.statement_activity._config.run_sync is False
+    assert check.statement_samples._config.collection_interval == 1
+    assert check.statement_samples._config.payload_row_limit == 1000
+    assert check.statement_samples._config.run_sync is False

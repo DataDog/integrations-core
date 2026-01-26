@@ -88,7 +88,7 @@ files:
         example: True
     - name: dbm
       description: |
-        Enable Database Monitoring (DBM) to collect query activity, metrics, and samples.
+        Enable Database Monitoring (DBM) to collect query samples, metrics, and completions.
         This feature provides deep observability into query performance.
       value:
         type: boolean
@@ -118,33 +118,33 @@ files:
       value:
         type: boolean
         example: false
-    - name: query_activity
-      description: Configure collection of database activity snapshots from system.processes
+    - name: query_samples
+      description: Configure collection of database samples snapshots from system.processes
       options:
         - name: enabled
           description: |
-            Enable collection of database activity snapshots. Requires `dbm: true`.
-            Activity snapshots show currently executing queries and connection counts.
+            Enable collection of database samples snapshots. Requires `dbm: true`.
+            Samples snapshots show currently executing queries and connection counts.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the activity snapshot collection interval (in seconds). Each collection involves a single query to
+            Set the samples snapshot collection interval (in seconds). Each collection involves a single query to
             `system.processes` to capture currently executing queries.
           value:
             type: number
             example: 1
         - name: payload_row_limit
           description: |
-            Set the maximum number of active sessions to include in each activity snapshot.
+            Set the maximum number of active sessions to include in each samples snapshot.
           value:
             type: integer
             example: 1000
         - name: run_sync
           hidden: true
           description: |
-            Run the activity collection synchronously. This is useful for testing purposes, but should not be used
+            Run the samples collection synchronously. This is useful for testing purposes, but should not be used
             in production as it can block the main thread and cause performance issues.
           value:
             type: boolean
