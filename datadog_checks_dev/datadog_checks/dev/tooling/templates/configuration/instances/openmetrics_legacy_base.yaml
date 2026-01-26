@@ -7,7 +7,6 @@
 - name: namespace
   hidden: true
   description: The namespace to be prepended to all metrics.
-  fleet_configurable: true
   value:
     type: string
     example: service
@@ -16,7 +15,6 @@
   description: |
     List of metrics to be fetched from the prometheus endpoint, if there's a
     value it'll be renamed. This list should contain at least one metric.
-  fleet_configurable: true
   value:
     type: array
     example:
@@ -140,7 +138,6 @@
   description: |
     A list of labels to be excluded. May be used in conjunction with `include_labels`.
     Labels defined in `excluded labels` will take precedence in case of overlap.
-  fleet_configurable: true
   value:
     example:
       - timestamp
@@ -151,7 +148,6 @@
   description: |
     A list of labels to include. May be used in conjunction with `exclude_labels`.
     Labels defined in `excluded labels` will take precedence in case of overlap.
-  fleet_configurable: true
   value:
     type: array
     items:
@@ -183,7 +179,6 @@
   description: |
     A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
     The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
-  fleet_configurable: true
   value:
     type: array
     items:
@@ -208,7 +203,6 @@
 - name: ignore_tags
   description: |
     A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
-  fleet_configurable: true
   value:
     type: array
     items:
