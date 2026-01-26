@@ -9,6 +9,10 @@ on:
     - datadog_checks_dev/datadog_checks/dev/*.py
     - ddev/src/**
     - "!agent_requirements.in"
+    # Also run if we modify the workflow files
+    - '.github/workflows/pr-all-windows.yml'
+    - '.github/workflows/test-target.yml'
+    - '.github/workflows/test-all-windows.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}

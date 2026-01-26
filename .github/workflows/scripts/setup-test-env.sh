@@ -7,7 +7,8 @@ set -euo pipefail
 # Required environment variables (passed from workflow):
 # INPUT_PYTHON_VERSION, INPUT_TEST_PY2, INPUT_TEST_PY3, INPUT_PLATFORM
 # INPUT_AGENT_IMAGE, INPUT_AGENT_IMAGE_PY2, INPUT_AGENT_IMAGE_WINDOWS, INPUT_AGENT_IMAGE_WINDOWS_PY2
-# INPUT_TARGET, INPUT_REPO, INPUT_CONTEXT, INPUT_MINIMUM_BASE_PACKAGE, INPUT_JOB_NAME
+# INPUT_TARGET, INPUT_TARGET_ENV, INPUT_REPO, INPUT_CONTEXT, INPUT_MINIMUM_BASE_PACKAGE, INPUT_JOB_NAME
+# INPUT_PYTEST_ARGS, INPUT_IS_FORK
 # DD_API_KEY_SECRET, SETUP_ENV_VARS
 # DOCKER_USERNAME, DOCKER_ACCESS_TOKEN, ORACLE_DOCKER_USERNAME, ORACLE_DOCKER_PASSWORD
 # DD_GITHUB_USER, DD_GITHUB_TOKEN
@@ -25,16 +26,16 @@ PYTHON_VERSION="${INPUT_PYTHON_VERSION:-$DEFAULT_PYTHON_VERSION}"
 PYTHONUNBUFFERED="1"
 
 # SKIP_ENV_NAME logic
-if [ "${INPUT_TEST_PY2:-}" = 'true' ] && [ "${INPUT_TEST_PY3:-}" != 'true' ]; then
+if [[ "${INPUT_TEST_PY2:-}" == 'true' && "${INPUT_TEST_PY3:-}" != 'true' ]]; then
   SKIP_ENV_NAME="py3.*"
-elif [ "${INPUT_TEST_PY2:-}" != 'true' ] && [ "${INPUT_TEST_PY3:-}" = 'true' ]; then
+elif [[ "${INPUT_TEST_PY2:-}" != 'true' && "${INPUT_TEST_PY3:-}" == 'true' ]]; then
   SKIP_ENV_NAME="py2.*"
 else
   SKIP_ENV_NAME=""
 fi
 
 # Windows E2E requires Windows containers
-if [ "${INPUT_PLATFORM:-}" = 'windows' ]; then
+if [[ "${INPUT_PLATFORM:-}" == 'windows' ]]; then
   DDEV_E2E_AGENT="$INPUT_AGENT_IMAGE_WINDOWS"
   DDEV_E2E_AGENT_PY2="$INPUT_AGENT_IMAGE_WINDOWS_PY2"
 else
@@ -54,7 +55,7 @@ DD_SITE="datadoghq.com"
 DD_API_KEY="$DD_API_KEY_SECRET"
 
 # Prefix for artifact names when using minimum base package
-if [ "${INPUT_MINIMUM_BASE_PACKAGE:-}" = 'true' ]; then
+if [[ "${INPUT_MINIMUM_BASE_PACKAGE:-}" == 'true' ]]; then
   MINIMUM_BASE_PACKAGE_PREFIX="minimum-base-package-"
 else
   MINIMUM_BASE_PACKAGE_PREFIX=""
@@ -66,7 +67,14 @@ JOB_NAME=$(echo "$INPUT_JOB_NAME" | sed 's/^\./Dot/')
 TEST_RESULTS_DIR="${TEST_RESULTS_BASE_DIR}/${JOB_NAME}"
 
 # DD_TAGS
-DD_TAGS="team:agent-integrations,platform:${INPUT_PLATFORM},integration:${INPUT_TARGET},agent_image:${DDEV_E2E_AGENT},context:${INPUT_CONTEXT}"
+DD_TAGS="team:agent-integrations,platform:${INPUT_PLATFORM},target:${INPUT_TARGET},target_env:${INPUT_TARGET_ENV:-all},agent_image:${DDEV_E2E_AGENT},context:${INPUT_CONTEXT}"
+
+# Compute INPUT_TARGET_STR from INPUT_TARGET and INPUT_TARGET_ENV
+if [[ -n "${INPUT_TARGET_ENV:-}" ]]; then
+  INPUT_TARGET_STR="${INPUT_TARGET}:${INPUT_TARGET_ENV}"
+else
+  INPUT_TARGET_STR="${INPUT_TARGET}"
+fi
 
 # =============================================================================
 # Export all variables to GITHUB_ENV
@@ -97,9 +105,19 @@ DD_TAGS="team:agent-integrations,platform:${INPUT_PLATFORM},integration:${INPUT_
   echo "ORACLE_DOCKER_PASSWORD=${ORACLE_DOCKER_PASSWORD}"
   echo "DD_GITHUB_USER=${DD_GITHUB_USER}"
   echo "DD_GITHUB_TOKEN=${DD_GITHUB_TOKEN}"
+  # Variables used by test scripts (run-unit-integration-tests.sh, run-e2e-tests.sh)
+  # Define once here to avoid overloading the action object map
+  echo "INPUT_REPO=${INPUT_REPO}"
+  echo "INPUT_TARGET=${INPUT_TARGET}"
+  echo "INPUT_TARGET_ENV=${INPUT_TARGET_ENV:-}"
+  echo "INPUT_TARGET_STR=${INPUT_TARGET_STR}"
+  echo "INPUT_PLATFORM=${INPUT_PLATFORM}"
+  echo "INPUT_MINIMUM_BASE_PACKAGE=${INPUT_MINIMUM_BASE_PACKAGE:-false}"
+  echo "INPUT_PYTEST_ARGS=${INPUT_PYTEST_ARGS:-}"
+  echo "INPUT_IS_FORK=${INPUT_IS_FORK:-false}"
 } >> "$GITHUB_ENV"
 
 # Override with custom vars if provided
-if [ -n "${SETUP_ENV_VARS:-}" ]; then
+if [[ -n "${SETUP_ENV_VARS:-}" ]]; then
   echo "$SETUP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
 fi

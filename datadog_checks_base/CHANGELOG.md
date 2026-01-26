@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 37.27.0 / 2026-01-13
+## 37.27.1 / 2026-01-20
+
+***Fixed***:
+
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+* Optimize StatementMetrics cache to only store fields we need to compute statement metrics ([#22358](https://github.com/DataDog/integrations-core/pull/22358))
+
+## 37.27.0 / 2026-01-13 / Agent 7.75.0
 
 ***Security***:
 
