@@ -90,20 +90,17 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_and_submit(self):
         """
-        Collect and submit completed query samples, saving checkpoint on success.
+        Collect and submit completed query samples.
 
-        Critical: Checkpoint is ONLY saved after successful submission to ensure
-        exactly-once semantics and automatic retry on failure.
+        Checkpoint is always advanced after collection to prefer dropped data over duplicates.
         """
         try:
             # Step 1: Collect rows (loads checkpoint internally)
             rows = self._collect_completed_queries()
 
             if not rows:
-                # No new queries, but still advance checkpoint
-                if self._current_checkpoint_microseconds:
-                    self._advance_checkpoint()
-                    self._log.debug("Advanced checkpoint (no new completed queries)")
+                # No new queries
+                self._log.debug("No new completed queries")
                 return
 
             # Step 2: Apply rate limiting and create payload
@@ -111,8 +108,6 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
 
             if not payload or not payload.get('clickhouse_query_completions'):
                 self._log.debug("No query completions after rate limiting")
-                # Still advance checkpoint even if all were rate-limited
-                self._advance_checkpoint()
                 return
 
             # Step 3: Submit payload
@@ -125,17 +120,17 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
             )
             self._check.database_monitoring_query_activity(payload_data)
 
-            # Step 4: CRITICAL - Only save checkpoint AFTER successful submission
-            self._advance_checkpoint()
             if self._current_checkpoint_microseconds:
                 self._log.info(
-                    "Successfully advanced checkpoint to %d microseconds", self._current_checkpoint_microseconds
+                    "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
 
         except Exception:
             self._log.exception('Unable to collect completed query samples due to an error')
-            # Don't save checkpoint on error - will retry same window next time
-            return
+        finally:
+            # Always advance checkpoint to avoid duplicates on retry.
+            # Dropped payloads are preferable to duplicate samples which can skew analysis.
+            self._advance_checkpoint()
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_completed_queries(self):
@@ -260,8 +255,8 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
                 raw=True,
             )
 
-            # Re-raise to let outer handler skip checkpoint advancement
-            # This ensures the failed time window will be retried
+            # Re-raise to let outer handler log the error.
+            # Checkpoint will still advance to avoid duplicates on retry.
             raise
 
     def _normalize_query(self, row):
