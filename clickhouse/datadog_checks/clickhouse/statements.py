@@ -131,9 +131,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             if not rows:
                 # Even if no rows, save the checkpoint to advance the window
                 # This prevents re-querying the same empty window repeatedly
-                if self._current_checkpoint_microseconds:
-                    self._save_checkpoint(self._current_checkpoint_microseconds)
-                    self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
+                self._advance_checkpoint()
                 return
 
             # Emit FQT (Full Query Text) events
@@ -167,13 +165,9 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
 
             # Only save checkpoint after ALL payloads are successfully submitted
             # This ensures we don't lose data if submission fails partway through
+            self._advance_checkpoint()
             if self._current_checkpoint_microseconds:
-                self._save_checkpoint(self._current_checkpoint_microseconds)
-                self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
-                self._log.info(
-                    "Collection complete. Checkpoint saved: %d",
-                    self._current_checkpoint_microseconds,
-                )
+                self._log.info("Collection complete. Checkpoint saved: %d", self._current_checkpoint_microseconds)
 
         except Exception:
             self._log.exception('Unable to collect statement metrics due to an error')
@@ -247,15 +241,11 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             )
             rows = self._execute_query(query)
 
-            # Log with deployment type indicator
-            deployment_mode = (
-                "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
-            )
             self._log.info(
                 "Loaded %d rows from %s [%s] (last_checkpoint=%d)",
                 len(rows),
                 query_log_table,
-                deployment_mode,
+                self.deployment_mode,
                 self._last_checkpoint_microseconds,
             )
 
@@ -332,14 +322,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 )
 
             # Set checkpoint from results, or fetch current time if no rows (idle period)
-            if global_max_event_time > 0:
-                self._current_checkpoint_microseconds = global_max_event_time
-                self._log.debug("Checkpoint from results: %d", global_max_event_time)
-            else:
-                # No rows returned - fetch current time to advance checkpoint
-                # This prevents re-querying the same empty window indefinitely
-                self._current_checkpoint_microseconds = self._get_current_time_from_db()
-                self._log.debug("No rows, fetched checkpoint from DB: %d", self._current_checkpoint_microseconds)
+            self._set_checkpoint_from_event_time(global_max_event_time)
 
             return result_rows
 

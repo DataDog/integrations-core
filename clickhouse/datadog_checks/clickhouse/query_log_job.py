@@ -294,6 +294,48 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
             return int(val.timestamp() * 1_000_000)
         return int(val)
 
+    @property
+    def deployment_mode(self) -> str:
+        """
+        Get a human-readable string describing the deployment mode.
+
+        Returns:
+            'cluster-wide (single endpoint)' for ClickHouse Cloud
+            'local (direct)' for self-hosted
+        """
+        return "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
+
+    def _advance_checkpoint(self):
+        """
+        Save the current checkpoint and update the last checkpoint reference.
+
+        This should be called ONLY after successful submission to ensure
+        exactly-once semantics. If submission fails, don't call this method
+        so the same time window will be retried.
+        """
+        if self._current_checkpoint_microseconds:
+            self._save_checkpoint(self._current_checkpoint_microseconds)
+            self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
+
+    def _set_checkpoint_from_event_time(self, max_event_time: int):
+        """
+        Set the current checkpoint from the max event time in results.
+
+        If no results (max_event_time == 0), fetches current time from DB
+        to advance the checkpoint during idle periods.
+
+        Args:
+            max_event_time: Maximum event_time_microseconds from query results
+        """
+        if max_event_time > 0:
+            self._current_checkpoint_microseconds = max_event_time
+            self._log.debug("Checkpoint from results: %d", max_event_time)
+        else:
+            # No rows returned - fetch current time to advance checkpoint
+            # This prevents re-querying the same empty window indefinitely
+            self._current_checkpoint_microseconds = self._get_current_time_from_db()
+            self._log.debug("No rows, fetched checkpoint from DB: %d", self._current_checkpoint_microseconds)
+
     def run_job(self):
         """
         Main job entry point. Sets up tags and calls subclass collection logic.
