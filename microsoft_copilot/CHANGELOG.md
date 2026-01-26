@@ -1,6 +1,6 @@
 # CHANGELOG - Microsoft Copilot
 
-## 1.1.0 / 2026-01-05
+## 1.1.0 / 2026-01-25
 
 ***Added***:
 

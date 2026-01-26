@@ -248,7 +248,7 @@
               "hide_zero_counts": true,
               "show_status": true,
               "last_triggered_format": "relative",
-              "query": "tag:(source:microsoft-copilot AND service:user-detail)",
+              "query": "tag:(source:microsoft-copilot AND @interactionType:*)",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
@@ -1379,7 +1379,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail @interactionType:aiResponse !@body.content:OK??I'll?search?for*"
+                        "query": "source:microsoft-copilot @interactionType:aiResponse !@body.content:OK??I'll?search?for*"
                       },
                       "indexes": [
                         "*"
@@ -1394,7 +1394,7 @@
                       "name": "query2",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail @interactionType:userPrompt"
+                        "query": "source:microsoft-copilot @interactionType:userPrompt"
                       },
                       "indexes": [
                         "*"
@@ -1436,7 +1436,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail @interactionType:aiResponse @from.application.displayName:*"
+                        "query": "source:microsoft-copilot @interactionType:aiResponse @from.application.displayName:*"
                       },
                       "indexes": [
                         "*"
@@ -1504,7 +1504,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail @copilot.guardrail:* @interactionType:aiResponse"
+                        "query": "source:microsoft-copilot @copilot.guardrail:* @interactionType:aiResponse"
                       },
                       "indexes": [
                         "*"
@@ -1573,7 +1573,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail @interactionType:userPrompt @body.contentType:text !@body.content:?attachment*"
+                        "query": "source:microsoft-copilot @interactionType:userPrompt @body.contentType:text !@body.content:?attachment*"
                       },
                       "indexes": [
                         "*"
@@ -1643,7 +1643,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail @links.displayName:* @interactionType:aiResponse"
+                        "query": "source:microsoft-copilot @links.displayName:* @interactionType:aiResponse"
                       },
                       "indexes": [
                         "*"
@@ -1713,7 +1713,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail @links.linkUrl:*"
+                        "query": "source:microsoft-copilot @links.linkUrl:*"
                       },
                       "indexes": [
                         "*"
@@ -1846,7 +1846,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.copilotChat:1"
+                        "query": "source:microsoft-copilot @active.copilotChat:1"
                       },
                       "indexes": [
                         "*"
@@ -1861,7 +1861,7 @@
                       "name": "query2",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.microsoftTeams:1"
+                        "query": "source:microsoft-copilot @active.microsoftTeams:1"
                       },
                       "indexes": [
                         "*"
@@ -1876,7 +1876,7 @@
                       "name": "query3",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.word:1"
+                        "query": "source:microsoft-copilot @active.word:1"
                       },
                       "indexes": [
                         "*"
@@ -1891,7 +1891,7 @@
                       "name": "query4",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.outlook:1"
+                        "query": "source:microsoft-copilot @active.outlook:1"
                       },
                       "indexes": [
                         "*"
@@ -1906,7 +1906,7 @@
                       "name": "query5",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.powerPoint:1"
+                        "query": "source:microsoft-copilot @active.powerPoint:1"
                       },
                       "indexes": [
                         "*"
@@ -1921,7 +1921,7 @@
                       "name": "query6",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.oneNote:1"
+                        "query": "source:microsoft-copilot @active.oneNote:1"
                       },
                       "indexes": [
                         "*"
@@ -1936,7 +1936,7 @@
                       "name": "query7",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.loop:1"
+                        "query": "source:microsoft-copilot @active.loop:1"
                       },
                       "indexes": [
                         "*"
@@ -1951,7 +1951,7 @@
                       "name": "query8",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.excel:1"
+                        "query": "source:microsoft-copilot @active.excel:1"
                       },
                       "indexes": [
                         "*"
@@ -2015,7 +2015,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.copilotChat:0 @active.microsoftTeams:0 @active.word:0 @active.excel:0 @active.powerPoint:0 @active.outlook:0 @active.oneNote:0 @active.loop:0"
+                        "query": "source:microsoft-copilot @active.copilotChat:0 @active.microsoftTeams:0 @active.word:0 @active.excel:0 @active.powerPoint:0 @active.outlook:0 @active.oneNote:0 @active.loop:0"
                       },
                       "indexes": [
                         "*"
@@ -2103,7 +2103,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:microsoft-copilot service:user-detail-report @active.copilotChat:0"
+                        "query": "source:microsoft-copilot @active.copilotChat:0"
                       },
                       "indexes": [
                         "*"

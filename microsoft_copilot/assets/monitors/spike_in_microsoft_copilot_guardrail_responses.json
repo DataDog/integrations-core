@@ -11,8 +11,7 @@
 	"query": "sum(last_30m):avg:microsoft_copilot.airesponse.guardrail.count{*} > 50",
 	"message": "The number of recent guardrail responses from Microsoft 365 Copilot has {{#is_alert}}exceeded threshold{{/is_alert}}{{#is_alert_recovery}}recovered and is under threshold{{/is_alert_recovery}}.\\n\\n@email@example.com",
 	"tags": [
-		"source:microsoft-copilot",
-		"service:user-detail"
+		"source:microsoft-copilot"
 	],
 	"options": {
 		"thresholds": {

@@ -113,7 +113,6 @@ tests:
         },
         "conversationType": "bizchat",
         "interactionType": "aiResponse",
-        "service": "user-detail",
         "requestId": "ec14849c-1d2d-4930-994e-008eb4faf816",
         "appClass": "IPM.SkypeTeams.Message.Copilot.BizChat",
         "etag": "1757535543678",
@@ -241,7 +240,6 @@ tests:
             linkType: "Web"
         locale: "en-us"
         requestId: "ec14849c-1d2d-4930-994e-008eb4faf816"
-        service: "user-detail"
         sessionId: "19:0CJ-1p9cphG3eUoR0BiPXJw1kT_H5gyEVgFxKBzJ9FU1@thread.v2"
       message: |-
         {
@@ -259,7 +257,6 @@ tests:
           },
           "conversationType" : "bizchat",
           "interactionType" : "aiResponse",
-          "service" : "user-detail",
           "requestId" : "ec14849c-1d2d-4930-994e-008eb4faf816",
           "appClass" : "IPM.SkypeTeams.Message.Copilot.BizChat",
           "etag" : "1757535543678",
@@ -303,7 +300,6 @@ tests:
           } ],
           "id" : "1757535543678"
         }
-      service: "user-detail"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1757535543678
@@ -311,7 +307,6 @@ tests:
       {
         "conversationType": "bizchat",
         "interactionType": "aiResponse",
-        "service": "user-detail",
         "requestId": "F67371A4-CC64-43CF-97F7-E2F4DF99098E",
         "createdDateTime": "2025-09-10T19:10:27.667Z",
         "appClass": "IPM.SkypeTeams.Message.Copilot.BizChat",
@@ -359,13 +354,11 @@ tests:
         interactionType: "aiResponse"
         locale: "en-us"
         requestId: "F67371A4-CC64-43CF-97F7-E2F4DF99098E"
-        service: "user-detail"
         sessionId: "19:gM1aoErSrOLtqi7ZZMAiF4MoiuSofu95LEK7fsGMEA41@thread.v2"
       message: |-
         {
           "conversationType" : "bizchat",
           "interactionType" : "aiResponse",
-          "service" : "user-detail",
           "requestId" : "F67371A4-CC64-43CF-97F7-E2F4DF99098E",
           "createdDateTime" : "2025-09-10T19:10:27.667Z",
           "appClass" : "IPM.SkypeTeams.Message.Copilot.BizChat",
@@ -391,7 +384,6 @@ tests:
             "content" : "OK, I'll search for 'Lucky Lips'..."
           }
         }
-      service: "user-detail"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1757531427667
@@ -406,7 +398,6 @@ tests:
         },
         "conversationType": "appchat",
         "interactionType": "aiResponse",
-        "service": "user-detail",
         "requestId": "sdrT2poWDn7JasQrAh4uTW.2295.1.1",
         "appClass": "IPM.SkypeTeams.Message.Copilot.Outlook",
         "etag": "1756467618403",
@@ -449,13 +440,11 @@ tests:
         interactionType: "aiResponse"
         locale: "en-us"
         requestId: "sdrT2poWDn7JasQrAh4uTW.2295.1.1"
-        service: "user-detail"
         sessionId: "19:h_PqBJFhOc6bwvzCu2yymQylwXHlG_06FR9c4EqDSgU1@thread.v2"
       message: |-
         {
           "conversationType" : "appchat",
           "interactionType" : "aiResponse",
-          "service" : "user-detail",
           "requestId" : "sdrT2poWDn7JasQrAh4uTW.2295.1.1",
           "createdDateTime" : "2025-08-29T11:40:18.403Z",
           "appClass" : "IPM.SkypeTeams.Message.Copilot.Outlook",
@@ -481,7 +470,6 @@ tests:
             "content" : "Sorry, Copilot can't generate high quality content for this."
           }
         }
-      service: "user-detail"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1756467618403
@@ -503,7 +491,6 @@ tests:
         },
         "conversationType": "bizchat",
         "interactionType": "aiResponse",
-        "service": "user-detail",
         "requestId": "CDDDEE59-FE2A-46A1-BC00-F7630E0B6847",
         "appClass": "IPM.SkypeTeams.Message.Copilot.BizChat",
         "etag": "1756468271355",
@@ -557,7 +544,6 @@ tests:
         interactionType: "aiResponse"
         locale: "en-us"
         requestId: "CDDDEE59-FE2A-46A1-BC00-F7630E0B6847"
-        service: "user-detail"
         sessionId: "19:PcPQbnhjChEKut9De2_xFmsGbXQNYDtM33W6OAlBkJU1@thread.v2"
       message: |-
         {
@@ -575,7 +561,6 @@ tests:
           },
           "conversationType" : "bizchat",
           "interactionType" : "aiResponse",
-          "service" : "user-detail",
           "requestId" : "CDDDEE59-FE2A-46A1-BC00-F7630E0B6847",
           "appClass" : "IPM.SkypeTeams.Message.Copilot.BizChat",
           "etag" : "1756468271355",
@@ -594,7 +579,6 @@ tests:
           },
           "id" : "1756468271355"
         }
-      service: "user-detail"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1756468271355

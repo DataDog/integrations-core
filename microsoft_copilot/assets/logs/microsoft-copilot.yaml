@@ -103,7 +103,7 @@ pipeline:
       name: AI Interactions
       enabled: true
       filter:
-        query: source:microsoft-copilot service:user-detail
+        query: source:microsoft-copilot @interactionType:*
       processors:
         - type: date-remapper
           name: Define `createdDateTime` as the official date of the log
@@ -114,7 +114,7 @@ pipeline:
       name: aiResponses with text in body.content
       enabled: true
       filter:
-        query: source:microsoft-copilot service:user-detail @interactionType:aiResponse
+        query: source:microsoft-copilot @interactionType:aiResponse
           !@body.content:?attachment*
       processors:
         - type: date-remapper
@@ -133,7 +133,7 @@ pipeline:
               \"Sorry, Copilot can't generate high quality content for this. Try
               something
               else\"},\"conversationType\":\"appchat\",\"interactionType\":\"ai\
-              Response\",\"service\":\"user-detail\",\"requestId\":\"sdrT2poWDn\
+              Response\",\"requestId\":\"sdrT2poWDn\
               7JasQrAh4uTW.2295.1.1\",\"appClass\":\"IPM.SkypeTeams.Message.Cop\
               ilot.Outlook\",\"etag\":\"1756467618403\",\"from\":{\"application\
               \":{\"displayName\":\"Copilot in
@@ -155,7 +155,7 @@ pipeline:
       name: aiResponses with text in attachments.0.content
       enabled: true
       filter:
-        query: source:microsoft-copilot service:user-detail @interactionType:aiResponse
+        query: source:microsoft-copilot @interactionType:aiResponse
           @body.content:?attachment*
       processors:
         - type: date-remapper
@@ -218,7 +218,7 @@ pipeline:
               ontentType\":\"html\",\"content\":\"<attachment
               id=\\\"c9c5fe0bd767404bb6a9897c3982773e\\\"></attachment>\"},\"co\
               nversationType\":\"bizchat\",\"interactionType\":\"aiResponse\",\
-              \"service\":\"user-detail\",\"requestId\":\"6F4793D8-66B3-4DAD-91\
+              \"requestId\":\"6F4793D8-66B3-4DAD-91\
               80-386F87A1CD25\",\"appClass\":\"IPM.SkypeTeams.Message.Copilot.B\
               izChat\",\"etag\":\"1756840599112\",\"from\":{\"application\":{\"\
               displayName\":\"Microsoft 365
@@ -260,7 +260,7 @@ pipeline:
               ontentType\":\"html\",\"content\":\"<attachment
               id=\\\"22fe4e8348574b13ba6684e27d51b3c8\\\"></attachment>\"},\"co\
               nversationType\":\"bizchat\",\"interactionType\":\"aiResponse\",\
-              \"service\":\"user-detail\",\"requestId\":\"CDDDEE59-FE2A-46A1-BC\
+              \"requestId\":\"CDDDEE59-FE2A-46A1-BC\
               00-F7630E0B6847\",\"appClass\":\"IPM.SkypeTeams.Message.Copilot.B\
               izChat\",\"etag\":\"1756468271355\",\"from\":{\"application\":{\"\
               displayName\":\"Microsoft 365
