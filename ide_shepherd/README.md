@@ -52,8 +52,8 @@ See [Datadog Agent Commands][2] for more details.
 
 Telemetry is now **sent automatically** in real-time:
 
-- Extension installed/updated/uninstalled → OCSF event sent immediately
-- Security threat detected → OCSF event sent immediately
+- Extension installed/updated/uninstalled -> OCSF event sent immediately
+- Security threat detected -> OCSF event sent immediately
 
 You can verify the connection from the IDE Shepherd sidebar:
 
