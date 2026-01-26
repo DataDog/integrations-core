@@ -1,0 +1,103 @@
+id: ibm_spectrum_lsf
+metric_id: ibm-spectrum-lsf
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: IBM Spectrum LSF Logs
+  enabled: true
+  filter:
+    query: source:ibm_spectrum_lsf
+  processors:
+    - type: pipeline
+      name: IBM Spectrum LSF job logs
+      enabled: true
+      filter:
+        query: log_type:job
+      processors:
+        - type: attribute-remapper
+          name: Remapping `filename` as attribute
+          enabled: true
+          sources:
+            - filename
+          sourceType: tag
+          target: filename
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Remapping `filename` to job ID
+          enabled: true
+          source: message
+          samples:
+            - 795.err
+            - 743.out
+            - logs/724.out
+            - /test/logs/724.out
+          grok:
+            supportRules: ""
+            matchRules: log_file_name (%{data:path}/)?%{word:job_id}\.%{word:extension}
+        - type: attribute-remapper
+          name: Remapping job ID to tag
+          enabled: true
+          sources:
+            - job_id
+          sourceType: attribute
+          target: job_id
+          targetType: tag
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: Remapping file extension to level
+          enabled: true
+          categories:
+            - filter:
+                query: "@extension:out"
+              name: INFO
+            - filter:
+                query: "@extension:err"
+              name: ERROR
+          target: level
+        - type: status-remapper
+          name: Status Remapper
+          enabled: true
+          sources:
+            - level
+    - type: pipeline
+      name: IBM Spectrum LSF system logs
+      enabled: true
+      filter:
+        query: log_type:system
+      processors:
+        - type: grok-parser
+          name: Parsing IBM Spectrum LSF default formats
+          enabled: true
+          source: message
+          samples:
+            - |
+              Jan 15 21:46:34 2025 30196:30196 3 10.1 mbdReConf: start
+            - "Jan 15 19:18:46 2026 30170 3 10.1 successExitJob: Job <2566[10]>
+              exit with error code <42>"
+            - "Nov 14 02:32:17 2025 30133 4 3.4.0 collectGpuInfo: GPU collection
+              thread stopped responding. GPU information not updated."
+            - "Jan 15 22:02:12 2025 7288 4 10.1 write_jobinfo_report(): Cannot
+              open your job file: /home/test-user/.lsbatch/8322342.23.10"
+          grok:
+            supportRules: ""
+            matchRules: ibm_spectrum_lsf_system %{date("MMM DD HH:mm:ss
+              yyyy"):timestamp}\s+%{number:pid}(:%{number:tid})?\s+%{number:level}\s+%{data:version}\s+%{data:message}
+        - type: message-remapper
+          name: Define `message` as the official message of the log
+          enabled: true
+          sources:
+            - message
+        - type: date-remapper
+          name: Define `timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - timestamp
+        - type: status-remapper
+          name: Define `level` as the official status of the log
+          enabled: true
+          sources:
+            - level

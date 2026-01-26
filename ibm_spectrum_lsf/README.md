@@ -122,6 +122,59 @@ View more information about setting environment variables for the Datadog Agent 
 
 2. [Restart the Agent][5].
 
+#### Logs
+
+The IBM Spectrum LSF integration collects two types of logs: system logs and job logs.
+
+##### Collecting system logs
+
+System logs are diagnostic information from the IBM Spectrum LSF [daemons][15]. They can be collected from the management host and execution hosts. To collect system logs:
+
+1. Enable log collection in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `ibm_spectrum_lsf.d/conf.yaml` file. For example:
+
+   ```yaml
+     - type: file
+       source: ibm_spectrum_lsf
+       tags:
+        - log_type:system
+       path: <LSF_TOP_DIR>/log/*
+       service: <SERVICE_NAME>
+   ```
+
+##### Collecting job logs
+
+Note: Job logs are located on the job submission host, which is likely different from the management host. Ensure the Datadog agent is installed and running on the host where jobs are submitted.
+
+Job logs are gathered from jobs tasks and are useful for debugging failed jobs. To collect job logs:
+
+1. Ensure the IBM Spectrum LSF job log files you would like to monitor are named <JOB_ID>.out and <JOB_ID>.err. You can do this by submitting them using these [bsub][14] options: `bsub -o %J.out -e %J.err`.
+
+2. Enable log collection in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+3. Uncomment and edit the logs configuration block in your `ibm_spectrum_lsf.d/conf.yaml` file. For example:
+
+   ```yaml
+    logs:
+     - type: file
+       source: ibm_spectrum_lsf
+       tags:
+       - log_type:job
+       path:
+       - <PATH_TO_JOB_LOGS>/*.out
+       - <PATH_TO_SYSTEM_LOGS>/*.err
+       service: <SERVICE_NAME>
+   ```
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `ibm_spectrum_lsf` under the Checks section.
@@ -163,5 +216,7 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.ibm.com/docs/en/spectrum-lsf/10.1.0?topic=cluster-adding-administrators
 [11]: https://docs.datadoghq.com/agent/guide/environment-variables/#using-environment-variables-in-systemd-units
-[12]: https://www.ibm.com/docs/ru/spectrum-lsf/10.1.0?topic=performance-monitor-metrics-in-real-time
+[12]: https://www.ibm.com/docs/en/spectrum-lsf/10.1.0?topic=performance-monitor-metrics-in-real-time
 [13]: https://www.ibm.com/docs/en/spectrum-lsf/10.1.0?topic=tips-maintaining-cluster-performance
+[14]: https://www.ibm.com/docs/en/spectrum-lsf/10.1.0?topic=bsub-options
+[15]: https://www.ibm.com/docs/en/spectrum-lsf/10.1.0?topic=files-about-lsf-log#concept_bvz_5gb_kv__title__2
