@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 7.3.1 / 2025-12-22
+## 7.4.0 / 2026-01-21
+
+***Added***:
+
+* Add `startup_wait_retries` option to handle Spark driver startup messages gracefully. ([#22252](https://github.com/DataDog/integrations-core/pull/22252))
+
+## 7.3.1 / 2025-12-22 / Agent 7.75.0
 
 ***Fixed***:
 

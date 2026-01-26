@@ -1,3 +1,17 @@
+## Datadog Agent version [7.75.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7750)
+
+* Datadog Checks Base [37.27.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Datadog Checks Downloader [9.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
+* ClickHouse [6.2.1](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* datadog_csi_driver [1.3.1](https://github.com/DataDog/integrations-core/blob/master/datadog_csi_driver/CHANGELOG.md)
+* IBM MQ [8.7.0](https://github.com/DataDog/integrations-core/blob/master/ibm_mq/CHANGELOG.md)
+* IBM Spectrum LSF [1.1.0](https://github.com/DataDog/integrations-core/blob/master/ibm_spectrum_lsf/CHANGELOG.md)
+* Infiniband [1.4.0](https://github.com/DataDog/integrations-core/blob/master/infiniband/CHANGELOG.md)
+* Kafka Actions [2.0.1](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [6.10.2](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* Spark [7.3.1](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
+* SQL Server [22.12.2](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+
 ## Datadog Agent version [7.74.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7740)
 
 * Active Directory [4.5.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
