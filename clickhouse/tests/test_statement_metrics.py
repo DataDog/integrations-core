@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics, _row_key
 
@@ -295,8 +296,6 @@ def test_get_query_metrics_payloads_single_payload(check_with_dbm):
 
     # Should produce a single payload for small data
     assert len(payloads) == 1
-
-    import json
 
     payload_data = json.loads(payloads[0])
     assert payload_data['host'] == 'localhost'
