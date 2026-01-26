@@ -75,7 +75,7 @@ pipeline:
       name: Connection authorized postgres_logs messages
       enabled: true
       filter:
-        query: service:postgres_logs @data.event_message:connection?authorized*
+        query: "@data.event_message:connection?authorized*"
       processors:
         - type: grok-parser
           name: Parse connection authorized messages into `supabase.pg_authorization`
@@ -99,7 +99,7 @@ pipeline:
       name: Postgres log_min_duration_statement messages
       enabled: true
       filter:
-        query: service:postgres_logs @data.event_message:duration*
+        query: "@data.event_message:duration*"
       processors:
         - type: grok-parser
           name: Parse duration milliseconds
@@ -148,7 +148,7 @@ pipeline:
       name: Realtime messages received
       enabled: true
       filter:
-        query: service:realtime_logs @data.event_message:Received?message?on?realtime*
+        query: "@data.event_message:Received?message?on?realtime*"
       processors:
         - type: grok-parser
           name: Parse `data.event_message` message name into

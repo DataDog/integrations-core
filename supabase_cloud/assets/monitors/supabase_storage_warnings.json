@@ -8,7 +8,7 @@
 	"id": 236366189,
 	"name": "[Supabase] Spike in Storage Warnings",
 	"type": "log alert",
-	"query": "logs(\"source:supabase service:storage_logs @data.metadata.level:warning\").index(\"*\").rollup(\"count\").by(\"@data.project\").last(\"10m\") > 20",
+	"query": "logs(\"source:supabase (service:storage_logs OR @data.metadata.operation:storage.*) @data.metadata.level:warning\").index(\"*\").rollup(\"count\").by(\"@data.project\").last(\"10m\") > 20",
 	"message": "{{#is_alert}}\n  Please check project {{[data.project].name}} as more than {{threshold}} storage warnings have occurred.\n{{/is_alert}}\n\n{{#is_recovery}}\n  Storage warnings for project {{[data.project].name}} are back below {{threshold}}. \n{{/is_recovery}} @example@example.com",
 	"tags": [
 		"source:supabase-cloud"

@@ -1,6 +1,6 @@
 # CHANGELOG - Supabase Cloud
 
-## 1.0.0 / 2026-01-14
+## 1.0.0 / 2026-01-26
 
 ***Added***:
 
