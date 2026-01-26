@@ -23,7 +23,7 @@ Install the IDE Shepherd extension in VS Code or Cursor from the [IDE Shepherd r
 IDE Shepherd **automatically configures the Datadog Agent** when you enable telemetry for the first time:
 
 1. Open the IDE Shepherd sidebar in VS Code or Cursor
-2. Navigate to **Settings → Datadog Telemetry**
+2. Navigate to **Settings > Datadog Telemetry**
 3. Click on **Telemetry: Disabled** to enable it
 4. IDE Shepherd will automatically:
    - Create the configuration directory: `/opt/datadog-agent/etc/conf.d/ide-shepherd.d/`
