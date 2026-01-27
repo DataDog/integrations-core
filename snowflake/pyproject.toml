@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "snowflake-connector-python==3.17.2",
+    "snowflake-connector-python==4.2.0",
 ]
 
 [project.urls]
