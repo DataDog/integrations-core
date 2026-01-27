@@ -288,14 +288,6 @@ files:
                 example: false
               - name: collection_interval
                 fleet_configurable: true
-                fleet_configurable: true
-                fleet_configurable: true
-                fleet_configurable: true
-                fleet_configurable: true
-                fleet_configurable: true
-                fleet_configurable: true
-                fleet_configurable: true
-                fleet_configurable: true
                 type: integer
                 example: 300
                 display_default: 300
