@@ -1,0 +1,88 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "4139f2e2-ba87-4e17-bcda-73bdade3ed8f",
+  "app_id": "cato-networks",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Cato Networks audit logs and events.",
+    "title": "Cato Networks",
+    "media": [
+      {
+        "caption": "Cato Networks Overview",
+        "image_url": "images/cato_networks_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Overview",
+        "image_url": "images/cato_networks_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Events",
+        "image_url": "images/cato_networks_events_light_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Events",
+        "image_url": "images/cato_networks_events_light_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Events",
+        "image_url": "images/cato_networks_events_dark_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Events",
+        "image_url": "images/cato_networks_events_dark_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Audit Logs",
+        "image_url": "images/cato_networks_audit_logs_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cato Networks Audit Logs",
+        "image_url": "images/cato_networks_audit_logs_dark.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Cloud",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 65775656,
+      "source_type_name": "Cato Networks",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Cato Networks Overview": "assets/dashboards/cato_networks_overview.json",
+      "Cato Networks Events": "assets/dashboards/cato_networks_events.json",
+      "Cato Networks Audit Logs": "assets/dashboards/cato_networks_audit_logs.json"
+    },
+    "logs": {
+      "source": "cato-networks"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

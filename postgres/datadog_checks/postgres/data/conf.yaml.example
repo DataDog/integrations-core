@@ -33,8 +33,8 @@ instances:
 
   -
     ## @param host - string - optional - default: localhost
-    ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
-    ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
+    ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
+    ## e.g. `/var/run/postgresql`.
     #
     # host: <HOST>
 
@@ -271,17 +271,20 @@ instances:
     #
     collect_bloat_metrics: false
 
-    ## @param collect_wal_metrics - boolean - optional - default: true
+    ## @param collect_wal_metrics - boolean - optional
     ## Collect metrics about WAL file age.
-    ## NOTE:
-    ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
-    ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
+    ##
+    ## When unset, this defaults to `true` for Postgres 10+ (uses `pg_ls_waldir` via SQL) and `false` for
+    ## Postgres 9.6 and below (requires local filesystem access to the WAL directory).
+    ##
+    ## Set to `true` explicitly for Postgres 9.6 and below only if the Agent runs on the same host as the
+    ## database and has read access to the WAL directory. You must also configure `data_directory`.
     #
     # collect_wal_metrics: true
 
     ## @param data_directory - string - optional - default: /usr/local/pgsql/data
-    ## The data directory of your postgres installation
-    ## Required when collecting WAL metrics on Postgres 9.6.
+    ## The data directory of your postgres installation.
+    ## Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
     #
     # data_directory: /usr/local/pgsql/data
 

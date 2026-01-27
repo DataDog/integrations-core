@@ -2,6 +2,15 @@
 
 <!-- towncrier release notes start -->
 
+## 15.11.2 / 2026-01-21
+
+***Fixed***:
+
+* Skip sample and explain plan collection when statement timer instrumentation is not enabled ([#22264](https://github.com/DataDog/integrations-core/pull/22264))
+* Fixes a performance issue when collecting `mysql.performance.errors_raised` metric by switching to a global aggregation instead of a per-user aggregation that we aggregated manually. ([#22373](https://github.com/DataDog/integrations-core/pull/22373))
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+  Optimize StatementMetrics cache to only store fields we need to compute statement metrics. ([#22358](https://github.com/DataDog/integrations-core/pull/22358)) ([#22376](https://github.com/DataDog/integrations-core/pull/22376))
+
 ## 15.11.1 / 2025-12-16 / Agent 7.74.0
 
 ***Fixed***:
