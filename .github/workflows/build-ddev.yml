@@ -35,6 +35,10 @@ jobs:
   define-tags:
     name: Define Base Tags
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # No need to checkout the code for this job yet
+        working-directory: .
     outputs:
       base_tags: ${{ steps.tags.outputs.base_tags }}
     steps:
