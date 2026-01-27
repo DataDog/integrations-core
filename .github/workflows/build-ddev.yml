@@ -14,6 +14,8 @@ on:
     - ddev/**
     branches:
     - master
+  schedule:
+  - cron: 0 0 * * *
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -30,9 +32,26 @@ env:
   PYOXIDIZER_VERSION: "0.24.0"
 
 jobs:
+  define-tags:
+    name: Define Base Tags
+    runs-on: ubuntu-latest
+    outputs:
+      base_tags: ${{ steps.tags.outputs.base_tags }}
+    steps:
+    - id: tags
+      run: |
+        context="master"
+        if [[ "${{ github.event_name }}" == "schedule" ]]; then
+          context="schedule"
+        elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          context="pr"
+        fi
+        echo "base_tags=team:agent-integrations,service:ddev,context:$context" >> $GITHUB_OUTPUT
+
   python-artifacts:
     name: Build wheel and source distribution
     runs-on: ubuntu-latest
+    needs: define-tags
 
     steps:
     - name: Checkout code
@@ -43,7 +62,7 @@ jobs:
     - name: Tag Job
       uses: ./.github/actions/tag-job
       with:
-        tags: 'team:agent-integrations,service:ddev,step:build-artifacts'
+        tags: '${{ needs.define-tags.outputs.base_tags }},step:build-artifacts'
         dd_api_key: ${{ secrets.DD_API_KEY }}
 
     - name: Install build frontend
@@ -62,6 +81,7 @@ jobs:
   binaries:
     name: ${{ matrix.job.target }} (${{ matrix.job.os }})
     needs:
+    - define-tags
     - python-artifacts
     runs-on: ${{ matrix.job.os }}
     strategy:
@@ -111,7 +131,7 @@ jobs:
     - name: Tag Job
       uses: ./.github/actions/tag-job
       with:
-        tags: 'team:agent-integrations,service:ddev,step:build-binary,os:${{ matrix.job.os }},target:${{ matrix.job.target }}'
+        tags: '${{ needs.define-tags.outputs.base_tags }},step:build-binary,os:${{ matrix.job.os }},target:${{ matrix.job.target }}'
         dd_api_key: ${{ secrets.DD_API_KEY }}
 
     - name: Fetch PyApp
@@ -268,7 +288,9 @@ jobs:
   windows-packaging:
     name: Build Windows installers
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-    needs: binaries
+    needs:
+    - define-tags
+    - binaries
     runs-on: windows-2022
 
     env:
@@ -281,7 +303,7 @@ jobs:
     - name: Tag Job
       uses: ./.github/actions/tag-job
       with:
-        tags: 'team:agent-integrations,service:ddev,step:package-windows,os:windows'
+        tags: '${{ needs.define-tags.outputs.base_tags }},step:package-windows,os:windows'
         dd_api_key: ${{ secrets.DD_API_KEY }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -380,7 +402,9 @@ jobs:
   macos-packaging:
     name: Build macOS installer and sign/notarize artifacts
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-    needs: binaries
+    needs:
+    - define-tags
+    - binaries
     runs-on: macos-14-large
 
     env:
@@ -393,7 +417,7 @@ jobs:
     - name: Tag Job
       uses: ./.github/actions/tag-job
       with:
-        tags: 'team:agent-integrations,service:ddev,step:package-macos,os:macos'
+        tags: '${{ needs.define-tags.outputs.base_tags }},step:package-macos,os:macos'
         dd_api_key: ${{ secrets.DD_API_KEY }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -597,6 +621,7 @@ jobs:
     name: Publish release
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     needs:
+    - define-tags
     - python-artifacts
     - binaries
     - windows-packaging
@@ -616,7 +641,7 @@ jobs:
     - name: Tag Job
       uses: ./.github/actions/tag-job
       with:
-        tags: 'team:agent-integrations,service:ddev,step:publish'
+        tags: '${{ needs.define-tags.outputs.base_tags }},step:publish'
         dd_api_key: ${{ secrets.DD_API_KEY }}
 
     - name: Download Python artifacts
