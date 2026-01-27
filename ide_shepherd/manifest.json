@@ -14,11 +14,6 @@
     "media": [
         {
             "media_type": "image",
-            "caption": "IDE Shepherd - Icon",
-            "image_url": "images/ide-shepherd-icon.png"
-        },
-        {
-            "media_type": "image",
             "caption": "IDE Shepherd - Dashboard",
             "image_url": "images/ide-shepherd-dashboard.png"
         }

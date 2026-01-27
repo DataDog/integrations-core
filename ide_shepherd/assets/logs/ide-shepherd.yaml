@@ -93,4 +93,14 @@ pipeline:
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `isAlert` to `ide_shepherd.isAlert`
+      enabled: true
+      sources:
+        - isAlert
+      sourceType: attribute
+      target: ide_shepherd.isAlert
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
 
