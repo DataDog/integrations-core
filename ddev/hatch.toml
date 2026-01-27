@@ -1,6 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = true
-mypy-args = [
+mypy-files = [
   "src/ddev",
 ]
 

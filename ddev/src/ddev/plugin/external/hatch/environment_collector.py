@@ -66,6 +66,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
 
     @cached_property
+    def mypy_files(self):
+        return self.config.get('mypy-files', ['.'])
+
+    @cached_property
     def mypy_deps(self):
         return self.config.get('mypy-deps', []) + ['mypy']
 
@@ -218,7 +222,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
         if self.check_types:
             lint_env['scripts']['typing'] = [
-                f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)}'.rstrip()
+                f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)} {" ".join(self.mypy_files)}'.rstrip()
             ]
             lint_env['scripts']['all'].append('typing')
             lint_env['dependencies'].extend(self.mypy_deps)

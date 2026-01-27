@@ -55,6 +55,8 @@ mypy-args = [
     "--py2",
     "--install-types",
     "--non-interactive",
+]
+mypy-files = [
     "datadog_checks/",
     "tests/",
 ]
