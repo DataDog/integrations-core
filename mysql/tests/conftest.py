@@ -12,6 +12,7 @@ from packaging.version import parse as parse_version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.mysql.version_utils import parse_version as parse_mysql_version
 
 from . import common, tags
 from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED
@@ -394,14 +395,19 @@ def init_master():
     _init_datadog_sample_collection(conn)
 
 
-@pytest.fixture
-def root_conn():
-    conn = pymysql.connect(
+def _get_root_connection():
+    """Create a root connection to MySQL. Caller is responsible for closing."""
+    return pymysql.connect(
         host=common.HOST,
         port=common.PORT,
         user='root',
         password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION == 'group' else None,
     )
+
+
+@pytest.fixture
+def root_conn():
+    conn = _get_root_connection()
     yield conn
     conn.close()
 
@@ -632,3 +638,78 @@ def _mysql_docker_repo():
         return 'percona/percona-server'
     else:
         raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
+
+
+# Runtime version detection fixtures
+
+# Well-known MySQL/MariaDB version thresholds
+JSON_AGGREGATION_MYSQL = (8, 0, 19)
+JSON_AGGREGATION_MARIADB = (10, 5, 0)
+
+
+@pytest.fixture(scope='session')
+def mysql_version(dd_environment):
+    """
+    Query the actual MySQL/MariaDB version from the running database.
+
+    Returns the MySQLVersion object from version_utils with:
+        - version: string like "8.0.32"
+        - flavor: "MySQL", "MariaDB", or "Percona"
+        - build: build info
+        - version_compatible(tuple): method to check version >= tuple
+
+    Usage:
+        def test_my_feature(mysql_version):
+            if mysql_version.version_compatible((8, 0, 19)):
+                # MySQL 8.0.19+ specific code
+    """
+    conn = _get_root_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT @@version, @@version_comment")
+            version_str, version_comment = cursor.fetchone()
+
+        mysql_ver = parse_mysql_version(version_str, version_comment)
+        logger.info("Detected runtime MySQL version: %s %s", mysql_ver.flavor, mysql_ver.version)
+        return mysql_ver
+    finally:
+        conn.close()
+
+
+def _supports_json_aggregation(mysql_version):
+    """Check if the MySQL/MariaDB version supports JSON aggregation functions."""
+    if mysql_version.flavor.lower() == 'mariadb':
+        return mysql_version.version_compatible(JSON_AGGREGATION_MARIADB)
+    return mysql_version.version_compatible(JSON_AGGREGATION_MYSQL)
+
+
+@pytest.fixture
+def skip_unless_legacy_schema_collector(mysql_version):
+    """
+    Fixture that skips the test if the runtime MySQL version supports JSON aggregation.
+
+    Usage:
+        def test_my_legacy_test(skip_unless_legacy_schema_collector, ...):
+            # Test code here - will only run on MySQL < 8.0.19 or MariaDB < 10.5.0
+    """
+    if _supports_json_aggregation(mysql_version):
+        pytest.skip(
+            f"Legacy schema collector test - skipping for {mysql_version.flavor} {mysql_version.version} "
+            "(supports JSON aggregation)"
+        )
+
+
+@pytest.fixture
+def skip_unless_new_schema_collector(mysql_version):
+    """
+    Fixture that skips the test if the runtime MySQL version does NOT support JSON aggregation.
+
+    Usage:
+        def test_my_new_collector_test(skip_unless_new_schema_collector, ...):
+            # Test code here - will only run on MySQL >= 8.0.19 or MariaDB >= 10.5.0
+    """
+    if not _supports_json_aggregation(mysql_version):
+        pytest.skip(
+            f"New schema collector test - skipping for {mysql_version.flavor} {mysql_version.version} "
+            "(no JSON aggregation support)"
+        )

@@ -32,7 +32,7 @@ def sort_names_split_by_comma(names):
     return ','.join(sorted_columns)
 
 
-def normalize_values(actual_payload):
+def normalize_values_legacy(actual_payload):
     actual_payload["default_character_set_name"] = "normalized_value"
     actual_payload["default_collation_name"] = "normalized_value"
     actual_payload["tables"].sort(key=lambda x: x["name"])
@@ -45,6 +45,49 @@ def normalize_values(actual_payload):
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
                 f_key["referenced_column_names"] = sort_names_split_by_comma(f_key["referenced_column_names"])
+        if 'columns' in table:
+            for column in table['columns']:
+                if column['column_type'] == 'int':
+                    # 11 is omitted in certain versions
+                    # if its not 11 i.e. not default we keep it
+                    column['column_type'] = 'int(11)'
+        if 'partitions' in table:
+            for partition in table['partitions']:
+                if partition["partition_expression"] is not None:
+                    partition["partition_expression"] = (
+                        partition["partition_expression"].replace("`", "").lower().strip()
+                    )
+                if "subpartitions" in partition and partition["subpartitions"]:
+                    for subpartition in partition["subpartitions"]:
+                        if subpartition["subpartition_expression"] is not None:
+                            subpartition["subpartition_expression"] = (
+                                subpartition["subpartition_expression"].replace("`", "").lower().strip()
+                            )
+
+def normalize_values(actual_payload):
+    actual_payload["default_character_set_name"] = "normalized_value"
+    actual_payload["default_collation_name"] = "normalized_value"
+    actual_payload["tables"].sort(key=lambda x: x["name"])
+    for table in actual_payload['tables']:
+        table['create_time'] = "normalized_value"
+        if 'columns' in table:
+            table['columns'].sort(key=lambda x: x['name'])
+        if 'indexes' in table:
+            table['indexes'].sort(key=lambda x: x['name'])
+            for index in table['indexes']:
+                index['columns'].sort(key=lambda x: x['name'])
+        if 'foreign_keys' in table:
+            for f_key in table['foreign_keys']:
+                f_key["referenced_column_names"] = (
+                    sort_names_split_by_comma(f_key["referenced_column_names"])
+                    if "referenced_column_names" in f_key and f_key["referenced_column_names"] is not None
+                    else None
+                )
+        if 'partitions' in table:
+            table['partitions'].sort(key=lambda x: x['name'])
+            for partition in table['partitions']:
+                if 'subpartitions' in partition:
+                    partition['subpartitions'].sort(key=lambda x: x['name'])
         if 'columns' in table:
             for column in table['columns']:
                 if column['column_type'] == 'int':
@@ -110,17 +153,11 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_collect_schemas_legacy(aggregator, dd_run_check, dbm_instance):
+def test_collect_schemas_legacy(aggregator, dd_run_check, dbm_instance, skip_unless_legacy_schema_collector):
     """Test schema collection using legacy collector (MySQL < 8.0.19, MariaDB < 10.5.0)"""
-    # Skip if MySQL version supports JSON aggregation
-    is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
-    if is_maria_db and MYSQL_VERSION_PARSED >= parse_version('10.5.0'):
-        pytest.skip("Skipping legacy test - MariaDB version supports JSON aggregation")
-    elif not is_maria_db and MYSQL_VERSION_PARSED >= parse_version('8.0.19'):
-        pytest.skip("Skipping legacy test - MySQL version supports JSON aggregation")
-
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
+    is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
     is_percona = MYSQL_FLAVOR.lower() == 'percona'
     exp_datadog_test_schemas = {
         "name": "datadog_test_schemas",
@@ -704,14 +741,15 @@ def test_collect_schemas_legacy(aggregator, dd_run_check, dbm_instance):
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
-        normalize_values(actual_payload)
-        normalize_values(expected_data_for_db[db_name])
+        normalize_values_legacy(actual_payload)
+        normalize_values_legacy(expected_data_for_db[db_name])
         assert db_name in databases_to_find
         assert expected_data_for_db[db_name] == actual_payload
 
 
 @pytest.mark.integration
-def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
+def test_collect_schemas_legacy_truncated(aggregator, dd_run_check, dbm_instance, skip_unless_legacy_schema_collector):
+    """Test schema collection truncation using legacy collector (MySQL < 8.0.19, MariaDB < 10.5.0)"""
     dbm_instance['dbm'] = True
     dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
     expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
@@ -727,6 +765,599 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
             ):
                 found = True
     assert found
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_collect_schemas(aggregator, dd_run_check, dbm_instance, skip_unless_new_schema_collector):
+    databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
+
+    is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
+    is_percona = MYSQL_FLAVOR.lower() == 'percona'
+    exp_datadog_test_schemas = {
+        "name": "datadog_test_schemas",
+        "default_character_set_name": "normalized_value",
+        "default_collation_name": "normalized_value",
+        "tables": [
+            {
+                "name": "RestaurantReviews",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
+                "columns": [
+                    {
+                        "name": "RestaurantName",
+                        "column_type": "varchar(255)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 1,
+                        "column_key": "MUL",
+                    },
+                    {
+                        "name": "District",
+                        "column_type": "varchar(255)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 2,
+                        "column_key": "",
+                    },
+                    {
+                        "name": "Review",
+                        "column_type": "text",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 3,
+                        "column_key": "",
+                    },
+                ],
+                "foreign_keys": [
+                    {
+                        "name": "FK_RestaurantNameDistrict",
+                        "constraint_schema": "datadog_test_schemas",
+                        "table_name": "RestaurantReviews",
+                        "column_names": "RestaurantName,District",
+                        "referenced_table_schema": "datadog_test_schemas",
+                        "referenced_table_name": "Restaurants",
+                        "referenced_column_names": "District,RestaurantName",
+                        "update_action": "NO ACTION",
+                        "delete_action": "CASCADE",
+                    }
+                ],
+                "indexes": [
+                    {
+                        "name": "FK_RestaurantNameDistrict",
+                        "cardinality": 0,
+                        "index_type": "BTREE",
+                        "columns": [
+                            {
+                                "name": "RestaurantName",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                            {
+                                "name": "District",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": True,
+                    }
+                ],
+                "partitions": [],
+            },
+            {
+                "name": "Restaurants",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
+                "columns": [
+                    {
+                        "name": "RestaurantName",
+                        "column_type": "varchar(255)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 1,
+                        "column_key": "MUL",
+                    },
+                    {
+                        "name": "District",
+                        "column_type": "varchar(100)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 2,
+                        "column_key": "",
+                    },
+                    {
+                        "name": "Cuisine",
+                        "column_type": "varchar(100)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 3,
+                        "column_key": "",
+                    },
+                ],
+                "indexes": [
+                    {
+                        "name": "UC_RestaurantNameDistrict",
+                        "cardinality": 0,
+                        "index_type": "BTREE",
+                        "columns": [
+                            {
+                                "name": "RestaurantName",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                            {
+                                "name": "District",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": False,
+                    }
+                ],
+                "foreign_keys": [],
+                "partitions": [],
+            },
+            {
+                "name": "cities",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
+                "columns": [
+                    {
+                        "name": "id",
+                        "column_type": "int(11)",
+                        "default": "0",
+                        "nullable": False,
+                        "ordinal_position": 1,
+                        "column_key": "PRI",
+                    },
+                    {
+                        "name": "name",
+                        "column_type": "varchar(255)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 2,
+                        "column_key": "",
+                    },
+                    {
+                        "name": "population",
+                        "column_type": "int(11)",
+                        "default": "0",
+                        "nullable": False,
+                        "ordinal_position": 3,
+                        "column_key": "MUL",
+                    },
+                ],
+                "indexes": [
+                    {
+                        "name": "PRIMARY",
+                        "cardinality": 0,
+                        "index_type": "BTREE",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "collation": "A",
+                                "nullable": False,
+                            }
+                        ],
+                        "non_unique": False,
+                    },
+                    {
+                        "name": "single_column_index",
+                        "cardinality": 0,
+                        "index_type": "BTREE",
+                        "columns": [
+                            {
+                                "name": "population",
+                                "collation": "A",
+                                "nullable": False,
+                            }
+                        ],
+                        "non_unique": True,
+                    },
+                    {
+                        "name": "two_columns_index",
+                        "index_type": "BTREE",
+                        "cardinality": 0,
+                        "columns": [
+                            {
+                                "name": "id",
+                                "collation": "A",
+                                "nullable": False,
+                            },
+                            {
+                                "name": "name",
+                                "sub_part": 3,
+                                "collation": (
+                                    'D'
+                                    if (
+                                        (MYSQL_VERSION_PARSED >= parse_version('8.0') and not is_maria_db)
+                                        or (MYSQL_VERSION_PARSED >= parse_version('10.8') and is_maria_db)
+                                    )
+                                    else 'A'
+                                ),
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": True,
+                    },
+                ]
+                + (
+                    [
+                        {
+                            "name": "functional_key_part_index",
+                            "index_type": "BTREE",
+                            "cardinality": 0,
+                            "non_unique": True,
+                            "expression": "(`population` + 1)",
+                            "columns": [],
+                        }
+                    ]
+                    if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db and not is_percona
+                    else []
+                ),
+                "foreign_keys": [],
+                "partitions": [],
+            },
+            {
+                "name": "cities_partitioned",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
+                "columns": [
+                    {
+                        "name": "id",
+                        "column_type": "int(11)",
+                        "default": "0",
+                        "nullable": False,
+                        "ordinal_position": 1,
+                        "column_key": "PRI",
+                    },
+                    {
+                        "name": "name",
+                        "column_type": "varchar(255)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 2,
+                        "column_key": "",
+                    },
+                    {
+                        "name": "population",
+                        "column_type": "int(11)",
+                        "default": "0",
+                        "nullable": False,
+                        "ordinal_position": 3,
+                        "column_key": "",
+                    },
+                ],
+                "partitions": [
+                    {
+                        "name": "p0",
+                        "partition_ordinal_position": 1,
+                        "partition_method": "RANGE",
+                        "partition_expression": "id",
+                        "partition_description": "100",
+                        "table_rows": 0,
+                        "data_length": 16384,
+                        "subpartitions": [],
+                    },
+                    {
+                        "name": "p1",
+                        "partition_ordinal_position": 2,
+                        "partition_method": "RANGE",
+                        "partition_expression": "id",
+                        "partition_description": "200",
+                        "table_rows": 0,
+                        "data_length": 16384,
+                        "subpartitions": [],
+                    },
+                    {
+                        "name": "p2",
+                        "partition_ordinal_position": 3,
+                        "partition_method": "RANGE",
+                        "partition_expression": "id",
+                        "partition_description": "300",
+                        "table_rows": 0,
+                        "data_length": 16384,
+                        "subpartitions": [],
+                    },
+                    {
+                        "name": "p3",
+                        "partition_ordinal_position": 4,
+                        "partition_method": "RANGE",
+                        "partition_expression": "id",
+                        "partition_description": "MAXVALUE",
+                        "table_rows": 0,
+                        "data_length": 16384,
+                        "subpartitions": [],
+                    },
+                ],
+                "indexes": [
+                    {
+                        "name": "PRIMARY",
+                        "cardinality": 4 if is_maria_db else 0,
+                        "index_type": "BTREE",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "collation": "A",
+                                "nullable": False,
+                            }
+                        ],
+                        "non_unique": False,
+                    }
+                ],
+                "foreign_keys": [],
+            },
+            {
+                "name": "landmarks",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
+                "columns": [
+                    {
+                        "name": "name",
+                        "column_type": "varchar(255)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 1,
+                        "column_key": "",
+                    },
+                    {
+                        "name": "city_id",
+                        "column_type": "int(11)",
+                        "default": "0",
+                        "nullable": True,
+                        "ordinal_position": 2,
+                        "column_key": "MUL",
+                    },
+                ],
+                "foreign_keys": [
+                    {
+                        "name": "FK_CityId",
+                        "constraint_schema": "datadog_test_schemas",
+                        "table_name": "landmarks",
+                        "column_names": "city_id",
+                        "referenced_table_schema": "datadog_test_schemas",
+                        "referenced_table_name": "cities",
+                        "referenced_column_names": "id",
+                        "update_action": "RESTRICT",
+                        "delete_action": "SET NULL",
+                    }
+                ],
+                "indexes": [
+                    {
+                        "name": "FK_CityId",
+                        "cardinality": 0,
+                        "index_type": "BTREE",
+                        "columns": [
+                            {
+                                "name": "city_id",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": True,
+                    }
+                ],
+                "partitions": [],
+            },
+        ],
+    }
+    exp_datadog_test_schemas_second = {
+        "name": "datadog_test_schemas_second",
+        "default_character_set_name": "normalized_value",
+        "default_collation_name": "normalized_value",
+        "tables": [
+            {
+                "name": "ϑings",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
+                "columns": [
+                    {
+                        "name": "id",
+                        "column_type": "int(11)",
+                        "default": "0",
+                        "nullable": True,
+                        "ordinal_position": 1,
+                        "column_key": "",
+                    },
+                    {
+                        "name": "name",
+                        "column_type": "varchar(255)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 2,
+                        "column_key": "UNI",
+                    },
+                ],
+                "indexes": [
+                    {
+                        "name": "thingsindex",
+                        "cardinality": 0,
+                        "index_type": "BTREE",
+                        "columns": [
+                            {
+                                "name": "name",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": False,
+                    }
+                ],
+                "foreign_keys": [],
+                "partitions": [],
+            },
+            {
+                "name": "ts",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
+                "columns": [
+                    {
+                        "name": "id",
+                        "column_type": "int(11)",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 1,
+                        "column_key": "",
+                    },
+                    {
+                        "name": "purchased",
+                        "column_type": "date",
+                        "default": "NULL" if is_maria_db else None,
+                        "nullable": True,
+                        "ordinal_position": 2,
+                        "column_key": "",
+                    },
+                ],
+                "foreign_keys": [],
+                "indexes": [],
+                "partitions": [
+                    {
+                        "name": "p0",
+                        "subpartitions": [
+                            {
+                                "name": "p0sp0",
+                                "subpartition_ordinal_position": 1,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                            {
+                                "name": "p0sp1",
+                                "subpartition_ordinal_position": 2,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                        ],
+                        "partition_ordinal_position": 1,
+                        "partition_method": "RANGE",
+                        "partition_expression": "year(purchased)",
+                        "partition_description": "1990",
+                        "table_rows": 0,
+                        "data_length": 32768,
+                    },
+                    {
+                        "name": "p1",
+                        "subpartitions": [
+                            {
+                                "name": "p1sp0",
+                                "subpartition_ordinal_position": 1,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                            {
+                                "name": "p1sp1",
+                                "subpartition_ordinal_position": 2,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                        ],
+                        "partition_ordinal_position": 2,
+                        "partition_method": "RANGE",
+                        "partition_expression": "year(purchased)",
+                        "partition_description": "2000",
+                        "table_rows": 0,
+                        "data_length": 32768,
+                    },
+                    {
+                        "name": "p2",
+                        "subpartitions": [
+                            {
+                                "name": "p2sp0",
+                                "subpartition_ordinal_position": 1,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                            {
+                                "name": "p2sp1",
+                                "subpartition_ordinal_position": 2,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                        ],
+                        "partition_ordinal_position": 3,
+                        "partition_method": "RANGE",
+                        "partition_expression": "year(purchased)",
+                        "partition_description": "MAXVALUE",
+                        "table_rows": 0,
+                        "data_length": 32768,
+                    },
+                ],
+            },
+        ],
+    }
+
+    expected_data_for_db = {
+        'datadog_test_schemas': exp_datadog_test_schemas,
+        'datadog_test_schemas_second': exp_datadog_test_schemas_second,
+    }
+
+    dbm_instance['schemas_collection'] = {"enabled": True}
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    dd_run_check(mysql_check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+    actual_payloads = {}
+
+    expected_tags = (
+        'database_hostname:stubbed.hostname',
+        'database_instance:stubbed.hostname',
+        'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
+        'dd.internal.resource:database_instance:stubbed.hostname',
+        'tag1:value1',
+        'tag2:value2',
+    )
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
+        expected_tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            expected_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
+
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
+        assert schema_event.get("timestamp") is not None
+        assert schema_event["host"] == "stubbed.hostname"
+        assert schema_event["agent_version"] == "0.0.0"
+        assert schema_event["dbms"] == "mysql"
+        assert schema_event.get("collection_interval") is not None
+        assert schema_event.get("dbms_version") is not None
+        assert schema_event.get("flavor") in ("MariaDB", "MySQL", "Percona")
+        assert sorted(schema_event["tags"]) == sorted(expected_tags)
+        database_metadata = schema_event['metadata']
+
+        for db_metadata in database_metadata:
+            db_name = db_metadata['name']
+            if db_name not in databases_to_find:
+                continue
+
+            if db_name in actual_payloads:
+                actual_payloads[db_name]['tables'] = actual_payloads[db_name]['tables'] + db_metadata['tables']
+            else:
+                actual_payloads[db_name] = db_metadata
+
+    assert len(actual_payloads) == len(expected_data_for_db)
+
+    for db_name, actual_payload in actual_payloads.items():
+        normalize_values(actual_payload)
+        normalize_values(expected_data_for_db[db_name])
+        assert db_name in databases_to_find
+        assert expected_data_for_db[db_name] == actual_payload
 
 
 @pytest.mark.unit
