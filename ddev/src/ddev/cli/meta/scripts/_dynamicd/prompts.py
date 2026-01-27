@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from ddev.cli.meta.scripts.dynamicd.constants import SCENARIOS
+from ddev.cli.meta.scripts._dynamicd.constants import SCENARIOS
 
 # =============================================================================
 # STAGE 1: Context Analysis Prompt

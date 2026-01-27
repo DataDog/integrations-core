@@ -14,14 +14,14 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from ddev.cli.meta.scripts.dynamicd.constants import (
+from ddev.cli.meta.scripts._dynamicd.constants import (
     DOCKER_CPU_LIMIT,
     DOCKER_IMAGE,
     DOCKER_MEMORY_LIMIT,
     FAKE_DATA_DIR,
     MAX_RETRIES,
 )
-from ddev.cli.meta.scripts.dynamicd.generator import GeneratorError, fix_script_error
+from ddev.cli.meta.scripts._dynamicd.generator import GeneratorError, fix_script_error
 
 
 @dataclass

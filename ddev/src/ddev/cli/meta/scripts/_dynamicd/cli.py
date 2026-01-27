@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""CLI interface for DynamicD."""
+"""CLI implementation for DynamicD."""
 
 from __future__ import annotations
 
@@ -9,25 +9,22 @@ import os
 from typing import TYPE_CHECKING
 
 import click
-import requests
 
-from ddev.cli.meta.scripts.dynamicd.constants import (
-    DEFAULT_DURATION_SECONDS,
-    DEFAULT_METRICS_PER_BATCH,
-    SCENARIOS,
-)
+from ddev.cli.meta.scripts._dynamicd.constants import SCENARIOS
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-def validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, str, bool]:
+def _validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, str, bool]:
     """Validate API key and return (is_internal_org, org_name, key_valid).
 
     Checks if the API key belongs to a Datadog internal org (HQ or Staging).
     Note: Org lookup requires an Application Key. If not provided, we can only
     validate the API key works but cannot determine the org name.
     """
+    import requests
+
     # First validate the API key
     try:
         resp = requests.get(
@@ -76,118 +73,11 @@ def validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, st
         return False, f"(unexpected error: {type(e).__name__}: {e})", True
 
 
-@click.command("dynamicd", short_help="Generate realistic fake telemetry data using AI")
-@click.argument("integration")
-@click.option(
-    "--scenario",
-    "-s",
-    type=click.Choice(list(SCENARIOS.keys())),
-    default=None,
-    help="Scenario to simulate. If not provided, shows interactive menu.",
-)
-@click.option(
-    "--duration",
-    "-d",
-    type=int,
-    default=DEFAULT_DURATION_SECONDS,
-    help="Duration in seconds. Default: 0 (run forever until Ctrl+C)",
-)
-@click.option(
-    "--rate",
-    "-r",
-    type=int,
-    default=DEFAULT_METRICS_PER_BATCH,
-    help=f"Target metrics per batch (batches sent every 10s). Default: {DEFAULT_METRICS_PER_BATCH}",
-)
-@click.option(
-    "--save",
-    is_flag=True,
-    help="Save the generated script to the integration's fake_data/ directory",
-)
-@click.option(
-    "--show-only",
-    is_flag=True,
-    help="Only show the generated script, don't execute it",
-)
-@click.option(
-    "--timeout",
-    type=int,
-    default=None,
-    help="Execution timeout in seconds (for testing). Default: no timeout",
-)
-@click.option(
-    "--all-metrics",
-    is_flag=True,
-    help="Generate ALL metrics from metadata.csv, not just dashboard metrics. Use for load testing.",
-)
-@click.option(
-    "--sandbox/--no-sandbox",
-    default=True,
-    help="Run script in Docker container for isolation (default: enabled). Use --no-sandbox to run directly.",
-)
-@click.pass_obj
-def dynamicd(
-    app: Application,
-    integration: str,
-    scenario: str | None,
-    duration: int,
-    rate: int,
-    save: bool,
-    show_only: bool,
-    timeout: int | None,
-    all_metrics: bool,
-    sandbox: bool,
-):
-    """Generate realistic fake telemetry data for an integration using AI.
+def _get_api_keys(app: Application) -> tuple[str, str]:
+    """Get and validate API keys from config/environment.
 
-    DynamicD uses Claude to analyze your integration's metrics and generate
-    a sophisticated simulator that produces realistic, scenario-aware data.
-
-    \b
-    Examples:
-        # Interactive scenario selection
-        ddev meta scripts dynamicd ibm_mq
-
-        # Specific scenario
-        ddev meta scripts dynamicd ibm_mq --scenario incident
-
-        # Save the script for later use
-        ddev meta scripts dynamicd ibm_mq --scenario healthy --save
-
-        # Just show the generated script
-        ddev meta scripts dynamicd ibm_mq --show-only
+    Returns (llm_api_key, dd_api_key) or aborts if not configured.
     """
-    from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
-    from ddev.cli.meta.scripts.dynamicd.executor import (
-        execute_script,
-        is_docker_available,
-        save_script,
-        validate_script_syntax,
-    )
-    from ddev.cli.meta.scripts.dynamicd.generator import GeneratorError, generate_simulator_script
-
-    # Get the integration
-    try:
-        intg = app.repo.integrations.get(integration)
-    except OSError:
-        app.abort(f"Unknown integration: {integration}")
-
-    # Check for metrics
-    if not intg.has_metrics:
-        app.abort(f"Integration '{integration}' has no metrics defined in metadata.csv")
-
-    # Validate numeric options
-    if duration < 0:
-        app.abort("Duration cannot be negative")
-    if rate <= 0:
-        app.abort("Rate must be a positive number")
-
-    # Handle sandbox mode (default: enabled)
-    use_sandbox = sandbox
-    if use_sandbox and not is_docker_available():
-        app.display_error("Docker is not available. Install Docker or use --no-sandbox.")
-        app.abort()
-
     # Get LLM API key from config or environment variable
     llm_api_key = app.config.raw_data.get("dynamicd", {}).get("llm_api_key")
     if not llm_api_key:
@@ -208,13 +98,16 @@ def dynamicd(
         )
         app.abort()
 
-    # Get Datadog site and app key
-    dd_site = app.config.org.config.get("site", "datadoghq.com")
-    dd_app_key = app.config.org.config.get("app_key")
+    return llm_api_key, dd_api_key
 
-    # Validate org and warn if internal Datadog org
+
+def _validate_and_warn_internal_org(app: Application, dd_api_key: str, dd_app_key: str | None, dd_site: str) -> None:
+    """Validate Datadog org and warn if it's an internal Datadog org.
+
+    Aborts if the API key is invalid or user declines to continue for internal orgs.
+    """
     app.display_info("Validating Datadog API key...")
-    is_internal_org, org_name, key_valid = validate_org(dd_api_key, dd_app_key, dd_site)
+    is_internal_org, org_name, key_valid = _validate_org(dd_api_key, dd_app_key, dd_site)
 
     if not key_valid:
         app.display_error(f"API key validation failed: {org_name}")
@@ -225,11 +118,10 @@ def dynamicd(
     app.display_info("")
 
     if is_internal_org:
-        app.display_warning("=" * 60)
-        app.display_warning("WARNING: You are about to send fake data to a Datadog internal org!")
+        app.display_header("WARNING", line_style="bold yellow")
+        app.display_warning("You are about to send fake data to a Datadog internal org!")
         app.display_warning(f"  Org: {org_name}")
         app.display_warning(f"  Site: {dd_site}")
-        app.display_warning("=" * 60)
         app.display_warning("")
         confirm = click.prompt(
             "Are you sure you want to continue? Type 'y' to proceed",
@@ -240,6 +132,58 @@ def dynamicd(
             app.display_info("Aborted by user.")
             app.abort()
 
+
+def run_dynamicd(
+    app: Application,
+    integration: str,
+    scenario: str | None,
+    duration: int,
+    rate: int,
+    save: bool,
+    show_only: bool,
+    timeout: int | None,
+    all_metrics: bool,
+    sandbox: bool,
+) -> None:
+    """Run the DynamicD command logic."""
+    from ddev.cli.meta.scripts._dynamicd.context_builder import build_context
+    from ddev.cli.meta.scripts._dynamicd.executor import (
+        execute_script,
+        is_docker_available,
+        save_script,
+        validate_script_syntax,
+    )
+    from ddev.cli.meta.scripts._dynamicd.generator import GeneratorError, generate_simulator_script
+
+    # Validate integration
+    try:
+        intg = app.repo.integrations.get(integration)
+    except OSError:
+        app.abort(f"Unknown integration: {integration}")
+
+    if not intg.has_metrics:
+        app.abort(f"Integration '{integration}' has no metrics defined in metadata.csv")
+
+    # Validate options
+    if duration < 0:
+        app.abort("Duration cannot be negative")
+    if rate <= 0:
+        app.abort("Rate must be a positive number")
+
+    # Validate sandbox availability
+    use_sandbox = sandbox
+    if use_sandbox and not is_docker_available():
+        app.display_error("Docker is not available. Install Docker or use --no-sandbox.")
+        app.abort()
+
+    # Get and validate API keys
+    llm_api_key, dd_api_key = _get_api_keys(app)
+    dd_site = app.config.org.config.get("site", "datadoghq.com")
+    dd_app_key = app.config.org.config.get("app_key")
+
+    # Validate org and warn if internal
+    _validate_and_warn_internal_org(app, dd_api_key, dd_app_key, dd_site)
+
     # Interactive scenario selection if not provided
     if scenario is None:
         scenario = _select_scenario_interactive(app)
@@ -249,10 +193,7 @@ def dynamicd(
     # Type narrowing: scenario is guaranteed to be str after the above check
     assert scenario is not None
 
-    app.display_info("")
-    app.display_info(f"╔{'═' * 60}╗")
-    app.display_info(f"║{'DynamicD - Smart Fake Data Generator':^60}║")
-    app.display_info(f"╚{'═' * 60}╝")
+    app.display_header("DynamicD - Smart Fake Data Generator")
     app.display_info("")
     app.display_info(f"  Integration: {intg.display_name}")
     app.display_info(f"  Scenario:    {scenario}")
@@ -300,12 +241,9 @@ def dynamicd(
 
     # Show only mode
     if show_only:
-        app.display_info("")
-        app.display_info("=" * 70)
-        app.display_info("GENERATED SCRIPT")
-        app.display_info("=" * 70)
+        app.display_header("Generated Script")
         click.echo(script)
-        app.display_info("=" * 70)
+        app.display_header("")
         return
 
     # Save if requested

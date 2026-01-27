@@ -9,15 +9,15 @@ import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from ddev.cli.meta.scripts.dynamicd.constants import DEFAULT_MODEL, MAX_TOKENS
-from ddev.cli.meta.scripts.dynamicd.prompts import (
+from ddev.cli.meta.scripts._dynamicd.constants import DEFAULT_MODEL, MAX_TOKENS
+from ddev.cli.meta.scripts._dynamicd.prompts import (
     build_error_correction_prompt,
     build_stage1_prompt,
     build_stage2_prompt,
 )
 
 if TYPE_CHECKING:
-    from ddev.cli.meta.scripts.dynamicd.context_builder import IntegrationContext
+    from ddev.cli.meta.scripts._dynamicd.context_builder import IntegrationContext
 
 
 class GeneratorError(Exception):

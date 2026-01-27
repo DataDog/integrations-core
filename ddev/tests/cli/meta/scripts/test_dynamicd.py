@@ -34,7 +34,7 @@ class TestReadDashboardMetrics:
     @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
     def test_extracts_metrics_from_dashboard(self, real_repo, integration_name, metric_prefix, check_exact):
         """Dashboard should have metrics extracted for the integration."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
+        from ddev.cli.meta.scripts._dynamicd.context_builder import _read_dashboard_metrics
 
         integration = real_repo.integrations.get(integration_name)
         metrics = _read_dashboard_metrics(integration, metric_prefix)
@@ -45,7 +45,7 @@ class TestReadDashboardMetrics:
 
     def test_returns_empty_for_integration_without_dashboard(self, tmp_path):
         """Integration without dashboards should return empty list."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_metrics
+        from ddev.cli.meta.scripts._dynamicd.context_builder import _read_dashboard_metrics
 
         fake_integration = type('FakeIntegration', (), {'path': tmp_path})()
 
@@ -59,7 +59,7 @@ class TestReadDashboardTags:
     @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
     def test_extracts_tags_from_dashboard(self, real_repo, integration_name, metric_prefix, check_exact):
         """Dashboard should have tags extracted for grouping."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_tags
+        from ddev.cli.meta.scripts._dynamicd.context_builder import _read_dashboard_tags
 
         integration = real_repo.integrations.get(integration_name)
         tags = _read_dashboard_tags(integration)
@@ -68,7 +68,7 @@ class TestReadDashboardTags:
 
     def test_returns_empty_for_integration_without_dashboard(self, tmp_path):
         """Integration without dashboards should return empty dict."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_tags
+        from ddev.cli.meta.scripts._dynamicd.context_builder import _read_dashboard_tags
 
         fake_integration = type('FakeIntegration', (), {'path': tmp_path})()
 
@@ -82,7 +82,7 @@ class TestReadDashboardTagValues:
     @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
     def test_extracts_tag_values_from_dashboard(self, real_repo, integration_name, metric_prefix, check_exact):
         """Should extract specific tag:value pairs from dashboard queries."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_tag_values
+        from ddev.cli.meta.scripts._dynamicd.context_builder import _read_dashboard_tag_values
 
         integration = real_repo.integrations.get(integration_name)
         tag_values = _read_dashboard_tag_values(integration)
@@ -91,7 +91,7 @@ class TestReadDashboardTagValues:
 
     def test_returns_empty_for_integration_without_dashboard(self, tmp_path):
         """Integration without dashboards should return empty dict."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_dashboard_tag_values
+        from ddev.cli.meta.scripts._dynamicd.context_builder import _read_dashboard_tag_values
 
         fake_integration = type('FakeIntegration', (), {'path': tmp_path})()
 
@@ -105,7 +105,7 @@ class TestBuildContext:
     @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
     def test_builds_context_for_integration(self, real_repo, integration_name, metric_prefix, check_exact):
         """Should build complete context for integration."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
+        from ddev.cli.meta.scripts._dynamicd.context_builder import build_context
 
         integration = real_repo.integrations.get(integration_name)
         context = build_context(integration)
@@ -117,7 +117,7 @@ class TestBuildContext:
 
     def test_all_metrics_mode(self, real_repo):
         """all_metrics mode should set the flag in context."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
+        from ddev.cli.meta.scripts._dynamicd.context_builder import build_context
 
         redis = real_repo.integrations.get('redisdb')
 
@@ -129,7 +129,7 @@ class TestBuildContext:
 
     def test_to_prompt_context_generates_string(self, real_repo):
         """to_prompt_context should generate a non-empty string."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import build_context
+        from ddev.cli.meta.scripts._dynamicd.context_builder import build_context
 
         redis = real_repo.integrations.get('redisdb')
         context = build_context(redis)
@@ -147,7 +147,7 @@ class TestReadMetrics:
     @pytest.mark.parametrize('integration_name,metric_prefix,check_exact', INTEGRATION_TEST_CASES)
     def test_reads_metrics_from_metadata_csv(self, real_repo, integration_name, metric_prefix, check_exact):
         """Should read metrics from metadata.csv."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_metrics
+        from ddev.cli.meta.scripts._dynamicd.context_builder import _read_metrics
 
         integration = real_repo.integrations.get(integration_name)
         metrics = _read_metrics(integration)
@@ -161,7 +161,7 @@ class TestReadServiceChecks:
 
     def test_reads_service_checks(self, real_repo):
         """Should read service checks from service_checks.json."""
-        from ddev.cli.meta.scripts.dynamicd.context_builder import _read_service_checks
+        from ddev.cli.meta.scripts._dynamicd.context_builder import _read_service_checks
 
         redis = real_repo.integrations.get('redisdb')
         checks = _read_service_checks(redis)

@@ -35,7 +35,6 @@ dependencies = [
     "httpx",
     "jsonpointer",
     "pluggy",
-    "pyyaml",
     "rich>=12.5.1",
     "stamina==23.2.0",
     "tomli; python_version < '3.11'",
