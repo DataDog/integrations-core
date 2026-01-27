@@ -115,6 +115,8 @@ fi
   echo "INPUT_MINIMUM_BASE_PACKAGE=${INPUT_MINIMUM_BASE_PACKAGE:-false}"
   echo "INPUT_PYTEST_ARGS=${INPUT_PYTEST_ARGS:-}"
   echo "INPUT_IS_FORK=${INPUT_IS_FORK:-false}"
+  # GitHub Actions job run ID for CI Visibility correlation
+  echo "JOB_ID=${INPUT_JOB_ID}"
 } >> "$GITHUB_ENV"
 
 # Override with custom vars if provided
