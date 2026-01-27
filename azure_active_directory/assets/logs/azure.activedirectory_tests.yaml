@@ -302,6 +302,7 @@ tests:
           userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"
           userDisplayName: "Test Test"
           userId: "0abb8889-005c-4307-85c2-97a5d3cd0964"
+          userPrincipalName: "testtest@datadoghq.com"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
         resultSignature: "None"
         resultType: "0"
