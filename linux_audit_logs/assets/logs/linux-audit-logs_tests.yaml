@@ -8,9 +8,9 @@ tests:
       AUID: "root"
       auid: 0
       event_id: 6532
-      exe: "/usr/libexec/platform-python3.6"
       msg:
         comm: "semanage"
+        exe: "/usr/libexec/platform-python3.6"
         hostname: "10.10.10.10"
         lport: 3307
         op:
@@ -33,8 +33,8 @@ tests:
             path: "/usr/libexec/platform-python3.6"
             pid: 381980
             user:
-              id: "0"
               name: "root"
+              uid: "0"
           session:
             terminal: "ssh"
             uid: "138"
@@ -804,6 +804,7 @@ tests:
       msg:
         exe: "/sbin/semanage"
         hostname: "localhost"
+        id: 0
         new-range: "s0"
         new-role: "staff_r"
         new-seuser: "user_u"
@@ -894,6 +895,7 @@ tests:
       msg:
         exe: "/sbin/semanage"
         hostname: "localhost"
+        id: 0
         new-range: "s0"
         new-role: "user_r"
         new-seuser: "user_u"
