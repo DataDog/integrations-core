@@ -359,8 +359,30 @@ def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_ta
     elastic_check = ESCheck('elastic', {}, instances=[instance])
 
     elastic_check.check(None)
+
+    # Check disk metrics
     for m_name in CAT_ALLOCATION_METRICS:
         aggregator.assert_metric(m_name)
+
+    # Check detailed shard placement metrics
+    aggregator.assert_metric('elasticsearch.shards')
+
+    # Verify tags are present - we should have index and prirep tags
+    metrics = aggregator.metrics('elasticsearch.shards')
+    assert len(metrics) > 0, "Expected at least one elasticsearch.shards metric"
+
+    # Check that at least one metric has both index and prirep tags
+    has_index_tag = False
+    has_prirep_tag = False
+    for metric in metrics:
+        tags = metric.tags
+        if any(tag.startswith('index:') for tag in tags):
+            has_index_tag = True
+        if any(tag.startswith('prirep:') for tag in tags):
+            has_prirep_tag = True
+
+    assert has_index_tag, "Expected index tag on elasticsearch.shards metric"
+    assert has_prirep_tag, "Expected prirep tag on elasticsearch.shards metric"
 
 
 def test_health_event(dd_environment, aggregator):
