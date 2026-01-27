@@ -21,8 +21,30 @@ import pathspec
 import urllib3
 from dotenv import dotenv_values
 from utils import iter_wheels
-from wheel.cli.pack import pack
-from wheel.cli.unpack import unpack
+
+
+def unpack_wheel(wheel_file: str, dest_dir: str | None = None) -> None:
+    """
+    Unpack a wheel file into a directory using the supported CLI entrypoint:
+      python -m wheel unpack <wheel> [-d <dest>]
+    """
+    cmd = [sys.executable, '-m', 'wheel', 'unpack']
+    if dest_dir:
+        cmd += ['-d', dest_dir]
+    cmd.append(wheel_file)
+    subprocess.check_call(cmd)
+
+
+def pack_wheel(wheel_dir: str, dest_dir: str | None = None) -> None:
+    """
+    Pack a wheel directory into a wheel using:
+      python -m wheel pack <wheel-dir> [-d <dest>]
+    """
+    cmd = [sys.executable, '-m', 'wheel', 'pack']
+    if dest_dir:
+        cmd += ['-d', dest_dir]
+    cmd.append(wheel_dir)
+    subprocess.check_call(cmd)
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
@@ -160,10 +182,10 @@ def remove_test_files(wheel_path: Path) -> bool:
         td_path = Path(td)
 
         # Unpack the wheel into temp dir
-        unpack(wheel_path, dest=td_path)
+        unpack_wheel(str(wheel_path), dest_dir=str(td_path))
         unpacked_dir = next(td_path.iterdir())
         # Remove excluded files/folders
-        for root, dirs, files in os.walk(td, topdown=False):
+        for root, dirs, files in os.walk(str(unpacked_dir), topdown=False):
             for d in list(dirs):
                 full_dir = Path(root) / d
                 rel = full_dir.relative_to(unpacked_dir).as_posix()
@@ -180,7 +202,7 @@ def remove_test_files(wheel_path: Path) -> bool:
         dest_dir = wheel_path.parent
         before = {p.resolve() for p in dest_dir.glob("*.whl")}
         # Repack to same directory, regenerating RECORD
-        pack(unpacked_dir, dest_dir=dest_dir, build_number=None)
+        pack_wheel(str(unpacked_dir), dest_dir=str(dest_dir))
 
         # The wheel might not be platform-specific, so repacking restores its original name.
         # We need to move the repacked wheel to wheel_path, which was changed to be platform-specific.
