@@ -89,15 +89,17 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
-# Alisases add to homogenize fields across different database types like SQLServer, PostgreSQL
-SQL_DATABASES = """
+# Schema collection queries - Legacy approach (MySQL < 8.0.19, MariaDB < 10.5.0)
+# These queries use parameterized filtering and Python-side aggregation
+
+SQL_SCHEMAS_LEGACY_DATABASES = """
 SELECT schema_name as `name`,
        default_character_set_name as `default_character_set_name`,
        default_collation_name as `default_collation_name`
        FROM information_schema.SCHEMATA
        WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
 
-SQL_TABLES = """\
+SQL_SCHEMAS_LEGACY_TABLES = """\
 SELECT table_name as `name`,
        engine as `engine`,
        row_format as `row_format`,
@@ -106,7 +108,7 @@ SELECT table_name as `name`,
        WHERE TABLE_SCHEMA = %s AND TABLE_TYPE="BASE TABLE"
 """
 
-SQL_COLUMNS = """\
+SQL_SCHEMAS_LEGACY_COLUMNS = """\
 SELECT table_name as `table_name`,
        column_name as `name`,
        column_type as `column_type`,
@@ -119,7 +121,7 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
-SQL_INDEXES = """\
+SQL_SCHEMAS_LEGACY_INDEXES = """\
 SELECT
     table_name as `table_name`,
     index_name as `name`,
@@ -137,7 +139,7 @@ FROM INFORMATION_SCHEMA.STATISTICS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
-SQL_INDEXES_8_0_13 = """\
+SQL_SCHEMAS_LEGACY_INDEXES_8_0_13 = """\
 SELECT
     table_name as `table_name`,
     index_name as `name`,
@@ -155,7 +157,7 @@ FROM INFORMATION_SCHEMA.STATISTICS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
-SQL_FOREIGN_KEYS = """\
+SQL_SCHEMAS_LEGACY_FOREIGN_KEYS = """\
 SELECT
     kcu.constraint_schema as constraint_schema,
     kcu.constraint_name as name,
@@ -185,7 +187,7 @@ GROUP BY
     rc.delete_rule
 """
 
-SQL_PARTITION = """\
+SQL_SCHEMAS_LEGACY_PARTITION = """\
 SELECT
     table_name as `table_name`,
     partition_name as `name`,
@@ -202,6 +204,132 @@ SELECT
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
     table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL
+"""
+
+# Schema collection queries - New approach (MySQL 8.0.19+, MariaDB 10.5.0+)
+# These use JSON aggregation functions for efficient single-query collection
+
+SQL_SCHEMAS_DATABASES = """
+SELECT schema_name as `schema_name`,
+       default_character_set_name as `default_character_set_name`,
+       default_collation_name as `default_collation_name`
+       FROM information_schema.SCHEMATA
+       WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
+
+SQL_SCHEMAS_TABLES = """\
+SELECT table_name as `table_name`,
+       engine as `engine`,
+       row_format as `row_format`,
+       create_time as `create_time`,
+       table_schema as `schema_name`
+       FROM information_schema.TABLES
+       WHERE TABLE_TYPE="BASE TABLE"
+"""
+
+SQL_SCHEMAS_COLUMNS = """\
+SELECT table_name as `table_name`,
+       table_schema as `schema_name`,
+       column_name as `name`,
+       column_type as `column_type`,
+       column_default as `default`,
+       is_nullable as `nullable`,
+       ordinal_position as `ordinal_position`,
+       column_key as `column_key`,
+       extra as `extra`
+FROM INFORMATION_SCHEMA.COLUMNS
+"""
+
+SQL_SCHEMAS_INDEXES = """\
+SELECT
+    table_name as `table_name`,
+    table_schema as `schema_name`,
+    index_name as `name`,
+    cardinality as `cardinality`,
+    index_type as `index_type`,
+    non_unique as `non_unique`,
+    NULL as `expression`,
+    json_arrayagg(json_object(
+        'name', column_name,
+        'collation', collation,
+        'nullable', nullable,
+        'sub_part', sub_part
+    )) as `columns`
+FROM INFORMATION_SCHEMA.STATISTICS
+GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
+"""
+
+SQL_SCHEMAS_INDEXES_8_0_13 = """\
+SELECT
+    table_name as `table_name`,
+    table_schema as `schema_name`,
+    index_name as `name`,
+    cardinality as `cardinality`,
+    index_type as `index_type`,
+    non_unique as `non_unique`,
+    expression as `expression`,
+    json_arrayagg(json_object(
+        'name', column_name,
+        'collation', collation,
+        'nullable', nullable,
+        'sub_part', sub_part
+    )) as `columns`
+FROM INFORMATION_SCHEMA.STATISTICS
+GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
+"""
+
+SQL_SCHEMAS_FOREIGN_KEYS = """\
+SELECT
+    kcu.constraint_schema as constraint_schema,
+    kcu.constraint_name as name,
+    kcu.table_name as table_name,
+    kcu.table_schema as schema_name,
+    group_concat(kcu.column_name order by kcu.ordinal_position asc) as column_names,
+    kcu.referenced_table_schema as referenced_table_schema,
+    kcu.referenced_table_name as referenced_table_name,
+    group_concat(kcu.referenced_column_name) as referenced_column_names,
+    rc.update_rule as update_action,
+    rc.delete_rule as delete_action
+FROM
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+LEFT JOIN
+    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
+    ON kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
+    AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
+WHERE
+    kcu.referenced_table_name is not null
+GROUP BY
+    kcu.constraint_schema,
+    kcu.constraint_name,
+    kcu.table_name,
+    kcu.table_schema,
+    kcu.referenced_table_schema,
+    kcu.referenced_table_name,
+    rc.update_rule,
+    rc.delete_rule
+"""
+
+SQL_SCHEMAS_PARTITION = """\
+SELECT
+    table_name as `table_name`,
+    table_schema as `schema_name`,
+    partition_name as `name`,
+    partition_ordinal_position as `partition_ordinal_position`,
+    partition_method as `partition_method`,
+    partition_expression as `partition_expression`,
+    partition_description as `partition_description`,
+    json_arrayagg(json_object(
+        'name', subpartition_name,
+        'subpartition_ordinal_position', subpartition_ordinal_position,
+        'subpartition_method', subpartition_method,
+        'subpartition_expression', subpartition_expression,
+        'table_rows', table_rows,
+        'data_length', data_length
+    )) as `subpartitions`
+FROM INFORMATION_SCHEMA.PARTITIONS
+WHERE
+    partition_name IS NOT NULL
+GROUP BY table_name, table_schema, partition_name, partition_ordinal_position,
+   partition_method, partition_expression, partition_description
 """
 
 QUERY_DEADLOCKS = {
@@ -279,8 +407,10 @@ def get_indexes_query(version, is_mariadb, table_names):
     Get the appropriate indexes query based on MySQL version and flavor.
     The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
     MariaDB doesn't support functional indexes.
+
+    This function is used by the legacy schema collector for MySQL < 8.0.19 and MariaDB < 10.5.0.
     """
     if not is_mariadb and version.version_compatible((8, 0, 13)):
-        return SQL_INDEXES_8_0_13.format(table_names)
+        return SQL_SCHEMAS_LEGACY_INDEXES_8_0_13.format(table_names)
     else:
-        return SQL_INDEXES.format(table_names)
+        return SQL_SCHEMAS_LEGACY_INDEXES.format(table_names)

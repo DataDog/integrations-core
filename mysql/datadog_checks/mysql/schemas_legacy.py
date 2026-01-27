@@ -17,17 +17,17 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.queries import (
-    SQL_COLUMNS,
-    SQL_DATABASES,
-    SQL_FOREIGN_KEYS,
-    SQL_PARTITION,
-    SQL_TABLES,
+    SQL_SCHEMAS_LEGACY_COLUMNS,
+    SQL_SCHEMAS_LEGACY_DATABASES,
+    SQL_SCHEMAS_LEGACY_FOREIGN_KEYS,
+    SQL_SCHEMAS_LEGACY_PARTITION,
+    SQL_SCHEMAS_LEGACY_TABLES,
     get_indexes_query,
 )
 
 from .util import get_list_chunks
 
-DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
+DEFAULT_SCHEMAS_LEGACY_COLLECTION_INTERVAL = 600
 
 
 class SubmitData:
@@ -115,7 +115,14 @@ def agent_check_getter(self):
     return self._check
 
 
-class DatabasesData:
+class MySqlSchemaCollectorLegacy:
+    """
+    Legacy schema collector for MySQL versions that don't support JSON aggregation functions.
+
+    This collector uses the traditional approach of querying each database separately
+    and aggregating results in Python. It's compatible with MySQL < 8.0.19 and MariaDB < 10.5.0.
+    """
+
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -126,7 +133,7 @@ class DatabasesData:
         self._log = check.log
         self._tags = []
         collection_interval = config.schemas_config.get(
-            'collection_interval', DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
+            'collection_interval', DEFAULT_SCHEMAS_LEGACY_COLLECTION_INTERVAL
         )
         base_event = {
             "host": None,
@@ -146,6 +153,15 @@ class DatabasesData:
 
     def shut_down(self):
         self._data_submitter.submit()
+
+    def collect_schemas(self):
+        """
+        Wrapper method to match the interface of MySqlSchemaCollector.
+        This allows both collectors to be used interchangeably via a common interface.
+        """
+        # Tags are managed by metadata.py, so we pass them from the parent check
+        tags = self._check.tag_manager.get_tags() if hasattr(self._check, 'tag_manager') else []
+        return self.collect_databases_data(tags)
 
     def _cursor_run(self, cursor, query, params=None):
         """
@@ -266,7 +282,7 @@ class DatabasesData:
                 self._data_submitter.submit()
         finally:
             self._data_submitter.reset()  # Ensure we reset in case of errors
-        self._log.debug("Finished collect_databases_data")
+        self._log.debug("Finished collect_databases_data (legacy)")
 
     def _fetch_for_databases(self, db_infos, cursor):
         start_time = time.time()
@@ -299,7 +315,7 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
-        self._cursor_run(cursor, query=SQL_DATABASES)
+        self._cursor_run(cursor, query=SQL_SCHEMAS_LEGACY_DATABASES)
         rows = cursor.fetchall()
         return rows
 
@@ -309,7 +325,7 @@ class DatabasesData:
         list of table dicts
         "name": str
         """
-        self._cursor_run(cursor, query=SQL_TABLES, params=db_name)
+        self._cursor_run(cursor, query=SQL_SCHEMAS_LEGACY_TABLES, params=db_name)
         tables_info = cursor.fetchall()
         return tables_info
 
@@ -334,7 +350,7 @@ class DatabasesData:
     def _populate_with_columns_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(
             cursor,
-            query=SQL_COLUMNS.format(table_names),
+            query=SQL_SCHEMAS_LEGACY_COLUMNS.format(table_names),
             params=db_name,
         )
         rows = cursor.fetchall()
@@ -395,7 +411,7 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(table_names), params=db_name)
+        self._cursor_run(cursor, query=SQL_SCHEMAS_LEGACY_FOREIGN_KEYS.format(table_names), params=db_name)
         rows = cursor.fetchall()
         for row in rows:
             table_name = row["table_name"]
@@ -404,7 +420,7 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_PARTITION.format(table_names), params=db_name)
+        self._cursor_run(cursor, query=SQL_SCHEMAS_LEGACY_PARTITION.format(table_names), params=db_name)
         rows = cursor.fetchall()
         if not rows:
             return

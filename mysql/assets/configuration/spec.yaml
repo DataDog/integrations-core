@@ -429,7 +429,13 @@ files:
                   Capped by `collect_schemas.collection_interval`
                 value:
                   type: number
-                  example: 60
+                  display_default: 60
+              - name: max_tables
+                description: |
+                  Set the maximum number of tables to collect. Defaults to 300.
+                value:
+                  type: integer
+                  display_default: 300
           - name: schemas_collection
             deprecation:
               Agent version: 7.69.0
