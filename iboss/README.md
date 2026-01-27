@@ -74,8 +74,6 @@ Here is the list of monitors for metrics:
 - High proxy error rate detected
 - High proxy response time detected
 
-**Minimum Agent version:** 7.69.0
-
 ## Setup
 
 **Note**: The following steps are required only for collecting metrics. For log collection, see the `Log collection` section below.
@@ -127,6 +125,7 @@ To collect metrics, you can either use an existing user with **Full Administrato
 ### Installation
 
 **Note**: These steps are only required for collecting logs.
+**Minimum Agent version:** 7.69.0
 
 To install the iboss integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
 
@@ -206,9 +205,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 
 ### Metrics
 
-The iboss integration collects and forwards Gateway Performance, Bandwidth, Digital Experience, Web, CASB, Threat, and Zero Trust metrics to Datadog.
-
-{{< get-metrics-from-git "iboss" >}}
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -266,3 +263,4 @@ For further assistance, contact [Datadog support][3].
 [4]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
 [5]: https://github.com/DataDog/integrations-core/blob/master/iboss/datadog_checks/iboss/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/iboss/metadata.csv

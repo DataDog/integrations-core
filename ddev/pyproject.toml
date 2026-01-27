@@ -29,7 +29,7 @@ dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]~=35.2",
+    "datadog-checks-dev[cli]>=35.5.0,<35.6",
     "hatch>=1.8.1",
     "httpx",
     "jsonpointer",

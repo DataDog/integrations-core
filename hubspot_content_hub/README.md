@@ -8,8 +8,6 @@ The HubSpot Content Hub integration collects Activity Logs (audit, login, securi
 
 The integration includes dashboards that show and analyze both Activity Logs and Analytics Metrics, making it easier to monitor and understand trends and issues.
 
-**Minimum Agent version:** 7.57.0
-
 ## Setup
 
 To integrate HubSpot with Datadog, Datadog connects to HubSpot using OAuth. The authenticated user must have owner permissions in the organizations that want to be integrated.

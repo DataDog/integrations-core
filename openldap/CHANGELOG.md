@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 3.1.0 / 2025-10-02
+## 3.2.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 3.1.1 / 2025-10-31 / Agent 7.73.0
+
+***Fixed***:
+
+* Fix custom queries to properly use search_scope parameter ([#21385](https://github.com/DataDog/integrations-core/pull/21385))
+
+## 3.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

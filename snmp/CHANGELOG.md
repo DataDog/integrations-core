@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 12.0.0 / 2025-10-02
+## 12.2.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 12.1.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add `collect_vpn` config and `disabled` config in `interface_configs` to SNMP conf.yaml.example. ([#21620](https://github.com/DataDog/integrations-core/pull/21620))
+* [Juniper SRX] Update Juniper SRX SNMP profile to support new SRX models ([#21698](https://github.com/DataDog/integrations-core/pull/21698))
+
+## 12.0.0 / 2025-10-02 / Agent 7.72.0
 
 ***Changed***:
 

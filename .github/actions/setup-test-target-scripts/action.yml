@@ -1,0 +1,19 @@
+name: 'Setup Workflow Scripts'
+description: 'Installs test scripts from the action context to the workspace'
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure target directory exists
+      shell: bash
+      run: mkdir -p .github/workflows/scripts
+
+    - name: Install scripts from Action Context
+      shell: bash
+      # Copies scripts from the downloaded action folder (pinned SHA) to the workspace
+      run: |
+        cp "${{ github.action_path }}/src/setup-test-env.sh" .github/workflows/scripts/
+        cp "${{ github.action_path }}/src/run-unit-integration-tests.sh" .github/workflows/scripts/
+        cp "${{ github.action_path }}/src/run-e2e-tests.sh" .github/workflows/scripts/
+
+        # Ensure executable permissions
+        chmod +x .github/workflows/scripts/*.sh

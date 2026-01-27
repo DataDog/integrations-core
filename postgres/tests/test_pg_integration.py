@@ -67,8 +67,12 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 @pytest.mark.parametrize(
     'is_aurora',
-    [True, False],
+    [
+        pytest.param(True, id="aurora"),
+        pytest.param(False, id="not_aurora"),
+    ],
 )
+@pytest.mark.flaky
 def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
     check.is_aurora = is_aurora
@@ -119,6 +123,7 @@ def _increase_txid(cur):
     else:
         query = 'select txid_current();'
     cur.execute(query)
+    assert cur.fetchone() is not None
 
 
 def test_initialization_tags(integration_check, pg_instance):
@@ -437,6 +442,7 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
 
 
 @requires_over_10
+@pytest.mark.flaky
 def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -485,7 +491,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     check.run()
 
-    app = 'test_backend_transaction_age'
+    app = f'test_backend_transaction_age_{time.time()}'
     conn1 = _get_conn(pg_instance, application_name=app)
     cur = conn1.cursor()
 
@@ -498,8 +504,6 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     # Force assignement of a txid and keep the transaction opened
     _increase_txid(cur)
-    # Make sure to fetch the result to make sure we start the timer after the transaction started
-    cur.fetchall()
     start_transaction_time = time.time()
 
     aggregator.reset()

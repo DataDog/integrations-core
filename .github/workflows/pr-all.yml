@@ -4,9 +4,16 @@ on:
   pull_request:
     paths:
     - datadog_checks_base/datadog_checks/**
+    - datadog_checks_base/pyproject.toml
     - datadog_checks_dev/datadog_checks/dev/*.py
+    - datadog_checks_dev/pyproject.toml
     - ddev/src/**
+    - ddev/pyproject.toml
     - "!agent_requirements.in"
+    # Also run if we modify the workflow files
+    - '.github/workflows/pr-all.yml'
+    - '.github/workflows/test-target.yml'
+    - '.github/workflows/test-all.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
@@ -22,10 +29,12 @@ jobs:
 
     with:
       repo: core
-
-      # Options
-      test-py2: true
       context: "pr"
+      # Avoid running flaky tests since the intention of running everything in these
+      # prs is to ensure that tests can be run sucessfully. Reporting failed flaky tests
+      # does not provide much value.
+      pytest-args: '-m "not flaky"'
+
     secrets: inherit
 
   save-event:
@@ -63,11 +72,3 @@ jobs:
         use_oidc: true
         directory: coverage-reports
         fail_ci_if_error: false
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit

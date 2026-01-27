@@ -38,7 +38,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 42989389,
       "source_type_name": "Check Point Harmony Email & Collaboration",
       "events": {

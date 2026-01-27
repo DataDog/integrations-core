@@ -8,11 +8,11 @@ on:
       # List of files/paths that should trigger the run. The intention is to avoid running all tests if the commit only includes changes on assets or README
     - '*/datadog_checks/**'
     - '*/tests/**'
-    - 'ddev'
-    - 'datadog_check_base'
-    - 'datadog_checks_dev'
+    - 'ddev/**'
+    - 'datadog_checks_base/**'
+    - 'datadog_checks_dev/**'
     # Contains overrides for testing
-    - '.ddev'
+    - '.ddev/**'
     # Want to ensure any change in workflows is validated
     - '.github/workflows/**'
     # Test matrices and dependencies
@@ -93,11 +93,3 @@ jobs:
         use_oidc: true
         directory: coverage-reports
         fail_ci_if_error: false
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit

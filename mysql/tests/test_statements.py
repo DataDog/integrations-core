@@ -399,7 +399,13 @@ def test_statement_metrics_cloud_metadata(
         (
             'information_schema',
             'select * from testdb.users',
-            [{'strategy': 'PROCEDURE', 'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"}],
+            [
+                {
+                    'strategy': 'PROCEDURE',
+                    'code': 'database_error',
+                    'message': "1044: Access denied for user 'dog'@'%' to database 'information_schema'",
+                }
+            ],
             StatementTruncationState.not_truncated.value,
         ),
         (
@@ -409,7 +415,7 @@ def test_statement_metrics_cloud_metadata(
                 {
                     'strategy': 'FQ_PROCEDURE',
                     'code': 'database_error',
-                    'message': "<class 'pymysql.err.ProgrammingError'>",
+                    'message': "1146: Table 'datadog.users' doesn't exist",
                 }
             ],
             StatementTruncationState.not_truncated.value,
@@ -637,6 +643,40 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check._statement_metrics.collect_per_statement_metrics()
     mysql_check._statement_metrics.collect_per_statement_metrics()
     dd_run_check(mysql_check)
+    assert mysql_check.warnings == []
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_time_instrumentation_disabled(dbm_instance, dd_run_check):
+    # Disable query samples initially to avoid interference
+    dbm_instance['options']['extra_performance_metrics'] = False
+    dbm_instance['query_samples']['enabled'] = True
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    # Mock the time instrumentation check to return False
+    with mock.patch.object(mysql_check._statement_samples, '_is_time_instrumentation_enabled', return_value=False):
+        # Run this twice to confirm that duplicate warnings aren't added more than once
+        mysql_check._statement_samples._collect_statement_samples()
+        mysql_check._statement_samples._collect_statement_samples()
+
+        # Run the check only so that recorded warnings are actually added
+        dd_run_check(mysql_check)
+
+        assert mysql_check.warnings == [
+            'Cannot collect statement samples as time instrumentation is not enabled for statement events. '
+            'Enable time instrumentation by setting TIMED = YES for statement instruments in '
+            'performance_schema.setup_instruments. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+            'troubleshooting/#events-statements-time-instrumentation-not-enabled for more details.\n'
+            'code=events-statements-time-instrumentation-not-enabled host=stubbed.hostname'
+        ]
+
+    # clear the warnings and rerun with time instrumentation enabled
+    mysql_check.warnings.clear()
+    mysql_check._statement_samples._collect_statement_samples()
+    mysql_check._statement_samples._collect_statement_samples()
+    dd_run_check(mysql_check)
+    # Should have no warnings when time instrumentation is enabled
     assert mysql_check.warnings == []
 
 

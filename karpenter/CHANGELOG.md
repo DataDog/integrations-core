@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 3.1.0 / 2025-10-02
+## 3.2.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Add support for Karpenter v1.8 metrics ([#21819](https://github.com/DataDog/integrations-core/pull/21819))
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 3.1.1 / 2025-10-31 / Agent 7.73.0
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 3.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

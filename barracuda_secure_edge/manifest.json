@@ -2,14 +2,15 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c0acbaef-4769-4ea9-aa77-b208440f9303",
   "app_id": "barracuda-secure-edge",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "SecureEdge is a unified SASE platform that includes NGFW, zero trust and secure SD-WAN",
-    "title": "Barracuda Secure Edge",
+    "title": "Barracuda SecureEdge",
     "media": [
       {
         "media_type": "image",
@@ -18,8 +19,8 @@
       },
       {
         "media_type": "image",
-        "caption": "Barracuda SecureEdge Overview Dark Mode",
-        "image_url": "images/secure_edge_overview_dark.png"
+        "caption": "Barracuda SecureEdge Overview Bottom Light Mode",
+        "image_url": "images/secure_edge_overview_bottom_section_light.png"
       }
     ],
     "classifier_tags": [
@@ -35,7 +36,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 48860633,
       "source_type_name": "barracuda_secure_edge",
       "configuration": {

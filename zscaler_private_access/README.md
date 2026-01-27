@@ -2,7 +2,7 @@
 
 ## Overview
 
-The [Zscaler Private Access][4] (ZPA) service enables organizations to provide access to internal applications and services while ensuring the security of their networks. ZPA is an easier to deploy, more cost-effective, and more secure alternative to VPNs. Unlike VPNs, which require users to connect to your network to access your enterprise applications, ZPA allows you to give users policy-based secure access only to the internal apps they need to get their work done.
+The [Zscaler Private Access][5] (ZPA) service enables organizations to provide access to internal applications and services while ensuring the security of their networks. ZPA is an easier-to-deploy and a more cost-effective and secure alternative to VPNs. Unlike VPNs, which require users to connect to your network to access your enterprise applications, ZPA provides policy-based secure access so users are only given access to the internal apps they need.
 
 The integration parses and ingests the following types of logs:
 - User Activity
@@ -24,13 +24,11 @@ Datadog uses its built-in log pipelines to parse and enrich these logs, facilita
 
 ### Installation
 
-To install the Zscaler Private Access integration, run the following Agent installation command in your terminal. Then, complete the configuration steps. For more information, see the [Integration Management][5] documentation.
+The Zscaler Private Access check is included in the [Datadog Agent][1] package. No additional installation is needed on your server. 
 
-**Note**: This step is not necessary for Agent version >= 7.71.0.
+### Network placement 
 
-```shell
-sudo -u dd-agent -- datadog-agent integration install datadog-zscaler_private_access==1.0.0
-```
+Place the Datadog Agent in the same subnet as the Zscaler App Connector so that log traffic stays on a trusted network segment.
 
 ### Configuration
 
@@ -58,7 +56,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-zscaler_private_ac
    - `PORT`: Port should be similar to the port provided in **Configure log receiver from Zscaler Private Access** section.
    - It is recommended not to change the source value, as these parameters are integral to the pipeline's operation.
 
-3. [Restart the Agent][1].
+3. [Restart the Agent][2].
 
 #### Configure log receiver from Zscaler Private Access
 
@@ -158,7 +156,7 @@ For Zscaler Private Access integration, specific custom log formats must be conf
 
 #### Validation
 
-[Run the Agent's status subcommand][2] and look for `zscaler_private_access` under the Checks section.
+[Run the Agent's status subcommand][3] and look for `zscaler_private_access` under the Checks section.
 
 ## Data Collected
 
@@ -200,7 +198,7 @@ If you see a **Permission denied** error while port binding in the Agent logs:
 
       **Note**: Re-run this `setcap` command every time you upgrade the Agent.
 
-   3. [Restart the Agent][1].
+   3. [Restart the Agent][2].
 
 ### Data is not being collected
 
@@ -220,11 +218,11 @@ To resolve:
 
 ## Support
 
-For further assistance, contact [Datadog support][3].
+For further assistance, contact [Datadog support][4].
 
-[1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[3]: https://docs.datadoghq.com/help/
-[4]: https://www.zscaler.com/products-and-solutions/zscaler-private-access
-[5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
+[1]: /account/settings/agent/latest
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/help/
+[5]: https://www.zscaler.com/products-and-solutions/zscaler-private-access
 [6]: https://github.com/DataDog/integrations-core/blob/master/zscaler_private_access/datadog_checks/zscaler_private_access/data/conf.yaml.example

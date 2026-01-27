@@ -2,6 +2,51 @@
 
 <!-- towncrier release notes start -->
 
+## 35.5.0 / 2025-12-12
+
+***Added***:
+
+* Add an exclusion for the mysql file that was deleted ([#22095](https://github.com/DataDog/integrations-core/pull/22095))
+
+## 35.4.0 / 2025-12-10
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+***Fixed***:
+
+* Mark TLS and JMX configuration template passwords as secrets. ([#21975](https://github.com/DataDog/integrations-core/pull/21975))
+* Fix release make all command when an integration does not have a manifest file ([#21977](https://github.com/DataDog/integrations-core/pull/21977))
+
+## 35.3.1 / 2025-11-19
+
+***Fixed***:
+
+* Add a fallback mechanism when mount_logs is True and no manifest is present in the integration ([#21784](https://github.com/DataDog/integrations-core/pull/21784))
+* Update event integration template. ([#21897](https://github.com/DataDog/integrations-core/pull/21897))
+
+## 35.3.0 / 2025-11-03
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+* Add KindLoad wrapper utility that allows to load Docker images into kind for testing ([#21288](https://github.com/DataDog/integrations-core/pull/21288))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+* Add helper method to get a list of N free ports ([#21662](https://github.com/DataDog/integrations-core/pull/21662))
+* Add new template for creating event integrations ([#21717](https://github.com/DataDog/integrations-core/pull/21717))
+
+***Fixed***:
+
+* Fix validate models error reporting which would not report an invalid schema in the config spec and just fail ([#20445](https://github.com/DataDog/integrations-core/pull/20445))
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+* Fix wait_for_health flag win docker_run ([#21209](https://github.com/DataDog/integrations-core/pull/21209))
+* Move KindLoad to a built-in condition instead of a wrapper ([#21292](https://github.com/DataDog/integrations-core/pull/21292))
+* Remove license validation overrides for `pycryptodomex` dependency. ([#21378](https://github.com/DataDog/integrations-core/pull/21378))
+* Fixes InstanceConfig model generation when validators functions are defined in spec.yaml ([#21409](https://github.com/DataDog/integrations-core/pull/21409))
+* Fix schema issue on `ignore_metrics_by_labels` field ([#21583](https://github.com/DataDog/integrations-core/pull/21583))
+
 ## 35.2.0 / 2025-08-20
 
 ***Added***:

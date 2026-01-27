@@ -13,7 +13,7 @@ The Cisco ACI Integration lets you:
 
 ## Setup
 
-<div class="alert alert-info">Enabling send_ndm_metadata to send metadata from this integration has potential billing implications. See the <a href="https://www.datadoghq.com/pricing/?product=network-monitoring&tab=ndm#products"> pricing page </a> for more information.</div>
+**The Cisco ACI integration is Generally Available. To learn more about billing implications, visit our [pricing page][19].**
 
 ### Installation
 
@@ -153,7 +153,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 ## Troubleshooting
 
 ### Missing `cisco_aci.tenant.*` metrics
-If you are missing `cisco_aci.tenant.*` metrics, you can run the `test/cisco_aci_query.py` script to manually query the tenant endpoint.
+If you are missing `cisco_aci.tenant.*` metrics, you can run the `tests/cisco_aci_query.py` [script][18] to manually query the tenant endpoint. 
 
 Modify the `apic_url`, `apic_username`, and `apic_password` to your configuration information, and input the tenant URL for the `apic_url`.
 
@@ -197,3 +197,5 @@ Contact [Datadog support][9].
 [15]: /dash/integration/242/cisco-aci---overview
 [16]: /logs
 [17]: https://docs.datadoghq.com/logs/log_collection/?tab=host#setup
+[18]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/tests/cisco_aci_query.py
+[19]: https://www.datadoghq.com/pricing/?product=network-monitoring&tab=network-device-monitoring#products

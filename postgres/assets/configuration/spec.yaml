@@ -17,8 +17,8 @@ files:
     options:
     - name: host
       description: |
-        The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
-        e.g. `/var/run/postgresql/.s.PGSQL.5432`.
+        The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
+        e.g. `/var/run/postgresql`.
       value:
         type: string
         display_default: "localhost"
@@ -34,6 +34,7 @@ files:
         display_default: "datadog"
     - name: password
       description: The password associated with the Datadog user.
+      secret: true
       value:
         type: string
     - name: dbname
@@ -363,16 +364,20 @@ files:
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
-        NOTE:
-        For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
-        Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
+
+        When unset, this defaults to `true` for Postgres 10+ (uses `pg_ls_waldir` via SQL) and `false` for
+        Postgres 9.6 and below (requires local filesystem access to the WAL directory).
+
+        Set to `true` explicitly for Postgres 9.6 and below only if the Agent runs on the same host as the
+        database and has read access to the WAL directory. You must also configure `data_directory`.
       value:
         type: boolean
         example: true
+        display_default: null
     - name: data_directory
       description: |
-        The data directory of your postgres installation
-        Required when collecting WAL metrics on Postgres 9.6.
+        The data directory of your postgres installation.
+        Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
       value:
         type: string
         example: /usr/local/pgsql/data
@@ -467,6 +472,9 @@ files:
               - "rdsadmin"
             display_default:
               - "cloudsqladmin"
+              - "rdsadmin" 
+              - "alloydbadmin"
+              - "alloydbmetadata"
         - name: refresh
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
           value:
@@ -561,7 +569,7 @@ files:
             Set the max number of full statement text samples to collect per hour per query.
           value:
             type: number
-            default: 10000
+            default: 1
         - name: incremental_query_metrics
           hidden: true
           description: |
@@ -597,36 +605,36 @@ files:
             type: integer
             example: 20_000_000
     - name: query_samples
-      description: Configure collection of query samples
+      description: Configure collection of explain plan samples
       options:
         - name: enabled
           description: |
-            Enable collection of query samples. Requires `dbm: true`.
+            Enable collection of explain plans. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the query sample collection interval (in seconds). Each collection involves a single query to
+            Set the explain plan collection interval (in seconds). Each collection involves a single query to
             `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
           value:
             type: number
             example: 1
         - name: explain_function
           description: |
-            Override the default function used to collect execution plans for queries.
+            Override the default function used to collect explain plans for queries.
           value:
             type: string
             example: datadog.explain_statement
         - name: explained_queries_per_hour_per_query
           description: |
-            Set the rate limit for how many execution plans will be collected per hour per normalized query.
+            Set the rate limit for how many explain plans will be collected per hour per normalized query.
           value:
             type: integer
             example: 60
         - name: samples_per_hour_per_query
           description: |
-            Set the rate limit for how many query sample events will be ingested per hour per normalized execution
+            Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
             plan.
           value:
             type: integer
@@ -642,7 +650,7 @@ files:
         - name: seen_samples_cache_maxsize
           description: |
             Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
-            for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+            for databases with a very large number of unique normalized explain plans which exceed the cache's limit.
           value:
             type: integer
             example: 10000
@@ -676,25 +684,25 @@ files:
             type: boolean
             example: false
     - name: query_activity
-      description: Configure collection of query activity
+      description: Configure collection of in-flight query samples
       options:
         - name: enabled
           description: |
-            Enable collection of query activity. Requires `dbm: true`.
+            Enable collection of in-flight query samples. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the query activity collection interval (in seconds). This number cannot be smaller than
-            query_samples configured collection_interval.
+            Set the in-flight query sample collection interval (in seconds). This number cannot be smaller than
+            the `query_samples` configured collection_interval.
           value:
             type: number
             example: 10
           hidden: true
         - name: payload_row_limit
           description: |
-            Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+            Set the maximum number of pg_stat_activity rows you want to report. If the table is larger
             than the maximum rows set, then the top N longest running transactions will be reported.
           value:
             type: number
@@ -754,6 +762,12 @@ files:
             type: number
             example: 300
             display_default: 300
+        - name: max_query_duration
+          description: |
+            Maximum duration of the query to collect schema information in seconds.
+          value:
+            type: number
+            display_default: 60
         - name: max_columns
           description: |
             Maximum amount of columns the Agent collects per table.
@@ -846,8 +860,10 @@ files:
       options:
         - name: instance_endpoint
           description: |
-            Equal to the Endpoint.Address of the instance the agent is connecting to.
-            This value is optional if the value of `host` is already configured to the instance endpoint.
+            Set to the Endpoint.Address of the instance the agent is connecting to.
+            Use this value to allow association of RDS metrics with the instance when 
+            connecting to the instance through a proxy or CNAME, or if you set `reported_hostname`
+            to a different value from the instance endpoint.
 
             For more information on instance endpoints,
             see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
@@ -1101,11 +1117,11 @@ files:
             display_default: false
     - name: collect_raw_query_statement
       description: |
-        Configure the collection of raw query statements in query activity and execution plans.
-        Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+        Configure the collection of raw query statements in query samples and explain plans.
+        Raw query statements and explain plans may contain sensitive information (e.g., passwords)
         or personally identifiable information in query text.
         Enabling this option will allow the collection and ingestion of raw query statements and 
-        execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+        explain plans into Datadog, which can then become viewable in query samples or explain plans. 
         This option is disabled by default.
         Note: Collection of raw query statements is currently in preview.
         If you are interested in participating, please reach out to your Datadog Customer Success Manager.

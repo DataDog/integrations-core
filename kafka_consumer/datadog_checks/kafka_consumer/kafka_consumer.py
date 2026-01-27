@@ -13,10 +13,15 @@ from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
 from google.protobuf.json_format import MessageToJson
 from google.protobuf.message import DecodeError, EncodeError
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
+from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
-from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
+from datadog_checks.kafka_consumer.constants import (
+    HIGH_WATERMARK,
+    KAFKA_INTERNAL_TOPICS,
+    OFFSET_INVALID,
+)
 
 MAX_TIMESTAMPS = 1000
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
@@ -30,11 +35,14 @@ class KafkaCheck(AgentCheck):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
-        self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
+        self._data_streams_enabled = self.config._data_streams_enabled
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
         self.topic_partition_cache = {}
         self.check_initializations.insert(0, self.config.validate_config)
+
+        # Initialize cluster metadata collector
+        self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -66,8 +74,17 @@ class KafkaCheck(AgentCheck):
         try:
             if consumer_contexts_count < self._context_limit:
                 # Fetch highwater offsets
+                # Build partitions list or use all if configured
+                # If cluster monitoring is enabled, always fetch all broker highwater marks
+                if self.config._cluster_monitoring_enabled or self.config._monitor_all_broker_highwatermarks:
+                    partitions = None
+                else:
+                    partitions = set()
+                    for _, offsets in consumer_offsets.items():
+                        for topic, partition in offsets:
+                            partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
-                highwater_offsets, cluster_id = self.get_highwater_offsets(consumer_offsets)
+                highwater_offsets, cluster_id = self.get_watermark_offsets(partitions, mode=HIGH_WATERMARK)
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
@@ -106,6 +123,14 @@ class KafkaCheck(AgentCheck):
             cluster_id,
         )
         self.data_streams_live_message(highwater_offsets or {}, cluster_id)
+
+        # Collect cluster metadata if enabled
+        if self.config._cluster_monitoring_enabled:
+            try:
+                self.metadata_collector.collect_all_metadata(highwater_offsets)
+            except Exception as e:
+                self.log.error("Error collecting cluster metadata: %s", e)
+
         if self.config._close_admin_client:
             self.client.close_admin_client()
 
@@ -345,49 +370,52 @@ class KafkaCheck(AgentCheck):
         )
         return consumer_group_state
 
-    def get_highwater_offsets(self, consumer_offsets):
-        self.log.debug('Getting highwater offsets')
+    def get_watermark_offsets(self, partitions=None, mode=HIGH_WATERMARK):
+        self.log.debug('Getting %s offsets', 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
 
-        cluster_id = ""
-        dd_consumer_group = "datadog-agent"
-        highwater_offsets = {}
+        # Build partitions set
         topic_partitions_to_check = set()
-
-        if self.config._monitor_all_broker_highwatermarks:
+        if partitions is None:
             all_topic_partitions = self.client.get_topic_partitions()
             for topic in all_topic_partitions:
                 if topic in KAFKA_INTERNAL_TOPICS:
                     self.log.debug("Skipping internal topic %s", topic)
                     continue
-
                 for partition in all_topic_partitions[topic]:
                     topic_partitions_to_check.add((topic, partition))
-
         else:
-            for _, offsets in consumer_offsets.items():
-                for topic, partition in offsets:
-                    if topic in KAFKA_INTERNAL_TOPICS:
-                        self.log.debug("Skipping internal topic %s", topic)
-                        continue
+            for topic, partition in partitions:
+                if topic in KAFKA_INTERNAL_TOPICS:
+                    self.log.debug("Skipping internal topic %s", topic)
+                    continue
+                topic_partitions_to_check.add((topic, partition))
 
-                    topic_partitions_to_check.add((topic, partition))
+        if not topic_partitions_to_check:
+            self.log.debug('No partitions to check for offsets')
+            return {}, ""
 
+        dd_consumer_group = "datadog-agent"
+
+        # Open consumer once for both cluster_id and offset fetching
         self.client.open_consumer(dd_consumer_group)
         cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+
         self.log.debug(
-            'Querying %s highwater offsets for consumer group %s',
+            'Querying %s %s offsets',
             len(topic_partitions_to_check),
-            dd_consumer_group,
+            'highwater' if mode == HIGH_WATERMARK else 'lowwater',
         )
-        if topic_partitions_to_check:
-            for topic, partition, offset in self.client.consumer_offsets_for_times(
-                partitions=topic_partitions_to_check
-            ):
-                highwater_offsets[(topic, partition)] = offset
+
+        result = {}
+        for topic, partition, offset in self.client.consumer_offsets_for_times(
+            partitions=topic_partitions_to_check, offset=mode
+        ):
+            result[(topic, partition)] = offset
 
         self.client.close_consumer()
-        self.log.debug('Got %s highwater offsets', len(highwater_offsets))
-        return highwater_offsets, cluster_id
+
+        self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+        return result, cluster_id
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
@@ -415,8 +443,10 @@ class KafkaCheck(AgentCheck):
             config_id = cfg["id"]
             value_format = kafka["value_format"]
             value_schema_str = kafka.get("value_schema", "")
+            value_uses_schema_registry = kafka.get("value_uses_schema_registry", False)
             key_format = kafka["key_format"]
             key_schema_str = kafka.get("key_schema", "")
+            key_uses_schema_registry = kafka.get("key_uses_schema_registry", False)
             if self._messages_have_been_retrieved(config_id):
                 continue
             if not cluster or not cluster_id or cluster.lower() != cluster_id.lower():
@@ -497,7 +527,13 @@ class KafkaCheck(AgentCheck):
                         'feature': 'data_streams_messages',
                     }
                     decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(
-                        message, value_format, value_schema, key_format, key_schema
+                        message,
+                        value_format,
+                        value_schema,
+                        value_uses_schema_registry,
+                        key_format,
+                        key_schema,
+                        key_uses_schema_registry,
                     )
                     if decoded_value:
                         data['message_value'] = decoded_value
@@ -570,48 +606,116 @@ def resolve_start_offsets(highwater_offsets, target_topic, target_partition, sta
     return [TopicPartition(target_topic, target_partition, start_offset)]
 
 
-def deserialize_message(message, value_format, value_schema, key_format, key_schema):
+def deserialize_message(
+    message,
+    value_format,
+    value_schema,
+    value_uses_schema_registry,
+    key_format,
+    key_schema,
+    key_uses_schema_registry,
+):
     try:
         decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(
-            message.value(), value_format, value_schema
+            message.value(), value_format, value_schema, value_uses_schema_registry
         )
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return None, None, None, None
     try:
-        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(message.key(), key_format, key_schema)
+        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(
+            message.key(), key_format, key_schema, key_uses_schema_registry
+        )
         return decoded_value, value_schema_id, decoded_key, key_schema_id
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return decoded_value, value_schema_id, None, None
 
 
-def _deserialize_bytes_maybe_schema_registry(message, message_format, schema):
-    try:
-        return _deserialize_bytes(message, message_format, schema), None
-    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as e:
-        # If the message is not a valid JSON, it might be a schema registry message, that is prefixed
-        # with a magic byte and a schema ID.
-        if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
-            raise e
-        schema_id = int.from_bytes(message[1:5], 'big')
-        message = message[5:]  # Skip the schema ID bytes
-        return _deserialize_bytes(message, message_format, schema), schema_id
+def _read_varint(data):
+    shift = 0
+    result = 0
+    bytes_read = 0
+
+    for byte in data:
+        bytes_read += 1
+        result |= (byte & 0x7F) << shift
+        if (byte & 0x80) == 0:
+            return result, bytes_read
+        shift += 7
+
+    raise ValueError("Incomplete varint")
 
 
-def _deserialize_bytes(message, message_format, schema):
-    """Deserialize a message from Kafka. Supports JSON format.
+def _read_protobuf_message_indices(payload):
+    """
+    Read the Confluent Protobuf message indices array.
+
+    The Confluent Protobuf wire format includes message indices after the schema ID:
+    [message_indices_length:varint][message_indices:varint...]
+
+    The indices indicate which message type to use from the .proto schema.
+    For example, [0] = first message, [1] = second message, [0, 0] = nested message.
+
+    Args:
+        payload: bytes after the schema ID
+
+    Returns:
+        tuple: (message_indices list, remaining payload bytes)
+    """
+    array_len, bytes_read = _read_varint(payload)
+    payload = payload[bytes_read:]
+
+    indices = []
+    for _ in range(array_len):
+        index, bytes_read = _read_varint(payload)
+        indices.append(index)
+        payload = payload[bytes_read:]
+
+    return indices, payload
+
+
+def _deserialize_bytes_maybe_schema_registry(message, message_format, schema, uses_schema_registry):
+    if not message:
+        return "", None
+    if uses_schema_registry:
+        return _deserialize_bytes(message, message_format, schema, True)
+    else:
+        # Fallback behavior: try without schema registry format first, then with it
+        try:
+            return _deserialize_bytes(message, message_format, schema, False)
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+            return _deserialize_bytes(message, message_format, schema, True)
+
+
+def _deserialize_bytes(message, message_format, schema, uses_schema_registry):
+    """Deserialize a message from Kafka.
     Args:
         message: Raw message bytes from Kafka
+        message_format: Format of the message (protobuf, avro, json, etc.)
+        schema: Schema object (type depends on message_format)
+        uses_schema_registry: Whether message uses schema registry format
     Returns:
-        Decoded message as a string
+        Tuple of (decoded_message, schema_id) where schema_id is None if not using schema registry
     """
     if not message:
-        return ""
+        return "", None
+
+    schema_id = None
+    if uses_schema_registry:
+        if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
+            msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
+            raise ValueError(
+                f"Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
+                f"but message is too short or has wrong magic byte: {msg_hex}"
+            )
+        schema_id = int.from_bytes(message[1:5], 'big')
+        message = message[5:]
+
     if message_format == 'protobuf':
-        return _deserialize_protobuf(message, schema)
+        return _deserialize_protobuf(message, schema, uses_schema_registry), schema_id
     elif message_format == 'avro':
-        return _deserialize_avro(message, schema)
+        return _deserialize_avro(message, schema), schema_id
     else:
-        return _deserialize_json(message)
+        return _deserialize_json(message), schema_id
 
 
 def _deserialize_json(message):
@@ -620,19 +724,92 @@ def _deserialize_json(message):
     return decoded
 
 
-def _deserialize_protobuf(message, schema):
-    """Deserialize a Protobuf message using google.protobuf."""
+def _get_protobuf_message_class(schema_info, message_indices):
+    """Get the protobuf message class based on schema info and message indices.
+
+    Args:
+        schema_info: Tuple of (descriptor_pool, file_descriptor_set)
+        message_indices: List of indices (e.g., [0], [1], [2, 0] for nested)
+
+    Returns:
+        Message class for the specified type
+    """
+    pool, descriptor_set = schema_info
+
+    # First index is the message type in the file
+    file_descriptor = descriptor_set.file[0]
+    message_descriptor_proto = file_descriptor.message_type[message_indices[0]]
+
+    package = file_descriptor.package
+    name_parts = [message_descriptor_proto.name]
+
+    # Handle nested messages if there are more indices
+    current_proto = message_descriptor_proto
+    for idx in message_indices[1:]:
+        current_proto = current_proto.nested_type[idx]
+        name_parts.append(current_proto.name)
+
+    if package:
+        full_name = f"{package}.{'.'.join(name_parts)}"
+    else:
+        full_name = '.'.join(name_parts)
+
+    message_descriptor = pool.FindMessageTypeByName(full_name)
+    return message_factory.GetMessageClass(message_descriptor)
+
+
+def _deserialize_protobuf(message, schema_info, uses_schema_registry):
+    """Deserialize a Protobuf message using google.protobuf with strict validation.
+
+    Args:
+        message: Raw protobuf bytes
+        schema_info: Tuple of (descriptor_pool, file_descriptor_set) from build_protobuf_schema
+        uses_schema_registry: Whether to extract Confluent message indices from the message
+    """
     try:
-        schema.ParseFromString(message)
-        return MessageToJson(schema)
+        if uses_schema_registry:
+            message_indices, message = _read_protobuf_message_indices(message)
+            # Empty indices array means use the first message type (index 0)
+            if not message_indices:
+                message_indices = [0]
+        else:
+            message_indices = [0]
+
+        message_class = _get_protobuf_message_class(schema_info, message_indices)
+        schema_instance = message_class()
+
+        bytes_consumed = schema_instance.ParseFromString(message)
+
+        # Check if all bytes were consumed (strict validation)
+        if bytes_consumed != len(message):
+            raise ValueError(
+                f"Not all bytes were consumed during Protobuf decoding! "
+                f"Read {bytes_consumed} bytes, but message has {len(message)} bytes. "
+            )
+
+        return MessageToJson(schema_instance)
     except Exception as e:
         raise ValueError(f"Failed to deserialize Protobuf message: {e}")
 
 
 def _deserialize_avro(message, schema):
-    """Deserialize an Avro message using fastavro."""
+    """Deserialize an Avro message using fastavro with strict validation."""
     try:
-        data = schemaless_reader(BytesIO(message), schema)
+        bio = BytesIO(message)
+        initial_position = bio.tell()
+        data = schemaless_reader(bio, schema)
+        final_position = bio.tell()
+
+        # Check if all bytes were consumed (strict validation)
+        bytes_read = final_position - initial_position
+        total_bytes = len(message)
+
+        if bytes_read != total_bytes:
+            raise ValueError(
+                f"Not all bytes were consumed during Avro decoding! "
+                f"Read {bytes_read} bytes, but message has {total_bytes} bytes. "
+            )
+
         return json.dumps(data)
     except Exception as e:
         raise ValueError(f"Failed to deserialize Avro message: {e}")
@@ -657,6 +834,17 @@ def build_avro_schema(schema_str):
 
 
 def build_protobuf_schema(schema_str):
+    """Build a Protobuf schema from a base64-encoded FileDescriptorSet.
+
+    Returns a tuple of (descriptor_pool, file_descriptor_set) that can be used
+    to dynamically select and instantiate message types based on message indices.
+
+    Args:
+        schema_str: Base64-encoded FileDescriptorSet
+
+    Returns:
+        tuple: (DescriptorPool, FileDescriptorSet)
+    """
     # schema is encoded in base64, decode it before passing it to ParseFromString
     schema_str = base64.b64decode(schema_str)
     descriptor_set = descriptor_pb2.FileDescriptorSet()
@@ -667,24 +855,4 @@ def build_protobuf_schema(schema_str):
     for fd_proto in descriptor_set.file:
         pool.Add(fd_proto)
 
-    # Pick the first message type from the first file descriptor
-    first_fd = descriptor_set.file[0]
-    # The file descriptor contains a list of message types (DescriptorProto)
-    first_message_proto = first_fd.message_type[0]
-
-    # The fully qualified name includes the package name + message name
-    package = first_fd.package
-    message_name = first_message_proto.name
-    if package:
-        full_name = f"{package}.{message_name}"
-    else:
-        full_name = message_name
-    # # Get the message descriptor
-    message_descriptor = pool.FindMessageTypeByName(full_name)
-    # Create a dynamic message class
-    schema = message_factory.GetMessageClass(message_descriptor)()
-
-    if schema is None:
-        raise ValueError("Protobuf schema cannot be None")
-
-    return schema
+    return (pool, descriptor_set)

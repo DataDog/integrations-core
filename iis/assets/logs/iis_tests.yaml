@@ -34,6 +34,41 @@ tests:
         client:
           ip: "123.123.123.123"
           port: 80
+      ocsf:
+        activity_id: 3
+        activity_name: "Get"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "HTTP Activity"
+        class_uid: 4002
+        dst_endpoint:
+          ip: "172.22.255.255"
+        duration: 1.234E9
+        http_request:
+          http_method: "GET"
+          url:
+            path: "/images/picture.jpg"
+          user_agent: "Mozilla/4.0+(compatible;MSIE+5.5;+Windows+2000+Server)"
+        http_response:
+          code: 200
+          status: "OK"
+        metadata:
+          event_code: "GET"
+          product:
+            name: "iis"
+            vendor_name: "Microsoft"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "123.123.123.123"
+          os:
+            type: "Windows"
+            type_id: 100
+        status: "Success"
+        status_code: "200"
+        status_id: 1
+        time: 1020361335000
     message: "2002-05-02 17:42:15 172.22.255.255 GET /images/picture.jpg ?toto=tata 80 toto 123.123.123.123 Mozilla/4.0+(compatible;MSIE+5.5;+Windows+2000+Server) 200 211 322 1234"
     status: "ok"
     tags:

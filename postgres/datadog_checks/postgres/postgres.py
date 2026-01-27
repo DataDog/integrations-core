@@ -12,6 +12,7 @@ import psycopg
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
@@ -75,6 +76,7 @@ from .util import (
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
+    STAT_WAL_METRICS_LT_18,
     SUBSCRIPTION_STATE_METRICS,
     VACUUM_PROGRESS_METRICS,
     VACUUM_PROGRESS_METRICS_LT_17,
@@ -86,7 +88,7 @@ from .util import (
     payload_pg_version,
     warning_with_tags,
 )
-from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionUtils
+from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, V18, VersionUtils
 
 try:
     import datadog_agent
@@ -98,7 +100,7 @@ MAX_CUSTOM_RESULTS = 100
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
 
-class PostgreSql(AgentCheck):
+class PostgreSql(DatabaseCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     __NAMESPACE__ = 'postgresql'
@@ -128,32 +130,18 @@ class PostgreSql(AgentCheck):
 
         config, validation_result = build_config(self)
         self._config = config
+        self._validation_result = validation_result
         # Log validation errors and warnings
         for error in validation_result.errors:
             self.log.error(error)
         for warning in validation_result.warnings:
             self.log.warning(warning)
 
-        self.tags = list(self._config.tags)
+        self._tags = list(self._config.tags)
         self.add_core_tags()
 
-        try:
-            # Handle the config validation result after we've set tags so those tags are included in the health event
-            self.health.submit_health_event(
-                name=HealthEvent.INITIALIZATION,
-                status=HealthStatus.ERROR
-                if not validation_result.valid
-                else HealthStatus.WARNING
-                if validation_result.warnings
-                else HealthStatus.OK,
-                errors=[str(error) for error in validation_result.errors],
-                warnings=validation_result.warnings,
-                config=sanitize(self._config),
-                instance=sanitize(self.instance),
-                features=validation_result.features,
-            )
-        except Exception as e:
-            self.log.error("Error submitting health event for initialization: %s", e)
+        # Submit the initialization health event in case the `check` method is never called
+        self._submit_initialization_health_event()
 
         # Abort initializing the check if the config is invalid
         if validation_result.valid is False:
@@ -199,6 +187,30 @@ class PostgreSql(AgentCheck):
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
 
+    def _submit_initialization_health_event(self):
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            # TODO: Use the submission debouncer to only send this every 6 hours
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.ERROR
+                if not self._validation_result.valid
+                else HealthStatus.WARNING
+                if self._validation_result.warnings
+                else HealthStatus.OK,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={
+                    "errors": [str(error) for error in self._validation_result.errors],
+                    "warnings": self._validation_result.warnings,
+                    "initialized_at": self._validation_result.created_at,
+                    "config": sanitize(self._config),
+                    "instance": sanitize(self.instance),
+                    "features": self._validation_result.features,
+                },
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
+
     def _build_autodiscovery(self):
         if not self._config.database_autodiscovery.enabled:
             return None
@@ -216,6 +228,15 @@ class PostgreSql(AgentCheck):
             self._config.idle_connection_timeout,
         )
         return discovery
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def dbms(self):
+        # Override the default to return "postgres" instead of "postgresql"
+        return "postgres"
 
     def add_core_tags(self):
         """
@@ -376,7 +397,8 @@ class PostgreSql(AgentCheck):
             if self.is_aurora is False:
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
                 if self._config.collect_wal_metrics is not False:
-                    # collect wal metrics for pg >= 10 only if the user has not explicitly disabled it
+                    # collect wal metrics for pg >= 10 by default (uses pg_ls_waldir via SQL)
+                    # unless the user has explicitly disabled it
                     queries.append(WAL_FILE_METRICS)
             if self._config.collect_buffercache_metrics:
                 queries.append(BUFFERCACHE_METRICS)
@@ -397,7 +419,10 @@ class PostgreSql(AgentCheck):
             queries.append(SNAPSHOT_TXID_METRICS_LT_13)
         if self.version >= V14:
             if self.is_aurora is False:
-                queries.append(STAT_WAL_METRICS)
+                if self.version >= V18:
+                    queries.append(STAT_WAL_METRICS)
+                else:
+                    queries.append(STAT_WAL_METRICS_LT_18)
             queries.append(QUERY_PG_REPLICATION_SLOTS_STATS)
             queries.append(SUBSCRIPTION_STATE_METRICS)
         if self.version >= V15:
@@ -1031,6 +1056,10 @@ class PostgreSql(AgentCheck):
         for warning in messages:
             self.warning(warning)
 
+    @property
+    def dbms_version(self):
+        return payload_pg_version(self.version)
+
     def _send_database_instance_metadata(self):
         if self.database_identifier not in self._database_instance_emitted:
             event = {
@@ -1043,7 +1072,7 @@ class PostgreSql(AgentCheck):
                 "dbms": "postgres",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
-                'dbms_version': payload_pg_version(self.version),
+                'dbms_version': self.dbms_version,
                 'integration_version': __version__,
                 "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
@@ -1064,6 +1093,9 @@ class PostgreSql(AgentCheck):
         }
 
     def check(self, _):
+        # Resend the initialization event. The submitter will debounce it
+        self._submit_initialization_health_event()
+
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
@@ -1099,17 +1131,22 @@ class PostgreSql(AgentCheck):
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._emit_running_metric()
-            self._collect_stats(tags)
+
+            if not self._config.only_custom_queries:
+                self._collect_stats(tags)
+                if self._config.dbm:
+                    self.statement_metrics.run_job_loop(tags)
+                    self.statement_samples.run_job_loop(tags)
+                    self.metadata_samples.run_job_loop(tags)
+                if self._config.collect_wal_metrics is True:
+                    # collect wal metrics for pg < 10 only when explicitly enabled
+                    # (requires local filesystem access to the WAL directory)
+                    self._collect_wal_metrics()
+
             if self._query_manager.queries:
                 self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
-            if self._config.dbm:
-                self.statement_metrics.run_job_loop(tags)
-                self.statement_samples.run_job_loop(tags)
-                self.metadata_samples.run_job_loop(tags)
-            if self._config.collect_wal_metrics:
-                # collect wal metrics for pg < 10, disabled by enabled
-                self._collect_wal_metrics()
+
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()

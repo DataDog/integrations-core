@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 import subprocess
 from datetime import datetime, timezone
@@ -14,6 +15,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from .constants import (
     CURATED_PARAMS,
     DEFAULT_STATS,
+    DEVICE_ATTR_NAMES,
     EXTRA_STATS,
     FILESYSTEM_DISCOVERY_PARAM_MAPPING,
     IGNORED_LNET_GROUPS,
@@ -65,6 +67,30 @@ def _handle_ip_in_param(parts: List[str]) -> Tuple[List[str], bool]:
     return [*parts[: index - 3], new_part, *parts[index + 1 :]], True
 
 
+def _sanitize_command(bin_path: str) -> None:
+    """
+    Validate that the binary path is safe to execute.
+
+    Ensures the path is absolute and is an expected Lustre binary.
+
+    Raises:
+        ValueError: If the path is not absolute or not an expected binary
+    """
+    # Allowlist of expected Lustre binaries
+    EXPECTED_BINARIES = {'lctl', 'lnetctl', 'lfs'}
+
+    # Check if the path is absolute
+    if not os.path.isabs(bin_path):
+        raise ValueError(f'Binary path must be absolute: {bin_path}')
+
+    # Extract the binary name from the path
+    binary_name = os.path.basename(bin_path)
+
+    # Check if it's an expected Lustre binary
+    if binary_name not in EXPECTED_BINARIES:
+        raise ValueError(f'Unexpected binary: {binary_name}. Expected one of: {EXPECTED_BINARIES}')
+
+
 class LustreCheck(AgentCheck):
     __NAMESPACE__ = 'lustre'
 
@@ -92,6 +118,7 @@ class LustreCheck(AgentCheck):
         self.filesystems: List[str] = self.instance.get('filesystems', [])
         # If filesystems were provided by the instance, do not update the filesystem list
         self.filesystem_discovery: bool = False if self.filesystems else True
+        self._use_yaml: bool = True  # Older versions of Lustre (<2.15.5) do not support yaml as an output
         self.node_type: str = self.instance.get('node_type', self._find_node_type())
 
         self.tags: List[str] = self.instance.get('tags', [])
@@ -147,9 +174,28 @@ class LustreCheck(AgentCheck):
         Find devices using the lctl dl command.
         '''
         self.log.debug('Updating device list...')
-        output = self._run_command('lctl', 'dl', '-y')
-        device_data = yaml.safe_load(output)
-        self.devices = device_data.get('devices', [])
+        devices = []
+        if self._use_yaml:
+            try:
+                output = self._run_command('lctl', 'dl', '-y')
+                device_data = yaml.safe_load(output)
+                devices = device_data.get('devices', [])
+            except AttributeError:
+                self.log.debug('Device update failed with yaml flag, retrying without it.')
+                self._use_yaml = False
+        if not self._use_yaml:
+            output = self._run_command('lctl', 'dl')
+            for device_line in output.splitlines():
+                device_attr = device_line.split()
+                if not len(device_attr) == len(DEVICE_ATTR_NAMES):
+                    self.log.error('Could not parse device info: %s', device_line)
+                    continue
+                devices.append(dict(zip(DEVICE_ATTR_NAMES, device_attr)))
+        if not devices:
+            self.log.error("No devices detected.")
+            return
+        self.devices = devices
+        self.log.debug('Devices successfully updated.')
 
     def _update_filesystems(self) -> None:
         '''
@@ -204,10 +250,15 @@ class LustreCheck(AgentCheck):
         if bin not in self._bin_mapping:
             raise ValueError('Unknown binary: {}'.format(bin))
         bin_path = self._bin_mapping[bin]
-        cmd = f'{"sudo " if sudo else ""}{bin_path} {" ".join(args)}'
+        _sanitize_command(bin_path)
+        cmd = [bin_path, *args]
+        if sudo:
+            cmd.insert(0, "sudo")
         try:
             self.log.debug('Running command: %s', cmd)
-            output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
+            output = subprocess.run(
+                cmd, timeout=5, shell=False, capture_output=True, text=True
+            )  # Explicitly disable shell invocation to prevent command injection
             if not output.returncode == 0 and output.stderr:
                 self.log.debug(
                     'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr

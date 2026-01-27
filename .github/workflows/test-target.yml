@@ -1,6 +1,7 @@
-# "target" refers to the integration (a.k.a. check) that we want to test.
-# This action is a template that we reuse in other actions such as test-all or pr-test.
-name: Test target
+# This is a copy of the test target workflow created for testing updates on the workflow without impacting the on used in our PRs.
+# Since this workflow is used through workflow dispatch, it needs to be in master to be able tot be executed. This means that we cannot
+# easily update it to test someth8ing without impacting onging runs.
+name: Test Target
 
 on:
   workflow_call:
@@ -28,7 +29,7 @@ on:
 
       python-version:
         required: false
-        default: ""
+        default: "3.13"
         type: string
       benchmark:
         required: false
@@ -69,14 +70,6 @@ on:
         required: false
         default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
-      traces-artifact-name:
-        required: false
-        default: "traces"
-        type: string
-      trace-agent-port:
-        required: false
-        default: "8126"
-        type: string
       setup-env-vars:
         required: false
         default: ""
@@ -87,7 +80,7 @@ on:
         type: string
         default: ""
       context:
-        description: "Context where the test is run"
+        description: "Context where the test is run. This is used for CI visibility descovery."
         required: false
         default: "standard"
         type: string
@@ -106,38 +99,10 @@ jobs:
     name: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
     runs-on: ${{ fromJson(inputs.runner) }}
 
-    env:
-      FORCE_COLOR: "1"
-      PYTHON_VERSION: "${{ inputs.python-version || '3.13' }}"
-      SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
-      # Windows E2E requires Windows containers
-      DDEV_E2E_AGENT: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows) || inputs.agent-image }}"
-      DDEV_E2E_AGENT_PY2: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows-py2) || inputs.agent-image-py2 }}"
-      # Test results for later processing
-      TEST_RESULTS_BASE_DIR: "test-results"
-      # Tracing to monitor our test suite
-      DD_ENV: "ci"
-      DD_SERVICE: "${{ inputs.target }}-integrations-${{ inputs.repo }}"
-      DD_TRACE_ANALYTICS_ENABLED: "true"
-      # Capture traces for a separate job to do the submission
-      TRACE_CAPTURE_BASE_DIR: "trace-captures"
-      TRACE_CAPTURE_LOG: "trace-captures/output.log"
-      # Prefix for artifact names when using minimum base package
-      MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"
-
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
     steps:
-
-    - name: Set environment variables
-      run: |
-        # We want to replace leading dots as they will make directories hidden, which will cause them to be ignored by upload-artifact and EnricoMi/publish-unit-test-result-action
-        JOB_NAME=$(echo "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}" | sed 's/^\./Dot/')
-
-        echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
-        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
-        echo "DD_TAGS=team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }},agent_image:$DDEV_E2E_AGENT,context:${{ inputs.context }}" >> $GITHUB_ENV
 
     - name: Set up Windows
       if: runner.os == 'Windows'
@@ -146,6 +111,84 @@ jobs:
         diskperf -y
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    # We run this for EVERYONE to ensure the scripts are moved
+    # from the action folder to the expected workspace path.
+    # It should cover all repos using this workflow and respect the context if the
+    # workflow is being called with a pinned version.
+    - name: Install workflow scripts
+      uses: ./.github/actions/setup-test-target-scripts
+
+    - name: Set environment variables
+      # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
+      #   FORCE_COLOR
+      #   TEST_RESULTS_BASE_DIR
+      #   PYTHON_VERSION
+      #   PYTHONUNBUFFERED
+      #   SKIP_ENV_NAME
+      #   DDEV_E2E_AGENT
+      #   DDEV_E2E_AGENT_PY2
+      #   DD_ENV
+      #   DD_SERVICE
+      #   DD_TRACE_ANALYTICS_ENABLED
+      #   DD_CIVISIBILITY_ENABLED
+      #   DD_CIVISIBILITY_AGENTLESS_ENABLED
+      #   DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER
+      #   DD_PROFILING_ENABLED
+      #   DD_SITE
+      #   DD_API_KEY
+      #   MINIMUM_BASE_PACKAGE_PREFIX
+      #   TEST_RESULTS_DIR
+      #   DD_TAGS
+      #   DOCKER_USERNAME
+      #   DOCKER_ACCESS_TOKEN
+      #   ORACLE_DOCKER_USERNAME
+      #   ORACLE_DOCKER_PASSWORD
+      #   DD_GITHUB_USER
+      #   DD_GITHUB_TOKEN
+      #   INPUT_REPO
+      #   INPUT_TARGET
+      #   INPUT_TARGET_ENV
+      #   INPUT_TARGET_STR
+      #   INPUT_PLATFORM
+      #   INPUT_MINIMUM_BASE_PACKAGE
+      #   INPUT_PYTEST_ARGS
+      #   INPUT_IS_FORK
+      run: bash .github/workflows/scripts/setup-test-env.sh
+      env:
+        INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
+        INPUT_TEST_PY2: ${{ inputs.test-py2 }}
+        INPUT_TEST_PY3: ${{ inputs.test-py3 }}
+        INPUT_PLATFORM: ${{ inputs.platform }}
+        INPUT_AGENT_IMAGE: ${{ inputs.agent-image }}
+        INPUT_AGENT_IMAGE_PY2: ${{ inputs.agent-image-py2 }}
+        INPUT_AGENT_IMAGE_WINDOWS: ${{ inputs.agent-image-windows }}
+        INPUT_AGENT_IMAGE_WINDOWS_PY2: ${{ inputs.agent-image-windows-py2 }}
+        INPUT_TARGET: ${{ inputs.target }}
+        INPUT_TARGET_ENV: ${{ inputs.target-env }}
+        INPUT_REPO: ${{ inputs.repo }}
+        INPUT_CONTEXT: ${{ inputs.context }}
+        INPUT_MINIMUM_BASE_PACKAGE: ${{ inputs.minimum-base-package }}
+        INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
+        INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
+        INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
+        DD_API_KEY_SECRET: ${{ secrets.DD_API_KEY }}
+        SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+        ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
+        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
+        DD_GITHUB_USER: ${{ github.actor }}
+        DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Tag job for CI Visibility
+      # Skip on fork PRs and non-core repos since secrets won't be available
+      if: env.INPUT_IS_FORK != 'true' || env.INPUT_REPO == 'core'
+      uses: ./.github/actions/tag-job
+      with:
+        tags: ${{ env.DD_TAGS }}
+        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_site: ${{ env.DD_SITE }}
 
     - name: Set up Python 2.7
       if: inputs.test-py2
@@ -196,6 +239,7 @@ jobs:
 
     - name: Configure ddev
       run: |-
+        ddev config set upgrade_check false
         ddev config set repos.${{ inputs.repo }} .
         ddev config set repo ${{ inputs.repo }}
 
@@ -210,196 +254,45 @@ jobs:
 
     - name: Prepare for testing
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
-      env: >-
-        ${{ fromJson(inputs.setup-env-vars || format(
-          '{{
-            "PYTHONUNBUFFERED": "1",
-            "DOCKER_USERNAME": "{0}",
-            "DOCKER_ACCESS_TOKEN": "{1}",
-            "ORACLE_DOCKER_USERNAME": "{2}",
-            "ORACLE_DOCKER_PASSWORD": "{3}",
-            "DD_GITHUB_USER": "{4}",
-            "DD_GITHUB_TOKEN": "{5}"
-          }}',
-          secrets.DOCKER_USERNAME,
-          secrets.DOCKER_ACCESS_TOKEN,
-          secrets.ORACLE_DOCKER_USERNAME,
-          secrets.ORACLE_DOCKER_PASSWORD,
-          github.actor,
-          secrets.GITHUB_TOKEN
-        ))}}
       run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
-    - name: Set up trace capturing
-      if: inputs.repo == 'core'
-      env:
-        PYTHONUNBUFFERED: "1"
-      run: |-
-        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
-        python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
-
     - name: Run Unit & Integration tests
-      if: inputs.latest != true && inputs.minimum-base-package != true
+      if: inputs.latest != true
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
-      env:
-        # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
-        DD_PROFILING_STACK_V2_ENABLED: "false" # Workaround for ddtrace hangs with Python 3.13. #incident-43814
-      run: |
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev -v test --cov --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} -- ${{ inputs.pytest-args }} -k "not fips"
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        else
-          ddev -v test --cov --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
-        fi
-
-    - name: Run Unit & Integration tests with minimum version of base package
-      if: inputs.minimum-base-package
-      timeout-minutes: ${{ inputs.step-timeout-minutes }}
-      run: |
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev test --compat --recreate --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} -- ${{ inputs.pytest-args }} -k "not fips"
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        else
-          ddev test --compat --recreate --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
-        fi
-
-    - name: Run E2E tests with latest base package
-      if: inputs.repo == 'core' && !inputs.minimum-base-package
-      timeout-minutes: ${{ inputs.step-timeout-minutes }}
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: |
-        # '-- all' is passed for e2e tests if pytest args are provided
-        # This is done to avoid ddev from interpreting the arguments as environments
-        #   instead of pytest-args, because by default if no environment is provided
-        #   after -- it will run all environments. So when pytests args are provided
-        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-        # This is not required when no pytest args are provided and it will run all environments
-        #   by default
-        set +e # Disable immediate exit
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ] || [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
-          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} -- ${{ inputs.pytest-args }} -k "not fips"
-          exit_code=$?
-        else
-          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
-          exit_code=$?
-        fi
-
-        if [ "$exit_code" -eq 5 ]; then
-          echo "No tests were collected."
-          exit 0
-        else
-          exit "$exit_code"
-        fi
+      run: bash .github/workflows/scripts/run-unit-integration-tests.sh
 
     - name: Run E2E tests
-      if: inputs.repo != 'core'
+      if: (inputs.repo == 'core' && !inputs.minimum-base-package) || inputs.repo != 'core'
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      run: bash .github/workflows/scripts/run-e2e-tests.sh
       env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: |
-        # '-- all' is passed for e2e tests if pytest args are provided
-        # This is done to avoid ddev from interpreting the arguments as environments
-        #   instead of pytest-args, because by default if no environment is provided
-        #   after -- it will run all environments. So when pytests args are provided
-        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-        # This is not required when no pytest args are provided and it will run all environments
-        #   by default
-        set +e # Disable immediate exit
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ] || [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
-          ddev env test --dev --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} -- ${{ inputs.pytest-args }} -k "not fips"
-          exit_code=$?
-        else
-          ddev env test --dev --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
-          exit_code=$?
-        fi
-
-        if [ "$exit_code" -eq 5 ]; then
-          echo "No tests were collected."
-          exit 0
-        else
-          exit "$exit_code"
-        fi
+        INPUT_SESSION_NAME: "e2e-tests"
 
     - name: Run benchmarks
       if: inputs.benchmark
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && env.INPUT_IS_FORK != 'true' && '1' || '0' }}"
+        DD_TEST_SESSION_NAME: "benchmarks"
       run: ddev test --bench --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Run tests and verify support for the latest version
       if: inputs.latest
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && env.INPUT_IS_FORK != 'true' && '1' || '0' }}"
+        DD_TEST_SESSION_NAME: "latest-tests"
       run: ddev test --latest --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Run E2E tests for the latest version
       if: inputs.latest
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      run: bash .github/workflows/scripts/run-e2e-tests.sh
       env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-        # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
-        DD_PROFILING_STACK_V2_ENABLED: "false"  # Workaround for ddtrace hangs with Python 3.13. #incident-43814
-      run: |
-        # '-- all' is passed for e2e tests if pytest args are provided
-        # This is done to avoid ddev from interpreting the arguments as environments
-        #   instead of pytest-args, because by default if no environment is provided
-        #   after -- it will run all environments. So when pytests args are provided
-        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-        # This is not required when no pytest args are provided and it will run all environments
-        #   by default
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- ${{ inputs.pytest-args }} -k "not fips"
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
-          set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        else
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- all -k "not fips"' }}
-        fi
-
-    - name: View trace log
-      if: inputs.repo == 'core' && always()
-      run: cat "${{ env.TRACE_CAPTURE_LOG }}"
-
-    - name: Upload captured traces
-      if: inputs.repo == 'core' && always()
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}${{ inputs.traces-artifact-name }}-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
-        path: "${{ env.TRACE_CAPTURE_FILE }}"
+        # Override INPUT_TARGET to include :latest suffix
+        INPUT_TARGET: "${{ inputs.target }}:latest"
+        INPUT_SESSION_NAME: "latest-e2e-tests"
+        INPUT_IS_LATEST: "true"
 
     - name: Finalize test results
       if: always()
@@ -415,6 +308,14 @@ jobs:
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}test-results-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
+
+    - name: Upload local_clone debug info (ddev only)
+      if: always() && inputs.target == 'ddev'
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}local-clone-debug-${{ inputs.platform }}"
+        path: "local_clone_debug.txt"
+        if-no-files-found: ignore
 
     - name: Upload coverage data as artifact
       if: >

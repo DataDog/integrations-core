@@ -28,6 +28,7 @@ files:
               Password to use for the SSH connection.
               If an encrypted SSH private key is specified in `private_key_file`,
                 the given password will be used to decrypt the key.
+            secret: true
             value:
               type: string
 
@@ -58,7 +59,9 @@ files:
               type: string
 
           - name: add_missing_keys
-            description: Automatically add host key to known hosts when it is missing.
+            description: |
+              Automatically add host key to known hosts when it is missing.
+              Warning: only enable this if you trust your host's key.
             value:
               example: false
               type: boolean

@@ -2,7 +2,29 @@
 
 <!-- towncrier release notes start -->
 
-## 1.1.0 / 2025-10-02
+## 1.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 1.2.1 / 2025-11-19 / Agent 7.73.0
+
+***Fixed***:
+
+* Fix device discovery for older versions of Lustre (<2.15.5) ([#21901](https://github.com/DataDog/integrations-core/pull/21901))
+
+## 1.2.0 / 2025-10-31
+
+***Security***:
+
+* Switch from using shell=True to shell=False in subprocess command ([#21690](https://github.com/DataDog/integrations-core/pull/21690))
+
+***Added***:
+
+* Add histogram bucket metrics for `lustre.jobstats.read_bytes` and `lustre.jobstats.write_bytes` ([#21589](https://github.com/DataDog/integrations-core/pull/21589))
+
+## 1.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

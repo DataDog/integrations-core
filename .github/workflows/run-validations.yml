@@ -114,6 +114,8 @@ defaults:
 jobs:
   run:
     name: Validate
+    # Avoid blocking merge queues by validations that can break with false positives
+    if: github.event_name != 'merge_group'
     runs-on: ubuntu-22.04
 
     env:
@@ -142,6 +144,7 @@ jobs:
 
     - name: Configure ddev
       run: |
+        ddev config set upgrade_check false
         ddev config set repos.${{ inputs.repo }} .
         ddev config set repo ${{ inputs.repo }}
         ddev config set orgs.ci.dd_url "https://app.datadoghq.com"
@@ -242,13 +245,13 @@ jobs:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: ddev validate licenses
-      
+
     - name: Validate the CODEOWNERS file
       if: inputs.codeowners
       run: ddev validate codeowners
 
     - name: Comment PR on failure
-      if: ${{ failure() && github.event.pull_request.merged != true }}
+      if: ${{ failure() && github.event_name == 'pull_request' && github.event.pull_request.merged != true }}
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       continue-on-error: true
       with:

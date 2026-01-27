@@ -6,8 +6,6 @@
 
 Integrate Jamf Pro with Datadog to gain insights into [Events][2] using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
-**Minimum Agent version:** 7.68.1
-
 ## Setup
 
 ### Configuration

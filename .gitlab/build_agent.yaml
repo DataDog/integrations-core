@@ -20,15 +20,15 @@
 build-agent-auto:
   extends: .build-agent-tpl
   rules:
+    # Do not run on tags
+    - if: $CI_COMMIT_TAG
+      when: never
     # Do not run on release branches
     - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
       when: never
     # Only run if the branch is not a Github Merge Queue one.
     - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
       changes:
-        # We don't yet support variable expansion in `compare_to`. It was added in gitlab 17.2:
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/369916#note_1972773223
-        compare_to: "master"
         paths:
           - .deps/*
           - .gitlab/build_agent.yaml
