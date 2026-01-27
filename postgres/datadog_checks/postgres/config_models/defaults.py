@@ -52,16 +52,12 @@ def instance_collect_function_metrics():
     return False
 
 
-def instance_collect_wal_metrics():
-    return False
-
-
 def instance_data_directory():
     return '/usr/local/pgsql/data'
 
 
 def instance_database_instance_collection_interval():
-    return False
+    return 300
 
 
 def instance_dbm():
@@ -86,6 +82,10 @@ def instance_empty_default_hostname():
 
 def instance_exclude_hostname():
     return False
+
+
+def instance_host():
+    return 'localhost'
 
 
 def instance_idle_connection_timeout():
@@ -132,6 +132,10 @@ def instance_only_custom_queries():
     return False
 
 
+def instance_pg_stat_activity_view():
+    return 'pg_stat_activity'
+
+
 def instance_pg_stat_statements_view():
     return 'pg_stat_statements'
 
@@ -144,12 +148,40 @@ def instance_propagate_agent_tags():
     return False
 
 
+def instance_query_encodings():
+    return ['utf8']
+
+
 def instance_query_timeout():
     return 5000
 
 
+def instance_relations():
+    return []
+
+
+def instance_reported_hostname():
+    return None
+
+
 def instance_ssl():
     return 'allow'
+
+
+def instance_ssl_cert():
+    return None
+
+
+def instance_ssl_key():
+    return None
+
+
+def instance_ssl_password():
+    return None
+
+
+def instance_ssl_root_cert():
+    return None
 
 
 def instance_table_count_limit():
@@ -162,3 +194,7 @@ def instance_tag_replication_role():
 
 def instance_use_global_custom_queries():
     return 'true'
+
+
+def instance_username():
+    return 'datadog'

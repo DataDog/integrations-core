@@ -28,6 +28,7 @@ jobs:
       # which tells the command that everything following it
       # should be treated as positional arguments, not options
       pytest-args: '-m flaky'
+      context: "flaky-tests"
     secrets: inherit
 
     permissions:
@@ -47,12 +48,4 @@ jobs:
       pull-requests: write # Needed for test-results-master
 
     uses: ./.github/workflows/test-results-master.yml
-    secrets: inherit
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
     secrets: inherit

@@ -33,7 +33,7 @@ jobs:
 
     env:
       FORCE_COLOR: "1"
-      PYTHON_VERSION: "3.12"
+      PYTHON_VERSION: "3.13"
       # Test results for later processing
       TEST_RESULTS_BASE_DIR: "test-results"
       # Tracing to monitor our test suite
@@ -41,9 +41,6 @@ jobs:
       DD_SERVICE: "ddev-integrations-core"
       DD_TAGS: "team:agent-integrations"
       DD_TRACE_ANALYTICS_ENABLED: "true"
-      # Capture traces for a separate job to do the submission
-      TRACE_CAPTURE_BASE_DIR: "trace-captures"
-      TRACE_CAPTURE_LOG: "trace-captures/output.log"
 
     permissions:
        # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
@@ -90,6 +87,7 @@ jobs:
 
     - name: Configure ddev
       run: |-
+        ddev config set upgrade_check false
         ddev config set repos.core .
         ddev config set repo core
 
@@ -104,13 +102,6 @@ jobs:
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: ddev ci setup ${{ inputs.target || 'tls' }}
 
-    - name: Set up trace capturing
-      env:
-        PYTHONUNBUFFERED: "1"
-      run: |-
-        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
-        python .ddev/ci/scripts/traces.py capture --port "8126" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
-
     - name: Run E2E tests with FIPS disabled
       env:
         DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-py3' }}"
@@ -124,17 +115,6 @@ jobs:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
-
-    - name: View trace log
-      if: always()
-      run: cat "${{ env.TRACE_CAPTURE_LOG }}"
-
-    - name: Upload captured traces
-      if: always()
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: "traces-${{ inputs.target || 'tls' }}"
-        path: "${{ env.TRACE_CAPTURE_FILE }}"
 
     - name: Finalize test results
       if: always()

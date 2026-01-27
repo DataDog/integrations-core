@@ -2,7 +2,35 @@
 
 <!-- towncrier release notes start -->
 
-## 8.1.0 / 2025-09-05
+## 8.4.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 8.3.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add RabbitMQ stream metrics and queue info metric for replication monitoring.
+
+  Adds 20 new metrics from RabbitMQ Prometheus plugin:
+  - rabbitmq.queue.info (gauge) with membership/queue_type tags for replication monitoring
+  - 17 stream error counters (rabbitmq.global.stream.error.*)
+  - 2 stream health gauges (rabbitmq.stream.segments, rabbitmq.stream.consumer_max_offset_lag) ([#21604](https://github.com/DataDog/integrations-core/pull/21604))
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 8.2.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.1.0 / 2025-09-05 / Agent 7.71.0
 
 ***Added***:
 

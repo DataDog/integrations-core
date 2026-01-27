@@ -1094,6 +1094,9 @@ class AgentCheck(object):
         return entrypoint
 
     def __initialize_persistent_cache_key_prefix(self):
+        if self.__persistent_cache_key_prefix:
+            return
+
         namespace = ':'.join(self.check_id.split(':')[:-1])
         self.__persistent_cache_key_prefix = f'{namespace}:{self.persistent_cache_id()}_'
 
@@ -1484,14 +1487,20 @@ class AgentCheck(object):
         import subprocess
         import sys
 
+        # Force UTF-8 encoding for subprocess
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+
         process = subprocess.Popen(
             [sys.executable, '-c', 'import sys, yaml; print(yaml.safe_load(sys.stdin.read()))'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            env=env,
         )
-        stdout, stderr = process.communicate(yaml_str.encode())
+        # Explicitly encode as UTF-8 to match PYTHONIOENCODING
+        stdout, stderr = process.communicate(yaml_str.encode('utf-8'))
         if process.returncode != 0:
-            raise ValueError(f'Failed to load config: {stderr.decode()}')
+            raise ValueError(f'Failed to load config: {stderr.decode("utf-8", errors="replace")}')
 
-        return _parse_ast_config(stdout.strip().decode())
+        return _parse_ast_config(stdout.strip().decode('utf-8'))

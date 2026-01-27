@@ -3984,3 +3984,16 @@ def test_hostname_case_invalid_value(realtime_instance):
     realtime_instance['hostname_transform'] = 'something else'
     with pytest.raises(ConfigurationError):
         _ = VSphereCheck('vsphere', {}, [realtime_instance])
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
+def test_infra_mode_tag(aggregator, realtime_instance, dd_run_check):
+    # Enable infra_mode in the instance
+    realtime_instance['infrastructure_mode'] = 'basic'
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    dd_run_check(check)
+
+    for metric in aggregator.metrics('vsphere.cpu.usage.avg'):
+        tags = metric.tags
+        assert 'infra_mode:basic' in tags, f"infra_mode:basic tag missing from metric {metric}"

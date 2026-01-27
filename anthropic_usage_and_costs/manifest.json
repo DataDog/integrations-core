@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "96f960de-2b87-41ec-8d9a-88fe75e93dc9",
   "app_id": "anthropic-usage-and-costs",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

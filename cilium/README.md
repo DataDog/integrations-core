@@ -4,6 +4,8 @@
 
 This check monitors [Cilium][1] through the Datadog Agent. The integration can either collect metrics from the `cilium-agent` or `cilium-operator`.
 
+**Minimum Agent version:** 6.15.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
@@ -21,7 +23,7 @@ Starting with version 1.10.0, this OpenMetrics-based integration has a latest mo
      `global.prometheus.enabled=true` and `global.operatorPrometheus.enabled=true`
    * Cilium >= 1.9.x:
      `prometheus.enabled=true` and `operator.prometheus.enabled=true`
-   
+
 Or, separately enable Prometheus metrics in the Kubernetes manifests:
 <div class="alert alert-warning">For <a href="https://docs.cilium.io/en/v1.12/operations/upgrade/#id2">Cilium <= v1.11</a>, use <code>--prometheus-serve-addr=:9090</code>.</a></div>  
 
@@ -45,6 +47,8 @@ Or, separately enable Prometheus metrics in the Kubernetes manifests:
               - --enable-metrics
       ```
 
+<div class="alert alert-info"><strong>Note for GKE users:</strong> On Google Kubernetes Engine (GKE), Cilium exposes metrics on port <code>9990</code> by default, and this port cannot be changed. Make sure to configure the Datadog Agent to scrape port <code>9990</code> instead of the common defaults (<code>9090</code> or <code>9962</code>). Using an incorrect port can result in a high volume of connection errors in your Agent logs.</div>
+
 ### Configuration
 
 <!-- xxx tabs xxx -->
@@ -57,6 +61,12 @@ To configure this check for an Agent running on a host:
 
    - To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
    - To collect `cilium-operator` metrics, enable the `operator_endpoint` option.
+
+   **Note**: The default `agent_endpoint` port varies by environment and Cilium configuration:
+   - Cilium <= v1.11 typically uses port `9090`
+   - Self-managed Cilium >= v1.12 commonly uses port `9962`
+   - GKE-managed Cilium uses port `9990` (fixed and not configurable)
+
 
     ```yaml  
         instances:
@@ -124,6 +134,11 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | `<INTEGRATION_NAME>` | `"cilium"`                                                 |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
 | `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics", "use_openmetrics": "true"}` |
+
+**Note**: For GKE environments, use port `9990` instead of `9090` in the `agent_endpoint` configuration. For example:
+```json
+{"agent_endpoint": "http://%%host%%:9990/metrics", "use_openmetrics": "true"}
+```
 
 - Log collection
 

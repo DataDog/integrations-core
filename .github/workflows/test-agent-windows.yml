@@ -48,17 +48,10 @@ jobs:
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       skip-ddev-tests: true
+      context: "test-agent"
     secrets: inherit
     permissions:
        # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
        id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit

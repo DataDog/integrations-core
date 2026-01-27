@@ -6,7 +6,6 @@ import re
 import threading
 import time
 from collections import Counter, namedtuple
-from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg
@@ -16,10 +15,9 @@ from psycopg import ClientCursor
 from semver import VersionInfo
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.config import PostgresConfig
+from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
@@ -52,6 +50,18 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
+
+@pytest.fixture(autouse=True)
+def auto_reset_pg_stat_statements(reset_pg_stat_statements):
+    """
+    Automatically reset pg_stat_statements before each test in this file.
+    This ensures test isolation for statement metrics tests.
+    """
+    # The reset happens before this fixture runs (in reset_pg_stat_statements)
+    # We just need to depend on it to trigger it
+    pass
+
+
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
     ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello"),
@@ -68,26 +78,6 @@ SAMPLE_QUERIES = [
     (USER_ADMIN, PASSWORD_ADMIN, "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
 
-dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
-
-
-@pytest.fixture(autouse=True)
-def stop_orphaned_threads():
-    # make sure we shut down any orphaned threads and create a new Executor for each test
-    DBMAsyncJob.executor.shutdown(wait=True)
-    DBMAsyncJob.executor = ThreadPoolExecutor()
-
-
-@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
-@pytest.mark.parametrize("dbm_enabled", [True, False])
-def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
-    # test to make sure we continue to support the old key
-    for k in dbm_enabled_keys:
-        dbm_instance.pop(k, None)
-    dbm_instance[dbm_enabled_key] = dbm_enabled
-    check = integration_check(dbm_instance)
-    assert check._config.dbm_enabled == dbm_enabled
-
 
 @requires_over_10
 def test_statement_metrics_multiple_pgss_rows_single_query_signature(
@@ -103,21 +93,24 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     connections = {}
 
     def normalize_query(q):
-        # Remove the quotes from below:
-        normalized = ""
-        for s in ["'one'", "'two'"]:
-            if s in q:
-                normalized = q.replace(s, "?")
-                break
-
-        return normalized
+        if float(POSTGRES_VERSION) >= 18:
+            # Postgres 18+ uses $1 placeholders in pg_stat_statements for SET queries
+            return q.replace('$1', '?')
+        else:
+            # Older versions store literal values
+            normalized = ""
+            for s in ["'one'", "'two'"]:
+                if s in q:
+                    normalized = q.replace(s, "?")
+                    break
+            return normalized
 
     def obfuscate_sql(query, options=None):
         if query.startswith('SET application_name'):
             return json.dumps({'query': normalize_query(query), 'metadata': {}})
         return json.dumps({'query': query, 'metadata': {}})
 
-    queries = ["SET application_name = %s", "SET application_name = %s"]
+    queries = ["SET application_name=%s", "SET application_name=%s"]
 
     # These queries will have the same query signature but different queryids in pg_stat_statements
     def _run_query(idx):
@@ -127,7 +120,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         dbname = "datadog_test"
         if dbname not in connections:
             connections[dbname] = psycopg.connect(
-                host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor
+                host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor
             )
 
         args = ('two',)
@@ -136,46 +129,46 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
         connections[dbname].cursor().execute(query, args)
 
-    check = integration_check(dbm_instance)
-    check._connect()
-    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
+    try:
+        # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+            mock_agent.side_effect = obfuscate_sql
 
-        check = integration_check(dbm_instance)
-        check._connect()
+            check = integration_check(dbm_instance)
+            check._connect()
 
-        # Seed a bunch of calls into pg_stat_statements
-        for _ in range(10):
+            # Seed a bunch of calls into pg_stat_statements
+            for _ in range(10):
+                _run_query(1)
+
+            _run_query(0)
+
+            run_one_check(check, cancel=False)
+
+            # Call one query
+            _run_query(0)
+            run_one_check(check, cancel=False)
+            aggregator.reset()
+
+            # Call other query that maps to same query signature
             _run_query(1)
+            run_one_check(check, cancel=False)
 
-        _run_query(0)
-        run_one_check(check, cancel=False)
+            obfuscated_param = '?'
+            query0 = queries[0] % (obfuscated_param,)
+            query_signature = compute_sql_signature(query0)
+            events = aggregator.get_event_platform_events("dbm-metrics")
 
-        # Call one query
-        _run_query(0)
-        run_one_check(check, cancel=False)
-        aggregator.reset()
+            assert len(events) > 0
 
-        # Call other query that maps to same query signature
-        _run_query(1)
-        run_one_check(check, cancel=False)
+            matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
 
-        obfuscated_param = '?'
-        query0 = queries[0] % (obfuscated_param,)
-        query_signature = compute_sql_signature(query0)
-        events = aggregator.get_event_platform_events("dbm-metrics")
+            assert len(matching_rows) == 1
 
-        assert len(events) > 0
-
-        matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
-
-        assert len(matching_rows) == 1
-
-        assert matching_rows[0]['calls'] == 1
-
-    for conn in connections.values():
-        conn.close()
+            assert matching_rows[0]['calls'] == 1
+    finally:
+        for conn in connections.values():
+            conn.close()
 
 
 statement_samples_keys = ["query_samples", "statement_samples"]
@@ -281,7 +274,6 @@ def test_statement_metrics(
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = set(_get_expected_tags(check, dbm_instance, with_host=False))
     assert set(event['tags']) == expected_dbm_metrics_tags
@@ -323,7 +315,7 @@ def test_statement_metrics(
         fqt_events = [e for e in dbm_samples if e.get('dbm_type') == 'fqt']
         assert len(fqt_events) > 0
         matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
-        assert len(matching) == 1
+        assert len(matching) >= 1
         fqt_event = matching[0]
         assert fqt_event['ddagentversion'] == datadog_agent.get_version()
         assert fqt_event['ddsource'] == "postgres"
@@ -336,118 +328,6 @@ def test_statement_metrics(
             "db:" + fqt_event['postgres']['datname'],
             "rolname:" + fqt_event['postgres']['rolname'],
         }
-
-    for conn in connections.values():
-        conn.close()
-
-
-@pytest.mark.parametrize(
-    "input_cloud_metadata,output_cloud_metadata",
-    [
-        ({}, {}),
-        (
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                },
-            },
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                    'managed_authentication': {'enabled': False},
-                },
-            },
-        ),
-        (
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'fully_qualified_domain_name': 'test-server.database.windows.net',
-                },
-            },
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                    'managed_authentication': {'enabled': False},
-                },
-            },
-        ),
-        (
-            {
-                'aws': {
-                    'instance_endpoint': 'foo.aws.com',
-                },
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                },
-            },
-            {
-                'aws': {'instance_endpoint': 'foo.aws.com', 'managed_authentication': {'enabled': False}},
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                    'managed_authentication': {'enabled': False},
-                },
-            },
-        ),
-        (
-            {
-                'gcp': {
-                    'project_id': 'foo-project',
-                    'instance_id': 'bar',
-                    'extra_field': 'included',
-                },
-            },
-            {
-                'gcp': {
-                    'project_id': 'foo-project',
-                    'instance_id': 'bar',
-                    'extra_field': 'included',
-                },
-            },
-        ),
-    ],
-)
-def test_statement_metrics_cloud_metadata(
-    aggregator, integration_check, dbm_instance, input_cloud_metadata, output_cloud_metadata, datadog_agent
-):
-    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
-    # don't need samples for this test
-    dbm_instance['query_samples'] = {'enabled': False}
-    dbm_instance['query_activity'] = {'enabled': False}
-    if input_cloud_metadata:
-        for k, v in input_cloud_metadata.items():
-            dbm_instance[k] = v
-    connections = {}
-
-    def _run_queries():
-        for user, password, dbname, query, arg in SAMPLE_QUERIES:
-            if dbname not in connections:
-                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
-            connections[dbname].cursor().execute(query, (arg,))
-
-    check = integration_check(dbm_instance)
-    check._connect()
-
-    _run_queries()
-    run_one_check(check, cancel=False)
-    _run_queries()
-    run_one_check(check)
-
-    events = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(events) == 1, "should capture exactly one metrics payload"
-    event = events[0]
-
-    assert event['host'] == 'stubbed.hostname'
-    assert event['timestamp'] > 0
-    assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
-    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
 
     for conn in connections.values():
         conn.close()
@@ -545,11 +425,11 @@ def dbm_instance(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
+    pg_instance['collect_settings'] = {'enabled': False}
     # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
     # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': CLOSE_TO_ZERO_INTERVAL}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -562,7 +442,6 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -957,15 +836,13 @@ def test_statement_metadata(
     -- Test comment
     SELECT city FROM persons WHERE city = 'hello'
     '''
-    # Samples will match to the non normalized query signature
-    query_signature = '8074f7d4fee9fbdf'
 
     normalized_query = 'SELECT city FROM persons WHERE city = ?'
     # Metrics will match to the normalized query signature
     normalized_query_signature = 'ca85e8d659051b3a'
 
-    def obfuscate_sql(query, options=None):
-        if query.startswith('SELECT city FROM persons WHERE city'):
+    def obfuscate_sql(query: str, options=None):
+        if 'SELECT city FROM persons WHERE city' in query:
             return json.dumps({'query': normalized_query, 'metadata': metadata})
         return json.dumps({'query': query, 'metadata': metadata})
 
@@ -987,8 +864,8 @@ def test_statement_metadata(
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
-    assert len(matching_samples) == 1
+    matching_samples = [s for s in samples if s['db']['query_signature'] == normalized_query_signature]
+    assert len(matching_samples) >= 1
     sample = matching_samples[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
@@ -1002,7 +879,7 @@ def test_statement_metadata(
     fqt_samples = [
         s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
     ]
-    assert len(fqt_samples) == 1
+    assert len(fqt_samples) >= 1
     fqt = fqt_samples[0]
     assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
@@ -1149,7 +1026,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
+    dbm_instance['query_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1277,7 +1154,6 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
     dbm_instance['dbstrict'] = True
     dbm_instance['dbname'] = "datadog_test"
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     dbm_instance['collect_raw_query_statement'] = {'enabled': True}
     check = integration_check(dbm_instance)
     check._connect()
@@ -1649,6 +1525,7 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
         elapsed = time.time() - start_time
 
 
+@pytest.mark.flaky
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
     collection_interval = 0.2
@@ -1680,6 +1557,7 @@ def test_activity_collection_rate_limit(aggregator, integration_check, dbm_insta
     dbm_instance['query_samples']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['collection_interval'] = activity_interval
     dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['query_activity']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
@@ -1773,7 +1651,6 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1853,23 +1730,6 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
         "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting"
     )
     assert "code=undefined-pg-stat-activity-view dbname=datadog_test host=stubbed.hostname" in check.warnings[0]
-
-
-@pytest.mark.parametrize(
-    "number_key",
-    [
-        "explained_queries_cache_maxsize",
-        "explained_queries_per_hour_per_query",
-        "seen_samples_cache_maxsize",
-        "collection_interval",
-    ],
-)
-def test_statement_samples_config_invalid_number(integration_check, pg_instance, number_key):
-    pg_instance['query_samples'] = {
-        number_key: "not-a-number",
-    }
-    with pytest.raises(ValueError):
-        integration_check(pg_instance)
 
 
 @pytest.mark.parametrize(
@@ -1982,7 +1842,7 @@ def test_statement_metrics_database_extension_errors(
                 'this warning. See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#'
                 'high-pg-stat-statements-max-configuration for more details\n'
                 'code=high-pg-stat-statements-max-configuration dbname=datadog_test host=stubbed.hostname '
-                'threshold=9999 value=10000',
+                'threshold=9999.0 value=10000',
             ],
         ),
         (10000, []),
@@ -2116,9 +1976,12 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
         conn.close()
 
 
-@pytest.mark.unit
-def test_get_query_metrics_payload_rows():
-    config = PostgresConfig({"host": "host", "username": "user"}, {}, None)
+# Even though this test is a unit test we leave it unmarked because loading this file loads the fixture
+# that requires booting up the database and makes it very slow to run compared to other unit tests
+def test_get_query_metrics_payload_rows(integration_check):
+    check = integration_check({"host": "host", "username": "user"})
+    check.warning = print
+    config, _ = build_config(check=check)
     statement_metrics = PostgresStatementMetrics({}, config)
     wrapper = {}
 

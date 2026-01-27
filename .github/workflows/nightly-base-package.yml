@@ -25,14 +25,6 @@ jobs:
 
       # Options
       minimum-base-package: true
-      test-py2: true
       pytest-args: '-m "not flaky"'
-    secrets: inherit
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
+      context: "nightly-base-package"
     secrets: inherit

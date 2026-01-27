@@ -12,6 +12,8 @@ from datadog_checks.base.utils.tracking import tracked_method
 from .util import DBExplainError
 from .version_utils import V12
 
+PARAMETERIZED_QUERY_PATTERN = re.compile(r"(?<!')\$(?!'\$')[\d]+(?!')")
+
 logger = logging.getLogger(__name__)
 
 PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
@@ -197,5 +199,4 @@ class ExplainParameterizedQueries:
         # BUT single quoted string '$1' should not be considered as a parameter
         # e.g. SELECT * FROM products WHERE id = $1; -- $1 is a parameter
         # e.g. SELECT * FROM products WHERE id = '$1'; -- '$1' is not a parameter
-        parameterized_query_pattern = r"(?<!')\$(?!'\$')[\d]+(?!')"
-        return re.search(parameterized_query_pattern, statement) is not None
+        return PARAMETERIZED_QUERY_PATTERN.search(statement) is not None

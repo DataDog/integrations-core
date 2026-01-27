@@ -10,6 +10,8 @@ The check collects metrics from the head node (`slurmctld`) by executing and par
 
 On worker nodes, the check can also collect metrics using [`scontrol`][13], which provides process IDs (PIDs) and other job information that is not available through the head node.
 
+**Minimum Agent version:** 7.59.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various Slurm binaries, monitoring Slurm in containerized environments is not recommended.
@@ -147,6 +149,11 @@ The Slurm integration does not include any events.
 
 Need help? Contact [Datadog support][7].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Optimize HPC jobs and cluster utilization with Datadog][14]
 
 [1]: https://slurm.schedmd.com/overview.html
 [2]: /account/settings/agent/latest
@@ -161,3 +168,4 @@ Need help? Contact [Datadog support][7].
 [11]: https://slurm.schedmd.com/sdiag.html
 [12]: https://slurm.schedmd.com/sshare.html
 [13]: https://slurm.schedmd.com/scontrol.html
+[14]: https://www.datadoghq.com/blog/hpc-monitoring/

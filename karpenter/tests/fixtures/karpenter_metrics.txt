@@ -2577,3 +2577,31 @@ karpenter_cluster_state_node_count 265
 # HELP karpenter_disruption_consolidation_timeouts_total Number of times the Consolidation algorithm has reached a timeout. Labeled by consolidation type.
 # TYPE karpenter_disruption_consolidation_timeouts_total counter
 karpenter_disruption_consolidation_timeouts_total{consolidation_type="single"} 5
+# HELP client_go_request_total Total number of HTTP requests to the Kubernetes API by HTTP method and response code.
+# TYPE client_go_request_total counter
+client_go_request_total{code="200",host="10.100.0.1:443",method="GET"} 100
+client_go_request_total{code="200",host="10.100.0.1:443",method="PUT"} 50
+# HELP client_go_request_duration_seconds Latency of HTTP requests to the Kubernetes API by HTTP method and response code.
+# TYPE client_go_request_duration_seconds histogram
+client_go_request_duration_seconds_bucket{host="10.100.0.1:443",verb="GET",le="0.005"} 10
+client_go_request_duration_seconds_bucket{host="10.100.0.1:443",verb="GET",le="+Inf"} 100
+client_go_request_duration_seconds_sum{host="10.100.0.1:443",verb="GET"} 5.5
+client_go_request_duration_seconds_count{host="10.100.0.1:443",verb="GET"} 100
+# HELP controller_runtime_conversion_webhook_panics_total Total number of conversion webhook panics
+# TYPE controller_runtime_conversion_webhook_panics_total counter
+controller_runtime_conversion_webhook_panics_total 0
+# HELP karpenter_nodes_current_lifetime_seconds The current age of each node in seconds
+# TYPE karpenter_nodes_current_lifetime_seconds gauge
+karpenter_nodes_current_lifetime_seconds{nodepool="default"} 3600
+# HELP karpenter_nodes_drained_total Total number of nodes drained
+# TYPE karpenter_nodes_drained_total counter
+karpenter_nodes_drained_total{nodepool="default"} 5
+# HELP karpenter_nodes_eviction_requests_total Total number of eviction requests made
+# TYPE karpenter_nodes_eviction_requests_total counter
+karpenter_nodes_eviction_requests_total 10
+# HELP karpenter_nodes_lifetime_duration_seconds The lifetime duration of nodes that have been deleted or replaced
+# TYPE karpenter_nodes_lifetime_duration_seconds histogram
+karpenter_nodes_lifetime_duration_seconds_bucket{nodepool="default",le="3600"} 5
+karpenter_nodes_lifetime_duration_seconds_bucket{nodepool="default",le="+Inf"} 10
+karpenter_nodes_lifetime_duration_seconds_sum{nodepool="default"} 36000
+karpenter_nodes_lifetime_duration_seconds_count{nodepool="default"} 10

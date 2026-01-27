@@ -33,8 +33,8 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import (
     DatabaseConfigurationError,
+    ManagedAuthConnectionMixin,
     StatementTruncationState,
-    connect_with_session_variables,
     get_truncation_state,
     warning_with_tags,
 )
@@ -137,6 +137,18 @@ ENABLED_STATEMENTS_CONSUMERS_QUERY = re.sub(
 """,
 ).strip()
 
+EVENTS_STATEMENTS_TIME_INSTRUMENTATION_QUERY = re.sub(
+    r'\s+',
+    ' ',
+    """
+    SELECT COUNT(*) as count
+    FROM performance_schema.setup_instruments
+    WHERE name LIKE 'statement/%'
+    AND enabled = 'YES'
+    AND timed = 'YES'
+""",
+).strip()
+
 PYMYSQL_NON_RETRYABLE_ERRORS = frozenset(
     {
         1044,  # access denied on database
@@ -168,6 +180,9 @@ class DBExplainErrorCode(Enum):
     # database error i.e connection error
     database_error = 'database_error'
 
+    # failed to collect explain plan because the function is missing or invalid permissions
+    failed_function = 'failed_function'
+
     # this could be the result of a missing EXPLAIN function
     invalid_schema = 'invalid_schema'
 
@@ -188,12 +203,12 @@ ExplainState = namedtuple('ExplainState', ['strategy', 'error_code', 'error_mess
 EMPTY_EXPLAIN_STATE = ExplainState(strategy=None, error_code=None, error_message=None)
 
 
-class MySQLStatementSamples(DBMAsyncJob):
+class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
     """
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config, connection_args):
+    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
         collection_interval = float(config.statement_metrics_config.get('collection_interval', 1))
         if collection_interval <= 0:
             collection_interval = 1
@@ -210,7 +225,9 @@ class MySQLStatementSamples(DBMAsyncJob):
         )
         self._config = config
         self._version_processed = False
-        self._connection_args = connection_args
+        self._connection_args_provider = connection_args_provider
+        self._uses_managed_auth = uses_managed_auth
+        self._db_created_at = 0
         self._last_check_run = 0
         self._db = None
         self._check = check
@@ -273,16 +290,6 @@ class MySQLStatementSamples(DBMAsyncJob):
                 self._global_status_table = "performance_schema.global_status"
             self._version_processed = True
 
-    def _get_db_connection(self):
-        """
-        lazy reconnect db
-        pymysql connections are not thread safe so we can't reuse the same connection from the main check
-        :return:
-        """
-        if not self._db:
-            self._db = connect_with_session_variables(**self._connection_args)
-        return self._db
-
     def _close_db_conn(self):
         if self._db:
             try:
@@ -309,10 +316,11 @@ class MySQLStatementSamples(DBMAsyncJob):
         except pymysql.err.DatabaseError as e:
             if len(e.args) != 2:
                 raise
+            error_msg = f"{e.args[0]}: {e.args[1]}" if len(e.args) >= 2 else str(e)
             error_state = ExplainState(
                 strategy=None,
                 error_code=DBExplainErrorCode.use_schema_error,
-                error_message=str(type(e)),
+                error_message=error_msg,
             )
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[explain_state_cache_key] = error_state
@@ -508,6 +516,17 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._cursor_run(cursor, ENABLED_STATEMENTS_CONSUMERS_QUERY)
             return {r[0] for r in cursor.fetchall()}
 
+    def _is_time_instrumentation_enabled(self):
+        """
+        Check if time instrumentation is enabled for statement events.
+        Returns True if at least one statement instrument has TIMED = 'YES'
+        :return: bool
+        """
+        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
+            self._cursor_run(cursor, EVENTS_STATEMENTS_TIME_INSTRUMENTATION_QUERY)
+            result = cursor.fetchone()
+            return result[0] > 0 if result else False
+
     def _enable_events_statements_consumers(self):
         """
         Enable events statements consumers
@@ -556,11 +575,35 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.mysql.query_samples.error",
                 1,
-                tags=self._tags + ["error:no-enabled-events-statements-consumers"] + self._check._get_debug_tags(),
+                tags=(self._tags or [])
+                + ["error:no-enabled-events-statements-consumers"]
+                + self._check._get_debug_tags(),
                 hostname=self._check.reported_hostname,
             )
             return None, None
         self._log.debug("Found enabled performance_schema statements consumers: %s", enabled_consumers)
+
+        # Check if time instrumentation is enabled
+        if not self._is_time_instrumentation_enabled():
+            self._check.record_warning(
+                DatabaseConfigurationError.events_statements_time_instrumentation_not_enabled,
+                warning_with_tags(
+                    'Cannot collect statement samples as time instrumentation is not enabled for statement events. '
+                    'Enable time instrumentation by setting TIMED = YES for statement instruments in '
+                    'performance_schema.setup_instruments. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+                    'troubleshooting/#%s for more details.',
+                    DatabaseConfigurationError.events_statements_time_instrumentation_not_enabled.value,
+                    code=DatabaseConfigurationError.events_statements_time_instrumentation_not_enabled.value,
+                    host=self._check.reported_hostname,
+                ),
+            )
+            self._check.count(
+                "dd.mysql.query_samples.error",
+                1,
+                tags=(self._tags or []) + ["error:time-instrumentation-not-enabled"] + self._check._get_debug_tags(),
+                hostname=self._check.reported_hostname,
+            )
+            return None, None
 
         collection_interval = self._configured_collection_interval
         if collection_interval < 0:
@@ -737,9 +780,15 @@ class MySQLStatementSamples(DBMAsyncJob):
             except pymysql.err.DatabaseError as e:
                 if len(e.args) != 2:
                     raise
-                error_state = ExplainState(
-                    strategy=strategy, error_code=DBExplainErrorCode.database_error, error_message=str(type(e))
+                mysql_error_code = e.args[0] if len(e.args) > 0 else None
+                error_msg = f"{e.args[0]}: {e.args[1]}" if len(e.args) >= 2 else str(e)
+                error_code = (
+                    DBExplainErrorCode.failed_function
+                    if mysql_error_code
+                    in (pymysql.constants.ER.TABLEACCESS_DENIED_ERROR, pymysql.constants.ER.PROCACCESS_DENIED_ERROR)
+                    else DBExplainErrorCode.database_error
                 )
+                error_state = ExplainState(strategy=strategy, error_code=error_code, error_message=error_msg)
                 error_states.append(error_state)
                 self._log.debug(
                     'Failed to collect execution plan. error=%s, strategy=%s, schema=%s, statement="%s"',

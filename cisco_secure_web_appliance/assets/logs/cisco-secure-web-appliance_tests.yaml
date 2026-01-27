@@ -1,3 +1,4 @@
+# bypass-global-timestamp-format-in-sample-checks
 id: cisco-secure-web-appliance
 tests:
   - sample: '<38>Sep 25 12:13:55 Crest.CSWA accesslogs: Info: 1727246631.866 93971 10.10.10.10 TCP_MISS/200 8560 CONNECT tunnel://csp.withgoogle.com:443/ - DIRECT/csp.withgoogle.com application/octet-stream DEFAULT_CASE_12-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE <"IW_comp",3.0,1,"-",-,-,-,1,"-",-,-,-,"-",1,-,"-","-",-,-,"IW_comp,IW_csec",-,"-","Computers and Internet","-","Unknown","Unknown","-","-",0.73,0,-,"-","-",1,"-",-,-,"-","-",-,1,"-",-,-> - -'
