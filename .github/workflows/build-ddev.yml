@@ -65,6 +65,7 @@ jobs:
 
     - name: Tag Job
       uses: ./.github/actions/tag-job
+      if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:build-artifacts'
         dd_api_key: ${{ secrets.DD_API_KEY }}
@@ -134,6 +135,7 @@ jobs:
 
     - name: Tag Job
       uses: ./.github/actions/tag-job
+      if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:build-binary,os:${{ matrix.job.os }},target:${{ matrix.job.target }}'
         dd_api_key: ${{ secrets.DD_API_KEY }}
@@ -306,6 +308,7 @@ jobs:
 
     - name: Tag Job
       uses: ./.github/actions/tag-job
+      if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:package-windows,os:windows'
         dd_api_key: ${{ secrets.DD_API_KEY }}
@@ -420,6 +423,7 @@ jobs:
 
     - name: Tag Job
       uses: ./.github/actions/tag-job
+      if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:package-macos,os:macos'
         dd_api_key: ${{ secrets.DD_API_KEY }}
@@ -644,6 +648,7 @@ jobs:
 
     - name: Tag Job
       uses: ./.github/actions/tag-job
+      if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:publish'
         dd_api_key: ${{ secrets.DD_API_KEY }}
