@@ -32,77 +32,58 @@ def sort_names_split_by_comma(names):
     return ','.join(sorted_columns)
 
 
-def normalize_values_legacy(actual_payload):
+def normalize_values(actual_payload):
+    """
+    Normalize schema payload values for consistent comparison in tests.
+
+    This handles differences in ordering and formatting across MySQL/MariaDB versions
+    by sorting all collections and normalizing variable values like timestamps.
+    """
     actual_payload["default_character_set_name"] = "normalized_value"
     actual_payload["default_collation_name"] = "normalized_value"
     actual_payload["tables"].sort(key=lambda x: x["name"])
+
     for table in actual_payload['tables']:
         table['create_time'] = "normalized_value"
+
+        # Normalize columns
         if 'columns' in table:
             table['columns'].sort(key=lambda x: x['name'])
-        if 'indexes' in table:
-            table['indexes'].sort(key=lambda x: x['name'])
-        if 'foreign_keys' in table:
-            for f_key in table['foreign_keys']:
-                f_key["referenced_column_names"] = sort_names_split_by_comma(f_key["referenced_column_names"])
-        if 'columns' in table:
             for column in table['columns']:
                 if column['column_type'] == 'int':
                     # 11 is omitted in certain versions
                     # if its not 11 i.e. not default we keep it
                     column['column_type'] = 'int(11)'
-        if 'partitions' in table:
-            for partition in table['partitions']:
-                if partition["partition_expression"] is not None:
-                    partition["partition_expression"] = (
-                        partition["partition_expression"].replace("`", "").lower().strip()
-                    )
-                if "subpartitions" in partition and partition["subpartitions"]:
-                    for subpartition in partition["subpartitions"]:
-                        if subpartition["subpartition_expression"] is not None:
-                            subpartition["subpartition_expression"] = (
-                                subpartition["subpartition_expression"].replace("`", "").lower().strip()
-                            )
 
-def normalize_values(actual_payload):
-    actual_payload["default_character_set_name"] = "normalized_value"
-    actual_payload["default_collation_name"] = "normalized_value"
-    actual_payload["tables"].sort(key=lambda x: x["name"])
-    for table in actual_payload['tables']:
-        table['create_time'] = "normalized_value"
-        if 'columns' in table:
-            table['columns'].sort(key=lambda x: x['name'])
+        # Normalize indexes and their columns
         if 'indexes' in table:
             table['indexes'].sort(key=lambda x: x['name'])
             for index in table['indexes']:
-                index['columns'].sort(key=lambda x: x['name'])
+                if 'columns' in index:
+                    index['columns'].sort(key=lambda x: x['name'])
+
+        # Normalize foreign keys
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
+                ref_cols = f_key.get("referenced_column_names")
                 f_key["referenced_column_names"] = (
-                    sort_names_split_by_comma(f_key["referenced_column_names"])
-                    if "referenced_column_names" in f_key and f_key["referenced_column_names"] is not None
-                    else None
+                    sort_names_split_by_comma(ref_cols) if ref_cols is not None else None
                 )
+
+        # Normalize partitions and subpartitions
         if 'partitions' in table:
             table['partitions'].sort(key=lambda x: x['name'])
             for partition in table['partitions']:
-                if 'subpartitions' in partition:
-                    partition['subpartitions'].sort(key=lambda x: x['name'])
-        if 'columns' in table:
-            for column in table['columns']:
-                if column['column_type'] == 'int':
-                    # 11 is omitted in certain versions
-                    # if its not 11 i.e. not default we keep it
-                    column['column_type'] = 'int(11)'
-        if 'partitions' in table:
-            for partition in table['partitions']:
-                if partition["partition_expression"] is not None:
+                # Normalize partition expression
+                if partition.get("partition_expression") is not None:
                     partition["partition_expression"] = (
                         partition["partition_expression"].replace("`", "").lower().strip()
                     )
-                if "subpartitions" in partition and partition["subpartitions"]:
-                    for subpartition in partition["subpartitions"]:
-                        if subpartition["subpartition_expression"] is not None:
+                # Normalize subpartitions
+                if 'subpartitions' in partition and partition['subpartitions']:
+                    partition['subpartitions'].sort(key=lambda x: x['name'])
+                    for subpartition in partition['subpartitions']:
+                        if subpartition.get("subpartition_expression") is not None:
                             subpartition["subpartition_expression"] = (
                                 subpartition["subpartition_expression"].replace("`", "").lower().strip()
                             )
@@ -741,8 +722,8 @@ def test_collect_schemas_legacy(aggregator, dd_run_check, dbm_instance, skip_unl
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
-        normalize_values_legacy(actual_payload)
-        normalize_values_legacy(expected_data_for_db[db_name])
+        normalize_values(actual_payload)
+        normalize_values(expected_data_for_db[db_name])
         assert db_name in databases_to_find
         assert expected_data_for_db[db_name] == actual_payload
 
