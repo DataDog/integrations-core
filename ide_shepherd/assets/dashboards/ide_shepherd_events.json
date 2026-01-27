@@ -6,7 +6,7 @@
       "id": 2220119315921113,
       "definition": {
         "type": "image",
-        "url": "/api/v2/images/5a55f76e-a062-4aa1-9f9c-b757fdaa0a00",
+        "url": "https://datadog-securitylabs.imgix.net/img/ide-shepherd-release-article/logo.png",
         "sizing": "cover",
         "has_background": true,
         "has_border": true,
