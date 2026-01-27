@@ -1455,6 +1455,12 @@ pipeline:
           template: "%{auid}"
           target: ocsf.actor.user.uid
           replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.user.uid attribute
+          enabled: true
+          template: "%{msg.id}"
+          target: ocsf.user.uid
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3005
           enabled: true
@@ -1712,9 +1718,9 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `msg.id` to `ocsf.user.uid`
+            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
               sources:
-                - msg.id
+                - ocsf.user.uid
               sourceType: attribute
               target: ocsf.user.uid
               targetFormat: string
@@ -2015,7 +2021,7 @@ pipeline:
               overrideOnConflict: true
               type: schema-remapper
     - type: pipeline
-      name: OCSF sub pipeline for class Config State Change [5019]
+      name: OCSF sub pipeline for class Device Config State Change [5019]
       enabled: true
       ocsf:
         isOcsf: true
@@ -2031,7 +2037,7 @@ pipeline:
         - type: string-builder-processor
           name: Set ocsf.actor.process.user.uid attribute
           enabled: true
-          template: "%{user.id}"
+          template: "%{usr.id}"
           target: ocsf.actor.process.user.uid
           replaceMissing: false
         - type: string-builder-processor
@@ -2164,7 +2170,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.device.hostname
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `network.client.ip` to `ocsf.device.ip`
@@ -2173,7 +2179,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.device.ip
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
@@ -2218,7 +2224,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.user.name
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `msg.exe` to `ocsf.actor.process.path`
@@ -2227,7 +2233,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.path
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `pid` to `ocsf.actor.process.pid`
@@ -2236,7 +2242,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.pid
               targetFormat: integer
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `usr.name` to `ocsf.actor.process.user.name`
@@ -2245,7 +2251,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.user.name
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
@@ -2254,6 +2260,6 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.session.terminal
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper

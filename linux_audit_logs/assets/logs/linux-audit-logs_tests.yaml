@@ -5,10 +5,13 @@ tests:
   sample: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"root\""
   result:
     custom:
+      AUID: "root"
       auid: 0
       event_id: 6532
+      exe: "/usr/libexec/platform-python3.6"
       msg:
         comm: "semanage"
+        hostname: "10.10.10.10"
         lport: 3307
         op:
          - "add"
@@ -16,10 +19,12 @@ tests:
         res: "success"
         resrc: "port"
         tcontext: "system_u:object_r:mysqld_port_t:s0"
+        terminal: "ssh"
       msg_raw: ""
       network:
         client:
           geoip: {}
+          ip: "10.10.10.10"
       ocsf:
         activity_id: 1
         activity_name: "Log"
@@ -28,6 +33,7 @@ tests:
             path: "/usr/libexec/platform-python3.6"
             pid: 381980
             user:
+              id: "0"
               name: "root"
           session:
             terminal: "ssh"
@@ -57,6 +63,7 @@ tests:
         status_id: 1
         time: 1736329118112
       original_timestamp: 1.736329118112E9
+      pid: 381980
       post_msg_kv: ""
       pre_msg_kv: ""
       ses: 138
@@ -66,6 +73,7 @@ tests:
       type: "USER_MAC_CONFIG_CHANGE"
       usr:
         id: 0
+        name: "root"
     message: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"root\""
     status: "ok"
     tags:
