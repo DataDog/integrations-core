@@ -52,7 +52,6 @@ A comment-based type checker allowing a mix of dynamic and static typing. This i
 [env.collectors.datadog-checks]
 check-types: true
 mypy-args = [
-    "--py2",
     "--install-types",
     "--non-interactive",
 ]
@@ -66,12 +65,12 @@ mypy-deps = [
 ...
 ```
 
-The `mypy-args` defines the [mypy command line option][mypy-command-line] for this specific integration. `--py2` is here to make sure the integration is Python2.7 compatible. Here are some useful flags you can add:
+The `mypy-args` defines the [mypy command line option][mypy-command-line] for this specific integration. Here are some useful flags you can add:
 
 - `--check-untyped-defs`: Type-checks the interior of functions without type annotations.
 - `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations.
 
-The `datadog_checks/ tests/` arguments represent the list of files that `mypy` should type check. Feel free to edit them as desired, including removing `tests/` (if you'd prefer to not type-check the test suite), or targeting specific files (when doing partial type checking).
+The `datadog_checks/ tests/` arguments in `mypy-files` represent the list of files that `mypy` should type check. Feel free to edit them as desired, including removing `tests/` (if you'd prefer to not type-check the test suite), or targeting specific files (when doing partial type checking).
 
 Note that there is a default configuration in the [`mypy.ini`][mypy-ini] file.
 
