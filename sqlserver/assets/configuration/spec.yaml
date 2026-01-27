@@ -1,4 +1,5 @@
 name: SQL Server
+fleet_configurable: true
 files:
 - name: sqlserver.yaml
   options:
@@ -10,6 +11,7 @@ files:
         your SQL server counters.
 
         See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -21,6 +23,7 @@ files:
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+      fleet_configurable: true
       value:
         example: false
         type: boolean
@@ -38,16 +41,19 @@ files:
         If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
         of 0 to omit port from your connection string. This should allow SSBS to autodiscover the
         correct database port.
+      fleet_configurable: true
       required: true
       value:
         type: string
         example: <HOST>,<PORT>
     - name: username
       description: Username for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
+      fleet_configurable: true
       value:
         type: string
     - name: password
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
+      fleet_configurable: true
       secret: true
       value:
         type: string
@@ -57,12 +63,14 @@ files:
         Important for validating connection string attributes for older sqlserver versions.
 
         This is required if connecting to a SQLServer instance older than 2014.
+      fleet_configurable: true
       value:
         type: string
         example: "2014"
     - name: database
       description: |
         Database name to query.  Not compatible with `database_autodiscovery`.
+      fleet_configurable: true
       value:
         type: string
         example: master
@@ -70,6 +78,7 @@ files:
       description: |
         Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
         and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+      fleet_configurable: true
       value:
         type: string
     - name: exclude_hostname
@@ -110,6 +119,7 @@ files:
             In addition, you can use any key from the `tags` section of the configuration.
           default: "$resolved_hostname"
     - name: database_autodiscovery
+      fleet_configurable: true
       description: |
         Auto-discover and monitor databases. Supported for the metrics check.
         If `true`, overrides `database` option.
@@ -118,6 +128,7 @@ files:
         type: boolean
         example: false
     - name: autodiscovery_include
+      fleet_configurable: true
       description: |
         Regular expression for database names to include as part of `database_autodiscovery`.
         Will report metrics for databases that are found in this instance, ignores databases listed but not found.
@@ -134,6 +145,7 @@ files:
           - master$
           - AdventureWorks.*
     - name: autodiscovery_exclude
+      fleet_configurable: true
       description: |
         Regular expression for database names to exclude as part of `database_autodiscovery`.
 
@@ -152,12 +164,14 @@ files:
           - model_replicatedmaster
           - model_msdb
     - name: database_autodiscovery_interval
+      fleet_configurable: true
       description: |
         Frequency in seconds of scans for new databases.  Defaults to `3600`.
       value:
         type: integer
         example: 3600
     - name: autodiscovery_db_service_check
+      fleet_configurable: true
       description: |
         When enabled with database autodiscovery, attempts to connect to the list of
         autodiscovered databases and submits a service check that signifies whether
@@ -273,6 +287,15 @@ files:
                 type: boolean
                 example: false
               - name: collection_interval
+                fleet_configurable: true
+                fleet_configurable: true
+                fleet_configurable: true
+                fleet_configurable: true
+                fleet_configurable: true
+                fleet_configurable: true
+                fleet_configurable: true
+                fleet_configurable: true
+                fleet_configurable: true
                 type: integer
                 example: 300
                 display_default: 300
@@ -482,6 +505,7 @@ files:
         items:
           type: string
     - name: adoprovider
+      fleet_configurable: true
       description: |
         Choose the ADO provider.  Note that the (default) provider
         SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
@@ -492,6 +516,7 @@ files:
         type: string
         example: SQLOLEDB
     - name: connector
+      fleet_configurable: true
       description: |
         Change the connection method from adodbapi (the default) to
         odbc (valid connector names are 'odbc' and 'adodbapi')
@@ -500,15 +525,18 @@ files:
         type: string
         example: adodbapi
     - name: driver
+      fleet_configurable: true
       description: If using odbc, use the named driver.
       value:
         type: string
         example: SQL Server
     - name: dsn
+      fleet_configurable: true
       description: If using odbc, configure a connection using a DSN.
       value:
         type: string
     - name: connection_string
+      fleet_configurable: true
       description: |
         Specify a custom connection string to be used
         Ex: "ApplicationIntent=ReadWrite" or "Trusted_Connection=Yes" to use Windows Authentication
@@ -523,6 +551,7 @@ files:
         type: string
         example: "<CONNECTION_STRING>"
     - name: dbm
+      fleet_configurable: true
       description: |
         Set to `true` to enable Database Monitoring.
       value:
@@ -547,8 +576,10 @@ files:
             example: 600
     - name: query_metrics
       description: Configure collection of query metrics
+      fleet_configurable: true
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of query metrics. Requires `dbm: true`.
           value:
@@ -648,6 +679,7 @@ files:
           hidden: true
     - name: query_activity
       description: Configure collection of active sessions monitoring
+      fleet_configurable: true
       options:
         - name: enabled
           description: |
@@ -671,6 +703,7 @@ files:
         The characters limit is applicable to both query metrics and query samples.
         Please be aware that increasing this value may affect performance,
         as more data will be gathered from the database and sent to Datadog.
+      fleet_configurable: true
       value:
         type: integer
         example: 500
@@ -956,6 +989,7 @@ files:
         example: false
         display_default: false
     - name: command_timeout
+      fleet_configurable: true
       description: Timeout in seconds for the connection and each command run
       value:
         type: integer
@@ -972,11 +1006,13 @@ files:
         example: <PROCEDURE_NAME>
     - name: proc_only_if
       description: Run this SQL before each call to `stored_procedure`. Only if it returns 1 then call the proc.
+      fleet_configurable: true
       value:
         type: string
         example: <SQL_QUERY>
     - name: proc_only_if_database
       description: The database to run the `proc_only_if` SQL in.
+      fleet_configurable: true
       value:
         type: string
         example: master
