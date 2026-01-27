@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 6.2.0 / 2025-01-27
+
+***Changed***:
+
+* Add prirep and index tags to the elasticsearch.shards metric ([#22426](https://github.com/DataDog/integrations-core/pull/22426/))
+
 ## 6.1.0 / 2023-08-18
 
 ***Added***:
