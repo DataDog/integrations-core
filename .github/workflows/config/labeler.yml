@@ -91,6 +91,8 @@ integration/azure_iot_edge:
 - azure_iot_edge/**/*
 integration/barracuda_secure_edge:
 - barracuda_secure_edge/**/*
+integration/battery:
+- battery/**/*
 integration/bentoml:
 - bentoml/**/*
 integration/beyondtrust_identity_security_insights:
@@ -139,6 +141,8 @@ integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
 - cisco_aci/**/*
+integration/cisco_asa:
+- cisco_asa/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
 integration/cisco_sdwan:
@@ -675,6 +679,8 @@ integration/strimzi:
 - strimzi/**/*
 integration/supabase:
 - supabase/**/*
+integration/supabase_cloud:
+- supabase_cloud/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/supply_chain_firewall:

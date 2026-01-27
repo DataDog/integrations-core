@@ -1,4 +1,5 @@
 name: Nginx
+fleet_configurable: true
 files:
 - name: nginx.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: nginx_status_url
+      fleet_configurable: true
       required: true
       display_priority: 2
       description: |
@@ -32,6 +34,7 @@ files:
         there is a new API that replaces the extended status API.
         See https://www.nginx.com/blog/nginx-plus-r13-released/.
         To use it, set `use_plus_api` to `true`.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -42,12 +45,14 @@ files:
        See https://www.nginx.com/blog/nginx-plus-r13-released/
        If you're not using Stream servers, you can disable this part to remove errors in NGINX Plus API calls.
        To use it set `use_plus_api_stream` to `true`.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
         display_default: true
     - name: plus_api_version
       description: Specify the version of the Plus API to use. The check supports versions 1-7.
+      fleet_configurable: true
       value:
         type: integer
         display_default: 2
@@ -55,6 +60,7 @@ files:
       description: |
         Enable this option if you would like the check to determine which API endpoints
         to query based on your NGINX Plus configuration.
+      fleet_configurable: true
       value:
         type: boolean
         example: true

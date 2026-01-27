@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import itertools
+import re
 from typing import TYPE_CHECKING
 
 import click
@@ -59,12 +60,31 @@ def integrations(app):
 
 
 def update_ci_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
-    for file in (app.repo.path / ".github" / "workflows").glob("*.yml"):
+    files_to_update = [
+        *(app.repo.path / ".github" / "workflows").glob("*.yml"),
+        *(app.repo.path / ".github" / "workflows" / "scripts").glob("*.sh"),
+    ]
+
+    # Patterns to match:
+    # 1. python-version: '3.13' (YAML)
+    # 2. PYTHON_VERSION="3.13" or PYTHON_VERSION: "3.13" (Bash/Env)
+    # 3. DEFAULT_PYTHON_VERSION='3.13' or DEFAULT_PYTHON_VERSION: '3.13'
+    # 4. '3.13' (Bare version in quotes)
+    python_version_patterns = [
+        re.compile(rf'(python-version:\s*[\'"]){re.escape(old_version)}([\'"])'),
+        re.compile(rf'(PYTHON_VERSION\s*[:=]\s*[\'"]){re.escape(old_version)}([\'"])'),
+        re.compile(rf'(DEFAULT_PYTHON_VERSION\s*[:=]\s*[\'"]){re.escape(old_version)}([\'"])'),
+        re.compile(rf'([\'"]){re.escape(old_version)}([\'"])'),
+    ]
+
+    for file in files_to_update:
         old_content = new_content = file.read_text()
 
-        for pattern in ("python-version: '{}'", 'PYTHON_VERSION: "{}"', "'{}'"):
-            if pattern.format(old_version) in new_content:
-                new_content = new_content.replace(pattern.format(old_version), pattern.format(new_version))
+        for pattern in python_version_patterns:
+            if pattern.search(new_content):
+                # Replace group 1 (prefix) + new_version + group 2 (suffix/quote)
+                # The regex captures the prefix (key + opening quote) and the closing quote
+                new_content = pattern.sub(rf'\g<1>{new_version}\g<2>', new_content)
 
         if old_content != new_content:
             file.write_text(new_content)
