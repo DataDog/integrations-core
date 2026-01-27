@@ -6,6 +6,15 @@ from concurrent.futures import as_completed
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 
+# AWS MSK IAM authentication support
+try:
+    import boto3
+    from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
+
+    AWS_MSK_IAM_AVAILABLE = True
+except ImportError:
+    AWS_MSK_IAM_AVAILABLE = False
+
 
 class KafkaClient:
     def __init__(self, config, log) -> None:
@@ -69,12 +78,45 @@ class KafkaClient:
         }
 
         if self.config._sasl_mechanism == "OAUTHBEARER":
-            extras_parameters['sasl.oauthbearer.method'] = "oidc"
-            extras_parameters["sasl.oauthbearer.client.id"] = self.config._sasl_oauth_token_provider.get("client_id")
-            extras_parameters["sasl.oauthbearer.token.endpoint.url"] = self.config._sasl_oauth_token_provider.get("url")
-            extras_parameters["sasl.oauthbearer.client.secret"] = self.config._sasl_oauth_token_provider.get(
-                "client_secret"
-            )
+            # Default to 'oidc' for backwards compatibility with existing configs
+            method = self.config._sasl_oauth_token_provider.get("method", "oidc")
+
+            if method == "aws_msk_iam":
+                # AWS MSK IAM authentication requires OAuth callback
+                if not AWS_MSK_IAM_AVAILABLE:
+                    raise Exception(
+                        "AWS MSK IAM authentication requires 'aws-msk-iam-sasl-signer-python' library. "
+                        "Install it with: pip install aws-msk-iam-sasl-signer-python"
+                    )
+
+                # Set up OAuth callback for AWS MSK IAM
+                # The callback generates AWS IAM authentication tokens
+                def _aws_msk_iam_oauth_cb(oauth_config):
+                    """OAuth callback that generates AWS MSK IAM authentication tokens."""
+                    try:
+                        # Get AWS region from config or detect from environment
+                        region = boto3.session.Session().region_name or 'us-east-1'
+                        auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(region)
+                        self.log.debug("Generated AWS MSK IAM token, expires in %s ms", expiry_ms)
+                        return auth_token, expiry_ms / 1000  # Convert to seconds
+                    except Exception as e:
+                        self.log.error("Failed to generate AWS MSK IAM token: %s", e)
+                        raise
+
+                extras_parameters['oauth_cb'] = _aws_msk_iam_oauth_cb
+
+            elif method == "oidc":
+                # OIDC authentication
+                extras_parameters['sasl.oauthbearer.method'] = "oidc"
+                extras_parameters["sasl.oauthbearer.client.id"] = self.config._sasl_oauth_token_provider.get(
+                    "client_id"
+                )
+                extras_parameters["sasl.oauthbearer.token.endpoint.url"] = self.config._sasl_oauth_token_provider.get(
+                    "url"
+                )
+                extras_parameters["sasl.oauthbearer.client.secret"] = self.config._sasl_oauth_token_provider.get(
+                    "client_secret"
+                )
 
         for key, value in extras_parameters.items():
             # Do not add the value if it's not specified

@@ -183,6 +183,21 @@ mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
             mock_client,
             id="valid config",
         ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'method': 'aws_msk_iam'}},
+            does_not_raise(),
+            mock_client,
+            id="valid AWS MSK IAM config",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'method': 'invalid_method'}},
+            pytest.raises(
+                Exception,
+                match="Invalid method 'invalid_method' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'",
+            ),
+            None,
+            id="invalid method",
+        ),
     ],
 )
 def test_oauth_config(
@@ -1352,6 +1367,56 @@ def test_count_consumer_contexts(check, kafka_instance):
         'consumer_group2': {('topic2', 'partition0'): 3},  # 1 context
     }
     assert kafka_consumer_check.count_consumer_contexts(consumer_offsets) == 3
+
+
+@pytest.mark.parametrize(
+    'oauth_config, expected_auth_keys',
+    [
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            ['oauth_cb'],  # AWS MSK IAM uses oauth_cb callback, not sasl.oauthbearer.method
+            id="AWS MSK IAM authentication",
+        ),
+        pytest.param(
+            {'method': 'oidc', 'url': 'http://fake.url', 'client_id': 'test_id', 'client_secret': 'test_secret'},
+            {
+                'sasl.oauthbearer.method': 'oidc',
+                'sasl.oauthbearer.client.id': 'test_id',
+                'sasl.oauthbearer.token.endpoint.url': 'http://fake.url',
+                'sasl.oauthbearer.client.secret': 'test_secret',
+            },
+            id="OIDC authentication",
+        ),
+    ],
+)
+def test_oauth_authentication_config(oauth_config, expected_auth_keys, kafka_instance, check):
+    """Test that OAuth authentication configuration is correctly set for both AWS MSK IAM and OIDC."""
+    kafka_instance.update(
+        {
+            'monitor_unlisted_consumer_groups': True,
+            'security_protocol': 'SASL_SSL',
+            'sasl_mechanism': 'OAUTHBEARER',
+            'sasl_oauth_token_provider': oauth_config,
+        }
+    )
+    kafka_consumer_check = check(kafka_instance)
+    auth_config = kafka_consumer_check.client._KafkaClient__get_authentication_config()
+
+    # Verify security protocol is set
+    assert auth_config['security.protocol'] == 'sasl_ssl'
+    assert auth_config['sasl.mechanism'] == 'OAUTHBEARER'
+
+    # Verify OAuth-specific configuration
+    if isinstance(expected_auth_keys, dict):
+        # OIDC: verify exact key-value pairs
+        for key, value in expected_auth_keys.items():
+            assert auth_config[key] == value
+    else:
+        # AWS MSK IAM: verify oauth_cb callback is present and callable
+        for key in expected_auth_keys:
+            assert key in auth_config
+            if key == 'oauth_cb':
+                assert callable(auth_config[key])
 
 
 def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):

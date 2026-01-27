@@ -199,26 +199,28 @@ files:
         description: |
           Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
         options:
-        - name: url
-          required: true
-          enabled: false
+        - name: method
           description: |
-            The token endpoint.
+            The OAuth method to use. Either 'aws_msk_iam' for AWS MSK IAM authentication 
+            or 'oidc' for standard OIDC authentication. Defaults to 'oidc' for backwards compatibility.
+          value:
+            type: string
+            example: aws_msk_iam
+            display_default: oidc
+        - name: url
+          description: |
+            The token endpoint URL. Required when method is 'oidc'.
           value:
             type: string
         - name: client_id
-          required: true
-          enabled: false
           description: |
-            The client identifier.
+            The client identifier. Required when method is 'oidc'.
           value:
             type: string
         - name: client_secret
           secret: true
-          required: true
-          enabled: false
           description: |
-            The client secret.
+            The client secret. Required when method is 'oidc'.
           value:
             type: string
       - template: instances/tls
