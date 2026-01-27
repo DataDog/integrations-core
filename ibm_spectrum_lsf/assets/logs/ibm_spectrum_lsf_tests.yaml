@@ -51,14 +51,14 @@ tests:
      - "log_type:system"
     timestamp: 1768357937000
  -
-  sample: "Jan 15 22:02:12 2025 7288 4 10.1 write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
+  sample: "Feb 15 22:02:12 2025 7288 4 10.1 write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
   tags:
    - "log_type:system"
   result:
     custom:
       level: 4
       pid: 7288
-      timestamp: 1736978532000
+      timestamp: 1739656932000
       version: "10.1"
     message: "write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
     status: "warn"

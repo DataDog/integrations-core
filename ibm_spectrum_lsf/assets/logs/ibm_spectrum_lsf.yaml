@@ -104,7 +104,7 @@ pipeline:
               open your job file: /home/test-user/.lsbatch/8322342.23.10"
           grok:
             supportRules: ""
-            matchRules: ibm_spectrum_lsf_system %{date("MMM DD HH:mm:ss
+            matchRules: ibm_spectrum_lsf_system %{date("MMM dd HH:mm:ss
               yyyy"):timestamp}\s+%{integer:pid}(:%{integer:tid})?\s+%{integer:level}\s+%{data:version}\s+%{data:message}
         - type: message-remapper
           name: Define `message` as the official message of the log
