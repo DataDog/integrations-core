@@ -46,7 +46,7 @@ pipeline:
             - /test/logs/724.out
           grok:
             supportRules: ""
-            matchRules: log_file_name (%{data:path}/)?%{word:job_id}\.%{word:extension}
+            matchRules: log_file_name (%{notSpace:path}/)?%{word:job_id}\.%{word:extension}
         - type: attribute-remapper
           name: Remapping job ID to tag
           enabled: true
@@ -83,6 +83,11 @@ pipeline:
           enabled: true
           sources:
             - message
+        - type: service-remapper
+          name: Define `service` as the official service of the log
+          enabled: true
+          sources:
+            - service
     - type: pipeline
       name: IBM Spectrum LSF system logs
       enabled: true
@@ -105,7 +110,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: ibm_spectrum_lsf_system %{date("MMM dd HH:mm:ss
-              yyyy"):timestamp}\s+%{integer:pid}(:%{integer:tid})?\s+%{integer:level}\s+%{data:version}\s+%{data:message}
+              yyyy"):timestamp}\s+%{integer:pid}(:%{integer:tid})?\s+%{integer:level}\s+%{notSpace:version}\s+%{data:message}
         - type: message-remapper
           name: Define `message` as the official message of the log
           enabled: true
@@ -121,3 +126,8 @@ pipeline:
           enabled: true
           sources:
             - level
+        - type: service-remapper
+          name: Define `service` as the official service of the log
+          enabled: true
+          sources:
+            - service
