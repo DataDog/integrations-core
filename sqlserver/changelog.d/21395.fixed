@@ -1,1 +1,1 @@
-Fix schemas_collection errors on Azure SQL Database - add FK.object_id to SELECT clause and handle None in deadlock collection
+Fix schemas_collection GROUP BY aggregation error on Azure SQL Database by removing FK.object_id from FOREIGN_KEY_QUERY
