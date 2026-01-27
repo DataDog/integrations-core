@@ -64,7 +64,6 @@
         exactly at the collection interval.
         The query will be run at the next check run after the collection interval has passed.
     5. metric_prefix (optional) - The prefix to apply to each metric.
-  fleet_configurable: true
   value:
     type: array
     items:
