@@ -183,7 +183,7 @@ jobs:
 
     - name: Tag job for CI Visibility
       # Skip on fork PRs and non-core repos since secrets won't be available
-      if: env.INPUT_IS_FORK != 'true' || env.INPUT_REPO == 'core'
+      if: env.INPUT_IS_FORK != 'true' && env.INPUT_REPO == 'core'
       uses: ./.github/actions/tag-job
       with:
         tags: ${{ env.DD_TAGS }}
