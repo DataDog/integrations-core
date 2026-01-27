@@ -1,4 +1,5 @@
 name: Teradata
+fleet_configurable: true
 files:
 - name: teradata.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: server
+      fleet_configurable: true
       required: true
       description: |
         The IP address or FQDN (fully qualified domain name) of the Teradata database server.
@@ -22,9 +24,11 @@ files:
         example: 1025
     - name: username
       description: Username for the Datadog-Teradata check user.
+      fleet_configurable: true
       value:
         type: string
     - name: password
+      fleet_configurable: true
       secret: true
       description: Password for the Datadog-Teradata check user.
       value:
@@ -35,6 +39,7 @@ files:
       value:
         type: string
     - name: database
+      fleet_configurable: true
       required: true
       description: |
         The name of the database to access.
@@ -68,6 +73,7 @@ files:
           exclude:
             - <TABLE_3>
     - name: collect_table_disk_metrics
+      fleet_configurable: true
       description: |
         Whether or not to collect table-specific disk space metrics from the DBC.AllSpaceV view.
         If this option is enabled, Disk Space metrics will be collected for each included table specified in the
