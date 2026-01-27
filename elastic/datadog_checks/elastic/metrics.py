@@ -766,7 +766,6 @@ NODE_SYSTEM_METRICS_POST_5 = {
 }
 
 CAT_ALLOCATION_METRICS = {
-    'elasticsearch.shards': ('gauge', 'shards'),
     'elasticsearch.disk.indices': ('gauge', 'disk_indices'),
     'elasticsearch.disk.used': ('gauge', 'disk_used'),
     'elasticsearch.disk.avail': ('gauge', 'disk_avail'),
