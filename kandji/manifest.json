@@ -67,7 +67,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 58021352,
-      "source_type_name": "iru(kandji)",
+      "source_type_name": "kandji",
       "events": {
         "creates_events": false
       }
