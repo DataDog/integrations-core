@@ -9,7 +9,7 @@ import re
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
-from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
+from typing import Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
 
 import pytest
 
