@@ -75,7 +75,6 @@ def labeler(app: Application, sync: bool):
 
         # Check if label config is properly configured
         integration_label_config = pr_labels_config.get(integration_label)
-        expected_config = labeler_config_for_check(check_name)
         if integration_label_config != expected_config:
             if sync:
                 new_pr_labels_config[integration_label] = expected_config
