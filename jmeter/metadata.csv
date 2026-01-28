@@ -13,7 +13,7 @@ jmeter.bytes_received.min,gauge,10,byte,,Minimum bytes received.,0,jmeter,jmeter
 jmeter.bytes_received.p90,gauge,10,byte,,90th percentile of bytes received.,0,jmeter,jmeter,
 jmeter.bytes_received.p95,gauge,10,byte,,95th percentile of bytes received.,0,jmeter,jmeter,
 jmeter.bytes_received.p99,gauge,10,byte,,99th percentile of bytes received.,0,jmeter,jmeter,
-jmeter.bytes_received.total,count,10,byte,,Total number of bytes received during the interval (rate per second).,0,jmeter,jmeter,
+jmeter.bytes_received.total,count,10,byte,,Total bytes received during the interval.,0,jmeter,jmeter,
 jmeter.bytes_sent.avg,gauge,10,byte,,Average bytes sent.,0,jmeter,jmeter,
 jmeter.bytes_sent.count,count,10,request,,Number of samples used to compute the bytes sent distribution.,0,jmeter,jmeter,
 jmeter.bytes_sent.max,gauge,10,byte,,Maximum bytes sent.,0,jmeter,jmeter,
