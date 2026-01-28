@@ -11,7 +11,7 @@ sudo apt install -y --no-install-recommends build-essential libkrb5-dev libsasl2
 git clone https://github.com/confluentinc/librdkafka
 cd librdkafka
 git checkout v2.13.0
-sudo ./configure --install-deps --prefix=/usr
+sudo ./configure --prefix=/usr
 make
 sudo make install
 
