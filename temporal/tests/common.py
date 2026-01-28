@@ -508,3 +508,40 @@ MOCKED_METRICS = [
     "temporal.server.workflow_update_registry.size.count",
     "temporal.server.workflow_update_registry.size.sum",
 ]
+
+# These verify that _seconds metrics are converted to milliseconds and mapped correctly
+SECONDS_CONVERSION_METRICS = [
+    {
+        # The sum value should be converted from seconds (0.5) to milliseconds (500)
+        "name": "service.latency.sum",
+        "value": 500.0,
+        "type": AggregatorStub.MONOTONIC_COUNT,
+        "tags": TAGS + ["namespace:default", "operation:Test", "service_name:frontend"],
+    },
+    {
+        # The count value should remain unchanged
+        "name": "service.latency.count",
+        "value": 100,
+        "type": AggregatorStub.MONOTONIC_COUNT,
+        "tags": TAGS + ["namespace:default", "operation:Test", "service_name:frontend"],
+    },
+    {
+        # Bucket boundaries stay in original units (seconds) to match original metrics
+        "name": "service.latency.bucket",
+        "value": 10,
+        "type": AggregatorStub.MONOTONIC_COUNT,
+        "tags": TAGS + ["namespace:default", "operation:Test", "service_name:frontend", "upper_bound:0.001"],
+    },
+    {
+        "name": "service.latency.bucket",
+        "value": 50,
+        "type": AggregatorStub.MONOTONIC_COUNT,
+        "tags": TAGS + ["namespace:default", "operation:Test", "service_name:frontend", "upper_bound:0.01"],
+    },
+    {
+        "name": "service.latency.bucket",
+        "value": 100,
+        "type": AggregatorStub.MONOTONIC_COUNT,
+        "tags": TAGS + ["namespace:default", "operation:Test", "service_name:frontend", "upper_bound:0.1"],
+    },
+]

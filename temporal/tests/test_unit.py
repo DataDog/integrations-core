@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.temporal import TemporalCheck
 
-from .common import METRICS, MOCKED_METRICS, TAGS
+from .common import METRICS, MOCKED_METRICS, SECONDS_CONVERSION_METRICS, TAGS
 
 pytestmark = [pytest.mark.unit]
 
@@ -49,3 +49,22 @@ def test_metadata(dd_run_check, datadog_agent, check, mock_metrics):
     }
 
     datadog_agent.assert_metadata(check.check_id, expected_version_metadata)
+
+
+def test_seconds_to_milliseconds_conversion(dd_run_check, aggregator, check, mock_seconds_metrics):
+    """
+    Test that _seconds latency metrics are converted to milliseconds and mapped
+    to the same metric names as the original _milliseconds metrics.
+
+    This ensures backward compatibility with existing dashboards and monitors
+    that expect millisecond values.
+    """
+    dd_run_check(check)
+
+    for expected_metric in SECONDS_CONVERSION_METRICS:
+        aggregator.assert_metric(
+            name=f"temporal.server.{expected_metric['name']}",
+            value=expected_metric.get("value"),
+            metric_type=expected_metric.get("type"),
+            tags=expected_metric.get("tags", TAGS),
+        )

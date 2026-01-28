@@ -1,0 +1,8 @@
+# HELP service_latency_seconds service_latency histogram
+# TYPE service_latency_seconds histogram
+service_latency_seconds_bucket{namespace="default",operation="Test",service_name="frontend",le="0.001"} 10
+service_latency_seconds_bucket{namespace="default",operation="Test",service_name="frontend",le="0.01"} 50
+service_latency_seconds_bucket{namespace="default",operation="Test",service_name="frontend",le="0.1"} 100
+service_latency_seconds_bucket{namespace="default",operation="Test",service_name="frontend",le="+Inf"} 100
+service_latency_seconds_sum{namespace="default",operation="Test",service_name="frontend"} 0.5
+service_latency_seconds_count{namespace="default",operation="Test",service_name="frontend"} 100
