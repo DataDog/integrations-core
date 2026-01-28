@@ -82,19 +82,15 @@ class KafkaClient:
             method = self.config._sasl_oauth_token_provider.get("method", "oidc")
 
             if method == "aws_msk_iam":
-                # AWS MSK IAM authentication requires OAuth callback
                 if not AWS_MSK_IAM_AVAILABLE:
                     raise Exception(
                         "AWS MSK IAM authentication requires 'aws-msk-iam-sasl-signer-python' library. "
                         "Install it with: pip install aws-msk-iam-sasl-signer-python"
                     )
 
-                # Set up OAuth callback for AWS MSK IAM
-                # The callback generates AWS IAM authentication tokens
                 def _aws_msk_iam_oauth_cb(oauth_config):
                     """OAuth callback that generates AWS MSK IAM authentication tokens."""
                     try:
-                        # Get AWS region from config or detect from environment
                         region = self.config._sasl_oauth_token_provider.get("aws_region")
                         if not region:
                             region = boto3.session.Session().region_name
@@ -115,7 +111,6 @@ class KafkaClient:
                 extras_parameters['oauth_cb'] = _aws_msk_iam_oauth_cb
 
             elif method == "oidc":
-                # OIDC authentication
                 extras_parameters['sasl.oauthbearer.method'] = "oidc"
                 extras_parameters["sasl.oauthbearer.client.id"] = self.config._sasl_oauth_token_provider.get(
                     "client_id"

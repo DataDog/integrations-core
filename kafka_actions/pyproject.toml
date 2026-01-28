@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "confluent-kafka==2.11.1",
+    "confluent-kafka==2.13.0",
     "fastavro==1.12.0",
     "protobuf==6.32.0",
     "pymongo[srv]==4.8.0; python_version >= '3.9'",

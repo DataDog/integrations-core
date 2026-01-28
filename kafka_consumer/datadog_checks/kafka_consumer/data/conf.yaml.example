@@ -202,7 +202,7 @@ instances:
         # aws_region: us-west-2
 
         ## @param url - string - optional
-        ## The token endpoint URL. Required when method is 'oidc'.
+        ## The token endpoint. Required when method is 'oidc'.
         #
         # url: <URL>
 

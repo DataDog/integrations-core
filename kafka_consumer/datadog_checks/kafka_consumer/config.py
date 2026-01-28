@@ -138,13 +138,10 @@ class KafkaConfig:
             method = self._sasl_oauth_token_provider.get("method", "oidc")
 
             if method == "aws_msk_iam":
-                # AWS MSK IAM requires region to be specified or detectable
                 aws_region = self._sasl_oauth_token_provider.get("aws_region")
                 if not aws_region:
-                    # Check if boto3 can detect region from environment
                     try:
                         import boto3
-
                         detected_region = boto3.session.Session().region_name
                         if not detected_region:
                             self.log.warning(
@@ -159,7 +156,6 @@ class KafkaConfig:
                             "libraries. Install them with: pip install boto3 aws-msk-iam-sasl-signer-python"
                         )
             elif method == "oidc":
-                # OIDC requires url, client_id, and client_secret
                 if self._sasl_oauth_token_provider.get("url") is None:
                     raise ConfigurationError("The `url` setting of `auth_token` reader is required")
 
