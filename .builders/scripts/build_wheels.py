@@ -23,27 +23,27 @@ from dotenv import dotenv_values
 from utils import iter_wheels
 
 
-def unpack_wheel(wheel_file: str, dest_dir: str | None = None) -> None:
+def unpack_wheel(wheel_file: Path, dest_dir: Path | None = None):
     """
     Unpack a wheel file into a directory using the supported CLI entrypoint:
       python -m wheel unpack <wheel> [-d <dest>]
     """
     cmd = [sys.executable, '-m', 'wheel', 'unpack']
     if dest_dir:
-        cmd += ['-d', dest_dir]
-    cmd.append(wheel_file)
+        cmd += ['-d', str(dest_dir)]
+    cmd.append(str(wheel_file))
     subprocess.check_call(cmd)
 
 
-def pack_wheel(wheel_dir: str, dest_dir: str | None = None) -> None:
+def pack_wheel(wheel_dir: Path, dest_dir: Path | None = None):
     """
     Pack a wheel directory into a wheel using:
       python -m wheel pack <wheel-dir> [-d <dest>]
     """
     cmd = [sys.executable, '-m', 'wheel', 'pack']
     if dest_dir:
-        cmd += ['-d', dest_dir]
-    cmd.append(wheel_dir)
+        cmd += ['-d', str(dest_dir)]
+    cmd.append(str(wheel_dir))
     subprocess.check_call(cmd)
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
@@ -182,27 +182,27 @@ def remove_test_files(wheel_path: Path) -> bool:
         td_path = Path(td)
 
         # Unpack the wheel into temp dir
-        unpack_wheel(str(wheel_path), dest_dir=str(td_path))
+        unpack_wheel(wheel_path, dest_dir=td_path)
         unpacked_dir = next(td_path.iterdir())
         # Remove excluded files/folders
-        for root, dirs, files in os.walk(str(unpacked_dir), topdown=False):
+        for root, dirs, files in unpacked_dir.walk(top_down=False):
             for d in list(dirs):
-                full_dir = Path(root) / d
+                full_dir = root / d
                 rel = full_dir.relative_to(unpacked_dir).as_posix()
                 if is_excluded_from_wheel(rel):
                     shutil.rmtree(full_dir)
                     dirs.remove(d)
             for f in files:
-                rel = Path(root).joinpath(f).relative_to(unpacked_dir).as_posix()
+                rel = (root / f).relative_to(unpacked_dir).as_posix()
                 if is_excluded_from_wheel(rel):
-                    os.remove(Path(root) / f)
+                    (root / f).unlink()
 
         print(f'Tests removed from {wheel_path.name}')
 
         dest_dir = wheel_path.parent
         before = {p.resolve() for p in dest_dir.glob("*.whl")}
         # Repack to same directory, regenerating RECORD
-        pack_wheel(str(unpacked_dir), dest_dir=str(dest_dir))
+        pack_wheel(unpacked_dir, dest_dir=dest_dir)
 
         # The wheel might not be platform-specific, so repacking restores its original name.
         # We need to move the repacked wheel to wheel_path, which was changed to be platform-specific.
