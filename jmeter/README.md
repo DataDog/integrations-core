@@ -70,8 +70,8 @@ The plugin has the following configuration options:
 
 The plugin automatically adds a `test_run_id` tag to all metrics, logs, and events (Test Started/Ended) to help you isolate and filter specific test executions in Datadog.
 
-- **Format**: `{hostname}-{ISO-8601 timestamp}-{random8chars}`
-  - Example: `myhost-2026-01-24T14:30:25Z-a1b2c3d4`
+- **Format**: `{timestamp}-{hostname}-{random8chars}`
+  - Example: `2026-01-24T14:30:25Z-myhost-a1b2c3d4`
   - In distributed mode, the `hostname` prefix becomes the `runner_id` (the JMeter distributed prefix) when present.
 
 You can override this by providing your own `test_run_id` in the `customTags` configuration (e.g., `test_run_id:my-custom-run-id`). Any additional tags you add to `customTags` will also be included alongside the `test_run_id`.
