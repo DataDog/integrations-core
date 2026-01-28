@@ -156,62 +156,13 @@ For Zscaler Private Access integration, specific custom log formats must be conf
 > Note:
 >- Complete these steps only if **TLS Encryption** is enabled in **Configure log receiver from Zscaler Private Access**.
 
-1. Generate a custom root CA and its private key:
-   ```
-   openssl genrsa -out rootCA.key 4096
-   ```
-2. In the ZPA Admin Portal, go to **Configuration & Control > Certificate Management > Enrollment Certificates > Upload Certificate Chain**, and upload `rootCA.crt`.
-3. Go to **Configuration & Control > Certificate Management > Enrollment Certificates > Actions > Create CSR**.
-   - Provide a name and description
-   - Download the CSR (for example, `zpa_enrollment.csr`)
-4. Sign the ZPA CSR using the root CA generated in Step 1.
-   - Create ext.cnf:
-      ```
-      basicConstraints = CA:TRUE
-      keyUsage = critical, digitalSignature, keyCertSign, cRLSign
-      extendedKeyUsage = serverAuth, clientAuth
-      subjectKeyIdentifier = hash
-      authorityKeyIdentifier = keyid:always
-      ```
-   - Sign the CSR
-      ```
-      openssl x509 -req -in zpa_enrollment.csr \
-      -CA rootCA.crt -CAkey rootCA.key -CAcreateserial \
-      -out zpa_enrollment_signed.crt \
-      -days 365 -sha256 \
-      -extfile ext.cnf
-      ```
-5. Go to **Configuration & Control > Certificate Management > Enrollment Certificates > Upload Certificate Chain**, and upload `zpa_enrollment_signed.crt` and `rootCA.crt`.
-6. Deploy your App Connector using the signed certificate from the previous step. See [here][7] for platform-specific instructions.
-   - Download the App Connector package
-   - Install `zpa_enrollment_signed.crt` and select the Enrollment Key if applicable.
-8. Create a server TLS Certificate for syslog-ng
-   - Generate private key using openssl
-   - Generate CSR
-   - Create server_ext.cnf:
-      ```
-      basicConstraints = CA:FALSE
-      keyUsage = digitalSignature, keyEncipherment
-      extendedKeyUsage = serverAuth
-      subjectAltName = DNS:your-syslog-server.domain, IP:YOUR_SERVER_IP
-      ```
-   - Sign server certificate
-      ```
-      openssl x509 -req -in server.csr \
-      -CA rootCA.crt -CAkey rootCA.key -CAcreateserial \
-      -out server.crt \
-      -days 3650 -sha256 \
-      -extfile server_ext.cnf
-      ```
-9. Install certificates in syslog-ng
-   ```
-   sudo mkdir -p /etc/syslog-ng/cert.d
-   sudo cp server.crt server.key rootCA.crt /etc/syslog-ng/cert.d/
-   sudo chmod 600 /etc/syslog-ng/cert.d/server.key
-   sudo chmod 644 /etc/syslog-ng/cert.d/server.crt
-   sudo chmod 644 /etc/syslog-ng/cert.d/rootCA.crt
-   ```
-10. Configure the TLS listener in syslog-ng
+1. Generate a custom root CA and its private key.
+2. Follow the [steps][8] to create Certificate Signing Requests for Enrollment (CA) Certificates.
+3. Go to **Configuration & Control** > **Certificate Management** > **Enrollment Certificates** > **Upload Certificate Chain**, and upload the required enrollment certificate along with the corresponding root CA certificate.
+4. Deploy your App Connector using the signed certificate from the previous step. See [here][7] for platform-specific instructions.
+5. Create and sign a server TLS certificate for syslog-ng.
+6. Install and configure the required TLS certificates in syslog-ng to decrypt incoming traffic from Zscaler.
+7. Configure the TLS listener in syslog-ng
    - Create **zpa-tls.conf** in **/etc/syslog-ng/conf.d**.
       ```
       # TLS listener for ZPA LSS
@@ -221,9 +172,9 @@ For Zscaler Private Access integration, specific custom log formats must be conf
             port(<source_port>)
             transport("tls")
             tls(
-                  key-file("/etc/syslog-ng/cert.d/server.key")
-                  cert-file("/etc/syslog-ng/cert.d/server.crt")
-                  ca-file("/etc/syslog-ng/cert.d/rootCA.crt")
+                  key-file("<path-to-private-key>")
+                  cert-file("<path-to-server-certificate>")
+                  ca-file("<path-to-ca-certificate>")
                   peer-verify(optional-untrusted)
             )
          );
@@ -249,10 +200,7 @@ For Zscaler Private Access integration, specific custom log formats must be conf
    >- `destination_port` should match the port specified in **Log collection**.
    >- In the `destination_ip`, specify the `IP address` or `hostname` of the host where Datadog Agent is installed.
 
-11. Restart syslog-ng:
-      ```
-      sudo systemctl restart syslog-ng
-      ```
+8. Restart syslog-ng.
 
 #### Validation
 
@@ -327,3 +275,4 @@ For further assistance, contact [Datadog support][4].
 [5]: https://www.zscaler.com/products-and-solutions/zscaler-private-access
 [6]: https://github.com/DataDog/integrations-core/blob/master/zscaler_private_access/datadog_checks/zscaler_private_access/data/conf.yaml.example
 [7]: https://help.zscaler.com/zpa/app-connector-management/app-connector-deployment-guides-supported-platforms
+[8]: https://help.zscaler.com/zpa/creating-certificate-signing-requests-enrollment-ca-certificates
