@@ -112,6 +112,13 @@ jobs:
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+    # We run this for EVERYONE to ensure the scripts are moved
+    # from the action folder to the expected workspace path.
+    # It should cover all repos using this workflow and respect the context if the
+    # workflow is being called with a pinned version.
+    - name: Install workflow scripts
+      uses: ./.github/actions/setup-test-target-scripts
+
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
       #   FORCE_COLOR
@@ -175,8 +182,8 @@ jobs:
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Tag job for CI Visibility
-      # Skip on fork PRs since secrets won't be available
-      if: env.INPUT_IS_FORK != 'true'
+      # Skip on fork PRs and non-core repos since secrets won't be available
+      if: env.INPUT_IS_FORK != 'true' && env.INPUT_REPO == 'core'
       uses: ./.github/actions/tag-job
       with:
         tags: ${{ env.DD_TAGS }}
