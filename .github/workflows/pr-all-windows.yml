@@ -14,7 +14,7 @@ on:
     - '.github/workflows/test-target.yml'
     - '.github/workflows/test-all-windows.yml'
     # Also run in the action to install test-target scripts changes
-    - '.github/actions/setup-test-target-scripts/**
+    - '.github/actions/setup-test-target-scripts/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
