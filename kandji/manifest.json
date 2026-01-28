@@ -9,32 +9,47 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Kandji logs.",
-    "title": "Kandji",
+    "description": "Gain insights into Iru (formerly known as Kandji) logs.",
+    "title": "Iru(Kandji)",
     "media": [
       {
-        "caption": "Kandji - Overview",
-        "image_url": "images/kandji_overview.png",
+        "caption": "Iru(Kandji) - Overview",
+        "image_url": "images/kandji_overview_light.png",
         "media_type": "image"
       },
       {
-        "caption": "Kandji - Audit",
-        "image_url": "images/kandji_audit_1.png",
+        "caption": "Iru(Kandji) - Overview",
+        "image_url": "images/kandji_overview_dark.png",
         "media_type": "image"
       },
       {
-        "caption": "Kandji - Audit",
-        "image_url": "images/kandji_audit_2.png",
+        "caption": "Iru(Kandji) - Audit",
+        "image_url": "images/kandji_audit_light.png",
         "media_type": "image"
       },
       {
-        "caption": "Kandji - Threat Insights",
-        "image_url": "images/kandji_threat_insights.png",
+        "caption": "Iru(Kandji) - Audit",
+        "image_url": "images/kandji_audit_dark.png",
         "media_type": "image"
       },
       {
-        "caption": "Kandji - Detections",
-        "image_url": "images/kandji_detection.png",
+        "caption": "Iru(Kandji) - Threat Insights",
+        "image_url": "images/kandji_threat_insights_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Iru(Kandji) - Threat Insights",
+        "image_url": "images/kandji_threat_insights_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Iru(Kandji) - Detections",
+        "image_url": "images/kandji_detections_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Iru(Kandji) - Detections",
+        "image_url": "images/kandji_detections_dark.png",
         "media_type": "image"
       }
     ],
@@ -52,16 +67,16 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 58021352,
-      "source_type_name": "kandji",
+      "source_type_name": "iru(kandji)",
       "events": {
         "creates_events": false
       }
     },
     "dashboards": {
-      "Kandji - Overview": "assets/dashboards/kandji_overview.json",
-      "Kandji - Audit": "assets/dashboards/kandji_audit.json",
-      "Kandji - Threat Insights": "assets/dashboards/kandji_threat_insights.json",
-      "Kandji - Detections": "assets/dashboards/kandji_detections.json"
+      "Iru(Kandji) - Overview": "assets/dashboards/kandji_overview.json",
+      "Iru(Kandji) - Audit": "assets/dashboards/kandji_audit.json",
+      "Iru(Kandji) - Threat Insights": "assets/dashboards/kandji_threat_insights.json",
+      "Iru(Kandji) - Detections": "assets/dashboards/kandji_detections.json"
     },
     "logs": {
       "source": "kandji"
