@@ -48,6 +48,7 @@ jobs:
       platform: "${{ matrix.platform }}"
       runner: "${{ toJson(matrix.runner) }}"
       repo: "${{ inputs.repo }}"
+      context: "pr"
 
       # Options
       # We never test Python in integrations-core, but some partners may want to keep testing it
