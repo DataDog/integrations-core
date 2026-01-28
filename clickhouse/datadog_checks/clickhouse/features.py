@@ -20,7 +20,7 @@ class FeatureKey(Enum):
     DBM = "dbm"
     QUERY_METRICS = "query_metrics"
     QUERY_SAMPLES = "query_samples"
-    COMPLETED_QUERY_SAMPLES = "completed_query_samples"
+    QUERY_COMPLETIONS = "query_completions"
     SINGLE_ENDPOINT_MODE = "single_endpoint_mode"
 
 
@@ -28,7 +28,7 @@ FeatureNames = {
     FeatureKey.DBM: 'Database Monitoring',
     FeatureKey.QUERY_METRICS: 'Query Metrics',
     FeatureKey.QUERY_SAMPLES: 'Query Samples',
-    FeatureKey.COMPLETED_QUERY_SAMPLES: 'Completed Query Samples',
+    FeatureKey.QUERY_COMPLETIONS: 'Query Completions',
     FeatureKey.SINGLE_ENDPOINT_MODE: 'Single Endpoint Mode',
 }
 

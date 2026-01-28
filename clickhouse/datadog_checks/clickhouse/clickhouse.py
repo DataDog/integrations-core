@@ -15,7 +15,7 @@ from datadog_checks.base.utils.serialization import json
 
 from . import queries
 from .__about__ import __version__
-from .completed_query_samples import ClickhouseCompletedQuerySamples
+from .query_completions import ClickhouseQueryCompletions
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
 from .statement_samples import ClickhouseStatementSamples
@@ -114,11 +114,11 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             self.statement_samples = None
 
-        # Initialize completed query samples (from system.query_log - completed queries)
-        if self._config.dbm and self._config.completed_query_samples.enabled:
-            self.completed_query_samples = ClickhouseCompletedQuerySamples(self, self._config.completed_query_samples)
+        # Initialize query completions (from system.query_log - completed queries)
+        if self._config.dbm and self._config.query_completions.enabled:
+            self.query_completions = ClickhouseQueryCompletions(self, self._config.query_completions)
         else:
-            self.completed_query_samples = None
+            self.query_completions = None
 
     @property
     def tags(self) -> list[str]:
@@ -240,9 +240,9 @@ class ClickhouseCheck(DatabaseCheck):
         if self.statement_samples:
             self.statement_samples.run_job_loop(self.tags)
 
-        # Run completed query samples if DBM is enabled (from system.query_log)
-        if self.completed_query_samples:
-            self.completed_query_samples.run_job_loop(self.tags)
+        # Run query completions if DBM is enabled (from system.query_log)
+        if self.query_completions:
+            self.query_completions.run_job_loop(self.tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):
@@ -459,16 +459,16 @@ class ClickhouseCheck(DatabaseCheck):
             self.statement_metrics.cancel()
         if self.statement_samples:
             self.statement_samples.cancel()
-        if self.completed_query_samples:
-            self.completed_query_samples.cancel()
+        if self.query_completions:
+            self.query_completions.cancel()
 
         # Wait for job loops to finish
         if self.statement_metrics and self.statement_metrics._job_loop_future:
             self.statement_metrics._job_loop_future.result()
         if self.statement_samples and self.statement_samples._job_loop_future:
             self.statement_samples._job_loop_future.result()
-        if self.completed_query_samples and self.completed_query_samples._job_loop_future:
-            self.completed_query_samples._job_loop_future.result()
+        if self.query_completions and self.query_completions._job_loop_future:
+            self.query_completions._job_loop_future.result()
 
         # Close main client
         if self._client:
