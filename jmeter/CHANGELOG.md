@@ -1,4 +1,4 @@
-# Changes
+# CHANGELOG - JMeter
 
 ## 0.6.0
 
