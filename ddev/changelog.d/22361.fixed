@@ -1,0 +1,1 @@
+Add pagination when fetching previous sizes in `ddev size status`
