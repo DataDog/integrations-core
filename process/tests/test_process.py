@@ -57,15 +57,16 @@ class MockProcess(object):
 
 
 class NamedMockProcess(object):
-    def __init__(self, name):
-        self.pid = None
+    def __init__(self, name, pid=None, cmdline=None):
+        self.pid = pid
         self._name = name
+        self._cmdline = cmdline or []
 
     def name(self):
         return self._name
 
     def cmdline(self):
-        return []
+        return self._cmdline
 
 
 def get_psutil_proc():
@@ -235,6 +236,14 @@ def test_check_missing_process(aggregator, dd_run_check, caplog):
     dd_run_check(process)
     aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
     assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
+
+
+@patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo", "bar", "--baz"])])
+def test_search_string_with_spaces(mock_process_iter):
+    instance = {'name': 'foo', 'search_string': ['foo bar'], 'exact_match': False}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    pids = process.find_pids(instance['name'], instance['search_string'], instance['exact_match'])
+    assert pids == {123}
 
 
 @pytest.mark.parametrize("oneshot", [True, False])
