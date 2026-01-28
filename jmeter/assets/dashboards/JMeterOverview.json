@@ -1,32 +1,97 @@
 {
   "title": "JMeter Overview",
-  "description": "This dashboard provides an overview of your JMeter test results so you can track how well your applications perform under stress.\n\nConfigure the Datadog plugin for JMeter to start collecting all your test results as logs so you can easily filter and drill down on the results that really matter.\n\n[**Documentation ↗**](https://github.com/DataDog/jmeter-datadog-backend-listener/)",
+  "description": "## JMeter Performance Testing Dashboard\n\nThis dashboard provides comprehensive monitoring for your JMeter load tests. Track request rates, response times, error rates, and JVM memory usage to ensure your applications perform well under stress.\n\n**Statistics Configuration**\nTo match JMeter's calculation algorithms, configure `statisticsCalculationMode` in the plugin settings:\n- **ddsketch** (default): Uses Datadog's [DDSketch algorithm](https://www.datadoghq.com/blog/engineering/computing-accurate-percentiles-with-ddsketch/). It computes approximate percentiles with a 1% error guarantee compared to the exact percentile value, while using very little memory. When compared with `aggregate_report`, results may differ more because `aggregate_report` picks the nearest observed value for each percentile, which can cause noticeable jumps when there are few samples.\n- **aggregate_report**: Matches JMeter's \"Aggregate Reports\" listener. It stores all response times in memory and calculates percentiles using the \"nearest rank\" method (nearest exact value from the dataset).\n- **dashboard**: Uses a sliding window and linear interpolation (by default) to calculate percentiles, matching JMeter's HTML Dashboards. This mode may diverge significantly from the others when the limit of the sliding window is reached (default 20,000, but [configurable](https://jmeter.apache.org/usermanual/properties_reference.html#reporting)).\n\nSee [configuration docs](https://github.com/DataDog/integrations-core/blob/master/jmeter/README.md#statistics-calculation-modes) to set the statistics calculation mode.\n\n**Setup tips**\nThe plugin automatically adds a `test_run_id` tag to all metrics, logs, and events. Format: `{timestamp}-{hostname}-{random8chars}`. You can override this by providing your own `test_run_id` in `customTags`. In distributed mode, the hostname prefix becomes the `runner_id`.\n\n**Support tips**\n- Filter by `test_run_id` to isolate a single run.\n- Make sure the time range matches the test run.\n- In distributed tests, use the `runner_id` filter to compare results per runner.\n- Logs widgets require `sendResultsAsLogs=true` and a valid Logs intake URL.\n\n**Further reading:**\n- [Datadog JMeter Plugin](https://github.com/DataDog/jmeter-datadog-backend-listener/)\n- [Apache JMeter Documentation](https://jmeter.apache.org/usermanual/)\n- [JMeter Best Practices](https://jmeter.apache.org/usermanual/best-practices.html)\n- [JMeter Getting Started Guide](https://jmeter.apache.org/usermanual/get-started.html)\n- [Datadog Log Management](https://docs.datadoghq.com/logs/)",
   "widgets": [
     {
-      "id": 3779688345422708,
+      "id": 2983628806246287,
       "definition": {
-        "type": "note",
-        "content": "![JMeter icon](/static/images/logos/jmeter_large.svg)\n\nThis dashboard provides an overview of your JMeter test results so you can track how well your applications perform under stress.\n\nConfigure the Datadog plugin for JMeter to start collecting all your test results as logs so you can easily filter and drill down on the results that really matter.\n\n[**Documentation ↗**](https://github.com/DataDog/jmeter-datadog-backend-listener/)",
-        "background_color": "white",
-        "font_size": "16",
-        "text_align": "left",
-        "vertical_align": "top",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left",
-        "has_padding": true
-      },
-      "layout": { "x": 0, "y": 0, "width": 4, "height": 6 }
-    },
-    {
-      "id": 917448088447486,
-      "definition": {
-        "title": "Summary",
+        "title": "",
+        "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 4721302432311740,
+            "id": 5465449063064605,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/jmeter_large.svg",
+              "url_dark_theme": "/static/images/logos/jmeter_reversed_large.svg",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": true,
+              "has_border": true,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8872878744824342,
+            "definition": {
+              "type": "note",
+              "content": "## JMeter Performance Testing\n\nThis dashboard provides comprehensive monitoring for your JMeter load tests. Track request rates, response times, error rates, and JVM memory usage.\n\n### Setup tips\nThe plugin automatically adds a `test_run_id` tag to all metrics, logs, and events. Format: `{timestamp}-{hostname}-{random8chars}`. Override by setting `test_run_id` in `customTags`. In distributed mode, the hostname becomes the `runner_id`.\n\n### Statistics calculation mode\n- **ddsketch** (default): Uses Datadog's [DDSketch algorithm](https://www.datadoghq.com/blog/engineering/computing-accurate-percentiles-with-ddsketch/). It computes approximate percentiles with a 1% error guarantee compared to the exact percentile value, while using very little memory. When compared with `aggregate_report`, results may differ more because `aggregate_report` picks the nearest observed value for each percentile, which can cause noticeable jumps when there are few samples.\n- **aggregate_report**: Matches JMeter's \"Aggregate Reports\" listener. It stores all response times in memory and calculates percentiles using the \"nearest rank\" method (nearest exact value from the dataset).\n- **dashboard**: Uses a sliding window and linear interpolation (by default) to calculate percentiles, matching JMeter's HTML Dashboards. This mode may diverge significantly from the others when the limit of the sliding window is reached (default 20,000, but [configurable](https://jmeter.apache.org/usermanual/properties_reference.html#reporting)).\n\nSee [configuration docs](https://github.com/DataDog/integrations-core/blob/master/jmeter/README.md#statistics-calculation-modes) to set the statistics calculation mode.\n\n### More tips\n- Align the dashboard time range with the test duration, or filter by `test_run_id` to isolate a single run.\n- In distributed tests, compare percentiles per runner (use the `runner_id` filter).\n- Logs widgets require `sendResultsAsLogs=true` and a valid Logs intake URL.\n\n**Further reading:**\n- [Datadog JMeter Plugin](https://github.com/DataDog/jmeter-datadog-backend-listener/)\n- [Apache JMeter Docs](https://jmeter.apache.org/usermanual/)\n- [JMeter Best Practices](https://jmeter.apache.org/usermanual/best-practices.html)\n- [Getting Started](https://jmeter.apache.org/usermanual/get-started.html)\n- [Datadog Logs](https://docs.datadoghq.com/logs/)",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 8
+      }
+    },
+    {
+      "id": 3729970567387,
+      "definition": {
+        "title": "Summary",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6318225577793541,
+            "definition": {
+              "type": "note",
+              "content": "High-level overview of test execution including total requests, failures, and error rates.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 836751485960072,
             "definition": {
               "title": "Total requests",
               "title_size": "16",
@@ -34,26 +99,34 @@
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
-                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
-                      "query": "sum:jmeter.responses_count{$sample_label}.as_count()",
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "sum"
+                      "query": "sum:jmeter.responses_count{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode}.as_count()"
                     }
-                  ]
+                  ],
+                  "response_format": "scalar"
                 }
               ],
               "autoscale": true,
-              "custom_unit": "req",
               "precision": 2
             },
-            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
           },
           {
-            "id": 7783889698549364,
+            "id": 7609727636317192,
             "definition": {
               "title": "Failed requests",
               "title_size": "16",
@@ -61,26 +134,34 @@
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [{ "formula": "default_zero(query1)" }],
-                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
                   "queries": [
                     {
-                      "query": "sum:jmeter.responses_count{result:ko,$sample_label}.as_count()",
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "sum"
+                      "query": "sum:jmeter.responses_count{result:ko,$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode}.as_count()"
                     }
-                  ]
+                  ],
+                  "response_format": "scalar"
                 }
               ],
               "autoscale": true,
-              "custom_unit": "req",
               "precision": 2
             },
-            "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
           },
           {
-            "id": 3550428849801200,
+            "id": 7862625340285245,
             "definition": {
               "title": "Error rate",
               "title_size": "16",
@@ -88,7 +169,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query2 / query3 * 100" }],
                   "conditional_formats": [
                     {
                       "comparator": ">",
@@ -101,31 +181,46 @@
                       "value": 30
                     }
                   ],
-                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query2 / query3 * 100"
+                    }
+                  ],
                   "queries": [
                     {
-                      "query": "sum:jmeter.responses_count{result:ko,$sample_label}.as_count()",
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "sum"
+                      "query": "sum:jmeter.responses_count{result:ko,$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode}.as_count()"
                     },
                     {
-                      "query": "sum:jmeter.responses_count{$sample_label}.as_count()",
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query3",
-                      "aggregator": "sum"
+                      "query": "sum:jmeter.responses_count{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode}.as_count()"
                     }
-                  ]
+                  ],
+                  "response_format": "scalar"
                 }
               ],
               "autoscale": true,
-              "custom_unit": "%",
               "precision": 0
             },
-            "layout": { "x": 6, "y": 0, "width": 2, "height": 2 }
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
           },
           {
-            "id": 2431746156331004,
+            "id": 1492728170907820,
             "definition": {
               "title": "Error count per sampler",
               "title_size": "16",
@@ -133,214 +228,2313 @@
               "type": "toplist",
               "requests": [
                 {
-                  "formulas": [
+                  "conditional_formats": [
                     {
-                      "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [
+                        {
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          },
+                          "facet": "@sampler.sample_label"
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter -status:ok $test_run_id $runner_id $runner_mode"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "name": "query1"
                     }
                   ],
                   "response_format": "scalar",
-                  "queries": [
+                  "formulas": [
                     {
-                      "search": { "query": "source:jmeter -status:ok" },
-                      "data_source": "logs",
-                      "compute": { "aggregation": "count" },
-                      "name": "query1",
-                      "indexes": ["*"],
-                      "group_by": [
-                        {
-                          "facet": "@sampler.sample_label",
-                          "sort": { "aggregation": "count", "order": "desc" },
-                          "limit": 10
-                        }
-                      ]
+                      "formula": "query1"
                     }
-                  ]
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
                 }
               ]
             },
-            "layout": { "x": 0, "y": 2, "width": 8, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
           }
         ]
       },
-      "layout": { "x": 4, "y": 0, "width": 8, "height": 6 }
-    },
-    {
-      "id": 8287596340995706,
-      "definition": {
-        "title": "Sampler metrics",
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 2435370198375322,
-            "definition": {
-              "title": "Latency",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [{ "formula": "query" }],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "queries": [
-                    {
-                      "query": "avg:jmeter.latency.avg{$sample_label} by {sample_label}",
-                      "data_source": "metrics",
-                      "name": "query"
-                    }
-                  ],
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 3 }
-          },
-          {
-            "id": 8326465934092174,
-            "definition": {
-              "title": "Response time",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [{ "formula": "query" }],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "queries": [
-                    {
-                      "query": "avg:jmeter.response_time.avg{$sample_label} by {sample_label}",
-                      "data_source": "metrics",
-                      "name": "query"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 4, "y": 0, "width": 4, "height": 3 }
-          },
-          {
-            "id": 6235026049239840,
-            "definition": {
-              "title": "Active simultaneous threads",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [{ "formula": "default_zero(query)" }],
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "query": "sum:jmeter.active_threads.avg{*}.fill(zero).rollup(avg, 10)",
-                      "data_source": "metrics",
-                      "name": "query"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 8, "y": 0, "width": 4, "height": 3 }
-          }
-        ]
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 8
       }
     },
     {
-      "id": 6579882437787634,
+      "id": 5355089363461877,
       "definition": {
-        "title": "Logs",
+        "title": "End Results",
+        "background_color": "vivid_pink",
+        "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 6520617461054292,
+            "id": 1620901641066399,
             "definition": {
-              "title": "Test results",
+              "type": "note",
+              "content": "Statistics summarizing the results of an entire test run.\n\n### Not seeing results?\n- Wait for the end of the test run, or disable the _final_result_ tag filter to see intermediate results.\n- Make sure the time range covers the test run, or filter by `test_run_id` if you tag runs.\n- In distributed tests, percentiles are per runner; use the `runner_id` filter to compare with JMeter.\n- `runner_id` is only emitted in distributed mode. For local runs, use `runner_host` or `runner_mode:local` instead.\n\n### Statistics calculation mode\n- **ddsketch** (default): Uses Datadog's [DDSketch algorithm](https://www.datadoghq.com/blog/engineering/computing-accurate-percentiles-with-ddsketch/). It computes approximate percentiles with a 1% error guarantee compared to the exact percentile value, while using very little memory. When compared with `aggregate_report`, results may differ more because `aggregate_report` picks the nearest observed value for each percentile, which can cause noticeable jumps when there are few samples.\n- **aggregate_report**: Matches JMeter's \"Aggregate Reports\" listener. It stores all response times in memory and calculates percentiles using the \"nearest rank\" method (nearest exact value from the dataset).\n- **dashboard**: Uses a sliding window and linear interpolation (by default) to calculate percentiles, matching JMeter's HTML Dashboards. This mode may diverge significantly from the others when the limit of the sliding window is reached (default 20,000, but [configurable](https://jmeter.apache.org/usermanual/properties_reference.html#reporting)).\n\nSee [configuration docs](https://github.com/DataDog/integrations-core/blob/master/jmeter/README.md#statistics-calculation-modes) to set the statistics calculation mode.\n\n\n",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 4976767121980209,
+            "definition": {
+              "title": "End Results Table",
               "title_size": "16",
               "title_align": "left",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:(jmeter)",
-              "sort": { "column": "time", "order": "desc" },
-              "columns": [
-                "@sampler.sample_label",
-                "@sampler.url_details.host",
-                "@sampler.response_code"
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query11",
+                      "query": "sum:jmeter.cumulative.responses_count{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:jmeter.cumulative.response_time.avg{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query12",
+                      "query": "avg:jmeter.cumulative.response_time.median{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:jmeter.cumulative.response_time.p90{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "avg:jmeter.cumulative.response_time.p95{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "avg:jmeter.cumulative.response_time.p99{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "min:jmeter.cumulative.response_time.min{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "max:jmeter.cumulative.response_time.max{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query10",
+                      "query": "avg:jmeter.cumulative.responses.error_percent{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "query": "sum:jmeter.cumulative.throughput.rps{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "query": "sum:jmeter.cumulative.bytes_received.rate{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query9",
+                      "query": "sum:jmeter.cumulative.bytes_sent.rate{$test_run_id,$sample_label,$statistics_mode,$final_result,$runner_id,$runner_mode} by {sample_label,statistics_mode,test_run_id}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "# Samples",
+                      "cell_display_mode": "bar",
+                      "formula": "query11"
+                    },
+                    {
+                      "alias": "Average",
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Median",
+                      "cell_display_mode": "bar",
+                      "formula": "query12"
+                    },
+                    {
+                      "alias": "90% Line",
+                      "cell_display_mode": "bar",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "95% Line",
+                      "cell_display_mode": "bar",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "99% Line",
+                      "cell_display_mode": "bar",
+                      "formula": "query6"
+                    },
+                    {
+                      "alias": "Min",
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Max",
+                      "cell_display_mode": "bar",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Error %",
+                      "cell_display_mode": "bar",
+                      "formula": "query10"
+                    },
+                    {
+                      "alias": "Throughput",
+                      "cell_display_mode": "bar",
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "Received Rate",
+                      "cell_display_mode": "bar",
+                      "formula": "query8"
+                    },
+                    {
+                      "alias": "Sent Rate",
+                      "cell_display_mode": "bar",
+                      "formula": "query9"
+                    }
+                  ]
+                }
               ],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "inline"
+              "has_search_bar": "auto"
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 7 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 10,
+        "y": 8,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 2095980992723000,
+      "definition": {
+        "title": "Timing Metrics",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7585883296615541,
+            "definition": {
+              "type": "note",
+              "content": "# Latency\n\n**Latency** is the time to first byte (TTFB) - from request sent until first response byte received.\n\nMeasures network + initial server processing.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7327056581063298,
+            "definition": {
+              "title": "Latency (Median)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p50",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "avg:jmeter.latency.median{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode} by {sample_label,runner_id}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2446948415405390,
+            "definition": {
+              "title": "Latency (p90)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p90",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "avg:jmeter.latency.p90{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode} by {sample_label,runner_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3345876987687975,
+            "definition": {
+              "title": "Latency (p99)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p99",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "avg:jmeter.latency.p99{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode} by {sample_label,runner_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4234971993435620,
+            "definition": {
+              "type": "note",
+              "content": "# Response Time\n\n**Response time** is total request duration - from request sent to complete response received.\n\nIncludes network, server processing, and body transfer.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5368131656189873,
+            "definition": {
+              "title": "Response Time (Median)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p50",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "avg:jmeter.response_time.median{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode} by {sample_label,runner_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5992636341014884,
+            "definition": {
+              "title": "Response Time (p90)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p90",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "avg:jmeter.response_time.p90{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode} by {sample_label,runner_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3466613202674649,
+            "definition": {
+              "title": "Response Time (p99)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p99",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "avg:jmeter.response_time.p99{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode} by {sample_label,runner_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 8641020577788552,
+      "definition": {
+        "title": "Assertions",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3971980183994067,
+            "definition": {
+              "type": "note",
+              "content": "Track JMeter assertion results to validate response content, status codes, and other test conditions. Failures mean the assertion evaluated and did not pass; errors mean the assertion could not be evaluated.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 519335048327407,
+            "definition": {
+              "title": "Passed Assertions",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Passed",
+                      "formula": "default_zero(query1) - default_zero(query2) - default_zero(query3)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.count{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:jmeter.assertions.failed{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:jmeter.assertions.error{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter $assertion_name"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2918346346615929,
+            "definition": {
+              "title": "Total Assertions",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total",
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.count{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter $assertion_name"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 6483996870970806,
+            "definition": {
+              "title": "Top Successful Assertions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.count{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:jmeter.assertions.failed{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:jmeter.assertions.error{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1) - default_zero(query2) - default_zero(query3)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "legend": "automatic",
+                  "type": "stacked"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 1506439173088348,
+            "definition": {
+              "title": "Failed Assertions",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Failed",
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.failed{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter $assertion_name"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 8599267216819934,
+            "definition": {
+              "title": "Assertion Failure Rate % By Assertion",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1) / default_zero(query2) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:jmeter.assertions.count{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.failed{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter $assertion_name"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "min": "0",
+                "max": "100"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2281511381151227,
+            "definition": {
+              "title": "Top Failed Assertions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_yellow",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.failed{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "legend": "automatic",
+                  "type": "stacked"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7506439173088349,
+            "definition": {
+              "title": "Error Assertions",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Error",
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.error{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter $assertion_name"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 9599267216819935,
+            "definition": {
+              "title": "Assertion Error Rate % By Assertion",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1) / default_zero(query2) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:jmeter.assertions.count{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.error{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter $assertion_name"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "min": "0",
+                "max": "100"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 8281511381151228,
+            "definition": {
+              "title": "Top Error Assertions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.error{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name} by {assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "legend": "automatic",
+                  "type": "stacked"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
         "width": 12,
         "height": 8,
         "is_column_break": true
       }
+    },
+    {
+      "id": 3605853157431024,
+      "definition": {
+        "title": "Throughput",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 321597966893129,
+            "definition": {
+              "type": "note",
+              "content": "# Samples per second\n\nSamples are tracked when **completed**, not when initiated. This means the count reflects finished requests including their full round-trip time.\n\n**OK** = successful responses\n**KO** = failed responses (errors, timeouts, assertion failures)",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1293844217434922,
+            "definition": {
+              "title": "Samples/s (Total)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "sum:jmeter.responses_count{$test_run_id,$sample_label,$statistics_mode,$runner_id,$runner_mode} by {sample_label}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4101472439133760,
+            "definition": {
+              "title": "Samples/s (OK)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "OK",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "sum:jmeter.responses_count{result:ok,$test_run_id,$sample_label,$statistics_mode,$runner_id,$runner_mode} by {sample_label}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2847643277310335,
+            "definition": {
+              "title": "Samples/s (KO)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "KO",
+                      "formula": "default_zero(query)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "sum:jmeter.responses_count{result:ko,$test_run_id,$sample_label,$statistics_mode,$runner_id,$runner_mode} by {sample_label}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 8792328440546201,
+            "definition": {
+              "type": "note",
+              "content": "# Load & Bandwidth\n\n**Active Threads** = concurrent virtual users executing samplers.\n\n**Bytes** = network bandwidth (sent/received) per sampler.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2998720804147773,
+            "definition": {
+              "title": "Active Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Threads",
+                      "formula": "default_zero(query)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "sum:jmeter.active_threads.avg{$test_run_id,$statistics_mode,$runner_id,$runner_mode}.fill(zero).rollup(avg, 10)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 454988881246881,
+            "definition": {
+              "title": "Bytes Sent",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Sent",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "sum:jmeter.bytes_sent.total{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode} by {sample_label}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7900247950843392,
+            "definition": {
+              "title": "Bytes Received",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Received",
+                      "formula": "query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query",
+                      "query": "sum:jmeter.bytes_received.total{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode} by {sample_label}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "events_query"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "group_by": [],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "name": "events_query"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "overlay"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 2182515620937799,
+      "definition": {
+        "title": "Logs",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7379889790686790,
+            "definition": {
+              "type": "note",
+              "content": "Individual test results as logs. Filter by sampler, response code, or status.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8818613406407856,
+            "definition": {
+              "title": "Test results",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@sampler.sample_label",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@sampler.url_details.host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@sampler.response_code",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ],
+                  "query": {
+                    "indexes": [],
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "desc"
+                    },
+                    "storage": "hot",
+                    "data_source": "logs_stream",
+                    "query_string": "source:jmeter $test_run_id $runner_id $runner_mode"
+                  },
+                  "response_format": "event_list"
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 9
+            }
+          },
+          {
+            "id": 4833015182718934,
+            "definition": {
+              "title": "JMeter Events",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "columns": [],
+                  "query": {
+                    "event_size": "s",
+                    "data_source": "event_stream",
+                    "query_string": "source:jmeter $test_run_id $runner_id $runner_mode"
+                  },
+                  "response_format": "event_list"
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6882407464148604,
+            "definition": {
+              "title": "Top Error Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "group_by": [
+                        {
+                          "limit": 5,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          },
+                          "facet": "message"
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "search": {
+                        "query": "source:jmeter status:error $test_run_id $runner_id $runner_mode"
+                      },
+                      "storage": "hot",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "dog_classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 12,
+        "height": 11
+      }
     }
   ],
   "template_variables": [
-    { "name": "sample_label", "default": "*", "prefix": "sample_label" }
+    {
+      "name": "sample_label",
+      "prefix": "sample_label",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "test_run_id",
+      "prefix": "test_run_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "assertion_name",
+      "prefix": "assertion_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "statistics_mode",
+      "prefix": "statistics_mode",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "final_result",
+      "prefix": "final_result",
+      "available_values": [],
+      "default": "true"
+    },
+    {
+      "name": "runner_host",
+      "prefix": "runner_host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "runner_id",
+      "prefix": "runner_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "runner_mode",
+      "prefix": "runner_mode",
+      "available_values": [],
+      "default": "*"
+    }
   ],
   "layout_type": "ordered",
-  "is_read_only": false,
   "notify_list": [],
   "reflow_type": "fixed"
 }
