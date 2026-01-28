@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 14.2.1 / 2026-01-28
+
+***Fixed***:
+
+* Ignore upgrade check in dev versions and also fix windows cache location ([#22359](https://github.com/DataDog/integrations-core/pull/22359))
+
 ## 14.2.0 / 2026-01-28
 
 ***Added***:
