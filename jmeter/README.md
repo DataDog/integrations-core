@@ -31,7 +31,7 @@ No Datadog Agent is necessary.
 3. Launch JMeter (or quit and re-open the application).
 4. Go to `Options > Plugins Manager > Available Plugins`.
 5. Search for "Datadog Backend Listener".
-6. Click the checbox next to the Datadog Backend Listener plugin.
+6. Click the checkbox next to the Datadog Backend Listener plugin.
 7. Click "Apply Changes and Restart JMeter".
 
 ### Configuration
