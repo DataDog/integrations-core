@@ -42,10 +42,6 @@ documentation:
 downloader:
 - changed-files:
   - any-glob-to-any-file: datadog_checks_downloader/**/*
-integration/__pycache__:
-- changed-files:
-  - any-glob-to-any-file:
-    - __pycache__/**/*
 integration/active_directory:
 - changed-files:
   - any-glob-to-any-file:
