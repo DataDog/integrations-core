@@ -70,6 +70,26 @@ METRIC_WITH_LABEL_NAME = {
         'metric_type': 'gauge',
         'new_name': 'cluster.circuit_breakers.rq_retry_open',
     },
+    r'^envoy_cluster_circuit_breakers_(\w+)_remaining_cx$': {
+        'label_name': 'priority',
+        'metric_type': 'gauge',
+        'new_name': 'cluster.circuit_breakers.remaining_cx',
+    },
+    r'^envoy_cluster_circuit_breakers_(\w+)_remaining_pending$': {
+        'label_name': 'priority',
+        'metric_type': 'gauge',
+        'new_name': 'cluster.circuit_breakers.remaining_pending',
+    },
+    r'^envoy_cluster_circuit_breakers_(\w+)_remaining_rq$': {
+        'label_name': 'priority',
+        'metric_type': 'gauge',
+        'new_name': 'cluster.circuit_breakers.remaining_rq',
+    },
+    r'^envoy_cluster_circuit_breakers_(\w+)_remaining_retries$': {
+        'label_name': 'priority',
+        'metric_type': 'gauge',
+        'new_name': 'cluster.circuit_breakers.remaining_retries',
+    },
     r'^envoy_listener_admin_(.+\_.+)_downstream_cx_active$': {
         'label_name': 'handler',
         'metric_type': 'gauge',
