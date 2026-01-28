@@ -22,11 +22,3 @@ jobs:
       id-token: write
       # needed for compute-matrix in test-target.yml
       contents: read
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit
