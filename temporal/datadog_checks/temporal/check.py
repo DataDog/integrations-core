@@ -57,7 +57,7 @@ class TemporalCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 if sample_name.endswith('_bucket') and sample.labels.get('le', '').endswith('inf'):
                     continue
 
-                # Only sum needs conversion)
+                # Only sum needs conversion
                 if sample_name.endswith('_sum'):
                     suffix, value = 'sum', sample.value * SECONDS_TO_MS
                 elif sample_name.endswith('_count'):
