@@ -29,8 +29,7 @@ jobs:
         with:
           configuration-path: .github/workflows/config/labeler.yml
           repo-token: "${{ steps.token-generator.outputs.token }}"
-          sync-labels: ""   # workaround for sync-labels bug:
-                            # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
+          sync-labels: true
       - name: Add team labels
         run: |
           jq -r '.event.pull_request.requested_teams[].name' <<< "$GITHUB_CONTEXT" | while read -r team; do
