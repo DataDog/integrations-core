@@ -1,0 +1,42 @@
+name: Find Worker Logs
+
+on:
+  pull_request:
+
+jobs:
+  find_worker_logs:
+    name: Find Worker_*.log locations
+    runs-on: macos-latest
+
+    steps:
+    - name: Find all Worker_*.log files
+      run: |
+        echo "Searching for Worker_*.log files across the system..."
+        echo "========================================"
+
+        echo "Using find command:"
+        sudo find / -name "Worker_*.log" 2>/dev/null || true
+
+        echo ""
+        echo "========================================"
+        echo "Using mdfind (Spotlight):"
+        mdfind "kMDItemFSName == 'Worker_*.log'" 2>/dev/null || true
+
+        echo ""
+        echo "========================================"
+        echo "Common log directories:"
+        for dir in /var/log /tmp /Library/Logs ~/Library/Logs /usr/local/var/log; do
+          if [ -d "$dir" ]; then
+            echo "Checking $dir:"
+            find "$dir" -name "Worker_*.log" 2>/dev/null || true
+          fi
+        done
+
+        echo ""
+        echo "========================================"
+        echo "GitHub Actions runner directories:"
+        find /Users/runner -name "Worker_*.log" 2>/dev/null || true
+        find /opt -name "Worker_*.log" 2>/dev/null || true
+
+        echo ""
+        echo "Done searching."
