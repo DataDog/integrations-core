@@ -1,0 +1,85 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "dc6f1cb8-cd93-44e9-a474-eb69d10c87d0",
+  "app_id": "cisco-secure-client",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Cisco Secure Client logs.",
+    "title": "Cisco Secure Client",
+    "media": [
+      {
+        "caption": "Cisco Secure Client Overview",
+        "image_url": "images/cisco_secure_client_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Client Overview",
+        "image_url": "images/cisco_secure_client_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Client VPN Connection Insights",
+        "image_url": "images/cisco_secure_client_vpn_connection_insights_light_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Client VPN Connection Insights",
+        "image_url": "images/cisco_secure_client_vpn_connection_insights_dark_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Client VPN Connection Insights",
+        "image_url": "images/cisco_secure_client_vpn_connection_insights_light_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Client VPN Connection Insights",
+        "image_url": "images/cisco_secure_client_vpn_connection_insights_dark_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Network",
+      "Category::Security",
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 65793420,
+      "source_type_name": "Cisco Secure Client",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Cisco Secure Client Overview": "assets/dashboards/cisco_secure_client_overview.json",
+      "Cisco Secure Client VPN Connection Insights": "assets/dashboards/cisco_secure_client_vpn_connection_insights.json"
+    },
+    "monitors": {
+      "Maximum client connection limit reached": "assets/monitors/cisco_secure_client_maximum_client_connection_limit_reached.json"
+    },
+    "logs": {
+      "source": "cisco-secure-client"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
