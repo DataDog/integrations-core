@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=quay.io/pypa/manylinux2014_x86_64
+ARG BASE_IMAGE=quay.io/pypa/manylinux_2_28_x86_64
 FROM ${BASE_IMAGE}
 
 ARG SOURCE_DATE_EPOCH
@@ -191,6 +191,6 @@ RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
-ENV MANYLINUX_POLICY="manylinux2014_x86_64"
+ENV MANYLINUX_POLICY="manylinux_2_28_x86_64"
 
 ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
