@@ -49,9 +49,9 @@ The plugin has the following configuration options:
 | Name       | Required | Default value | description|
 |------------|:--------:|---------------|------------|
 |apiKey | true | NA | Your Datadog API key.|
-|datadogUrl | false | https://api.datadoghq.com/api/ | You can configure a different endpoint, for instance https://api.datadoghq.eu/api/ if your datadog instance is in the EU|
-|logIntakeUrl | false | https://http-intake.logs.datadoghq.com/v1/input/ | You can configure a different endpoint, for instance https://http-intake.logs.datadoghq.eu/v1/input/ if your datadog instance is in the EU|
-|metricsMaxBatchSize|false|200|Metrics are submitted every 10 seconds in batches of size `metricsMaxBatchSize`|
+|datadogUrl | false | https://api.datadoghq.com/api/ | You can configure a different endpoint, for instance https://api.datadoghq.eu/api/ if your Datadog instance is in the EU. |
+|logIntakeUrl | false | https://http-intake.logs.datadoghq.com/v1/input/ | You can configure a different endpoint, for instance https://http-intake.logs.datadoghq.eu/v1/input/ if your datadog instance is in the EU. |
+|metricsMaxBatchSize|false|200|Metrics are submitted every 10 seconds in batches of size `metricsMaxBatchSize`. |
 |logsBatchSize|false|500|Logs are submitted in batches of size `logsBatchSize` as soon as this size is reached.|
 |sendResultsAsLogs|false|true|By default, individual test results are reported as log events. Set to `false` to disable log reporting.|
 |includeSubresults|false|false|A subresult is for instance when an individual HTTP request has to follow redirects. By default subresults are ignored.|
@@ -119,9 +119,9 @@ These events appear in the Datadog Event Explorer and can be used to correlate m
 
 ## Troubleshooting
 
-If for whatever reason you are not seeing JMeter metrics in Datadog, check your `jmeter.log` file, which should be in the `/bin` folder of your JMeter installation.
+If you're not seeing JMeter metrics in Datadog, check your `jmeter.log` file, which should be in the `/bin` folder of your JMeter installation.
 
-#### Not Seeing `runner_id`?
+#### Troubleshoot missing `runner_id` tag
 
 This is normal in local mode. The `runner_id` tag is only emitted in **distributed** tests, where JMeter provides a distributed prefix. In local runs, use `runner_host` or `runner_mode:local` for filtering instead.
 
