@@ -6,7 +6,7 @@ Base class for jobs that query ClickHouse's system.query_log table.
 
 This module provides shared functionality for:
 - ClickhouseStatementMetrics (aggregated query metrics)
-- ClickhouseCompletedQuerySamples (individual query samples)
+- ClickhouseQueryCompletions (individual query samples)
 
 Both jobs share:
 - Checkpoint-based collection with persistent cache

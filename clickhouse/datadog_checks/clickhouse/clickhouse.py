@@ -15,9 +15,9 @@ from datadog_checks.base.utils.serialization import json
 
 from . import queries
 from .__about__ import __version__
-from .query_completions import ClickhouseQueryCompletions
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .query_completions import ClickhouseQueryCompletions
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer

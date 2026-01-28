@@ -185,8 +185,7 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
         default_value = dict_defaults.instance_query_completions().collection_interval
         args['query_completions']['collection_interval'] = default_value
         validation_result.add_warning(
-            f"query_completions.collection_interval must be greater than 0, "
-            f"defaulting to {default_value} seconds."
+            f"query_completions.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
 

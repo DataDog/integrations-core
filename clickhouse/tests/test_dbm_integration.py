@@ -12,8 +12,10 @@ from datadog_checks.clickhouse import ClickhouseCheck
 from .common import CLICKHOUSE_VERSION
 
 # DBM features require ClickHouse 21.8+ due to normalized_query_hash, query_kind etc
+# Note: query_kind column in system.processes is not available in all 22.7 builds
 # Versions below 21.8: "18", "19", "20"
-UNSUPPORTED_DBM_VERSIONS = {'18', '19', '20'}
+# Version 22.7: Missing query_kind column in system.processes
+UNSUPPORTED_DBM_VERSIONS = {'18', '19', '20', '22.7'}
 
 
 def _is_dbm_supported():
