@@ -142,6 +142,7 @@ class KafkaConfig:
                 if not aws_region:
                     try:
                         import boto3
+
                         detected_region = boto3.session.Session().region_name
                         if not detected_region:
                             self.log.warning(
