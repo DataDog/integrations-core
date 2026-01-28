@@ -1,1 +1,1 @@
-Add support for AWS MSK IAM authentication using SASL/OAUTHBEARER mechanism.
+Add support for AWS MSK IAM authentication using SASL/OAUTHBEARER mechanism. Requires confluent-kafka>=2.13.0 for OAuth callback support.

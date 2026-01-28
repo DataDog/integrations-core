@@ -201,12 +201,20 @@ files:
         options:
         - name: method
           description: |
-            The OAuth method to use. Either 'aws_msk_iam' for AWS MSK IAM authentication 
+            The OAuth method to use. Either 'aws_msk_iam' for AWS MSK IAM authentication
             or 'oidc' for standard OIDC authentication. Defaults to 'oidc' for backwards compatibility.
           value:
             type: string
             example: aws_msk_iam
             display_default: oidc
+        - name: aws_region
+          description: |
+            AWS region for MSK IAM authentication. Required when method is 'aws_msk_iam' and the region
+            cannot be automatically detected from the environment (e.g., via AWS_REGION or instance metadata).
+            If not specified, attempts to detect the region automatically.
+          value:
+            type: string
+            example: us-west-2
         - name: url
           description: |
             The token endpoint URL. Required when method is 'oidc'.

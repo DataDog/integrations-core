@@ -189,10 +189,17 @@ instances:
     # sasl_oauth_token_provider:
 
         ## @param method - string - optional - default: oidc
-        ## The OAuth method to use. Either 'aws_msk_iam' for AWS MSK IAM authentication 
+        ## The OAuth method to use. Either 'aws_msk_iam' for AWS MSK IAM authentication
         ## or 'oidc' for standard OIDC authentication. Defaults to 'oidc' for backwards compatibility.
         #
         # method: aws_msk_iam
+
+        ## @param aws_region - string - optional - default: us-west-2
+        ## AWS region for MSK IAM authentication. Required when method is 'aws_msk_iam' and the region
+        ## cannot be automatically detected from the environment (e.g., via AWS_REGION or instance metadata).
+        ## If not specified, attempts to detect the region automatically.
+        #
+        # aws_region: us-west-2
 
         ## @param url - string - optional
         ## The token endpoint URL. Required when method is 'oidc'.

@@ -34,6 +34,7 @@ class SaslOauthTokenProvider(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    aws_region: Optional[str] = None
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
     method: Optional[str] = None

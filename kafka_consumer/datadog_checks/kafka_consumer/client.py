@@ -95,9 +95,18 @@ class KafkaClient:
                     """OAuth callback that generates AWS MSK IAM authentication tokens."""
                     try:
                         # Get AWS region from config or detect from environment
-                        region = boto3.session.Session().region_name or 'us-east-1'
+                        region = self.config._sasl_oauth_token_provider.get("aws_region")
+                        if not region:
+                            region = boto3.session.Session().region_name
+
+                        if not region:
+                            raise Exception(
+                                "AWS region could not be determined. Please specify 'aws_region' in "
+                                "sasl_oauth_token_provider configuration."
+                            )
+
                         auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(region)
-                        self.log.debug("Generated AWS MSK IAM token, expires in %s ms", expiry_ms)
+                        self.log.debug("Generated AWS MSK IAM token for region %s, expires in %s ms", region, expiry_ms)
                         return auth_token, expiry_ms / 1000  # Convert to seconds
                     except Exception as e:
                         self.log.error("Failed to generate AWS MSK IAM token: %s", e)

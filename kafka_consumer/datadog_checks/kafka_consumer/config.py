@@ -138,8 +138,26 @@ class KafkaConfig:
             method = self._sasl_oauth_token_provider.get("method", "oidc")
 
             if method == "aws_msk_iam":
-                # AWS MSK IAM doesn't require additional fields
-                pass
+                # AWS MSK IAM requires region to be specified or detectable
+                aws_region = self._sasl_oauth_token_provider.get("aws_region")
+                if not aws_region:
+                    # Check if boto3 can detect region from environment
+                    try:
+                        import boto3
+
+                        detected_region = boto3.session.Session().region_name
+                        if not detected_region:
+                            self.log.warning(
+                                "AWS region cannot be detected automatically for MSK IAM authentication. "
+                                "Consider specifying 'aws_region' in sasl_oauth_token_provider configuration. "
+                                "You can also set it via AWS_REGION environment variable or AWS config file. "
+                                "Authentication will fail at runtime if the region cannot be determined."
+                            )
+                    except ImportError:
+                        raise ConfigurationError(
+                            "AWS MSK IAM authentication requires 'boto3' and 'aws-msk-iam-sasl-signer-python' "
+                            "libraries. Install them with: pip install boto3 aws-msk-iam-sasl-signer-python"
+                        )
             elif method == "oidc":
                 # OIDC requires url, client_id, and client_secret
                 if self._sasl_oauth_token_provider.get("url") is None:

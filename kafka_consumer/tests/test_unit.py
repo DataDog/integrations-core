@@ -1419,6 +1419,75 @@ def test_oauth_authentication_config(oauth_config, expected_auth_keys, kafka_ins
                 assert callable(auth_config[key])
 
 
+@pytest.mark.parametrize(
+    'oauth_config, mock_boto3_region, expected_region, should_succeed',
+    [
+        pytest.param(
+            {'method': 'aws_msk_iam', 'aws_region': 'us-west-2'},
+            None,  # Explicitly configured region should be used regardless of boto3
+            'us-west-2',
+            True,
+            id="explicit region in config",
+        ),
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            'eu-central-1',  # Region detected by boto3
+            'eu-central-1',
+            True,
+            id="region from boto3 auto-detection",
+        ),
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            None,  # No region configured or detected
+            None,
+            False,
+            id="no region available - should fail",
+        ),
+    ],
+)
+def test_aws_msk_iam_region_handling(
+    oauth_config, mock_boto3_region, expected_region, should_succeed, kafka_instance, check
+):
+    """Test that AWS MSK IAM authentication properly handles region configuration."""
+    kafka_instance.update(
+        {
+            'monitor_unlisted_consumer_groups': True,
+            'security_protocol': 'SASL_SSL',
+            'sasl_mechanism': 'OAUTHBEARER',
+            'sasl_oauth_token_provider': oauth_config,
+        }
+    )
+
+    kafka_consumer_check = check(kafka_instance)
+
+    # Get the OAuth callback from the authentication config
+    auth_config = kafka_consumer_check.client._KafkaClient__get_authentication_config()
+    assert 'oauth_cb' in auth_config
+    oauth_callback = auth_config['oauth_cb']
+
+    # Mock boto3 session and MSKAuthTokenProvider
+    with mock.patch('datadog_checks.kafka_consumer.client.boto3') as mock_boto3_module:
+        mock_session = mock.Mock()
+        mock_session.region_name = mock_boto3_region
+        mock_boto3_module.session.Session.return_value = mock_session
+
+        with mock.patch('datadog_checks.kafka_consumer.client.MSKAuthTokenProvider') as mock_auth_provider:
+            mock_auth_provider.generate_auth_token.return_value = ('fake_token', 900000)
+
+            if should_succeed:
+                # Should successfully generate token
+                token, expiry = oauth_callback(None)
+                assert token == 'fake_token'
+                assert expiry == 900  # 900000ms / 1000 = 900s
+
+                # Verify the correct region was used
+                mock_auth_provider.generate_auth_token.assert_called_once_with(expected_region)
+            else:
+                # Should fail with clear error message about missing region
+                with pytest.raises(Exception, match="AWS region could not be determined"):
+                    oauth_callback(None)
+
+
 def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):
     mock_client = seed_mock_client()
     # Set up two partitions for same topic to check multiple contexts in same consumer group
