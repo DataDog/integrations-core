@@ -1,0 +1,1103 @@
+id: valence-security
+tests:
+ -
+  sample: |-
+    {
+      "alert_type_details" : {
+        "severity" : "High",
+        "sourceKind" : "valenceDefined",
+        "mitreAttackTactics" : [ "TA0003", "TA0004", "TA0005" ],
+        "name" : "Privileged Administrator Role Assigned",
+        "description" : "A highly privileged role has been assigned to a service principal, application, or user within Entra ID, potentially indicating an unauthorized privilege escalation. \nThis role allows broad control over role assignments, including the ability to manage administrative groups, modify security policies, and assign high-risk permissions \nsuch as Global Administrator. If misused, this could enable persistent access, privilege abuse, and unauthorized modifications to identity configurations. \nThreat actors often establish redundant access pathways to maintain control even if their initial entry method is revoked. This activity should be promptly investigated \nto determine its legitimacy and mitigate security risks.\n",
+        "disabled" : false,
+        "mitreAttackTechniques" : [ "T1098.003", "T1078.004", "T1548", "T1484" ],
+        "defaultSeverity" : "High",
+        "vuid" : "VALENCE:_::_:ALERT_TYPE:_::_::_:AzureActiveDirectory.PrivilegedRoleAssigned",
+        "platform" : "Microsoft 365"
+      },
+      "alert" : {
+        "alertTypeVuid" : "VALENCE:_::_:ALERT_TYPE:_::_::_:AzureActiveDirectory.PrivilegedRoleAssigned",
+        "connectorUids" : [ "4___Microsoft365___Fetch___Microsoft365Primary" ],
+        "creationTimestamp" : 1767161389,
+        "summaryLine" : "test1@example.com granted the privileged role \"Global Administrator\" to the user test2@example.com.",
+        "vuid" : "VALENCE:_:ynetlDeUbl:_:ALERT:_::_::_:a7c3f9d1-8b4e-4e6a-9f21-1c7b2a9d4e53",
+        "events" : [ {
+          "eventId" : "f3a9b7d2-6c41-4e8b-91fa-0d5e8c2b7a19",
+          "actorType" : "User",
+          "eventSummary" : "",
+          "aux" : {
+            "ModifiedProperties[1]" : {
+              "OldValue" : "",
+              "NewValue" : "Global Administrator",
+              "Name" : "Role.DisplayName"
+            },
+            "Target[3]" : {
+              "Type" : "5",
+              "ID" : "test2@example.com"
+            },
+            "AzureActiveDirectoryEventType" : "1",
+            "ModifiedProperties[3]" : {
+              "OldValue" : "",
+              "NewValue" : "TenantAdmins",
+              "Name" : "Role.WellKnownObjectName"
+            },
+            "Target[1]" : {
+              "Type" : "2",
+              "ID" : "f8d2c6a4-3b1e-4f97-8a5d-9e7c0b2a1645"
+            },
+            "UserKey" : "9F2B7A603E4C1D85@crestdata.ai",
+            "Actor[3]" : {
+              "Type" : "2",
+              "ID" : "00000006-0000-0bb1-ce00-000000000000"
+            },
+            "Actor[1]" : {
+              "Type" : "3",
+              "ID" : "9F2B7A603E4C1D85"
+            },
+            "Operation" : "Add member to role.",
+            "OrganizationId" : "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39",
+            "IntraSystemId" : "e3a1f9d8-7c2b-4a6e-91d4-b5f8c0a2e317",
+            "RecordType" : "8",
+            "Version" : "1",
+            "Actor[5]" : {
+              "Type" : "2",
+              "ID" : "5d9e12af-3c7a-4f1b-8e64-b0a7c4d92e18"
+            },
+            "SupportTicketId" : "",
+            "ExtendedProperties[1]" : {
+              "Value" : "Role",
+              "Name" : "extendedAuditEventCategory"
+            },
+            "ActorContextId" : "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39",
+            "ModifiedProperties[2]" : {
+              "OldValue" : "",
+              "NewValue" : "b6a7e9f2-5d41-4c8a-9b73-2f0e1d6c8a55",
+              "Name" : "Role.TemplateId"
+            },
+            "Target[2]" : {
+              "Type" : "2",
+              "ID" : "User"
+            },
+            "Target[0]" : {
+              "Type" : "2",
+              "ID" : "User_f8d2c6a4-3b1e-4f97-8a5d-9e7c0b2a1645"
+            },
+            "ObjectId" : "test2@example.com",
+            "ResultStatus" : "Success",
+            "ModifiedProperties[0]" : {
+              "OldValue" : "",
+              "NewValue" : "4d8f2c1b-9e73-4a56-8f9c-1e6b7a2d5c40",
+              "Name" : "Role.ObjectID"
+            },
+            "Target[4]" : {
+              "Type" : "3",
+              "ID" : "C39E5B104A7D82F6"
+            },
+            "Actor[2]" : {
+              "Type" : "1",
+              "ID" : "Microsoft Office 365 Portal"
+            },
+            "Actor[0]" : {
+              "Type" : "5",
+              "ID" : "test1@example.com"
+            },
+            "Workload" : "AzureActiveDirectory",
+            "Actor[6]" : {
+              "Type" : "2",
+              "ID" : "User"
+            },
+            "TargetContextId" : "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39",
+            "UserId" : "test1@example.com",
+            "Actor[4]" : {
+              "Type" : "2",
+              "ID" : "User_5d9e12af-3c7a-4f1b-8e64-b0a7c4d92e18"
+            },
+            "CreationTime" : "2025-12-31T06:09:49",
+            "ExtendedProperties[0]" : {
+              "Value" : "{\"User-Agent\":\"O365AdminPortal\"}",
+              "Name" : "additionalDetails"
+            },
+            "Id" : "f3a9b7d2-6c41-4e8b-91fa-0d5e8c2b7a19",
+            "InterSystemsId" : "9b7e4c2a-1f6d-4b93-8a5e-2d9c6f1b7a44",
+            "UserType" : "0"
+          },
+          "ip" : "10.10.10.10",
+          "connectorDisplayName" : "Microsoft 365 Primary",
+          "eventResultDetails" : "Success",
+          "targetType" : "",
+          "userAgent" : "Mobile Safari - 17.5",
+          "eventResult" : "Success",
+          "platform" : "Microsoft 365",
+          "actorUser" : {
+            "name" : "Test 1",
+            "id" : "9F2B7A603E4C1D85@crestdata.ai",
+            "email" : "test1@example.com"
+          },
+          "target" : {
+            "name" : "Test 2",
+            "id" : "test2@example.com",
+            "email" : "test2@example.com"
+          },
+          "connectorUid" : "4___Microsoft365___Fetch___Microsoft365Primary",
+          "eventTime" : {
+            "timestampKind" : "exact",
+            "timestamp" : 1767161389
+          },
+          "action" : {
+            "actionType" : "AzureActiveDirectory",
+            "actionDescription" : "Added a user to an admin role in Microsoft 365.",
+            "actionName" : "Add member to role."
+          }
+        } ],
+        "status" : "Open"
+      }
+    }
+  service: "alerts"
+  result:
+    custom:
+      alert:
+        alertTypeVuid: "VALENCE:_::_:ALERT_TYPE:_::_::_:AzureActiveDirectory.PrivilegedRoleAssigned"
+        connectorUids:
+         - "4___Microsoft365___Fetch___Microsoft365Primary"
+        creationTimestamp: 1767161389
+        events:
+         -
+          eventId: "f3a9b7d2-6c41-4e8b-91fa-0d5e8c2b7a19"
+          actorType: "User"
+          eventSummary: ""
+          aux:
+            ModifiedProperties[1]:
+              OldValue: ""
+              NewValue: "Global Administrator"
+              Name: "Role.DisplayName"
+            Target[3]:
+              Type: "5"
+              ID: "test2@example.com"
+            AzureActiveDirectoryEventType: "1"
+            ModifiedProperties[3]:
+              OldValue: ""
+              NewValue: "TenantAdmins"
+              Name: "Role.WellKnownObjectName"
+            Target[1]:
+              Type: "2"
+              ID: "f8d2c6a4-3b1e-4f97-8a5d-9e7c0b2a1645"
+            UserKey: "9F2B7A603E4C1D85@crestdata.ai"
+            Actor[3]:
+              Type: "2"
+              ID: "00000006-0000-0bb1-ce00-000000000000"
+            Actor[1]:
+              Type: "3"
+              ID: "9F2B7A603E4C1D85"
+            Operation: "Add member to role."
+            OrganizationId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
+            IntraSystemId: "e3a1f9d8-7c2b-4a6e-91d4-b5f8c0a2e317"
+            RecordType: "8"
+            Version: "1"
+            Actor[5]:
+              Type: "2"
+              ID: "5d9e12af-3c7a-4f1b-8e64-b0a7c4d92e18"
+            SupportTicketId: ""
+            ExtendedProperties[1]:
+              Value: "Role"
+              Name: "extendedAuditEventCategory"
+            ActorContextId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
+            ModifiedProperties[2]:
+              OldValue: ""
+              NewValue: "b6a7e9f2-5d41-4c8a-9b73-2f0e1d6c8a55"
+              Name: "Role.TemplateId"
+            Target[2]:
+              Type: "2"
+              ID: "User"
+            Target[0]:
+              Type: "2"
+              ID: "User_f8d2c6a4-3b1e-4f97-8a5d-9e7c0b2a1645"
+            ObjectId: "test2@example.com"
+            ResultStatus: "Success"
+            ModifiedProperties[0]:
+              OldValue: ""
+              NewValue: "4d8f2c1b-9e73-4a56-8f9c-1e6b7a2d5c40"
+              Name: "Role.ObjectID"
+            Target[4]:
+              Type: "3"
+              ID: "C39E5B104A7D82F6"
+            Actor[2]:
+              Type: "1"
+              ID: "Microsoft Office 365 Portal"
+            Actor[0]:
+              Type: "5"
+              ID: "test1@example.com"
+            Workload: "AzureActiveDirectory"
+            Actor[6]:
+              Type: "2"
+              ID: "User"
+            TargetContextId: "1c9b7f5e-8d2a-4e63-96a1-4b0d2f8c7e39"
+            UserId: "test1@example.com"
+            Actor[4]:
+              Type: "2"
+              ID: "User_5d9e12af-3c7a-4f1b-8e64-b0a7c4d92e18"
+            CreationTime: "2025-12-31T06:09:49"
+            ExtendedProperties[0]:
+              Value: "{\"User-Agent\":\"O365AdminPortal\"}"
+              Name: "additionalDetails"
+            Id: "f3a9b7d2-6c41-4e8b-91fa-0d5e8c2b7a19"
+            InterSystemsId: "9b7e4c2a-1f6d-4b93-8a5e-2d9c6f1b7a44"
+            UserType: "0"
+          ip: "10.10.10.10"
+          connectorDisplayName: "Microsoft 365 Primary"
+          eventResultDetails: "Success"
+          targetType: ""
+          userAgent: "Mobile Safari - 17.5"
+          eventResult: "Success"
+          platform: "Microsoft 365"
+          actorUser:
+            name: "Test 1"
+            id: "9F2B7A603E4C1D85@crestdata.ai"
+            email: "test1@example.com"
+          target:
+            name: "Test 2"
+            id: "test2@example.com"
+            email: "test2@example.com"
+          connectorUid: "4___Microsoft365___Fetch___Microsoft365Primary"
+          eventTime:
+            timestampKind: "exact"
+            timestamp: 1767161389
+          action:
+            actionType: "AzureActiveDirectory"
+            actionDescription: "Added a user to an admin role in Microsoft 365."
+            actionName: "Add member to role."
+        status: "Open"
+        vuid: "VALENCE:_:ynetlDeUbl:_:ALERT:_::_::_:a7c3f9d1-8b4e-4e6a-9f21-1c7b2a9d4e53"
+      alert_type_details:
+        defaultSeverity: "High"
+        description: "A highly privileged role has been assigned to a service principal, application, or user within Entra ID, potentially indicating an unauthorized privilege escalation. \nThis role allows broad control over role assignments, including the ability to manage administrative groups, modify security policies, and assign high-risk permissions \nsuch as Global Administrator. If misused, this could enable persistent access, privilege abuse, and unauthorized modifications to identity configurations. \nThreat actors often establish redundant access pathways to maintain control even if their initial entry method is revoked. This activity should be promptly investigated \nto determine its legitimacy and mitigate security risks.\n"
+        disabled: false
+        mitreAttackTactics:
+         - "TA0003"
+         - "TA0004"
+         - "TA0005"
+        mitreAttackTechniques:
+         - "T1098.003"
+         - "T1078.004"
+         - "T1548"
+         - "T1484"
+        name: "Privileged Administrator Role Assigned"
+        platform: "Microsoft 365"
+        severity: "High"
+        sourceKind: "valenceDefined"
+        vuid: "VALENCE:_::_:ALERT_TYPE:_::_::_:AzureActiveDirectory.PrivilegedRoleAssigned"
+      evt:
+        name: "Add member to role."
+        outcome: "Success"
+      http:
+        useragent: "Mobile Safari - 17.5"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      status: "critical"
+      timestamp: 1.767161389E12
+      usr:
+        email: "test1@example.com"
+        id: "9F2B7A603E4C1D85@crestdata.ai"
+        name: "Test 1"
+    message: "test1@example.com granted the privileged role \"Global Administrator\" to the user test2@example.com."
+    service: "alerts"
+    status: "critical"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767161389000
+ -
+  sample: |-
+    {
+      "alert_type_details" : {
+        "severity" : "High",
+        "sourceKind" : "valenceDefined",
+        "mitreAttackTactics" : [ "TA0001", "TA0007", "TA0043" ],
+        "name" : "Unauthorized IP Event in Microsoft 365",
+        "description" : "Activity from an unauthorized IP address has been detected in Microsoft 365, potentially indicating an attempt to access resources from an unrecognized or disallowed source. This may suggest credential misuse, session hijacking, or evasion tactics such as anonymized networks. Attackers commonly use unfamiliar IP ranges to bypass geographic or network-based controls and avoid detection. This activity should be promptly investigated by reviewing access logs, enforcing policies, and terminating suspicious sessions if necessary.",
+        "disabled" : false,
+        "mitreAttackTechniques" : [ "T1078", "T1016", "T1590.005", "T1018", "T1046" ],
+        "defaultSeverity" : "High",
+        "vuid" : "VALENCE:_::_:ALERT_TYPE:_::_::_:ipBased-Microsoft 365",
+        "platform" : "Microsoft 365"
+      },
+      "alert" : {
+        "alertTypeVuid" : "VALENCE:_::_:ALERT_TYPE:_::_::_:ipBased-Microsoft 365",
+        "connectorUids" : [ "4___Microsoft365___Fetch___Microsoft365Primary" ],
+        "creationTimestamp" : 1766638612,
+        "summaryLine" : "The test1@example.com actor operated from 20.20.20.20, which is flagged as unauthorized in your tenant IP settings.",
+        "vuid" : "VALENCE:_:ynetlDeUbl:_:ALERT:_::_::_:c0e8d4a6-1b2f-4f95-8a73-9c5d7e6b2149",
+        "events" : [ {
+          "eventId" : "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904",
+          "actorType" : "App",
+          "eventSummary" : "",
+          "aux" : {
+            "auditLogRecordType" : "ExchangeItemAggregated",
+            "createdDateTime" : "2025-12-25T04:56:52Z",
+            "userId" : "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14",
+            "administrativeUnits[0]" : "",
+            "organizationId" : "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354",
+            "auditData" : {
+              "OrganizationName" : "test.onmicrosoft.com",
+              "ActorInfoString" : "Client=REST;Client=RESTSystem;UserAgent=[NoUserAgent];",
+              "Version@odata" : {
+                "type" : "#Int64"
+              },
+              "UserKey" : "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14",
+              "MailboxGuid" : "5d07f441-3956-45f7-ab54-215f9357509d",
+              "Operation" : "AttachmentAccess",
+              "OrganizationId" : "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354",
+              "ClientIPAddress" : "20.20.20.20",
+              "LogonUserSid" : "S-1-5-21-2876401935-984563210-3650928741-1105",
+              "OriginatingServer" : "PN3PPF96113D681 (15.20.4200.000)\r\n",
+              "RecordType" : "50",
+              "Version" : "1",
+              "ClientInfoString" : "Client=REST;Client=RESTSystem;;",
+              "ClientAppId" : "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14",
+              "@odata" : {
+                "type" : "#microsoft.graph.security.defaultAuditData"
+              },
+              "MailboxOwnerUPN" : "test1@example.com",
+              "OperationCount" : "1",
+              "OperationProperties[0]" : {
+                "Value" : "Bind",
+                "Name" : "AttachmentAccessType"
+              },
+              "MailboxOwnerSid" : "S-1-5-21-2876401935-984563210-3650928741-1105",
+              "ResultStatus" : "Succeeded",
+              "UserType@odata" : {
+                "type" : "#Int64"
+              },
+              "ExternalAccess" : "false",
+              "LogonType" : "0",
+              "LogonType@odata" : {
+                "type" : "#Int64"
+              },
+              "OperationCount@odata" : {
+                "type" : "#Int64"
+              },
+              "TokenTenantId" : "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354",
+              "AppAccessContext" : {
+                "ClientAppId" : "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14",
+                "UniqueTokenId" : "2f8a7d9c-4e13-4b6a-8c51-1d0e9f72a354",
+                "@odata" : {
+                  "type" : "#microsoft.graph.security.defaultAuditData"
+                },
+                "APIId" : "a5d4b1c9-7e8f-4a62-93d0-2f6e8c1b5973",
+                "IssuedAtTime" : "2025-12-25T04:56:52Z"
+              },
+              "InternalLogonType@odata" : {
+                "type" : "#Int64"
+              },
+              "Workload" : "Exchange",
+              "Messages[0]" : {
+                "Path" : "Messages",
+                "Id" : "test=",
+                "MessageItems[0]" : {
+                  "SizeInBytes@odata" : {
+                    "type" : "#Int64"
+                  },
+                  "SizeInBytes" : "0",
+                  "Id" : "test="
+                }
+              },
+              "InternalLogonType" : "0",
+              "AppId" : "a5d4b1c9-7e8f-4a62-93d0-2f6e8c1b5973",
+              "UserId" : "test1@example.com",
+              "CreationTime" : "2025-12-25T04:56:52Z",
+              "RecordType@odata" : {
+                "type" : "#Int64"
+              },
+              "Id" : "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904",
+              "UserType" : "5"
+            },
+            "service" : "Exchange",
+            "clientIp" : "",
+            "id" : "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904",
+            "userType" : "Application",
+            "ValenceData" : {
+              "IPData" : {
+                "continent" : {
+                  "code" : "NA",
+                  "names" : {
+                    "en" : "North America"
+                  },
+                  "geoname_id" : "1355149"
+                },
+                "country" : {
+                  "names" : {
+                    "en" : "Canada"
+                  },
+                  "is_in_european_union" : "false",
+                  "iso_code" : "CA",
+                  "geoname_id" : "1351999"
+                },
+                "traits" : {
+                  "user_type" : "business",
+                  "connection_type" : "Corporate",
+                  "isp" : "Microsoft Corporation",
+                  "autonomous_system_organization" : "",
+                  "autonomous_system_number" : "0"
+                },
+                "city" : {
+                  "names" : {
+                    "en" : "Montreal"
+                  },
+                  "geoname_id" : "5027243"
+                },
+                "subdivisions[0]" : {
+                  "names" : {
+                    "en" : "Quebec"
+                  },
+                  "iso_code" : "QC",
+                  "geoname_id" : "6115143"
+                },
+                "subdivisions[1]" : {
+                  "names" : {
+                    "en" : "Montréal"
+                  },
+                  "iso_code" : "",
+                  "geoname_id" : "2177246"
+                },
+                "location" : {
+                  "latitude" : "0.0",
+                  "time_zone" : "America/Toronto",
+                  "weather_code" : "CAXX1120",
+                  "longitude" : "-0.0"
+                },
+                "postal" : {
+                  "code" : "H4X"
+                }
+              },
+              "Country" : "CA",
+              "IsTorExitNode" : "false"
+            },
+            "operation" : "AttachmentAccess",
+            "objectId" : "",
+            "userPrincipalName" : "test1@example.com"
+          },
+          "ip" : "20.20.20.20",
+          "connectorDisplayName" : "Microsoft 365 Primary",
+          "eventResultDetails" : "Succeeded",
+          "targetType" : "",
+          "userAgent" : "",
+          "eventResult" : "Success",
+          "platform" : "Microsoft 365",
+          "target" : {
+            "name" : "",
+            "id" : "",
+            "email" : ""
+          },
+          "actorApp" : {
+            "name" : "test1@example.com",
+            "id" : "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14",
+            "email" : "test1@example.com"
+          },
+          "connectorUid" : "4___Microsoft365___Fetch___Microsoft365Primary",
+          "eventTime" : {
+            "timestampKind" : "exact",
+            "timestamp" : 1766638612
+          },
+          "action" : {
+            "actionType" : "ExchangeItemAggregated",
+            "actionDescription" : "",
+            "actionName" : "AttachmentAccess"
+          }
+        } ],
+        "status" : "Open"
+      }
+    }
+  service: "alerts"
+  result:
+    custom:
+      alert:
+        alertTypeVuid: "VALENCE:_::_:ALERT_TYPE:_::_::_:ipBased-Microsoft 365"
+        connectorUids:
+         - "4___Microsoft365___Fetch___Microsoft365Primary"
+        creationTimestamp: 1766638612
+        events:
+         -
+          eventId: "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904"
+          actorType: "App"
+          eventSummary: ""
+          aux:
+            auditLogRecordType: "ExchangeItemAggregated"
+            createdDateTime: "2025-12-25T04:56:52Z"
+            userId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+            administrativeUnits[0]: ""
+            organizationId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
+            auditData:
+              OrganizationName: "test.onmicrosoft.com"
+              ActorInfoString: "Client=REST;Client=RESTSystem;UserAgent=[NoUserAgent];"
+              Version@odata:
+                type: "#Int64"
+              UserKey: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+              MailboxGuid: "5d07f441-3956-45f7-ab54-215f9357509d"
+              Operation: "AttachmentAccess"
+              OrganizationId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
+              ClientIPAddress: "20.20.20.20"
+              LogonUserSid: "S-1-5-21-2876401935-984563210-3650928741-1105"
+              OriginatingServer: "PN3PPF96113D681 (15.20.4200.000)\r\n"
+              RecordType: "50"
+              Version: "1"
+              ClientInfoString: "Client=REST;Client=RESTSystem;;"
+              ClientAppId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+              '@odata':
+                type: "#microsoft.graph.security.defaultAuditData"
+              MailboxOwnerUPN: "test1@example.com"
+              OperationCount: "1"
+              OperationProperties[0]:
+                Value: "Bind"
+                Name: "AttachmentAccessType"
+              MailboxOwnerSid: "S-1-5-21-2876401935-984563210-3650928741-1105"
+              ResultStatus: "Succeeded"
+              UserType@odata:
+                type: "#Int64"
+              ExternalAccess: "false"
+              LogonType: "0"
+              LogonType@odata:
+                type: "#Int64"
+              OperationCount@odata:
+                type: "#Int64"
+              TokenTenantId: "3a9d1f2c-5e8b-4a67-8c14-7e0b6d9f2354"
+              AppAccessContext:
+                ClientAppId: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+                UniqueTokenId: "2f8a7d9c-4e13-4b6a-8c51-1d0e9f72a354"
+                '@odata':
+                  type: "#microsoft.graph.security.defaultAuditData"
+                APIId: "a5d4b1c9-7e8f-4a62-93d0-2f6e8c1b5973"
+                IssuedAtTime: "2025-12-25T04:56:52Z"
+              InternalLogonType@odata:
+                type: "#Int64"
+              Workload: "Exchange"
+              Messages[0]:
+                Path: "Messages"
+                Id: "test="
+                MessageItems[0]:
+                  SizeInBytes@odata:
+                    type: "#Int64"
+                  SizeInBytes: "0"
+                  Id: "test="
+              InternalLogonType: "0"
+              AppId: "a5d4b1c9-7e8f-4a62-93d0-2f6e8c1b5973"
+              UserId: "test1@example.com"
+              CreationTime: "2025-12-25T04:56:52Z"
+              RecordType@odata:
+                type: "#Int64"
+              Id: "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904"
+              UserType: "5"
+            service: "Exchange"
+            clientIp: ""
+            id: "e6c1f29a-8b47-4d3e-9a50-7c2f81b6d904"
+            userType: "Application"
+            ValenceData:
+              IPData:
+                continent:
+                  code: "NA"
+                  names:
+                    en: "North America"
+                  geoname_id: "1355149"
+                country:
+                  names:
+                    en: "Canada"
+                  is_in_european_union: "false"
+                  iso_code: "CA"
+                  geoname_id: "1351999"
+                traits:
+                  user_type: "business"
+                  connection_type: "Corporate"
+                  isp: "Microsoft Corporation"
+                  autonomous_system_organization: ""
+                  autonomous_system_number: "0"
+                city:
+                  names:
+                    en: "Montreal"
+                  geoname_id: "5027243"
+                subdivisions[0]:
+                  names:
+                    en: "Quebec"
+                  iso_code: "QC"
+                  geoname_id: "6115143"
+                subdivisions[1]:
+                  names:
+                    en: "Montréal"
+                  iso_code: ""
+                  geoname_id: "2177246"
+                location:
+                  latitude: "0.0"
+                  time_zone: "America/Toronto"
+                  weather_code: "CAXX1120"
+                  longitude: "-0.0"
+                postal:
+                  code: "H4X"
+              Country: "CA"
+              IsTorExitNode: "false"
+            operation: "AttachmentAccess"
+            objectId: ""
+            userPrincipalName: "test1@example.com"
+          ip: "20.20.20.20"
+          connectorDisplayName: "Microsoft 365 Primary"
+          eventResultDetails: "Succeeded"
+          targetType: ""
+          userAgent: ""
+          eventResult: "Success"
+          platform: "Microsoft 365"
+          target:
+            name: ""
+            id: ""
+            email: ""
+          actorApp:
+            name: "test1@example.com"
+            id: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+            email: "test1@example.com"
+          connectorUid: "4___Microsoft365___Fetch___Microsoft365Primary"
+          eventTime:
+            timestampKind: "exact"
+            timestamp: 1766638612
+          action:
+            actionType: "ExchangeItemAggregated"
+            actionDescription: ""
+            actionName: "AttachmentAccess"
+        status: "Open"
+        vuid: "VALENCE:_:ynetlDeUbl:_:ALERT:_::_::_:c0e8d4a6-1b2f-4f95-8a73-9c5d7e6b2149"
+      alert_type_details:
+        defaultSeverity: "High"
+        description: "Activity from an unauthorized IP address has been detected in Microsoft 365, potentially indicating an attempt to access resources from an unrecognized or disallowed source. This may suggest credential misuse, session hijacking, or evasion tactics such as anonymized networks. Attackers commonly use unfamiliar IP ranges to bypass geographic or network-based controls and avoid detection. This activity should be promptly investigated by reviewing access logs, enforcing policies, and terminating suspicious sessions if necessary."
+        disabled: false
+        mitreAttackTactics:
+         - "TA0001"
+         - "TA0007"
+         - "TA0043"
+        mitreAttackTechniques:
+         - "T1078"
+         - "T1016"
+         - "T1590.005"
+         - "T1018"
+         - "T1046"
+        name: "Unauthorized IP Event in Microsoft 365"
+        platform: "Microsoft 365"
+        severity: "High"
+        sourceKind: "valenceDefined"
+        vuid: "VALENCE:_::_:ALERT_TYPE:_::_::_:ipBased-Microsoft 365"
+      evt:
+        name: "AttachmentAccess"
+        outcome: "Success"
+      network:
+        client:
+          geoip: {}
+          ip: "20.20.20.20"
+      status: "critical"
+      timestamp: 1.766638612E12
+      usr:
+        email: "test1@example.com"
+        id: "9b4e6d21-1f7a-4c83-92a5-6e0b3f8d7c14"
+        name: "test1@example.com"
+    message: "The test1@example.com actor operated from 20.20.20.20, which is flagged as unauthorized in your tenant IP settings."
+    service: "alerts"
+    status: "critical"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1766638612000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1766737272,
+      "success" : true,
+      "ipAddress" : "10.10.10.10",
+      "action" : "User created",
+      "details" : "Created user test2@example.com with role \"admin\" with access to all platforms and permission sets None"
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      evt:
+        name: "User created"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      status: "Ok"
+      timeEpoch: 1766737272
+      timestamp: 1.766737272E12
+      user_change_details:
+        activity: "Created"
+        permission_sets: "None"
+        platforms:
+         - "all platforms"
+        role: "admin"
+        username: "test2@example.com"
+      usr:
+        name: "test1@example.com"
+    message: "Created user test2@example.com with role \"admin\" with access to all platforms and permission sets None"
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1766737272000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1766737272,
+      "success" : true,
+      "ipAddress" : "30.30.30.30",
+      "action" : "User deleted",
+      "details" : "Deleted user test2@example.com with role \"admin\" with access to all platforms and permission sets None"
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      evt:
+        name: "User deleted"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "30.30.30.30"
+      status: "Ok"
+      timeEpoch: 1766737272
+      timestamp: 1.766737272E12
+      user_change_details:
+        activity: "Deleted"
+        permission_sets: "None"
+        platforms:
+         - "all platforms"
+        role: "admin"
+        username: "test2@example.com"
+      usr:
+        name: "test1@example.com"
+    message: "Deleted user test2@example.com with role \"admin\" with access to all platforms and permission sets None"
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1766737272000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1767086508,
+      "success" : true,
+      "ipAddress" : "20.20.20.20",
+      "action" : "User access updated",
+      "details" : "Updated user test2@example.com to role \"readonly\" with access to CrowdStrike \"CrowdStrike Primary\" and permission sets ALLOW_SAASAPPS_FOR_READONLY (Valence Managed)"
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      evt:
+        name: "User access updated"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "20.20.20.20"
+      status: "Ok"
+      timeEpoch: 1767086508
+      timestamp: 1.767086508E12
+      user_change_details:
+        activity: "Updated"
+        permission_sets: "ALLOW_SAASAPPS_FOR_READONLY (Valence Managed)"
+        platforms:
+         - "CrowdStrike \"CrowdStrike Primary\""
+        role: "readonly"
+        username: "test2@example.com"
+      usr:
+        name: "test1@example.com"
+    message: "Updated user test2@example.com to role \"readonly\" with access to CrowdStrike \"CrowdStrike Primary\" and permission sets ALLOW_SAASAPPS_FOR_READONLY (Valence Managed)"
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767086508000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1765866737,
+      "success" : true,
+      "ipAddress" : "10.10.10.10",
+      "action" : "Policy created or updated",
+      "details" : "Created a policy on Integrations. Policy name: \"Test\". Platform: \"Google Workspace\". Instance(s): \"Google Workspcae Primary\""
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      evt:
+        name: "Policy created or updated"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      policy_change_details:
+        activity: "Created"
+        instances: "Google Workspcae Primary"
+        name: "Test"
+        platform: "Google Workspace"
+        type: "Integrations"
+      status: "Ok"
+      timeEpoch: 1765866737
+      timestamp: 1.765866737E12
+      usr:
+        name: "test1@example.com"
+    message: "Created a policy on Integrations. Policy name: \"Test\". Platform: \"Google Workspace\". Instance(s): \"Google Workspcae Primary\""
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1765866737000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1765866737,
+      "success" : true,
+      "ipAddress" : "30.30.30.30",
+      "action" : "Policy created or updated",
+      "details" : "Updated a policy on Integrations. Policy name: \"Test policy\". Platform: \"Google Workspace\". Instance(s): \"Google Workspcae Primary\""
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      evt:
+        name: "Policy created or updated"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "30.30.30.30"
+      policy_change_details:
+        activity: "Updated"
+        instances: "Google Workspcae Primary"
+        name: "Test policy"
+        platform: "Google Workspace"
+        type: "Integrations"
+      status: "Ok"
+      timeEpoch: 1765866737
+      timestamp: 1.765866737E12
+      usr:
+        name: "test1@example.com"
+    message: "Updated a policy on Integrations. Policy name: \"Test policy\". Platform: \"Google Workspace\". Instance(s): \"Google Workspcae Primary\""
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1765866737000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1767087978,
+      "success" : true,
+      "ipAddress" : "20.20.20.20",
+      "action" : "Policy disabled",
+      "details" : "Disabled a policy on Integrations. Policy name: \"Test\". Platform: \"Microsoft 365\". Instance(s): \"Microsoft 365 Primary\""
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      evt:
+        name: "Policy disabled"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "20.20.20.20"
+      policy_change_details:
+        activity: "Disabled"
+        instances: "Microsoft 365 Primary"
+        name: "Test"
+        platform: "Microsoft 365"
+        type: "Integrations"
+      status: "Ok"
+      timeEpoch: 1767087978
+      timestamp: 1.767087978E12
+      usr:
+        name: "test1@example.com"
+    message: "Disabled a policy on Integrations. Policy name: \"Test\". Platform: \"Microsoft 365\". Instance(s): \"Microsoft 365 Primary\""
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767087978000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1767086508,
+      "success" : true,
+      "ipAddress" : "10.10.10.10",
+      "action" : "Connector created",
+      "details" : "Created Datadog connector named \"Datadog Events API SIEM\""
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      connector_change_details:
+        activity: "Created"
+        name: "Datadog Events API SIEM"
+        type: "Datadog"
+      evt:
+        name: "Connector created"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      status: "Ok"
+      timeEpoch: 1767086508
+      timestamp: 1.767086508E12
+      usr:
+        name: "test1@example.com"
+    message: "Created Datadog connector named \"Datadog Events API SIEM\""
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767086508000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1765441157,
+      "success" : false,
+      "ipAddress" : "20.20.20.20",
+      "action" : "Authenticate connector",
+      "details" : "Authenticated Microsoft Sentinel connector named \"Microsoft Sentinel SIEM\" via method \"Microsoft Sentinel Log Analytics Push\""
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      connector_change_details:
+        activity: "Authenticated"
+        method: "Microsoft Sentinel Log Analytics Push"
+        name: "Microsoft Sentinel SIEM"
+        type: "Microsoft Sentinel"
+      evt:
+        name: "Authenticate connector"
+        outcome: false
+      network:
+        client:
+          geoip: {}
+          ip: "20.20.20.20"
+      status: "Error"
+      timeEpoch: 1765441157
+      timestamp: 1.765441157E12
+      usr:
+        name: "test1@example.com"
+    message: "Authenticated Microsoft Sentinel connector named \"Microsoft Sentinel SIEM\" via method \"Microsoft Sentinel Log Analytics Push\""
+    service: "audit-logs"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1765441157000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1765270224,
+      "success" : true,
+      "ipAddress" : "10.10.10.10",
+      "action" : "Connector renamed",
+      "details" : "Renamed Datadog connector from \"Primary\" to \"Test Primary\""
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      connector_change_details:
+        activity: "Renamed"
+        new_name: "Test Primary"
+        old_name: "Primary"
+        type: "Datadog"
+      evt:
+        name: "Connector renamed"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      status: "Ok"
+      timeEpoch: 1765270224
+      timestamp: 1.765270224E12
+      usr:
+        name: "test1@example.com"
+    message: "Renamed Datadog connector from \"Primary\" to \"Test Primary\""
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1765270224000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1764917393,
+      "success" : true,
+      "ipAddress" : "20.20.20.20",
+      "action" : "Upload data to connector",
+      "details" : "Uploaded data file \"dwd_clients.csv\" of kind \"Domain Wide Delegation Apps\" to a Google Workspace connector named \"Google Workspcae Primary\""
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      connector_details:
+        file_name: "dwd_clients.csv"
+        kind: "Domain Wide Delegation Apps"
+        name: "Google Workspcae Primary"
+        type: "Google Workspace"
+      evt:
+        name: "Upload data to connector"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "20.20.20.20"
+      status: "Ok"
+      timeEpoch: 1764917393
+      timestamp: 1.764917393E12
+      usr:
+        name: "test1@example.com"
+    message: "Uploaded data file \"dwd_clients.csv\" of kind \"Domain Wide Delegation Apps\" to a Google Workspace connector named \"Google Workspcae Primary\""
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1764917393000
+ -
+  sample: |-
+    {
+      "actor" : "test1@example.com",
+      "timeEpoch" : 1766124936,
+      "success" : true,
+      "ipAddress" : "10.10.10.10",
+      "action" : "API Key created",
+      "details" : "Created API Key \"test_api\" for \"test_api_valenceapi@example.com\""
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      api_key_change_details:
+        activity: "Created"
+        name: "test_api"
+        service_user: "test_api_valenceapi@example.com"
+      evt:
+        name: "API Key created"
+        outcome: true
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      status: "Ok"
+      timeEpoch: 1766124936
+      timestamp: 1.766124936E12
+      usr:
+        name: "test1@example.com"
+    message: "Created API Key \"test_api\" for \"test_api_valenceapi@example.com\""
+    service: "audit-logs"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1766124936000
