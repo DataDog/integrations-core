@@ -47,7 +47,7 @@ jmeter.final_result.response_time.p99,gauge,,second,,99th percentile response ti
 jmeter.final_result.responses.error_percent,gauge,,percent,,Percentage of failed samples for a label (final test result only).,0,jmeter,jmeter,
 jmeter.final_result.responses_count,gauge,,response,,Total number of samples collected for a label (final test result only).,0,jmeter,jmeter,
 jmeter.final_result.throughput.rps,gauge,,request,second,Requests per second for a label (final test result only).,0,jmeter,jmeter,
-jmeter.latency.avg,gauge,10,second,,Average value of the latency.,0,jmeter,jmeter,
+jmeter.latency.avg,gauge,10,second,,Average latency.,0,jmeter,jmeter,
 jmeter.latency.count,count,10,request,,Number of samples used to compute the latency distribution.,0,jmeter,jmeter,
 jmeter.latency.max,gauge,10,second,,Maximum value of the latency.,0,jmeter,jmeter,
 jmeter.latency.median,gauge,10,second,,Median value of the latency.,0,jmeter,jmeter,
