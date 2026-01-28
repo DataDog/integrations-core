@@ -1606,12 +1606,6 @@ integration/zscaler_private_access:
 - changed-files:
   - any-glob-to-any-file:
     - zscaler_private_access/**/*
-qa/skip-qa:
-- changed-files:
-  - any-glob-to-any-file:
-    - '**/__about__.py'
-    - requirements-agent-release.txt
-    - '*/CHANGELOG.md'
 release:
 - changed-files:
   - any-glob-to-any-file:
