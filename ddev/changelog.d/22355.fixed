@@ -1,0 +1,1 @@
+Ensure ddtrace is used with pytest for every package to emit CI visibility tracking by updating the hatch plugin and `ddev env test` command.
