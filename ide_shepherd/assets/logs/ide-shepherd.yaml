@@ -1,0 +1,106 @@
+id: ide-shepherd
+metric_id: ide-shepherd
+backend_only: false
+installation_sources:
+  - ide-shepherd
+facets:
+  - groups:
+      - IDE-Shepherd
+    name: IDE
+    path: metadata.environment.ide_flavor
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Extension Lifecycle
+    path: ide_shepherd.activity_name
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: OCSF Class
+    path: ide_shepherd.class_name
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Extension
+    path: application.name
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Resource (Extension / Workspace)
+    path: resources.uid
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Technique
+    path: observables.name
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Is Alert
+    path: ide_shepherd.isAlert
+    source: log
+pipeline:
+  type: pipeline
+  name: IDE-Shepherd
+  enabled: true
+  filter:
+    query: source:ide-shepherd
+  processors:
+    - type: date-remapper
+      name: Define `time` as the official date of the log
+      enabled: true
+      sources:
+        - time
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - name: Lookup for `activity_id` to `activity_name`
+      enabled: true
+      source: activity_id
+      target: activity_name
+      lookupTable: |-
+        1,installed
+        2,updated
+        3,uninstalled
+      type: lookup-processor
+    - type: attribute-remapper
+      name: Map `activity_name` to `ide_shepherd.activity_name`
+      enabled: true
+      sources:
+        - activity_name
+      sourceType: attribute
+      target: ide_shepherd.activity_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - name: Lookup for `class_uid` to `class_name`
+      enabled: true
+      source: class_uid
+      target: class_name
+      lookupTable: |-
+        2007,Application Security Posture Finding
+        2004,Detection Finding
+      type: lookup-processor
+    - type: attribute-remapper
+      name: Map `class_name` to `ide_shepherd.class_name`
+      enabled: true
+      sources:
+        - class_name
+      sourceType: attribute
+      target: ide_shepherd.class_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `isAlert` to `ide_shepherd.isAlert`
+      enabled: true
+      sources:
+        - isAlert
+      sourceType: attribute
+      target: ide_shepherd.isAlert
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+
