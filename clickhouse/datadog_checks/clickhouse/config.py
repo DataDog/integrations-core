@@ -116,9 +116,9 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_query_metrics().model_dump(),
                 **(instance.get('query_metrics', {})),
             },
-            "completed_query_samples": {
-                **dict_defaults.instance_completed_query_samples().model_dump(),
-                **(instance.get('completed_query_samples', {})),
+            "query_completions": {
+                **dict_defaults.instance_query_completions().model_dump(),
+                **(instance.get('query_completions', {})),
             },
             # Tags - ensure we have a list, not None
             "tags": list(instance.get('tags', [])),
@@ -181,11 +181,11 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"query_samples.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
-    if _safefloat(args.get('completed_query_samples', {}).get('collection_interval')) <= 0:
-        default_value = dict_defaults.instance_completed_query_samples().collection_interval
-        args['completed_query_samples']['collection_interval'] = default_value
+    if _safefloat(args.get('query_completions', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_query_completions().collection_interval
+        args['query_completions']['collection_interval'] = default_value
         validation_result.add_warning(
-            f"completed_query_samples.collection_interval must be greater than 0, "
+            f"query_completions.collection_interval must be greater than 0, "
             f"defaulting to {default_value} seconds."
         )
 
@@ -201,8 +201,8 @@ def _validate_config(config: InstanceConfig, instance: dict, validation_result: 
         ('query_metrics', config.query_metrics.enabled if config.query_metrics else False),
         ('query_samples', config.query_samples.enabled if config.query_samples else False),
         (
-            'completed_query_samples',
-            config.completed_query_samples.enabled if config.completed_query_samples else False,
+            'query_completions',
+            config.query_completions.enabled if config.query_completions else False,
         ),
     ]
     for feature_name, _is_enabled in dbm_features:
@@ -231,8 +231,8 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(
-        FeatureKey.COMPLETED_QUERY_SAMPLES,
-        config.completed_query_samples.enabled and config.dbm,
+        FeatureKey.QUERY_COMPLETIONS,
+        config.query_completions.enabled and config.dbm,
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
