@@ -2,9 +2,10 @@
 
 [envs.default]
 # If you bump the `confluent-kafka` version, also bump the `librdkafka` version in the `32_install_kerberos.sh` file
+# Note: For e2e tests, the agent-dev image already has confluent-kafka with GSSAPI support,
+# so we skip rebuilding to avoid issues with missing libsasl2-dev in the container
 post-install-commands = [
-  "python -m pip uninstall -y confluent-kafka",
-  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.13.0",
+  "bash -c 'if [ -z \"$DDEV_E2E_UP\" ]; then python -m pip uninstall -y confluent-kafka && python -m pip install --no-binary confluent-kafka confluent-kafka==2.13.0; fi'",
 ]
 
 [[envs.default.matrix]]
