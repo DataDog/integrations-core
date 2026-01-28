@@ -1,0 +1,28 @@
+## Log Section
+##
+## type - required - Type of log input source (tcp / udp / file / windows_event).
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: tcp
+#     port: <PORT>
+#     source: beyondtrust-privileged-remote-access
+#     service: beyondtrust-privileged-remote-access
+#     log_processing_rules:
+#     - type: include_at_match
+#       name: include_pra_logs
+#       pattern: BG
+#     - type: mask_sequences
+#       name: remove_subsequent_segment_headers
+#       replace_placeholder: ''
+#       pattern: '\\n(<\d+>)?\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\w+\s+[A-Z]+\[\d+\]\s+\d+:([0-9])?[2-9]+:\d+:'
