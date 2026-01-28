@@ -38,7 +38,7 @@ pipeline:
         - type: grok-parser
           name: Remapping `filename` to job ID
           enabled: true
-          source: message
+          source: filename
           samples:
             - 795.err
             - 743.out
