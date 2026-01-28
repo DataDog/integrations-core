@@ -5,7 +5,7 @@
 Datadog Backend Listener for Apache JMeter is a JMeter plugin used to send test results to the Datadog platform. It includes the following features:
 
 - Real-time reporting of test metrics (latency, bytes sent and more). See the [Metrics](#metrics) section.
-- Real time reporting of test results as Datadog log events.
+- Real-time reporting of test results as Datadog log events.
 - Ability to include sub results.
 
 ## Setup
