@@ -1,6 +1,6 @@
 base_package:
 - changed-files:
-  - any-glob-to-any-file: 'datadog_checks_base/**/*'
+  - any-glob-to-any-file: datadog_checks_base/**/*
 changelog/no-changelog:
 - changed-files:
   - any-glob-to-any-file:
@@ -8,29 +8,29 @@ changelog/no-changelog:
     - '**/__about__.py'
 ddev:
 - changed-files:
-  - any-glob-to-any-file: 'ddev/**/*'
+  - any-glob-to-any-file: ddev/**/*
 dependencies:
 - changed-files:
-  - any-glob-to-any-file: 'agent_requirements.in'
+  - any-glob-to-any-file: agent_requirements.in
 dependency_provider:
 - changed-files:
-  - any-glob-to-any-file: 'datadog_checks_dependency_provider/**/*'
+  - any-glob-to-any-file: datadog_checks_dependency_provider/**/*
 dev/testing:
 - changed-files:
   - any-glob-to-any-file:
-    - '.github/workflows/**'
-    - '.codecov.yml'
+    - .github/workflows/**
+    - .codecov.yml
 dev/tooling:
 - changed-files:
   - any-glob-to-any-file:
-    - '.github/workflows/**'
-    - '.github/stale.yml'
-    - '.gitlab/**'
-    - '.gitlab-ci.yml'
-    - 'datadog_checks_dev/datadog_checks/dev/tooling/**'
+    - .github/workflows/**
+    - .github/stale.yml
+    - .gitlab/**
+    - .gitlab-ci.yml
+    - datadog_checks_dev/datadog_checks/dev/tooling/**
 dev_package:
 - changed-files:
-  - any-glob-to-any-file: 'datadog_checks_dev/**/*'
+  - any-glob-to-any-file: datadog_checks_dev/**/*
 documentation:
 - changed-files:
   - any-glob-to-any-file:
@@ -38,13 +38,14 @@ documentation:
     - '*/assets/configuration/**'
     - '*/CHANGELOG.md'
     - '*/README.md'
-    - 'docs/**'
+    - docs/**
 downloader:
 - changed-files:
-  - any-glob-to-any-file: 'datadog_checks_downloader/**/*'
+  - any-glob-to-any-file: datadog_checks_downloader/**/*
 integration/__pycache__:
 - changed-files:
-  - any-glob-to-any-file: '__pycache__/**/*'
+  - any-glob-to-any-file:
+    - __pycache__/**/*
 integration/active_directory:
 - changed-files:
   - any-glob-to-any-file:
@@ -881,8 +882,6 @@ integration/litellm:
 - changed-files:
   - any-glob-to-any-file:
     - litellm/**/*
-integration/logs_integration:
-- logs_integration/**/*
 integration/lustre:
 - changed-files:
   - any-glob-to-any-file:
