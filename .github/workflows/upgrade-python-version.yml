@@ -28,6 +28,7 @@ jobs:
         pip install -e ./ddev
     - name: Configure ddev
       run: |-
+        ddev config set upgrade_check false
         ddev config set repos.core .
         ddev config set repo core
     - name: Get GitHub token via dd-octo-sts

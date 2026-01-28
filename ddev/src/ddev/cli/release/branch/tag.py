@@ -3,7 +3,7 @@ import re
 import click
 from packaging.version import Version
 
-from .create import BRANCH_NAME_REGEX
+from .create import BRANCH_NAME_REGEX, ensure_build_agent_yaml_updated
 
 
 @click.command
@@ -26,6 +26,13 @@ def tag(app, final):
         )
     click.echo(app.repo.git.pull(branch_name))
     click.echo(app.repo.git.fetch_tags())
+
+    # Check if build_agent.yaml needs to be updated (agent branch may have been created since branch creation)
+    if ensure_build_agent_yaml_updated(app, branch_name):
+        app.repo.git.run('add', '.gitlab/build_agent.yaml')
+        app.repo.git.run('commit', '-m', f"Update build_agent.yaml to use agent branch: {branch_name}")
+        app.repo.git.run('push', 'origin', branch_name)
+        app.display_success("build_agent.yaml has been updated and pushed.")
     major_minor_version = branch_name.replace('.x', '')
     this_release_tags = sorted(
         (

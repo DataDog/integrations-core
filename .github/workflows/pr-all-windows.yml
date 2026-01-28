@@ -9,6 +9,10 @@ on:
     - datadog_checks_dev/datadog_checks/dev/*.py
     - ddev/src/**
     - "!agent_requirements.in"
+    # Also run if we modify the workflow files
+    - '.github/workflows/pr-all-windows.yml'
+    - '.github/workflows/test-target.yml'
+    - '.github/workflows/test-all-windows.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
@@ -26,8 +30,8 @@ jobs:
       repo: core
 
       # Options
-      test-py2: true
       context: "pr"
+
     secrets: inherit
 
   save-event:
@@ -65,11 +69,3 @@ jobs:
         use_oidc: true
         directory: coverage-reports
         fail_ci_if_error: false
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit

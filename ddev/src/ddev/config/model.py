@@ -71,6 +71,31 @@ class RootConfig(LazilyParsedConfig):
         self._field_pypi = FIELD_TO_PARSE
         self._field_trello = FIELD_TO_PARSE
         self._field_terminal = FIELD_TO_PARSE
+        self._field_upgrade_check = FIELD_TO_PARSE
+
+    @property
+    def upgrade_check(self):
+        if self._field_upgrade_check is FIELD_TO_PARSE:
+            raw_update = self.raw_data.get('upgrade_check', True)
+            if isinstance(raw_update, bool):
+                upgrade_check = raw_update
+            elif isinstance(raw_update, str):
+                if raw_update.lower() == 'true':
+                    upgrade_check = True
+                elif raw_update.lower() == 'false':
+                    upgrade_check = False
+                else:
+                    self.raise_error(f'must be a boolean or the string "true"/"false", got: {raw_update!r}')
+
+            else:
+                self.raise_error(f'must be a boolean or string, got type: {type(raw_update).__name__}')
+            self._field_upgrade_check = upgrade_check
+        return self._field_upgrade_check
+
+    @upgrade_check.setter
+    def upgrade_check(self, value):
+        self.raw_data['upgrade_check'] = value
+        self._field_upgrade_check = FIELD_TO_PARSE
 
     @property
     def repo(self):

@@ -7,6 +7,7 @@ from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.ibm_mq import metrics
 from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
+from datadog_checks.ibm_mq.utils import normalize_desc_tag
 
 try:
     import pymqi
@@ -50,6 +51,15 @@ class ChannelMetricCollector(object):
         self.service_check = service_check
         self.gauge = gauge
 
+    def _add_channel_description_tag(self, channel_info, channel_tags):
+        # Add channel description as a tag, normalizing if configured.
+        channel_desc = to_string(channel_info[pymqi.CMQCFC.MQCACH_DESC]).strip()
+        if channel_desc:
+            if self.config.normalize_description_tags:
+                channel_desc = normalize_desc_tag(channel_desc)
+            if channel_desc:
+                channel_tags.append("channel_desc:{}".format(channel_desc))
+
     def get_pcf_channel_metrics(self, queue_manager):
         discovered_channels = self._discover_channels(queue_manager)
         if discovered_channels:
@@ -60,6 +70,9 @@ class ChannelMetricCollector(object):
             for channel_info in discovered_channels:
                 channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
+                if self.config.add_description_tags and pymqi.CMQCFC.MQCACH_DESC in channel_info:
+                    self._add_channel_description_tag(channel_info, channel_tags)
+
                 self._submit_metrics_from_properties(
                     channel_info, channel_name, metrics.channel_metrics(), channel_tags
                 )
@@ -153,6 +166,8 @@ class ChannelMetricCollector(object):
                 if channel_name in channels_to_skip:
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
+                if self.config.add_description_tags and pymqi.CMQCFC.MQCACH_DESC in channel_info:
+                    self._add_channel_description_tag(channel_info, channel_tags)
 
                 self._submit_metrics_from_properties(
                     channel_info, channel_name, metrics.channel_status_metrics(), channel_tags

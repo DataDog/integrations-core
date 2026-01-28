@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 14.1.0 / 2025-12-18
+
+***Added***:
+
+* Bump datatog_checks_dev to get its latest features. ([#22171](https://github.com/DataDog/integrations-core/pull/22171))
+
+***Fixed***:
+
+* Ensure correct commit attribution when sending size metrics by requiring an explicit commit in the ddev size status command. ([#21993](https://github.com/DataDog/integrations-core/pull/21993))
+
 ## 14.0.2 / 2025-11-21
 
 ***Fixed***:

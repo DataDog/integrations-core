@@ -13,6 +13,7 @@ GRANT SELECT ON pg_stat_database TO datadog;
 GRANT SELECT ON pg_stat_database TO datadog_no_catalog;
 GRANT SELECT ON ALL tables IN SCHEMA pg_catalog to datadog;
 CREATE DATABASE datadog_test;
+COMMENT ON DATABASE datadog_test IS 'Datadog test database';
 GRANT ALL PRIVILEGES ON DATABASE datadog_test TO datadog;
 CREATE DATABASE dogs;
 GRANT USAGE on SCHEMA public to bob;
