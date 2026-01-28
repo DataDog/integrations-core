@@ -154,18 +154,18 @@ instances:
         #
         # collection_interval: 10
 
-    ## Configure collection of completed query samples from system.query_log
+    ## Configure collection of query completions from system.query_log
     #
-    # completed_query_samples:
+    # query_completions:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of completed query samples. Requires `dbm: true`.
+        ## Enable collection of query completions. Requires `dbm: true`.
         ## These samples represent individual completed queries and appear on the DBM Query Samples page.
         #
         # enabled: true
 
         ## @param collection_interval - number - optional - default: 10
-        ## Set the completed query samples collection interval (in seconds).
+        ## Set the query completions collection interval (in seconds).
         ## Lower values show more recent queries but increase collection overhead.
         #
         # collection_interval: 10

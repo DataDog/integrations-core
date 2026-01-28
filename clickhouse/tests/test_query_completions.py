@@ -7,14 +7,14 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.completed_query_samples import ClickhouseCompletedQuerySamples
+from datadog_checks.clickhouse.query_completions import ClickhouseQueryCompletions
 
 pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
 def instance_with_dbm():
-    """Return a ClickHouse instance configuration with DBM and completed query samples enabled"""
+    """Return a ClickHouse instance configuration with DBM and query completions enabled"""
     return {
         'server': 'localhost',
         'port': 9000,
@@ -22,7 +22,7 @@ def instance_with_dbm():
         'password': '',
         'db': 'default',
         'dbm': True,
-        'completed_query_samples': {
+        'query_completions': {
             'enabled': True,
             'collection_interval': 10,
             'samples_per_hour_per_query': 15,
@@ -41,17 +41,17 @@ def check_with_dbm(instance_with_dbm):
     return check
 
 
-def test_completed_query_samples_initialization(check_with_dbm):
-    """Test that completed query samples are properly initialized when DBM is enabled"""
-    assert check_with_dbm.completed_query_samples is not None
-    assert isinstance(check_with_dbm.completed_query_samples, ClickhouseCompletedQuerySamples)
-    assert check_with_dbm.completed_query_samples._config.enabled is True
-    assert check_with_dbm.completed_query_samples._config.collection_interval == 10
-    assert check_with_dbm.completed_query_samples._config.samples_per_hour_per_query == 15
+def test_query_completions_initialization(check_with_dbm):
+    """Test that query completions are properly initialized when DBM is enabled"""
+    assert check_with_dbm.query_completions is not None
+    assert isinstance(check_with_dbm.query_completions, ClickhouseQueryCompletions)
+    assert check_with_dbm.query_completions._config.enabled is True
+    assert check_with_dbm.query_completions._config.collection_interval == 10
+    assert check_with_dbm.query_completions._config.samples_per_hour_per_query == 15
 
 
-def test_completed_query_samples_disabled():
-    """Test that completed query samples are not initialized when disabled"""
+def test_query_completions_disabled():
+    """Test that query completions are not initialized when disabled"""
     instance = {
         'server': 'localhost',
         'port': 9000,
@@ -59,17 +59,17 @@ def test_completed_query_samples_disabled():
         'password': '',
         'db': 'default',
         'dbm': True,
-        'completed_query_samples': {
+        'query_completions': {
             'enabled': False,
         },
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    assert check.completed_query_samples is None
+    assert check.query_completions is None
 
 
-def test_dbm_disabled_no_completed_query_samples():
-    """Test that completed query samples are not initialized when DBM is disabled"""
+def test_dbm_disabled_no_query_completions():
+    """Test that query completions are not initialized when DBM is disabled"""
     instance = {
         'server': 'localhost',
         'port': 9000,
@@ -80,12 +80,12 @@ def test_dbm_disabled_no_completed_query_samples():
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    assert check.completed_query_samples is None
+    assert check.query_completions is None
 
 
 def test_normalize_query(check_with_dbm):
     """Test query obfuscation and normalization for completed queries"""
-    completed_query_samples = check_with_dbm.completed_query_samples
+    query_completions = check_with_dbm.query_completions
 
     row = {
         'query_id': 'test-query-id-123',
@@ -104,7 +104,7 @@ def test_normalize_query(check_with_dbm):
         'current_database': 'default',
     }
 
-    normalized_row = completed_query_samples._normalize_query(row)
+    normalized_row = query_completions._normalize_query(row)
 
     # Verify that statement and query_signature are set
     assert normalized_row['statement'] is not None
@@ -118,8 +118,8 @@ def test_normalize_query(check_with_dbm):
 
 def test_create_batched_payload_query_details(check_with_dbm):
     """Test that batched payload creates correct query_details structure"""
-    completed_query_samples = check_with_dbm.completed_query_samples
-    completed_query_samples._tags_no_db = ['test:clickhouse']
+    query_completions = check_with_dbm.query_completions
+    query_completions._tags_no_db = ['test:clickhouse']
 
     rows = [
         {
@@ -148,9 +148,9 @@ def test_create_batched_payload_query_details(check_with_dbm):
         }
     ]
 
-    with mock.patch('datadog_checks.clickhouse.completed_query_samples.datadog_agent') as mock_agent:
+    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        payload = completed_query_samples._create_batched_payload(rows)
+        payload = query_completions._create_batched_payload(rows)
 
     # Verify payload has completions
     assert payload is not None
@@ -174,8 +174,8 @@ def test_create_batched_payload_query_details(check_with_dbm):
 
 def test_create_batched_payload_structure(check_with_dbm):
     """Test creation of batched query completion payload structure"""
-    completed_query_samples = check_with_dbm.completed_query_samples
-    completed_query_samples._tags_no_db = ['test:clickhouse', 'server:localhost']
+    query_completions = check_with_dbm.query_completions
+    query_completions._tags_no_db = ['test:clickhouse', 'server:localhost']
 
     rows = [
         {
@@ -194,9 +194,9 @@ def test_create_batched_payload_structure(check_with_dbm):
         },
     ]
 
-    with mock.patch('datadog_checks.clickhouse.completed_query_samples.datadog_agent') as mock_agent:
+    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        payload = completed_query_samples._create_batched_payload(rows)
+        payload = query_completions._create_batched_payload(rows)
 
     # Verify payload structure
     assert payload['ddsource'] == 'clickhouse'
@@ -213,20 +213,20 @@ def test_create_batched_payload_structure(check_with_dbm):
 
 def test_rate_limiting(check_with_dbm):
     """Test that query sample rate limiting works correctly"""
-    completed_query_samples = check_with_dbm.completed_query_samples
+    query_completions = check_with_dbm.query_completions
 
     query_cache_key = ('test-signature-123', 'default', 'default_user')
 
     # First acquisition should succeed
-    assert completed_query_samples._seen_samples_ratelimiter.acquire(query_cache_key) is True
+    assert query_completions._seen_samples_ratelimiter.acquire(query_cache_key) is True
 
     # Immediate re-acquisition should fail due to rate limiting
-    assert completed_query_samples._seen_samples_ratelimiter.acquire(query_cache_key) is False
+    assert query_completions._seen_samples_ratelimiter.acquire(query_cache_key) is False
 
 
 def test_completed_queries_query_format():
     """Test that the completed queries query is properly formatted"""
-    from datadog_checks.clickhouse.completed_query_samples import COMPLETED_QUERIES_QUERY
+    from datadog_checks.clickhouse.query_completions import COMPLETED_QUERIES_QUERY
 
     # Verify query uses placeholder for table (supports both local and cluster-wide queries)
     assert '{query_log_table}' in COMPLETED_QUERIES_QUERY
@@ -255,7 +255,7 @@ def test_completed_queries_query_format():
 
 def test_normalize_query_with_obfuscation(check_with_dbm):
     """Test that query normalization properly obfuscates and extracts metadata"""
-    completed_query_samples = check_with_dbm.completed_query_samples
+    query_completions = check_with_dbm.query_completions
 
     row = {
         'query_id': 'id-1',
@@ -268,7 +268,7 @@ def test_normalize_query_with_obfuscation(check_with_dbm):
         'user': 'default',
     }
 
-    normalized_row = completed_query_samples._normalize_query(row)
+    normalized_row = query_completions._normalize_query(row)
 
     # Should return a normalized row
     assert normalized_row is not None
@@ -280,20 +280,20 @@ def test_normalize_query_with_obfuscation(check_with_dbm):
     assert normalized_row['query_signature'] is not None
 
 
-@mock.patch('datadog_checks.clickhouse.completed_query_samples.datadog_agent')
+@mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent')
 def test_checkpoint_persistence(mock_agent, check_with_dbm):
     """Test checkpoint save and load functionality"""
-    completed_query_samples = check_with_dbm.completed_query_samples
+    query_completions = check_with_dbm.query_completions
 
     # Test saving checkpoint
     test_checkpoint = 1234567890123456
-    completed_query_samples._save_checkpoint(test_checkpoint)
+    query_completions._save_checkpoint(test_checkpoint)
 
     # Mock persistent cache
     check_with_dbm.read_persistent_cache = mock.MagicMock(return_value=str(test_checkpoint))
 
     # Load checkpoint (uses _get_last_checkpoint which reads from persistent cache)
-    loaded_checkpoint = check_with_dbm.read_persistent_cache(completed_query_samples.CHECKPOINT_CACHE_KEY)
+    loaded_checkpoint = check_with_dbm.read_persistent_cache(query_completions.CHECKPOINT_CACHE_KEY)
 
     assert int(loaded_checkpoint) == test_checkpoint
 
@@ -307,7 +307,7 @@ def test_default_config_values():
         'password': '',
         'db': 'default',
         'dbm': True,
-        'completed_query_samples': {
+        'query_completions': {
             'enabled': True,
         },
         'tags': ['test:clickhouse'],
@@ -315,7 +315,7 @@ def test_default_config_values():
     check = ClickhouseCheck('clickhouse', {}, [instance])
 
     # Verify defaults are applied
-    assert check.completed_query_samples._config.collection_interval == 10
-    assert check.completed_query_samples._config.samples_per_hour_per_query == 15
-    assert check.completed_query_samples._config.seen_samples_cache_maxsize == 10000
-    assert check.completed_query_samples._config.max_samples_per_collection == 1000
+    assert check.query_completions._config.collection_interval == 10
+    assert check.query_completions._config.samples_per_hour_per_query == 15
+    assert check.query_completions._config.seen_samples_cache_maxsize == 10000
+    assert check.query_completions._config.max_samples_per_collection == 1000

@@ -65,11 +65,11 @@ LIMIT {max_samples}
 """
 
 
-class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
+class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
     """Collects individual completed query samples from system.query_log"""
 
     # Persistent cache key for storing the last collection timestamp
-    CHECKPOINT_CACHE_KEY = "completed_query_samples_last_checkpoint_microseconds"
+    CHECKPOINT_CACHE_KEY = "query_completions_last_checkpoint_microseconds"
 
     def __init__(self, check: ClickhouseCheck, config):
         super().__init__(
@@ -249,7 +249,7 @@ class ClickhouseCompletedQuerySamples(ClickhouseQueryLogJob):
             self._log.exception("Failed to load completed queries from system.query_log: %s", e)
 
             self._check.count(
-                "dd.clickhouse.completed_query_samples.error",
+                "dd.clickhouse.query_completions.error",
                 1,
                 tags=self.tags + ["error:query_log_load_failed"],
                 raw=True,

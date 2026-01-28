@@ -20,19 +20,6 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-class CompletedQuerySamples(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    collection_interval: Optional[float] = None
-    enabled: Optional[bool] = None
-    max_samples_per_collection: Optional[float] = None
-    run_sync: Optional[bool] = None
-    samples_per_hour_per_query: Optional[float] = None
-    seen_samples_cache_maxsize: Optional[float] = None
-
-
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -60,6 +47,19 @@ class MetricPatterns(BaseModel):
     )
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
+
+
+class QueryCompletions(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_samples_per_collection: Optional[float] = None
+    run_sync: Optional[bool] = None
+    samples_per_hour_per_query: Optional[float] = None
+    seen_samples_cache_maxsize: Optional[float] = None
 
 
 class QueryMetrics(BaseModel):
@@ -91,7 +91,6 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    completed_query_samples: Optional[CompletedQuerySamples] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
@@ -106,6 +105,7 @@ class InstanceConfig(BaseModel):
     only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
     port: Optional[int] = None
+    query_completions: Optional[QueryCompletions] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None

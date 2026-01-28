@@ -33,8 +33,8 @@ def instance_query_metrics():
     )
 
 
-def instance_completed_query_samples():
-    return instance.CompletedQuerySamples(
+def instance_query_completions():
+    return instance.QueryCompletions(
         enabled=True,
         collection_interval=10,
         samples_per_hour_per_query=15,
