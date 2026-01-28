@@ -28,7 +28,7 @@ openstacksdk==4.7.0
 orjson==3.11.3
 packaging==25.0
 paramiko==3.5.1
-prometheus-client==0.22.1
+prometheus-client==0.23.1
 protobuf==6.32.0
 psutil==6.0.0
 psycopg[c,pool]==3.2.10
