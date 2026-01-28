@@ -50,7 +50,7 @@ EXPECTED_DEFAULTS = {
     'collect_database_size_metrics': True,
     'collect_default_database': True,
     'collect_bloat_metrics': False,
-    'collect_wal_metrics': True,
+    'collect_wal_metrics': None,  # Version-aware: defaults to True for PG 10+, False for PG 9.6 and below
     'tag_replication_role': True,
     'table_count_limit': 200,
     'max_relations': 300,

@@ -5,6 +5,7 @@
   description: |
     This changes the collection interval of the check. For more information, see:
     https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+  fleet_configurable: true
 - name: empty_default_hostname
   value:
     example: false
@@ -13,3 +14,4 @@
     This forces the check to send metrics with no hostname.
 
     This is useful for cluster-level checks.
+  fleet_configurable: true
