@@ -16,8 +16,8 @@ ENV CXXFLAGS="${CFLAGS}"
 ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 
 # openssl
-RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
- cpanp -i List::Util 1.66 && \
+RUN yum install -y perl-IPC-Cmd perl-core perl-App-cpanminus && \
+ cpanm --notest List::Util@1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
  VERSION="3.5.4" \
  SHA256="967311f84955316969bdb1d8d4b983718ef42338639c621ec4c34fddef355e99" \
