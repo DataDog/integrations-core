@@ -1607,8 +1607,12 @@ integration/zscaler_private_access:
   - any-glob-to-any-file:
     - zscaler_private_access/**/*
 qa/skip-qa:
-- '**/__about__.py'
-- requirements-agent-release.txt
-- '*/CHANGELOG.md'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/__about__.py'
+    - requirements-agent-release.txt
+    - '*/CHANGELOG.md'
 release:
-- '**/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/__about__.py'
