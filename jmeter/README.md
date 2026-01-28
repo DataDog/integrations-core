@@ -38,7 +38,7 @@ No Datadog Agent is necessary.
 
 To start reporting metrics to Datadog:
 
-1. Right click on the thread group or the test plan for which you want to send metrics to Datadog.
+1. Right-click on the thread group or the test plan for which you want to send metrics to Datadog.
 2. Go to `Add > Listener > Backend Listener`.
 3. Modify the `Backend Listener Implementation` and select `org.datadog.jmeter.plugins.DatadogBackendClient` from the drop-down.
 4. Set the `apiKey` variable to [your Datadog API key][7].
