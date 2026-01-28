@@ -317,7 +317,7 @@ pipeline:
       sources:
         - properties.userPrincipalName
       target: usr.email
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
