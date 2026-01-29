@@ -1,0 +1,1 @@
+Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false.

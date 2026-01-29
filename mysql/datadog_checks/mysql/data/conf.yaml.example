@@ -810,6 +810,11 @@ instances:
     #
     disable_generic_tags: true
 
+    ## @param enable_legacy_tags_normalization - boolean - optional - default: true
+    ## Whether to enable the legacy tags normalization.
+    #
+    # enable_legacy_tags_normalization: false
+
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##

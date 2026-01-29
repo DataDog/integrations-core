@@ -76,6 +76,11 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param enable_legacy_tags_normalization - boolean - optional - default: true
+    ## Whether to enable the legacy tags normalization.
+    #
+    # enable_legacy_tags_normalization: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

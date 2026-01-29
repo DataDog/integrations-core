@@ -481,3 +481,8 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param enable_legacy_tags_normalization - boolean - optional - default: true
+    ## Whether to enable the legacy tags normalization.
+    #
+    # enable_legacy_tags_normalization: false

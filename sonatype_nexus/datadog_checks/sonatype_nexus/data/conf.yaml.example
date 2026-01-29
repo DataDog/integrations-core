@@ -74,3 +74,8 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     min_collection_interval: 600
+
+    ## @param enable_legacy_tags_normalization - boolean - optional - default: true
+    ## Whether to enable the legacy tags normalization.
+    #
+    # enable_legacy_tags_normalization: false
