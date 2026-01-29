@@ -6,7 +6,7 @@
 
 With built-in device discovery and rich metadata, you can analyze Versa SD-WAN performance by site, appliance, tunnel, and access circuit, and quickly identify issues such as degraded paths, overloaded interfaces, or underperforming tunnels that may impact user experience.
 
-### WAN Edge and Controller Health
+### WAN edge and controller health
 
 This integration surfaces key health and resource metrics for Versa appliances and control-plane components, allowing teams to detect failures or capacity constraints early. You can track device availability, CPU, memory, disk usage, and uptime across branch and data center deployments to ensure SD-WAN infrastructure remains stable and responsive.
 
