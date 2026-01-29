@@ -26,8 +26,7 @@ RUN yum install -y \
     perl-Scalar-List-Utils \
     perl-core \
     perl-devel
-RUN cpanm --notest Scalar::List::Utils@1.66 && \
- DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
+RUN DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
  VERSION="3.5.4" \
  SHA256="967311f84955316969bdb1d8d4b983718ef42338639c621ec4c34fddef355e99" \
  RELATIVE_PATH="openssl-{{version}}" \
