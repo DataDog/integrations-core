@@ -18,19 +18,18 @@ jobs:
       pull-requests: write
     steps:
       - name: Create token
-        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: token-generator
         with:
           app-id: ${{ secrets.app-id }}
           private-key: ${{ secrets.private-key }}
           repositories: integrations-core
       - name: Add labels
-        uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594 # v4.3.0
+        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6.0.1
         with:
           configuration-path: .github/workflows/config/labeler.yml
           repo-token: "${{ steps.token-generator.outputs.token }}"
-          sync-labels: ""   # workaround for sync-labels bug:
-                            # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
+          sync-labels: true
       - name: Add team labels
         run: |
           jq -r '.event.pull_request.requested_teams[].name' <<< "$GITHUB_CONTEXT" | while read -r team; do

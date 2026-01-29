@@ -104,6 +104,13 @@ jira_statuses = [
 github_team = "ndm-integrations"
 github_labels = ["team/ndm-integrations"]
 
+[teams."Network Path"]
+jira_project = "NETPATH"
+jira_issue_type = "Task"
+jira_statuses = ["To Do", "In Progress", "Done"]
+github_team = "network-path"
+github_labels = ["team/network-path"]
+
 [teams."Windows Agent"]
 jira_project = "WINA"
 jira_issue_type = "QA Task"
