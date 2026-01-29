@@ -151,6 +151,8 @@ RUN \
 RUN \
  # Add -fPIC to let librdkafka link against it statically
  CFLAGS="${CFLAGS} -fPIC" \
+ # cyrus-sasl 2.1.28 misses <time.h> in saslutil.c on newer toolchains
+ CPPFLAGS="${CPPFLAGS} -include time.h" \
  # Explicitly ask the linker to use gssapi_krb5, otherwise static compilation fails
  LDFLAGS="${LDFLAGS} -L/usr/local/lib -lgssapi_krb5" \
  DOWNLOAD_URL="https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-{{version}}/cyrus-sasl-{{version}}.tar.gz" \
