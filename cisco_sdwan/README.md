@@ -16,7 +16,7 @@ Cisco SD-WAN environments depend on continuous evaluation of link quality across
 
 ### Traffic and application visibility
 
-By surfacing traffic and throughput metrics at the device and interface level, this integration helps teams understand where bandwidth is being consumed and identify hotspots or oversubscribed links. Combined with Datadog’s broader observability platform, network data can be correlated with application and service performance for faster root cause analysis.
+By surfacing traffic and throughput metrics at the device and interface level, this integration helps teams understand where bandwidth is being consumed and identify hotspots or oversubscribed links. Combined with Datadog's broader observability platform, network data can be correlated with application and service performance for faster root cause analysis.
 
 ## Setup
 
