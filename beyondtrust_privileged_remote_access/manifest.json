@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b8fc3cea-9653-4852-905e-e6d340070b9f",
   "app_id": "beyondtrust-privileged-remote-access",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
