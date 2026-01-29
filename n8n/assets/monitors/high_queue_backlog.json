@@ -1,0 +1,31 @@
+{
+    "name": "[n8n] High Queue Backlog Size",
+    "type": "query alert",
+    "query": "avg(last_5m):sum:n8n.queue.job.waiting.total{*} by {host} > 100",
+    "message": "{{#is_alert}}Queue backlog on {{host.name}} exceeded threshold. Current: {{value}} jobs waiting (threshold: {{threshold}}).{{/is_alert}}{{#is_warning}}Queue backlog on {{host.name}} approaching threshold. Current: {{value}} jobs waiting.{{/is_warning}}{{#is_recovery}}Queue backlog on {{host.name}} returned to normal.{{/is_recovery}}",
+    "tags": [
+        "integration:n8n",
+        "service:n8n",
+        "category:queue"
+    ],
+    "options": {
+        "thresholds": {
+            "critical": 100,
+            "warning": 50,
+            "critical_recovery": 80,
+            "warning_recovery": 40
+        },
+        "notify_audit": false,
+        "require_full_window": false,
+        "notify_no_data": true,
+        "no_data_timeframe": 10,
+        "renotify_interval": 30,
+        "include_tags": true,
+        "evaluation_delay": 60,
+        "new_group_delay": 60,
+        "escalation_message": "Queue backlog still high. Please investigate.",
+        "renotify_statuses": ["alert"]
+    },
+    "priority": 2,
+    "restricted_roles": null
+}

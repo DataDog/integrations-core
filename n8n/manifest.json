@@ -41,8 +41,7 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "/bin/n8n",
-        "node pm2"
+        "/bin/n8n"
       ]
     },
     "dashboards": {

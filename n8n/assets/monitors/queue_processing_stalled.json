@@ -1,0 +1,30 @@
+{
+    "name": "[n8n] Queue Processing Stalled (No Dequeues)",
+    "type": "query alert",
+    "query": "sum(last_10m):sum:n8n.queue.job.dequeued.count{*} by {host}.as_count() < 1",
+    "message": "{{#is_alert}}No jobs dequeued on {{host.name}} in last 10 minutes. Workers may be crashed, blocked, or disconnected.{{/is_alert}}{{#is_warning}}Very few jobs processed on {{host.name}}.{{/is_warning}}{{#is_recovery}}Job processing resumed on {{host.name}}.{{/is_recovery}}",
+    "tags": [
+        "integration:n8n",
+        "service:n8n",
+        "category:queue",
+        "category:availability"
+    ],
+    "options": {
+        "thresholds": {
+            "critical": 1,
+            "warning": 5
+        },
+        "notify_audit": false,
+        "require_full_window": true,
+        "notify_no_data": true,
+        "no_data_timeframe": 15,
+        "renotify_interval": 15,
+        "include_tags": true,
+        "evaluation_delay": 60,
+        "new_group_delay": 60,
+        "escalation_message": "Queue processing still stalled. Immediate intervention required.",
+        "renotify_statuses": ["alert", "no data"]
+    },
+    "priority": 1,
+    "restricted_roles": null
+}
