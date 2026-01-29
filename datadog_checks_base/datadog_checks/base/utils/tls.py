@@ -57,24 +57,6 @@ class TlsConfig(BaseModel, frozen=True):
     tls_verify: bool = True
 
 
-def _load_certifi_fallback(context):
-    """Attempt to load CA certificates from certifi as a fallback."""
-    try:
-        import certifi
-    except ImportError:
-        LOGGER.warning('Failed to import certifi, TLS verification may fail.')
-        return
-
-    try:
-        certifi_path = certifi.where()
-        context.load_verify_locations(cafile=certifi_path)
-        LOGGER.info('Successfully loaded CA certificates from certifi bundle: %s', certifi_path)
-    except (FileNotFoundError, IOError) as e:
-        LOGGER.error('Failed to load CA certificates from certifi bundle: %s. TLS verification may fail.', e)
-    except Exception as e:
-        LOGGER.error('Unexpected error loading certifi certificates: %s', e)
-
-
 def _load_ca_certs(context, config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
@@ -100,11 +82,6 @@ def _load_ca_certs(context, config):
             context.load_default_certs(ssl.Purpose.SERVER_AUTH)
         except Exception as e:
             LOGGER.debug('Failed to load default CA certificates: %s', e)
-
-        # Check if any certs were actually loaded
-        if not context.get_ca_certs():
-            LOGGER.info('No CA certificates loaded from system default paths, attempting certifi fallback.')
-            _load_certifi_fallback(context)
 
     # Load intermediate CA certs if provided
     intermediate_ca_certs = config.get('tls_intermediate_ca_certs')
