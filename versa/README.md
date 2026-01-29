@@ -8,7 +8,7 @@ With built-in device discovery and rich metadata, you can analyze Versa SD-WAN p
 
 ### WAN edge and controller health
 
-This integration surfaces key health and resource metrics for Versa appliances and control-plane components, allowing teams to detect failures or capacity constraints early. You can track device availability, CPU, memory, disk usage, and uptime across branch and data center deployments to ensure SD-WAN infrastructure remains stable and responsive.
+This integration surfaces key health and resource metrics for Versa appliances and control plane components, allowing teams to detect failures or capacity constraints early. You can track device availability, CPU, memory, disk usage, and uptime across branch and data center deployments to ensure SD-WAN infrastructure remains stable and responsive.
 
 ### Link, Tunnel, and Path SLA Monitoring
 
