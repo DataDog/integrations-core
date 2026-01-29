@@ -23,6 +23,9 @@
       "events": {
         "creates_events": false
       }
+    },
+    "logs": {
+      "source": "bluecat-edge"
     }
   },
   "author": {
