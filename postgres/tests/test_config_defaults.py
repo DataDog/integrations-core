@@ -13,6 +13,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from datadog_checks.postgres.config import build_config
+from datadog_checks.postgres.config_models.dict_defaults import DEFAULT_EXCLUDED_DATABASES
 
 # Single source of truth for all expected default values
 # Organized by category for readability
@@ -55,15 +56,7 @@ EXPECTED_DEFAULTS = {
     'table_count_limit': 200,
     'max_relations': 300,
     # === Database filtering ===
-    'ignore_databases': [
-        'template0',
-        'template1',
-        'rdsadmin',
-        'azure_maintenance',
-        'cloudsqladmin',
-        'alloydbadmin',
-        'alloydbmetadata',
-    ],
+    'ignore_databases': list(DEFAULT_EXCLUDED_DATABASES),
     'ignore_schemas_owned_by': [
         'rds_superuser',
         'rdsadmin',
@@ -121,7 +114,7 @@ EXPECTED_DEFAULTS = {
         'collection_interval': 600,
         'max_query_duration': 60,
         'include_databases': [],
-        'exclude_databases': ['rdsadmin'],
+        'exclude_databases': list(DEFAULT_EXCLUDED_DATABASES),
         'include_schemas': [],
         'exclude_schemas': [],
         'include_tables': [],
@@ -151,7 +144,7 @@ EXPECTED_DEFAULTS = {
         'global_view_db': 'postgres',
         'max_databases': 100,
         'refresh': 600,
-        'exclude': ['cloudsqladmin', 'rdsadmin', 'alloydbadmin', 'alloydbmetadata'],
+        'exclude': list(DEFAULT_EXCLUDED_DATABASES),
         'include': ['.*'],
     },
     # === DBM: Lock metrics ===

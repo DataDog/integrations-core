@@ -7,6 +7,19 @@
 
 from . import instance
 
+# Default databases to exclude from schema collection and autodiscovery.
+# These are system databases or cloud provider admin databases that are not accessible to users.
+# This list should match the default value for `ignore_databases` in spec.yaml.
+DEFAULT_EXCLUDED_DATABASES = [
+    "template0",
+    "template1",
+    "rdsadmin",
+    "azure_maintenance",
+    "cloudsqladmin",
+    "alloydbadmin",
+    "alloydbmetadata",
+]
+
 
 def instance_database_identifier():
     return instance.DatabaseIdentifier(
@@ -20,7 +33,7 @@ def instance_database_autodiscovery():
         global_view_db="postgres",
         max_databases=100,
         include=[".*"],
-        exclude=["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"],
+        exclude=list(DEFAULT_EXCLUDED_DATABASES),
         refresh=600,
     )
 
@@ -78,7 +91,7 @@ def instance_collect_schemas():
         max_columns=50,
         collection_interval=600,
         include_databases=[],
-        exclude_databases=["rdsadmin"],
+        exclude_databases=list(DEFAULT_EXCLUDED_DATABASES),
         include_schemas=[],
         exclude_schemas=[],
         include_tables=[],

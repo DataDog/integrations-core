@@ -471,8 +471,11 @@ files:
               - "cloudsqladmin"
               - "rdsadmin"
             display_default:
+              - "template0"
+              - "template1"
+              - "rdsadmin"
+              - "azure_maintenance"
               - "cloudsqladmin"
-              - "rdsadmin" 
               - "alloydbadmin"
               - "alloydbmetadata"
         - name: refresh
@@ -804,7 +807,13 @@ files:
             example:
               - "privatedb.*"
             default:
+              - "template0"
+              - "template1"
               - "rdsadmin"
+              - "azure_maintenance"
+              - "cloudsqladmin"
+              - "alloydbadmin"
+              - "alloydbmetadata"
         - name: include_schemas
           description: |
             A list of regex patterns to include schemas. 
