@@ -194,6 +194,9 @@ integration/blazemeter:
 - changed-files:
   - any-glob-to-any-file:
     - blazemeter/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - bluecat_edge/**/*
 integration/boundary:
 - changed-files:
   - any-glob-to-any-file:

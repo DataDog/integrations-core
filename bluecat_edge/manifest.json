@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ccd5850d-3e2d-49ab-8f9c-b8f796a20760",
   "app_id": "bluecat-edge",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,7 +13,8 @@
     "title": "BlueCat Edge",
     "media": [],
     "classifier_tags": [
-      "Category::Metrics"
+      "Category::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
