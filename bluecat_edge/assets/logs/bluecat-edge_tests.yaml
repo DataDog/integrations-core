@@ -1,0 +1,227 @@
+id: "bluecat-edge"
+tests:
+ -
+  sample: |-
+    {
+      "queryClassId" : 1,
+      "query" : "beacons.gcp.gvt2.com.",
+      "latency" : 13,
+      "answers" : [ {
+        "recordType" : "CNAME",
+        "domainName" : "beacons.gcp.gvt2.com.",
+        "parsed" : true,
+        "rData" : "beacons-handoff.gcp.gvt2.com."
+      }, {
+        "recordType" : "CNAME",
+        "domainName" : "beacons-handoff.gcp.gvt2.com.",
+        "parsed" : true,
+        "rData" : "gce-beacons.gcp.gvt2.com."
+      }, {
+        "recordType" : "A",
+        "domainName" : "gce-beacons.gcp.gvt2.com.",
+        "parsed" : true,
+        "rData" : "35.206.70.60"
+      } ],
+      "source" : "10.40.12.130",
+      "queryType" : "A",
+      "queryId" : 55695,
+      "queryProtocol" : "UDP",
+      "queriedNamespaces" : [ {
+        "latency" : 13,
+        "name" : "Default",
+        "rCode" : "NOERROR",
+        "responseData" : {
+          "answers" : [ {
+            "recordType" : "CNAME",
+            "domainName" : "beacons.gcp.gvt2.com.",
+            "parsed" : true,
+            "rData" : "beacons-handoff.gcp.gvt2.com."
+          }, {
+            "recordType" : "CNAME",
+            "domainName" : "beacons-handoff.gcp.gvt2.com.",
+            "parsed" : true,
+            "rData" : "gce-beacons.gcp.gvt2.com."
+          }, {
+            "recordType" : "A",
+            "domainName" : "gce-beacons.gcp.gvt2.com.",
+            "parsed" : true,
+            "rData" : "35.206.70.60"
+          } ],
+          "questions" : [ {
+            "classId" : 1,
+            "recordType" : "A",
+            "domainName" : "beacons.gcp.gvt2.com."
+          } ],
+          "header" : {
+            "rCode" : "NOERROR",
+            "id" : 55695
+          },
+          "time" : 1768561963113
+        },
+        "id" : "97e3ecb9-f066-11f0-96fb-06915da638a5",
+        "cycle" : 0
+      } ],
+      "actionTaken" : "query-response",
+      "response" : "NOERROR",
+      "identity" : {
+        "identityId" : "identity_id_example",
+        "userId" : "example@test.bluecat.com"
+      },
+      "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b96",
+      "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f44",
+      "threats" : [ {
+        "type" : "DGA",
+        "indicators" : [ "DGA_ADVANCED" ]
+      } ],
+      "time" : 1768561963100,
+      "id" : "1768561963100750D3C0AFB5B0C59968900C3D51AE369"
+    }
+  result:
+    custom:
+      actionTaken: "query-response"
+      answers:
+       -
+        recordType: "CNAME"
+        domainName: "beacons.gcp.gvt2.com."
+        parsed: true
+        rData: "beacons-handoff.gcp.gvt2.com."
+       -
+        recordType: "CNAME"
+        domainName: "beacons-handoff.gcp.gvt2.com."
+        parsed: true
+        rData: "gce-beacons.gcp.gvt2.com."
+       -
+        recordType: "A"
+        domainName: "gce-beacons.gcp.gvt2.com."
+        parsed: true
+        rData: "35.206.70.60"
+      drsId: "87a16e58-11d3-4d45-a574-af92520d3b96"
+      id: "1768561963100750D3C0AFB5B0C59968900C3D51AE369"
+      identity:
+        identityId: "identity_id_example"
+        userId: "example@test.bluecat.com"
+      latency: 13
+      queriedNamespaces:
+       -
+        latency: 13
+        name: "Default"
+        rCode: "NOERROR"
+        responseData:
+          answers:
+           -
+            recordType: "CNAME"
+            domainName: "beacons.gcp.gvt2.com."
+            parsed: true
+            rData: "beacons-handoff.gcp.gvt2.com."
+           -
+            recordType: "CNAME"
+            domainName: "beacons-handoff.gcp.gvt2.com."
+            parsed: true
+            rData: "gce-beacons.gcp.gvt2.com."
+           -
+            recordType: "A"
+            domainName: "gce-beacons.gcp.gvt2.com."
+            parsed: true
+            rData: "35.206.70.60"
+          questions:
+           -
+            classId: 1
+            recordType: "A"
+            domainName: "beacons.gcp.gvt2.com."
+          header:
+            rCode: "NOERROR"
+            id: 55695
+          time: 1768561963113
+        id: "97e3ecb9-f066-11f0-96fb-06915da638a5"
+        cycle: 0
+      query: "beacons.gcp.gvt2.com."
+      queryClassId: 1
+      queryId: 55695
+      queryProtocol: "UDP"
+      queryType: "A"
+      response: "NOERROR"
+      siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f44"
+      source: "10.40.12.130"
+      threats:
+       -
+        type: "DGA"
+        indicators:
+         - "DGA_ADVANCED"
+      time: 1768561963100
+    message: |-
+      {
+        "queryClassId" : 1,
+        "query" : "beacons.gcp.gvt2.com.",
+        "latency" : 13,
+        "answers" : [ {
+          "recordType" : "CNAME",
+          "domainName" : "beacons.gcp.gvt2.com.",
+          "parsed" : true,
+          "rData" : "beacons-handoff.gcp.gvt2.com."
+        }, {
+          "recordType" : "CNAME",
+          "domainName" : "beacons-handoff.gcp.gvt2.com.",
+          "parsed" : true,
+          "rData" : "gce-beacons.gcp.gvt2.com."
+        }, {
+          "recordType" : "A",
+          "domainName" : "gce-beacons.gcp.gvt2.com.",
+          "parsed" : true,
+          "rData" : "35.206.70.60"
+        } ],
+        "source" : "10.40.12.130",
+        "queryType" : "A",
+        "queryId" : 55695,
+        "queryProtocol" : "UDP",
+        "queriedNamespaces" : [ {
+          "latency" : 13,
+          "name" : "Default",
+          "rCode" : "NOERROR",
+          "responseData" : {
+            "answers" : [ {
+              "recordType" : "CNAME",
+              "domainName" : "beacons.gcp.gvt2.com.",
+              "parsed" : true,
+              "rData" : "beacons-handoff.gcp.gvt2.com."
+            }, {
+              "recordType" : "CNAME",
+              "domainName" : "beacons-handoff.gcp.gvt2.com.",
+              "parsed" : true,
+              "rData" : "gce-beacons.gcp.gvt2.com."
+            }, {
+              "recordType" : "A",
+              "domainName" : "gce-beacons.gcp.gvt2.com.",
+              "parsed" : true,
+              "rData" : "35.206.70.60"
+            } ],
+            "questions" : [ {
+              "classId" : 1,
+              "recordType" : "A",
+              "domainName" : "beacons.gcp.gvt2.com."
+            } ],
+            "header" : {
+              "rCode" : "NOERROR",
+              "id" : 55695
+            },
+            "time" : 1768561963113
+          },
+          "id" : "97e3ecb9-f066-11f0-96fb-06915da638a5",
+          "cycle" : 0
+        } ],
+        "actionTaken" : "query-response",
+        "response" : "NOERROR",
+        "identity" : {
+          "identityId" : "identity_id_example",
+          "userId" : "example@test.bluecat.com"
+        },
+        "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b96",
+        "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f44",
+        "threats" : [ {
+          "type" : "DGA",
+          "indicators" : [ "DGA_ADVANCED" ]
+        } ],
+        "time" : 1768561963100,
+        "id" : "1768561963100750D3C0AFB5B0C59968900C3D51AE369"
+      }
+    tags:
+     - "source:LOGS_SOURCE"

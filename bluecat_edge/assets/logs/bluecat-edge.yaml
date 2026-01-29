@@ -1,0 +1,133 @@
+id: bluecat-edge
+metric_id: bluecat-edge
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - DNS
+    name: Question Name
+    path: dns.question.name
+    source: log
+  - groups:
+      - DNS
+    name: Question Type
+    path: dns.question.type
+    source: log
+  - groups:
+      - DNS
+    name: Response Code
+    path: dns.flags.rcode
+    source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
+    path: duration
+    source: log
+    type: double
+    unit:
+      family: time
+      name: nanosecond
+  - groups:
+      - DNS
+    name: DNS ID
+    path: dns.id
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+pipeline:
+  type: pipeline
+  name: Bluecat Edge
+  enabled: true
+  filter:
+    query: source:bluecat-edge
+  processors:
+    - type: date-remapper
+      name: Define `time` as the official date of the log
+      enabled: true
+      sources:
+        - time
+    - type: attribute-remapper
+      name: Map `source` to `network.client.ip`
+      enabled: true
+      sources:
+        - source
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `query` to `dns.question.name`
+      enabled: true
+      sources:
+        - query
+      sourceType: attribute
+      target: dns.question.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `queryType` to `dns.question.type`
+      enabled: true
+      sources:
+        - queryType
+      sourceType: attribute
+      target: dns.question.type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `response` to `dns.flags.rcode`
+      enabled: true
+      sources:
+        - response
+      sourceType: attribute
+      target: dns.flags.rcode
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `latency` to `duration`
+      enabled: true
+      sources:
+        - latency
+      sourceType: attribute
+      target: duration
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `queryId` to `dns.id`
+      enabled: true
+      sources:
+        - queryId
+      sourceType: attribute
+      target: dns.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `identity.userId` to `usr.id`
+      enabled: true
+      sources:
+        - identity.userId
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: geo-ip-parser
+      name: Extract Geolocation information from Client IP
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
