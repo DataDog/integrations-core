@@ -160,7 +160,7 @@ RUN \
  SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
  RELATIVE_PATH="cyrus-sasl-{{version}}" \
  bash install-from-source.sh --with-dblib=lmdb --enable-gssapi=/usr/local \
-    --enable-static --disable-shared
+    --enable-static --disable-shared --disable-saslauthd
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
