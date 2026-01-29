@@ -16,7 +16,7 @@ Versa SD-WAN relies on SLA-based routing decisions to steer traffic across multi
 
 Historical SLA data makes it easier to understand whether performance issues are transient or persistent and whether routing decisions are behaving as expected.
 
-### Application, User, and QoS Visibility
+### Application, user, and QoS visibility
 
 This integration provides insight into how applications and users consume bandwidth across the WAN. You can identify top applications and users by site, track direct internet access (DIA) usage, and analyze QoS metrics such as traffic volume and drop rates to understand congestion, prioritization effectiveness, and traffic shaping behavior.
 
