@@ -4,6 +4,7 @@
 import logging
 import os
 import ssl
+import truststore
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
 
@@ -120,7 +121,7 @@ def _load_ca_certs(context, config):
 def create_ssl_context(config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
-    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+    context = truststore.SSLContext(protocol=ssl.PROTOCOL_TLS)
 
     LOGGER.debug('Creating SSL context with config: %s', config)
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
