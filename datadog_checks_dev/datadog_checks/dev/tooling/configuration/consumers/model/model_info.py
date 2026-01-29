@@ -15,6 +15,8 @@ class ModelInfo:
         self.defaults_file_lines: List[str] = []
         self.validator_data = []
         self.deprecation_data = defaultdict(dict)
+        # List of (normalized_option_name, original_option_name) for fields marked as require_trusted_provider
+        self.require_trusted_providers: List[tuple[str, str]] = []
 
     def update(self, section_model):
         """
@@ -24,6 +26,16 @@ class ModelInfo:
         self.defaults_file_lines.extend(section_model.defaults_file_lines)
         self.validator_data.extend(section_model.validator_data)
         self.deprecation_data.update(section_model.deprecation_data)
+        self.require_trusted_providers.extend(section_model.require_trusted_providers)
+
+    def add_require_trusted_provider(self, normalized_option_name: str, original_option_name: str):
+        """
+        Add a field to the list of fields requiring trusted provider.
+
+        :param normalized_option_name: Normalized option name (used in code)
+        :param original_option_name: Original option name (used as field alias)
+        """
+        self.require_trusted_providers.append((normalized_option_name, original_option_name))
 
     def add_type_validators(self, type_data: dict, option_name: str, normalized_option_name: str) -> List[str]:
         """

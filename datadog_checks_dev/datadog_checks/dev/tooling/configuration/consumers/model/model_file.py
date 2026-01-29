@@ -29,7 +29,9 @@ def build_model_file(
     if model_id in model_info.deprecation_data:
         model_file_lines += _define_deprecation_functions(model_id, section_name)
 
-    model_file_lines += _define_validator_functions(model_id, model_info.validator_data, options_with_defaults)
+    model_file_lines += _define_validator_functions(
+        model_id, model_info.validator_data, options_with_defaults, model_info.require_trusted_providers
+    )
 
     config_lines = []
     for i, line in enumerate(model_file_lines):
@@ -139,7 +141,8 @@ def _define_deprecation_functions(model_id, section_name):
     return model_file_lines
 
 
-def _define_validator_functions(model_id, validator_data, need_defaults):
+def _define_validator_functions(model_id, validator_data, need_defaults, require_trusted_providers=None):
+    require_trusted_providers = require_trusted_providers or []
     model_file_lines = ['']
     model_file_lines.append("    @model_validator(mode='before')")
     model_file_lines.append('    def _initial_validation(cls, values):')
@@ -163,6 +166,23 @@ def _define_validator_functions(model_id, validator_data, need_defaults):
         model_file_lines.append(f'            if info.field_name == {option_name!r}:')
         for import_path in import_paths:
             model_file_lines.append(f'                value = validators.{import_path}(value, field=field)')
+
+    # Add security validation for fields requiring trusted provider
+    if require_trusted_providers:
+        model_file_lines.append('')
+        model_file_lines.append('            # Security validation for fields requiring trusted provider')
+        for normalized_name, original_name in require_trusted_providers:
+            model_file_lines.append(f'            if info.field_name == {normalized_name!r}:')
+            model_file_lines.append(
+                "                if not validation.security.validate_require_trusted_provider("
+                "value, info.context.get('provider', ''), "
+                "info.context.get('check_name', ''), info.context.get('security_config')):"
+            )
+            model_file_lines.append(
+                f"                    raise ValueError("
+                f"f\"Field '{original_name}' is not allowed from untrusted provider "
+                f"'{{info.context.get('provider', '')}}'\")"
+            )
 
     if need_defaults:
         model_file_lines.append('        else:')

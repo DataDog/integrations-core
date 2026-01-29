@@ -27,6 +27,7 @@ from datadog_checks.base.utils.agent.utils import should_profile_memory
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.models.validation.security import SecurityConfig
 from datadog_checks.base.utils.tagging import GENERIC_TAGS
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -193,6 +194,7 @@ class AgentCheck(object):
         instance = instances[0] if instances else None
 
         self.check_id = ''
+        self.provider = ''
         self.name = name  # type: str
         self.init_config = init_config  # type: InitConfigType
         self.agentConfig = agentConfig  # type: AgentConfigType
@@ -294,6 +296,7 @@ class AgentCheck(object):
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+        self.__security_config = None
         self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
@@ -395,6 +398,25 @@ class AgentCheck(object):
             self.__logs_enabled = bool(datadog_agent.get_config('logs_enabled'))
 
         return self.__logs_enabled
+
+    @property
+    def security_config(self):
+        # type: () -> dict
+        """
+        Returns the integration security configuration, loaded once and cached.
+
+        The security config controls file path validation for untrusted providers.
+        """
+        if self.__security_config is None:
+            self.__security_config = SecurityConfig(
+                ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
+                file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
+                trusted_providers=datadog_agent.get_config('integration_trusted_providers')
+                or ['file', 'remote-config'],
+                excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
+            )
+
+        return self.__security_config
 
     @property
     def formatted_tags(self):
@@ -602,7 +624,14 @@ class AgentCheck(object):
                 return config_model
 
     def _get_config_model_context(self, config):
-        return {'logger': self.log, 'warning': self.warning, 'configured_fields': frozenset(config)}
+        return {
+            'logger': self.log,
+            'warning': self.warning,
+            'configured_fields': frozenset(config),
+            'provider': self.provider,
+            'check_name': self.name,
+            'security_config': self.security_config,
+        }
 
     def register_secret(self, secret: str) -> None:
         """
