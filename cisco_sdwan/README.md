@@ -8,7 +8,7 @@ With automatic discovery of SD-WAN components and consistent tagging across site
 
 ### WAN edge and control plane monitoring
 
-This integration tracks the availability and resource utilization of Cisco SD-WAN edge devices and controllers, helping teams quickly identify outages, overloaded devices, or control-plane issues that could disrupt connectivity or routing decisions.
+This integration tracks the availability and resource utilization of Cisco SD-WAN edge devices and controllers, helping teams quickly identify outages, overloaded devices, or control plane issues that could disrupt connectivity or routing decisions.
 
 ### Transport and SLA Performance
 
