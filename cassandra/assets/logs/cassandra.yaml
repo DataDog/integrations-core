@@ -5,7 +5,7 @@ backend_only: false
 facets:
   - groups:
       - Database
-    name: Operation Type
+    name: Operataion Type
     path: db.operation
     source: log
   - facetType: range
