@@ -4,10 +4,10 @@
 import logging
 import os
 import ssl
-import truststore
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
 
+import truststore
 from pydantic import BaseModel
 
 from datadog_checks.base.config import is_affirmative
