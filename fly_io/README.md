@@ -124,7 +124,7 @@ Use the [fly_logs_shipper][10] to collect logs from your Fly.io applications.
     inputs = ["nats"]
     source  = '''
     . = parse_json!(.message)
-    .ddsource = 'fly-io'
+    .ddsource = "fly-io"
     .host = .fly.app.instance
     .env = <YOUR_ENV_NAME>
     '''
