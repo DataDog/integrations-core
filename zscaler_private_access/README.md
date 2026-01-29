@@ -22,6 +22,9 @@ Datadog uses its built-in log pipelines to parse and enrich these logs, facilita
 
 ## Setup
 
+### Prerequisites
+- Ensure that `syslog-ng` is installed.
+
 ### Installation
 
 The Zscaler Private Access check is included in the [Datadog Agent][1] package. No additional installation is needed on your server. 
@@ -53,7 +56,7 @@ Place the Datadog Agent in the same subnet as the Zscaler App Connector so that 
 
    **Note**:
 
-   - `PORT`: Port should be similar to the port provided in **Configure log receiver from Zscaler Private Access** section.
+   - `PORT`: If TLS encryption is enabled, use the `destination_port` from the **Certificate Setup Guide**; otherwise, use the port from the **Configure log receiver from Zscaler Private Access** section.
    - It is recommended not to change the source value, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][2].
@@ -65,9 +68,9 @@ Place the Datadog Agent in the same subnet as the Zscaler App Connector so that 
 3. Click **Add**.
 4. In the **Log Receiver** tab, configure the following:
     - **Name**: Provide a name for the log receiver.
-    - **Domain or IP Address**: Enter the public IP or hostname of the Datadog Agent that will receive the logs.
-    - **TCP Port**: Specify an open port on the Datadog Agent for receiving ZPA logs.
-    - **TLS Encryption**: Keep it disabled.
+    - **Domain or IP Address**: If TLS encryption is enabled, provide the `public IP` or `hostname` of the `syslog-ng` server; otherwise, provide the `public IP` or `hostname` of the Datadog Agent.
+    - **TCP Port**: If TLS encryption is enabled, specify an open port on the `syslog-ng` server; otherwise, specify an open port on the Datadog Agent.
+    - **TLS Encryption**: Disabled by default. To enable it, follow the steps in the **Certificate Setup Guide**.
     - **App Connector Groups**: Choose the App Connector groups that can forward logs to the receiver.
 5. Click **Next**.
 6. In the **Log Stream** tab:
@@ -153,6 +156,55 @@ For Zscaler Private Access integration, specific custom log formats must be conf
    {"LogTimestamp": %j{LogTimestamp:time},"Customer": %j{Customer},"AgentID": %j{AgentID},"AgentName": %j{AgentName},"ResourceID": %j{ResourceID},"ResourceName": %j{ResourceName},"AppZoneID": %j{AppZoneID},"AppName": %j{AppName},"AppZoneName": %j{AppZoneName},"ConnectionStartTime": %j{ConnectionStartTime},"SourceIP": %j{SourceIP},"DestinationIP": %j{DestinationIP},"SourcePorts": %j{SourcePorts},"DestinationPort": %j{DestinationPort},"Protocol": %j{Protocol},"AppExecutablePath": %j{AppExecutablePath},"Direction": %j{Direction},"PolicyID": %j{PolicyID},"PolicyName": %j{PolicyName},"EnforcementReason": %j{EnforcementReason},"EnforcementAction": %j{EnforcementAction},"EnforcementDisposition": %j{EnforcementDisposition},"EventType": "microsegmentation"}\n
    ```
 
+#### Certificate Setup Guide
+> Note:
+>- Complete these steps only if **TLS Encryption** is enabled in **Configure log receiver from Zscaler Private Access**.
+
+1. Generate a custom root CA and its private key.
+2. Follow the [steps][8] to create Certificate Signing Requests for Enrollment (CA) Certificates.
+3. Go to **Configuration & Control** > **Certificate Management** > **Enrollment Certificates** > **Upload Certificate Chain**, and upload the required enrollment certificate along with the corresponding root CA certificate.
+4. Deploy your App Connector using the signed certificate from the previous step. See [here][7] for platform-specific instructions.
+5. Create and sign a server TLS certificate for syslog-ng.
+6. Install and configure the required TLS certificates in syslog-ng to decrypt incoming traffic from Zscaler.
+7. Configure the TLS listener in syslog-ng
+   - Create **zpa-tls.conf** in **/etc/syslog-ng/conf.d**.
+      ```
+      # TLS listener for ZPA LSS
+      source s_zpa_tls {
+         network(
+            ip("0.0.0.0")
+            port(<source_port>)
+            transport("tls")
+            tls(
+                  key-file("<path-to-private-key>")
+                  cert-file("<path-to-server-certificate>")
+                  ca-file("<path-to-ca-certificate>")
+                  peer-verify(optional-untrusted)
+            )
+         );
+      };
+
+      destination d_local {
+         file("/var/log/zpa.log");
+      };
+
+
+      destination d_forward {
+         network("<destination_ip>" port(<destination_port>) transport("tcp"));
+      };
+
+      log {
+         source(s_zpa_tls);
+         destination(d_forward);
+         destination(d_local);
+      };
+      ```
+   > Notes:
+   >- `source_port` should match the port specified in **Configure log receiver from Zscaler Private Access**.
+   >- `destination_port` should match the port specified in **Log collection**.
+   >- In the `destination_ip`, specify the `IP address` or `hostname` of the host where Datadog Agent is installed.
+
+8. Restart syslog-ng.
 
 #### Validation
 
@@ -226,3 +278,5 @@ For further assistance, contact [Datadog support][4].
 [4]: https://docs.datadoghq.com/help/
 [5]: https://www.zscaler.com/products-and-solutions/zscaler-private-access
 [6]: https://github.com/DataDog/integrations-core/blob/master/zscaler_private_access/datadog_checks/zscaler_private_access/data/conf.yaml.example
+[7]: https://help.zscaler.com/zpa/app-connector-management/app-connector-deployment-guides-supported-platforms
+[8]: https://help.zscaler.com/zpa/creating-certificate-signing-requests-enrollment-ca-certificates
