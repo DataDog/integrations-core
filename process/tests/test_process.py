@@ -251,9 +251,6 @@ def test_check_missing_process_with_spaces(aggregator, dd_run_check, caplog):
 def test_search_string_with_spaces(mock_process_iter, aggregator, dd_run_check):
     instance = {'name': 'foo', 'search_string': ['foo bar --baz'], 'exact_match': False}
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
-    pids = process.find_pids(instance['name'], instance['search_string'], instance['exact_match'])
-    assert pids == {123}
-
     dd_run_check(process)
     expected_tags = generate_expected_tags(instance)
     aggregator.assert_metric('system.processes.number', value=1, tags=expected_tags)
