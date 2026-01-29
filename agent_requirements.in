@@ -1,4 +1,5 @@
 aerospike==7.1.1; sys_platform != 'win32' and sys_platform != 'darwin'
+aws-msk-iam-sasl-signer-python==1.0.2
 aws-requests-auth==0.4.3
 azure-identity==1.24.0
 beautifulsoup4==4.13.5
@@ -8,7 +9,7 @@ botocore==1.40.21
 cachetools==6.2.0
 clickhouse-connect==0.8.18
 cm-client==45.0.4
-confluent-kafka==2.11.1
+confluent-kafka==2.13.0
 cryptography==45.0.6
 ddtrace==3.16.4
 dnspython==2.7.0
