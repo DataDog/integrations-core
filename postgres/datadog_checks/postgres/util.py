@@ -662,22 +662,25 @@ select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_curren
 VACUUM_PROGRESS_METRICS = {
     'name': 'vacuum_progress_metrics',
     'query': """
-SELECT v.datname, c.relname, v.phase,
+  SELECT v.datname, N.nspname, c.relname, v.phase,
        v.heap_blks_total, v.heap_blks_scanned, v.heap_blks_vacuumed,
-       v.index_vacuum_count, v.max_dead_tuple_bytes, v.num_dead_item_ids
+       v.index_vacuum_count, v.max_dead_tuple_bytes, v.num_dead_item_ids, v.dead_tuple_bytes
   FROM pg_stat_progress_vacuum as v
   JOIN pg_class c on c.oid = v.relid
+  LEFT JOIN pg_namespace N ON N.oid = c.relnamespace
 """,
     'columns': [
         {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
         {'name': 'phase', 'type': 'tag'},
         {'name': 'vacuum.heap_blks_total', 'type': 'gauge'},
         {'name': 'vacuum.heap_blks_scanned', 'type': 'gauge'},
         {'name': 'vacuum.heap_blks_vacuumed', 'type': 'gauge'},
         {'name': 'vacuum.index_vacuum_count', 'type': 'gauge'},
-        {'name': 'vacuum.max_dead_tuples', 'type': 'gauge'},
+        {'name': 'vacuum.max_dead_tuple_bytes', 'type': 'gauge'},
         {'name': 'vacuum.num_dead_tuples', 'type': 'gauge'},
+        {'name': 'vacuum.dead_tuple_bytes', 'type': 'gauge'},
     ],
 }
 
@@ -685,14 +688,16 @@ SELECT v.datname, c.relname, v.phase,
 VACUUM_PROGRESS_METRICS_LT_17 = {
     'name': 'vacuum_progress_metrics',
     'query': """
-SELECT v.datname, c.relname, v.phase,
+  SELECT v.datname, N.nspname, c.relname, v.phase,
        v.heap_blks_total, v.heap_blks_scanned, v.heap_blks_vacuumed,
        v.index_vacuum_count, v.max_dead_tuples, v.num_dead_tuples
   FROM pg_stat_progress_vacuum as v
   JOIN pg_class c on c.oid = v.relid
+  LEFT JOIN pg_namespace N ON N.oid = c.relnamespace
 """,
     'columns': [
         {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
         {'name': 'phase', 'type': 'tag'},
         {'name': 'vacuum.heap_blks_total', 'type': 'gauge'},
