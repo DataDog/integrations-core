@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=quay.io/pypa/manylinux2014_aarch64
+ARG BASE_IMAGE=quay.io/pypa/manylinux_2_28_aarch64
 FROM ${BASE_IMAGE}
 
 ARG SOURCE_DATE_EPOCH
@@ -16,9 +16,15 @@ ENV CXXFLAGS="${CFLAGS}"
 ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 
 # openssl
-RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
- cpanp -i List::Util 1.66 && \
- DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
+RUN yum install -y \
+    perl-App-cpanminus \
+    perl-ExtUtils-MakeMaker \
+    perl-ExtUtils-ParseXS \
+    perl-IPC-Cmd \
+    perl-Scalar-List-Utils \
+    perl-core \
+    perl-devel
+RUN DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
  VERSION="3.6.1" \
  SHA256="b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e" \
  RELATIVE_PATH="openssl-{{version}}" \
@@ -143,6 +149,8 @@ RUN \
 RUN \
  # Add -fPIC to let librdkafka link against it statically
  CFLAGS="${CFLAGS} -fPIC" \
+ # cyrus-sasl 2.1.28 misses some headers on newer toolchains
+ CPPFLAGS="${CPPFLAGS} -D_GNU_SOURCE -include time.h -include stdio.h" \
  # Explicitly ask the linker to use gssapi_krb5, otherwise static compilation fails
  LDFLAGS="${LDFLAGS} -L/usr/local/lib -lgssapi_krb5" \
  DOWNLOAD_URL="https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-{{version}}/cyrus-sasl-{{version}}.tar.gz" \
@@ -187,6 +195,6 @@ RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
-ENV MANYLINUX_POLICY="manylinux2014_aarch64"
+ENV MANYLINUX_POLICY="manylinux_2_28_aarch64"
 
 ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
