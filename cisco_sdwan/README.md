@@ -10,7 +10,7 @@ With automatic discovery of SD-WAN components and consistent tagging across site
 
 This integration tracks the availability and resource utilization of Cisco SD-WAN edge devices and controllers, helping teams quickly identify outages, overloaded devices, or control plane issues that could disrupt connectivity or routing decisions.
 
-### Transport and SLA Performance
+### Transport and SLA performance
 
 Cisco SD-WAN environments depend on continuous evaluation of link quality across transports such as MPLS, broadband, and LTE. Datadog monitors latency, jitter, packet loss, throughput, and utilization per transport and path, making it easier to troubleshoot degraded links and validate SLA-driven routing behavior.
 
