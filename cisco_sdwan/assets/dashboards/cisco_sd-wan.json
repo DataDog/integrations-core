@@ -1,111 +1,217 @@
 {
+    "title": "Cisco SD-WAN",
     "author_name": "Datadog",
     "description": "[[suggested_dashboards]]",
-    "layout_type": "ordered",
-    "template_variables": [
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "device_namespace",
-            "prefix": "device_namespace"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "site_id",
-            "prefix": "site_id"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "hostname",
-            "prefix": "hostname"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "system_ip",
-            "prefix": "system_ip"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "interface",
-            "prefix": "interface"
-        }
-    ],
-    "title": "Cisco SD-WAN",
     "widgets": [
         {
+            "id": 935293438892236,
             "definition": {
-                "background_color": "blue",
-                "layout_type": "ordered",
-                "show_title": true,
                 "title": "Overview",
+                "background_color": "blue",
+                "show_title": true,
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 4619350414909276,
                         "definition": {
-                            "has_background": false,
-                            "has_border": false,
-                            "horizontal_align": "center",
-                            "sizing": "cover",
                             "type": "image",
                             "url": "/static/images/logos/cisco_large.svg",
-                            "vertical_align": "center"
+                            "sizing": "contain",
+                            "has_background": false,
+                            "has_border": false,
+                            "vertical_align": "center",
+                            "horizontal_align": "center"
                         },
-                        "id": 4619350414909276,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 0
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
                         }
                     },
                     {
-                        "definition": {
-                            "background_color": "white",
-                            "content": "**Cisco SD-WAN Overview Dashboard**\n\nThis dashboard provides a comprehensive overview of your SD-WAN environment, allowing you to effortlessly monitor the status of your sites, tunnels, and devices. Stay informed about network performance, traffic patterns, and potential issues, to ensure optimal network efficiency and reliability.\n\n**Further reading on NDM**\n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
-                            "font_size": "14",
-                            "has_padding": true,
-                            "show_tick": false,
-                            "text_align": "left",
-                            "tick_edge": "left",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "top"
-                        },
                         "id": 7609936259716352,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Cisco SD-WAN Overview Dashboard**\n\nThis dashboard provides a comprehensive overview of your SD-WAN environment, allowing you to effortlessly monitor the status of your sites, tunnels, and devices. Stay informed about network performance, traffic patterns, and potential issues, to ensure optimal network efficiency and reliability.\n\n**Further reading on NDM**\n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 3
+                            "y": 3,
+                            "width": 4,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 1431607488305134,
+                        "definition": {
+                            "title": "Monitors overview",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "cisco sd-wan",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 8,
+                            "height": 5
                         }
                     }
                 ]
             },
-            "id": 935293438892236,
             "layout": {
-                "height": 7,
-                "width": 6,
                 "x": 0,
-                "y": 0
+                "y": 0,
+                "width": 12,
+                "height": 9
             }
         },
         {
+            "id": 4105254245177532,
             "definition": {
+                "title": "Sites",
                 "background_color": "blue",
-                "layout_type": "ordered",
                 "show_title": true,
-                "title": "Sites Health",
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 3366793789694834,
                         "definition": {
-                            "has_search_bar": "auto",
+                            "title": "SD-WAN Sites",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:cisco_sdwan.tunnel.status{$device_namespace} by {site_id,device_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4978464917105286,
+                        "definition": {
+                            "title": "Sites",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:cisco_sdwan.tunnel.status{state:up,$device_namespace} by {site_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "max:cisco_sdwan.tunnel.latency{state:up,$device_namespace} by {site_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "max:cisco_sdwan.tunnel.jitter{state:up,$device_namespace} by {site_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "max:cisco_sdwan.tunnel.loss{state:up,$device_namespace} by {site_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "max:cisco_sdwan.tunnel.qoe{state:up,$device_namespace} by {site_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "max:cisco_sdwan.tunnel.rx_bits{state:up,$device_namespace} by {site_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "query": "max:cisco_sdwan.tunnel.tx_bits{state:up,$device_namespace} by {site_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "up"
+                                                },
+                                                "palette": "black_on_light_green"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is_not",
+                                                    "value": ""
+                                                },
+                                                "palette": "black_on_light_red"
+                                            }
+                                        ]
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "asc"
+                                            }
+                                        ]
+                                    },
                                     "formulas": [
                                         {
                                             "alias": "Tunnels up",
@@ -132,154 +238,87 @@
                                         {
                                             "alias": "Avg latency",
                                             "cell_display_mode": "number",
-                                            "formula": "query2",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
                                                     "unit_name": "millisecond"
                                                 }
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "max",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_sdwan.tunnel.status{state:up,$device_namespace} by {site_id}"
+                                            },
+                                            "formula": "query2"
                                         },
                                         {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "max:cisco_sdwan.tunnel.latency{state:up,$device_namespace} by {site_id}"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "asc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    },
-                                    "text_formats": [
-                                        [],
-                                        [
-                                            {
-                                                "match": {
-                                                    "type": "is",
-                                                    "value": "up"
-                                                },
-                                                "palette": "black_on_light_green"
+                                            "alias": "Avg jitter",
+                                            "cell_display_mode": "number",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
                                             },
-                                            {
-                                                "match": {
-                                                    "type": "is_not",
-                                                    "value": ""
-                                                },
-                                                "palette": "black_on_light_red"
-                                            }
-                                        ]
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Avg loss",
+                                            "cell_display_mode": "number",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "alias": "Qoe Score",
+                                            "cell_display_mode": "number",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "Total Bytes",
+                                            "formula": "query6 + query7"
+                                        }
                                     ]
                                 }
                             ],
-                            "title": "Sites",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            "has_search_bar": "auto"
                         },
-                        "id": 4978464917105286,
                         "layout": {
-                            "height": 3,
-                            "width": 3,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "count_not_null(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_sdwan.tunnel.status{$device_namespace} by {site_id,device_namespace}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "title": "SD-WAN Sites",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 3366793789694834,
-                        "layout": {
-                            "height": 3,
-                            "width": 3,
                             "x": 3,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "color_preference": "text",
-                            "count": 50,
-                            "display_format": "countsAndList",
-                            "hide_zero_counts": true,
-                            "query": "cisco sd-wan",
-                            "show_last_triggered": false,
-                            "show_priority": false,
-                            "sort": "status,asc",
-                            "start": 0,
-                            "summary_type": "monitors",
-                            "title": "Monitors overview",
-                            "type": "manage_status"
-                        },
-                        "id": 1431607488305134,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 0,
-                            "y": 3
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
                         }
                     }
                 ]
             },
-            "id": 4105254245177532,
             "layout": {
-                "height": 7,
-                "width": 6,
-                "x": 6,
-                "y": 0
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 4
             }
         },
         {
+            "id": 744285248415926,
             "definition": {
-                "background_color": "blue",
-                "layout_type": "ordered",
-                "show_title": true,
                 "title": "Controllers",
+                "background_color": "blue",
+                "show_title": true,
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 3671177390268672,
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "title": "Validators up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -305,27 +344,27 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "autoscale": true,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "bars",
                                 "yaxis": {}
-                            },
-                            "title": "Validators up",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 3671177390268672,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 0,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 2984469459443936,
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "title": "Validators down",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -351,27 +390,27 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "autoscale": true,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "bars",
                                 "yaxis": {}
-                            },
-                            "title": "Validators down",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 2984469459443936,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 2,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 4826237700518540,
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "title": "Controllers up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -397,27 +436,27 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "autoscale": true,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "bars",
                                 "yaxis": {}
-                            },
-                            "title": "Controllers up",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 4826237700518540,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 4,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 322242489397432,
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "title": "Controllers down",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -443,28 +482,27 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "autoscale": true,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "bars",
                                 "yaxis": {}
-                            },
-                            "title": "Controllers down",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 322242489397432,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 6,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 4218621438666410,
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "title": "Managers up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -490,27 +528,27 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "autoscale": true,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "bars",
                                 "yaxis": {}
-                            },
-                            "title": "Managers up",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 4218621438666410,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 8,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 1470058880191572,
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "title": "Managers down",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -536,26 +574,28 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "autoscale": true,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "bars",
                                 "yaxis": {}
-                            },
-                            "title": "Managers down",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 1470058880191572,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 10,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 8023478344148984,
                         "definition": {
+                            "title": "CPU %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -563,10 +603,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -581,28 +620,29 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
-                            ],
-                            "show_legend": false,
-                            "title": "CPU %",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
+                            ]
                         },
-                        "id": 8023478344148984,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 0,
-                            "y": 2
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 4849815149829142,
                         "definition": {
+                            "title": "Memory %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -610,10 +650,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -628,28 +667,29 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
-                            ],
-                            "show_legend": false,
-                            "title": "Memory %",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
+                            ]
                         },
-                        "id": 4849815149829142,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 4,
-                            "y": 2
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 8898738309346606,
                         "definition": {
+                            "title": "Disk %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -657,10 +697,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "query1",
@@ -681,45 +720,30 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
-                            ],
-                            "show_legend": false,
-                            "title": "Disk %",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
+                            ]
                         },
-                        "id": 8898738309346606,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 8,
-                            "y": 2
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 1469926092028614,
                         "definition": {
-                            "has_search_bar": "auto",
+                            "title": "OMP Peers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Status",
-                                            "cell_display_mode": "number",
-                                            "conditional_formats": [
-                                                {
-                                                    "comparator": ">",
-                                                    "palette": "black_on_light_green",
-                                                    "value": 0
-                                                }
-                                            ],
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "aggregator": "avg",
@@ -738,44 +762,1199 @@
                                                 "type": "formula"
                                             }
                                         ]
-                                    }
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Status",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "black_on_light_green",
+                                                    "value": 0
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        }
+                                    ]
                                 }
                             ],
-                            "title": "OMP Peers",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            "has_search_bar": "auto"
                         },
-                        "id": 1469926092028614,
                         "layout": {
-                            "height": 5,
-                            "width": 12,
                             "x": 0,
-                            "y": 4
+                            "y": 4,
+                            "width": 12,
+                            "height": 3
                         }
                     }
                 ]
             },
-            "id": 744285248415926,
             "layout": {
-                "height": 10,
-                "width": 12,
                 "x": 0,
-                "y": 7
+                "y": 13,
+                "width": 12,
+                "height": 8
             }
         },
         {
+            "id": 5414270826871604,
             "definition": {
+                "title": "WAN Edge Health",
                 "background_color": "blue",
-                "layout_type": "ordered",
                 "show_title": true,
-                "title": "Tunnels",
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 6469093578730180,
                         "definition": {
+                            "title": "Edges up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip,device_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
                             "autoscale": true,
                             "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2484984471821140,
+                        "definition": {
+                            "title": "Edges down",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(cutoff_max(query1, 0.5))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip,device_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 825708022521290,
+                        "definition": {
+                            "title": "CPU %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 5, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.cpu.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1449280365731508,
+                        "definition": {
+                            "title": "Memory %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.memory.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 948757196807262,
+                        "definition": {
+                            "title": "Edges up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip,device_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7920516611328712,
+                        "definition": {
+                            "title": "Reboots",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:cisco_sdwan.reboot.count{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3378898933476166,
+                        "definition": {
+                            "title": "Disk %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.disk.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4190475366165090,
+                        "definition": {
+                            "title": "Control connections",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.control_connection.status{$hostname,$site_id,$device_namespace,$system_ip} by {hostname,peer_type,local_color,state}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4974141601181476,
+                        "definition": {
+                            "title": "Crashs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:cisco_sdwan.crash.count{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 6,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3307635170669220,
+                        "definition": {
+                            "title": "Uptime",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "10 * query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:cisco_sdwan.device.uptime{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 6,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1304752409606322,
+                        "definition": {
+                            "title": "Traffic",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bits Out",
+                                            "formula": "top(query1, 5, 'mean', 'desc')"
+                                        },
+                                        {
+                                            "alias": "Bits In",
+                                            "formula": "top(query2, 5, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:cisco_sdwan.interface.tx_bits{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:cisco_sdwan.interface.rx_bits{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7911665527963424,
+                        "definition": {
+                            "title": "Traffic (Bits per second)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bps Out",
+                                            "formula": "top(query1, 5, 'mean', 'desc')"
+                                        },
+                                        {
+                                            "alias": "Bps In",
+                                            "formula": "top(query2, 5, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:cisco_sdwan.interface.tx_bps{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:cisco_sdwan.interface.rx_bps{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 10,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7534407184962699,
+                        "definition": {
+                            "title": "WAN Edges",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:cisco_sdwan.cpu.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:cisco_sdwan.memory.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:cisco_sdwan.disk.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "avg:cisco_sdwan.device.uptime{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "query": "sum:cisco_sdwan.interface.rx_bits{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.weighted()",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query8",
+                                            "query": "sum:cisco_sdwan.interface.tx_bits{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.weighted()",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query9",
+                                            "query": "sum:cisco_sdwan.interface.rx_bps{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.weighted()",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query10",
+                                            "query": "sum:cisco_sdwan.interface.tx_bps{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.weighted()",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU",
+                                            "cell_display_mode": "number",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Memory",
+                                            "cell_display_mode": "number",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "alias": "Disk",
+                                            "cell_display_mode": "number",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Uptime",
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Bits In",
+                                            "formula": "query7"
+                                        },
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Bits Out",
+                                            "formula": "query8"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Bps In",
+                                            "formula": "query9"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Bps Out",
+                                            "formula": "query10"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 21,
+                "width": 12,
+                "height": 16,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 834571569796418,
+            "definition": {
+                "title": "Interface Performance",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3046667562861032,
+                        "definition": {
+                            "title": "Interfaces up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(count_nonzero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.interface.status{$hostname,$site_id,$device_namespace,state:up,$system_ip} by {site_id,hostname,interface}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7931517390575187,
+                        "definition": {
+                            "title": "Interfaces Down",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(count_nonzero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.interface.status{$hostname,$site_id,$device_namespace,state:down ,$system_ip} by {site_id,hostname,interface}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6338199663349715,
+                        "definition": {
+                            "title": "Traffic (Bits)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "In Bits",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family"
+                                                }
+                                            },
+                                            "formula": "top(query1, 5, 'mean', 'desc')"
+                                        },
+                                        {
+                                            "alias": "Out Bits",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family"
+                                                }
+                                            },
+                                            "formula": "top(query2, 5, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:cisco_sdwan.interface.rx_bits{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface}.weighted()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:cisco_sdwan.interface.tx_bits{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface}.weighted()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3826325098474478,
+                        "definition": {
+                            "title": "In Bandwidth Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "In Bandwidth Usage",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "top(query1, 5, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.interface.rx_bandwidth_usage{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5556604966495750,
+                        "definition": {
+                            "title": "Out Bandwidth Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Out Bandwidth Usage",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "top(query2, 5, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:cisco_sdwan.interface.tx_bandwidth_usage{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2373696653508728,
+                        "definition": {
+                            "title": "Interfaces",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.interface.rx_bandwidth_usage{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:cisco_sdwan.interface.tx_bandwidth_usage{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:cisco_sdwan.interface.rx_errors{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:cisco_sdwan.interface.tx_errors{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "sum:cisco_sdwan.interface.tx_bits{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "query": "sum:cisco_sdwan.interface.rx_bits{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:cisco_sdwan.interface.speed{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 50,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "In Bandwidth Usage",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "alias": "Out Bandwidth Usage",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "alias": "In Errors",
+                                            "cell_display_mode": "number",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "alias": "Out Errors",
+                                            "cell_display_mode": "number",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "In Bits",
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "alias": "Out Bits",
+                                            "formula": "query7"
+                                        },
+                                        {
+                                            "alias": "Speed",
+                                            "formula": "query3 / 1000"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 37,
+                "width": 12,
+                "height": 12
+            }
+        },
+        {
+            "id": 6401842860303328,
+            "definition": {
+                "title": "Tunnel Performance",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5110325776178276,
+                        "definition": {
+                            "title": "Tunnels up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -801,23 +1980,27 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Tunnels up",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
-                        "id": 5110325776178276,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 0,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 5580645444956250,
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "title": "Tunnels down",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -843,21 +2026,28 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Tunnels down",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
-                        "id": 5580645444956250,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 2,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 895609292978588,
                         "definition": {
+                            "title": "Top latencies",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -865,10 +2055,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "top(query2, 50, 'mean', 'desc')",
@@ -889,28 +2078,29 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
-                            ],
-                            "show_legend": false,
-                            "title": "Top latencies",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
+                            ]
                         },
-                        "id": 895609292978588,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 4,
-                            "y": 0
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 5496154914157032,
                         "definition": {
+                            "title": "Top traffic",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -918,28 +2108,27 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "top(query2, 50, 'mean', 'desc')",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
                                                     "unit_name": "byte"
                                                 }
-                                            }
+                                            },
+                                            "formula": "top(query2, 10, 'mean', 'desc')"
                                         },
                                         {
-                                            "formula": "top(query1, 50, 'mean', 'desc')",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
                                                     "unit_name": "byte"
                                                 }
-                                            }
+                                            },
+                                            "formula": "top(query1, 10, 'mean', 'desc')"
                                         }
                                     ],
                                     "queries": [
@@ -956,31 +2145,73 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
                                 }
-                            ],
-                            "show_legend": false,
-                            "title": "Top traffic",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
+                            ]
                         },
-                        "id": 5496154914157032,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 8,
-                            "y": 0
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 2573797378604048,
                         "definition": {
-                            "has_search_bar": "auto",
+                            "title": "Tunnels",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.tunnel.latency{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:cisco_sdwan.tunnel.jitter{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:cisco_sdwan.tunnel.loss{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:cisco_sdwan.tunnel.qoe{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "min:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
                                     "formulas": [
                                         {
                                             "alias": "Latency",
@@ -1099,806 +2330,45 @@
                                             ],
                                             "formula": "query5"
                                         }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.tunnel.latency{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:cisco_sdwan.tunnel.jitter{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "query": "avg:cisco_sdwan.tunnel.loss{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query4",
-                                            "query": "avg:cisco_sdwan.tunnel.qoe{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
-                                        },
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query5",
-                                            "query": "min:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    ]
                                 }
                             ],
-                            "title": "Tunnels",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            "has_search_bar": "auto"
                         },
-                        "id": 2573797378604048,
                         "layout": {
-                            "height": 6,
-                            "width": 12,
                             "x": 0,
-                            "y": 2
+                            "y": 3,
+                            "width": 12,
+                            "height": 6
                         }
                     }
                 ]
             },
-            "id": 6401842860303328,
             "layout": {
-                "height": 9,
-                "width": 12,
                 "x": 0,
-                "y": 17
+                "y": 49,
+                "width": 12,
+                "height": 10
             }
         },
         {
+            "id": 3573404850480302,
             "definition": {
-                "background_color": "blue",
-                "layout_type": "ordered",
-                "show_title": true,
-                "title": "WAN Edges",
-                "type": "group",
-                "widgets": [
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "palette": "green_on_white",
-                                            "value": 0
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "count_nonzero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip,device_namespace}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "timeseries_background": {
-                                "type": "bars",
-                                "yaxis": {}
-                            },
-                            "title": "Edges up",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 6469093578730180,
-                        "layout": {
-                            "height": 2,
-                            "width": 2,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "palette": "red_on_white",
-                                            "value": 0
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "count_not_null(cutoff_max(query1, 0.5))"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip,device_namespace}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "timeseries_background": {
-                                "type": "bars",
-                                "yaxis": {}
-                            },
-                            "title": "Edges down",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 2484984471821140,
-                        "layout": {
-                            "height": 2,
-                            "width": 2,
-                            "x": 2,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.cpu.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "CPU %",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 825708022521290,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 4,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.memory.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "Memory %",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 1449280365731508,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 8,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend": {
-                                "type": "automatic"
-                            },
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.control_connection.status{$hostname,$site_id,$device_namespace,$system_ip} by {hostname,peer_type,local_color,state}"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    }
-                                }
-                            ],
-                            "title": "Control connections",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "sunburst"
-                        },
-                        "id": 4190475366165090,
-                        "layout": {
-                            "height": 4,
-                            "width": 4,
-                            "x": 0,
-                            "y": 2
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "bars",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_sdwan.reboot.count{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "Reboots",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 7920516611328712,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 4,
-                            "y": 2
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.disk.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "Disk %",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 3378898933476166,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 8,
-                            "y": 2
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "bars",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_sdwan.crash.count{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "Crashs",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 4974141601181476,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 4,
-                            "y": 4
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "bars",
-                                    "formulas": [
-                                        {
-                                            "formula": "10 * query2",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "millisecond"
-                                                }
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:cisco_sdwan.device.uptime{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "Uptime",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 3307635170669220,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 8,
-                            "y": 4
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "Bits Out",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Bits In",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_sdwan.interface.tx_bits{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:cisco_sdwan.interface.rx_bits{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "Traffic",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 1304752409606322,
-                        "layout": {
-                            "height": 2,
-                            "width": 6,
-                            "x": 0,
-                            "y": 6
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "Bps Out",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Bps In",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_sdwan.interface.tx_bps{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:cisco_sdwan.interface.rx_bps{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "Traffic (Bits per second)",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 7911665527963424,
-                        "layout": {
-                            "height": 2,
-                            "width": 6,
-                            "x": 6,
-                            "y": 6
-                        }
-                    },
-                    {
-                        "definition": {
-                            "has_search_bar": "auto",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "In Bandwidth Usage",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "alias": "Out Bandwidth Usage",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query2",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "alias": "In Errors",
-                                            "cell_display_mode": "number",
-                                            "formula": "query4"
-                                        },
-                                        {
-                                            "alias": "Out Errors",
-                                            "cell_display_mode": "number",
-                                            "formula": "query5"
-                                        },
-                                        {
-                                            "alias": "In Bits",
-                                            "formula": "query6"
-                                        },
-                                        {
-                                            "alias": "Out Bits",
-                                            "formula": "query7"
-                                        },
-                                        {
-                                            "alias": "Speed",
-                                            "formula": "query3 / 1000"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.interface.rx_bandwidth_usage{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:cisco_sdwan.interface.tx_bandwidth_usage{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query4",
-                                            "query": "sum:cisco_sdwan.interface.rx_errors{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query5",
-                                            "query": "sum:cisco_sdwan.interface.tx_errors{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query6",
-                                            "query": "sum:cisco_sdwan.interface.tx_bits{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query7",
-                                            "query": "sum:cisco_sdwan.interface.rx_bits{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
-                                        },
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "query": "avg:cisco_sdwan.interface.speed{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 50,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "title": "Interfaces",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
-                        },
-                        "id": 2373696653508728,
-                        "layout": {
-                            "height": 5,
-                            "width": 12,
-                            "x": 0,
-                            "y": 8
-                        }
-                    }
-                ]
-            },
-            "id": 5414270826871604,
-            "layout": {
-                "height": 14,
-                "is_column_break": true,
-                "width": 12,
-                "x": 0,
-                "y": 26
-            }
-        },
-        {
-            "definition": {
-                "background_color": "blue",
-                "layout_type": "ordered",
-                "show_title": true,
                 "title": "Applications",
+                "background_color": "blue",
+                "show_title": true,
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 5915723240946546,
                         "definition": {
-                            "has_search_bar": "auto",
+                            "title": "Gateway/DIA sites",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Latency",
-                                            "cell_display_mode": "number",
-                                            "conditional_formats": [
-                                                {
-                                                    "comparator": "<",
-                                                    "palette": "black_on_light_green",
-                                                    "value": 50
-                                                },
-                                                {
-                                                    "comparator": "<",
-                                                    "palette": "black_on_light_yellow",
-                                                    "value": 100
-                                                },
-                                                {
-                                                    "comparator": ">=",
-                                                    "palette": "black_on_light_red",
-                                                    "value": 100
-                                                }
-                                            ],
-                                            "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "millisecond"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "alias": "Loss",
-                                            "cell_display_mode": "number",
-                                            "formula": "query2"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "aggregator": "avg",
@@ -1923,25 +2393,61 @@
                                                 "type": "formula"
                                             }
                                         ]
-                                    }
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Latency",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "black_on_light_green",
+                                                    "value": 50
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "black_on_light_yellow",
+                                                    "value": 100
+                                                },
+                                                {
+                                                    "comparator": ">=",
+                                                    "palette": "black_on_light_red",
+                                                    "value": 100
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "alias": "Loss",
+                                            "cell_display_mode": "number",
+                                            "formula": "query2"
+                                        }
+                                    ]
                                 }
                             ],
-                            "time": {},
-                            "title": "Gateway/DIA sites",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            "has_search_bar": "auto"
                         },
-                        "id": 5915723240946546,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 0,
-                            "y": 0
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 8244569067053950,
                         "definition": {
+                            "title": "Gateway/DIA sites latency",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1949,10 +2455,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "Latency",
@@ -1975,149 +2480,31 @@
                                     "response_format": "timeseries",
                                     "style": {
                                         "color_order": "shuffled",
-                                        "line_type": "solid",
-                                        "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
-                            ],
-                            "show_legend": true,
-                            "time": {},
-                            "title": "Gateway/DIA sites latency",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
+                            ]
                         },
-                        "id": 8244569067053950,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 4,
-                            "y": 0
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 5267770934373470,
                         "definition": {
-                            "has_search_bar": "auto",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Latency",
-                                            "cell_display_mode": "number",
-                                            "conditional_formats": [
-                                                {
-                                                    "comparator": "<",
-                                                    "palette": "black_on_light_green",
-                                                    "value": 50
-                                                },
-                                                {
-                                                    "comparator": "<",
-                                                    "palette": "black_on_light_yellow",
-                                                    "value": 100
-                                                },
-                                                {
-                                                    "comparator": ">=",
-                                                    "palette": "black_on_light_red",
-                                                    "value": 100
-                                                }
-                                            ],
-                                            "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "millisecond"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "alias": "Loss",
-                                            "cell_display_mode": "number",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_sdwan.application.latency{best_path:true,$site_id,exit_type:remote,$device_namespace} by {device_hostname,site_id,application,local_color,remote_color,best_path,gateway_system_ip,gateway_hostname}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:cisco_sdwan.application.loss{best_path:true,$site_id,exit_type:remote,$device_namespace} by {device_hostname,site_id,application,local_color,remote_color,best_path,gateway_system_ip,gateway_hostname}"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "time": {},
-                            "title": "Current best paths per application",
-                            "title_align": "left",
+                            "title": "Client sites",
                             "title_size": "16",
-                            "type": "query_table"
-                        },
-                        "id": 791874001038262,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 8,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "has_search_bar": "auto",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Latency",
-                                            "cell_display_mode": "number",
-                                            "conditional_formats": [
-                                                {
-                                                    "comparator": "<",
-                                                    "palette": "black_on_light_green",
-                                                    "value": 50
-                                                },
-                                                {
-                                                    "comparator": "<",
-                                                    "palette": "black_on_light_yellow",
-                                                    "value": 100
-                                                },
-                                                {
-                                                    "comparator": ">=",
-                                                    "palette": "black_on_light_red",
-                                                    "value": 100
-                                                }
-                                            ],
-                                            "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "millisecond"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "alias": "Loss",
-                                            "cell_display_mode": "number",
-                                            "formula": "query2"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "aggregator": "avg",
@@ -2142,28 +2529,63 @@
                                                 "type": "formula"
                                             }
                                         ]
-                                    }
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Latency",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "black_on_light_green",
+                                                    "value": 50
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "black_on_light_yellow",
+                                                    "value": 100
+                                                },
+                                                {
+                                                    "comparator": ">=",
+                                                    "palette": "black_on_light_red",
+                                                    "value": 100
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "alias": "Loss",
+                                            "cell_display_mode": "number",
+                                            "formula": "query2"
+                                        }
+                                    ]
                                 }
                             ],
-                            "time": {},
-                            "title": "Client sites",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            "has_search_bar": "auto"
                         },
-                        "id": 5267770934373470,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 0,
-                            "y": 2
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 8898913149061512,
                         "definition": {
+                            "title": "Client sites latency",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "Latency",
@@ -2186,57 +2608,129 @@
                                     "response_format": "timeseries",
                                     "style": {
                                         "color_order": "shuffled",
-                                        "line_type": "solid",
-                                        "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 791874001038262,
+                        "definition": {
+                            "title": "Current best paths per application",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.application.latency{best_path:true,$site_id,exit_type:remote,$device_namespace} by {device_hostname,site_id,application,local_color,remote_color,best_path,gateway_system_ip,gateway_hostname}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:cisco_sdwan.application.loss{best_path:true,$site_id,exit_type:remote,$device_namespace} by {device_hostname,site_id,application,local_color,remote_color,best_path,gateway_system_ip,gateway_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Latency",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "black_on_light_green",
+                                                    "value": 50
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "black_on_light_yellow",
+                                                    "value": 100
+                                                },
+                                                {
+                                                    "comparator": ">=",
+                                                    "palette": "black_on_light_red",
+                                                    "value": 100
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "alias": "Loss",
+                                            "cell_display_mode": "number",
+                                            "formula": "query2"
+                                        }
+                                    ]
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Client sites latency",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
+                            "has_search_bar": "auto"
                         },
-                        "id": 8898913149061512,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 4,
-                            "y": 2
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 3
                         }
                     }
                 ]
             },
-            "id": 3573404850480302,
             "layout": {
-                "height": 5,
-                "width": 12,
                 "x": 0,
-                "y": 40
+                "y": 59,
+                "width": 12,
+                "height": 10
             }
         },
         {
+            "id": 8248389798926716,
             "definition": {
-                "background_color": "blue",
-                "layout_type": "ordered",
-                "show_title": true,
                 "title": "BGP",
+                "background_color": "blue",
+                "show_title": true,
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 8935090550015062,
                         "definition": {
-                            "has_search_bar": "auto",
+                            "title": "Neighbors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": " ",
-                                            "cell_display_mode": "number",
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "aggregator": "max",
@@ -2246,16 +2740,6 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "sort": {
-                                        "count": 50,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    },
                                     "text_formats": [
                                         [],
                                         [],
@@ -2272,34 +2756,141 @@
                                                 "palette": "black_on_light_green"
                                             }
                                         ]
+                                    ],
+                                    "sort": {
+                                        "count": 50,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": ".",
+                                            "formula": "query1"
+                                        }
                                     ]
                                 }
                             ],
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "title": "Neighbors",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            "has_search_bar": "auto"
                         },
-                        "id": 8935090550015062,
                         "layout": {
-                            "height": 5,
-                            "width": 12,
                             "x": 0,
-                            "y": 0
+                            "y": 0,
+                            "width": 12,
+                            "height": 5
                         }
                     }
                 ]
             },
-            "id": 8248389798926716,
             "layout": {
-                "height": 6,
-                "width": 12,
                 "x": 0,
-                "y": 45
+                "y": 69,
+                "width": 12,
+                "height": 6
+            }
+        },
+        {
+            "id": 1576888418339534,
+            "definition": {
+                "title": "Events",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6339487769042005,
+                        "definition": {
+                            "title": "Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:cisco-sdwan",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "status",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 75,
+                "width": 12,
+                "height": 5
             }
         }
-    ]
+    ],
+    "template_variables": [
+        {
+            "name": "device_namespace",
+            "prefix": "device_namespace",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "site_id",
+            "prefix": "site_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "hostname",
+            "prefix": "hostname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "system_ip",
+            "prefix": "system_ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "interface",
+            "prefix": "interface",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "pause_auto_refresh": false,
+    "reflow_type": "fixed"
 }
