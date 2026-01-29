@@ -700,3 +700,5 @@ def test_throughput_with_partition_unavailable(check, dd_run_check, aggregator):
     for metric in metrics:
         if 'topic:test-topic' in metric.tags:
             assert metric.value >= 0, f"Message rate should be non-negative, got {metric.value}"
+
+
