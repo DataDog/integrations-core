@@ -78,7 +78,7 @@ def instance_collect_schemas():
         max_columns=50,
         collection_interval=600,
         include_databases=[],
-        exclude_databases=[],
+        exclude_databases=["rdsadmin"],
         include_schemas=[],
         exclude_schemas=[],
         include_tables=[],

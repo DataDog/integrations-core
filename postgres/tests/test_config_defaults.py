@@ -120,6 +120,12 @@ EXPECTED_DEFAULTS = {
         'max_columns': 50,
         'collection_interval': 600,
         'max_query_duration': 60,
+        'include_databases': [],
+        'exclude_databases': ['rdsadmin'],
+        'include_schemas': [],
+        'exclude_schemas': [],
+        'include_tables': [],
+        'exclude_tables': [],
     },
     # === DBM: Obfuscator options ===
     'obfuscator_options': {

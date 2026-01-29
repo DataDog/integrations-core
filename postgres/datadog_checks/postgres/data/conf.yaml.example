@@ -594,7 +594,7 @@ instances:
         #   - mydb
 
         ## @param exclude_databases - list of strings - optional
-        ## A list of regex patterns to exclude databases. 
+        ## A list of regex patterns to exclude databases.
         ## Any database whose name matches any one of these patterns will be excluded.
         ## If empty, all databases matching other filters are included.
         #

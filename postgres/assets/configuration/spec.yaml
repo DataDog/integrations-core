@@ -794,7 +794,7 @@ files:
               - "mydb"
         - name: exclude_databases
           description: |
-            A list of regex patterns to exclude databases. 
+            A list of regex patterns to exclude databases.
             Any database whose name matches any one of these patterns will be excluded.
             If empty, all databases matching other filters are included.
           value:
@@ -803,6 +803,8 @@ files:
               type: string
             example:
               - "privatedb.*"
+            default:
+              - "rdsadmin"
         - name: include_schemas
           description: |
             A list of regex patterns to include schemas. 
