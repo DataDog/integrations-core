@@ -155,23 +155,52 @@ CLUSTER_BASIC_METRICS = [
     "nutanix.cluster.vm.inefficient_count",
 ]
 
+# Cluster capacity metrics (aggregated from hosts and VMs)
+CLUSTER_CAPACITY_METRICS = [
+    "nutanix.cluster.cpu.total_cores",
+    "nutanix.cluster.cpu.total_threads",
+    "nutanix.cluster.memory.total_bytes",
+    "nutanix.cluster.cpu.vcpus_allocated",
+    "nutanix.cluster.memory.allocated_bytes",
+]
+
 HOST_BASIC_METRICS = [
     "nutanix.host.count",
+]
+
+# Host capacity metrics
+HOST_CAPACITY_METRICS = [
+    "nutanix.host.cpu.sockets",
+    "nutanix.host.cpu.cores",
+    "nutanix.host.cpu.threads",
+    "nutanix.host.memory.bytes",
 ]
 
 VM_BASIC_METRICS = [
     "nutanix.vm.count",
 ]
 
+# VM capacity metrics
+VM_CAPACITY_METRICS = [
+    "nutanix.vm.cpu.sockets",
+    "nutanix.vm.cpu.cores_per_socket",
+    "nutanix.vm.cpu.threads_per_core",
+    "nutanix.vm.cpu.vcpus_allocated",
+    "nutanix.vm.memory.allocated_bytes",
+]
+
 ALL_METRICS = (
     HEALTH_METRICS
     + CLUSTER_BASIC_METRICS
+    + CLUSTER_CAPACITY_METRICS
     + CLUSTER_STATS_METRICS_REQUIRED
     + CLUSTER_STATS_METRICS_OPTIONAL
     + HOST_BASIC_METRICS
+    + HOST_CAPACITY_METRICS
     + HOST_STATS_METRICS_REQUIRED
     + HOST_STATS_METRICS_OPTIONAL
     + VM_BASIC_METRICS
+    + VM_CAPACITY_METRICS
     + VM_STATS_METRICS_REQUIRED
     + VM_STATS_METRICS_OPTIONAL
 )

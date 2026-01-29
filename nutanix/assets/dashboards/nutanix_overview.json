@@ -526,6 +526,27 @@
         "layout_type": "ordered",
         "widgets": [
           {
+            "id": 7000000000000001,
+            "definition": {
+              "type": "note",
+              "content": "**Cluster-level aggregated metrics** showing overall capacity and performance across all nodes. Use these to understand total resource availability, storage utilization trends, and cluster-wide I/O patterns.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
             "id": 6210150961869077,
             "definition": {
               "title": "CPU Capacity",
@@ -567,7 +588,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -614,7 +635,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 0,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -661,7 +682,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 0,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -705,7 +726,7 @@
             },
             "layout": {
               "x": 9,
-              "y": 0,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -718,7 +739,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -756,7 +783,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 1,
+              "y": 2,
               "width": 3,
               "height": 2
             }
@@ -769,7 +796,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -807,7 +840,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 1,
+              "y": 2,
               "width": 3,
               "height": 2
             }
@@ -820,7 +853,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -886,7 +924,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 1,
+              "y": 2,
               "width": 3,
               "height": 2
             }
@@ -899,7 +937,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -937,7 +981,7 @@
             },
             "layout": {
               "x": 9,
-              "y": 1,
+              "y": 2,
               "width": 3,
               "height": 2
             }
@@ -950,7 +994,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1045,7 +1094,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -1058,7 +1107,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1152,7 +1206,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -1165,7 +1219,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1259,7 +1318,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -1272,7 +1331,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1310,7 +1375,7 @@
             },
             "layout": {
               "x": 9,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -1321,7 +1386,7 @@
         "x": 0,
         "y": 5,
         "width": 12,
-        "height": 6
+        "height": 7
       }
     },
     {
@@ -1333,6 +1398,27 @@
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
+          {
+            "id": 1700000000000001,
+            "definition": {
+              "type": "note",
+              "content": "**Individual host performance metrics** for all nodes in your Nutanix clusters. Monitor per-host CPU, memory, storage usage, and I/O metrics to identify hotspots or failing nodes. Use the host filter to drill down into specific nodes.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
           {
             "id": 18,
             "definition": {
@@ -1363,7 +1449,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -1413,7 +1499,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 0,
+              "y": 1,
               "width": 4,
               "height": 3
             }
@@ -1464,7 +1550,7 @@
             },
             "layout": {
               "x": 7,
-              "y": 0,
+              "y": 1,
               "width": 5,
               "height": 3
             }
@@ -1527,7 +1613,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 1,
+              "y": 2,
               "width": 3,
               "height": 2
             }
@@ -1540,7 +1626,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1578,7 +1669,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -1591,7 +1682,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1629,7 +1725,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -1642,7 +1738,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1708,7 +1809,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -1721,7 +1822,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1797,7 +1903,7 @@
             },
             "layout": {
               "x": 9,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -1810,7 +1916,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1881,7 +1992,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 5,
+              "y": 6,
               "width": 6,
               "height": 2
             }
@@ -1894,7 +2005,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1962,7 +2078,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 5,
+              "y": 6,
               "width": 6,
               "height": 2
             }
@@ -1971,9 +2087,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 11,
+        "y": 12,
         "width": 12,
-        "height": 8
+        "height": 9
       }
     },
     {
@@ -1985,6 +2101,27 @@
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
+          {
+            "id": 2800000000000001,
+            "definition": {
+              "type": "note",
+              "content": "**Virtual machine performance and resource metrics** across your Nutanix environment. Track VM CPU/memory utilization, I/O throughput, network traffic, and identify inefficient VMs. Use the VM filter to investigate specific workloads.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
           {
             "id": 29,
             "definition": {
@@ -2021,7 +2158,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -2065,7 +2202,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 0,
+              "y": 1,
               "width": 4,
               "height": 3
             }
@@ -2109,7 +2246,7 @@
             },
             "layout": {
               "x": 7,
-              "y": 0,
+              "y": 1,
               "width": 5,
               "height": 3
             }
@@ -2157,7 +2294,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 1,
+              "y": 2,
               "width": 3,
               "height": 2
             }
@@ -2170,7 +2307,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2211,7 +2354,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -2224,8 +2367,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2265,7 +2413,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -2278,7 +2426,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2373,7 +2526,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -2386,7 +2539,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2481,7 +2639,7 @@
             },
             "layout": {
               "x": 9,
-              "y": 3,
+              "y": 4,
               "width": 3,
               "height": 2
             }
@@ -2494,7 +2652,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2533,7 +2697,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 5,
+              "y": 6,
               "width": 3,
               "height": 2
             }
@@ -2546,7 +2710,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2585,7 +2755,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 5,
+              "y": 6,
               "width": 3,
               "height": 2
             }
@@ -2598,7 +2768,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2693,7 +2868,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 5,
+              "y": 6,
               "width": 3,
               "height": 2
             }
@@ -2706,7 +2881,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2773,7 +2953,7 @@
             },
             "layout": {
               "x": 9,
-              "y": 5,
+              "y": 6,
               "width": 3,
               "height": 2
             }
@@ -2786,7 +2966,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2853,7 +3038,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 7,
+              "y": 8,
               "width": 3,
               "height": 2
             }
@@ -2866,7 +3051,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -2933,7 +3124,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 7,
+              "y": 8,
               "width": 3,
               "height": 2
             }
@@ -2946,7 +3137,12 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -3041,7 +3237,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 7,
+              "y": 8,
               "width": 6,
               "height": 2
             }
@@ -3050,10 +3246,810 @@
       },
       "layout": {
         "x": 0,
-        "y": 19,
+        "y": 21,
         "width": 12,
-        "height": 10,
+        "height": 11,
         "is_column_break": true
+      }
+    },
+    {
+      "id": 9000000000000001,
+      "definition": {
+        "title": "Capacity Planning",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9000000000000002,
+            "definition": {
+              "type": "note",
+              "content": "## Resource Capacity & Allocation\n\nThis section provides visibility into physical capacity (from hosts) vs allocated resources (to VMs) to help with capacity planning and detect overcommitment.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9000000000000003,
+            "definition": {
+              "title": "Total Physical Cores",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:nutanix.cluster.cpu.total_cores{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 9000000000000004,
+            "definition": {
+              "title": "Total Physical Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:nutanix.cluster.cpu.total_threads{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 9000000000000005,
+            "definition": {
+              "title": "Total Physical Memory",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:nutanix.cluster.memory.total_bytes{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 9000000000000006,
+            "definition": {
+              "title": "vCPUs Allocated to VMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:nutanix.cluster.cpu.vcpus_allocated{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 9000000000000007,
+            "definition": {
+              "title": "Memory Allocated to VMs",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:nutanix.cluster.memory.allocated_bytes{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 9000000000000008,
+            "definition": {
+              "title": "CPU Overcommit Ratio",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "vcpus",
+                      "query": "sum:nutanix.cluster.cpu.vcpus_allocated{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "cores",
+                      "query": "sum:nutanix.cluster.cpu.total_cores{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "vcpus / cores"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 4,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 2,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 2,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": ":1",
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 10,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 9000000000000009,
+            "definition": {
+              "title": "Memory Overcommit Ratio",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "allocated",
+                      "query": "sum:nutanix.cluster.memory.allocated_bytes{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "total",
+                      "query": "sum:nutanix.cluster.memory.total_bytes{$ntnx_cluster_name,$prism_central}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "allocated / total"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 1,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 0.8,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 0.8,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": ":1",
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 10,
+              "y": 2,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 9000000000000014,
+            "definition": {
+              "title": "Cluster Resource Capacity by Cluster",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "cores",
+                      "query": "sum:nutanix.cluster.cpu.total_cores{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "threads",
+                      "query": "sum:nutanix.cluster.cpu.total_threads{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "memory",
+                      "query": "sum:nutanix.cluster.memory.total_bytes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "vcpus",
+                      "query": "sum:nutanix.cluster.cpu.vcpus_allocated{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "mem_alloc",
+                      "query": "sum:nutanix.cluster.memory.allocated_bytes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Cores",
+                      "cell_display_mode": "number",
+                      "formula": "cores"
+                    },
+                    {
+                      "alias": "Threads",
+                      "cell_display_mode": "number",
+                      "formula": "threads"
+                    },
+                    {
+                      "alias": "Memory",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "cell_display_mode": "number",
+                      "formula": "memory"
+                    },
+                    {
+                      "alias": "vCPUs Allocated",
+                      "cell_display_mode": "number",
+                      "formula": "vcpus"
+                    },
+                    {
+                      "alias": "Memory Allocated",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "cell_display_mode": "number",
+                      "formula": "mem_alloc"
+                    },
+                    {
+                      "alias": "CPU Overcommit",
+                      "cell_display_mode": "number",
+                      "formula": "vcpus / cores",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 4,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 2,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 2,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    },
+                    {
+                      "alias": "Mem Overcommit",
+                      "cell_display_mode": "number",
+                      "formula": "mem_alloc / memory",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 1,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 0.8,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 0.8,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 9000000000000010,
+            "definition": {
+              "title": "Host Resource Allocation by Host",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "sockets",
+                      "query": "sum:nutanix.host.cpu.sockets{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "cores",
+                      "query": "sum:nutanix.host.cpu.cores{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "threads",
+                      "query": "sum:nutanix.host.cpu.threads{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "memory",
+                      "query": "sum:nutanix.host.memory.bytes{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Sockets",
+                      "cell_display_mode": "number",
+                      "formula": "sockets"
+                    },
+                    {
+                      "alias": "Cores",
+                      "cell_display_mode": "number",
+                      "formula": "cores"
+                    },
+                    {
+                      "alias": "Threads",
+                      "cell_display_mode": "number",
+                      "formula": "threads"
+                    },
+                    {
+                      "alias": "Memory",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "cell_display_mode": "number",
+                      "formula": "memory"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9000000000000011,
+            "definition": {
+              "title": "VM Resource Allocation",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "vcpus",
+                      "query": "sum:nutanix.vm.cpu.vcpus_allocated{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "sockets",
+                      "query": "sum:nutanix.vm.cpu.sockets{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "cores",
+                      "query": "sum:nutanix.vm.cpu.cores_per_socket{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "memory",
+                      "query": "sum:nutanix.vm.memory.allocated_bytes{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "vCPUs",
+                      "cell_display_mode": "number",
+                      "formula": "vcpus"
+                    },
+                    {
+                      "alias": "Sockets",
+                      "cell_display_mode": "number",
+                      "formula": "sockets"
+                    },
+                    {
+                      "alias": "Cores/Socket",
+                      "cell_display_mode": "number",
+                      "formula": "cores"
+                    },
+                    {
+                      "alias": "Memory",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "cell_display_mode": "number",
+                      "formula": "memory"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 6,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9000000000000012,
+            "definition": {
+              "title": "vCPUs Allocated Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "vCPUs Allocated",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Physical Cores",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:nutanix.cluster.cpu.vcpus_allocated{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:nutanix.cluster.cpu.total_cores{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9000000000000013,
+            "definition": {
+              "title": "Memory Allocated Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Memory Allocated",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Physical Memory",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:nutanix.cluster.memory.allocated_bytes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:nutanix.cluster.memory.total_bytes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 9,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 32,
+        "width": 12,
+        "height": 13
       }
     }
   ],
@@ -3085,5 +4081,6 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
+  "pause_auto_refresh": false,
   "reflow_type": "fixed"
 }

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
@@ -10,6 +11,39 @@ from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_MET
 
 # Entity types for metrics counting
 EntityType = Literal['cluster', 'host', 'vm']
+
+
+@dataclass
+class ClusterCapacity:
+    """Accumulator for cluster-level capacity metrics aggregated from hosts and VMs."""
+
+    # Host capacity totals
+    total_cores: int = 0
+    total_threads: int = 0
+    total_memory_bytes: int = 0
+
+    # VM allocation totals
+    vcpus_allocated: int = 0
+    memory_allocated_bytes: int = 0
+
+    def reset(self) -> None:
+        """Reset all accumulators to zero."""
+        self.total_cores = 0
+        self.total_threads = 0
+        self.total_memory_bytes = 0
+        self.vcpus_allocated = 0
+        self.memory_allocated_bytes = 0
+
+    def add_host(self, cores: int, threads: int, memory_bytes: int) -> None:
+        """Add host capacity to cluster totals."""
+        self.total_cores += cores
+        self.total_threads += threads
+        self.total_memory_bytes += memory_bytes
+
+    def add_vm(self, vcpus: int, memory_bytes: int) -> None:
+        """Add VM allocation to cluster totals."""
+        self.vcpus_allocated += vcpus
+        self.memory_allocated_bytes += memory_bytes
 
 
 class InfrastructureMonitor:
@@ -23,6 +57,8 @@ class InfrastructureMonitor:
         self.cluster_metrics_count = 0
         self.host_metrics_count = 0
         self.vm_metrics_count = 0
+        # Cluster capacity accumulator
+        self._cluster_capacity = ClusterCapacity()
 
     def reset_state(self) -> None:
         """Reset all caches and counters for a new collection run."""
@@ -33,6 +69,7 @@ class InfrastructureMonitor:
         self.cluster_metrics_count = 0
         self.host_metrics_count = 0
         self.vm_metrics_count = 0
+        self._cluster_capacity.reset()
 
     def collect_cluster_metrics(self) -> None:
         """Collect metrics from all Nutanix clusters."""
@@ -63,6 +100,10 @@ class InfrastructureMonitor:
                     continue
 
                 self.check.log.info("[%s][%s] Processing cluster", pc_label, cluster_name)
+
+                # Reset capacity accumulator for this cluster
+                self._cluster_capacity.reset()
+
                 self._process_cluster(cluster, pc_label)
 
                 # Fetch VM stats for entire cluster in one call
@@ -71,6 +112,11 @@ class InfrastructureMonitor:
                 self.check.log.debug("[%s][%s] Fetched stats for %d VMs", pc_label, cluster_name, len(vm_stats))
 
                 self._process_hosts(cluster, vm_stats, cluster_name, pc_label)
+
+                # Report cluster capacity metrics (aggregated from hosts and VMs)
+                cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
+                self._report_cluster_capacity_metrics(cluster_tags)
+
                 processed += 1
 
             if skipped > 0:
@@ -134,6 +180,34 @@ class InfrastructureMonitor:
         """
         self.check.gauge("vm.count", 1, hostname=hostname, tags=vm_tags)
 
+        # Report VM capacity metrics
+        self._report_vm_capacity_metrics(vm, hostname, vm_tags)
+
+    def _report_vm_capacity_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:
+        """Report VM capacity metrics (CPU and memory allocation).
+
+        Args:
+            vm: VM object from API
+            hostname: VM hostname
+            vm_tags: Tags to apply to metrics
+        """
+        num_sockets = int(vm.get("numSockets") or 0)
+        num_cores_per_socket = int(vm.get("numCoresPerSocket") or 0)
+        num_threads_per_core = int(vm.get("numThreadsPerCore") or 0)
+        memory_bytes = int(vm.get("memorySizeBytes") or 0)
+
+        # Total vCPUs = sockets * cores_per_socket
+        vcpus_allocated = num_sockets * num_cores_per_socket
+
+        self.check.gauge("vm.cpu.sockets", num_sockets, hostname=hostname, tags=vm_tags)
+        self.check.gauge("vm.cpu.cores_per_socket", num_cores_per_socket, hostname=hostname, tags=vm_tags)
+        self.check.gauge("vm.cpu.threads_per_core", num_threads_per_core, hostname=hostname, tags=vm_tags)
+        self.check.gauge("vm.cpu.vcpus_allocated", vcpus_allocated, hostname=hostname, tags=vm_tags)
+        self.check.gauge("vm.memory.allocated_bytes", memory_bytes, hostname=hostname, tags=vm_tags)
+
+        # Accumulate for cluster totals
+        self._cluster_capacity.add_vm(vcpus_allocated, memory_bytes)
+
     def _report_cluster_basic_metrics(self, cluster: dict, cluster_tags: list[str]) -> None:
         """Report basic cluster metrics (counts).
 
@@ -149,6 +223,19 @@ class InfrastructureMonitor:
         self.check.gauge("cluster.nbr_nodes", nbr_nodes, tags=cluster_tags)
         self.check.gauge("cluster.vm.count", vm_count, tags=cluster_tags)
         self.check.gauge("cluster.vm.inefficient_count", inefficient_vm_count, tags=cluster_tags)
+
+    def _report_cluster_capacity_metrics(self, cluster_tags: list[str]) -> None:
+        """Report cluster capacity metrics aggregated from hosts and VMs.
+
+        Args:
+            cluster_tags: Tags to apply to metrics
+        """
+        cap = self._cluster_capacity
+        self.check.gauge("cluster.cpu.total_cores", cap.total_cores, tags=cluster_tags)
+        self.check.gauge("cluster.cpu.total_threads", cap.total_threads, tags=cluster_tags)
+        self.check.gauge("cluster.memory.total_bytes", cap.total_memory_bytes, tags=cluster_tags)
+        self.check.gauge("cluster.cpu.vcpus_allocated", cap.vcpus_allocated, tags=cluster_tags)
+        self.check.gauge("cluster.memory.allocated_bytes", cap.memory_allocated_bytes, tags=cluster_tags)
 
     def _report_stats(
         self,
@@ -343,6 +430,9 @@ class InfrastructureMonitor:
         self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
         self._set_external_tags_for_host(host_name, host_tags)
 
+        # Report host capacity metrics
+        self._report_host_capacity_metrics(host, host_name, host_tags)
+
         # Report host stats
         stats = self._get_host_stats(cluster_id, host_id)
         if stats:
@@ -364,6 +454,27 @@ class InfrastructureMonitor:
             self._process_vm(vm, cluster_vm_stats_dict, cluster_name, pc_label)
 
         return len(vms)
+
+    def _report_host_capacity_metrics(self, host: dict, hostname: str, host_tags: list[str]) -> None:
+        """Report host capacity metrics (CPU sockets, cores, threads, memory).
+
+        Args:
+            host: Host object from API
+            hostname: Host hostname
+            host_tags: Tags to apply to metrics
+        """
+        cpu_sockets = int(host.get("numberOfCpuSockets") or 0)
+        cpu_cores = int(host.get("numberOfCpuCores") or 0)
+        cpu_threads = int(host.get("numberOfCpuThreads") or 0)
+        memory_bytes = int(host.get("memorySizeBytes") or 0)
+
+        self.check.gauge("host.cpu.sockets", cpu_sockets, hostname=hostname, tags=host_tags)
+        self.check.gauge("host.cpu.cores", cpu_cores, hostname=hostname, tags=host_tags)
+        self.check.gauge("host.cpu.threads", cpu_threads, hostname=hostname, tags=host_tags)
+        self.check.gauge("host.memory.bytes", memory_bytes, hostname=hostname, tags=host_tags)
+
+        # Accumulate for cluster totals
+        self._cluster_capacity.add_host(cpu_cores, cpu_threads, memory_bytes)
 
     def _extract_host_tags(self, host: dict) -> list[str]:
         """Extract tags from a host object.
