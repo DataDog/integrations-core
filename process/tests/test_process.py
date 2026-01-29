@@ -238,12 +238,26 @@ def test_check_missing_process(aggregator, dd_run_check, caplog):
     assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
 
 
+def test_check_missing_process_with_spaces(aggregator, dd_run_check, caplog):
+    caplog.set_level(logging.DEBUG)
+    instance = {'name': 'foo', 'search_string': ['foo bar process', '/usr/bin/foo test'], 'exact_match': False}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
+    aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
+    assert "Unable to find process named ['foo bar process', '/usr/bin/foo test'] among processes" in caplog.text
+
+
 @patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo", "bar", "--baz"])])
-def test_search_string_with_spaces(mock_process_iter):
-    instance = {'name': 'foo', 'search_string': ['foo bar'], 'exact_match': False}
+def test_search_string_with_spaces(mock_process_iter, aggregator, dd_run_check):
+    instance = {'name': 'foo', 'search_string': ['foo bar --baz'], 'exact_match': False}
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     pids = process.find_pids(instance['name'], instance['search_string'], instance['exact_match'])
     assert pids == {123}
+
+    dd_run_check(process)
+    expected_tags = generate_expected_tags(instance)
+    aggregator.assert_metric('system.processes.number', value=1, tags=expected_tags)
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'])
 
 
 @pytest.mark.parametrize("oneshot", [True, False])
