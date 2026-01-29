@@ -85,6 +85,7 @@ files:
         type: boolean
         example: false
     - name: collect_server_info
+      fleet_configurable: true
       hidden: true
       description: |
         Collect Envoy version by accessing the `/server_info` endpoint.
@@ -93,6 +94,7 @@ files:
         type: boolean
         example: true
     - name: disable_legacy_cluster_tag
+      fleet_configurable: true
       hidden: true
       description: |
         Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
