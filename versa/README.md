@@ -10,7 +10,7 @@ With built-in device discovery and rich metadata, you can analyze Versa SD-WAN p
 
 This integration surfaces key health and resource metrics for Versa appliances and control plane components, allowing teams to detect failures or capacity constraints early. You can track device availability, CPU, memory, disk usage, and uptime across branch and data center deployments to ensure SD-WAN infrastructure remains stable and responsive.
 
-### Link, Tunnel, and Path SLA Monitoring
+### Link, tunnel, and path SLA monitoring
 
 Versa SD-WAN relies on SLA-based routing decisions to steer traffic across multiple transports. Datadog monitors latency, jitter, packet loss, utilization, and error rates across links, tunnels, and paths, helping you verify SLA compliance and troubleshoot degraded connectivity between sites.
 
