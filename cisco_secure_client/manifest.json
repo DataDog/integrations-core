@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "dc6f1cb8-cd93-44e9-a474-eb69d10c87d0",
   "app_id": "cisco-secure-client",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
