@@ -19,7 +19,7 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from prometheus_client.samples import Sample
 
 from datadog_checks.base import ensure_bytes
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
 
