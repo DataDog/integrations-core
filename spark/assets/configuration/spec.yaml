@@ -1,4 +1,5 @@
 name: Spark
+fleet_configurable: true
 files:
 - name: spark.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
       - name: spark_url
+        fleet_configurable: true
         required: true
         description: |
           The Spark check can retrieve metrics from Standalone Spark, YARN and Mesos.
@@ -34,6 +36,7 @@ files:
           type: string
           example: http://localhost:8080
       - name: cluster_name
+        fleet_configurable: true
         required: true
         description: A friendly name for the cluster.
         value:
@@ -46,6 +49,7 @@ files:
            * `spark_standalone_mode`
            * `spark_mesos_mode`
            * `spark_driver_mode`
+        fleet_configurable: true
         value:
           type: string
           example: spark_yarn_mode
@@ -55,6 +59,7 @@ files:
           port(s) the Spark Web UI runs on and the check filters out the frameworks
           whose port don't match. If the check attempts to connect to a framework that
           requires authentication it will fail; this is to prevent that.
+        fleet_configurable: true
         value:
           type: array
           items:
@@ -71,6 +76,7 @@ files:
           example: false
       - name: spark_proxy_enabled
         description: If you have enabled the spark UI proxy, set this to `true`
+        fleet_configurable: true
         value:
           type: boolean
           example: false
@@ -86,6 +92,7 @@ files:
             2. https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#reporting-metrics-using-dropwizard  /noqa
           Note that if the MetricsServlet is not serving the JSON metrics payload on the default path (/metrics/json)
           you also need to set the `metricsservlet_path` option below.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -101,11 +108,13 @@ files:
           example: /metrics/json
       - name: executor_level_metrics
         description: Enable collection of more granular executor metrics.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
       - name: disable_legacy_cluster_tag
         description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `spark_cluster`.
+        fleet_configurable: true
         value:
           type: boolean
           display_default: false
@@ -117,6 +126,7 @@ files:
           This option should ONLY be enabled if the stream had a `.queryName` param supplied on `writeStream`,
           otherwise the stream is given a default UUID.
           See: https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#starting-streaming-queries
+        fleet_configurable: true
         value:
           type: boolean
           display_default: false
@@ -131,6 +141,7 @@ files:
       - name: disable_spark_stage_metrics
         description: |
           Enable to stop collecting Spark stage metrics.
+        fleet_configurable: true
         value:
           type: boolean
           display_default: false

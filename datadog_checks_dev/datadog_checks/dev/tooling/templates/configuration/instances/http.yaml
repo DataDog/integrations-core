@@ -163,6 +163,7 @@
     type: string
   description: Set the path to your Kerberos key tab file.
 - name: auth_token
+  fleet_configurable: true
   value:
     example:
       reader:
@@ -275,6 +276,7 @@
     The unencrypted private key to use for `tls_cert` when connecting to services. This is
     required if `tls_cert` is set and it does not already contain a private key.
 - name: tls_ca_cert
+  fleet_configurable: true
   value:
     example: <CA_CERT_PATH>
     type: string
@@ -369,6 +371,7 @@
     type: boolean
   description: Whether or not to persist cookies and use connection pooling for improved performance.
 - name: allow_redirects
+  fleet_configurable: true
   value:
     example: true
     type: boolean

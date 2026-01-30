@@ -1,4 +1,5 @@
 name: Envoy
+fleet_configurable: true
 files:
 - name: envoy.yaml
   options:
@@ -15,6 +16,7 @@ files:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.enabled: true
     - name: stats_url
+      fleet_configurable: true
       display_priority: 1
       description: |
         The check will collect and parse metrics from the admin /stats/ endpoint.
@@ -30,6 +32,7 @@ files:
         example: http://localhost:80/stats
         type: string
     - name: included_metrics
+      fleet_configurable: true
       hidden: true
       description: |
         Includes metrics using regular expressions.
@@ -48,6 +51,7 @@ files:
         example:
           - cluster\.(in|out)\..*
     - name: excluded_metrics
+      fleet_configurable: true
       hidden: true
       description: |
         Excludes metrics using regular expressions.
@@ -81,6 +85,7 @@ files:
         type: boolean
         example: false
     - name: collect_server_info
+      fleet_configurable: true
       hidden: true
       description: |
         Collect Envoy version by accessing the `/server_info` endpoint.
@@ -89,6 +94,7 @@ files:
         type: boolean
         example: true
     - name: disable_legacy_cluster_tag
+      fleet_configurable: true
       hidden: true
       description: |
         Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
