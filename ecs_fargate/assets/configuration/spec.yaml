@@ -1,4 +1,5 @@
 name: Amazon Fargate
+fleet_configurable: true
 files:
   - name: ecs_fargate.yaml
     options:
