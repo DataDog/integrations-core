@@ -197,7 +197,11 @@ def _assert_complex_config(
     else:
         testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
 
-    operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
+    operation_time_metrics = (
+        variables.SIMPLE_OPERATION_TIME_METRICS
+        + variables.COMPLEX_OPERATION_TIME_METRICS
+        + variables.REPLICATION_OPERATION_TIME_METRICS
+    )
 
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
@@ -212,8 +216,14 @@ def _assert_complex_config(
             count=1,
         )
         operation_time_metrics.extend(variables.GROUP_REPLICATION_OPERATION_TIME_METRICS)
-    else:
-        operation_time_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
+
+        # Verify traditional replication metrics are NOT emitted for pure group replication setups
+        for metric in variables.TRADITIONAL_REPLICATION_METRICS:
+            aggregator.assert_metric(metric, count=0)
+
+        # Verify traditional replication service checks are NOT emitted
+        aggregator.assert_service_check('mysql.replication.slave_running', count=0)
+        aggregator.assert_service_check('mysql.replication.replica_running', count=0)
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
@@ -326,7 +336,7 @@ def _assert_complex_config(
     _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags)
     # test optional metrics
     optional_metrics = (
-        variables.OPTIONAL_REPLICATION_METRICS
+        variables.TRADITIONAL_REPLICATION_METRICS
         + variables.OPTIONAL_INNODB_VARS
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
