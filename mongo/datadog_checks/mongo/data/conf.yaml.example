@@ -34,8 +34,8 @@ instances:
     ## Do not specify more than one host here unless you are connecting to a mongos instance
     ## and you want to balance requests performed by the agent to multiple mongos instances.
     ##
-    ## If you need to monitor multiple mongos instances and are using version 7.39 or later of the Agent, 
-    ## configure the integration to disable directConnection, which is enabled by default starting in 4.0.2. 
+    ## If you need to monitor multiple mongos instances and are using version 7.39 or later of the Agent,
+    ## configure the integration to disable directConnection, which is enabled by default starting in 4.0.2.
     ## This can be done by setting options.directConnection to 'false'.
     #
   - hosts:
@@ -158,7 +158,7 @@ instances:
     # cluster_name: <CLUSTER_NAME>
 
     ## @param reported_database_hostname - string - optional
-    ## Set the reported database hostname for the connected mongodb instance. This value overrides the mongodb hostname 
+    ## Set the reported database hostname for the connected mongodb instance. This value overrides the mongodb hostname
     ## detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
     ## when connecting to a remote database through a proxy.
     #
@@ -313,14 +313,14 @@ instances:
         # collect_search_indexes: false
 
     ## Configure collection of MongoDB query metrics using $queryStats aggregation pipeline.
-    ## This feature requires MongoDB 8.0+ and the clusterMonitor role.
+    ## This feature requires MongoDB 7.0+ for Atlas deployments or 8.0+ for self-hosted, and the clusterMonitor role.
     ## Query metrics provide aggregated performance statistics for normalized queries,
     ## similar to pg_stat_statements for PostgreSQL.
     #
     # query_metrics:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable collection of query metrics. Requires `dbm: true` and MongoDB 8.0+.
+        ## Enable collection of query metrics. Requires `dbm: true` and MongoDB 7.0+ (Atlas) or 8.0+ (self-hosted).
         ## Unlike other DBM features, query_metrics must be explicitly enabled.
         #
         # enabled: false
@@ -363,22 +363,22 @@ instances:
     # tls_certificate_key_file: <TLS_CERTIFICATE_KEY_FILE>
 
     ## @param tls_ca_file - string - optional
-    ## A file containing one or a bundle of “certification authority” certificates, 
-    ## which are used to validate certificates passed from the other end of the connection. 
+    ## A file containing one or a bundle of “certification authority” certificates,
+    ## which are used to validate certificates passed from the other end of the connection.
     ## Implies tls=True.
     #
     # tls_ca_file: <TLS_CA_FILE>
 
     ## @param tls_allow_invalid_hostnames - boolean - optional - default: false
-    ## If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True. 
-    ## Think very carefully before setting this to True as that could make your application 
+    ## If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True.
+    ## Think very carefully before setting this to True as that could make your application
     ## vulnerable to on-path attackers.
     #
     # tls_allow_invalid_hostnames: false
 
     ## @param tls_allow_invalid_certificates - boolean - optional - default: false
-    ## If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process. 
-    ## Think very carefully before setting this to True as that could make your application 
+    ## If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process.
+    ## Think very carefully before setting this to True as that could make your application
     ## vulnerable to on-path attackers.
     #
     # tls_allow_invalid_certificates: false
@@ -415,7 +415,7 @@ instances:
     ##  * `collection:<COLLECTION_NAME>` e.g. `collection:<COLLECTION_NAME>`
     ## Each collection generates many metrics, up to 8 + the number of indices on the collection for each collection.
     ##
-    ## NOTE: This option is ignored when database_autodiscovery is enabled. 
+    ## NOTE: This option is ignored when database_autodiscovery is enabled.
     ## Metrics are collected for all authorized collections on autodiscovered databases.
     #
     # collections:
@@ -428,19 +428,19 @@ instances:
     # collections_indexes_stats: false
 
     ## @param system_database_stats - boolean - optional - default: true
-    ## Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+    ## Enable or disable the collection of database stats, collection stats, and index stats for system databases
     ## (`admin`, `local`, and `config`).
-    ## By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+    ## By default, this option is enabled (`true`), meaning stats for system databases are collected.
     ## Set to `false` to disable collection of stats for all system databases.
     #
     # system_database_stats: true
 
     ## @param free_storage_metrics - boolean - optional - default: true
     ## Enabled or disable the collection of free storage metrics.
-    ## By default, this option is enabled (`true`), meaning free storage metrics are collected. 
+    ## By default, this option is enabled (`true`), meaning free storage metrics are collected.
     ## Set to `false` to disable collection of free storage metrics.
     ##
-    ## Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause 
+    ## Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause
     ## processing delays and high CPU usage on the instance.
     ## https://www.mongodb.com/docs/manual/reference/command/dbStats/#std-label-dbStats-freeStorage
     #
@@ -454,7 +454,7 @@ instances:
     ## Note: For MongoDB date types you can use functions matching any of these regular expressions:
     ## "ISODate\(\s*\'(.*?)\'\s*\)" (e.g. "ISODate('2022-12-15T08:26:00.969Z')")
     ## "ISODate\(\s*\)|Date\(\s*\)" (e.g. "Date()")
-    ## "new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)" 
+    ## "new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)"
     ##   (e.g. "new Date(ISODate().getTime() - 60 * 1000)")
     #
     # custom_queries:

@@ -15,7 +15,7 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.mongo.common import ReplicaSetDeployment
+from datadog_checks.mongo.common import HostingType, ReplicaSetDeployment
 
 from .types import QueryMetricsRow
 from .utils import (
@@ -31,27 +31,29 @@ except ImportError:
 
 
 # Minimum MongoDB version required for $queryStats
-MINIMUM_MONGODB_VERSION = Version("8.0")
+# For Atlas deployments, $queryStats is available in MongoDB 7.0+
+# For self-hosted deployments, $queryStats requires MongoDB 8.0+
+MINIMUM_MONGODB_VERSION_ATLAS = Version("7.0")
+MINIMUM_MONGODB_VERSION_SELF_HOSTED = Version("8.0")
 
-# Metrics columns for derivative calculation
-QUERY_METRICS_COLUMNS = frozenset(
-    {
-        'exec_count',
-        'total_exec_micros_sum',
-        'first_response_exec_micros_sum',
-        'keys_examined_sum',
-        'docs_examined_sum',
-        'docs_returned_sum',
-        # P1 metrics
-        'bytes_read_sum',
-        'cpu_nanos_sum',
-        'used_disk_count',
-        'has_sort_stage_count',
-        # P2 metrics
-        'read_time_micros_sum',
-        'working_time_millis_sum',
-    }
-)
+# Mapping from MongoDB $queryStats field names to our normalized field names
+# Each entry maps: mongodb_field -> (our_field_name, extraction_type)
+# extraction_type: 'sum' for sum-based metrics, 'true_count' for boolean counters, 'direct' for direct values
+METRICS_FIELD_MAPPING = {
+    'execCount': ('exec_count', 'direct'),
+    'totalExecMicros': ('total_exec_micros_sum', 'sum'),
+    'firstResponseExecMicros': ('first_response_exec_micros_sum', 'sum'),
+    'keysExamined': ('keys_examined_sum', 'sum'),
+    'docsExamined': ('docs_examined_sum', 'sum'),
+    'docsReturned': ('docs_returned_sum', 'sum'),
+    # MongoDB 8.0+
+    'bytesRead': ('bytes_read_sum', 'sum'),
+    'cpuNanos': ('cpu_nanos_sum', 'sum'),
+    'usedDisk': ('used_disk_count', 'true_count'),
+    'hasSortStage': ('has_sort_stage_count', 'true_count'),
+    'readTimeMicros': ('read_time_micros_sum', 'sum'),
+    'workingTimeMillis': ('working_time_millis_sum', 'sum'),
+}
 
 
 def agent_check_getter(self):
@@ -62,7 +64,7 @@ class MongoQueryMetrics(DBMAsyncJob):
     """
     Collects query metrics from MongoDB using $queryStats aggregation pipeline.
 
-    This is only available in MongoDB 8.0+.
+    This is available in MongoDB 7.0+ for Atlas deployments and MongoDB 8.0+ for self-hosted.
 
     The implementation follows the pattern established by PostgresStatementMetrics:
     1. Collect raw statistics from $queryStats
@@ -112,17 +114,27 @@ class MongoQueryMetrics(DBMAsyncJob):
                 self._check.log.debug("Skipping query metrics collection on node in recovering state")
                 return False
 
-        # Check MongoDB version (8.0+ required)
+        # Check MongoDB version
+        # Atlas supports $queryStats in MongoDB 7.0+, self-hosted requires 8.0+
         if not self._check._mongo_version:
             self._check.log.debug("MongoDB version not available yet, skipping query metrics collection")
             return False
 
         try:
             mongo_version = Version(self._check._mongo_version.split('-')[0])
-            if mongo_version < MINIMUM_MONGODB_VERSION:
+
+            # Determine minimum version based on hosting type
+            is_atlas = deployment.hosting_type == HostingType.ATLAS
+            min_version = MINIMUM_MONGODB_VERSION_ATLAS if is_atlas else MINIMUM_MONGODB_VERSION_SELF_HOSTED
+            version_requirement = "7.0+" if is_atlas else "8.0+"
+
+            if mongo_version < min_version:
                 if not self._version_warning_logged:
                     self._check.log.warning(
-                        "Query metrics collection requires MongoDB 8.0+. Current version: %s. Skipping collection.",
+                        "Query metrics collection requires MongoDB %s for %s deployments. "
+                        "Current version: %s. Skipping collection.",
+                        version_requirement,
+                        "Atlas" if is_atlas else "self-hosted",
                         self._check._mongo_version,
                     )
                     self._version_warning_logged = True
@@ -172,7 +184,8 @@ class MongoQueryMetrics(DBMAsyncJob):
             # $queryStats might not be available or user lacks permissions
             self._check.log.warning(
                 "Failed to collect query metrics: %s. "
-                "Ensure the user has the clusterMonitor role and MongoDB 8.0+ is running.",
+                "Ensure the user has the clusterMonitor role and MongoDB version supports $queryStats "
+                "(7.0+ for Atlas, 8.0+ for self-hosted).",
                 e,
             )
         except Exception as e:
@@ -191,14 +204,16 @@ class MongoQueryMetrics(DBMAsyncJob):
         if not raw_rows:
             return []
 
-        # Normalize rows
         normalized_rows = self._normalize_rows(raw_rows)
         if not normalized_rows:
             return []
 
+        # Dynamically determine which metric columns exist based on MongoDB version
+        metrics_columns = self._get_available_metrics_columns(normalized_rows)
+
         # Compute derivative metrics
         rows = self._statement_metrics.compute_derivative_rows(
-            normalized_rows, QUERY_METRICS_COLUMNS, key=get_query_stats_row_key, execution_indicators=['exec_count']
+            normalized_rows, metrics_columns, key=get_query_stats_row_key, execution_indicators=['exec_count']
         )
 
         self._check.gauge(
@@ -244,12 +259,8 @@ class MongoQueryMetrics(DBMAsyncJob):
                 db_name = cmd_ns.get('db', '')
                 coll_name = cmd_ns.get('coll', '')
 
-                # Skip if database not in monitored list
-                if db_name not in databases_monitored:
-                    continue
-
-                # Skip admin database
-                if db_name == 'admin':
+                # Skip if database not in monitored list or is admin
+                if db_name not in databases_monitored or db_name == 'admin':
                     continue
 
                 # Reconstruct command and obfuscate
@@ -257,22 +268,7 @@ class MongoQueryMetrics(DBMAsyncJob):
                 obfuscated_command = obfuscate_command(reconstructed_cmd)
                 query_signature = compute_exec_plan_signature(obfuscated_command)
 
-                # Extract and flatten metrics
-                exec_count = metrics.get('execCount', 0)
-                total_exec_micros = metrics.get('totalExecMicros', {})
-                first_response_exec_micros = metrics.get('firstResponseExecMicros', {})
-                keys_examined = metrics.get('keysExamined', {})
-                docs_examined = metrics.get('docsExamined', {})
-                docs_returned = metrics.get('docsReturned', {})
-                # P1 metrics
-                bytes_read = metrics.get('bytesRead', {})
-                cpu_nanos = metrics.get('cpuNanos', {})
-                used_disk = metrics.get('usedDisk', {})
-                has_sort_stage = metrics.get('hasSortStage', {})
-                # P2 metrics
-                read_time_micros = metrics.get('readTimeMicros', {})
-                working_time_millis = metrics.get('workingTimeMillis', {})
-
+                # Build row with required fields
                 row: QueryMetricsRow = {
                     'query_signature': query_signature,
                     'db_name': db_name,
@@ -281,25 +277,25 @@ class MongoQueryMetrics(DBMAsyncJob):
                     'command_type': query_shape.get('command', 'unknown'),
                     'key_hash': doc.get('keyHash', ''),
                     'query_shape_hash': doc.get('queryShapeHash', ''),
-                    # Metrics for derivative calculation
-                    'exec_count': exec_count,
-                    'total_exec_micros_sum': total_exec_micros.get('sum', 0),
-                    'first_response_exec_micros_sum': first_response_exec_micros.get('sum', 0),
-                    'keys_examined_sum': keys_examined.get('sum', 0),
-                    'docs_examined_sum': docs_examined.get('sum', 0),
-                    'docs_returned_sum': docs_returned.get('sum', 0),
-                    # P1 metrics
-                    'bytes_read_sum': bytes_read.get('sum', 0),
-                    'cpu_nanos_sum': cpu_nanos.get('sum', 0),
-                    'used_disk_count': used_disk.get('true', 0),
-                    'has_sort_stage_count': has_sort_stage.get('true', 0),
-                    # P2 metrics
-                    'read_time_micros_sum': read_time_micros.get('sum', 0),
-                    'working_time_millis_sum': working_time_millis.get('sum', 0),
                     # Timestamps
                     'first_seen_timestamp': self._format_timestamp(metrics.get('firstSeenTimestamp')),
                     'latest_seen_timestamp': self._format_timestamp(metrics.get('latestSeenTimestamp')),
                 }
+
+                # Dynamically extract metrics based on what's available in $queryStats response
+                for mongo_field, (our_field, extraction_type) in METRICS_FIELD_MAPPING.items():
+                    raw_value = metrics.get(mongo_field)
+                    if raw_value is None:
+                        continue
+
+                    if extraction_type == 'direct':
+                        row[our_field] = raw_value
+                    elif extraction_type == 'sum':
+                        if isinstance(raw_value, dict) and 'sum' in raw_value:
+                            row[our_field] = raw_value['sum']
+                    elif extraction_type == 'true_count':
+                        if isinstance(raw_value, dict) and 'true' in raw_value:
+                            row[our_field] = raw_value['true']
 
                 normalized.append(row)
 
@@ -316,6 +312,28 @@ class MongoQueryMetrics(DBMAsyncJob):
         if hasattr(ts, 'isoformat'):
             return ts.isoformat()
         return str(ts)
+
+    def _get_available_metrics_columns(self, normalized_rows: list[QueryMetricsRow]) -> list[str]:
+        """
+        Determine which metric columns are available in the normalized rows.
+
+        Returns only columns that exist in at least one row, handling differences
+        between MongoDB versions (7.0 has fewer metrics than 8.0).
+        """
+        if not normalized_rows:
+            return []
+
+        # Get all possible metric column names from the mapping
+        all_metric_columns = {field_name for field_name, _ in METRICS_FIELD_MAPPING.values()}
+
+        # Find which columns actually exist in the normalized rows
+        available_columns = set()
+        for row in normalized_rows:
+            for col in all_metric_columns:
+                if col in row:
+                    available_columns.add(col)
+
+        return list(available_columns)
 
     def _get_query_metrics_payloads(self, payload_wrapper: dict, rows: list) -> list[str]:
         """
