@@ -694,7 +694,7 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
 
         # Job <2226[1]>, Job Name <myArray[1]>, User <ec2-user>, Project <default>
         # handle cases like "Comma\nnd" -> "Command"
-        full_header = " ".join(lines[:12])
+        full_header = " ".join(lines[:15])
         full_header = re.sub(r'\s+', '', full_header).strip()
 
         tags = self.base_tags.copy()
@@ -712,7 +712,7 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         tags.append(f"task_id:{task_id}")
 
         job_name_match = re.search(r'JobName<([^>]+)>', full_header)
-        job_name = transform_tag(job_name_match.group(1))
+        job_name = transform_tag(job_name_match.group(1)) if job_name_match else None
         tags.append(f"job_name:{job_name}")
 
         user_match = re.search(r'User<([^>]+)>', full_header)
@@ -725,11 +725,17 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
 
         host_match = re.search(r'Submittedfromhost<([^>]+)>', full_header)
         host = transform_tag(host_match.group(1)) if host_match else None
-        tags.append(f"lsf_host:{host}")
+        tags.append(f"from_host:{host}")
 
         queue_match = re.search(r'toQueue<([^>]+)>', full_header)
         queue = transform_tag(queue_match.group(1)) if queue_match else None
         tags.append(f"lsf_queue:{queue}")
+
+        exec_host_match = re.search(r'Dispatched.*?onHost\(s\)<([^>]+)>', full_header)
+        if exec_host_match:
+            exec_host = transform_tag(exec_host_match.group(1))
+            if exec_host:
+                tags.append(f"exec_host:{exec_host}")
 
         success: int = -1
         exit_code_value: float = -1
