@@ -27,6 +27,7 @@ files:
       description: |
         Deprecated alias for `prometheus_url`.
       hidden: true
+      legacy: true
       value:
         type: string
     - name: gitaly_server_endpoint
