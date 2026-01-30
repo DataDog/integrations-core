@@ -28,6 +28,11 @@ replication = ["group"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
+version = ["8.0"]
+replication = ["hybrid"]
+
+[[envs.default.matrix]]
+python = ["3.13"]
 flavor = ["mariadb"]
 version = [
   "10.5",  # EOL 24 June 2025 (LTS version)
@@ -51,6 +56,9 @@ matrix.version.env-vars = [
 ]
 name."8.0-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
+]
+name."8.0-hybrid".env-vars = [
+  { key = "COMPOSE_FILE", value = "mysql8-hybrid.yaml" },
 ]
 
 

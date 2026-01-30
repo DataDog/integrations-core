@@ -601,3 +601,63 @@ def test_set_cluster_tags(
         # Check that no replication_role tag is present
         replication_role_tags = [tag for tag in tags if tag.startswith('replication_role:')]
         assert len(replication_role_tags) == 0
+
+
+def test_collect_replication_metrics_returns_empty_when_no_data():
+    """Test that _collect_replication_metrics returns {} when no traditional replication is configured."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    # Mock methods to return empty data (no traditional replication)
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    # Should return empty dict when no traditional replication data
+    assert replication_metrics == {}
+    # Results should not be updated
+    assert results == {}
+
+
+def test_collect_replication_metrics_returns_vars_when_replica():
+    """Test that _collect_replication_metrics returns REPLICA_VARS when this node is a replica."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    # Mock: this node is a traditional replica
+    replica_stats = {
+        'Seconds_Behind_Source': {'channel:default': 5},
+        'Slave_IO_Running': {'channel:default': 'Yes'},
+        'Slave_SQL_Running': {'channel:default': 'Yes'},
+    }
+    mysql_check._get_replica_stats = mock.MagicMock(return_value=replica_stats)
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    # Should return REPLICA_VARS when this node is a replica
+    assert replication_metrics == REPLICA_VARS
+    # Results should be updated with replica stats
+    assert 'Seconds_Behind_Source' in results
+
+
+def test_collect_replication_metrics_returns_vars_when_has_replicas_connected():
+    """Test that _collect_replication_metrics returns REPLICA_VARS when replicas are connected."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    # Mock: this node is a primary with replicas connected
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 2})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    # Should return REPLICA_VARS when replicas are connected
+    assert replication_metrics == REPLICA_VARS
+    # Results should be updated with replicas connected count
+    assert results.get('Replicas_connected') == 2

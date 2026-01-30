@@ -29,6 +29,9 @@ HOST = get_docker_hostname()
 PORT = 13306
 SLAVE_PORT = 13307
 PORTS_GROUP = [13306, 13307, 13308]
+# Hybrid topology: group replication nodes + traditional replica
+PORTS_HYBRID_GROUP = [13306, 13307, 13308]  # Group replication nodes (node1, node2, node3)
+PORT_HYBRID_TRADITIONAL_REPLICA = 13309  # Traditional replica connected to node1
 
 USER = 'dog'
 PASS = 'dog'
@@ -38,4 +41,7 @@ requires_static_version = pytest.mark.skipif(
 )
 requires_classic_replication = pytest.mark.skipif(
     MYSQL_REPLICATION != 'classic', reason='Classic replication not active, skipping'
+)
+requires_hybrid_replication = pytest.mark.skipif(
+    MYSQL_REPLICATION != 'hybrid', reason='Hybrid replication not active, skipping'
 )
