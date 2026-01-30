@@ -214,7 +214,7 @@ jobs:
       run: |-
         cat <<"OUTER" >> $GITHUB_OUTPUT
         script<<INNER
-        cd dist/app
+        cd dist/binary
         old_binary="$(ls)"
         binary="${old_binary/${{ steps.version.outputs.raw-version }}/${{ steps.version.outputs.version }}}"
         mv "$old_binary" "$binary"
@@ -227,7 +227,7 @@ jobs:
         cat <<"OUTER" >> $GITHUB_OUTPUT
         script<<INNER
         mkdir packaging
-        cd dist/app
+        cd dist/binary
 
         binary="$(ls)"
 
@@ -243,7 +243,7 @@ jobs:
     - name: Build managed binary
       env:
         PYAPP_SELF_COMMAND: "none"
-      run: hatch build --target app
+      run: hatch build --target binary
 
     - name: Correct binary version
       if: steps.version.outputs.version != steps.version.outputs.raw-version
@@ -261,10 +261,10 @@ jobs:
         if-no-files-found: error
 
     - name: Reset artifact directories
-      run: rm -rf dist/app packaging
+      run: rm -rf dist/binary packaging
 
     - name: Build standalone binary
-      run: hatch build --target app
+      run: hatch build --target binary
 
     - name: Correct binary version
       if: steps.version.outputs.version != steps.version.outputs.raw-version
