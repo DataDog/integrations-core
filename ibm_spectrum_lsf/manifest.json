@@ -16,6 +16,7 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
+      "Category::Log Collection",
       "Category::OS & System",
       "Category::Metrics",
       "Offering::Integration",

@@ -61,3 +61,19 @@ files:
         display_default: true
         example: false
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      source: ibm_spectrum_lsf
+      tags:
+        - "log_type:job"
+      path:
+        - <PATH_TO_JOB_LOGS>/*.out
+        - <PATH_TO_SYSTEM_LOGS>/*.err
+      service: <SERVICE_NAME>
+    - type: file
+      source: ibm_spectrum_lsf
+      tags:
+        - "log_type:system"
+      path: <LSF_TOP_DIR>/log/*
+      service: <SERVICE_NAME>
