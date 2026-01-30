@@ -9,8 +9,9 @@ from .requirements import requirements
 ALL_COMMANDS = (requirements,)
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='A collection of tasks related to the Datadog Agent')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def agent():
+    """Tasks related to the Agent."""
     pass
 
 

@@ -25,11 +25,12 @@ will be committed to the repo on the feature branch in ascending order.
 """
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Create branch commits from example repo')
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('source_dir')
 @click.option('--prefix', '-p', default='', help='Optional text to prefix each commit')
 @click.pass_context
 def create_example_commits(ctx, source_dir, prefix):
+    """Create sequential commits for integration examples."""
     repo_choice = ctx.obj['repo_choice']
     root = get_root()
     branch = get_current_branch()

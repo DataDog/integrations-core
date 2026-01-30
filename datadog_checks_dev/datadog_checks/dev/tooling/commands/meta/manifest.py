@@ -8,8 +8,9 @@ from datadog_checks.dev.tooling.manifest_validator.v2.migration import TODO_FILL
 from datadog_checks.dev.tooling.utils import get_valid_integrations
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='Manifest utilities')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def manifest():
+    """Manage integration manifests."""
     pass
 
 
