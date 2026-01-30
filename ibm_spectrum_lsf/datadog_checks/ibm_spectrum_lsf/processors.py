@@ -619,7 +619,7 @@ class BHistProcessor(LSFMetricsProcessor):
             base_job_id = transform_job_id(job_id)
             base_job_ids.add(base_job_id)
 
-        return sorted(base_job_ids)
+        return list[str](base_job_ids)
 
     def process_metrics(self) -> list[LSFMetric]:
         tags = [
@@ -708,10 +708,7 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         tags = self.base_tags.copy()
 
         job_id_match = re.search(r'Job<([^>]+)>', full_header)
-        if job_id_match:
-            job_id = job_id_match.group(1).strip()
-        else:
-            job_id = base_job_id
+        job_id = job_id_match.group(1).strip() if job_id_match else base_job_id
         base_job_id = transform_job_id(job_id)
         task_id = transform_task_id(job_id)
 

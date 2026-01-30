@@ -593,6 +593,12 @@ def test_bhist_get_completed_job_ids_error(
             "Skipping empty job section",
             id="empty_job_section",
         ),
+        pytest.param(
+            [None],
+            ("", "", 0),
+            "No job ID provided for bhist_details command",
+            id="no_job_id",
+        ),
     ],
 )
 def test_bhist_details_get_bhist_details_error(
