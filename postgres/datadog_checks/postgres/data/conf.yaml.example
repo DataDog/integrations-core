@@ -593,7 +593,7 @@ instances:
         # include_databases:
         #   - mydb
 
-        ## @param exclude_databases - list of strings - optional
+        ## @param exclude_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
         ## A list of regex patterns to exclude databases.
         ## Any database whose name matches any one of these patterns will be excluded.
         ## If empty, all databases matching other filters are included.
