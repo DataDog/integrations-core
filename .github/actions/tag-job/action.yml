@@ -16,12 +16,46 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    # Update this job to inclue any reason why the job should be skipped.
+    - name: Check if job should be tagged
+      id: check_tagging
+      shell: bash
+      env:
+        IS_PR: ${{ github.event_name == 'pull_request' }}
+        PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
+      run: |
+        should_skip="false"
+        skip_reason=""
+
+        if [[ "$IS_PR" == "true" ]]; then
+          if [[ "$PR_AUTHOR" == "dependabot[bot]" ]]; then
+            # Dependabot has no access to secrets so we can't tag the job.
+            should_skip="true"
+            skip_reason="Action is being run from a PR with dependabot as author"
+          elif [[ "$IS_FORK" == "true" ]]; then
+            # Forked repos have no access to secrets so we can't tag the job.
+            should_skip="true"
+            skip_reason="Action is being run from a fork"
+          fi
+        fi
+
+        echo "should_skip=$should_skip" >> $GITHUB_OUTPUT
+        echo "skip_reason=$skip_reason" >> $GITHUB_OUTPUT
+
+    - name: Log skip reason
+      if: steps.check_tagging.outputs.should_skip == 'true'
+      shell: bash
+      run: |
+        echo "Skipping tagging. Reason: ${{ steps.check_tagging.outputs.skip_reason }}"
+
     - name: Set up Node.js
       uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
         node-version: '20'
 
     - name: Install datadog-ci and tag job
+      if: steps.check_tagging.outputs.should_skip != 'true'
       shell: bash
       env:
         DATADOG_API_KEY: ${{ inputs.dd_api_key }}

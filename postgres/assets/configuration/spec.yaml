@@ -499,8 +499,11 @@ files:
               - "cloudsqladmin"
               - "rdsadmin"
             display_default:
+              - "template0"
+              - "template1"
+              - "rdsadmin"
+              - "azure_maintenance"
               - "cloudsqladmin"
-              - "rdsadmin" 
               - "alloydbadmin"
               - "alloydbmetadata"
         - name: refresh
@@ -837,7 +840,7 @@ files:
               - "mydb"
         - name: exclude_databases
           description: |
-            A list of regex patterns to exclude databases. 
+            A list of regex patterns to exclude databases.
             Any database whose name matches any one of these patterns will be excluded.
             If empty, all databases matching other filters are included.
           value:
@@ -846,6 +849,14 @@ files:
               type: string
             example:
               - "privatedb.*"
+            default:
+              - "template0"
+              - "template1"
+              - "rdsadmin"
+              - "azure_maintenance"
+              - "cloudsqladmin"
+              - "alloydbadmin"
+              - "alloydbmetadata"
         - name: include_schemas
           description: |
             A list of regex patterns to include schemas. 
