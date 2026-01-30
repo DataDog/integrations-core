@@ -33,6 +33,7 @@ from datadog_checks.sqlserver.queries import (
 KEY_PREFIX = "dbm-schemas-"
 KEY_PREFIX_PRE_2017 = "dbm-schemas-pre-2017"
 
+
 class DatabaseInfo(TypedDict):
     name: str
     id: str
