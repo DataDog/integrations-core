@@ -693,11 +693,13 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         lines = job_entry.splitlines()
 
         # Job <2226[1]>, Job Name <myArray[1]>, User <ec2-user>, Project <default>
-        full_header = " ".join(lines[:10])
+        # handle cases like "Comma\nnd" -> "Command"
+        full_header = " ".join(lines[:12])
+        full_header = re.sub(r'\s+', '', full_header).strip()
 
         tags = self.base_tags.copy()
 
-        job_id_match = re.search(r'Job <([^>]+)>', full_header)
+        job_id_match = re.search(r'Job<([^>]+)>', full_header)
         if job_id_match:
             job_id = job_id_match.group(1).strip()
         else:
@@ -709,17 +711,25 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         tags.append(f"full_job_id:{job_id}")
         tags.append(f"task_id:{task_id}")
 
-        job_name_match = re.search(r'Job Name <([^>]+)>', full_header)
-        job_name = transform_tag(job_name_match.group(1)) if job_name_match else None
+        job_name_match = re.search(r'JobName<([^>]+)>', full_header)
+        job_name = transform_tag(job_name_match.group(1))
         tags.append(f"job_name:{job_name}")
 
-        user_match = re.search(r'User <([^>]+)>', full_header)
+        user_match = re.search(r'User<([^>]+)>', full_header)
         user = transform_tag(user_match.group(1)) if user_match else None
         tags.append(f"user:{user}")
 
-        project_match = re.search(r'Project <([^>]+)>', full_header)
+        project_match = re.search(r'Project<([^>]+)>', full_header)
         project = transform_tag(project_match.group(1)) if project_match else None
         tags.append(f"project:{project}")
+
+        host_match = re.search(r'Submittedfromhost<([^>]+)>', full_header)
+        host = transform_tag(host_match.group(1)) if host_match else None
+        tags.append(f"lsf_host:{host}")
+
+        queue_match = re.search(r'toQueue<([^>]+)>', full_header)
+        queue = transform_tag(queue_match.group(1)) if queue_match else None
+        tags.append(f"lsf_queue:{queue}")
 
         success: int = -1
         exit_code_value: float = -1
