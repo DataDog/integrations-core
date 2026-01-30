@@ -755,8 +755,7 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
 
             if "the cpu time used is" in normalized_line:
                 cpu_match = re.search(r'the cpu time used is ([\d.]+)', normalized_line)
-                if cpu_match:
-                    cpu_time = transform_float(cpu_match.group(1))
+                cpu_time = transform_float(cpu_match.group(1)) if cpu_match else -1
 
             if "done successfully" in normalized_line:
                 success = 1
@@ -764,39 +763,31 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
             elif "exited with exit code" in normalized_line:
                 success = 0
                 exit_match = re.search(r'exited with exit code (\d+)', normalized_line)
-                if exit_match:
-                    exit_code_value = transform_float(exit_match.group(1))
+                exit_code_value = transform_float(exit_match.group(1)) if exit_match else -1
             elif "max mem:" in normalized_line:
                 # MAX MEM: 9 Mbytes;  AVG MEM: 8 Mbytes; MEM Efficiency: 0.31%
                 max_mem_match = re.search(r'max mem:\s*([\d.]+)', normalized_line)
-                if max_mem_match:
-                    max_mem = transform_float(max_mem_match.group(1))
+                max_mem = transform_float(max_mem_match.group(1)) if max_mem_match else -1
 
                 avg_mem_match = re.search(r'avg mem:\s*([\d.]+)', normalized_line)
-                if avg_mem_match:
-                    avg_mem = transform_float(avg_mem_match.group(1))
+                avg_mem = transform_float(avg_mem_match.group(1)) if avg_mem_match else -1
 
                 mem_eff_match = re.search(r'mem efficiency:\s*([\d.]+)', normalized_line)
-                if mem_eff_match:
-                    mem_efficiency = transform_float(mem_eff_match.group(1))
+                mem_efficiency = transform_float(mem_eff_match.group(1)) if mem_eff_match else -1
             elif "cpu peak:" in normalized_line and "cpu peak duration:" in normalized_line:
                 # CPU PEAK: 0.00 ;  CPU PEAK DURATION: 0 second(s)
                 cpu_peak_match = re.search(r'cpu peak:\s*([\d.]+)', normalized_line)
-                if cpu_peak_match:
-                    cpu_peak = transform_float(cpu_peak_match.group(1))
+                cpu_peak = transform_float(cpu_peak_match.group(1)) if cpu_peak_match else -1
 
                 cpu_peak_dur_match = re.search(r'cpu peak duration:\s*([\d.]+)', normalized_line)
-                if cpu_peak_dur_match:
-                    cpu_peak_duration = transform_float(cpu_peak_dur_match.group(1))
+                cpu_peak_duration = transform_float(cpu_peak_dur_match.group(1)) if cpu_peak_dur_match else -1
             elif "cpu peak efficiency:" in normalized_line:
                 # CPU AVERAGE EFFICIENCY: 0.00% ;  CPU PEAK EFFICIENCY: 0.00%
                 cpu_avg_eff_match = re.search(r'cpu average efficiency:\s*([\d.]+)', normalized_line)
-                if cpu_avg_eff_match:
-                    cpu_average_efficiency = transform_float(cpu_avg_eff_match.group(1))
+                cpu_average_efficiency = transform_float(cpu_avg_eff_match.group(1)) if cpu_avg_eff_match else -1
 
                 cpu_peak_eff_match = re.search(r'cpu peak efficiency:\s*([\d.]+)', normalized_line)
-                if cpu_peak_eff_match:
-                    cpu_peak_efficiency = transform_float(cpu_peak_eff_match.group(1))
+                cpu_peak_efficiency = transform_float(cpu_peak_eff_match.group(1)) if cpu_peak_eff_match else -1
 
         return [
             LSFMetric(f"{self.prefix}.success", success, tags),
