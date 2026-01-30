@@ -60,12 +60,16 @@ class BadminMetricMapping:
     transform: Callable[[str], float]
 
 
+def add_tag_if_present(tags: list[str], tag_key: str, tag_value: str | None) -> None:
+    if tag_value is not None:
+        tags.append(f"{tag_key}:{tag_value}")
+
+
 def process_table_tags(tag_mapping: list[LSFTagMapping], line_data: list[str]) -> list[str]:
-    tags = []
+    tags: list[str] = []
     for tag in tag_mapping:
         transformed_val = tag.transform(line_data[tag.position])
-        if transformed_val is not None:
-            tags.append(f"{tag.name}:{transformed_val}")
+        add_tag_if_present(tags, tag.name, transformed_val)
     return tags
 
 
@@ -707,35 +711,33 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         base_job_id = transform_job_id(job_id)
         task_id = transform_task_id(job_id)
 
-        tags.append(f"job_id:{base_job_id}")
-        tags.append(f"full_job_id:{job_id}")
-        tags.append(f"task_id:{task_id}")
+        add_tag_if_present(tags, "job_id", base_job_id)
+        add_tag_if_present(tags, "full_job_id", job_id)
+        add_tag_if_present(tags, "task_id", task_id)
 
         job_name_match = re.search(r'JobName<([^>]+)>', full_header)
         job_name = transform_tag(job_name_match.group(1)) if job_name_match else None
-        tags.append(f"job_name:{job_name}")
+        add_tag_if_present(tags, "job_name", job_name)
 
         user_match = re.search(r'User<([^>]+)>', full_header)
         user = transform_tag(user_match.group(1)) if user_match else None
-        tags.append(f"user:{user}")
+        add_tag_if_present(tags, "user", user)
 
         project_match = re.search(r'Project<([^>]+)>', full_header)
         project = transform_tag(project_match.group(1)) if project_match else None
-        tags.append(f"project:{project}")
+        add_tag_if_present(tags, "project", project)
 
         host_match = re.search(r'Submittedfromhost<([^>]+)>', full_header)
         host = transform_tag(host_match.group(1)) if host_match else None
-        tags.append(f"from_host:{host}")
+        add_tag_if_present(tags, "from_host", host)
 
         queue_match = re.search(r'toQueue<([^>]+)>', full_header)
         queue = transform_tag(queue_match.group(1)) if queue_match else None
-        tags.append(f"lsf_queue:{queue}")
+        add_tag_if_present(tags, "lsf_queue", queue)
 
         exec_host_match = re.search(r'Dispatched.*?onHost\(s\)<([^>]+)>', full_header)
-        if exec_host_match:
-            exec_host = transform_tag(exec_host_match.group(1))
-            if exec_host:
-                tags.append(f"exec_host:{exec_host}")
+        exec_host = transform_tag(exec_host_match.group(1)) if exec_host_match else None
+        add_tag_if_present(tags, "exec_host", exec_host)
 
         success: int = -1
         exit_code_value: float = -1
