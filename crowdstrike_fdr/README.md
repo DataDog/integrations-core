@@ -13,7 +13,7 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
 #### Setup a custom AWS S3 bucket
 1. Sign in to the AWS Management Console and navigate to Amazon S3.
 2. Provide the details as mentioned below:
-   - **Bucket name**: Enter a Bucket name (must be globally unique and begins with the prefix `crowdstrike-fdr` to comply with integration naming requirements).
+   - **Bucket name**: Enter a Bucket name.
    - **AWS Region**: Choose a region.
       - You can only use your S3 bucket if you're using the US-1, US-2, or EU-1 CrowdStrike clouds.
       - Ensure that your bucket resides in the same AWS region as your Falcon CID.
@@ -82,7 +82,11 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
 
 ## Configure Datadog Forwarder
 
-- See the [Datadog Forwarder][2] page for configuration steps.
+Refer to the [Datadog Forwarder][2] documentation for detailed configuration guidance.
+- During the Datadog Forwarder configuration, set the **source** as follows:
+    - For **CloudFormation** deployments, set `DdSource` to `crowdstrike-fdr`.
+    - For **Terraform** deployments, set `dd_source` to `crowdstrike-fdr`.
+    - For **Manual** deployments, set the `DD_SOURCE` environment variable to `crowdstrike-fdr`.
 
 ## Data Collected
 
