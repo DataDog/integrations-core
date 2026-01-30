@@ -9,39 +9,40 @@ if TYPE_CHECKING:
     from .orchestrator import BaseMessage
 
 
-class TaskQueueError(Exception):
+class ProcessorQueueError(Exception):
     """
-    Exception raised when a task queue is not initialized.
+    Exception raised when a processor queue is not initialized.
     """
 
     pass
 
 
-class TaskProcessingError(Exception):
+class MessageProcessingError(Exception):
     """
-    Exception raised when a task fails to process a message.
+    Exception raised when a processor fails to process a message.
     """
 
-    def __init__(self, task_name: str, message: BaseMessage, original_exception: Exception):
-        self.task_name = task_name
+    def __init__(self, processor_name: str, message: BaseMessage, original_exception: Exception):
+        self.processor_name = processor_name
         self.message = message
         self.original_exception = original_exception
         super().__init__(
-            f"Error processing message by task '{task_name}'. Message: {message}. Original error: {original_exception}"
+            f"Error processing message by processor '{processor_name}'. "
+            f"Message: {message}. Original error: {original_exception}"
         )
 
 
-class TaskSuccessHookError(TaskProcessingError):
+class ProcessorSuccessHookError(MessageProcessingError):
     """
-    Exception raised when the on_success hook of a task fails.
+    Exception raised when the on_success hook of a processor fails.
     """
 
-    def __init__(self, task_name: str, message: BaseMessage, original_exception: Exception):
+    def __init__(self, processor_name: str, message: BaseMessage, original_exception: Exception):
         super(Exception, self).__init__(
-            f"Error in 'on_success' hook for task '{task_name}'. "
+            f"Error in 'on_success' hook for processor '{processor_name}'. "
             f"Message: {message}. "
             f"Original error: {original_exception}"
         )
-        self.task_name = task_name
+        self.processor_name = processor_name
         self.message = message
         self.original_exception = original_exception

@@ -10,7 +10,7 @@ from concurrent.futures import Executor, ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import assert_never
 
-from .exceptions import TaskProcessingError, TaskQueueError, TaskSuccessHookError
+from .exceptions import MessageProcessingError, ProcessorQueueError, ProcessorSuccessHookError
 
 
 @dataclass
@@ -24,10 +24,10 @@ class BaseMessage:
     id: str
 
 
-class BaseTask[T: BaseMessage]:
+class BaseProcessor[T: BaseMessage]:
     def __init__(self, name: str):
         self.name = name
-        self.event_bus: EventBusOrchestrator | None = None
+        self.queue: asyncio.Queue[BaseMessage] | None = None
 
     async def on_success(self, message: T) -> None:
         pass
@@ -36,27 +36,27 @@ class BaseTask[T: BaseMessage]:
         pass
 
     def submit_message(self, message: BaseMessage) -> None:
-        if self.event_bus is None:
-            raise TaskQueueError("This task has not been added to an active event bus")
-        self.event_bus.submit(message)
+        if self.queue is None:
+            raise ProcessorQueueError("This processor has not been added to an active event bus")
+        self.queue.put_nowait(message)
 
 
-class AsyncTask[T: BaseMessage](BaseTask[T], ABC):
+class AsyncProcessor[T: BaseMessage](BaseProcessor[T], ABC):
     @abstractmethod
     async def process_message(self, message: T) -> None: ...
 
 
-class SyncTask[T: BaseMessage](BaseTask[T], ABC):
+class SyncProcessor[T: BaseMessage](BaseProcessor[T], ABC):
     @abstractmethod
     def process_message(self, message: T) -> None: ...
 
 
-type ValidTask[T: BaseMessage] = AsyncTask[T] | SyncTask[T]
+type Processor[T: BaseMessage] = AsyncProcessor[T] | SyncProcessor[T]
 
 
 class EventBusOrchestrator(ABC):
     """
-    EventBus engine that handles the message polling and task execution.
+    EventBus engine that handles the message polling and processor execution.
     """
 
     def __init__(
@@ -72,7 +72,7 @@ class EventBusOrchestrator(ABC):
             max_timeout: The maximum time in seconds to wait for the orchestrator to complete.
             grace_period: The timeout in seconds to wait for a new message to be submitted after all
                 messages have been processed.
-            executor: The executor to use for running sync tasks.
+            executor: The executor to use for running sync processors.
                       The default will be a ThreadpoolExecutor with 4 workers.
         """
         self.__validate_parameters(max_timeout, grace_period)
@@ -80,7 +80,7 @@ class EventBusOrchestrator(ABC):
         self._max_timeout = max_timeout
         self._grace_period = grace_period
         self._executor = executor or ThreadPoolExecutor(max_workers=4)
-        self._subscribers: dict[type[BaseMessage], list[ValidTask]] = {}
+        self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
@@ -96,13 +96,13 @@ class EventBusOrchestrator(ABC):
         if max_timeout <= grace_period:
             raise ValueError("max_timeout must be greater than grace_period")
 
-    def register_task[T: BaseMessage](self, task: ValidTask[T], message_types: list[type[T]]):
-        """Registers a task to receive specific message types."""
-        task.event_bus = self
+    def register_processor[T: BaseMessage](self, processor: Processor[T], message_types: list[type[T]]):
+        """Registers a processor to receive specific message types."""
+        processor.queue = self._queue
         for msg_type in message_types:
-            self._subscribers.setdefault(msg_type, []).append(task)
+            self._subscribers.setdefault(msg_type, []).append(processor)
 
-    def submit(self, message: BaseMessage):
+    def submit_message(self, message: BaseMessage):
         """
         Adds a message to the queue.
         """
@@ -112,7 +112,7 @@ class EventBusOrchestrator(ABC):
         """
         Launch the orchestrator and start consuming messages from the message queue.
 
-        The orchestrator will process messages and submit them to the tasks that are subscribed to them.
+        The orchestrator will process messages and submit them to the processors that are subscribed to them.
 
         The execution flow is as follows:
         - initialize()
@@ -137,7 +137,7 @@ class EventBusOrchestrator(ABC):
 
     async def initialize(self):
         """
-        Hook for subclasses to perform initial setup.
+        Initializes the orchestrator.
         """
         self._running = True
         await self.on_initialize()
@@ -151,11 +151,10 @@ class EventBusOrchestrator(ABC):
 
     async def finalize(self, exception: Exception | None):
         """
-        Method called at the end of the execution lifecycle when all tasks have been completed.
+        Method called at the end of the execution lifecycle when all processors have been completed.
 
         In the case that the execution failed, the exception will be passed to the method
         """
-        # Ensure we close everything
         self._running = False
         await self.on_finalize(exception)
 
@@ -182,8 +181,8 @@ class EventBusOrchestrator(ABC):
 
     async def process_messages(self):
         """
-        Continuously reads from the queue and processes the messages by submitting them to the subscribed tasks.
-        Processing ends when the queue is empty and all tasks have been completed.
+        Continuously reads from the queue and processes the messages by submitting them to the subscribed processors.
+        Processing ends when the queue is empty and all processors have been completed.
         """
         # If this is launched without any subscribers, we can exit early
         if not self._subscribers:
@@ -213,7 +212,7 @@ class EventBusOrchestrator(ABC):
         """
         Checks whether the orchestrator should stop. This can happen in two ways:
         - The max timeout is reached
-        - The queue is empty and all tasks have been completed and the grace period is reached
+        - The queue is empty and all processors have been completed and the grace period is reached
         """
         # Check first whether we are over the max timeout
         if self._remaining_time(start_time) <= 0:
@@ -225,7 +224,7 @@ class EventBusOrchestrator(ABC):
             get_task.cancel()
             return True
 
-        # Check exit condition: empty queue (implied by get_task not done) and no running tasks
+        # Check exit condition: empty queue (implied by get_task not done) and no running processors
         if not running_tasks and not get_task.done() and self._queue.empty():
             try:
                 remaining = self._remaining_time(start_time)
@@ -257,7 +256,6 @@ class EventBusOrchestrator(ABC):
         """
         try:
             msg = get_task.result()
-            print(msg)
             await self.on_message_received(msg)
             self._handle_message(msg, running_tasks)
         except asyncio.CancelledError:
@@ -288,37 +286,38 @@ class EventBusOrchestrator(ABC):
 
     def _handle_message(self, msg: BaseMessage, running_tasks: set[asyncio.Task]):
         """
-        Launches tasks to process the given message by any tasks that are subscribed to the message type.
+        Launches asyncio tasks to process the given message by any processors that are subscribed to the message type.
 
-        The `running_tasks` set is updated with the tasks that have been launched.
+        The `running_tasks` set is updated with the processors that have been launched.
         """
         running_tasks.update(
-            asyncio.create_task(self._task_wrapper(task, msg)) for task in self._subscribers.get(type(msg), [])
+            asyncio.create_task(self._task_wrapper(processor, msg))
+            for processor in self._subscribers.get(type(msg), [])
         )
 
-    async def _task_wrapper(self, task: ValidTask, message: BaseMessage):
+    async def _task_wrapper(self, processor: Processor, message: BaseMessage):
         """
-        Processes a message by the given task.
+        Processes a message by the given processor.
         """
         try:
-            match task:
-                case AsyncTask():
-                    await task.process_message(message)
-                case SyncTask():
-                    await asyncio.get_running_loop().run_in_executor(self._executor, task.process_message, message)
+            match processor:
+                case AsyncProcessor():
+                    await processor.process_message(message)
+                case SyncProcessor():
+                    await asyncio.get_running_loop().run_in_executor(self._executor, processor.process_message, message)
                 case _:
-                    assert_never(task)
+                    assert_never(processor)
         except Exception as e:
             try:
-                await task.on_error(message, e)
+                await processor.on_error(message, e)
             except Exception as hook_error:
-                self._logger.error("Error in task %s on_error: %s", task.__class__.__name__, hook_error)
+                self._logger.error("Error in processor %s on_error: %s", processor.__class__.__name__, hook_error)
 
-            raise TaskProcessingError(task.name, message, e) from e
+            raise MessageProcessingError(processor.name, message, e) from e
 
         try:
-            await task.on_success(message)
+            await processor.on_success(message)
         except Exception as e:
-            # Raise a TaskSuccessHookError to ensure the error to show that the failure happened even if the
+            # Raise a ProcessorSuccessHookError to ensure the error to show that the failure happened even if the
             # process_message call succeeded.
-            raise TaskSuccessHookError(task.name, message, e) from e
+            raise ProcessorSuccessHookError(processor.name, message, e) from e
