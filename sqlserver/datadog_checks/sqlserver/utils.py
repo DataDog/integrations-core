@@ -187,10 +187,15 @@ def parse_sqlserver_major_version(version):
     :param version: String representation of full SQL Server version (from @@version)
     :return: integer representation of SQL Server major version (i.e. 12, 13)
     """
-    match = re.search(r"(\d+)\.\d+\.\d+\.\d+", version)
-    if not match:
-        return None
-    return int(match.group(1))
+    for pattern in (
+        r"-\s*(\d+)\.\d+(?:\.\d+){0,2}",
+        r"(\d+)\.\d+\.\d+\.\d+",
+        r"(\d+)\.\d+\.\d+",
+    ):
+        match = re.search(pattern, version)
+        if match:
+            return int(match.group(1))
+    return None
 
 
 def is_azure_database(engine_edition):
