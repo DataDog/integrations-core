@@ -28,7 +28,15 @@ from datadog_checks.mysql.const import (
 )
 
 from . import common, tags, variables
-from .common import HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
+from .common import (
+    HOST,
+    MYSQL_FLAVOR,
+    MYSQL_REPLICATION,
+    MYSQL_VERSION_PARSED,
+    PORT,
+    requires_hybrid_replication,
+    requires_static_version,
+)
 
 
 @pytest.mark.integration
@@ -403,6 +411,94 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     # Make sure group replication is not detected
     with mysql_check._connect() as db:
         assert mysql_check._is_group_replication_active(db) is False
+
+
+@requires_hybrid_replication
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_hybrid_replication_primary(aggregator, dd_run_check, instance_hybrid_primary):
+    """
+    Test that the hybrid primary (node1) reports both group replication AND traditional replication metrics.
+    This node is a group replication primary that also has a traditional replica connected.
+    """
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_hybrid_primary])
+    dd_run_check(mysql_check)
+
+    # Verify group replication is active
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is True
+
+    # Service checks - use hybrid-specific tags
+    service_check_tags = tags.SC_TAGS_HYBRID_PRIMARY
+
+    # Should report group replication service check
+    group_replication_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE', 'member_role:PRIMARY')
+    aggregator.assert_service_check(
+        'mysql.replication.group.status',
+        status=MySql.OK,
+        tags=service_check_tags + group_replication_tags,
+        count=1,
+    )
+
+    # Should also report traditional replication service check (as source/primary)
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=service_check_tags + ('replication_mode:source',),
+        at_least=1,
+    )
+
+    # Verify group replication metrics are collected
+    for metric in variables.GROUP_REPLICATION_VARS:
+        aggregator.assert_metric(metric, at_least=1)
+
+    # Verify additional group replication metrics for MySQL 8.0+
+    if MYSQL_VERSION_PARSED >= parse_version('8.0'):
+        for metric in variables.GROUP_REPLICATION_VARS_8_0_2:
+            aggregator.assert_metric(metric, at_least=1)
+
+    # Verify traditional replication metrics are collected (node has replicas connected)
+    aggregator.assert_metric('mysql.replication.replicas_connected', at_least=1)
+    aggregator.assert_metric('mysql.replication.slaves_connected', at_least=1)
+
+
+@requires_hybrid_replication
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_hybrid_replication_traditional_replica(aggregator, dd_run_check, instance_hybrid_traditional_replica):
+    """
+    Test that the traditional replica (connected to node1) reports ONLY traditional replication metrics,
+    not group replication metrics (since it's not part of the group).
+    """
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_hybrid_traditional_replica])
+    dd_run_check(mysql_check)
+
+    # Verify group replication is NOT active on this node
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is False
+
+    # Service checks - use hybrid-specific tags for the traditional replica
+    service_check_tags = tags.SC_TAGS_HYBRID_TRADITIONAL_REPLICA
+
+    # Should NOT report group replication service check
+    aggregator.assert_service_check('mysql.replication.group.status', count=0)
+
+    # Should report traditional replication service check (as replica)
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=service_check_tags + ('replication_mode:replica',),
+        at_least=1,
+    )
+
+    # Verify group replication metrics are NOT collected
+    for metric in variables.GROUP_REPLICATION_VARS:
+        aggregator.assert_metric(metric, count=0)
+
+    # Verify traditional replication metrics are collected (this node is a replica)
+    aggregator.assert_metric('mysql.replication.seconds_behind_master', at_least=1)
+    aggregator.assert_metric('mysql.replication.seconds_behind_source', at_least=1)
+    aggregator.assert_metric('mysql.replication.slave_running', at_least=1)
 
 
 @pytest.mark.integration

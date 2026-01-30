@@ -278,6 +278,13 @@ GROUP_REPLICATION_VARS_8_0_2 = [
     'mysql.replication.group.transactions_rollback',
 ]
 
+HYBRID_REPLICATION_VARS = (
+    # Traditional replication metrics (node has replicas connected)
+    TRADITIONAL_REPLICATION_METRICS
+    # Group replication metrics
+    + GROUP_REPLICATION_VARS
+)
+
 INDEX_SIZE_VARS = [
     'mysql.index.size',
 ]
