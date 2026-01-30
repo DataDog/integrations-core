@@ -109,7 +109,7 @@ class LSFMetricsProcessor(ABC):
         self.base_tags = base_tags
 
     @abstractmethod
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         pass
 
     def parse_table_command(
@@ -178,7 +178,7 @@ class LsClustersProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.lsclusters()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -208,7 +208,7 @@ class BHostsProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.bhosts()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -240,7 +240,7 @@ class LSHostsProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.lshosts()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -277,7 +277,7 @@ class LsLoadProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.lsload()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -313,7 +313,7 @@ class BSlotsProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.bslots()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -339,7 +339,7 @@ class BQueuesProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.bqueues()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -374,7 +374,7 @@ class BJobsProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.bjobs()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -414,7 +414,7 @@ class GPULoadProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.gpuload()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -452,7 +452,7 @@ class GPUHostsProcessor(LSFMetricsProcessor):
             base_tags=base_tags,
         )
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         return self.client.bhosts_gpu()
 
     def process_metrics(self) -> list[LSFMetric]:
@@ -485,7 +485,7 @@ class BadminPerfmonProcessor(LSFMetricsProcessor):
         )
         self.collection_started = False
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         if self.config.badmin_perfmon_auto:
             collection_interval = (
                 self.config.min_collection_interval if self.config.min_collection_interval is not None else 60
@@ -579,7 +579,7 @@ class BHistProcessor(LSFMetricsProcessor):
         self.last_check_time = get_current_datetime().strftime('%Y/%m/%d/%H:%M')
         self.completed_job_ids = completed_job_ids
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
         start_time = self.last_check_time
         end_time = get_current_datetime().strftime('%Y/%m/%d/%H:%M')
         self.log.trace("Last check time: %s, end time: %s", start_time, end_time)
@@ -659,7 +659,7 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         super().__init__(
             name='bhist_details',
             prefix='job.completed.details',
-            expected_columns=0,
+            expected_columns=None,
             delimiter=None,
             client=client,
             config=config,
@@ -668,9 +668,12 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         )
         self.completed_job_ids = completed_job_ids
 
-    def run_lsf_command(self) -> tuple[str, str, int]:
-        # This processor runs bhist_l for each job
-        return ("", "", 0)
+    def run_lsf_command(self, **kwargs) -> tuple[str, str, int]:
+        job_id = kwargs.get('job_id')
+        if job_id is None:
+            self.log.info("No job ID provided for bhist_details command")
+            return ("", "", 0)
+        return self.client.bhist_l(job_id)
 
     def get_bhist_details(self) -> list[tuple[str, str]]:
         base_job_ids = self.completed_job_ids.get_job_ids()
@@ -682,7 +685,7 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         for base_job_id in base_job_ids:
             self.log.debug("Fetching detailed info for job %s", base_job_id)
 
-            detail_output, detail_err, detail_exit_code = self.client.bhist_l(base_job_id)
+            detail_output, detail_err, detail_exit_code = self.run_lsf_command(job_id=base_job_id)
             if detail_exit_code != 0:
                 self.log.warning("Failed to get details for job %s: %s", base_job_id, detail_err)
                 continue
@@ -696,9 +699,10 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
 
         lines = job_entry.splitlines()
 
+        # first parse the header for tags:
         # Job <2226[1]>, Job Name <myArray[1]>, User <ec2-user>, Project <default>
-        # handle cases like "Comma\nnd" -> "Command"
         full_header = " ".join(lines[:15])
+        # handle cases like "Comma\nnd" -> "Command"
         full_header = re.sub(r'\s+', '', full_header).strip()
 
         tags = self.base_tags.copy()
@@ -750,6 +754,7 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         cpu_average_efficiency: float = -1
         cpu_peak_efficiency: float = -1
 
+        # now parse the body for metrics:
         for line in lines:
             normalized_line = line.lower()
 
@@ -808,8 +813,6 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         ]
 
     def parse_bhist_details(self, details_per_job: list[tuple[str, str]]) -> list[LSFMetric]:
-        """Parse detailed bhist -l output for each job and extract metrics."""
-
         all_metrics = []
 
         for base_job_id, detail_output in details_per_job:

@@ -89,8 +89,6 @@ def transform_time_left(val: str) -> int:
 
 
 class RecentlyCompletedJobIDs:
-    """share recently completed job IDs between BHistProcessor and BHistDetailsProcessor."""
-
     def __init__(self) -> None:
         self.completed_job_ids: list[str] = []
 
