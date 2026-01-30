@@ -175,6 +175,7 @@
     In order to exclude all metrics but the ones matching a specific filter,
     you can use a negative lookahead regex like:
       - ^(?!foo).*$
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -228,6 +229,7 @@
     Labels defined in `exclude_labels` will take precedence in case of overlap.
 
     Note: Label filtering happens before `rename_labels`.
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -276,6 +278,7 @@
 - name: non_cumulative_histogram_buckets
   description: |
     Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -356,6 +359,7 @@
     for improved performance.
 
     Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+  fleet_configurable: true
   value:
     type: boolean
     example: true
