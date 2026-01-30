@@ -611,6 +611,7 @@ class BHistProcessor(LSFMetricsProcessor):
         for line in job_lines:
             parts = line.split()
             if len(parts) < 1:
+                self.log.debug("Skipping empty job line with missing job ID: %s", line)
                 continue
 
             job_id = parts[0]

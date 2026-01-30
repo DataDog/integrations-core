@@ -548,6 +548,16 @@ def test_bhist_details(mock_client, dd_run_check, aggregator, instance):
             "No jobs found in bhist output. No completed job IDs will be tracked.",
             id="insufficient_lines",
         ),
+        pytest.param(
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL\n   \nsdfsdf",
+                "",
+                0,
+            ),
+            "Skipping empty job line with missing job ID:",
+            id="empty_job_line",
+        ),
     ],
 )
 def test_bhist_get_completed_job_ids_error(
@@ -558,7 +568,7 @@ def test_bhist_get_completed_job_ids_error(
     check.client = mock_client
     mock_client.bhist.return_value = bhist_output
 
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
     dd_run_check(check)
 
     assert_metrics(LSID_METRICS, [], aggregator)
