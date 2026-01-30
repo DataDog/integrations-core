@@ -86,3 +86,16 @@ def transform_time_left(val: str) -> int:
         return int(parts[0]) * 3600 + int(parts[1]) * 60
     else:
         return int(val) * 60
+
+
+class RecentlyCompletedJobIDs:
+    """share recently completed job IDs between BHistProcessor and BHistDetailsProcessor."""
+
+    def __init__(self) -> None:
+        self.completed_job_ids: list[str] = []
+
+    def set_job_ids(self, job_ids: list[str]) -> None:
+        self.completed_job_ids = job_ids
+
+    def get_job_ids(self) -> list[str]:
+        return self.completed_job_ids.copy()
