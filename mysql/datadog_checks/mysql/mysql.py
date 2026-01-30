@@ -686,15 +686,15 @@ class MySql(DatabaseCheck):
             metrics.update(TABLE_VARS)
 
         if self._config.replication_enabled:
+            with tracked_query(self, operation="replication_metrics"):
+                replication_metrics = self._collect_replication_metrics(db, results, above_560)
+            metrics.update(replication_metrics)
+            self._check_replication_status(results)
+
             if self.global_variables.performance_schema_enabled and self._group_replication_active:
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
                     self._collect_group_replica_metrics(db, results)
-            else:
-                with tracked_query(self, operation="replication_metrics"):
-                    replication_metrics = self._collect_replication_metrics(db, results, above_560)
-                metrics.update(replication_metrics)
-                self._check_replication_status(results)
 
         if len(self._config.additional_status) > 0:
             additional_status_dict = {}
