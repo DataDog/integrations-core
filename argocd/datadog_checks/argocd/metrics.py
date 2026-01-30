@@ -46,12 +46,27 @@ APPLICATION_CONTROLLER = {
     'argocd_app_sync': 'app.sync',
     'argocd_app_sync_duration_seconds': 'app.sync.duration.seconds',
     'argocd_app_labels': 'app.labels',
+    'argocd_app_condition': 'app.condition',
+    'argocd_app_orphaned_resources_count': 'app.orphaned_resources.count',
+    'argocd_resource_events_processing': 'resource_events.processing',
+    'argocd_resource_events_processed_in_batch': 'resource_events.processed_in_batch',
     'argocd_cluster_api_resource_objects': 'cluster.api.resource_objects',
     'argocd_cluster_api_resources': 'cluster.api.resources',
     'argocd_cluster_cache_age_seconds': 'cluster.cache.age.seconds',
     'argocd_cluster_events': 'cluster.events',
     'argocd_kubectl_exec_pending': 'kubectl.exec.pending',
     'argocd_kubectl_exec': 'kubectl.exec',
+    'argocd_kubectl_client_cert_rotation_age_seconds': 'kubectl.client_cert_rotation.age.seconds',
+    'argocd_kubectl_request_duration_seconds': 'kubectl.request.duration.seconds',
+    'argocd_kubectl_dns_resolution_duration_seconds': 'kubectl.dns_resolution.duration.seconds',
+    'argocd_kubectl_request_size_bytes': 'kubectl.request.size.bytes',
+    'argocd_kubectl_response_size_bytes': 'kubectl.response.size.bytes',
+    'argocd_kubectl_rate_limiter_duration_seconds': 'kubectl.rate_limiter.duration.seconds',
+    'argocd_kubectl_requests_total': 'kubectl.requests',
+    'argocd_kubectl_exec_plugin_call_total': 'kubectl.exec_plugin.call',
+    'argocd_kubectl_request_retries_total': 'kubectl.request.retries',
+    'argocd_kubectl_transport_cache_entries': 'kubectl.transport.cache_entries',
+    'argocd_kubectl_transport_create_calls_total': 'kubectl.transport.create_calls',
     'argocd_redis_request_duration': 'redis.request.duration',
     'workqueue_adds': 'workqueue.adds',
     'workqueue_depth': 'workqueue.depth',
@@ -72,6 +87,13 @@ APPSET_CONTROLLER = {
     'argocd_appset_reconcile': 'appset.reconcile',
     'argocd_appset_owned_applications': 'appset.owned.applications',
     'argocd_appset_labels': 'appset.labels',
+    # GitHub API metrics (optional, disabled by default in ArgoCD)
+    'argocd_github_api_requests_total': 'github_api.requests',
+    'argocd_github_api_request_duration_seconds': 'github_api.request.duration.seconds',
+    'argocd_github_api_rate_limit_remaining': 'github_api.rate_limit.remaining',
+    'argocd_github_api_rate_limit_limit': 'github_api.rate_limit.limit',
+    'argocd_github_api_rate_limit_reset_seconds': 'github_api.rate_limit.reset.seconds',
+    'argocd_github_api_rate_limit_used': 'github_api.rate_limit.used',
 }
 
 API_SERVER = {
@@ -80,13 +102,25 @@ API_SERVER = {
     'grpc_server_msg_sent': 'grpc.server.msg.sent',
     'grpc_server_msg_received': 'grpc.server.msg.received',
     'grpc_server_started': 'grpc.server.started',
+    'argocd_login_request_total': 'login.request',
+    'argocd_proxy_extension_request_total': 'proxy_extension.request',
+    'argocd_proxy_extension_request_duration_seconds': 'proxy_extension.request.duration.seconds',
 }
 
 REPO_SERVER = {
     'argocd_git_request_duration_seconds': 'git.request.duration.seconds',
     'argocd_git_request': 'git.request',
+    'argocd_git_fetch_fail_total': 'git.fetch.fail',
     'argocd_redis_request_duration_seconds': 'redis.request.duration.seconds',
     'argocd_repo_pending_request_total': 'repo.pending.request.total',
+    # OCI registry metrics
+    'argocd_oci_request_total': 'oci.request',
+    'argocd_oci_request_duration_seconds': 'oci.request.duration.seconds',
+    'argocd_oci_test_repo_fail_total': 'oci.test_repo.fail',
+    'argocd_oci_get_tags_fail_total': 'oci.get_tags.fail',
+    'argocd_oci_digest_metadata_fail_total': 'oci.digest_metadata.fail',
+    'argocd_oci_resolve_revision_fail_total': 'oci.resolve_revision.fail',
+    'argocd_oci_extract_fail_total': 'oci.extract.fail',
 }
 
 # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/monitoring/
