@@ -1,4 +1,5 @@
 - name: tls_verify
+  fleet_configurable: true
   value:
     example: true
     type: boolean
