@@ -16,6 +16,10 @@ def instance_db():
     return 'default'
 
 
+def instance_dbm():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 
@@ -33,11 +37,15 @@ def instance_only_custom_queries():
 
 
 def instance_port():
-    return 9000
+    return 8123
 
 
 def instance_read_timeout():
     return 10
+
+
+def instance_single_endpoint_mode():
+    return False
 
 
 def instance_tls_verify():
