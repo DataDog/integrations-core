@@ -97,7 +97,7 @@ instances:
     #
     # dbstrict: false
 
-    ## @param ignore_databases - list of strings - optional
+    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
     ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
     ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
     ## set collect_default_database to false in addition to adding it to this array.
@@ -112,7 +112,7 @@ instances:
     #   - alloydbadmin
     #   - alloydbmetadata
 
-    ## @param ignore_schemas_owned_by - list of strings - optional
+    ## @param ignore_schemas_owned_by - list of strings - optional - default: ['rds_superuser', 'rdsadmin']
     ## A list of database users which own schemas to ignore.
     ## No metrics will be collected for these schemas.
     ## Each value can be a plain string or a Postgres pattern.
@@ -177,7 +177,7 @@ instances:
     #
     # query_timeout: 5000
 
-    ## @param relations - (list of string or mapping) - optional
+    ## @param relations - (list of string or mapping) - optional - default: []
     ## The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
     ## If enabled, `dbname` should be specified to collect database-specific relations metrics.
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
@@ -240,7 +240,7 @@ instances:
     #
     # collect_activity_metrics: false
 
-    ## @param activity_metrics_excluded_aggregations - list of strings - optional
+    ## @param activity_metrics_excluded_aggregations - list of strings - optional - default: []
     ## A list of columns to remove from the pg_stat_activity aggregation.
     ## By default, datname, usename and application_name will be used.
     ## If applications with different application_name are creating a lot of short-lived queries,
@@ -271,17 +271,20 @@ instances:
     #
     collect_bloat_metrics: false
 
-    ## @param collect_wal_metrics - boolean - optional - default: true
+    ## @param collect_wal_metrics - boolean - optional
     ## Collect metrics about WAL file age.
-    ## NOTE:
-    ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
-    ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
+    ##
+    ## When unset, this defaults to `true` for Postgres 10+ (uses `pg_ls_waldir` via SQL) and `false` for
+    ## Postgres 9.6 and below (requires local filesystem access to the WAL directory).
+    ##
+    ## Set to `true` explicitly for Postgres 9.6 and below only if the Agent runs on the same host as the
+    ## database and has read access to the WAL directory. You must also configure `data_directory`.
     #
     # collect_wal_metrics: true
 
     ## @param data_directory - string - optional - default: /usr/local/pgsql/data
-    ## The data directory of your postgres installation
-    ## Required when collecting WAL metrics on Postgres 9.6.
+    ## The data directory of your postgres installation.
+    ## Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
     #
     # data_directory: /usr/local/pgsql/data
 
@@ -399,7 +402,7 @@ instances:
         #   - master$
         #   - AdventureWorks.*
 
-        ## @param exclude - list of strings - optional - default: ['cloudsqladmin', 'rdsadmin', 'alloydbadmin', 'alloydbmetadata']
+        ## @param exclude - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
         ## Regular expression for database names to exclude as part of `database_autodiscovery`.
         ## Character casing is ignored. The regular expressions start matching from the beginning,
         ## so to match anywhere, prepend `.*`. For exact matches append `$`.
@@ -544,7 +547,7 @@ instances:
         #
         # collection_interval: 600
 
-        ## @param ignored_settings_patterns - list of strings - optional
+        ## @param ignored_settings_patterns - list of strings - optional - default: ['plpgsql%']
         ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will
         ## not be collected. This uses the traditional LIKE pattern-matching approach.
         #
@@ -590,8 +593,8 @@ instances:
         # include_databases:
         #   - mydb
 
-        ## @param exclude_databases - list of strings - optional
-        ## A list of regex patterns to exclude databases. 
+        ## @param exclude_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+        ## A list of regex patterns to exclude databases.
         ## Any database whose name matches any one of these patterns will be excluded.
         ## If empty, all databases matching other filters are included.
         #
