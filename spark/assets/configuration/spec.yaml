@@ -135,6 +135,18 @@ files:
           type: boolean
           display_default: false
           example: true
+      - name: startup_wait_retries
+        description: |
+          Controls how to handle "Spark is starting up" responses from the driver.
+          When the Spark driver is not yet ready, it returns a non-JSON startup message
+          instead of the expected JSON response.
+
+          Set to 0 to disable this feature and treat startup messages as errors immediately.
+          Set to a positive integer to retry that many times before marking the check as failed.
+        value:
+          type: integer
+          display_default: 3
+          example: 3
       - template: instances/http
         overrides:
           auth_token.description: |

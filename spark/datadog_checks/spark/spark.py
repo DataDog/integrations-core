@@ -86,6 +86,12 @@ class SparkCheck(AgentCheck):
         self._connection_error_seen = False
         self._debounced_this_run = False
 
+        # Startup retry configuration:
+        # -1: disable (treat startup messages as JSON parse errors immediately)
+        # >0: retry N times before marking as broken
+        self._startup_wait_retries = int(self.instance.get('startup_wait_retries', 3))
+        self._startup_retry_count = 0
+
     def check(self, _):
         self._debounced_this_run = False
 
@@ -701,6 +707,27 @@ class SparkCheck(AgentCheck):
             response_json = response.json()
 
         except JSONDecodeError as e:
+            response_text = response.text.strip()
+            if response_text and 'spark is starting up' in response_text.lower():
+                # Handle startup message based on retry configuration
+                if self._startup_wait_retries > 0:
+                    self._startup_retry_count += 1
+                    if self._startup_retry_count <= self._startup_wait_retries:
+                        self.log.debug(
+                            "Spark driver not ready yet at %s (attempt %d/%d): %s",
+                            self._get_url_base(address),
+                            self._startup_retry_count,
+                            self._startup_wait_retries,
+                            response_text,
+                        )
+                        return None
+                    else:
+                        self.log.warning(
+                            "Spark driver startup retries exhausted (%d/%d)",
+                            self._startup_retry_count,
+                            self._startup_wait_retries,
+                        )
+
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
@@ -709,6 +736,8 @@ class SparkCheck(AgentCheck):
             )
             raise
 
+        # Reset startup retry counter on successful JSON parse
+        self._startup_retry_count = 0
         return response_json
 
     def _should_suppress_connection_error(self, exception, tags):

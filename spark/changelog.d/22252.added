@@ -1,0 +1,1 @@
+Add `startup_wait_retries` option to handle Spark driver startup messages gracefully.

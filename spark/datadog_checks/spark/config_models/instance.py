@@ -96,6 +96,7 @@ class InstanceConfig(BaseModel):
     spark_proxy_enabled: Optional[bool] = None
     spark_ui_ports: Optional[tuple[int, ...]] = None
     spark_url: str
+    startup_wait_retries: Optional[int] = None
     streaming_metrics: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
