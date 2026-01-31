@@ -76,6 +76,7 @@ service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack and the service-ide
 simplejson,PyPI,MIT,Copyright (c) 2006 Bob Ippolito
 snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2023 Snowflake Computing, Inc."
 supervisor,PyPI,BSD-3-Clause-Modification,"Copyright (c) 2002-2005, Daniel Krech, http://eikeon.com/"
+truststore,PyPI,MIT,Copyright (c) 2022 Seth Michael Larson
 tuf,PyPI,Apache-2.0,Copyright (c) 2010 New York University
 tuf,PyPI,MIT,Copyright (c) 2010 New York University
 urllib3,PyPI,MIT,Copyright (c) 2008-2020 Andrey Petrov and contributors.
