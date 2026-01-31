@@ -2,12 +2,14 @@
   required: true
   description: |
     The URL exposing metrics in the OpenMetrics format.
+  fleet_configurable: true
   value:
     type: string
 - name: namespace
   hidden: true
   description: |
     The namespace to be prepended to all metrics.
+  fleet_configurable: true
   value:
     type: string
     pattern: '\w*'
@@ -69,6 +71,7 @@
       - .+:
           type: gauge
       ````
+  fleet_configurable: true
   value:
     example:
       - <METRIC_1>
@@ -142,6 +145,7 @@
       - .+:
           type: gauge
       ```
+  fleet_configurable: true
   value:
     example:
       - <METRIC_1>
@@ -171,6 +175,7 @@
     In order to exclude all metrics but the ones matching a specific filter,
     you can use a negative lookahead regex like:
       - ^(?!foo).*$
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -200,6 +205,7 @@
           type: string
 - name: tag_by_endpoint
   description: Whether to include an endpoint tag or not.
+  fleet_configurable: true
   hidden: true
   value:
     type: boolean
@@ -212,6 +218,7 @@
     Labels defined in `exclude_labels` will take precedence in case of overlap.
 
     Note: Label filtering happens before `rename_labels`.
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -222,6 +229,7 @@
     Labels defined in `exclude_labels` will take precedence in case of overlap.
 
     Note: Label filtering happens before `rename_labels`.
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -244,6 +252,7 @@
 - name: ignore_connection_errors
   description: |
     Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -262,12 +271,14 @@
 - name: collect_histogram_buckets
   description: |
     Whether or not to send histogram buckets.
+  fleet_configurable: true
   value:
     example: true
     type: boolean
 - name: non_cumulative_histogram_buckets
   description: |
     Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -278,6 +289,7 @@
 
     Learn more about distribution metrics:
     https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -286,6 +298,7 @@
     Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
     when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
     `histogram_buckets_as_distributions` option.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -346,6 +359,7 @@
     for improved performance.
 
     Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+  fleet_configurable: true
   value:
     type: boolean
     example: true
