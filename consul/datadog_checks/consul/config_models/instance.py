@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
     )
     acl_token: Optional[str] = None
     allow_redirects: Optional[bool] = None
+    allowed_service_tags: Optional[tuple[str, ...]] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
     aws_host: Optional[str] = None
