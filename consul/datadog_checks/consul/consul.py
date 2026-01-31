@@ -109,6 +109,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
             'service_whitelist', self.instance.get('services_include', default_services_include)
         )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
+        self.services_tags_include_service_name = is_affirmative(
+            self.instance.get('services_tags_include_service_name', True)
+        )
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
         self.collect_health_checks = self.instance.get(
@@ -320,11 +323,12 @@ class ConsulCheck(OpenMetricsBaseCheck):
         return services
 
     @staticmethod
-    def _get_service_tags(service, tags):
+    def _get_service_tags(service, tags, include_service_name):
         service_tags = ['consul_service_id:{}'.format(service)]
 
         for tag in tags:
-            service_tags.append('consul_{}_service_tag:{}'.format(service, tag))
+            if include_service_name:
+                service_tags.append('consul_{}_service_tag:{}'.format(service, tag))
             service_tags.append('consul_service_tag:{}'.format(tag))
 
         return service_tags
@@ -523,7 +527,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         # `consul.catalog.nodes_passing` : # of Nodes with service status `passing` from those registered
         # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
         # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
-        all_service_tags = self._get_service_tags(service, service_tags)
+        all_service_tags = self._get_service_tags(service, service_tags, self.services_tags_include_service_name)
         # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
         node_count_per_status = defaultdict(int)
         for node in nodes_with_service:
