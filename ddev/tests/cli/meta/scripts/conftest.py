@@ -148,7 +148,7 @@ classifiers = [
     write_file(
         repo_path / '.builders' / 'images' / 'linux-aarch64',
         'Dockerfile',
-        """ARG BASE_IMAGE=quay.io/pypa/manylinux2014_aarch64
+        """ARG BASE_IMAGE=quay.io/pypa/manylinux_2_28_aarch64
 FROM ${BASE_IMAGE}
 
 # Compile and install Python 3
@@ -164,7 +164,7 @@ bash install-from-source.sh
     write_file(
         repo_path / '.builders' / 'images' / 'linux-x86_64',
         'Dockerfile',
-        """ARG BASE_IMAGE=quay.io/pypa/manylinux2014_x86_64
+        """ARG BASE_IMAGE=quay.io/pypa/manylinux_2_28_x86_64
 FROM ${BASE_IMAGE}
 
 # Compile and install Python 3
