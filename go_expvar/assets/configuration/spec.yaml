@@ -1,4 +1,5 @@
 name: Go Expvar
+fleet_configurable: true
 files:
 - name: go_expvar.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: expvar_url
+      fleet_configurable: true
       required: true
       description: Expvar URL to gather your metrics from.
       value:
@@ -16,6 +18,7 @@ files:
         example: http://localhost:8080
     - name: namespace
       description: Define your namespace that is prefixed to all metrics collected by this check.
+      fleet_configurable: true
       value:
         type: string
         display_default: go_expvar
@@ -34,6 +37,7 @@ files:
          * count
          * gauge (the default)
          * rate (note that this shows up as a gauge in Datadog that is meant to be seen as a "per second rate")
+      fleet_configurable: true
       value:
         type: array
         items:

@@ -76,6 +76,7 @@
 
   fleet_configurable: true
 - name: use_legacy_auth_encoding
+  fleet_configurable: true
   value:
     example: true
     type: boolean
@@ -209,6 +210,7 @@
         value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
         placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
 - name: aws_region
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -243,6 +245,7 @@
     type: boolean
   description: Instructs the check to validate the TLS certificate of services.
 - name: tls_use_host_header
+  fleet_configurable: true
   value:
     example: false
     type: boolean

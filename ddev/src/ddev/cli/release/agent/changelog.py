@@ -74,17 +74,25 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
         else:
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
-            for name, ver in version_changes.items():
-                try:
-                    display_name = app.repo.integrations.get(name).display_name
-                    display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
-                # OSError is raised if the integration path does not exist - likely a deleted or migrated integration
-                except OSError:
-                    display_name = REMOVED_INTEGRATIONS.get(name, name)
 
-                breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
-                changelog_url = check_changelog_url.format(name)
-                changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url}){breaking_notice}\n')
+            new_integration = any(ver[1] for ver in version_changes.values())
+            if new_integration:
+                changelog_contents.write('### New Integrations\n')
+                for name, ver in version_changes.items():
+                    if ver[1]:
+                        display_name = get_display_name(app, name)
+                        changelog_url = check_changelog_url.format(name)
+                        changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url})\n')
+
+            new_change = any(not ver[1] for ver in version_changes.values())
+            if new_change:
+                changelog_contents.write("### Integration Updates\n")
+                for name, ver in version_changes.items():
+                    if not ver[1]:
+                        display_name = get_display_name(app, name)
+                        breaking_notice = " **BREAKING CHANGE**" if ver[2] else ""
+                        changelog_url = check_changelog_url.format(name)
+                        changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url}){breaking_notice}\n')
             # add an extra line to separate the release block
             changelog_contents.write('\n')
 
@@ -99,3 +107,14 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
         dest.write_text(changelog_contents.getvalue())
     else:
         app.display(changelog_contents.getvalue())
+
+
+def get_display_name(app: Application, name: str) -> str:
+    try:
+        display_name = app.repo.integrations.get(name).display_name
+        display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
+    # OSError is raised if the integration path does not exist - likely a deleted or migrated integration
+    except OSError:
+        display_name = REMOVED_INTEGRATIONS.get(name, name)
+
+    return display_name

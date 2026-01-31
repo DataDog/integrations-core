@@ -105,8 +105,13 @@ class StatementMetrics:
 
             result.append(diffed_row)
 
-        self._previous_statements.clear()
-        self._previous_statements = merged_rows
+        # Only cache the metric columns needed for derivative computation.
+        # Non-metric columns (query text, metadata, etc.) are not needed for the diff calculation
+        # and would waste memory. The returned diffed_row already uses current row values for
+        # non-metric columns.
+        self._previous_statements = {
+            row_key: {col: row[col] for col in metrics if col in row} for row_key, row in merged_rows.items()
+        }
 
         return result
 
