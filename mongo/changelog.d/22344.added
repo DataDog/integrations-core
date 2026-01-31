@@ -1,0 +1,1 @@
+Add query metrics collection using $queryStats aggregation pipeline (MongoDB 8.0+)

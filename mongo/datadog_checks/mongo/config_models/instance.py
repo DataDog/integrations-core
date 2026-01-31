@@ -108,6 +108,17 @@ class OperationSamples(BaseModel):
     explain_verbosity: Optional[str] = None
 
 
+class QueryMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[float] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
+
+
 class Schemas(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -163,6 +174,7 @@ class InstanceConfig(BaseModel):
     operation_samples: Optional[OperationSamples] = None
     options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
+    query_metrics: Optional[QueryMetrics] = None
     replica_check: Optional[bool] = None
     reported_database_hostname: Optional[str] = None
     schemas: Optional[Schemas] = None
