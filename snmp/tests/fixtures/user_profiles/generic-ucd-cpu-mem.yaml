@@ -1,3 +1,5 @@
 extends:
+  - _base.yaml
   - _generic-ucd-cpu-mem.yaml
-  - _generic-ucd-base.yaml
+
+sysobjectid: 1.2.3.41
