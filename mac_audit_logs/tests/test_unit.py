@@ -138,8 +138,9 @@ def test_convert_local_to_utc_timezone_timestamp_str():
 @pytest.mark.unit
 @patch("os.path.isdir", return_value=True)
 @patch('os.listdir', return_value=file_names)
+@patch("os.path.isfile", side_effect=lambda path: not path.endswith(("current", "_hold", "secure")))
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-def test_collect_relevant_files(mock_listdir, mock_isdir, utc_timestamp_minus_hours, instance):
+def test_collect_relevant_files(mock_listdir, mock_isdir, mock_isfile, utc_timestamp_minus_hours, instance):
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
     # Call the method
     result = check.collect_relevant_files("20230401120000")
