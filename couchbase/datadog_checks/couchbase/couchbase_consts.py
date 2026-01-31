@@ -364,7 +364,6 @@ SYNC_GATEWAY_COUNT_METRICS = [
 INDEX_STATS_COUNT_METRICS = [
     "cache_hits",
     "cache_misses",
-    "items_count",
     "num_docs_indexed",
     "num_items_flushed",
     "num_requests",
@@ -372,6 +371,7 @@ INDEX_STATS_COUNT_METRICS = [
     "num_scan_errors",
     "num_scan_timeouts",
     "scan_bytes_read",
+    "total_scan_duration",
 ]
 
 INDEXER_STATE_MAP = {'Active': 0, 'Pause': 1, 'Warmup': 2}

@@ -880,9 +880,22 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
+      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+    strategy:
+      matrix:
+        target-env:
+        - py3.13-7.0-rest
+        - py3.13-7.0-prometheus
+        - py3.13-7.1-rest
+        - py3.13-7.1-prometheus
+        - py3.13-7.2-rest
+        - py3.13-7.2-prometheus
+        - py3.13-7.6-rest
+        - py3.13-7.6-prometheus
+      fail-fast: false
   ja3692a6:
     uses: ./.github/workflows/test-target.yml
     with:

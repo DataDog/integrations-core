@@ -45,10 +45,27 @@ init_config:
 #
 instances:
 
-    ## @param server - string - required
-    ## The server's url.
+  -
+    ## @param server - string - optional - default: http://localhost:8091
+    ## The server's url for the legacy REST API-based check.
+    ## Required if prometheus_url is not set.
     #
-  - server: http://localhost:8091
+    # server: http://localhost:8091
+
+    ## @param prometheus_url - string - optional - default: http://localhost:8091/metrics
+    ## The Prometheus/OpenMetrics endpoint URL for the Prometheus-based check.
+    ## Required if server is not set. This enables collection of metrics from Couchbase's
+    ## Prometheus exporter (available in Couchbase 7.0+).
+    #
+    # prometheus_url: http://localhost:8091/metrics
+
+    ## @param labels_mapper - mapping - optional
+    ## A mapping of Prometheus labels to rename to avoid conflicts with reserved tag names.
+    ## By default, the "service" label is renamed to "couchbase_service" to avoid conflict
+    ## with Datadog's reserved "service" tag while preserving the contextual information.
+    #
+    # labels_mapper:
+    #   service: couchbase_service
 
     ## @param query_monitoring_url - string - optional - default: http://localhost:8093
     ## Url to get query monitoring stats, available since couchbase 4.5.
