@@ -523,10 +523,13 @@ jobs:
     - name: Extract staged standalone binaries
       run: ${{ steps.script-extract.outputs.script }}
 
+    # Signing and notarization steps are skipped for Dependabot PRs (no access to Apple secrets)
     - name: Sign standalone binaries
+      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize standalone binaries
+      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
       run: ${{ steps.script-notarize.outputs.script }}
 
     - name: Archive standalone binaries
@@ -559,9 +562,11 @@ jobs:
       run: ${{ steps.script-extract.outputs.script }}
 
     - name: Sign managed binaries
+      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize managed binaries
+      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
       run: ${{ steps.script-notarize.outputs.script }}
 
     # bin/<APP_NAME>-<VERSION>-<TARGET> -> targets/<TARGET>/<APP_NAME>
@@ -604,6 +609,7 @@ jobs:
         echo "path=$pkg_file" >> "$GITHUB_OUTPUT"
 
     - name: Sign PKG
+      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
       run: >-
         rcodesign sign -vv
         --pem-source /tmp/certificate-installer.pem
@@ -612,6 +618,7 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Notarize PKG
+      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
       run: >-
         rcodesign notary-submit
         --api-key-path /tmp/app-store-connect.json
@@ -619,6 +626,7 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Upload installer
+      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: installers-${{ runner.os }}
