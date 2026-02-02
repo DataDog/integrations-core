@@ -4,6 +4,8 @@
 
 This check monitors [Argo Workflows][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.53.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running in your Kubernetes environment. For more information about configuration in containerized environments, see the [Autodiscovery Integration Templates][3] for guidance.

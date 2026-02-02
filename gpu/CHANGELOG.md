@@ -1,5 +1,11 @@
 # CHANGELOG - GPU
 
+## 0.5.0
+
+***Added***:
+
+* Added Xid errors count metric: `gpu.errors.xid.total`.
+
 ## 0.4.1
 
 ***Added***:

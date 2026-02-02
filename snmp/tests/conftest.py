@@ -11,6 +11,7 @@ import pytest
 import requests
 import yaml
 
+from datadog_checks.base.agent import datadog_agent
 from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from datadog_checks.dev.docker import get_container_ip
 
@@ -104,6 +105,7 @@ def create_datadog_conf_file(tmp_dir):
         # Setting check_runners to a negative number to disable check runners is a workaround,
         # Datadog Agent might not guarantee this behaviour in the future.
         'check_runners': -1,
+        'hostname': datadog_agent.get_hostname(),
         'network_devices': {
             'autodiscovery': {
                 'workers': 4,
@@ -144,7 +146,7 @@ def create_datadog_conf_file(tmp_dir):
                         'privacy_key': 'doggiePRIVkey',
                         'privacy_protocol': 'des',
                         'context_name': 'public',
-                        'ignored_ip_addresses': {'{}.2'.format(prefix): True},
+                        'ignored_ip_addresses': ['{}.2'.format(prefix)],
                         'loader': 'core',
                     },
                     {
@@ -160,7 +162,7 @@ def create_datadog_conf_file(tmp_dir):
                         'privacy_key': 'doggiePRIVkey',
                         'privacy_protocol': 'AES',
                         'context_name': 'public',
-                        'ignored_ip_addresses': {'{}.2'.format(prefix): True},
+                        'ignored_ip_addresses': ['{}.2'.format(prefix)],
                         'loader': 'core',
                     },
                 ],

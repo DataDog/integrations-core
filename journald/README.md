@@ -5,6 +5,8 @@
 Systemd-journald is a system service that collects and stores logging data. 
 It creates and maintains structured, indexed journals based on logging information from a variety of sources.
 
+**Minimum Agent version:** 7.29.0
+
 ## Setup
 
 ### Installation

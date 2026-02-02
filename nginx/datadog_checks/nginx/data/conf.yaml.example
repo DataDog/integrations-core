@@ -52,7 +52,7 @@ instances:
     ## configuration stanza.  On debian/ubuntu, this is included in the
     ## `nginx-extras` package.  For more details, see:
     ##
-    ##   http://docs.datadoghq.com/integrations/nginx/
+    ##   https://docs.datadoghq.com/integrations/nginx/
     ##
     ## For NGINX Plus API Release 13+ users using the http_api_module,
     ## set nginx_status_url to the location of the `/api` endpoint.
@@ -60,11 +60,19 @@ instances:
     #
   - nginx_status_url: http://localhost:81/nginx_status/
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as `cluster` will be replaced by nginx_cluster to avoid
+    ## getting mixed with other integration tags. Note that this is only relevant 
+    ## to service check submissions. Metrics do not include any generic tags. 
+    ## Datadog recommends setting this to `true` to avoid confusion.
+    #
+    disable_generic_tags: true
+
     ## @param use_plus_api - boolean - optional - default: false
-    ## If you are using the commercial version of nginx, for releases R13 and above,
-    ## there is a new API to replace the extended status API.
-    ## See https://www.nginx.com/blog/nginx-plus-r13-released/
-    ## To use it set `use_plus_api` to true
+    ## If you are using the commercial version of NGINX for releases R13 and above,
+    ## there is a new API that replaces the extended status API.
+    ## See https://www.nginx.com/blog/nginx-plus-r13-released/.
+    ## To use it, set `use_plus_api` to `true`.
     #
     # use_plus_api: false
 
@@ -443,13 +451,6 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param disable_generic_tags - boolean - optional - default: false
-    ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
-    ## getting mixed with other integration tags.
-    ## Note that this is only relevant to service check submissions. Metrics do not include any generic tags.
-    #
-    disable_generic_tags: true
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.

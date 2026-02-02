@@ -1,0 +1,2 @@
+HOST_NAME                  gpuid       gpu_model  gpu_mode gpu_temp  gpu_ecc  gpu_ut  gpu_mut  gpu_power  gpu_mtotal  gpu_mused  gpu_pstate  gpu_status  gpu_error
+ip-11-21-111-198.ec2.internal      0         TeslaT4          0      26C        0      5%       0%      25972         15G       431M           0          ok  -

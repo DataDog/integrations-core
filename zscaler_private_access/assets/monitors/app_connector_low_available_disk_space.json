@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2025-09-03",
+	"last_updated_at": "2025-09-03",
+	"title": "App connector low available disk space",
+	"description": "This monitor triggers an alert when the App connector's available disk space falls at or below 100 bytes, which may compromise system stability and logging, and can affect the processing of user connections in a reliable manner.",
+	"definition": {
+		"id": 186318366,
+		"name": "App connector low available disk space",
+		"type": "log alert",
+		"query": "logs(\"source:zscaler-private-access service:app-connector-metrics @AvailableDiskBytes:<=100\").index(\"*\").rollup(\"count\").by(\"@Connector\").last(\"5m\") >= 1",
+		"message": "{{#is_alert}} \nConnector: `{{@Connector}}` detected with low available disk space(<=100), which may impact system stability, logging, and the ability to process user connections reliably.\n{{/is_alert}}\n\n@example@example.com",
+		"tags": [
+			"source:zscaler-private-access"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"enable_logs_sample": true,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:zscaler-private-access"
+	]
+}

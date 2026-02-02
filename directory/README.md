@@ -9,6 +9,8 @@ Capture metrics from directories and files of your choosing. The Agent collects:
 - Age of the last modification
 - Age of the creation
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

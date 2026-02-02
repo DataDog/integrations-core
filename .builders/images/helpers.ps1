@@ -38,3 +38,12 @@ function Add-ToPath() {
     $target="$oldPath;$Append"
     [Environment]::SetEnvironmentVariable("Path", $target, [System.EnvironmentVariableTarget]::User)
 }
+
+
+function RunOnVSConsole() {
+    param(
+        [Parameter(Mandatory = $true)][string] $Command
+    )
+    Write-Host "Running $Command"
+    Start-Process -Wait -NoNewWindow "cmd.exe" -ArgumentList "/c ""$Env:VCVARSALL_BAT"" $Env:DD_TARGET_ARCH && $Command"
+}

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8c4717a8-93f0-4de6-b79b-1e7f52c94895",
   "app_id": "azure-active-directory",
+  "owner": "azureintegrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

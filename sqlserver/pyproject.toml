@@ -23,12 +23,12 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.13.0",
+    "datadog-checks-base>=37.27.1",
 ]
 dynamic = [
     "version",
@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "azure-identity==1.24.0",
-    "lxml==5.1.1",
+    "lxml==6.0.1",
     "pyodbc==5.2.0",
     "pywin32==311; sys_platform == 'win32'",
 ]

@@ -4,6 +4,8 @@
 
 The NFS integration collects metrics about mount points on the NFS client as it uses the `nfsiostat` tool that displays NFS client per-mount [statistics][1].
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.

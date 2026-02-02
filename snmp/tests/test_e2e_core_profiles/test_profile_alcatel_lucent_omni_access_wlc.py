@@ -33,6 +33,7 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'wlsx_model_name:quaintly Jaded oxen oxen',
         'wlsx_switch_license_serial_number:quaintly oxen their',

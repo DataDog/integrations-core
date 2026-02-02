@@ -16,6 +16,7 @@
         - event
         - set_metadata
         - metadata_entrypoint
+        - persistent_cache_id
         - read_persistent_cache
         - write_persistent_cache
         - send_log

@@ -10,6 +10,8 @@ import pytest
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.pgbouncer import PgBouncer
 
+from .common import DEFAULT_INSTANCE, INSTANCE_NO_PASS, INSTANCE_URL
+
 
 @pytest.mark.unit
 def test_config_missing_host(instance):
@@ -235,3 +237,30 @@ def test_no_new_connection_when_cached_exists(instance):
 
         # Verify that the existing connection is still open
         assert check.connection is not None
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'instance',
+    [
+        pytest.param(INSTANCE_NO_PASS, id="no password, ident method"),
+        pytest.param(INSTANCE_URL, id="connecting via database_url"),
+        pytest.param(DEFAULT_INSTANCE, id="default connection"),
+    ],
+)
+def test_always_use_client_cusor(instance):
+    """
+    This test verifies whether we always use the ClientCursor with autocommit=True.
+    This in turn verifies we are using simple query protocol rather than extended
+    query protocol.
+    """
+    mock_connection = MagicMock()
+    with patch('psycopg.connect', return_value=mock_connection) as mock_connect:
+        check = PgBouncer('pgbouncer', {}, [instance])
+
+        check.check(instance)
+
+        cursor_factory = mock_connect.call_args.kwargs.get('cursor_factory')
+        use_autocommit = mock_connect.call_args.kwargs.get('autocommit')
+        assert cursor_factory == pg.ClientCursor
+        assert use_autocommit

@@ -83,6 +83,35 @@ class KafkaConfig:
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
 
+        self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
+
+        if self._cluster_monitoring_enabled:
+            self._monitor_unlisted_consumer_groups = True
+            if not is_affirmative(instance.get('monitor_unlisted_consumer_groups', False)):
+                self.log.debug(
+                    "Cluster monitoring is enabled. Automatically enabling consumer lag collection "
+                    "for all consumer groups (monitor_unlisted_consumer_groups)."
+                )
+
+            self._data_streams_enabled = True
+            if not is_affirmative(instance.get('data_streams_enabled', False)):
+                self.log.debug(
+                    "Cluster monitoring is enabled. Automatically enabling Data Streams monitoring "
+                    "(data_streams_enabled)."
+                )
+        else:
+            self._data_streams_enabled = is_affirmative(instance.get('data_streams_enabled', False))
+
+        self._collect_schema_registry = instance.get('schema_registry_url')
+
+        # Schema Registry authentication
+        self._schema_registry_username = instance.get('schema_registry_username')
+        self._schema_registry_password = instance.get('schema_registry_password')
+        self._schema_registry_tls_verify = is_affirmative(instance.get('schema_registry_tls_verify', True))
+        self._schema_registry_tls_cert = instance.get('schema_registry_tls_cert')
+        self._schema_registry_tls_key = instance.get('schema_registry_tls_key')
+        self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
+
     def validate_config(self):
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')

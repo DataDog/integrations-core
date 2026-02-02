@@ -28,6 +28,7 @@ files:
       - name: password
         description: The password of `username`.
         required: True
+        secret: true
         value:
           type: string
       - name: host

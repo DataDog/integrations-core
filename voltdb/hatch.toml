@@ -9,7 +9,7 @@ mypy-deps = [
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 version = ["8.4", "10.0"]
 tls = ["with-tls", "without-tls"]
 

@@ -4,6 +4,8 @@
 
 This check monitors [Tekton][1] through the Datadog Agent. Tekton is a powerful and flexible open source framework for creating CI/CD systems, allowing developers to build, test, and deploy across cloud providers and on-premise systems.
 
+**Minimum Agent version:** 7.53.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

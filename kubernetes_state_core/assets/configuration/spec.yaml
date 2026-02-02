@@ -86,7 +86,7 @@ files:
             description: |
               disable_global_tags disables adding the global host tags defined via tags/DD_TAG in the Agent config, default false.
             value:
-              type: bool
+              type: boolean
               example: false
           - name: namespaces
             required: false
@@ -95,7 +95,7 @@ files:
 
                Example: Enable metric collection for objects in prod and kube-system namespaces.
             value:
-              type: list
+              type: array
               items:
                 type: string
               example:
@@ -114,7 +114,7 @@ files:
               enables telemetry check's metrics, default false.
               Metrics can be found under kubernetes_state.telemetry
             value:
-              type: bool
+              type: boolean
               example: false
           - name: skip_leader_election
             required: false
@@ -122,5 +122,5 @@ files:
               skip_leader_election forces ignoring the leader election when running the check
               Can be useful when running the check as cluster check
             value:
-              type: bool
+              type: boolean
               example: false

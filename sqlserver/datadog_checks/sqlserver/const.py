@@ -26,7 +26,32 @@ STATIC_INFO_SERVERNAME = 'servername'
 STATIC_INFO_INSTANCENAME = 'instancename'
 STATIC_INFO_FULL_SERVERNAME = 'full_servername'
 STATIC_INFO_VERSION = 'version'
+# SQLSERVER_MAJOR_VERSIONS = [
+#     (2025, 17),
+#     (2022, 16),
+#     (2019, 15),
+#     (2017, 14),
+#     (2016, 13),
+#     (2014, 12),
+#     (2012, 11),
+#     (2008, 10),     # 2008 and 2008 R2 share major version 10, but R2 is 10.50.x, 2008 is 10.00.x
+# ]
+# https://learn.microsoft.com/en-us/troubleshoot/sql/releases/download-and-install-latest-updates
+STATIC_INFO_YEAR = 'year'
 STATIC_INFO_MAJOR_VERSION = 'major_version'
+
+# Database Engine edition of the instance of SQL Server installed on the server.
+# 1 = Personal or Desktop Engine (Not available in SQL Server 2005 (9.x) and later versions.)
+# 2 = Standard (For Standard, Standard Developer, Web, and Business Intelligence.)
+# 3 = Enterprise (For Enterprise, Enterprise Developer, Developer, and Evaluation editions.)
+# 4 = Express (For Express, Express with Tools, and Express with Advanced Services)
+# 5 = SQL Database
+# 6 = Azure Synapse Analytics
+# 8 = Azure SQL Managed Instance
+# 9 = Azure SQL Edge (For all editions of Azure SQL Edge)
+# 11 = Azure Synapse serverless SQL pool, or Microsoft Fabric
+# 12 = Microsoft Fabric SQL database in Microsoft Fabric.
+# https://learn.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql?view=sql-server-ver17
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'
 STATIC_INFO_RDS = 'is_rds'
 AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
@@ -62,7 +87,6 @@ expected_sys_databases_columns = [
 ]
 
 DATABASE_SERVICE_CHECK_QUERY = """SELECT 1;"""
-SWITCH_DB_STATEMENT = """USE [{}];"""
 
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
@@ -212,6 +236,7 @@ DATABASE_FILES_METRICS = [
     ('sqlserver.database.files.state', 'sys.database_files', 'state'),
 ]
 DATABASE_STATS_METRICS = [
+    ('sqlserver.database.user_access', 'sys.databases', 'user_access'),
     ('sqlserver.database.state', 'sys.databases', 'state'),
     ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
     ('sqlserver.database.is_in_standby', 'sys.databases', 'is_in_standby'),

@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-count-per-pipeline-checks
 id: proxysql
 metric_id: proxysql
 backend_only: false

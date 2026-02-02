@@ -14,7 +14,7 @@ from datadog_checks.dev.subprocess import run_command
 
 
 def setup_kuma():
-    kuma_version = os.environ.get("KUMA_VERSION", "2.10.1")
+    kuma_version = os.environ.get("KUMA_VERSION", "2.10.6")
     run_command(["kubectl", "create", "namespace", "kuma-system"])
     run_command(["helm", "repo", "add", "kuma", "https://kumahq.github.io/charts"])
     run_command(["helm", "repo", "update"])

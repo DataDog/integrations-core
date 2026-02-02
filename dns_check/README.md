@@ -4,6 +4,8 @@
 
 Monitor the resolvability of and lookup times for any DNS records using nameservers of your choosing.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

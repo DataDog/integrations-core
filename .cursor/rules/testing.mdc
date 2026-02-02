@@ -1,8 +1,0 @@
----
-description: 
-globs: **/*.py
-alwaysApply: false
----
-Run unit and integration tests with `ddev --no-interactive test <INTEGRATION>`. For example, for the pgbouncer integration, run `ddev --no-interactive test pgbouncer`.
-Run E2E tests with `ddev --no-interactive env test <INTEGRATION> --dev`. For example, for the pgbouncer integration, run `ddev --no-interactive env test pgbouncer --dev`.
-Run specific tests with `ddev --no-interactive test <INTEGRATION> -- -k <PYTEST_FILTER_STRING>`, for example `ddev --no-interactive test kuma -- -k test_code_class_injection -s`.

@@ -29,7 +29,7 @@ def _create_conn_args(pg_instance, application_name="test_connection_pool"):
     """
     return PostgresConnectionArgs(
         application_name=application_name,
-        user=pg_instance["username"],
+        username=pg_instance["username"],
         password=pg_instance["password"],
         host=pg_instance["host"],
         port=int(pg_instance["port"]),
@@ -40,7 +40,7 @@ def _make_base_args(**overrides):
     """Helper to create base connection arguments with defaults."""
     base = {
         "application_name": "test_app",
-        "user": "testuser",
+        "username": "testuser",
         "password": "testpass",
         "host": "localhost",
         "port": 5432,
@@ -738,7 +738,7 @@ def test_closed_state_and_pool_creation_prevention():
     # Create a pool manager with mock connection args (no real DB needed for this test)
     conn_args = PostgresConnectionArgs(
         application_name="test_closed_state",
-        user="testuser",
+        username="testuser",
         password="testpass",
         host="localhost",
         port=5432,

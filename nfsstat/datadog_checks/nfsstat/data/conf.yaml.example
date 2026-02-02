@@ -28,7 +28,7 @@ instances:
 
   -
     ## @param disable_missing_mountpoints_warning - boolean - optional - default: false
-    ## If false, no warning is logged if host has check enabled but no NFS mount point is found.
+    ## If true, no warning is logged if host has check enabled but no NFS mount point is found.
     #
     # disable_missing_mountpoints_warning: false
 

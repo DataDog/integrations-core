@@ -1,0 +1,38 @@
+{{
+  "manifest_version": "2.0.0",
+  "app_uuid": "{app_uuid}",
+  "app_id": "{integration_id}",
+  "display_on_public_website": false,
+  "tile": {{
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "{description}",
+    "title": "{integration_name}",
+    "media": [],
+    "classifier_tags": [
+      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::<FILL IN>",
+      "Category::Event Management",
+      "Offering::Integration",
+      "Submitted Data Type::<FILL IN>"
+    ]
+  }},
+  "assets": {{
+    "integration": {{
+        "auto_install": {auto_install},
+        "source_type_id": {source_type_id},
+        "source_type_name": "{integration_name}",
+        "events": {{
+          "creates_events": true
+        }},
+    }},
+    "monitors": {{}},
+    "saved_views": {{}}
+  }},{pricing_plan}{terms}{author_info}
+}}
+

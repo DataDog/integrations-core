@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-count-per-pipeline-checks
 id: linux-audit-logs
 metric_id: linux-audit-logs
 backend_only: false

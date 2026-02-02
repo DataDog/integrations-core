@@ -4,6 +4,8 @@
 
 This check monitors [Vault][1] cluster health and leader changes.
 
+**Minimum Agent version:** 6.3.2
+
 ## Setup
 
 ### Installation

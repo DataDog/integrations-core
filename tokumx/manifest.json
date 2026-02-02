@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8169c714-555c-4e00-9be0-c6604cf1e858",
   "app_id": "tokumx",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

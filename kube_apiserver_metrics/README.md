@@ -6,6 +6,8 @@
 
 This check monitors [Kube_apiserver_metrics][2].
 
+**Minimum Agent version:** 6.11.3
+
 ## Setup
 
 ### Installation

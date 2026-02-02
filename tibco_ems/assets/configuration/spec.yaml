@@ -36,6 +36,7 @@ files:
         Password from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
         For the check to work, this user must have access so that the Datadog Tibeco EMS
         check can execute the `show` command.
+      secret: true
       value:
         type: string
     - name: script_path

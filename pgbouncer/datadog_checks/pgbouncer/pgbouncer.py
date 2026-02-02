@@ -155,7 +155,6 @@ class PgBouncer(AgentCheck):
             'user': self.user,
             'password': self.password,
             'dbname': self.DB_NAME,
-            'cursor_factory': ClientCursor,
             'client_encoding': 'utf-8',
         }
         if self.port:
@@ -170,7 +169,9 @@ class PgBouncer(AgentCheck):
             connect_kwargs = self._get_connect_kwargs()
             # Somewhat counterintuitively, we need to set autocommit to True to avoid a BEGIN/COMMIT block
             # https://www.psycopg.org/psycopg3/docs/basic/transactions.html#autocommit-transactions
-            connection = pg.connect(**connect_kwargs, autocommit=True)
+            # We need to set ClientCursor to true to use simple query protocol:
+            # https://www.psycopg.org/psycopg3/docs/advanced/cursors.html#simple-query-protocol
+            connection = pg.connect(**connect_kwargs, autocommit=True, cursor_factory=ClientCursor)
             return connection
         except Exception:
             if connection:

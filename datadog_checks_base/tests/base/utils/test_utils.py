@@ -10,7 +10,7 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
-from datadog_checks.base.utils.containers import hash_mutable, iter_unique
+from datadog_checks.base.utils.containers import hash_mutable, hash_mutable_stable, iter_unique
 from datadog_checks.base.utils.limiter import Limiter
 from datadog_checks.base.utils.secrets import SecretsSanitizer
 
@@ -131,6 +131,15 @@ class TestRounding:
 
 
 class TestContainers:
+    COMPLEX_OBJECT = {
+        'url': 'http://localhost:9090/metrics',
+        'tags': ['test:tag', 'env:dev'],
+        'port': 9090,
+        'options': {'timeout': 5, 'retries': 3},
+        'none_value': None,
+        123: 'integer_key',
+    }
+
     def test_iter_unique(self):
         custom_queries = [
             {
@@ -179,10 +188,12 @@ class TestContainers:
     )
     def test_hash_mutable_unsupported_mixed_type(self, value):
         """
-        Hashing mixed type containers is not supported, mostly because we haven't needed to add support for it yet.
+        Mixed typed containers should be valid as well.
         """
-        with pytest.raises(TypeError):
+        try:
             hash_mutable(value)
+        except TypeError:
+            pytest.fail("Mixed typed containers should not raise TypeError.")
 
     @pytest.mark.parametrize(
         'left, right',
@@ -196,6 +207,12 @@ class TestContainers:
         hash_mutable() is expected to return the same hash regardless of the order of items in the container.
         """
         assert hash_mutable(left) == hash_mutable(right)
+
+    # Tests for the hash_mutable_stable just ensure that the hash is always the same
+    # No need to cover all usecases since internally we use the same logic as with hash_mutable
+    def test_hash_mutable_stable(self):
+        expected = "13d8320744fcf8a4c2a1dfe3c4401153b81f5481ddae622374fcf44712198b3c"
+        assert hash_mutable_stable(self.COMPLEX_OBJECT) == expected
 
 
 class TestBytesUnicode:

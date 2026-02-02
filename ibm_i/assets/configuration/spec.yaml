@@ -27,6 +27,7 @@ files:
     - name: password
       description: |
         The user profile password used to authenticate to the system.
+      secret: true
       value:
         type: string
     - name: driver

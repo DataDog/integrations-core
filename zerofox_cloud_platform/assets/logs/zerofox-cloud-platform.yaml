@@ -1,0 +1,66 @@
+id: zerofox-cloud-platform
+metric_id: zerofox-cloud-platform
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: ZeroFox Cloud Platform
+  enabled: true
+  filter:
+    query: source:zerofox-cloud-platform
+  processors:
+    - type: date-remapper
+      name: Define `last_modified` as the official date of the log
+      enabled: true
+      sources:
+        - last_modified
+    - name: Lookup on `severity` to `risk_rating`
+      enabled: true
+      source: severity
+      target: risk_rating
+      lookupTable: |-
+        5,Critical
+        4,High
+        3,Medium
+        2,Low
+        1,Info
+      type: lookup-processor
+    - name: Lookup on `severity` to `severity_to_status`
+      enabled: true
+      source: severity
+      target: severity_to_status
+      lookupTable: |-
+        5,Alert
+        4,Critical
+        3,Warning
+        2,Notice
+        1,Info
+      type: lookup-processor
+    - type: status-remapper
+      name: Define `severity_to_status` as the official status of the log
+      enabled: true
+      sources:
+        - severity_to_status
+    - type: string-builder-processor
+      name: Build ZeroFox Platform Alert Link
+      enabled: true
+      template: https://cloud.zerofox.com/alerts/%{id}
+      target: alert_link
+      replaceMissing: true
+    - type: string-builder-processor
+      name: Extract actors from logs
+      enabled: true
+      template: "%{logs.actor}"
+      target: actors
+      replaceMissing: true
+    - type: grok-parser
+      name: Convert actors string to array
+      enabled: true
+      source: actors
+      samples:
+        - " ,,ZeroFox Platform Specialist, "
+        - "ZeroFox Platform Specialist,, "
+      grok:
+        supportRules: ""
+        matchRules: extract_actors (%{regex("\\s*"):},)*%{data:actor:array(",",
+          nullIf(""))}

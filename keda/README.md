@@ -4,6 +4,8 @@
 
 This check monitors [KEDA][1] through the Datadog Agent. For more information, see [KEDA monitoring][10].
 
+**Minimum Agent version:** 7.62.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

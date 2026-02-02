@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "def4c078-7aa6-45ab-8429-b594c98f3d48",
   "app_id": "activemq-xml",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

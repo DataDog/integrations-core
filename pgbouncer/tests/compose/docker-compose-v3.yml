@@ -9,7 +9,8 @@ services:
       - "5432:5432"
 
   pgbouncer:
-    image: "bitnami/pgbouncer:${PGBOUNCER_IMAGE_TAG}"
+    # TODO: use a different source than bitnamilegacy as it will no longer be updated
+    image: "bitnamilegacy/pgbouncer:${PGBOUNCER_IMAGE_TAG}"
     environment:
       POSTGRESQL_USERNAME: postgres
       POSTGRESQL_PASSWORD: d@tadog

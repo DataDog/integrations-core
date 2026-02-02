@@ -14,6 +14,8 @@ This check collects TokuMX metrics, including:
 - Replication lag.
 - Cache table utilization and storage size.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

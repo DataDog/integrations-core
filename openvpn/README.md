@@ -11,6 +11,8 @@ This integration enriches and ingests the following events:
 
 This integration seamlessly collects all of the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The OpenVPN integration provides insight into authentication and connection events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Minimum Agent version:** 7.67.0
+
 ## Setup
 
 ### Installation

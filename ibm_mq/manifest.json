@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d29a1df9-6038-41f5-b017-82bf45f58767",
   "app_id": "ibm-mq",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

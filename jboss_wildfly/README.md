@@ -4,6 +4,8 @@
 
 This check monitors [JBoss][1] and [WildFly][2] applications.
 
+**Minimum Agent version:** 6.11.0
+
 ## Setup
 
 ### Installation

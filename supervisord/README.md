@@ -6,6 +6,8 @@
 
 This check monitors the uptime, status, and number of processes running under Supervisor.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

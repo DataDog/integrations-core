@@ -6,8 +6,8 @@
             "id": 80178177366926,
             "definition": {
                 "type": "image",
-                "url": "https://www.iboss.com/storage/2022/09/500x144-logo-black@2x.png",
-                "url_dark_theme": "https://www.iboss.com/core/assets/iboss/img/2022_iboss-wordmark-primary-white.svg",
+                "url": "https://static.datadoghq.com/static/images/logos/iboss_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/iboss_reversed_large.svg",
                 "sizing": "contain",
                 "margin": "md",
                 "has_background": true,
@@ -1929,27 +1929,6 @@
                             "width": 12,
                             "height": 4
                         }
-                    },
-                    {
-                        "id": 4527190463574390,
-                        "definition": {
-                            "type": "note",
-                            "content": "**Note**\n- This dashboard is populated using logs data.\n- If you have not configured syslog option, please follow the **Installation**, and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
-                            "background_color": "yellow",
-                            "font_size": "16",
-                            "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 43,
-                            "width": 12,
-                            "height": 2
-                        }
                     }
                 ]
             },
@@ -1957,7 +1936,7 @@
                 "x": 0,
                 "y": 5,
                 "width": 12,
-                "height": 46
+                "height": 44
             }
         },
         {
@@ -2760,7 +2739,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 51,
+                "y": 49,
                 "width": 12,
                 "height": 20
             }

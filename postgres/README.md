@@ -10,6 +10,8 @@ Enable [Database Monitoring][28] (DBM) for enhanced insights into query performa
 
 Postgres versions 9.6-16 are supported.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 <div class="alert alert-info">This page describes the standard Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -280,6 +282,7 @@ Then, [instrument your application container that makes requests to Postgres][11
 To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
+**Note**: The `<container-name>.check_names` must match the container name where the integration needs to collect metrics. In the example, we are using `postgres.check_names` because the container name is postgres.
 
 Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][14].
 
@@ -291,9 +294,9 @@ kind: Pod
 metadata:
   name: postgres
   annotations:
-    ad.datadoghq.com/postgresql.check_names: '["postgres"]'
-    ad.datadoghq.com/postgresql.init_configs: '[{}]'
-    ad.datadoghq.com/postgresql.instances: |
+    ad.datadoghq.com/postgres.check_names: '["postgres"]'
+    ad.datadoghq.com/postgres.init_configs: '[{}]'
+    ad.datadoghq.com/postgres.instances: |
       [
         {
           "host": "%%host%%",

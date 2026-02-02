@@ -1,4 +1,5 @@
 name: Apache
+fleet_configurable: true
 files:
 - name: apache.yaml
   options:
@@ -9,7 +10,9 @@ files:
   - template: instances
     options:
     - name: apache_status_url
+      fleet_configurable: true
       required: true
+      display_priority: 2
       description: Status url of your Apache server.
       value:
         example: http://localhost/server-status?auto
@@ -17,11 +20,12 @@ files:
     - template: instances/http
     - template: instances/default
       overrides:
+        disable_generic_tags.display_priority: 1
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
         disable_generic_tags.description: |
-            Generic tags such as `host` will be replaced by `apache_host` to avoid
-            getting mixed with other integration tags.
+            Generic tags such as `host` will be replaced by `apache_host` to prevent
+            mixing them up with tags from other integrations. Datadog recommends setting this to `true` to avoid confusion.
   - template: logs
     example:
     - type: file

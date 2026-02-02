@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ee9cd120-9667-4a81-a309-c34f5942406a",
   "app_id": "hudi",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

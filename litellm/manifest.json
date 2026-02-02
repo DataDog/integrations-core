@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e6ea092c-302f-4810-9c0d-0da969c4774e",
   "app_id": "litellm",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -4,6 +4,8 @@
 
 This check monitors two parts of [Hive][1]: Hive Metastore and HiveServer2.
 
+**Minimum Agent version:** 6.11.3
+
 ## Setup
 
 ### Installation

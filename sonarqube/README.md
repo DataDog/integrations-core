@@ -4,6 +4,8 @@
 
 This check monitors [SonarQube][1].
 
+**Minimum Agent version:** 7.24.0
+
 ## Setup
 
 ### Installation

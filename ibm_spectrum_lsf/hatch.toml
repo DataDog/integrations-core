@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+  "--explicit-package-bases",
+  "datadog_checks/ibm_spectrum_lsf",
+  "tests/",
+]
+
+[[envs.default.matrix]]
+python = ["3.13"]

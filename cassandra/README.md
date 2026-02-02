@@ -9,6 +9,8 @@ Get metrics from Cassandra in real time to:
 - Visualize and monitor Cassandra states.
 - Be notified about Cassandra failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

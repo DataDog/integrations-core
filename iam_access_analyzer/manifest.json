@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "13a88901-3d20-43b3-9a3c-3b20b2adf1cc",
   "app_id": "iam-access-analyzer",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import sys
 
 import pytest
 from pydantic import ValidationError
@@ -164,3 +165,30 @@ def test_list_environment_names_no_match(mocker: MockerFixture, mock_integration
     names = hatch.list_environment_names(mock_platform, mock_integration, filters)
 
     assert names == []
+
+
+def test_list_environments_without_filters(mocker: MockerFixture, mock_integration: Integration):
+    mock_platform = platform(mocker, json.dumps(HATCH_OUTPUT))
+    environments = hatch.list_environments(mock_platform, mock_integration)
+
+    assert len(environments) == 3
+    assert sorted(env.name for env in environments) == sorted(
+        ["linux_e2e_no_python", "no_platform_no_e2e_py3.8", "no_platform_e2e_no_python"]
+    )
+
+
+def test_remove_environment(mocker: MockerFixture, mock_integration: Integration):
+    mock_platform = platform(mocker, json.dumps(HATCH_OUTPUT))
+    hatch.remove_environment(mock_platform, mock_integration, "linux_e2e_no_python")
+
+    mock_platform.check_command.assert_called_once_with(
+        [sys.executable, '-m', 'hatch', 'env', 'remove', 'linux_e2e_no_python']
+    )
+
+
+def test_remove_environment_fails(mocker: MockerFixture, mock_integration: Integration):
+    mock_platform = platform(mocker, json.dumps(HATCH_OUTPUT))
+    mock_platform.check_command.side_effect = Exception("Failed to remove environment")
+
+    with pytest.raises(hatch.HatchCommandError):
+        hatch.remove_environment(mock_platform, mock_integration, "linux_e2e_no_python")

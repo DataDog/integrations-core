@@ -15,6 +15,8 @@ The Datadog Agent can collect many metrics from Lustre clusters, including:
 - **Changelog Events**: Capture filesystem change events for audit and analysis (client nodes only)
 
 
+**Minimum Agent version:** 7.69.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.

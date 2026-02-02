@@ -359,7 +359,16 @@ def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
     metric_and_tags = collect_profile_metrics_and_tags(profile)
     global_tags = set(
         metric_and_tags["global_tags"]
-        + ['device_namespace', 'snmp_device', 'snmp_host', 'snmp_profile', 'device_id', 'device_ip', 'device_hostname']
+        + [
+            'device_namespace',
+            'snmp_device',
+            'agent_host',
+            'snmp_host',
+            'snmp_profile',
+            'device_id',
+            'device_ip',
+            'device_hostname',
+        ]
     )
 
     for metric, metric_info in metric_and_tags["table_metrics"].items():

@@ -7,6 +7,8 @@ Get metrics from kubernetes_state service in real time to:
 - Visualize and monitor kubernetes_state states
 - Be notified about kubernetes_state failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

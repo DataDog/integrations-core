@@ -4,7 +4,6 @@ include:
 
 variables:
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
-  VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
   VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
   NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
   TAGGER_EMAIL: packages@datadoghq.com
@@ -24,58 +23,12 @@ cache: &slack-cache
     - .slack-cache
   policy: pull-push
 
-validate-log-integrations:
-  stage: validate
-  needs: []
-  image: $VALIDATE_LOG_INTGS
-  only:
-  - schedules
-  variables:
-    INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
-  script:
-    - cd /app
-    - export WEBUI_INTGS_FILE=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.webui_intgs_file --with-decryption --query "Parameter.Value" --out text)
-    - export LOGS_BACKEND_INTGS_ROOT=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.logs_backend_intgs_root --with-decryption --query "Parameter.Value" --out text)
-    - git clone -b prod https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
-    - ts-node parse_ts.ts > logs_integrations.json
-    - git clone -b prod https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
-    - python3 validate_log_intgs.py logs_integrations.json 2> $CI_PROJECT_DIR/errors.txt
-  artifacts:
-    paths:
-    - $CI_PROJECT_DIR/errors.txt
-    expire_in: 1 day
-    when: always
-  tags: [ "runner:main" ]
-
-notify-slack:
-  needs:
-    - validate-log-integrations
-  stage: notify
-  image: $NOTIFIER_IMAGE
-  only:
-  - schedules
-  cache:
-    <<: *slack-cache
-  script:
-    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
-    - |
-      if [[ -s $CI_PROJECT_DIR/errors.txt ]]; then
-          cat $CI_PROJECT_DIR/errors.txt
-          MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
-          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
-      else
-          MESSAGE="Logs pipelines passed validation steps, good job :+1:"
-          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
-      fi
-  tags: [ "runner:main" ]
-
-
 notify-failed-pipeline:
   stage: notify
   image: $NOTIFIER_IMAGE
-  only:
-  - master
-  when: on_failure
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: on_failure
   cache:
     <<: *slack-cache
   script:
@@ -83,46 +36,52 @@ notify-failed-pipeline:
     - |
       MESSAGE="The pipeline encountered an unexpected error in job $CI_JOB_NAME. Please investigate $CI_JOB_URL for errors."
       postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
-  tags: [ "runner:main" ]
-
+  tags: [ "arch:amd64" ]
 
 release-auto:
   stage: release
   image: $TAGGER_IMAGE
-  only:
-    - master
-    - /^\d+\.\d+\.x$/
-  except:
-    - schedules
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^\d+\.\d+\.x$/
   script:
     - ddev --version
     - ddev config override
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
-  tags: [ "runner:main" ]
+  tags: [ "arch:amd64" ]
   needs: []
 
 release-manual:
   stage: release
   image: $TAGGER_IMAGE
-  only:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     # Integration release tags e.g. any_check-X.Y.Z-rc.N
-    - /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
-  except:
-  - schedules
+    - if: $CI_COMMIT_TAG =~ /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == 'master'
+      when: manual
+      allow_failure: true
   script:
-    # Get tagger info
-    - tagger=$(git for-each-ref refs/tags/$CI_COMMIT_TAG  --format='%(taggername) %(taggeremail)')
-    # The automatic release builder will trigger this job as a side-effect of
-    # tagging releases. To prevent multiple redundant builds we don't trigger
-    # the pipeline unless the tag was applied manually.
     - |
-      if [[ "$tagger" =~ "$TAGGER_NAME <$TAGGER_EMAIL>" ]]; then
-          echo "Skipping, packages have already been built"
-      else
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
           ./.gitlab/tagger/build-packages.sh
+      else
+          # Get tagger info
+          tagger=$(git for-each-ref refs/tags/$CI_COMMIT_TAG  --format='%(taggername) %(taggeremail)')
+          # The automatic release builder will trigger this job as a side-effect of
+          # tagging releases. To prevent multiple redundant builds we don't trigger
+          # the pipeline unless the tag was applied manually.
+          if [[ "$tagger" =~ "$TAGGER_NAME <$TAGGER_EMAIL>" ]]; then
+              echo "Skipping, packages have already been built"
+          else
+              ./.gitlab/tagger/build-packages.sh
+          fi
       fi
-  tags: [ "runner:main" ]
+  tags: [ "arch:amd64" ]
   needs: []
 
 tagger-image-builder:
@@ -143,21 +102,4 @@ tagger-image-builder:
       allow_failure: true
   script:
     - docker buildx build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile . --push
-  tags: [ "arch:amd64" ]
-
-validate-log-intgs-builder:
-  stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'schedule'
-      when: never
-    - if: $CI_COMMIT_TAG
-      when: never
-    - if: $CI_COMMIT_BRANCH == 'master'
-      changes:
-        - .gitlab/validate-logs-intgs/**/*
-        - .gitlab-ci.yml
-  script:
-    - cd .gitlab/validate-logs-intgs/
-    - docker buildx build --tag $VALIDATE_LOG_INTGS . --push
   tags: [ "arch:amd64" ]

@@ -39,6 +39,7 @@ def test_bentoml_mock_metrics(dd_run_check, aggregator, mock_http_response):
         assert mock_http.get.call_count == 2
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metric_has_tag('bentoml.service.request.count', 'bentoml_endpoint:/summarize')
         aggregator.assert_service_check('bentoml.openmetrics.health', ServiceCheck.OK)
 
 

@@ -15,6 +15,13 @@ from . import common
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+E2E_METADATA = {
+    'start_commands': [
+        'apt update',
+        'apt install -y --no-install-recommends build-essential python3-dev libpq-dev',
+    ],
+}
+
 
 def container_up(service_name, port):
     """
@@ -53,7 +60,7 @@ def dd_environment():
             WaitFor(container_up, args=("PgBouncer", common.PORT)),
         ],
     ):
-        yield common.DEFAULT_INSTANCE
+        yield common.DEFAULT_INSTANCE, E2E_METADATA
 
 
 @pytest.fixture

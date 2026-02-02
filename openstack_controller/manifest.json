@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f5c2cc69-1efc-40b2-8dcd-61e1215b237d",
   "app_id": "openstack-controller",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

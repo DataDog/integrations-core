@@ -5,10 +5,49 @@ import ctypes
 
 import pytest
 import pywintypes
+import win32service
 import winerror
 from mock import patch
 
 from datadog_checks.windows_service import WindowsService
+
+
+class ServiceAssertion:
+    def __init__(self, name, state, extra_tags=None, count=1):
+        self.name = name
+        self.check_status = WindowsService.STATE_TO_STATUS.get(state, WindowsService.UNKNOWN)
+        self.tags = [
+            f'windows_service:{name}',
+            f'windows_service_state:{WindowsService.STATE_TO_STRING.get(state, WindowsService.UNKNOWN_LITERAL)}',
+        ] + (extra_tags or [])
+        self.count = count
+
+
+def assert_service_check_and_metrics(aggregator, services):
+    for service in services:
+        aggregator.assert_service_check(
+            WindowsService.SERVICE_CHECK_NAME,
+            status=service.check_status,
+            tags=service.tags,
+            count=service.count,
+        )
+        aggregator.assert_metric(
+            'windows_service.uptime',
+            tags=service.tags,
+            count=service.count,
+        )
+        aggregator.assert_metric(
+            'windows_service.state',
+            tags=service.tags,
+            value=1,
+            count=service.count,
+        )
+        aggregator.assert_metric(
+            'windows_service.restarts',
+            tags=service.tags,
+            value=0,
+            count=service.count,
+        )
 
 
 def test_bad_config(check, instance_bad_config):
@@ -20,52 +59,34 @@ def test_bad_config(check, instance_bad_config):
 def test_basic(aggregator, check, instance_basic):
     c = check(instance_basic)
     c.check(instance_basic)
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=['service:EventLog', 'windows_service:EventLog', 'optional:tag1'],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=['service:Dnscache', 'windows_service:Dnscache', 'optional:tag1'],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.UNKNOWN,
-        tags=['service:NonExistentService', 'windows_service:NonExistentService', 'optional:tag1'],
-        count=1,
-    )
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING, extra_tags=['service:EventLog', 'optional:tag1']),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, extra_tags=['service:Dnscache', 'optional:tag1']),
+        ServiceAssertion('NonExistentService', -1, extra_tags=['service:NonExistentService', 'optional:tag1']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_wildcard(aggregator, check, instance_wildcard):
     c = check(instance_wildcard)
     c.check(instance_wildcard)
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:EventLog', 'windows_service:EventLog'], count=1
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:EventSystem', 'windows_service:EventSystem'], count=1
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:Dnscache', 'windows_service:Dnscache'], count=1
-    )
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING, extra_tags=['service:EventLog']),
+        ServiceAssertion('EventSystem', win32service.SERVICE_RUNNING, extra_tags=['service:EventSystem']),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, extra_tags=['service:Dnscache']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_all(aggregator, check, instance_all):
     c = check(instance_all)
     c.check(instance_all)
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:EventLog', 'windows_service:EventLog'], count=1
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:Dnscache', 'windows_service:Dnscache'], count=1
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:EventSystem', 'windows_service:EventSystem'], count=1
-    )
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING, extra_tags=['service:EventLog']),
+        ServiceAssertion('EventSystem', win32service.SERVICE_RUNNING, extra_tags=['service:EventSystem']),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, extra_tags=['service:Dnscache']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
     msg = 'The `service` tag is deprecated and has been renamed to `windows_service`'
     assert msg in c.warnings[0]
 
@@ -82,6 +103,8 @@ def test_startup_type_filter_automatic(aggregator, check, instance_startup_type_
     # Assert all found were automatic
     for sc in aggregator.service_checks(c.SERVICE_CHECK_NAME):
         assert 'windows_service_startup_type:automatic' in sc.tags
+    # Assert uptime metrics were sent
+    aggregator.assert_metric('windows_service.uptime', at_least=1)
 
 
 def test_startup_type_filter_automatic_and_delayed(aggregator, check, instance_startup_type_filter):
@@ -100,43 +123,32 @@ def test_startup_type_filter_automatic_and_delayed(aggregator, check, instance_s
             'windows_service_startup_type:automatic' in sc.tags
             or 'windows_service_startup_type:automatic_delayed_start' in sc.tags
         )
+    # Assert uptime metrics were sent
+    aggregator.assert_metric('windows_service.uptime', at_least=1)
 
 
 def test_name_dict_basic(aggregator, check, instance_basic_dict):
     c = check(instance_basic_dict)
     c.check(instance_basic_dict)
 
-    # Check count
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, count=2)
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.UNKNOWN, count=1)
-    # Check details
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=['windows_service:EventLog', 'optional:tag1'],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=['windows_service:Dnscache', 'optional:tag1'],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.UNKNOWN,
-        tags=['windows_service:NonExistentService', 'optional:tag1'],
-        count=1,
-    )
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING, extra_tags=['optional:tag1']),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, extra_tags=['optional:tag1']),
+        ServiceAssertion('NonExistentService', -1, extra_tags=['optional:tag1']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_name_dict_wildcard_with_wmi_compat(aggregator, check, instance_wildcard_dict):
     c = check(instance_wildcard_dict)
     c.check(instance_wildcard_dict)
 
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:EventLog'], count=1)
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:EventSystem'], count=1)
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:Dnscache'], count=1)
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING),
+        ServiceAssertion('EventSystem', win32service.SERVICE_RUNNING),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_startup_type_filter_name_dict_wildcard_without_wmi_compat(aggregator, check, instance_wildcard_dict):
@@ -145,9 +157,12 @@ def test_startup_type_filter_name_dict_wildcard_without_wmi_compat(aggregator, c
     c = check(instance_wildcard_dict)
     c.check(instance_wildcard_dict)
 
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:EventLog'], count=1)
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:EventSystem'], count=1)
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:Dnscache'], count=0)
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING),
+        ServiceAssertion('EventSystem', win32service.SERVICE_RUNNING),
+        ServiceAssertion('Dnscache', -1, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_startup_type_filter_automatic_single_without_tag(aggregator, check, instance_startup_type_filter):
@@ -162,107 +177,78 @@ def test_startup_type_filter_automatic_single_without_tag(aggregator, check, ins
     c = check(instance_startup_type_filter)
     c.check(instance_startup_type_filter)
 
-    # Make sure we got exactly one
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, count=1)
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:EventLog'], count=1)
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_basic_disable_service_tag(aggregator, check, instance_basic_disable_service_tag):
     c = check(instance_basic_disable_service_tag)
     c.check(instance_basic_disable_service_tag)
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:EventLog', 'optional:tag1'], count=1
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:Dnscache', 'optional:tag1'], count=1
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.UNKNOWN, tags=['windows_service:NonExistentService', 'optional:tag1'], count=1
-    )
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING, extra_tags=['optional:tag1']),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, extra_tags=['optional:tag1']),
+        ServiceAssertion('NonExistentService', -1, extra_tags=['optional:tag1']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_startup_type_tag(aggregator, check, instance_basic):
     instance_basic['windows_service_startup_type_tag'] = True
     c = check(instance_basic)
     c.check(instance_basic)
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=[
-            'service:EventLog',
-            'windows_service:EventLog',
-            'windows_service_startup_type:automatic',
-            'optional:tag1',
-        ],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=[
-            'service:Dnscache',
-            'windows_service:Dnscache',
-            'windows_service_startup_type:automatic',
-            'optional:tag1',
-        ],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.UNKNOWN,
-        tags=[
-            'service:NonExistentService',
-            'windows_service:NonExistentService',
-            'windows_service_startup_type:unknown',
-            'optional:tag1',
-        ],
-        count=1,
-    )
+    services = [
+        ServiceAssertion(
+            'EventLog',
+            win32service.SERVICE_RUNNING,
+            extra_tags=['service:EventLog', 'windows_service_startup_type:automatic', 'optional:tag1'],
+            count=1,
+        ),
+        ServiceAssertion(
+            'Dnscache',
+            win32service.SERVICE_RUNNING,
+            extra_tags=['service:Dnscache', 'windows_service_startup_type:automatic', 'optional:tag1'],
+            count=1,
+        ),
+        ServiceAssertion(
+            'NonExistentService',
+            -1,
+            extra_tags=['service:NonExistentService', 'windows_service_startup_type:unknown', 'optional:tag1'],
+            count=1,
+        ),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_display_name_tag(aggregator, check, instance_basic):
     instance_basic['collect_display_name_as_tag'] = True
     c = check(instance_basic)
     c.check(instance_basic)
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=[
-            'service:EventLog',
-            'windows_service:EventLog',
-            'display_name:Windows Event Log',
-            'optional:tag1',
-        ],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=[
-            'service:Dnscache',
-            'windows_service:Dnscache',
-            'display_name:DNS Client',
-            'optional:tag1',
-        ],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.UNKNOWN,
-        tags=[
-            'service:NonExistentService',
-            'windows_service:NonExistentService',
-            'display_name:Not_Found',
-            'optional:tag1',
-        ],
-        count=1,
-    )
+    services = [
+        ServiceAssertion(
+            'EventLog',
+            win32service.SERVICE_RUNNING,
+            extra_tags=['service:EventLog', 'display_name:Windows Event Log', 'optional:tag1'],
+            count=1,
+        ),
+        ServiceAssertion(
+            'Dnscache',
+            win32service.SERVICE_RUNNING,
+            extra_tags=['service:Dnscache', 'display_name:DNS Client', 'optional:tag1'],
+            count=1,
+        ),
+        ServiceAssertion(
+            'NonExistentService',
+            -1,
+            extra_tags=['service:NonExistentService', 'display_name:Not_Found', 'optional:tag1'],
+            count=1,
+        ),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_openservice_failure(aggregator, check, instance_basic_dict, caplog):
-    # dict type
-    instance_basic_dict['services'].append({'startup_type': 'automatic'})
-    # str type
     instance_basic_dict['services'].append('EventLog')
 
     instance_basic_dict['windows_service_startup_type_tag'] = True
@@ -300,19 +286,11 @@ def test_invalid_pattern_regex(aggregator, check, instance_basic_dict):
 def test_trigger_start(aggregator, check, instance_trigger_start):
     c = check(instance_trigger_start)
     c.check(instance_trigger_start)
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.OK,
-        tags=['windows_service:EventLog', 'optional:tag1'],
-        count=1,
-    )
-
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.UNKNOWN,
-        tags=['windows_service:dnscache', 'optional:tag1'],
-        count=1,
-    )
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING, extra_tags=['optional:tag1']),
+        ServiceAssertion('dnscache', -1, extra_tags=['optional:tag1']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_trigger_count_failure(aggregator, check, instance_trigger_start, caplog):
@@ -343,25 +321,71 @@ def test_name_regex_order(aggregator, check, instance_name_regex_prefix):
     c = check(instance_name_regex_prefix)
     c.check(instance_name_regex_prefix)
 
-    # More specific names should match
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.OK,
-        tags=['windows_service:EventLog'],
-        count=1,
+    services = [
+        # More specific names should match
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING),
+        ServiceAssertion('EventSystem', win32service.SERVICE_RUNNING),
+        # The prefix match should go unmatched, even though it is listed first in the config
+        ServiceAssertion('event', -1, count=1),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
+
+
+def test_service_restart_detection(aggregator, check, instance_basic):
+    """
+    Test that service restarts are detected when the service PID changes between checks.
+    """
+    c = check(instance_basic)
+
+    mock_services = [
+        {
+            'ServiceName': 'EventLog',
+            'DisplayName': 'Windows Event Log',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 1234,
+        },
+        {
+            'ServiceName': 'Dnscache',
+            'DisplayName': 'DNS Client',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 5678,
+        },
+    ]
+
+    with patch('win32service.EnumServicesStatusEx', return_value=mock_services):
+        c.check(instance_basic)
+
+    # On first check, restarts should be 0
+    aggregator.assert_metric(
+        'windows_service.restarts',
+        value=0,
+        tags=['windows_service:EventLog', 'windows_service_state:running', 'service:EventLog', 'optional:tag1'],
     )
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.OK,
-        tags=['windows_service:EventSystem'],
-        count=1,
+    aggregator.assert_metric(
+        'windows_service.restarts',
+        value=0,
+        tags=['windows_service:Dnscache', 'windows_service_state:running', 'service:Dnscache', 'optional:tag1'],
     )
-    # The prefix match should go unmatched, even though it is listed first in the config
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.UNKNOWN,
-        tags=['windows_service:event'],
-        count=1,
+
+    aggregator.reset()
+
+    # Only change the PID of EventLog
+    mock_services[0]['ProcessId'] = 9999
+
+    with patch('win32service.EnumServicesStatusEx', return_value=mock_services):
+        c.check(instance_basic)
+
+    # On second check, EventLog should have restarts=1
+    aggregator.assert_metric(
+        'windows_service.restarts',
+        value=1,
+        tags=['windows_service:EventLog', 'windows_service_state:running', 'service:EventLog', 'optional:tag1'],
+    )
+    # Dnscache should still have restarts=0
+    aggregator.assert_metric(
+        'windows_service.restarts',
+        value=0,
+        tags=['windows_service:Dnscache', 'windows_service_state:running', 'service:Dnscache', 'optional:tag1'],
     )
 
 
@@ -369,21 +393,9 @@ def test_name_regex_order(aggregator, check, instance_name_regex_prefix):
 def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)
 
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.OK,
-        tags=['service:EventLog', 'windows_service:EventLog', 'optional:tag1'],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.OK,
-        tags=['service:Dnscache', 'windows_service:Dnscache', 'optional:tag1'],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.UNKNOWN,
-        tags=['service:NonExistentService', 'windows_service:NonExistentService', 'optional:tag1'],
-        count=1,
-    )
+    services = [
+        ServiceAssertion('EventLog', win32service.SERVICE_RUNNING, extra_tags=['service:EventLog', 'optional:tag1']),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, extra_tags=['service:Dnscache', 'optional:tag1']),
+        ServiceAssertion('NonExistentService', -1, extra_tags=['service:NonExistentService', 'optional:tag1']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)

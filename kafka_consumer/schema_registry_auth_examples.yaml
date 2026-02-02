@@ -1,0 +1,77 @@
+# Schema Registry Authentication Examples
+# Copy the relevant section to your kafka_consumer.yaml configuration
+
+# Example 1: No Authentication (Development/Testing Only)
+# --------------------------------------------------------
+instances:
+  - kafka_connect_str: localhost:9092
+    consumer_groups:
+      my-consumer-group: {}
+    enable_cluster_monitoring: true
+    schema_registry_url: http://localhost:8081
+
+# Example 2: Basic Authentication (Most Common)
+# -----------------------------------------------
+instances:
+  - kafka_connect_str: kafka-broker:9092
+    consumer_groups:
+      my-consumer-group: {}
+    enable_cluster_monitoring: true
+    schema_registry_url: https://schema-registry:8081
+    schema_registry_username: registry-user
+    schema_registry_password: registry-password
+    schema_registry_tls_verify: true
+
+# Example 3: Basic Auth with Custom CA Certificate
+# --------------------------------------------------
+instances:
+  - kafka_connect_str: kafka-broker:9092
+    consumer_groups:
+      my-consumer-group: {}
+    enable_cluster_monitoring: true
+    schema_registry_url: https://schema-registry:8081
+    schema_registry_username: registry-user
+    schema_registry_password: registry-password
+    schema_registry_tls_verify: true
+    schema_registry_tls_ca_cert: /etc/ssl/certs/custom-ca.pem
+
+# Example 4: Mutual TLS Authentication (Client Certificates)
+# ------------------------------------------------------------
+instances:
+  - kafka_connect_str: kafka-broker:9092
+    consumer_groups:
+      my-consumer-group: {}
+    enable_cluster_monitoring: true
+    schema_registry_url: https://schema-registry:8081
+    schema_registry_tls_verify: true
+    schema_registry_tls_ca_cert: /etc/ssl/certs/ca.pem
+    schema_registry_tls_cert: /etc/ssl/certs/client.pem
+    schema_registry_tls_key: /etc/ssl/private/client-key.pem
+
+# Example 5: Basic Auth + Mutual TLS (Maximum Security)
+# -------------------------------------------------------
+instances:
+  - kafka_connect_str: kafka-broker:9092
+    consumer_groups:
+      my-consumer-group: {}
+    enable_cluster_monitoring: true
+    schema_registry_url: https://schema-registry:8081
+    schema_registry_username: registry-user
+    schema_registry_password: registry-password
+    schema_registry_tls_verify: true
+    schema_registry_tls_ca_cert: /etc/ssl/certs/ca.pem
+    schema_registry_tls_cert: /etc/ssl/certs/client.pem
+    schema_registry_tls_key: /etc/ssl/private/client-key.pem
+
+# Example 6: Disable TLS Verification (NOT RECOMMENDED FOR PRODUCTION)
+# ----------------------------------------------------------------------
+instances:
+  - kafka_connect_str: kafka-broker:9092
+    consumer_groups:
+      my-consumer-group: {}
+    enable_cluster_monitoring: true
+    schema_registry_url: https://schema-registry:8081
+    schema_registry_username: registry-user
+    schema_registry_password: registry-password
+    schema_registry_tls_verify: false  # Only use for testing!
+

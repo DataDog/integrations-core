@@ -32,6 +32,7 @@ def test_e2e_profile_vertiv_liebert_ac(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'lgp_agent_ident_model:forward acted quaintly quaintly zombies Jaded quaintly '
         'oxen zombies forward acted quaintly quaintly zombies Jaded quaintly oxen '

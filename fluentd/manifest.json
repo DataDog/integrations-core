@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c725a834-feee-481d-94f0-afe95f39d0b1",
   "app_id": "fluentd",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

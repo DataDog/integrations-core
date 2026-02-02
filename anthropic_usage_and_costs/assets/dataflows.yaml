@@ -1,0 +1,4 @@
+provides:
+  - id: anthropic-cloud-cost-metrics
+    always_on: false
+    granular: true

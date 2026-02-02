@@ -17,6 +17,8 @@ Add [Data Streams Monitoring][24] to your producers and consumers to visualize t
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -157,10 +159,11 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 - [Collecting Kafka performance metrics][20]
 - [Monitoring Kafka with Datadog][21]
 - [Kafka Overview on the Knowledge Center][23]
+- [How microservice architectures have shaped the usage of database technologies][18]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
-[3]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
+[3]: https://docs.datadoghq.com/integrations/kafka-consumer/
 [4]: /account/settings/agent/latest
 [5]: https://github.com/DataDog/jmxfetch
 [6]: https://docs.datadoghq.com/integrations/amazon_msk/#pagetitle
@@ -175,6 +178,7 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [15]: https://github.com/DataDog/integrations-core/blob/master/kafka/assets/service_checks.json
 [16]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
 [17]: https://docs.datadoghq.com/integrations/guide/agent-failed-to-retrieve-rmiserver-stub/
+[18]: https://www.datadoghq.com/blog/datadog-database-research/
 [19]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [20]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

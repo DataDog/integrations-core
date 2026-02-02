@@ -120,6 +120,7 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'proxmox_server:http://localhost:8006/api2/json',
             'testing',
             'proxmox_type:node',
+            'proxmox_type:host',
             'proxmox_name:ip-122-82-3-112',
             'proxmox_id:node/ip-122-82-3-112',
         ],
@@ -282,6 +283,16 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
             },
             id='404',
         ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(
+                        status_code=200, json_data={"data": None, "message": "No QEMU guest agent configured\n"}
+                    )
+                }
+            },
+            id='qemu_agent_not_configured',
+        ),
     ],
     indirect=['mock_http_get'],
 )
@@ -328,6 +339,7 @@ def test_external_tags(dd_run_check, aggregator, instance, datadog_agent):
                 'proxmox_id:node/ip-122-82-3-112',
                 'proxmox_name:ip-122-82-3-112',
                 'proxmox_type:node',
+                'proxmox_type:host',
             ]
         },
     )

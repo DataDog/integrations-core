@@ -6,7 +6,7 @@
       "id": 4921638547489418,
       "definition": {
         "type": "image",
-        "url": "https://www.logo.wine/a/logo/Genesys_(company)/Genesys_(company)-Logo.wine.svg",
+        "url": "/static/images/logos/genesys_large.svg",
         "sizing": "cover",
         "has_background": false,
         "has_border": false,

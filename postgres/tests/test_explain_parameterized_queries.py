@@ -28,7 +28,6 @@ def dbm_instance(pg_instance):
     }
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -198,7 +197,6 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
         assert err is None
 
 
-@pytest.mark.unit
 @requires_over_12
 def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
@@ -216,8 +214,6 @@ def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_
         assert prepared_statement_query == f"EXECUTE dd_{test_query_signature}"
 
 
-@pytest.mark.unit
-@requires_over_12
 def test_generate_prepared_statement_query_three_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     test_query_signature = "12345678"

@@ -11,6 +11,7 @@ glusterfs.cluster.nodes.active,gauge,,node,,Current active nodes,0,glusterfs,clu
 glusterfs.cluster.nodes.count,gauge,,node,,Total number of nodes in cluster,0,glusterfs,cluster node total,
 glusterfs.cluster.volumes.count,gauge,,unit,,Number of volumes in cluster,0,glusterfs,cluster volume count,
 glusterfs.cluster.volumes.started,gauge,,unit,,Number of volumes started in cluster,0,glusterfs,cluster volume start,
+glusterfs.heal_info.entries.count,gauge,,unit,,Number of entries requiring healing,0,glusterfs,entry count,
 glusterfs.subvol.disperse,gauge,,unit,,Disperse count of subvolume,0,glusterfs,subvol disperse,
 glusterfs.subvol.disperse_redundancy,gauge,,unit,,Disperse redundancy of subvolume,0,glusterfs,subvol disperse redundancy,
 glusterfs.subvol.replica,gauge,,unit,,Replicas in subvolume,0,glusterfs,subvol replica,

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a18dccd2-35c0-40e2-9c0a-7a01a5daf5f3",
   "app_id": "systemd",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -40,20 +40,32 @@ class ConnectionErrorCode(Enum):
 # Connection error messages, which we expect to get from an ADO provider or
 # ODBC. These drivers can have inconsistent error codes across versions, so regex on
 # the known error messages
-known_error_patterns = {
+KNOWN_ERROR_PATTERNS = {
     # typically results in an -2147467259 ADO error code, which is not very descriptive. Identifying this error
     # can help provide specific troubleshooting help to the customer
-    "(certificate verify failed|"
-    "certificate chain was issued by an authority that is not trusted)": ConnectionErrorCode.certificate_verify_failed,
+    re.compile(
+        "(certificate verify failed|certificate chain was issued by an authority that is not trusted)", re.IGNORECASE
+    ): ConnectionErrorCode.certificate_verify_failed,
     # DSN could be specified incorrectly in config
-    "data source name not found.* and no default driver specified": ConnectionErrorCode.driver_not_found,
+    re.compile(
+        "data source name not found.* and no default driver specified", re.IGNORECASE
+    ): ConnectionErrorCode.driver_not_found,
     # driver not installed on host
-    "(can't open lib .* file not found|Provider cannot be found)": ConnectionErrorCode.driver_not_found,
+    re.compile(
+        "(can't open lib .* file not found|Provider cannot be found)", re.IGNORECASE
+    ): ConnectionErrorCode.driver_not_found,
     # Connection & login issues
-    "(cannot open database .* requested by the login|login timeout expired)": ConnectionErrorCode.tcp_connection_failed,
-    "(login failed for user|The login is from an untrusted domain)": ConnectionErrorCode.login_failed_for_user,
-    "ssl security error": ConnectionErrorCode.ssl_security_error,
+    re.compile(
+        "(cannot open database .* requested by the login|login timeout expired)", re.IGNORECASE
+    ): ConnectionErrorCode.tcp_connection_failed,
+    re.compile(
+        "(login failed for user|The login is from an untrusted domain)", re.IGNORECASE
+    ): ConnectionErrorCode.login_failed_for_user,
+    re.compile("ssl security error", re.IGNORECASE): ConnectionErrorCode.ssl_security_error,
 }
+
+# Pre-compiled regex pattern for password obfuscation
+PASSWORD_OBFUSCATION_PATTERN = re.compile(r"(?i)(Password=)([^;]+)")
 
 # ADO provider connection errors yield a hresult code, which
 # can be mapped to helpful err messages
@@ -132,9 +144,9 @@ def _get_is_odbc_driver_installed(configured_driver):
 
 
 def _lookup_conn_error_and_msg(hresult, msg):
-    for k in known_error_patterns.keys():
-        if re.search(k, msg, re.IGNORECASE):
-            return None, known_error_patterns[k]
+    for compiled_pattern, error_code in KNOWN_ERROR_PATTERNS.items():
+        if compiled_pattern.search(msg):
+            return None, error_code
     # if we cannot determine the type or error based on the msg, try to look it up by its hresult
     # this will be true for error messages like 'Invalid connection string attribute'
     if hresult:
@@ -151,7 +163,7 @@ def obfuscate_error_msg(msg, password):
     # obfuscate the password in the error message
     # regex to match the `Password=<password>;` in the connection string
     # and replace it with `Password=***;` (case insensitive)
-    obfuscated_error_msg = re.sub(r"(?i)(Password=)([^;]+)", r"\1******", msg)
+    obfuscated_error_msg = PASSWORD_OBFUSCATION_PATTERN.sub(r"\1******", msg)
     if password:
         # this is a fallback in case the password is not in the connection string
         obfuscated_error_msg = obfuscated_error_msg.replace(password, "*" * 6)

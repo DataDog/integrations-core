@@ -19,7 +19,7 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
 
     # lmdb doesnt't get the actual full path in its install name which means delocate won't find it
     # Luckily we can patch it here so that it does.
-    install_name_tool -change liblmdb.so "${DD_PREFIX_PATH}/lib/liblmdb.so" "${DD_PREFIX_PATH}/lib//librdkafka.1.dylib"
+    install_name_tool -change liblmdb.so "${DD_PREFIX_PATH}/lib/liblmdb.so" "${DD_PREFIX_PATH}/lib/librdkafka.1.dylib"
     always_build+=("confluent-kafka")
 fi
 

@@ -4,6 +4,8 @@
 
 [Prisma Cloud Compute Edition][1] is a security scanner. It scans containers, hosts, and packages to find vulnerabilities and compliance issues.
 
+**Minimum Agent version:** 6.11.0
+
 ## Setup
 
 ### Installation

@@ -7,6 +7,8 @@ Get metrics from ActiveMQ XML in real time to:
 - Visualize and monitor ActiveMQ XML states.
 - Be notified about ActiveMQ XML failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

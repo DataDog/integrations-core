@@ -1,0 +1,91 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "bbfe8b36-ac16-4f29-9b0c-7ee1d81e0a3c",
+  "app_id": "microsoft-copilot",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into your Microsoft Copilot usage across your organization.",
+    "title": "Microsoft Copilot",
+    "media": [
+      {
+        "caption": "Microsoft Copilot Usage",
+        "image_url": "images/microsoft_copilot_usage_reports_only_page1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Copilot Usage (Continued)",
+        "image_url": "images/microsoft_copilot_usage_reports_only_page2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Collaboration",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 55822486,
+      "source_type_name": "Microsoft Copilot",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "microsoft_copilot.",
+        "check": [
+          "microsoft_copilot.airesponse.count",
+          "microsoft_copilot.airesponse.guardrail.count",
+          "microsoft_copilot.userprompt.count",
+          "microsoft_copilot.teams.users.enabled",
+          "microsoft_copilot.teams.users.active",
+          "microsoft_copilot.word.users.enabled",
+          "microsoft_copilot.word.users.active",
+          "microsoft_copilot.powerpoint.users.enabled",
+          "microsoft_copilot.powerpoint.users.active",
+          "microsoft_copilot.outlook.users.enabled",
+          "microsoft_copilot.outlook.users.active",
+          "microsoft_copilot.excel.users.enabled",
+          "microsoft_copilot.excel.users.active",
+          "microsoft_copilot.onenote.users.enabled",
+          "microsoft_copilot.onenote.users.active",
+          "microsoft_copilot.loop.users.enabled",
+          "microsoft_copilot.loop.users.active",
+          "microsoft_copilot.anyapp.users.enabled",
+          "microsoft_copilot.anyapp.users.active",
+          "microsoft_copilot.copilotchat.users.enabled",
+          "microsoft_copilot.copilotchat.users.active"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Microsoft Copilot Usage": "assets/dashboards/microsoft_copilot_usage.json"
+    },
+    "logs": {
+        "source": "microsoft-copilot"
+    },
+    "monitors": {
+      "Low Percentage of Active Microsoft 365 Copilot Users" : "assets/monitors/low_percentage_of_microsoft_copilot_usage.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

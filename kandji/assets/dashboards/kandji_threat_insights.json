@@ -1,0 +1,1598 @@
+{
+    "title": "Kandji - Threat Insights",
+    "description": "This dashboard provides a comprehensive summary of Threats.",
+    "widgets": [
+        {
+            "id": 8187342910039561,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/kandji_small.svg",
+                "url_dark_theme": "/static/images/logos/kandji_reversed_small.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 3838180428255268,
+            "definition": {
+                "type": "note",
+                "content": "This dashboard provides a comprehensive summary of Threats.\n\nFor more information, see the [Kandji Documentation](https://docs.datadoghq.com/integrations/kandji/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 4858401842509675,
+            "definition": {
+                "title": "Total Threats",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_red"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "yaxis": {},
+                    "type": "bars"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 4982356914008687,
+            "definition": {
+                "title": "Total Resolved Threats",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection @metadata.resolved_date:* $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "yaxis": {},
+                    "type": "bars"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 3,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 1731394122420531,
+            "definition": {
+                "title": "Total Unresolved Threats",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection -@metadata.resolved_date:* $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_red"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "yaxis": {},
+                    "type": "bars"
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 3,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 6501658411093000,
+            "definition": {
+                "title": "Threats by Classification over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Threat",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection -@metadata.classification:(None OR \"\") $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@metadata.classification",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 2051045033476407,
+            "definition": {
+                "title": "Threats by Classification",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection -@metadata.classification:(None OR \"\") $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@metadata.classification",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 4120638970016434,
+            "definition": {
+                "title": "Threat Status Breakdown",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@metadata.threat_status",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 10,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 685691822177114,
+            "definition": {
+                "title": "Total Malware File Detections",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection @metadata.classification:Malware $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_red"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "yaxis": {},
+                    "type": "bars"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 5589689943126970,
+            "definition": {
+                "title": "Malware File Detections over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Malware Status",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection @metadata.classification:Malware $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@metadata.threat_status",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 13,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 1181346744223941,
+            "definition": {
+                "title": "Total PUP File Detections",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection @metadata.classification:PUP $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_yellow"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "yaxis": {},
+                    "type": "bars"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 4060583756903939,
+            "definition": {
+                "title": "PUP File Detections over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {},
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "PUP Status",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection @metadata.classification:PUP $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@metadata.threat_status",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 16,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 6052113376538490,
+            "definition": {
+                "title": "Top Users with Threats",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection -@usr.name:\"\" $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 19,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 8064092472715384,
+            "definition": {
+                "title": "Devices under Threat",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@device_name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 19,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 8106653353297456,
+            "definition": {
+                "title": "Threat Processes Details",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@metadata.threat_id",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@metadata.threat_family_name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@new_state.process.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@metadata.device.id",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 10000,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "number",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 6,
+                "y": 19,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 8043493970396152,
+            "definition": {
+                "title": "Top Detected Threat Families",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@metadata.threat_family_name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 4578844401131399,
+            "definition": {
+                "title": "Top Targeted OS Versions",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $file_name $user_name $device_name $classification $status"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@new_state.host.os.version",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 22,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 257597820115048,
+            "definition": {
+                "title": "Most Accessed Unquarantined File Paths",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection @metadata.threat_status:\"Not Quarantined\" $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@new_state.file.path",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 22,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7490327159237614,
+            "definition": {
+                "title": "Threat Detections by User",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "usr.id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "usr.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "metadata.threat_family_name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "metadata.threat_status",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "metadata.action_taken",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 25,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5508703999619209,
+            "definition": {
+                "title": "Most Accessed Files",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@metadata.threat_id",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@file_name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@new_state.file.hash.sha256",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 1000,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "number",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 6,
+                "y": 25,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5540712191146974,
+            "definition": {
+                "title": "File Action Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $file_name $user_name $device_name $classification $status"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@action",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 28,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 3764942938134058,
+            "definition": {
+                "title": "File Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:kandji service:audit @target_type:file_detection $file_name $user_name $device_name $classification $status",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "new_state.file.path",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "new_state.file.hash.sha256",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "new_state.file.directory",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "new_state.file.device",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "file_name",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 6,
+                "y": 28,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 3817015934138384,
+            "definition": {
+                "title": "File Event Outcome Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:kandji service:audit @target_type:file_detection $file_name $user_name $device_name $classification $status"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@evt.outcome",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        }
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 31,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 6721393541161164,
+            "definition": {
+                "title": "File Detection Event Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:kandji service:audit @target_type:file_detection $file_name $user_name $device_name $classification $status",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "new_state.event.kind",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "evt.outcome",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "new_state.event.category",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "new_state.event.type",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 6,
+                "y": 31,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5190676591181850,
+            "definition": {
+                "title": "Device Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "metadata.device.id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "device_name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "metadata.device.model",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "metadata.device.serial_number",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 34,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 7030533062827894,
+            "definition": {
+                "title": "Threat Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:kandji service:audit @target_type:file_detection $classification $status $file_name $user_name $device_name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 37,
+                "width": 12,
+                "height": 3
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "classification",
+            "prefix": "@metadata.classification",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "status",
+            "prefix": "@metadata.threat_status",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "file_name",
+            "prefix": "@file_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "user_name",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "device_name",
+            "prefix": "@device_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

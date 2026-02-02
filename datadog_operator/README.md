@@ -4,6 +4,8 @@
 
 This check monitors the [Datadog Operator][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.43.2
+
 ## Setup
 
 ### Installation

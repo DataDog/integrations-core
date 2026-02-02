@@ -6,6 +6,8 @@ This check monitors [Temporal][1] through the Datadog Agent.
 
 **Note**: This check can only be installed if you are self-hosting Temporal. **To monitor your Temporal Cloud instance**, follow the [Datadog Temporal Cloud integration documentation][13]. 
 
+**Minimum Agent version:** 7.45.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

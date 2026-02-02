@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "aadfa11b-3de5-4827-9cdd-888c4e9587d0",
   "app_id": "proxysql",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

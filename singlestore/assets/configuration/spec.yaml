@@ -27,6 +27,7 @@ files:
     - name: password
       description: The password to use for connecting to the SingleStore database.
       required: false
+      secret: true
       value:
         type: string
     - name: connect_timeout

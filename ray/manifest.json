@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "bae260a0-91be-4dc4-9767-61f072f82d76",
   "app_id": "ray",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

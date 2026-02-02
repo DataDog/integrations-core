@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "25d4ccd6-de50-4ef0-849f-b7ab1aea203e",
   "app_id": "kube-controller-manager",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

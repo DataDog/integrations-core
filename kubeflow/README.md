@@ -5,6 +5,8 @@
 This check monitors [Kubeflow][1] through the Datadog Agent. 
 
 
+**Minimum Agent version:** 7.59.0
+
 ## Setup
 
 <div class="alert alert-warning">

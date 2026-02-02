@@ -4,6 +4,8 @@
 
 Network Path integration collects traceroute data.
 
+**Minimum Agent version:** 7.55.0
+
 ## Setup
 
 ### Installation

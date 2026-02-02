@@ -6,6 +6,8 @@ Get metrics from Microsoft Exchange Server
 
 - Visualize and monitor Exchange server performance
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

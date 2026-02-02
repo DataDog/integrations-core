@@ -16,6 +16,8 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 - Caches, such as size, hits, and misses
 - SSL, such as handshakes and failed handshakes
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -160,8 +162,6 @@ spec:
 #### Host
 
 To configure this check for an Agent running on a host:
-
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
 
 ##### Metric collection
 

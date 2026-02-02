@@ -7,6 +7,8 @@ The Agent's Marathon check lets you:
 - Track the state and health of every application: see configured memory, disk, cpu, and instances; monitor the number of healthy and unhealthy tasks
 - Monitor the number of queued applications and the number of deployments
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

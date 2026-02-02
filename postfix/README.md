@@ -6,6 +6,8 @@
 
 This check monitors the size of all your Postfix queues.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

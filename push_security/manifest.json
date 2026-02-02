@@ -1,0 +1,85 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "5adddeb6-b278-49b7-b124-e67642e76f51",
+  "app_id": "push-security",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Push Security events.",
+    "title": "Push Security",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Push Security - Overview",
+        "image_url": "images/push_security_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Push Security - Activity",
+        "image_url": "images/push_security_activity.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Push Security - Audit",
+        "image_url": "images/push_security_audit.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Push Security - Controls",
+        "image_url": "images/push_security_controls.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Push Security - Detections",
+        "image_url": "images/push_security_detections_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Push Security - Detections",
+        "image_url": "images/push_security_detections_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Push Security - Entity",
+        "image_url": "images/push_security_entity.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 56861741,
+      "source_type_name": "Push Security",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Push Security - Overview": "assets/dashboards/push_security_overview.json",
+      "Push Security - Activity": "assets/dashboards/push_security_activity.json",
+      "Push Security - Audit": "assets/dashboards/push_security_audit.json",
+      "Push Security - Controls": "assets/dashboards/push_security_controls.json",
+      "Push Security - Detections": "assets/dashboards/push_security_detections.json",
+      "Push Security - Entity": "assets/dashboards/push_security_entity.json"
+    },
+    "logs": {
+      "source": "pushsecurity"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

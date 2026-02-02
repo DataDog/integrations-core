@@ -1,7 +1,0 @@
----
-description: 
-globs: **/*.py,**/*.toml
-alwaysApply: false
----
-* Always run unit/integration tests after modifying code files. Run E2E tests only if requested.
-* Always auto-format code with ddev test -fs.

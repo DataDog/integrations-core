@@ -4,6 +4,8 @@
 
 This check monitors [Argo CD][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.41.0
+
 ## Setup
 
 ### Installation

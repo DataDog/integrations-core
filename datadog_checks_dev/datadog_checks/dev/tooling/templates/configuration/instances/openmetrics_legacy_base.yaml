@@ -185,13 +185,10 @@
     Use the "*" wildcard to match all label values.
   value:
     type: object
-    properties:
-      - name: target_label_key
+    additionalProperties:
+      type: array
+      items:
         type: string
-      - name: target_label_value_list
-        type: array
-        items:
-          type: string
     example:
       <KEY_1>: [<LABEL_1>, <LABEL_2>]
       <KEY_2>: ['*']

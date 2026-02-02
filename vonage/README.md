@@ -10,6 +10,8 @@ This integration provides the following benefits:
 3. **Trend identification**: Allows businesses to spot trends in customer interactions, aiding proactive engagement.
 4. **Informed decision-making**: Provides insights that drive strategic decisions for growth and improvement.
 
+**Minimum Agent version:** 7.58.1
+
 ## Setup
 
 1. Log into [Vonage](https://www.vonage.com/log-in/).

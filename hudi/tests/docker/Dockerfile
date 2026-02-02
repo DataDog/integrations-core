@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM amazoncorretto:8-alpine-jdk
 
 ARG SPARK_VERSION
 ARG HADOOP_VERSION
@@ -12,7 +12,7 @@ RUN apk add --no-cache curl bash \
       && rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
       && cd /
 
-RUN wget -O - https://github.com/sbt/sbt/releases/download/v1.4.1/sbt-1.4.1.tgz | gunzip | tar -x -C /usr/local
+RUN wget -O - https://github.com/sbt/sbt/releases/download/v1.9.8/sbt-1.9.8.tgz | gunzip | tar -x -C /usr/local
 
 ENV PATH /usr/local/sbt/bin:${PATH}
 

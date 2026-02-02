@@ -33,7 +33,7 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         redis_check = Redis('redisdb', {}, [redis_instance])
         conn = redis.return_value
         conn.config_get.return_value = {}
-        conn.info = lambda *args: (
+        conn.info = lambda *args, **kwargs: (
             []
             if args
             else {

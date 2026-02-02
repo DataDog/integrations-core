@@ -4,6 +4,8 @@
 
 Collect metrics related to disk usage and IO.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -31,6 +33,11 @@ There are three scenarios where the Disk check can be used:
   Collecting mount point metrics for file shares on Windows is only supported by using the `create_mounts` option in the configuration.
   On Windows, each mounted folder is only visible to the user who mounted the share.
   Therefore, the `create_mounts` option allows the Agent to create the mount points to monitor in the context of the Agent's user.
+  
+4. Monitoring Cluster Shared Volumes
+
+  Cluster Shared Volumes (CSVs) in Windows Failover Clustering require elevated access for proper discovery.
+  While there may be other ways to grant the necessary permissions, running the Datadog Agent as LocalSystem is the most reliable and consistent method to ensure full CSV visibility and metric collection.
 
 ### Validation
 

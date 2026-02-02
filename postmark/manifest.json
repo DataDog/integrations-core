@@ -31,7 +31,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 28886018,
       "source_type_name": "Postmark",
       "events": {

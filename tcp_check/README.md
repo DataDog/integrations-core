@@ -6,6 +6,8 @@
 
 Monitor TCP connectivity and response time for any host and port.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

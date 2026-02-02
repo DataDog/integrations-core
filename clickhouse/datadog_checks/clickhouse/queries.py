@@ -1102,7 +1102,7 @@ SystemEvents = {
                 'KeeperSnapshotApplys': {'name': 'keeper.snapshot.apply', 'type': 'monotonic_gauge'},
                 'KeeperSnapshotApplysFailed': {'name': 'keeper.snapshot.apply.failed', 'type': 'monotonic_gauge'},
                 'KeeperSnapshotCreations': {'name': 'keeper.snapshot.create', 'type': 'monotonic_gauge'},
-                'KeeperSnapshotCreationsFailed': {'name': 'keerper.snapshot.create.failed', 'type': 'monotonic_gauge'},
+                'KeeperSnapshotCreationsFailed': {'name': 'keeper.snapshot.create.failed', 'type': 'monotonic_gauge'},
                 'LeaderElectionAcquiredLeadership': {
                     'name': 'table.mergetree.replicated.leader.elected',
                     'type': 'monotonic_gauge',
@@ -1895,6 +1895,24 @@ SystemEvents = {
     ],
 }
 
+SystemEventsToDeprecate = {
+    'name': 'system.events',
+    'query': 'SELECT value, event FROM system.events',
+    'columns': [
+        {'name': 'value', 'type': 'source'},
+        {
+            'name': 'event',
+            'type': 'match',
+            'source': 'value',
+            'items': {
+                'KeeperSnapshotCreationsFailed': {
+                    'name': 'keerper.snapshot.create.failed',
+                    'type': 'monotonic_gauge',
+                },  ## to deprecate - typo
+            },
+        },
+    ],
+}
 
 # https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-asynchronous_metrics
 SystemAsynchronousMetrics = {

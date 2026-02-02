@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 3
   tomcat:
-    image: bitnami/tomcat:${TOMCAT_VERSION}
+    image: bitnamilegacy/tomcat:${TOMCAT_VERSION}
     hostname: tomcat
     ports:
       - 8080:8080

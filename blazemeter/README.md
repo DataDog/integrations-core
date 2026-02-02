@@ -32,7 +32,7 @@ Integrate BlazeMeter with Datadog to gain insights into performance and function
 
 ### Metrics
 
-The BlazeMeter integration collects and forwards **Performance** and **Functional** test results metrics to Datadog. See [metadata.csv][3] for a list of metrics provided by this integration.
+See [metadata.csv][3] for a list of metrics provided by this integration.
 
 ### Service Checks
 

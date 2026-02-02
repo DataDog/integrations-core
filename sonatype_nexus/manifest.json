@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6cec5ac3-a686-4408-936d-26f19fa6763a",
   "app_id": "sonatype-nexus",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

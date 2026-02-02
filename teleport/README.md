@@ -9,6 +9,8 @@ This integration monitors the health and performance of [Teleport][1] through th
 - Cluster logs into patterns for faster investigation of abnormal infrastructure access, such as a high number of failed logins or attempts to access as many resources as possible in a short period of time.
 
 
+**Minimum Agent version:** 7.54.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

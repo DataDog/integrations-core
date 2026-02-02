@@ -1,0 +1,497 @@
+# bypass-global-grok-parser-rules-checks
+id: barracuda_secure_edge
+metric_id: barracuda-secure-edge
+backend_only: false
+installation_sources:
+  - barracuda_secure_edge
+facets:
+  - description: "Firewall protocol of the captured SecureEdge event"
+    facetType: list
+    groups:
+      - Barracuda SecureEdge
+    name: Firewall protocol
+    path: secure_edge.firewall.protocol
+    source: log
+    type: string
+  - description: "Firewall rule of the captured SecureEdge event"
+    facetType: list
+    groups:
+      - Barracuda SecureEdge
+    name: Firewall rule
+    path: secure_edge.firewall.rule
+    source: log
+    type: string
+  - description: "Source IP address of the captured SecureEdge event"
+    facetType: list
+    groups:
+      - Barracuda SecureEdge
+    name: Source IP
+    path: secure_edge.source_ip
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Barracuda SecureEdge
+  enabled: true
+  filter:
+    query: source:barracuda_secure_edge
+  processors:
+    - type: grok-parser
+      name: Field Extract
+      enabled: true
+      source: message
+      samples:
+        - "2025 05 27 19:47:27 +00:00 Info     : pam_unix(sudo:session): Login
+          root from 10.10.16.1: Denied: Invalid password"
+        - "2025 04 02 12:21:07 +00:00 Info     Allow:
+          LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|14.139.60.103|123|ntp|\
+          |BOX-NTP-OUT|0|10.10.16.116|14.139.60.103|0|1|0|0|0|0||||||"
+        - "2025 03 31 13:18:30 +00:00 Internal [0140200] 0 0 boxnet(p,ARGS):
+          wrote outer line control parametrisation for xDHCP links to
+          /var/phion/preserve/boxnet/DHCP/xDHCP.opconf"
+        - '2025 03 31 11:46:20 +00:00 Notice   phibs: Configuration: Adding
+          scheme certvalidate of type "Certificate-Validator"'
+        - "2025 04 02 09:24:16 +00:00 Notice   event: [1071200] starting worker
+          11022: connected from 10.10.16.116:6752"
+      grok:
+        supportRules: ""
+        matchRules: autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
+          Z"):timestamp}\s+%{word:level}\s+%{data:secure_edge.nested_message}
+    - type: pipeline
+      name: Box Auth Access
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:auth
+      processors:
+        - type: grok-parser
+          name: Box Auth Access
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "root : TTY=pts/0 ; PWD=/etc/yum.repos.d ; USER=root ;
+              COMMAND=/bin/systemctl rsyslog status"
+            - "LOGIN ATTEMPT: : pam_unix(sshd:auth): Login root from sshd:
+              Allowed"
+            - "LOGIN ATTEMPT: control[5405]: Login localhost_hapair_daemon from
+              127.0.0.1 : Allowed."
+            - ": pam_unix(sudo:session): pam_unix(sshd:auth): Login sacumen from
+              10.10.16.1: Denied: Unknown user sacumen"
+            - "LOGIN ATTEMPT: NGAdmin[26612]: Login root from 10.10.16.1 :
+              Denied: Invalid Password"
+          grok:
+            supportRules: operation %{data:secure_edge.auth.operation}:\s*
+            matchRules: >-
+              autoFilledRule1 %{operation}%{word:secure_edge.auth.type}\[%{number:secure_edge.auth.type_id}\]: Login %{data:secure_edge.auth.user} from %{ip:secure_edge.auth.origin} : %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
+
+              autoFilledRule2 : %{operation}%{word:secure_edge.auth.type}\(%{data:secure_edge.auth.type_id}\): Login %{data:secure_edge.auth.user} from %{data:secure_edge.auth.origin}: %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
+
+              autoFilledRule3 %{operation}(: )?%{word:secure_edge.auth.type}\(%{data:secure_edge.auth.type_id}\): Login %{data:secure_edge.auth.user} from %{data:secure_edge.auth.origin}: %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
+
+              autoFilledRule4 %{word:secure_edge.auth.module}\s*:\s*%{data:message}
+    - type: pipeline
+      name: Box Firewall Activity
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:firewall
+      processors:
+        - type: grok-parser
+          name: Box Firewall Activity
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "Block:
+              FWD|UDP|p1|10.10.17.18|137|00:41:0e:93:aa:91|10.10.17.255|137|net\
+              bios-ns||BLOCKALL|4002|||0|1|40|30|20|10||||||"
+            - "Allow:
+              LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|14.139.60.103|123|\
+              ntp||BOX-NTP-OUT|0|10.10.16.116|14.139.60.103|0|1|0|0|0|0||||||"
+            - "Block:
+              <cumulative>|UDP|p2|10.10.17.18|0|00:00:00:00:00:00|10.10.17.255|\
+              137|||BLOCKALL|4002|||0|2|0|0|0|0||||||"
+          grok:
+            supportRules: parsedTraffic
+              %{data::csv("secure_edge.firewall.type,secure_edge.firewall.protocol,secure_edge.firewall.source_if,secure_edge.firewall.source_ip,secure_edge.firewall.source_port,secure_edge.firewall.source_mac,secure_edge.firewall.dest_ip,secure_edge.firewall.dest_port,secure_edge.firewall.dest_service,secure_edge.firewall.dest_if,secure_edge.firewall.rule,secure_edge.firewall.info,secure_edge.firewall.source_nat,
+              secure_edge.firewall.dest_nat,secure_edge.firewall.duration,secure_edge.firewall.count,secure_edge.firewall.received_bytes,secure_edge.firewall.sent_bytes,secure_edge.firewall.received_packets,secure_edge.firewall.sent_packets,
+              secure_edge.firewall.user,secure_edge.firewall.prot,secure_edge.firewall.application,secure_edge.firewall.target,secure_edge.firewall.content,secure_edge.firewall.uricat","|")}
+            matchRules: >
+              trafficBlocked
+              %{regex("(Block|Allow)"):secure_edge.firewall.status}:\s+%{parsedTraffic}
+        - type: grok-parser
+          name: Box Firewall
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "firewall: [Request] Rule: /opt/phion/bin/acpffwdrule prefixwrite
+              /opt/phion/config/active/servers/CSC/services/NGFW/active.fwrule
+              /opt/phion/run/rule.prefix &"
+            - "firewall: [DNS] Operation: DNS server with IP 127.0.0.1 now
+              considererd dead after 4 failed health checks. Will be re-employed
+              when reachable again."
+            - "firewall: [DNS] Operation: DNS server with IP 127.0.0.1 now
+              considererd healthy again after responding to query for host name
+              connect.barracuda.com. Re-employing."
+            - "firewall: [DNS] Operation: DNS server with IP 127.0.0.1 did not
+              respond to health check for host name connect.barracuda.com. This
+              is consecutive fail number 1."
+            - "firewall: [Invalid] Startup: Startup"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              dnsDead
+              firewall:\s+\[%{word:secure_edge.firewall.service}\]\s+Operation:\s+DNS
+              server with IP %{ip:secure_edge.firewall.dns.dead_server} now
+              considered dead%{data}
+
+              dnsDeadWithTypo firewall:\s+\[%{word:secure_edge.firewall.service}\]\s+Operation:\s+DNS server with IP %{ip:secure_edge.firewall.dns.dead_server} now considererd dead%{data}
+
+              dnsRecoverd firewall:\s+\[%{word:secure_edge.firewall.service}\]\s+Operation:\s+DNS server with IP %{ip:secure_edge.firewall.dns.recovered_server} now considered healthy%{data}
+
+              dnsRecoveredWithTypo firewall:\s+\[%{word:secure_edge.firewall.service}\]\s+Operation:\s+DNS server with IP %{ip:secure_edge.firewall.dns.recovered_server} now considererd healthy%{data}
+
+              unhealthyServer firewall:\s+\[%{word:secure_edge.firewall.service}\]\s+Operation:\s+DNS server with IP %{ip:secure_edge.firewall.dns.unhealthy_server} did not respond to health check%{data}
+
+              autoFilledRule1 firewall:\s+\[%{word:secure_edge.firewall.service}\]\s+%{word:secure_edge.firewall.operation}:\s+%{data:secure_edge.firewall.operation_details}
+    - type: pipeline
+      name: "SSH "
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:ssh
+      processors:
+        - type: grok-parser
+          name: Box SSH sshd
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "sshd: Server listening on 169.254.128.2 port 22."
+            - "LOGIN ATTEMPT: sshd[26823]: Login (password) root from 10.10.16.1
+              port 55827 Accepted"
+            - "sshd: notice: Shell (/bin/bash) opened for user
+              root@10.10.16.1:57129 (uid=0)"
+            - "sshd: Connection from 10.10.16.1 port 52517 on 10.10.16.116 port
+              22"
+            - "sshd: Received signal 15; terminating."
+          grok:
+            supportRules: ""
+            matchRules: >-
+              loginAttempt LOGIN ATTEMPT:\s+%{data}: Login
+              \(%{data:secure_edge.ssh.login.type}\)
+              %{data:secure_edge.ssh.login.user} from
+              %{ip:secure_edge.ssh.login.from} port
+              %{port:secure_edge.ssh.login.port}
+              %{data:secure_edge.ssh.login.result}
+
+              signalReceived sshd:\s+Received signal %{number:secure_edge.ssh.signal.value}; %{data:secure_edge.ssh.signal.action}
+
+              serverListening sshd:\s+Server listening on %{ip:secure_edge.ssh.ip} port %{port:secure_edge.ssh.port}(.)?
+
+              connectionClosed sshd:\s+Connection closed by %{ip:secure_edge.ssh.connection.close.ip} port %{port:secure_edge.ssh.connection.close.port}
+
+              connectionStarted sshd:\s+Connection from %{ip:secure_edge.ssh.connection.open.from_ip} port %{port:secure_edge.ssh.connection.open.from_port} on %{ip:secure_edge.ssh.connection.open.to_ip} port %{port:secure_edge.ssh.connection.open.to_port}
+
+              shellOpened sshd:%{data}Shell \(%{data:secure_edge.ssh.shell.process}\) opened for user %{data:secure_edge.ssh.shell.user}@%{ip:secure_edge.ssh.shell.ip}:%{port:secure_edge.ssh.shell.port}%{data}
+        - type: grok-parser
+          name: Box SSH config
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "[0210108] writeSSHdconf(): starting handling of ssh daemon
+              configuration "
+            - "[0210112] writeSSHdconf(): finished activation of ssh daemon
+              configuration "
+            - "[0213014] writeSSHdconf(): -------------- END
+              ---------------------------- "
+          grok:
+            supportRules: ""
+            matchRules: autoFilledRule1
+              \[%{number:secure_edge.event_id}\]\s+%{data:secure_edge.ssh.function}:\s+%{data:message}
+    - type: pipeline
+      name: Network
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:network
+      processors:
+        - type: grok-parser
+          name: Box Network activation
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "[0140200] 0 0 boxnet(p,ARGS): wrote outer line control
+              parametrisation for xDHCP links to
+              /var/phion/preserve/boxnet/DHCP/xDHCP.opconf"
+            - "[0140000] 0 boxnet(Q,ARGS): Logical Check Sequence Begin "
+            - "boxnet: boxnet:  boot /opt/phion/config/active/boxnet.conf all"
+            - "[0140100] make_box(b,ARGS): local consistency check of network
+              configuration started "
+          grok:
+            supportRules: operationCore
+              \[%{number:secure_edge.event_id}\]\s+(%{regex("\\d+(\\s+\\d+)?"):secure_edge.network.context_level}\s+)?%{regex("\\w+\\([^)]*\\)"):secure_edge.network.function}
+            matchRules: >-
+              autoFilledRule1
+              \[%{number:secure_edge.event_id}\]\s+(%{regex("(\\d+\\s+)*"):secure_edge.network.context_level})?%{word:secure_edge.network.function}%{data}:\s+%{data:secure_edge.network.message}
+
+              stateInfo (%{word:secure_edge.network.service}:\s+)?%{data:secure_edge.network.message}
+    - type: pipeline
+      name: VPN
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:vpn
+      processors:
+        - type: grok-parser
+          name: VPN vpn
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - -------- VPN Server Startup Version = 5.0.0.1 (pid=9451, ppid=1,
+              inst=CSC_VPN) -----------
+          grok:
+            supportRules: ""
+            matchRules: serverStart %{data} VPN Server Startup Version =
+              %{data:secure_edge.vpn.server_version}
+              \(pid=%{number:secure_edge.vpn.server_pid},
+              ppid=%{number:secure_edge.vpn.server_ppid},
+              inst=%{data:secure_edge.vpn.instance}\)%{data}
+        - type: grok-parser
+          name: VPN sslvpn
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "sslvpn: SSL Cipher Spec unspecified - strong ciphers only
+              selected - using:
+              'ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+EXP:-SSLv2'"
+            - "sslvpn: ACTIVATE Self-signed certificate key is empty"
+            - "sslvpn: ACTIVATE Allow SSLv3 is not set, using default: false"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              cipherUse sslvpn: ACTIVATE Allow %{data:secure_edge.vpn.cipher} is
+              %{data:secure_edge.vpn.cipher_status}, using default:
+              %{word:secure_edge.vpn.use_default}
+
+              autoFilledRule1 sslvpn:\s+(%{word:secure_edge.vpn.event_type})?\s+%{data:message}
+    - type: pipeline
+      name: Box System mgmaccess
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:access
+      processors:
+        - type: grok-parser
+          name: Box System mgmaccess
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - Opened listen socket on 169.254.128.2:807
+            - "Handler #17 returned with code 2 (IOStreamSock:
+              Connect(10.10.16.116:814): Connection refused)"
+            - "Connected new handler #23 of type 'Firewall'"
+            - "Box group type: secure-edge-hubs"
+            - Shut down listen socket on 192.168.200.200:807
+          grok:
+            supportRules: ""
+            matchRules: >-
+              openSocket Opened listen socket on
+              %{ip:secure_edge.access.open_socket.ip}:%{port:secure_edge.access.open_socket.port}
+
+              closeSocket Shut down listen socket on %{ip:secure_edge.access.close_socket.ip}:%{port:secure_edge.access.close_socket.port}
+
+              connectedHandler Connected new handler #%{number:secure_edge.access.handler.id} of type '%{word:secure_edge.access.handler.type}'
+
+              socketConnectError Handler #%{number:secure_edge.access.handler.id} returned with code %{number:secure_edge.access.handler.return_code} \(IOStreamSock: Connect\(%{ip:secure_edge.access.handler.socket.ip}:%{port:secure_edge.access.handler.socket.port}\): %{data:secure_edge.access.handler.error_message}\)
+
+              handlerReturned Handler #%{number:secure_edge.access.handler.id} returned with code %{number:secure_edge.access.handler.return_code} \(%{data:secure_edge.access.handler.return_message}\)
+
+              boxGroupType Box group type: %{data:secure_edge.access.group}
+    - type: pipeline
+      name: Admin
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:admin
+      processors:
+        - type: grok-parser
+          name: Box Config admin
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - New Session GCSID_localhost_CloudGen-WAN_127.0.0.1_22883_31238
+            - "[localhost_wanhub@127.0.0.1_43774]  Commit operation: 0
+              Directory: servers/CSC/services/DHCPR"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              sessionStart New Session
+              GCSID_%{data:secure_edge.admin.config.session.user}_%{ip:secure_edge.admin.config.session.ip}_%{port:secure_edge.admin.config.session.port}_%{number:secure_edge.admin.config.session.pid}
+
+              commitOperation \[%{data:secure_edge.admin.config.commit.user}@%{ip:secure_edge.admin.config.commit.ip}_%{port:secure_edge.admin.config.commit.port}\]\s+Commit operation: %{number:secure_edge.admin.config.commit.return_code} %{data:secure_edge.admin.config.commit.operation}: %{data:secure_edge.admin.config.commit.target}
+        - type: grok-parser
+          name: Box Config changes
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "[localhost_wanhub@127.0.0.1_43774]  COMMIT(add)
+              servers/CSC/services/DHCPR (Generic Service directory for DHCPR)"
+            - "[init] COMMIT(add) servers/CSC/services/DHCP/dhcpe (DHCP
+              Enterprise Configuration)"
+            - "[localhost_wanhub@127.0.0.1_43774]  Commit Start"
+            - "[init] Commit Start"
+          grok:
+            supportRules: commitData
+              COMMIT\(%{word:secure_edge.admin.config.commit.operation}\)\s+%{data:secure_edge.admin.config.commit.target}\s+%{data:secure_edge.admin.config.commit.details}
+            matchRules: >
+              autoFilledRule1
+              \[%{data:secure_edge.admin.config.commit.user}@%{ip:secure_edge.admin.config.commit.ip}_%{port:secure_edge.admin.config.commit.port}\]\s+%{commitData}
+
+              autoFilledRule2 \[%{data:secure_edge.admin.config.commit.process}\]\s+%{commitData}
+
+              commitStartUser \[%{data:secure_edge.admin.config.commit.user}@%{ip:secure_edge.admin.config.commit.ip}_%{port:secure_edge.admin.config.commit.port}\]\s+Commit Start
+
+              commitStartProcess \[%{data:secure_edge.admin.config.commit.process}\]\s+Commit Start
+        - type: grok-parser
+          name: Box Config sync
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - Starting main loop pid=9123
+            - Starting main loop pid=7232
+          grok:
+            supportRules: ""
+            matchRules: autoFilledRule1 Starting main loop
+              pid=%{number:secure_edge.admin.config.sync.pid}
+        - type: grok-parser
+          name: Box Control AuthService
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - 'phibs: Configuration: Adding scheme ocsp of type "OCSP-Validator"'
+            - "phibs: Configuration: scheme msnt is disabled."
+          grok:
+            supportRules: ""
+            matchRules: >
+              disabledAuthScheme
+              %{word:secure_edge.admin.auth_service.component}:\s+%{word:secure_edge.admin.auth_service.process}:
+              scheme %{data:secure_edge.admin.auth_service.disabled_scheme} is
+              disabled.
+
+              enabledAuthScheme %{word:secure_edge.admin.auth_service.component}:\s+%{word:secure_edge.admin.auth_service.process}: Adding scheme %{data:secure_edge.admin.auth_service.enabled_scheme} of type "%{data:secure_edge.admin.auth_service.scheme_type}"
+    - type: pipeline
+      name: Box Network dhcp
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:dhcp
+      processors:
+        - type: grok-parser
+          name: Box Network dhcp
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "xdhcp1[4530]: interface dhcp addresses are local=10.10.17.114 and
+              gateway=10.10.16.1"
+            - "xdhcp1[4530]: local interface dhcp IP changed
+              0.0.0.0->10.10.17.114"
+          grok:
+            supportRules: module
+              %{data:secure_edge.dhcp.module}\[%{number:secure_edge.event_id}\]
+            matchRules: >
+              interfaceChange %{module}:
+              %{word:secure_edge.dhcp.change.interface} interface%{data}changed
+              %{ip:secure_edge.dhcp.change.original_ip}->%{ip:secure_edge.dhcp.change.new_ip}
+
+              dhcpGateway %{module}%{data}local=%{ip:secure_edge.dhcp.local_ip} and gateway=%{ip:secure_edge.dhcp.gateway_ip}
+    - type: pipeline
+      name: System
+      enabled: true
+      filter:
+        query: source:barracuda_secure_edge log_component:system
+      processors:
+        - type: grok-parser
+          name: Box Event eventS
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "event: [1071065] Insert Event from 127.0.0.1:43134 -
+              (D|2|ccactivate|1|License|4700|Query Activation State
+              for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for
+              the license activation state failed)"
+            - "event: [1071065] Insert Event from 127.0.0.1:42081 -
+              (D|2|NGAdmin|2|Login|2420|root|CloudGen-WAN|1743574182|Login root
+              from 10.10.16.1 : Allowed.)"
+            - "event: [1070310] Confirm (worker: 2759) from 10.10.16.1,  User
+              [root] - (D|2|ccactivate|1|License|4700|Query Activation State
+              for  Failed|DEVICE_001)"
+            - "event: [1071065] Confirmed (worker: 2759): 1 Rows confirmed -
+              (D|2|ccactivate|1|License|4700|Query Activation State
+              for  Failed|DEVICE_001)"
+          grok:
+            supportRules: >-
+              eventData
+              %{data::csv("secure_edge.system.type,secure_edge.system.notification_id,secure_edge.system.module,secure_edge.system.severity,secure_edge.system.event_name,secure_edge.system.event_code,secure_edge.system.demo,secure_edge.system.product_name,secure_edge.system.epoch,secure_edge.system.message","|")}
+
+
+              eventId event:\s+\[%{number:secure_edge.event_id}\]
+
+              worker_id \(worker: %{number:secure_edge.system.worker_id}\)
+            matchRules: >-
+              insertEvent %{eventId}\s+Insert Event from
+              %{ip:secure_edge.system.source_ip}:%{port:secure_edge.system.port}
+              - \(%{eventData}\)
+
+              confirmingWorker %{eventId}\s+%{word:secure_edge.system.confirmation}\s+%{worker_id}\s+from\s+%{ip:secure_edge.system.source_ip},\s+User\s+\[%{data:secure_edge.system.user}\]\s+-\s+\(%{eventData}\)
+
+              confirmedWorker %{eventId}\s+%{word:secure_edge.system.confirmation}\s+%{worker_id}%{data}\s+-\s+\(%{eventData}\)
+        - type: grok-parser
+          name: Box Event operative
+          enabled: true
+          source: secure_edge.nested_message
+          samples:
+            - "event: [1070045] Startup CheckEventState (pid=6397): check every
+              30 sec"
+            - "event: [1070256] (11) IOStreamSock: Receive() error:068000DF:asn1
+              encoding routines::too large"
+            - "event: [1070310] Confirm (worker: 2759) from 10.10.16.1,  User
+              [root] - (D|2|boxconfig|2|Login|2420|root|CloudGen-WAN)"
+            - "event: [1071200] starting worker 11022: connected from
+              10.10.16.116:6752"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              autoFilledRule1
+              %{word}:\s+\[%{number:secure_edge.event_id}\]\s+%{word:secure_edge.system.operation}\s+\(worker:
+              %{number:secure_edge.system.worker_id}\)\s+from\s+%{ip:secure_edge.system.source_ip},\s+User\s+\[%{data}\]\s+-\s+\(%{data::csv("secure_edge.system.type,secure_edge.system.severity,secure_edge.system.component,secure_edge.system.code,secure_edge.system.action,secure_edge.system.session_id,secure_edge.system.user,secure_edge.system.system_name","|")}\)
+
+              autoFilledRule2 %{word}:\s+\[%{number:secure_edge.event_id}\]\s+%{data:message}
+    - type: status-remapper
+      name: Remapper level to status
+      enabled: true
+      sources:
+        - level
+    - type: attribute-remapper
+      name: " Map timestamp to syslog.timestamp"
+      enabled: true
+      sources:
+        - timestamp
+      sourceType: attribute
+      target: syslog.timestamp
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: "Gather source_ip for facets"
+      enabled: true
+      sources:
+        - secure_edge.system.source_ip
+        - secure_edge.firewall.source_ip
+      sourceType: attribute
+      target: secure_edge.source_ip
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: date-remapper
+      name: "Define `timestamp` as the official date of the log "
+      enabled: true
+      sources:
+        - timestamp
+    - type: string-builder-processor
+      name: Socket IP:Port
+      enabled: true
+      template: "%{secure_edge.access.handler.socket.ip}:%{secure_edge.access.handler\
+        .socket.port}"
+      target: secure_edge.access.socket
+      replaceMissing: false

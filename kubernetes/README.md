@@ -11,6 +11,8 @@ Get metrics from the Kubernetes service in real time to:
 
 Note: This check only works with Agent v5. For Agent v6+, see the [kubelet check][2].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

@@ -98,6 +98,11 @@ RDMA_COUNTERS = {
     "rdma_read_wr_err",
     "rdma_read_resp_bytes",
     "rdma_read_bytes",
+    "retrans_bytes",
+    "retrans_pkts",
+    "retrans_timeout_events",
+    "impaired_remote_conn_events",
+    "unresponsive_remote_events",
 }
 
 STATUS_COUNTERS = {"state", "phys_state"}  # "4: ACTIVE"  # "5: LinkUp"

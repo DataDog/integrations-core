@@ -31,7 +31,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 24822827,
       "source_type_name": "Brevo",
       "events": {

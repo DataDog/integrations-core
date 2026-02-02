@@ -4,6 +4,8 @@
 
 This check monitors [Vertica][1] through the Datadog Agent.
 
+**Minimum Agent version:** 6.14.0
+
 ## Setup
 
 ### Installation

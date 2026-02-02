@@ -4,7 +4,7 @@
 from urllib.parse import urlparse, urlunparse
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from datadog_checks.bentoml.metrics import ENDPOINT_METRICS, METRICS
+from datadog_checks.bentoml.metrics import ENDPOINT_METRICS, LABEL_RENAME_MAP, METRICS
 
 
 class BentomlCheck(OpenMetricsBaseCheckV2):
@@ -27,6 +27,7 @@ class BentomlCheck(OpenMetricsBaseCheckV2):
         return {
             'openmetrics_endpoint': self.openmetrics_endpoint,
             'metrics': [METRICS],
+            'rename_labels': LABEL_RENAME_MAP,
         }
 
     def check(self, instance):

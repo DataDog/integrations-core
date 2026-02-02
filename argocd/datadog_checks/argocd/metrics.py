@@ -44,6 +44,7 @@ APPLICATION_CONTROLLER = {
     'argocd_app_info': 'app.info',
     'argocd_app_reconcile': 'app.reconcile',
     'argocd_app_sync': 'app.sync',
+    'argocd_app_sync_duration_seconds': 'app.sync.duration.seconds',
     'argocd_app_labels': 'app.labels',
     'argocd_cluster_api_resource_objects': 'cluster.api.resource_objects',
     'argocd_cluster_api_resources': 'cluster.api.resources',

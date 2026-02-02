@@ -8,6 +8,8 @@ For more information on using DuckDB, refer to the [DuckDB documentation][9].
 
 This check monitors [DuckDB][1] through the Datadog Agent. 
 
+**Minimum Agent version:** 7.63.0
+
 ## Setup
 
 DuckDB has two configurable options for concurrency:

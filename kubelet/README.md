@@ -7,6 +7,8 @@ This integration gets container metrics from kubelet
 - Visualize and monitor kubelet stats
 - Be notified about kubelet failovers and events.
 
+**Minimum Agent version:** 6.0.2
+
 ## Setup
 
 ### Installation

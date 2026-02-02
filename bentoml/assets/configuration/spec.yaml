@@ -13,3 +13,9 @@ files:
         openmetrics_endpoint.description: |
           Endpoint exposing the BentoML Prometheus metrics. For more information refer to:
           https://docs.bentoml.com/en/latest/build-with-bentoml/observability/metrics.html
+  - template: logs
+    example:
+    - type: file
+      path: monitoring/text_summarization/data/*.log
+      source: bentoml
+      service: <SERVICE>

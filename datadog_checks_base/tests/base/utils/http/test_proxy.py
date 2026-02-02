@@ -2,15 +2,26 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import OrderedDict
+from io import BytesIO
+from unittest import mock
 
-import mock
 import pytest
-from requests.exceptions import ConnectTimeout, ProxyError
+from requests import Response, Session
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import EnvVars
 
 pytestmark = [pytest.mark.unit]
+
+
+@pytest.fixture(scope="module")
+def mock_requests_get():
+    with mock.patch.object(Session, 'get', autospec=True) as mock_get:
+        response = Response()
+        response.status_code = 200
+        response.raw = BytesIO("Proxied request successful!".encode('utf-8'))
+        mock_get.return_value = response
+        yield mock_get
 
 
 def test_config_default():
@@ -24,7 +35,7 @@ def test_config_default():
 
 def test_config_proxy_agent():
     with mock.patch(
-        'datadog_checks.base.stubs.datadog_agent.get_config',
+        'datadog_checks.base.utils.http.datadog_agent.get_config',
         return_value={'http': 'http_host', 'https': 'https_host', 'no_proxy': 'uri1,uri2;uri3,uri4'},
     ):
         instance = {}
@@ -37,7 +48,7 @@ def test_config_proxy_agent():
 
 def test_config_proxy_init_config_override():
     with mock.patch(
-        'datadog_checks.base.stubs.datadog_agent.get_config',
+        'datadog_checks.base.utils.http.datadog_agent.get_config',
         return_value={'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'},
     ):
         instance = {}
@@ -50,7 +61,7 @@ def test_config_proxy_init_config_override():
 
 def test_config_proxy_instance_override():
     with mock.patch(
-        'datadog_checks.base.stubs.datadog_agent.get_config',
+        'datadog_checks.base.utils.http.datadog_agent.get_config',
         return_value={'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'},
     ):
         instance = {'proxy': {'http': 'http_host', 'https': 'https_host', 'no_proxy': 'uri1,uri2;uri3,uri4'}}
@@ -63,7 +74,7 @@ def test_config_proxy_instance_override():
 
 def test_config_no_proxy_as_list():
     with mock.patch(
-        'datadog_checks.base.stubs.datadog_agent.get_config',
+        'datadog_checks.base.utils.http.datadog_agent.get_config',
         return_value={'http': 'http_host', 'https': 'https_host', 'no_proxy': ['uri1', 'uri2', 'uri3', 'uri4']},
     ):
         instance = {}
@@ -92,58 +103,72 @@ def test_config_proxy_skip_init_config():
     assert http.no_proxy_uris is None
 
 
-def test_proxy_env_vars_skip():
+@pytest.mark.parametrize(
+    'url,env_var',
+    [('http://www.google.com', 'HTTP_PROXY'), ('https://www.google.com', 'HTTPS_PROXY')],
+    ids=['http', 'https'],
+)
+def test_proxy_env_vars_skip(mock_requests_get: mock.MagicMock, url: str, env_var: str):
     instance = {'skip_proxy': True}
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    with EnvVars({'HTTP_PROXY': 'http://1.2.3.4:567'}):
-        response = http.get('http://www.google.com')
-        response.raise_for_status()
+    expected_proxies = {'http': '', 'https': ''}
 
-    with EnvVars({'HTTPS_PROXY': 'https://1.2.3.4:567'}):
-        response = http.get('https://www.google.com')
-        response.raise_for_status()
+    with EnvVars({env_var: 'http://1.2.3.4:567'}):
+        http.get(url)
+
+        # Since skip is true, we inject empty proxies to the call
+        actual_proxies = mock_requests_get.call_args[1]['proxies']
+        assert actual_proxies == expected_proxies
 
 
-def test_proxy_env_vars_override_skip_fail():
+@pytest.mark.parametrize(
+    'url,env_var',
+    [('http://www.google.com', 'HTTP_PROXY'), ('https://www.google.com', 'HTTPS_PROXY')],
+    ids=['http', 'https'],
+)
+def test_proxy_env_vars_override_skip_fail(mock_requests_get: mock.MagicMock, url: str, env_var: str):
     instance = {'skip_proxy': True}
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    with EnvVars({'HTTP_PROXY': 'http://1.2.3.4:567'}):
-        with pytest.raises((ConnectTimeout, ProxyError)):
-            http.get('http://www.google.com', timeout=1, proxies=None)
+    with EnvVars({env_var: 'http://1.2.3.4:567'}):
+        http.get(url, timeout=1, proxies=None)
+        actual_proxies = mock_requests_get.call_args[1]['proxies']
 
-    with EnvVars({'HTTPS_PROXY': 'https://1.2.3.4:567'}):
-        with pytest.raises((ConnectTimeout, ProxyError)):
-            http.get('https://www.google.com', timeout=1, proxies=None)
+        # Even with skip true, we ignore it to call get with the proxies supplied to the get method
+        assert actual_proxies is None
 
 
-def test_proxy_bad():
-    instance = {'proxy': {'http': 'http://1.2.3.4:567', 'https': 'https://1.2.3.4:567'}}
+@pytest.mark.parametrize(
+    "url",
+    [
+        ('http://www.google.com'),
+        ('https://www.google.com'),
+    ],
+    ids=['http', 'https'],
+)
+@pytest.mark.parametrize(
+    "no_proxies,should_proxy",
+    [
+        pytest.param({'no_proxy': 'unused,google.com'}, False, id='with_matching_no_proxy'),
+        pytest.param({'no_proxy': 'unused,example.com'}, True, id='with_non_matching_no_proxy'),
+        pytest.param({}, True, id='without_no_proxy'),
+    ],
+)
+def test_no_proxy_bypass(mock_requests_get: mock.MagicMock, url: str, no_proxies: dict, should_proxy: bool):
+    proxies = {'http': 'http://1.2.3.4:567', 'https': 'https://1.2.3.4:567'}
+    instance = {'proxy': proxies | no_proxies}
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
-    with pytest.raises((ConnectTimeout, ProxyError)):
-        http.get('http://www.google.com', timeout=1)
+    # Validate that the proxies are injected appropriately
+    expected_proxies = proxies if should_proxy else {'http': '', 'https': ''}
 
-    with pytest.raises((ConnectTimeout, ProxyError)):
-        http.get('https://www.google.com', timeout=1)
-
-
-def test_proxy_bad_no_proxy_override_success():
-    instance = {
-        'proxy': {'http': 'http://1.2.3.4:567', 'https': 'https://1.2.3.4:567', 'no_proxy': 'unused,google.com'}
-    }
-    init_config = {}
-    http = RequestsWrapper(instance, init_config)
-
-    response = http.get('http://www.google.com')
-    response.raise_for_status()
-
-    response = http.get('https://www.google.com')
-    response.raise_for_status()
+    http.get(url)
+    actual_proxies = mock_requests_get.call_args[1]['proxies']
+    assert actual_proxies == expected_proxies
 
 
 def test_no_proxy_uris_coverage():

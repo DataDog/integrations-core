@@ -10,6 +10,8 @@ data availability, cluster configuration, and more.
 
 **Note**: this integration is compatible with RethinkDB **version 2.3.6 and above**.
 
+**Minimum Agent version:** 7.19.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For

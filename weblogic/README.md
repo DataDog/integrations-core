@@ -11,6 +11,8 @@ Oracle WebLogic monitoring with Datadog enables you to:
 - Track thread pool and messaging services
 - Track database connection pool usage
 
+**Minimum Agent version:** 7.33.0
+
 ## Setup
 
 ### Installation

@@ -4,6 +4,8 @@
 
 This check lets you monitor SSH connectivity to remote hosts and SFTP response times.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

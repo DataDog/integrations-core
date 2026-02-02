@@ -1,5 +1,9 @@
 # Agent Check: Snowflake
 
+**Deprecation Notice:** The Agent based Snowflake integration is officially deprecated and no longer supported. Please 
+  utilize the updated [Snowflake Integration](https://docs.datadoghq.com/integrations/snowflake-web/). 
+
+  
 ## Overview
 
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
@@ -9,6 +13,8 @@ Note: This integration is now deprecated and replaced by the new API-based integ
 
 <div class="alert alert-info"><bold>Note</bold>: Metrics are collected with queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</div>
 
+
+**Minimum Agent version:** 7.23.0
 
 ## Setup
 

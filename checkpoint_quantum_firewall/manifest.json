@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4b6b8ef9-e079-4ee4-877e-8f4aafbf8a1d",
   "app_id": "checkpoint-quantum-firewall",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

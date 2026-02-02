@@ -258,6 +258,8 @@ OPTIONAL_METRICS = [
     'clickhouse.UncompressedCacheBytes',
     'clickhouse.UncompressedCacheCells',
     'clickhouse.uptime',
+    'clickhouse.zk.data.exception.count',
+    'clickhouse.zk.data.exception.total',
     'clickhouse.zk.set.count',
     'clickhouse.zk.set.total',
     'clickhouse.zk.remove.count',

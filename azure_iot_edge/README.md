@@ -8,6 +8,8 @@ Use the Datadog-Azure IoT Edge integration to collect metrics and health status 
 
 **Note**: This integration requires IoT Edge runtime version 1.0.10 or above.
 
+**Minimum Agent version:** 7.24.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an IoT Edge device running on a device host.

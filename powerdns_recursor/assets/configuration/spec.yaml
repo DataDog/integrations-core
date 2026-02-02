@@ -23,6 +23,7 @@ files:
     - name: api_key
       required: true
       description: Recursor web server api key.
+      secret: true
       value:
         type: string
     - name: version

@@ -60,3 +60,8 @@ telemetry_scrape_duration_seconds_sum{registry="detailed",content_type="text/pla
 telemetry_scrape_size_bytes_count{registry="detailed",content_type="text/plain; version=0.0.4"} 1
 telemetry_scrape_size_bytes_sum{registry="detailed",content_type="text/plain; version=0.0.4"} 4547
 
+# TYPE rabbitmq_detailed_queue_info gauge
+# HELP rabbitmq_detailed_queue_info A metric with a constant '1' value and labels that provide queue details
+rabbitmq_detailed_queue_info{vhost="/",queue="test_queue1",queue_type="rabbit_classic_queue",membership="leader"} 1
+rabbitmq_detailed_queue_info{vhost="/",queue="test_queue2",queue_type="rabbit_stream_queue",membership="leader"} 1
+rabbitmq_detailed_queue_info{vhost="/",queue="test_queue3",queue_type="rabbit_stream_queue",membership="follower"} 1

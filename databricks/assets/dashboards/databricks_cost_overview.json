@@ -31,25 +31,31 @@
           }
         ],
         "autoscale": true,
-        "precision": 2
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
       },
       "layout": {
         "x": 0,
         "y": 0,
-        "width": 4,
+        "width": 3,
         "height": 2
       }
     },
     {
       "id": 7402251919033163,
       "definition": {
-        "title": "Total Costs (past 30d)",
+        "title": "Total Spend (past 30d)",
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1751932800000,
-          "to": 1754611200000,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
@@ -72,10 +78,16 @@
           }
         ],
         "autoscale": true,
-        "precision": 2
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
       },
       "layout": {
-        "x": 4,
+        "x": 3,
         "y": 0,
         "width": 3,
         "height": 2
@@ -84,13 +96,13 @@
     {
       "id": 5674547883690658,
       "definition": {
-        "title": "Total Costs (30d prior)",
+        "title": "Total Spend (30d prior)",
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1751932800000,
-          "to": 1754611200000,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
@@ -113,10 +125,16 @@
           }
         ],
         "autoscale": true,
-        "precision": 2
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
       },
       "layout": {
-        "x": 7,
+        "x": 6,
         "y": 0,
         "width": 3,
         "height": 2
@@ -129,9 +147,9 @@
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1749826086865,
-          "to": 1752504486865,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
@@ -188,383 +206,407 @@
           }
         ],
         "autoscale": true,
-        "precision": 2
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
       },
       "layout": {
-        "x": 10,
+        "x": 9,
         "y": 0,
-        "width": 2,
+        "width": 3,
         "height": 2
       }
     },
     {
-      "id": 5683139742669696,
+      "id": 2882781642909437,
       "definition": {
-        "type": "note",
-        "content": "Key concepts:\n- **workspace_id** - unified environment for performing data-centric tasks\n- **servicename** - the billing origin product, such as all purpose, jobs, dlt, etc\n- **charge_description** - the SKU, or pricing model, based on usage type",
-        "background_color": "green",
-        "font_size": "14",
-        "text_align": "left",
-        "vertical_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left",
-        "has_padding": true
-      },
-      "layout": {
-        "x": 0,
-        "y": 2,
-        "width": 3,
-        "height": 3
-      }
-    },
-    {
-      "id": 8604160612174419,
-      "definition": {
-        "title": "Daily Spend per Charge Description",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_layout": "auto",
-        "legend_columns": [
-          "avg",
-          "min",
-          "max",
-          "value",
-          "sum"
-        ],
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "type": "timeseries",
-        "requests": [
+        "title": "Cost Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {servicename,charge_description}.rollup(sum, daily)"
-              }
-            ],
-            "response_format": "timeseries",
-            "style": {
-              "palette": "classic",
-              "order_by": "values",
-              "line_type": "solid",
-              "line_width": "normal"
+            "id": 5683139742669696,
+            "definition": {
+              "type": "note",
+              "content": "Key concepts:\n- **workspace_id** - unified environment for performing data-centric tasks\n- **servicename** - the billing origin product, such as all purpose, jobs, dlt, etc\n- **charge_description** - the SKU, or pricing model, based on usage type",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
             },
-            "display_type": "bars"
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 8604160612174419,
+            "definition": {
+              "title": "Daily Spend per Charge Description",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {servicename,charge_description}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 7403434338270407,
+            "definition": {
+              "title": "Spend per ServiceName",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {servicename}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6603688971086557,
+            "definition": {
+              "title": "Spend per Charge Description",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {charge_description}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3011381139040291,
+            "definition": {
+              "title": "Cost by Workspace",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {workspace_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2933324945167311,
+            "definition": {
+              "title": "Cost by Workspace",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {workspace_id}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2469704178227516,
+            "definition": {
+              "title": "Usage Changes by ServiceName and SKU",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {servicename,charge_description}",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {servicename,charge_description}",
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 2,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Cost past 30 days",
+                      "cell_display_mode": "number",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Cost 30 days prior",
+                      "cell_display_mode": "number",
+                      "formula": "default_zero(timeshift(query2, -2592000))"
+                    },
+                    {
+                      "alias": "$ Change",
+                      "cell_display_mode": "number",
+                      "formula": "query1 - default_zero(timeshift(query2, -2592000))"
+                    },
+                    {
+                      "alias": "% Change",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 15,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 10,
+                          "palette": "black_on_light_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 5,
+                          "palette": "black_on_light_yellow"
+                        }
+                      ],
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 - default_zero(timeshift(query2, -2592000))) / default_zero(timeshift(query2, -2592000)) * 100"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "always"
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
+            }
           }
         ]
       },
       "layout": {
-        "x": 3,
+        "x": 0,
         "y": 2,
-        "width": 9,
-        "height": 3
-      }
-    },
-    {
-      "id": 7403434338270407,
-      "definition": {
-        "title": "Spend per ServiceName",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "requests": [
-          {
-            "response_format": "scalar",
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {servicename}",
-                "aggregator": "sum"
-              }
-            ],
-            "style": {
-              "palette": "classic"
-            },
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
-            "sort": {
-              "count": 500,
-              "order_by": [
-                {
-                  "type": "formula",
-                  "index": 0,
-                  "order": "desc"
-                }
-              ]
-            }
-          }
-        ],
-        "type": "sunburst",
-        "legend": {
-          "type": "table"
-        }
-      },
-      "layout": {
-        "x": 0,
-        "y": 5,
-        "width": 6,
-        "height": 4
-      }
-    },
-    {
-      "id": 6603688971086557,
-      "definition": {
-        "title": "Spend per Charge Description",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "requests": [
-          {
-            "response_format": "scalar",
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {charge_description}",
-                "aggregator": "sum"
-              }
-            ],
-            "style": {
-              "palette": "classic"
-            },
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
-            "sort": {
-              "count": 500,
-              "order_by": [
-                {
-                  "type": "formula",
-                  "index": 0,
-                  "order": "desc"
-                }
-              ]
-            }
-          }
-        ],
-        "type": "sunburst",
-        "legend": {
-          "type": "table"
-        }
-      },
-      "layout": {
-        "x": 6,
-        "y": 5,
-        "width": 6,
-        "height": 4
-      }
-    },
-    {
-      "id": 3011381139040291,
-      "definition": {
-        "title": "Cost by Workspace",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "requests": [
-          {
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {workspace_id}",
-                "aggregator": "sum"
-              }
-            ],
-            "response_format": "scalar",
-            "style": {
-              "palette": "classic"
-            },
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
-            "sort": {
-              "order_by": [
-                {
-                  "type": "formula",
-                  "index": 0,
-                  "order": "desc"
-                }
-              ]
-            }
-          }
-        ],
-        "type": "sunburst",
-        "legend": {
-          "type": "table"
-        }
-      },
-      "layout": {
-        "x": 0,
-        "y": 9,
-        "width": 6,
-        "height": 4
-      }
-    },
-    {
-      "id": 2933324945167311,
-      "definition": {
-        "title": "Cost by Workspace",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_layout": "auto",
-        "legend_columns": [
-          "avg",
-          "min",
-          "max",
-          "value",
-          "sum"
-        ],
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {workspace_id}.rollup(sum, daily)"
-              }
-            ],
-            "response_format": "timeseries",
-            "style": {
-              "palette": "classic",
-              "order_by": "values",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "bars"
-          }
-        ]
-      },
-      "layout": {
-        "x": 6,
-        "y": 9,
-        "width": 6,
-        "height": 4
-      }
-    },
-    {
-      "id": 2469704178227516,
-      "definition": {
-        "title": "Usage Changes by ServiceName and SKU",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "type": "query_table",
-        "requests": [
-          {
-            "response_format": "scalar",
-            "queries": [
-              {
-                "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {servicename,charge_description}",
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "aggregator": "sum"
-              },
-              {
-                "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {servicename,charge_description}",
-                "data_source": "cloud_cost",
-                "name": "query2",
-                "aggregator": "sum"
-              }
-            ],
-            "sort": {
-              "count": 500,
-              "order_by": [
-                {
-                  "type": "formula",
-                  "index": 2,
-                  "order": "desc"
-                }
-              ]
-            },
-            "formulas": [
-              {
-                "alias": "Cost past 30 days",
-                "cell_display_mode": "number",
-                "formula": "query1"
-              },
-              {
-                "alias": "Cost 30 days prior",
-                "cell_display_mode": "number",
-                "formula": "default_zero(timeshift(query2, -2592000))"
-              },
-              {
-                "alias": "$ Change",
-                "cell_display_mode": "number",
-                "formula": "query1 - default_zero(timeshift(query2, -2592000))"
-              },
-              {
-                "alias": "% Change",
-                "conditional_formats": [
-                  {
-                    "comparator": ">",
-                    "value": 15,
-                    "palette": "white_on_red"
-                  },
-                  {
-                    "comparator": ">",
-                    "value": 10,
-                    "palette": "black_on_light_red"
-                  },
-                  {
-                    "comparator": ">",
-                    "value": 5,
-                    "palette": "black_on_light_yellow"
-                  }
-                ],
-                "number_format": {
-                  "unit": {
-                    "type": "canonical_unit",
-                    "unit_name": "percent"
-                  }
-                },
-                "formula": "(query1 - default_zero(timeshift(query2, -2592000))) / default_zero(timeshift(query2, -2592000)) * 100"
-              }
-            ]
-          }
-        ],
-        "has_search_bar": "always"
-      },
-      "layout": {
-        "x": 0,
-        "y": 13,
         "width": 12,
-        "height": 4
+        "height": 16
       }
     },
     {
@@ -613,7 +655,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}",
                       "aggregator": "sum"
                     }
                   ],
@@ -680,7 +722,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -717,7 +759,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$workspace_id,$cluster_id,$job_id,$charge_description,$servicename} by {job_id}",
+                      "query": "sum:all.cost{providername:Databricks,$workspace_id,$cluster_id,$job_id,$charge_description,$servicename,job_id:*} by {job_id}",
                       "aggregator": "sum"
                     }
                   ],
@@ -784,7 +826,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {job_id}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,job_id:*} by {job_id}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -809,7 +851,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 17,
+        "y": 18,
         "width": 12,
         "height": 8,
         "is_column_break": true
@@ -861,7 +903,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}",
                       "aggregator": "sum"
                     },
                     {
@@ -917,7 +959,7 @@
                     },
                     {
                       "alias": "% Memory Allocation",
-                      "formula": "1 - (query3 / query4)",
+                      "formula": "100 * (1 - (query3 / query4))",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -941,7 +983,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 25,
+        "y": 26,
         "width": 12,
         "height": 7
       }

@@ -8,6 +8,8 @@ You can collect metrics from this integration in two ways-with the [Datadog Agen
 
 Consider [Data Streams Monitoring][20] to enhance your MSK integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
 
+**Minimum Agent version:** 7.16.1
+
 ## Setup
 
 The Agent check monitors Amazon Managed Streaming for Apache Kafka ([Amazon MSK][1]) through the Datadog Agent.

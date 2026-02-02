@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e92e309f-7bdc-4ff4-91d4-975497526325",
   "app_id": "openshift",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

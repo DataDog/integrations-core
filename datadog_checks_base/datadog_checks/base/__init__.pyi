@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
 from .agent import datadog_agent
-from .checks import AgentCheck
+from .checks import AgentCheck, DatabaseCheck
 from .checks.kube_leader import KubeLeaderElectionBaseCheck
 from .checks.openmetrics import OpenMetricsBaseCheck
 from .checks.openmetrics.v2.base import OpenMetricsBaseCheckV2
@@ -16,6 +16,7 @@ from .utils.common import ensure_bytes, ensure_unicode, to_native_string, to_str
 __all__ = [
     '__version__',
     'AgentCheck',
+    'DatabaseCheck',
     'ConfigurationError',
     'KubeLeaderElectionBaseCheck',
     'OpenMetricsBaseCheck',

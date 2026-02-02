@@ -1,0 +1,445 @@
+name: Kafka Actions
+files:
+- name: kafka_actions.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: remote_config_id
+      description: |
+        Remote configuration ID for tracking purposes.
+        This ID is automatically set by the Datadog backend via remote configuration.
+        This parameter is REQUIRED - the integration will not start without it.
+      required: true
+      value:
+        type: string
+        example: kafka-read-1732128000
+    
+    - name: kafka_connect_str
+      description: |
+        The Kafka connection string (bootstrap servers).
+      required: true
+      value:
+        type: string
+        example: localhost:9092
+    
+    - name: kafka_cluster_id
+      description: |
+        Expected Kafka cluster ID for verification.
+        If provided, the integration will verify that the connected Kafka cluster
+        matches this ID before executing any actions. This prevents accidentally
+        running actions against the wrong cluster.
+      value:
+        type: string
+        example: MkU3OEVBNTcwNTJENDM2Qk
+    
+    - name: security_protocol
+      description: |
+        Protocol used to communicate with brokers.
+        Valid values: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+      value:
+        type: string
+        example: PLAINTEXT
+    
+    - name: sasl_mechanism
+      description: |
+        SASL mechanism to use for authentication.
+        Valid values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+      value:
+        type: string
+        example: PLAIN
+    
+    - name: sasl_plain_username
+      description: Username for SASL PLAIN authentication
+      value:
+        type: string
+    
+    - name: sasl_plain_password
+      description: Password for SASL PLAIN authentication
+      secret: true
+      value:
+        type: string
+    
+    # ========================================================================
+    # ACTIONS
+    # ========================================================================
+    # Only one action per instance is supported.
+    # ========================================================================
+    
+    # ========================================================================
+    # Action #1: read_messages
+    # ========================================================================
+    - name: read_messages
+      description: |
+        Configuration for reading messages from Kafka topics.
+        Messages are streamed in real-time and sent to Datadog as they arrive.
+        The check has a 20-second timeout for the entire operation.
+        Supports JSON, BSON, Protobuf, and Avro with optional Schema Registry integration.
+        Filtering is applied after deserialization using jq-style expressions.
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+        example:
+          cluster: prod-kafka-1
+          topic: orders
+          partition: -1
+          start_offset: -1
+          n_messages_retrieved: 10
+          max_scanned_messages: 1000
+          filter: '.value.status == "failed"'
+          value_format: json
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic to read messages from
+          example: orders
+        - name: partition
+          type: integer
+          description: Specific partition to read from (-1 for all partitions)
+          default: -1
+          example: -1
+        - name: start_offset
+          type: integer
+          description: Starting offset (-1 for latest, -2 for earliest, or specific offset)
+          default: -1
+          example: -1
+        - name: n_messages_retrieved
+          type: integer
+          description: |
+            Maximum number of matching messages to retrieve and send to Datadog.
+            The operation stops when this many matching messages are found.
+          default: 10
+          example: 10
+        - name: max_scanned_messages
+          type: integer
+          description: |
+            Maximum number of messages to scan through from Kafka.
+            If this limit is reached before n_messages_retrieved matching messages are found,
+            the operation stops and the event will indicate the limit was hit.
+            This prevents scanning through millions of messages.
+          default: 1000
+          example: 1000
+        - name: filter
+          type: string
+          description: |
+            jq-style expression to filter messages (optional).
+            Filtering happens AFTER deserialization.
+            Examples: '.value.price > 100', '.value.user.country == "US"'
+          example: '.value.status == "failed"'
+        - name: value_format
+          type: string
+          description: |
+            Message value format:
+            - json: JSON data (strict validation, fails if not valid JSON)
+            - bson: BSON (Binary JSON) data
+            - string: Plain UTF-8 text (use for non-JSON text messages)
+            - protobuf: Protocol Buffers
+            - avro: Apache Avro
+            Note: If any message fails deserialization, the read_messages action will stop immediately.
+            Ensure the format matches the actual messages in your topic.
+          default: json
+          example: json
+        - name: value_schema
+          type: string
+          description: Schema definition for protobuf/avro value
+        - name: value_uses_schema_registry
+          type: boolean
+          description: Whether value uses Schema Registry format
+          default: false
+        - name: key_format
+          type: string
+          description: |
+            Message key format:
+            - string: Plain UTF-8 text (most common for keys)
+            - json: JSON data (strict validation, fails if not valid JSON)
+            - bson: BSON (Binary JSON) data
+            - protobuf: Protocol Buffers
+            - avro: Apache Avro
+          default: json
+          example: json
+        - name: key_schema
+          type: string
+          description: Schema definition for protobuf/avro key
+        - name: key_uses_schema_registry
+          type: boolean
+          description: Whether key uses Schema Registry format
+          default: false
+        - name: consumer_group_id
+          type: string
+          description: |
+            Consumer group ID (optional).
+            If not provided, defaults to: datadog-agent-<remote_config_id>
+          example: "datadog-agent-kafka-read-1732128000"
+    
+    # ========================================================================
+    # Action #2: create_topic
+    # ========================================================================
+    - name: create_topic
+      description: |
+        Configuration for creating a new Kafka topic.
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+          - num_partitions
+          - replication_factor
+        example:
+          cluster: prod-kafka-1
+          topic: orders-v2
+          num_partitions: 6
+          replication_factor: 3
+          configs:
+            retention.ms: "604800000"
+            compression.type: "snappy"
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic name to create
+          example: orders-v2
+        - name: num_partitions
+          type: integer
+          description: Number of partitions
+          example: 6
+        - name: replication_factor
+          type: integer
+          description: Replication factor
+          example: 3
+        - name: configs
+          type: object
+          description: |
+            Topic configuration parameters.
+            Common configs: retention.ms, compression.type, min.insync.replicas, etc.
+          example:
+            retention.ms: "604800000"
+            compression.type: "snappy"
+    
+    # ========================================================================
+    # Action #3: update_topic_config
+    # ========================================================================
+    - name: update_topic_config
+      description: |
+        Configuration for updating an existing topic's configuration.
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+        example:
+          cluster: prod-kafka-1
+          topic: orders
+          num_partitions: 12
+          configs:
+            retention.ms: "1209600000"
+            max.message.bytes: "2097152"
+          delete_configs:
+            - retention.bytes
+            - compression.type
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic name to update
+          example: orders
+        - name: num_partitions
+          type: integer
+          description: New partition count (can only increase, cannot decrease)
+          example: 12
+        - name: configs
+          type: object
+          description: Configuration parameters to update
+          example:
+            retention.ms: "1209600000"
+            max.message.bytes: "2097152"
+        - name: delete_configs
+          type: array
+          items:
+            type: string
+          description: Configuration keys to reset to defaults
+          example:
+            - retention.bytes
+            - compression.type
+    
+    # ========================================================================
+    # Action #4: delete_topic
+    # ========================================================================
+    - name: delete_topic
+      description: |
+        Configuration for deleting a Kafka topic.
+        WARNING: This operation is irreversible and will cause data loss.
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+        example:
+          cluster: prod-kafka-1
+          topic: old-orders
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic name to delete
+          example: old-orders
+    
+    # ========================================================================
+    # Action #5: delete_consumer_group
+    # ========================================================================
+    - name: delete_consumer_group
+      description: |
+        Configuration for deleting a consumer group.
+        The consumer group must have no active members.
+      value:
+        type: object
+        required:
+          - cluster
+          - consumer_group
+        example:
+          cluster: prod-kafka-1
+          consumer_group: old-service-v1
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: consumer_group
+          type: string
+          description: Consumer group ID to delete
+          example: old-service-v1
+    
+    # ========================================================================
+    # Action #6: update_consumer_group_offsets
+    # ========================================================================
+    - name: update_consumer_group_offsets
+      description: |
+        Configuration for updating consumer group offsets.
+        WARNING: Can cause duplicate processing or data loss.
+        Consumer group should be stopped (no active members).
+      value:
+        type: object
+        required:
+          - cluster
+          - consumer_group
+          - offsets
+        example:
+          cluster: prod-kafka-1
+          consumer_group: order-processor
+          offsets:
+            - topic: orders
+              partition: 0
+              offset: 1000
+            - topic: orders
+              partition: 1
+              offset: 1500
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: consumer_group
+          type: string
+          description: Consumer group ID to update
+          example: order-processor
+        - name: offsets
+          type: array
+          description: List of topic-partition-offset tuples to update
+          items:
+            type: object
+            required:
+              - topic
+              - partition
+              - offset
+            properties:
+            - name: topic
+              type: string
+              description: Topic name
+            - name: partition
+              type: integer
+              description: Partition number
+            - name: offset
+              type: integer
+              description: New offset value
+          example:
+            - topic: orders
+              partition: 0
+              offset: 1000
+            - topic: orders
+              partition: 1
+              offset: 1500
+    
+    # ========================================================================
+    # Action #7: produce_message
+    # ========================================================================
+    - name: produce_message
+      description: |
+        Configuration for producing a message to a Kafka topic.
+        All values (key, value, headers) must be base64-encoded to ensure
+        safe transmission via YAML and support for binary data.
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+          - value
+        example:
+          cluster: prod-kafka-1
+          topic: test-topic
+          key: "MTIzNDU="
+          value: "eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9"
+          partition: -1
+          headers:
+            source: "ZGF0YWRvZy1hZ2VudA=="
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic to produce to
+          example: test-topic
+        - name: key
+          type: string
+          description: |
+            Message key (optional), base64-encoded.
+            If not provided, the message will have a null key in Kafka.
+            Example: "12345" -> base64 -> "MTIzNDU="
+          example: "MTIzNDU="
+        - name: value
+          type: string
+          description: |
+            Message value, base64-encoded.
+            Example: '{"order_id": "12345"}' -> base64 -> "eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"
+          example: "eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9"
+        - name: partition
+          type: integer
+          description: Specific partition (-1 for automatic partitioning)
+          default: -1
+          example: -1
+        - name: headers
+          type: object
+          description: |
+            Message headers (metadata). Values must be base64-encoded.
+            Example: source: "datadog-agent" -> base64 -> "ZGF0YWRvZy1hZ2VudA=="
+          example:
+            source: "ZGF0YWRvZy1hZ2VudA=="
+    
+    - template: instances/default

@@ -11,6 +11,8 @@ Get metrics from OpenStack service in real time to:
 - Visualize and monitor OpenStack states.
 - Be notified about OpenStack failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

@@ -9,6 +9,12 @@ on:
     - datadog_checks_dev/datadog_checks/dev/*.py
     - ddev/src/**
     - "!agent_requirements.in"
+    # Also run if we modify the workflow files
+    - '.github/workflows/pr-all-windows.yml'
+    - '.github/workflows/test-target.yml'
+    - '.github/workflows/test-all-windows.yml'
+    # Also run in the action to install test-target scripts changes
+    - '.github/actions/setup-test-target-scripts/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
@@ -26,7 +32,8 @@ jobs:
       repo: core
 
       # Options
-      test-py2: true
+      context: "pr"
+
     secrets: inherit
 
   save-event:
@@ -49,26 +56,18 @@ jobs:
       contents: read
 
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Download all coverage artifacts
-      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
       with:
         pattern: coverage-*
         path: coverage-reports
         merge-multiple: false
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@15559ed290fa727036809b67ab0f646ffa6c5158
+      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
       with:
         use_oidc: true
         directory: coverage-reports
         fail_ci_if_error: false
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit

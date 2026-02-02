@@ -8,6 +8,8 @@ This check monitors [Kubernetes Scheduler][2], part of the Kubernetes control pl
 
 **Note**: This check does not collect data for Amazon EKS clusters, as those services are not exposed.
 
+**Minimum Agent version:** 6.11.0
+
 ## Setup
 
 ### Installation

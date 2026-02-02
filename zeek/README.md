@@ -12,6 +12,8 @@ This integration ingests the following logs:
 
 Visualize detailed insights into network connections, DNS and DHCP activity, detailed network protocol analysis, file analysis and certificates, security detection and observation, compliance monitoring through the out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.52.0
+
 ## Setup
 
 ### Installation

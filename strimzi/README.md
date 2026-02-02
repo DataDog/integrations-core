@@ -4,6 +4,8 @@
 
 This check monitors [Strimzi][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 ### Installation

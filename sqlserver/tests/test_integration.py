@@ -21,6 +21,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
+    STATIC_INFO_YEAR,
     TABLE_SIZE_METRICS,
 )
 
@@ -98,9 +99,8 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     expected_check_tags = sqlserver_check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
     expected_service_tags = expected_check_tags + [
         'connection_host:{}'.format(instance_docker.get('host')),
@@ -134,9 +134,8 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
         + [
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
-            "ddagenthostname:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         + sp_tags.split(',')
     )
@@ -170,9 +169,8 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
         + [
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
-            "ddagenthostname:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         + ['optional_tag:tag1']
     )
@@ -191,9 +189,8 @@ def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tab
     instance_tags = sqlserver_check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=instance_tags, count=1)
@@ -226,9 +223,8 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     instance_tags = check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     master_tags = [
@@ -273,9 +269,8 @@ def test_autodiscovery_db_service_checks(
     instance_tags = check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     # verify that the old status check returns OK
@@ -332,9 +327,8 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     instance_tags = check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     # assert no connection is created for an excluded database
@@ -380,9 +374,8 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
     instance_tags = check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE_SINGLE]
@@ -403,9 +396,8 @@ def test_autodiscovery_perf_counters_ao(aggregator, dd_run_check, instance_autod
     instance_tags = check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
@@ -497,13 +489,41 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
             + [
                 "database_hostname:{}".format("stubbed.hostname"),
                 "database_instance:{}".format("stubbed.hostname"),
-                "ddagenthostname:{}".format("stubbed.hostname"),
                 "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-                "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+                "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
             ]
             + kwargs.get('tags', [])
         )
         aggregator.assert_metric(metric_name, **kwargs)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_only_custom_queries(aggregator, dd_run_check, instance_docker):
+    """Test that only_custom_queries=True skips regular metrics but executes custom queries."""
+    instance = copy(instance_docker)
+    instance['only_custom_queries'] = True
+    instance['custom_queries'] = [
+        {
+            'query': "SELECT 42 as custom_value",
+            'columns': [{'name': 'custom_value', 'type': 'gauge'}],
+            'tags': ['test:only_custom'],
+        }
+    ]
+    instance['procedure_metrics'] = {'enabled': False}
+
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    # Verify that custom query metrics ARE collected
+    instance_tags = check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME).lower()),
+    ]
+    aggregator.assert_metric('sqlserver.custom_value', value=42, tags=instance_tags + ['test:only_custom'], count=1)
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.integration
@@ -861,7 +881,8 @@ def test_resolved_hostname_set(
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     if engine_edition:
         sqlserver_check.static_info_cache[STATIC_INFO_VERSION] = "Microsoft SQL Server 2019"
-        sqlserver_check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 2019
+        sqlserver_check.static_info_cache[STATIC_INFO_YEAR] = 2019
+        sqlserver_check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 15
         sqlserver_check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
     dd_run_check(sqlserver_check)
     assert sqlserver_check.resolved_hostname == expected_hostname
@@ -902,9 +923,10 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "sqlserver"
-    assert len(event['tags']) == 6
+    assert len(event['tags']) == 5
     assert event['tags'][0] == 'optional:tag1'
     assert any(tag.startswith('sqlserver_servername:') for tag in event['tags'])
+    assert event['ddagenthostname'] == "stubbed.hostname"
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
     assert event['metadata'] == {
@@ -956,9 +978,8 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
         + [
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
-            "ddagenthostname:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         + [
             'db:datadog_test-1',
@@ -982,9 +1003,8 @@ def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
         + [
             "database_hostname:{}".format("stubbed.hostname"),
             "database_instance:{}".format("stubbed.hostname"),
-            "ddagenthostname:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         + [
             'database_recovery_model_desc:SIMPLE',
@@ -1038,9 +1058,8 @@ def test_propagate_agent_tags(
                 + [
                     "database_hostname:{}".format("stubbed.hostname"),
                     "database_instance:{}".format("stubbed.hostname"),
-                    "ddagenthostname:{}".format("stubbed.hostname"),
                     "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-                    "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+                    "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
                 ]
                 + [
                     'connection_host:{}'.format(instance_docker.get('host')),
@@ -1057,25 +1076,58 @@ def test_propagate_agent_tags(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_table_size_metrics_with_indexes(aggregator, dd_run_check, instance_docker):
+    """
+    Test that table size metrics are correctly emitted for a table with data and multiple
+    indexes. This test uses the existing test_schema.cities table which has 2 rows and 2 indexes.
+    """
+    # Use the existing test table from the testing infrastructure
+    table_name = 'cities'
+    schema_name = 'test_schema'
+    database_name = 'datadog_test_schemas'
+    expected_row_count = 2  # The setup inserts 2 rows
+
+    # Configure instance to include the test database
+    instance_docker['database_autodiscovery'] = True
+    instance_docker['autodiscovery_include'] = [database_name]
+
+    # Run the check
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(check)
+
+    # Verify that table size metrics are emitted for the cities table
+    expected_table_tags = [f'table:{table_name}', f'schema:{schema_name}', f'database:{database_name}']
+
+    # Check row_count metric
+    row_count_metrics = aggregator.metrics('sqlserver.table.row_count')
+    test_table_metrics = [m for m in row_count_metrics if all(tag in m.tags for tag in expected_table_tags)]
+    assert len(test_table_metrics) > 0, f"No row_count metrics found for table {table_name}"
+    assert test_table_metrics[0].value == expected_row_count, (
+        f"Expected row_count={expected_row_count}, got {test_table_metrics[0].value}"
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_static_information_expire(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually clear static information cache
     sqlserver_check.static_info_cache.clear()
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually pop STATIC_INFO_ENGINE_EDITION to make sure it is reloaded
     sqlserver_check.static_info_cache.pop(STATIC_INFO_ENGINE_EDITION)
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 7
+    assert len(sqlserver_check.static_info_cache.keys()) == 8
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
 

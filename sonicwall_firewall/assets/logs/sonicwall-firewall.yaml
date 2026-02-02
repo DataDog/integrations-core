@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-count-per-pipeline-checks
 id: sonicwall-firewall
 metric_id: sonicwall-firewall
 backend_only: false

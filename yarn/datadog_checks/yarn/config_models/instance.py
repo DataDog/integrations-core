@@ -78,7 +78,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
-    kerberos_auth: Optional[str] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
     kerberos_force_initiate: Optional[bool] = None

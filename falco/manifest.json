@@ -35,7 +35,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 31431531,
       "source_type_name": "Falco",
       "configuration": {

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from typing import Any
 
 
 class _FreezeKey(object):
@@ -30,8 +31,9 @@ class _FreezeKey(object):
             if other.value is None:
                 # `x < None` -> `False`
                 return False
-            # ...But we let other cases bubble through.
-            raise
+
+            # If we get 2 types that cannot be compared, we compare the string representation of the types.
+            return str(type(self.value)) < str(type(other.value))
         else:
             # We're on Python 2, where `a < b` never fails (returns `False` by default), or
             # we're on Python 3 and values have the same type.
@@ -63,6 +65,17 @@ def freeze(o):
 
 def hash_mutable(m):
     return hash(freeze(m))
+
+
+def hash_mutable_stable(m: Any) -> str:
+    """
+    This method provides a way of hashing a mutable object ensuring that the same object always
+    provides the same hash even in different processes.
+    """
+    from datadog_checks.base.utils.hashing import HashMethod
+
+    algorithm = HashMethod.secure()
+    return algorithm(str(freeze(m)).encode()).hexdigest()
 
 
 def iter_unique(*iterables):
