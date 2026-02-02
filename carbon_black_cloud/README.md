@@ -28,8 +28,8 @@ Refer to the [Datadog Forwarder][3] documentation for detailed configuration gui
 5. Select a **Type** from the dropdown list.
 6. Select an **AWS S3** option from the provider dropdown list.
 7. Enter the **S3 bucket** name you have created on AWS.
-8. Set the **forwarder status** to `On`.
-9. Enter any S3 prefix of your choice.
+8. Enter any **S3 prefix** of your choice.
+9. Set the **forwarder status** to `On`.
 10. To apply the changes, click **Save**.
 
 ## Data Collected
