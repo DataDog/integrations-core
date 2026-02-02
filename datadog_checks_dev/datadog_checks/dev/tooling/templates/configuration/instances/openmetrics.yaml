@@ -244,12 +244,14 @@
   description: |
     Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
     the health of the `openmetrics_endpoint`.
+  fleet_configurable: true
   value:
     example: true
     type: boolean
 - name: ignore_connection_errors
   description: |
     Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -385,6 +387,7 @@
 - name: telemetry
   description: |
     Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
