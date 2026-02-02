@@ -59,57 +59,6 @@ def test_version_metadata(datadog_agent, instance):
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-def test_version_metadata_fallback(datadog_agent, instance):
-    # Mock responses where version endpoint fails or returns malformed data
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=[
-            # First call: version endpoint returns malformed version
-            mock.Mock(ok=True, status_code=200, json=lambda: {'versionCli': 'invalid'}),
-            # Second call: fallback to metrics for n8n version
-            mock.Mock(ok=True, status_code=200, text=open(common.get_fixture_path('n8n.txt')).read()),
-        ],
-    ):
-        check = N8nCheck('n8n', {}, [instance])
-        check.check_id = 'test:456'
-
-        # Call only the version metadata method
-        check._submit_version_metadata()
-
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': '1',
-        'version.minor': '117',
-        'version.patch': '2',
-        'version.raw': '1.117.2',
-    }
-    datadog_agent.assert_metadata('test:456', version_metadata)
-
-
-def test_nodejs_version_metadata(datadog_agent, instance):
-    # Mock the HTTP response for Node.js version metadata collection
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=[
-            mock.Mock(ok=True, status_code=200, text=open(common.get_fixture_path('n8n.txt')).read()),
-        ],
-    ):
-        check = N8nCheck('n8n', {}, [instance])
-        check.check_id = 'test:nodejs'
-
-        check._submit_nodejs_version_metadata()
-
-    nodejs_version_metadata = {
-        'nodejs.version.scheme': 'semver',
-        'nodejs.version.major': '22',
-        'nodejs.version.minor': '18',
-        'nodejs.version.patch': '0',
-        'nodejs.version.raw': '22.18.0',
-    }
-
-    datadog_agent.assert_metadata('test:nodejs', nodejs_version_metadata)
-
-
 def test_readiness_check_ready(aggregator, instance):
     with mock.patch(
         'requests.Session.get',

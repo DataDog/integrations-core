@@ -78,4 +78,18 @@ METRIC_MAP = {
     'workflow_started': 'workflow.started',
     'workflow_success': 'workflow.success',
     'process_cpu_seconds': 'process.cpu.seconds',
+    'version_info': 'version.info',
+    'nodejs_version_info': 'nodejs.version.info',
+}
+
+N8N_VERSION = {'version_info': {'type': 'metadata', 'label': 'version', 'name': 'version'}}
+NODEJS_VERSION = {'nodejs_version_info': {'type': 'metadata', 'label': 'version', 'name': 'nodejs.version'}}
+
+METRIC_MAP.update(N8N_VERSION)
+METRIC_MAP.update(NODEJS_VERSION)
+
+RENAME_LABELS_MAP = {
+    'name': 'n8n_name',
+    'namespace': 'n8n_namespace',
+    'version': 'n8n_version',
 }
