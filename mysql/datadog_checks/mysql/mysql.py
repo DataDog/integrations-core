@@ -188,9 +188,15 @@ class MySql(DatabaseCheck):
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
-            cursor.execute(query)
-            for row in cursor.fetchall_unbuffered():
-                yield row
+            # Enforce read-only mode for custom queries to prevent data modification
+            cursor.execute('SET SESSION TRANSACTION READ ONLY')
+            try:
+                cursor.execute(query)
+                for row in cursor.fetchall_unbuffered():
+                    yield row
+            finally:
+                # Reset to allow normal operations
+                cursor.execute('SET SESSION TRANSACTION READ WRITE')
 
     @AgentCheck.metadata_entrypoint
     def _send_metadata(self):

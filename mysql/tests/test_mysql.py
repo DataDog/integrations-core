@@ -928,3 +928,63 @@ def test_errors_raised_metric_with_dbm(aggregator, dd_run_check, instance_basic,
     else:
         # In all other cases the metric should not be present
         aggregator.assert_metric('mysql.performance.errors_raised', count=0)
+
+
+@pytest.mark.e2e
+@pytest.mark.usefixtures('dd_environment')
+def test_custom_queries_readonly_blocks_writes(dd_agent_check, instance_basic, root_conn):
+    """Verify custom queries cannot execute write operations"""
+    # Create a temporary test table for write operations
+    with root_conn.cursor() as cursor:
+        cursor.execute("CREATE TABLE IF NOT EXISTS test_readonly_table (id INT, value TEXT)")
+        cursor.execute("INSERT INTO test_readonly_table VALUES (1, 'test')")
+        root_conn.commit()
+
+    write_queries = [
+        'INSERT INTO test_readonly_table VALUES (2, \'test2\')',
+        'UPDATE test_readonly_table SET value = \'updated\' WHERE id = 1',
+        'DELETE FROM test_readonly_table WHERE id = 1',
+        'CREATE TABLE test_write_table (id INT)',
+        'DROP TABLE IF EXISTS test_write_table',
+    ]
+
+    try:
+        for query in write_queries:
+            instance_basic['custom_queries'] = [
+                {
+                    'query': query,
+                    'columns': [{'name': 'result', 'type': 'gauge'}],
+                    'metric_prefix': 'mysql',
+                }
+            ]
+
+            # Should fail with read-only error
+            with pytest.raises(Exception) as exc_info:
+                dd_agent_check(instance_basic)
+
+            # Verify error message indicates read-only restriction
+            error_msg = str(exc_info.value).lower()
+            assert 'read' in error_msg or 'write' in error_msg or 'permission' in error_msg or 'cannot' in error_msg, \
+                f"Expected read-only error for query '{query}', got: {exc_info.value}"
+    finally:
+        # Clean up test table
+        with root_conn.cursor() as cursor:
+            cursor.execute("DROP TABLE IF EXISTS test_readonly_table")
+            cursor.execute("DROP TABLE IF EXISTS test_write_table")
+            root_conn.commit()
+
+
+@pytest.mark.e2e
+@pytest.mark.usefixtures('dd_environment')
+def test_custom_queries_readonly_allows_reads(dd_agent_check, instance_basic):
+    """Verify custom queries can still execute read operations"""
+    instance_basic['custom_queries'] = [
+        {
+            'query': 'SELECT 1 as test_value',
+            'columns': [{'name': 'test_value', 'type': 'gauge'}],
+            'metric_prefix': 'mysql',
+        }
+    ]
+
+    aggregator = dd_agent_check(instance_basic)
+    aggregator.assert_metric('mysql.test_value', value=1)
