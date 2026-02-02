@@ -51,14 +51,24 @@ tests:
     }
   result:
     custom:
+      dns:
+        flags:
+          rcode: "NXDOMAIN"
+        id: 1
+        question:
+          name: "10.13.40.10.in-addr.arpa."
+          type: "PTR"
+      duration: 12
+      network:
+        client:
+          geoip: {}
+          ip: "10.41.13.131"
       query_log:
         actionTaken: "query-response"
         drsId: "87a16e58-11d3-4d45-a574-af92520d3b90"
         id: "17685619430971F61B04D4186D474A54EBAF987E153D9"
         identity:
           identityId: "identity_id_example"
-          userId: "example@test.bluecat.com"
-        latency: 12
         queriedNamespaces:
          -
           latency: 11
@@ -76,18 +86,15 @@ tests:
             time: 1768561943109
           id: "97e3ecb9-f066-11f0-96fb-06915da638a8"
           cycle: 0
-        query: "10.13.40.10.in-addr.arpa."
         queryClassId: 1
-        queryId: 1
         queryProtocol: "UDP"
-        queryType: "PTR"
-        response: "NXDOMAIN"
         siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f49"
-        source: "10.41.13.131"
         time: 1770033982000
       site_details:
         id: "a56e996d-cd54-45c5-8bed-5de015612e0b"
         name: "Site Testing"
+      usr:
+        id: "example@test.bluecat.com"
       vendor:
         endpoint: "dns-query-logs"
     message: |-
@@ -140,3 +147,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1770033982000
