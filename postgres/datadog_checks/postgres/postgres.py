@@ -295,6 +295,30 @@ class PostgreSql(DatabaseCheck):
                 rows = cursor.fetchall()
                 return rows
 
+    def execute_query_raw_readonly(self, query, db):
+        """Execute query with read-only enforcement for custom_queries.
+
+        This method wraps execute_query_raw and enforces read-only transaction mode
+        to prevent write operations (INSERT, UPDATE, DELETE, etc.) in custom queries.
+        """
+        with db() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    # Set session characteristics to read-only
+                    # This prevents any write operations in this session
+                    cursor.execute("SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY")
+                    self.log.debug("Enforcing read-only mode for custom query execution")
+                    cursor.execute(query)
+                    rows = cursor.fetchall()
+                    return rows
+                finally:
+                    # Reset to default (read-write) for the next query
+                    # This ensures we don't interfere with built-in queries
+                    try:
+                        cursor.execute("SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE")
+                    except Exception as e:
+                        self.log.debug("Failed to reset session characteristics: %s", e)
+
     @contextlib.contextmanager
     def db(self):
         """
@@ -1144,7 +1168,8 @@ class PostgreSql(DatabaseCheck):
                     self._collect_wal_metrics()
 
             if self._query_manager.queries:
-                self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
+                # Use read-only executor for custom_queries to prevent write operations
+                self._query_manager.executor = functools.partial(self.execute_query_raw_readonly, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
 
         except Exception as e:
