@@ -26,11 +26,15 @@ def build_model_file(
     _add_imports(model_file_lines, options_with_defaults, len(model_info.deprecation_data))
     _fix_types(model_file_lines)
 
+    # Add constant for secure fields requiring trusted provider validation
+    if model_info.require_trusted_providers:
+        _add_secure_fields_constant(model_file_lines, model_info.require_trusted_providers)
+
     if model_id in model_info.deprecation_data:
         model_file_lines += _define_deprecation_functions(model_id, section_name)
 
     model_file_lines += _define_validator_functions(
-        model_id, model_info.validator_data, options_with_defaults, model_info.require_trusted_providers
+        model_id, model_info.validator_data, options_with_defaults, bool(model_info.require_trusted_providers)
     )
 
     config_lines = []
@@ -128,6 +132,26 @@ def _fix_types(model_file_lines):
         model_file_lines[i] = buffer.decode('utf-8')
 
 
+def _add_secure_fields_constant(model_file_lines, require_trusted_providers):
+    """Add SECURE_FIELD_NAMES constant before the first class definition."""
+    # Find the first class definition
+    class_line_index = None
+    for i, line in enumerate(model_file_lines):
+        if line.startswith('class '):
+            class_line_index = i
+            break
+
+    if class_line_index is not None:
+        # Build the set of normalized field names
+        field_names = sorted(normalized_name for normalized_name, _ in require_trusted_providers)
+        fields_str = ', '.join(f'{name!r}' for name in field_names)
+
+        # Insert the constant before the first class, with blank lines for readability
+        model_file_lines.insert(class_line_index, '')
+        model_file_lines.insert(class_line_index, f'SECURE_FIELD_NAMES = frozenset([{fields_str}])')
+        model_file_lines.insert(class_line_index, '')
+
+
 def _define_deprecation_functions(model_id, section_name):
     model_file_lines = ['']
     model_file_lines.append("    @model_validator(mode='before')")
@@ -141,8 +165,7 @@ def _define_deprecation_functions(model_id, section_name):
     return model_file_lines
 
 
-def _define_validator_functions(model_id, validator_data, need_defaults, require_trusted_providers=None):
-    require_trusted_providers = require_trusted_providers or []
+def _define_validator_functions(model_id, validator_data, need_defaults, has_require_trusted_providers=False):
     model_file_lines = ['']
     model_file_lines.append("    @model_validator(mode='before')")
     model_file_lines.append('    def _initial_validation(cls, values):')
@@ -168,21 +191,13 @@ def _define_validator_functions(model_id, validator_data, need_defaults, require
             model_file_lines.append(f'                value = validators.{import_path}(value, field=field)')
 
     # Add security validation for fields requiring trusted provider
-    if require_trusted_providers:
+    if has_require_trusted_providers:
         model_file_lines.append('')
-        model_file_lines.append('            # Security validation for fields requiring trusted provider')
-        for normalized_name, original_name in require_trusted_providers:
-            model_file_lines.append(f'            if info.field_name == {normalized_name!r}:')
-            model_file_lines.append(
-                "                if not validation.security.validate_require_trusted_provider("
-                "value, info.context.get('security_config')):"
-            )
-            model_file_lines.append(
-                f"                    raise ValueError("
-                f"f\"Field '{original_name}' is not allowed from untrusted provider "
-                f"'{{info.context.get('security_config').provider if info.context.get('security_config') else ''}}'\")"
-                "# noqa: E501"
-            )
+        model_file_lines.append('            if info.field_name in SECURE_FIELD_NAMES:')
+        model_file_lines.append(
+            "                validation.security.check_field_trusted_provider("
+            "info.field_name, value, info.context.get('security_config'))"
+        )
 
     if need_defaults:
         model_file_lines.append('        else:')
