@@ -128,3 +128,28 @@ def validate_require_trusted_provider(
 
     # Block the value from untrusted provider
     return False
+
+
+def check_field_trusted_provider(
+    field_name: str,
+    value: object,
+    security_config: SecurityConfig | None,
+) -> None:
+    """
+    Validate a sensitive field value against trusted provider settings.
+
+    This function checks if a configuration parameter should be allowed
+    based on the provider trust settings and raises ValueError if blocked.
+
+    Args:
+        field_name: The name of the field being validated
+        value: The value to validate
+        security_config: The SecurityConfig instance containing check_name, provider,
+            and security settings. If None, validation is skipped.
+
+    Raises:
+        ValueError: If the field value is not allowed from an untrusted provider.
+    """
+    if not validate_require_trusted_provider(value, security_config):
+        provider = security_config.provider if security_config else ''
+        raise ValueError(f"Field '{field_name}' is not allowed from untrusted provider '{provider}'")
