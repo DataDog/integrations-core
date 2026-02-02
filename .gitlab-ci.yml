@@ -64,6 +64,7 @@ release-manual:
     - if: $CI_COMMIT_TAG =~ /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
     - if: $CI_COMMIT_BRANCH == 'master'
       when: manual
+      allow_failure: true
   script:
     - |
       if [[ -z "$CI_COMMIT_TAG" ]]; then
