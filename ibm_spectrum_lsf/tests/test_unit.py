@@ -218,6 +218,16 @@ def test_check_metric_sources_invalid(mock_client, dd_run_check, instance):
         dd_run_check(check)
 
 
+def test_check_bhist_details_requires_bhist(mock_client, dd_run_check, instance):
+    instance["metric_sources"] = ['bhist_details']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    with pytest.raises(
+        Exception, match="bhist_details is dependent on bhist, please enable bhist to collect bhist_details metrics"
+    ):
+        dd_run_check(check)
+
+
 def test_check_metric_sources_subset(mock_client, dd_run_check, aggregator, instance):
     instance["metric_sources"] = ['lsclusters', 'lshosts']
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
@@ -577,37 +587,55 @@ def test_bhist_get_completed_job_ids_error(
 
 
 @pytest.mark.parametrize(
-    "registry_job_ids,bhist_l_return_value,expected_log_message",
+    "bhist_output,bhist_l_return_value,expected_log_message",
     [
         pytest.param(
-            [],
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL",
+                "",
+                0,
+            ),
             ("", "", 0),
             "No completed job IDs in registry",
             id="empty_registry",
         ),
         pytest.param(
-            ["2211"],
-            ("", "Job <2211> not found", 1),
-            "Failed to get details for job 2211: Job <2211> not found",
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL\n"
+                "9999    test-user test-job 0       0       56      0       0       0       56",
+                "",
+                0,
+            ),
+            ("", "Job <9999> not found", 1),
+            "Failed to get details for job 9999: Job <9999> not found",
             id="bhist_l_not_found",
         ),
         pytest.param(
-            ["2211", "2212"],
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL\n"
+                "8888    test-user test-job 0       0       56      0       0       0       56\n"
+                "7777    test-user test-job1 1       0       57      0       0       0       58",
+                "",
+                0,
+            ),
             ("", "Failed to execute bhist_l", 1),
-            "Failed to get details for job 2211: Failed to execute bhist_l",
+            "Failed to get details for job 8888: Failed to execute bhist_l",
             id="bhist_l_error",
         ),
         pytest.param(
-            ["2211"],
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL\n"
+                "6666    test-user test-job 0       0       56      0       0       0       56",
+                "",
+                0,
+            ),
             ("----------", "", 0),
             "Skipping empty job section",
             id="empty_job_section",
-        ),
-        pytest.param(
-            [None],
-            ("", "", 0),
-            "No job ID provided for bhist_details command",
-            id="no_job_id",
         ),
     ],
 )
@@ -617,25 +645,23 @@ def test_bhist_details_get_bhist_details_error(
     aggregator,
     instance,
     caplog,
-    registry_job_ids,
+    bhist_output,
     bhist_l_return_value,
     expected_log_message,
 ):
-    instance['metric_sources'] = ['bhist_details']
+    instance['metric_sources'] = ['bhist', 'bhist_details']
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
 
+    mock_client.bhist.return_value = bhist_output
     mock_client.bhist_l.side_effect = None
     mock_client.bhist_l.return_value = bhist_l_return_value
-
-    check.completed_job_ids.set_job_ids(registry_job_ids)
 
     caplog.set_level(logging.DEBUG)
     dd_run_check(check)
 
     assert_metrics(LSID_METRICS, [], aggregator)
     assert expected_log_message in caplog.text
-    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.parametrize(

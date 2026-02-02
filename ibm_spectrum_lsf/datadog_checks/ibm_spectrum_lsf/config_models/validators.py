@@ -23,4 +23,9 @@ def initialize_instance(values, **kwargs):
             if val not in valid_options:
                 raise ValueError(f'Invalid metric source: {val}')
 
+        if 'bhist_details' in values['metric_sources'] and 'bhist' not in values['metric_sources']:
+            raise ValueError(
+                'bhist_details is dependent on bhist, please enable bhist to collect bhist_details metrics'
+            )
+
     return values
