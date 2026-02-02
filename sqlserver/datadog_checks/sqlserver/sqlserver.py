@@ -883,7 +883,7 @@ class SQLServer(DatabaseCheck):
             if self._query_manager is None:
                 # use QueryManager to process custom queries
                 self._query_manager = QueryManager(
-                    self, self.execute_query_raw, tags=self.tag_manager.get_tags(), hostname=self.reported_hostname
+                    self, self.execute_custom_query_raw, tags=self.tag_manager.get_tags(), hostname=self.reported_hostname
                 )
                 self._query_manager.compile_queries()
             self._send_database_instance_metadata()
@@ -1057,6 +1057,16 @@ class SQLServer(DatabaseCheck):
                     cursor.execute("SET NOCOUNT OFF")
 
     def execute_query_raw(self, query, db=None):
+        with self.connection.get_managed_cursor() as cursor:
+            if db:
+                ctx = construct_use_statement(db)
+                self.log.debug("changing cursor context via use statement: %s", ctx)
+                cursor.execute(ctx)
+            cursor.execute(query)
+            return cursor.fetchall()
+
+    def execute_custom_query_raw(self, query, db=None):
+        """Execute custom queries in read-only mode to prevent data modification"""
         with self.connection.get_managed_cursor() as cursor:
             if db:
                 ctx = construct_use_statement(db)
