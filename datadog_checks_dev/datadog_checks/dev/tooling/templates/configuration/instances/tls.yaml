@@ -6,6 +6,7 @@
   description: |
     Instructs the check to validate the TLS certificate(s) of the service(s).
 - name: tls_ca_cert
+  fleet_configurable: true
   value:
     example: <CA_CERT_PATH>
     type: string
@@ -17,6 +18,7 @@
 
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_cert
+  fleet_configurable: true
   value:
     example: <CERT_PATH>
     type: string
@@ -27,6 +29,8 @@
 
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_private_key
+  fleet_configurable: true
+  secret: true
   value:
     example: <PRIVATE_KEY_PATH>
     type: string
@@ -45,6 +49,7 @@
 
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_validate_hostname
+  fleet_configurable: true
   value:
     example: true
     type: boolean

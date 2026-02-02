@@ -1,4 +1,5 @@
 name: Snowflake
+fleet_configurable: true
 files:
 - name: snowflake.yaml
   options:
@@ -7,11 +8,13 @@ files:
       - template: init_config/db
       - name: proxy_host
         description: The host of your proxy server.
+        fleet_configurable: true
         value:
           type: string
           example: <PROXY_HOST>
       - name: proxy_port
         description: The port of your proxy server.
+        fleet_configurable: true
         value:
           type: integer
       - name: proxy_user
@@ -28,6 +31,7 @@ files:
   - template: instances
     options:
       - name: account
+        fleet_configurable: true
         required: true
         description: |
           Name of your account (provided by Snowflake), including the platform and region if applicable.
@@ -40,6 +44,7 @@ files:
           type: string
           example: <ORG_NAME>-<ACCOUNT_NAME>
       - name: username
+        fleet_configurable: true
         required: true
         description: Login name for the user.
         value:
@@ -47,11 +52,13 @@ files:
           example: <USER>
       - name: password
         description: Password for the user
+        fleet_configurable: true
         secret: true
         value:
           type: string
           example: <PASSWORD>
       - name: role
+        fleet_configurable: true
         required: true
         description: |
           Name of the role to use.
@@ -63,6 +70,7 @@ files:
           type: string
       - name: database
         description: Name of the default database to use.
+        fleet_configurable: true
         value:
           type: string
           example: SNOWFLAKE
@@ -71,15 +79,18 @@ files:
           Name of the default schema to use for the database.
 
           To collect organization level metrics, set this to ORGANIZATION_USAGE.
+        fleet_configurable: true
         value:
           type: string
           example: ACCOUNT_USAGE
       - name: warehouse
         description: Name of the default warehouse to use.
+        fleet_configurable: true
         value:
           type: string
           example: <WAREHOUSE>
       - name: client_prefetch_threads
+        fleet_configurable: true
         description: |
           The number of threads used to download the results sets. Increasing the value improves fetch
           performance but requires more memory.
@@ -87,6 +98,7 @@ files:
           type: integer
           example: 4
       - name: login_timeout
+        fleet_configurable: true
         description: |
           Timeout in seconds for login. The login request gives up after the timeout length if the HTTP response succeeds.
         value:
@@ -102,6 +114,7 @@ files:
           type: string
           example: <OCSP_RESPONSE_CACHE_FILENAME>
       - name: authenticator
+        fleet_configurable: true
         description: |
           Authenticator for Snowflake. Supported methods are:
           * `snowflake`, the default value, uses the internal Snowflake authenticator. It needs `password` or 
@@ -125,6 +138,7 @@ files:
           type: string
           example: /path/to/token
       - name: private_key_path
+        fleet_configurable: true
         description: |
           The path to the file that contains the private key used to connect to Snowflake.
           The key is re-read at every check run.
@@ -133,6 +147,7 @@ files:
           display_default: null
           example: /path/to/private_key
       - name: private_key_password
+        fleet_configurable: true
         secret: true
         description: |
           The password protecting the private key file in the `private_key_path` option.
@@ -148,6 +163,7 @@ files:
           type: boolean
           example: false
       - name: metric_groups
+        fleet_configurable: true
         description: |
           List of Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
 
@@ -183,6 +199,7 @@ files:
             - snowflake.storage
             - snowflake.logins
       - name: aggregate_last_24_hours
+        fleet_configurable: true
         description: |
           Set to `true` to aggregate table entries on the last 24 hours instead of
           aggregating entries of the current day.
