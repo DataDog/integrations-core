@@ -163,6 +163,7 @@
     type: string
   description: Set the path to your Kerberos key tab file.
 - name: auth_token
+  secret: true
   value:
     example:
       reader:
