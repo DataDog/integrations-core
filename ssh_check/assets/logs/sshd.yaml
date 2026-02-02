@@ -244,7 +244,7 @@ pipeline:
                   name: Success
                   id: 1
                 - filter:
-                    query: "@system.action:Failed"
+                    query: '@system.action:(Failed OR "authentication failure" OR "authentication failures")'
                   name: Failure
                   id: 2
                 - filter:
