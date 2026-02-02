@@ -39,12 +39,16 @@ fi
 
 # Set positional arguments ($@) based on inputs
 # This is done to ensure we handle pytest args correctly.
-if [[ -n "$INPUT_PYTEST_ARGS" ]]; then
-  # Use eval to correctly parse quoted arguments (e.g. -m "not flaky")
+# When no target env is provided, "all" must always be the first argument.
+if [[ -z "$INPUT_TARGET_ENV" ]]; then
+  if [[ -n "$INPUT_PYTEST_ARGS" ]]; then
+    # Use eval to correctly parse quoted arguments (e.g. -m "not flaky")
+    eval "set -- all $INPUT_PYTEST_ARGS"
+  else
+    set -- "all"
+  fi
+elif [[ -n "$INPUT_PYTEST_ARGS" ]]; then
   eval "set -- $INPUT_PYTEST_ARGS"
-elif [[ "$INPUT_IS_LATEST" == 'true' ]]; then
-  # Latest version without pytest args: include 'all' explicitly
-  set -- "all"
 else
   # Clear positional arguments
   set --

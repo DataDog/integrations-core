@@ -17,17 +17,16 @@ files:
         fleet_configurable: true
         value:
           type: integer
-          value: <PROXY_PORT>
       - name: proxy_user
         description: The username to authenticate your proxy server.
         value:
           type: string
-          value: <PROXY_USER>
+          example: <PROXY_USER>
       - name: proxy_password
         description: The password to authenticate your proxy server.
         value:
           type: string
-          value: <PROXY_PASSWORD>
+          example: <PROXY_PASSWORD>
       - template: init_config/default
   - template: instances
     options:
