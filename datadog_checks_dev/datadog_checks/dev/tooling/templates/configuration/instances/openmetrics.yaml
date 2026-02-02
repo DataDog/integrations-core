@@ -246,6 +246,7 @@
   description: |
     Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
     the health of the `openmetrics_endpoint`.
+  fleet_configurable: true
   value:
     example: true
     type: boolean
