@@ -164,6 +164,7 @@
   description: Set the path to your Kerberos key tab file.
 - name: auth_token
   fleet_configurable: true
+  secret: true
   value:
     example:
       reader:
