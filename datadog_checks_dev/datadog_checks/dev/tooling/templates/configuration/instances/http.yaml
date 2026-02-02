@@ -277,6 +277,7 @@
     The unencrypted private key to use for `tls_cert` when connecting to services. This is
     required if `tls_cert` is set and it does not already contain a private key.
 - name: tls_ca_cert
+  fleet_configurable: true
   value:
     example: <CA_CERT_PATH>
     type: string
@@ -286,6 +287,7 @@
     must have been processed using the `openssl rehash` command. See:
     https://www.openssl.org/docs/man3.2/man1/c_rehash.html
 - name: tls_protocols_allowed
+  fleet_configurable: true
   value:
     example:
     - 'SSLv3'
@@ -360,6 +362,7 @@
     example: 16
     type: number
 - name: log_requests
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -371,6 +374,7 @@
     type: boolean
   description: Whether or not to persist cookies and use connection pooling for improved performance.
 - name: allow_redirects
+  fleet_configurable: true
   value:
     example: true
     type: boolean
