@@ -13,7 +13,7 @@ Integrate Iru (Kandji) with Datadog to gain insights into audit, and threats and
 
 ### Generate API Token from the Iru (Kandji) platform
 
-1. Log in to Iru(Kandji) Platform using **Admin** or **Owner** account and click on **Settings**.
+1. Log in to Iru (Kandji) platform using **Admin** or **Owner** account and click on **Settings**.
 2. Click the **Access** tab.
 3. Scroll down to the **API Token** section and click the **Add Token** button. 
 4. Enter **Name** and **Description** for your API token.

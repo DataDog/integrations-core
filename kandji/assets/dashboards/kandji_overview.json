@@ -1,6 +1,6 @@
 {
-    "title": "Iru(Kandji) - Overview",
-    "description": "This dashboard provides a comprehensive summary of all Iru(Kandji) logs.",
+    "title": "Iru (Kandji) - Overview",
+    "description": "This dashboard provides a comprehensive summary of all Iru (Kandji) logs.",
     "widgets": [
         {
             "id": 8187342910039561,
@@ -26,7 +26,7 @@
             "id": 3838180428255268,
             "definition": {
                 "type": "note",
-                "content": "[Iru](https://www.iru.com/) (formerly known as Kandji) is a unified, AI-powered IT and security platform that helps organizations protect users, applications, and devices by replacing multiple point solutions with a single, automated system.\n\nThis dashboard provides a comprehensive summary of all Iru(Kandji) logs.\n\nFor more information, see the [Iru(Kandji) Documentation](https://docs.datadoghq.com/integrations/kandji/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
+                "content": "[Iru](https://www.iru.com/) (formerly known as Kandji) is a unified, AI-powered IT and security platform that helps organizations protect users, applications, and devices by replacing multiple point solutions with a single, automated system.\n\nThis dashboard provides a comprehensive summary of all Iru (Kandji) logs.\n\nFor more information, see the [Iru (Kandji) Documentation](https://docs.datadoghq.com/integrations/kandji/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -559,7 +559,7 @@
                         "id": 2768469841692041,
                         "definition": {
                             "type": "note",
-                            "content": "\nDatadog Cloud SIEM analyzes and correlates **Iru(Kandji)** Events to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates **Iru (Kandji)** Events to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
                             "background_color": "vivid_blue",
                             "font_size": "14",
                             "text_align": "center",

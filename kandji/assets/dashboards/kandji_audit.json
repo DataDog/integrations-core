@@ -1,6 +1,6 @@
 {
-    "title": "Iru(Kandji) - Audit",
-    "description": "This dashboard provides a comprehensive summary of Iru(Kandji) audit logs.",
+    "title": "Iru (Kandji) - Audit",
+    "description": "This dashboard provides a comprehensive summary of Iru (Kandji) audit logs.",
     "widgets": [
         {
             "id": 8187342910039561,
@@ -26,7 +26,7 @@
             "id": 3838180428255268,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a comprehensive summary of Iru(Kandji) audit logs.\n\nFor more information, see the [Iru(Kandji) Documentation](https://docs.datadoghq.com/integrations/kandji/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
+                "content": "This dashboard provides a comprehensive summary of Iru (Kandji) audit logs.\n\nFor more information, see the [Iru (Kandji) Documentation](https://docs.datadoghq.com/integrations/kandji/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
