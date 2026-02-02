@@ -138,7 +138,7 @@ class MySql(DatabaseCheck):
         # Global variables manager
         self.global_variables = GlobalVariables()
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
+        self._query_manager = QueryManager(self, self.execute_custom_query_raw, queries=[])
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
@@ -187,6 +187,13 @@ class MySql(DatabaseCheck):
             self.log.error("Error submitting health event for initialization: %s", e)
 
     def execute_query_raw(self, query):
+        with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
+            cursor.execute(query)
+            for row in cursor.fetchall_unbuffered():
+                yield row
+
+    def execute_custom_query_raw(self, query):
+        """Execute custom queries in read-only mode to prevent data modification"""
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
             # Enforce read-only mode for custom queries to prevent data modification
             cursor.execute('SET SESSION TRANSACTION READ ONLY')
