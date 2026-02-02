@@ -837,7 +837,6 @@ def draw_treemap_rects_with_labels(
 
 def send_metrics_to_dd(
     app: Application,
-    commit: str,
     modules: list[FileDataEntryPlatformVersion],
     org: str | None,
     key: str | None,
@@ -853,7 +852,8 @@ def send_metrics_to_dd(
     if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
-    timestamp, message, tickets, prs = get_commit_data(commit)
+    message, tickets, prs = get_last_commit_data()
+    timestamp = get_last_commit_timestamp()
 
     metrics = []
     n_integrations_metrics = []
@@ -965,28 +965,24 @@ def send_metrics_to_dd(
     api.Metric.send(metrics=n_dependencies_metrics)
 
 
-def get_commit_data(commit: str) -> tuple[int, str, list[str], list[str]]:
-    '''
-    Gets the timestamp, message, tickets and PRs of a given commit. If no commit is provided, it uses the last commit.
-    '''
-    result = subprocess.run(
-        ["git", "show", "-s", "--format=%ct,%s", commit],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+def get_last_commit_timestamp() -> int:
+    result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
+    return int(result.stdout.strip())
 
-    timestamp, message = result.stdout.strip().split(',', 1)
+
+def get_last_commit_data() -> tuple[str, list[str], list[str]]:
+    result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
 
+    message = result.stdout.strip()
     tickets = re.findall(ticket_pattern, message)
     prs = re.findall(pr_pattern, message)
     if not tickets:
         tickets = [""]
     if not prs:
         prs = [""]
-    return int(timestamp), message, tickets, prs
+    return message, tickets, prs
 
 
 @cache

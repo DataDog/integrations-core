@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import logging
+import re
 from copy import copy, deepcopy
 
 import pytest
@@ -116,15 +117,16 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'int',
                                 'default': '((0))',
                                 'nullable': True,
+                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '2',
                             },
                         ],
-                        'foreign_keys': [],
                         'partitions': {'partition_count': 1},
                         'indexes': [
                             {
@@ -162,21 +164,23 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'int',
                                 'default': '((0))',
                                 'nullable': False,
+                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '2',
                             },
                             {
                                 'name': 'population',
                                 'data_type': 'int',
                                 'default': '((0))',
                                 'nullable': False,
+                                'ordinal_position': '3',
                             },
                         ],
-                        'foreign_keys': [],
                         'partitions': {'partition_count': 12},
                         'indexes': [
                             {
@@ -217,15 +221,16 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'city_id',
                                 'data_type': 'int',
                                 'default': '((0))',
                                 'nullable': True,
+                                'ordinal_position': '2',
                             },
                         ],
-                        'indexes': [],
                         'partitions': {'partition_count': 1},
                         'foreign_keys': [
                             {
@@ -248,21 +253,23 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '2',
                             },
                             {
                                 'name': 'Review',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '3',
                             },
                         ],
-                        'indexes': [],
                         'partitions': {'partition_count': 1},
                         'foreign_keys': [
                             {
@@ -285,21 +292,23 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '1',
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '2',
                             },
                             {
                                 'name': 'Cuisine',
                                 'data_type': 'varchar',
                                 'default': 'None',
                                 'nullable': True,
+                                'ordinal_position': '3',
                             },
                         ],
-                        'foreign_keys': [],
                         'partitions': {'partition_count': 2},
                         'indexes': [
                             {
@@ -339,7 +348,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'datadog_test_collation',
     ]
     dbm_instance['dbm'] = True
-    dbm_instance['collect_schemas'] = {"enabled": True}
+    dbm_instance['schemas_collection'] = {"enabled": True}
 
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
@@ -357,15 +366,13 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("dbms_version") is not None
 
         database_metadata = schema_event['metadata']
-        for db_metadata in database_metadata:
-            db_name = db_metadata['name']
+        assert len(database_metadata) == 1
+        db_name = database_metadata[0]['name']
 
-            if db_name in actual_payloads:
-                actual_payloads[db_name]['schemas'][0]['tables'] = (
-                    actual_payloads[db_name]['schemas'][0]['tables'] + db_metadata['schemas'][0]['tables']
-                )
-            else:
-                actual_payloads[db_name] = db_metadata
+        if db_name in actual_payloads:
+            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
+        else:
+            actual_payloads[db_name] = database_metadata[0]
 
     assert len(actual_payloads) == len(expected_data_for_db)
 
@@ -375,5 +382,36 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_ids(actual_payload)
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
-        matches = deep_compare(actual_payload, expected_data_for_db[db_name])
-        assert matches
+        assert deep_compare(actual_payload, expected_data_for_db[db_name])
+
+
+@pytest.mark.flaky
+def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
+    dbm_instance['database_autodiscovery'] = True
+    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas']
+    dbm_instance['dbm'] = True
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    found = False
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
+        if "collection_errors" in schema_event:
+            if schema_event["collection_errors"][0]["error_type"] == "truncated" and re.fullmatch(
+                expected_pattern, schema_event["collection_errors"][0]["message"]
+            ):
+                found = True
+    assert found
+
+
+@pytest.mark.unit
+def test_collect_schemas_config(dbm_instance):
+    dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}
+
+    dbm_instance.pop('collect_schemas')
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}

@@ -30,7 +30,6 @@ files:
           example: default
     - name: password
       description: The password of `username`.
-      secret: true
       value:
         type: string
     - name: db

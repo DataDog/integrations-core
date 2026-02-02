@@ -93,10 +93,11 @@ class KafkaClient:
             return "", []
         return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
-    def consumer_offsets_for_times(self, partitions, offset=-1):
+    def consumer_offsets_for_times(self, partitions):
         topicpartitions_for_querying = [
-            # -1: latest; 0: earliest (timestamp 0)
-            TopicPartition(topic=topic, partition=partition, offset=offset)
+            # Setting offset to -1 will return the latest highwater offset while calling offsets_for_times
+            #   Reference: https://github.com/fede1024/rust-rdkafka/issues/460
+            TopicPartition(topic=topic, partition=partition, offset=-1)
             for topic, partition in partitions
         ]
         return [

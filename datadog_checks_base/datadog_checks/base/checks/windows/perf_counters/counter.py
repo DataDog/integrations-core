@@ -51,9 +51,7 @@ class PerfObject:
                         f'Pattern #{i} of option `include` for performance object `{self.name}` must be a string'
                     )
 
-            # Instance names are not case-sensitive, so instances should not have names that differ only in case.
-            # See: https://learn.microsoft.com/en-us/windows/win32/perfctrs/about-performance-counters
-            self.include_pattern = re.compile('|'.join(include_patterns), re.IGNORECASE)
+            self.include_pattern = re.compile('|'.join(include_patterns))
 
         # List of regex patterns to filter multi-instance counters AFTER ALL data
         # is collected and retrieved from PDH layer
@@ -69,9 +67,7 @@ class PerfObject:
 
             final_exclude_patterns = [r'\b_Total\b']
             final_exclude_patterns.extend(exclude_patterns)
-            # Instance names are not case-sensitive, so instances should not have names that differ only in case.
-            # See: https://learn.microsoft.com/en-us/windows/win32/perfctrs/about-performance-counters
-            self.exclude_pattern = re.compile('|'.join(final_exclude_patterns), re.IGNORECASE)
+            self.exclude_pattern = re.compile('|'.join(final_exclude_patterns))
 
         # List of wildcards or instance name directly to filter multi-instance counters by PDH layer itself.
         # Thus it is faster and and less resource intensive than regex-based include filtering.

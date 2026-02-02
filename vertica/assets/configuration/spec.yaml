@@ -57,7 +57,6 @@ files:
               example: <USERNAME>
           - name: password
             description: The password of `username`.
-            secret: true
             value:
               type: string
               example: <PASSWORD>

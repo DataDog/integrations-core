@@ -1,2 +1,0 @@
-SLOTS          RUNTIME
-2              UNLIMITED

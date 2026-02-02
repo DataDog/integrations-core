@@ -17,4 +17,5 @@ jobs:
       contents: read
     with:
       repo: core
+    secrets: inherit
 

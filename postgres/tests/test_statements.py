@@ -50,18 +50,6 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
-
-@pytest.fixture(autouse=True)
-def auto_reset_pg_stat_statements(reset_pg_stat_statements):
-    """
-    Automatically reset pg_stat_statements before each test in this file.
-    This ensures test isolation for statement metrics tests.
-    """
-    # The reset happens before this fixture runs (in reset_pg_stat_statements)
-    # We just need to depend on it to trigger it
-    pass
-
-
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
     ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello"),
@@ -93,24 +81,21 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     connections = {}
 
     def normalize_query(q):
-        if float(POSTGRES_VERSION) >= 18:
-            # Postgres 18+ uses $1 placeholders in pg_stat_statements for SET queries
-            return q.replace('$1', '?')
-        else:
-            # Older versions store literal values
-            normalized = ""
-            for s in ["'one'", "'two'"]:
-                if s in q:
-                    normalized = q.replace(s, "?")
-                    break
-            return normalized
+        # Remove the quotes from below:
+        normalized = ""
+        for s in ["'one'", "'two'"]:
+            if s in q:
+                normalized = q.replace(s, "?")
+                break
+
+        return normalized
 
     def obfuscate_sql(query, options=None):
         if query.startswith('SET application_name'):
             return json.dumps({'query': normalize_query(query), 'metadata': {}})
         return json.dumps({'query': query, 'metadata': {}})
 
-    queries = ["SET application_name=%s", "SET application_name=%s"]
+    queries = ["SET application_name = %s", "SET application_name = %s"]
 
     # These queries will have the same query signature but different queryids in pg_stat_statements
     def _run_query(idx):
@@ -120,7 +105,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         dbname = "datadog_test"
         if dbname not in connections:
             connections[dbname] = psycopg.connect(
-                host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor
+                host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor
             )
 
         args = ('two',)
@@ -129,46 +114,45 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
         connections[dbname].cursor().execute(query, args)
 
-    try:
-        # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
-        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-            mock_agent.side_effect = obfuscate_sql
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
 
-            check = integration_check(dbm_instance)
-            check._connect()
+        check = integration_check(dbm_instance)
+        check._connect()
 
-            # Seed a bunch of calls into pg_stat_statements
-            for _ in range(10):
-                _run_query(1)
-
-            _run_query(0)
-
-            run_one_check(check, cancel=False)
-
-            # Call one query
-            _run_query(0)
-            run_one_check(check, cancel=False)
-            aggregator.reset()
-
-            # Call other query that maps to same query signature
+        # Seed a bunch of calls into pg_stat_statements
+        for _ in range(10):
             _run_query(1)
-            run_one_check(check, cancel=False)
 
-            obfuscated_param = '?'
-            query0 = queries[0] % (obfuscated_param,)
-            query_signature = compute_sql_signature(query0)
-            events = aggregator.get_event_platform_events("dbm-metrics")
+        _run_query(0)
 
-            assert len(events) > 0
+        run_one_check(check, cancel=False)
 
-            matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
+        # Call one query
+        _run_query(0)
+        run_one_check(check, cancel=False)
+        aggregator.reset()
 
-            assert len(matching_rows) == 1
+        # Call other query that maps to same query signature
+        _run_query(1)
+        run_one_check(check, cancel=False)
 
-            assert matching_rows[0]['calls'] == 1
-    finally:
-        for conn in connections.values():
-            conn.close()
+        obfuscated_param = '?'
+        query0 = queries[0] % (obfuscated_param,)
+        query_signature = compute_sql_signature(query0)
+        events = aggregator.get_event_platform_events("dbm-metrics")
+
+        assert len(events) > 0
+
+        matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
+
+        assert len(matching_rows) == 1
+
+        assert matching_rows[0]['calls'] == 1
+
+    for conn in connections.values():
+        conn.close()
 
 
 statement_samples_keys = ["query_samples", "statement_samples"]
@@ -836,13 +820,15 @@ def test_statement_metadata(
     -- Test comment
     SELECT city FROM persons WHERE city = 'hello'
     '''
+    # Samples will match to the non normalized query signature
+    query_signature = '8074f7d4fee9fbdf'
 
     normalized_query = 'SELECT city FROM persons WHERE city = ?'
     # Metrics will match to the normalized query signature
     normalized_query_signature = 'ca85e8d659051b3a'
 
-    def obfuscate_sql(query: str, options=None):
-        if 'SELECT city FROM persons WHERE city' in query:
+    def obfuscate_sql(query, options=None):
+        if query.startswith('SELECT city FROM persons WHERE city'):
             return json.dumps({'query': normalized_query, 'metadata': metadata})
         return json.dumps({'query': query, 'metadata': metadata})
 
@@ -864,8 +850,8 @@ def test_statement_metadata(
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching_samples = [s for s in samples if s['db']['query_signature'] == normalized_query_signature]
-    assert len(matching_samples) >= 1
+    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
+    assert len(matching_samples) == 1
     sample = matching_samples[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
@@ -879,7 +865,7 @@ def test_statement_metadata(
     fqt_samples = [
         s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
     ]
-    assert len(fqt_samples) >= 1
+    assert len(fqt_samples) == 1
     fqt = fqt_samples[0]
     assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']

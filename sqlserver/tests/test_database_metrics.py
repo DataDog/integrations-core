@@ -14,7 +14,6 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_SERVERNAME,
-    STATIC_INFO_YEAR,
 )
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
@@ -43,16 +42,14 @@ from .common import (
     CHECK_NAME,
     SQLSERVER_ENGINE_EDITION,
     SQLSERVER_MAJOR_VERSION,
-    SQLSERVER_YEAR,
 )
 
 INCR_FRACTION_METRICS = {'sqlserver.latches.latch_wait_time'}
 AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test-1']
 
 STATIC_SERVER_INFO = {
-    STATIC_INFO_YEAR: SQLSERVER_YEAR,
-    STATIC_INFO_ENGINE_EDITION: SQLSERVER_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION: SQLSERVER_MAJOR_VERSION,
+    STATIC_INFO_ENGINE_EDITION: SQLSERVER_ENGINE_EDITION,
 }
 
 
@@ -66,7 +63,6 @@ def test_sqlserver_file_stats_metrics(
     instance_docker_metrics,
     include_file_stats_metrics,
 ):
-    print("STATIC_SERVER_INFO", STATIC_SERVER_INFO)
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
         'file_stats_metrics': {'enabled': include_file_stats_metrics},

@@ -14,13 +14,8 @@
     "media": [
       {
         "media_type": "image",
-        "caption": "Checkpoint Harmony Endpoint Overview (Light)",
-        "image_url": "images/checkpoint_harmony_endpoint_overview_light.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Checkpoint Harmony Endpoint Overview (Dark)",
-        "image_url": "images/checkpoint_harmony_endpoint_overview_dark.png"
+        "caption": "Checkpoint Harmony Endpoint Overview",
+        "image_url": "images/checkpoint_harmony_endpoint_overview.png"
       }
     ],
     "classifier_tags": [

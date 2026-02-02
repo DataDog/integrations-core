@@ -257,7 +257,6 @@ files:
                   type: string
                 - name: password
                   type: string
-                  secret: true
                 - name: host
                   type: string
                 - name: share

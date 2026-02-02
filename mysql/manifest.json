@@ -52,6 +52,7 @@
       },
       "process_signatures": [
         "mysqld",
+        "mysqld.exe",
         "mariadbd"
       ],
       "source_type_id": 18,

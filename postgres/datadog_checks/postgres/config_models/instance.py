@@ -81,7 +81,6 @@ class CollectSchemas(BaseModel):
     include_schemas: Optional[tuple[str, ...]] = None
     include_tables: Optional[tuple[str, ...]] = None
     max_columns: Optional[float] = None
-    max_query_duration: Optional[float] = None
     max_tables: Optional[float] = None
 
 

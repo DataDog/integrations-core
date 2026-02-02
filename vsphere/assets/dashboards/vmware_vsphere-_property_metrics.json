@@ -6,6 +6,12 @@
         {
             "available_values": [],
             "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
             "name": "vcenter_server",
             "prefix": "vcenter_server"
         },
@@ -20,18 +26,6 @@
             "default": "*",
             "name": "vsphere_cluster",
             "prefix": "vsphere_cluster"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "vsphere_host",
-            "prefix": "vsphere_host"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "VM",
-            "prefix": "host"
         }
     ],
     "title": "VMware vSphere - Property Metrics",
@@ -72,7 +66,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# ADAPTERS",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -80,20 +78,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.vm.guest.net{$VM,$vcenter_server, $vsphere_host, $vsphere_cluster, $vsphere_datastore} by {host,device_id,nic_mac_address,is_connected}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.net{$host,$vcenter_server} by {host,device_id,nic_mac_address,is_connected}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "Network Adapters",
@@ -116,7 +104,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# ADDRESSES",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -124,20 +116,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.vm.guest.net.ipConfig.address{$VM,$vcenter_server, $vsphere_host, $vsphere_datastore, $vsphere_cluster} by {host,device_id,is_connected,nic_ip_address,nic_mac_address}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.net.ipConfig.address{$host,$vcenter_server} by {host,device_id,is_connected,nic_ip_address,nic_mac_address}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "Static IP Addresses",
@@ -160,7 +142,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# ROUTES",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -168,20 +154,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.vm.guest.ipStack.ipRoute{$VM,$vcenter_server, $vsphere_datastore, $vsphere_cluster, $vsphere_host} by {host,device,gateway_address,network_dest_ip,prefix_length,route_domain_name,route_hostname}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.ipStack.ipRoute{$host,$vcenter_server} by {host,device,gateway_address,network_dest_ip,prefix_length,route_domain_name,route_hostname}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "All Routes",
@@ -225,7 +201,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# VMS",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -233,28 +213,19 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.vm.guest.toolsRunningStatus{$VM,$vcenter_server, $vsphere_host, $vsphere_cluster} by {host,toolsrunningstatus}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.toolsRunningStatus{$host,$vcenter_server} by {host,toolsrunningstatus}.as_count()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:vsphere.vm.guest.toolsVersion{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host,toolsversion}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.toolsVersion{$host,$vcenter_server} by {host,toolsversion}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "VMware Tools Running Status by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -275,7 +246,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# VMS",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -283,22 +258,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.vm.guest.toolsVersion{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host,toolsversion}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.toolsVersion{$host,$vcenter_server} by {host,toolsversion}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "VMware Tools Version by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -319,7 +285,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# VMS",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -327,22 +297,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.vm.guest.toolsVersionStatus2{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host,toolsversionstatus2}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.toolsVersionStatus2{$host,$vcenter_server} by {host,toolsversionstatus2}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": " VMware Tools Version Status by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -391,7 +352,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.vm.guest.disk.capacity{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}"
+                                            "query": "avg:vsphere.vm.guest.disk.capacity{$host,$vcenter_server} by {host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -415,7 +376,11 @@
                                     "formulas": [
                                         {
                                             "alias": "space",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -423,20 +388,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.vm.guest.disk.freeSpace{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host,disk_path}"
+                                            "query": "avg:vsphere.vm.guest.disk.freeSpace{$host,$vcenter_server} by {host,disk_path}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "Free Space in VMs",
@@ -480,7 +435,11 @@
                                     "formulas": [
                                         {
                                             "alias": "cpu limit",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         },
                                         {
                                             "alias": "mem limit",
@@ -500,38 +459,28 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.vm.config.cpuAllocation.limit{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}"
+                                            "query": "avg:vsphere.vm.config.cpuAllocation.limit{$host,$vcenter_server} by {host}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:vsphere.vm.config.memoryAllocation.limit{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}"
+                                            "query": "avg:vsphere.vm.config.memoryAllocation.limit{$host,$vcenter_server} by {host}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:vsphere.vm.config.memoryAllocation.overheadLimit{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}"
+                                            "query": "avg:vsphere.vm.config.memoryAllocation.overheadLimit{$host,$vcenter_server} by {host}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "avg:vsphere.vm.config.cpuAllocation.overheadLimit{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}"
+                                            "query": "avg:vsphere.vm.config.cpuAllocation.overheadLimit{$host,$vcenter_server} by {host}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "VM Limits",
@@ -553,7 +502,11 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -561,20 +514,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.vm.summary.quickStats.uptimeSeconds{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}.weighted()"
+                                            "query": "sum:vsphere.vm.summary.quickStats.uptimeSeconds{$host,$vcenter_server} by {host}.weighted()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "style": {},
@@ -597,7 +540,11 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -605,20 +552,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.vm.summary.config.numVirtualDisks{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}"
+                                            "query": "avg:vsphere.vm.summary.config.numVirtualDisks{$host,$vcenter_server} by {host}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "style": {},
@@ -644,7 +581,11 @@
                                         {
                                             "alias": "# VMS",
                                             "cell_display_mode": "number",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -652,28 +593,19 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.vm.guest.guestFullName{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {guestfullname,host}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.guestFullName{$host,$vcenter_server} by {guestfullname,host}.as_count()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:vsphere.vm.guest.toolsRunningStatus{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {toolsrunningstatus,host}.as_count()"
+                                            "query": "sum:vsphere.vm.guest.toolsRunningStatus{$host,$vcenter_server} by {toolsrunningstatus,host}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "Guest Running by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -694,7 +626,11 @@
                                     "formulas": [
                                         {
                                             "alias": "memory",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -702,20 +638,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.vm.summary.config.memorySizeMB{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}"
+                                            "query": "avg:vsphere.vm.summary.config.memorySizeMB{$host,$vcenter_server} by {host}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "Memory Size",
@@ -737,7 +663,11 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -745,23 +675,12 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.vm.config.hardware.numCoresPerSocket{$VM,$vcenter_server, $vsphere_cluster, $vsphere_host} by {host}"
+                                            "query": "avg:vsphere.vm.config.hardware.numCoresPerSocket{$host,$vcenter_server} by {host}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "style": {},
                             "title": "Cores per Socket per VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -800,7 +719,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# HOSTS",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -808,20 +731,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.host.summary.runtime.powerState{$VM,$vcenter_server} by {host,powerstate}.as_count()"
+                                            "query": "sum:vsphere.host.summary.runtime.powerState{$host,$vcenter_server} by {host,powerstate}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "Power State",
@@ -844,7 +757,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# HOSTS",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -852,20 +769,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.host.hardware.cpuPowerManagementInfo.currentPolicy{$VM,$vcenter_server} by {host,currentpolicy}.as_count()"
+                                            "query": "sum:vsphere.host.hardware.cpuPowerManagementInfo.currentPolicy{$host,$vcenter_server} by {host,currentpolicy}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "CPU Management Policy",
@@ -888,7 +795,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# HOSTS",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -896,20 +807,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.host.summary.runtime.inMaintenanceMode{$VM,$vcenter_server} by {host,inmaintenancemode}.as_count()"
+                                            "query": "sum:vsphere.host.summary.runtime.inMaintenanceMode{$host,$vcenter_server} by {host,inmaintenancemode}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "In Maintenance Mode?",
@@ -932,7 +833,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# HOSTS",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -940,20 +845,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.host.summary.runtime.connectionState{$VM,$vcenter_server} by {host,connectionstate}.as_count()"
+                                            "query": "avg:vsphere.host.summary.runtime.connectionState{$host,$vcenter_server} by {host,connectionstate}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "Connection State",
@@ -977,7 +872,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 0
+                "y": 26
             }
         },
         {
@@ -994,7 +889,11 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1002,20 +901,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.datastore.summary.capacity{$VM,$vcenter_server,$vsphere_datastore, $vsphere_host, $vsphere_cluster} by {vsphere_datastore}"
+                                            "query": "avg:vsphere.datastore.summary.capacity{$host,$vcenter_server, $vsphere_datastore} by {vsphere_datastore}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "style": {},
@@ -1046,7 +935,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vsphere.datastore.summary.freeSpace{$VM,$vcenter_server,$vsphere_datastore, $vsphere_cluster, $vsphere_host} by {vsphere_datastore}"
+                                            "query": "avg:vsphere.datastore.summary.freeSpace{$host,$vcenter_server, $vsphere_datastore} by {vsphere_datastore}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -1070,7 +959,7 @@
                 "height": 4,
                 "width": 12,
                 "x": 0,
-                "y": 4
+                "y": 30
             }
         },
         {
@@ -1088,7 +977,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# clusters",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1096,20 +989,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.cluster.configuration.dasConfig.enabled{$VM,$vcenter_server,$vsphere_cluster} by {vsphere_cluster,enabled}.as_count()"
+                                            "query": "sum:vsphere.cluster.configuration.dasConfig.enabled{$host,$vcenter_server, $vsphere_cluster} by {vsphere_cluster,enabled}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "DAS Enabled",
@@ -1132,7 +1015,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# clusters",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1140,20 +1027,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.cluster.configuration.drsConfig.enabled{$VM,$vcenter_server,$vsphere_cluster} by {vsphere_cluster,enabled}.as_count()"
+                                            "query": "sum:vsphere.cluster.configuration.drsConfig.enabled{$host,$vcenter_server, $vsphere_cluster} by {vsphere_cluster,enabled}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "DRS Enabled",
@@ -1176,7 +1053,11 @@
                                     "formulas": [
                                         {
                                             "alias": "rate",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1184,20 +1065,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.cluster.configuration.drsConfig.vmotionRate{$VM,$vcenter_server,$vsphere_cluster} by {vsphere_cluster}"
+                                            "query": "sum:vsphere.cluster.configuration.drsConfig.vmotionRate{$host,$vcenter_server, $vsphere_cluster} by {vsphere_cluster}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "vMotion Rate",
@@ -1220,7 +1091,11 @@
                                     "formulas": [
                                         {
                                             "alias": "# clusters",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1228,20 +1103,10 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vsphere.cluster.configuration.drsConfig.defaultVmBehavior{$VM,$vcenter_server,$vsphere_cluster} by {vsphere_cluster,defaultvmbehavior}.as_count()"
+                                            "query": "sum:vsphere.cluster.configuration.drsConfig.defaultVmBehavior{$host,$vcenter_server, $vsphere_cluster} by {vsphere_cluster,defaultvmbehavior}.as_count()"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
                             "title": "Default VM Behavior",
@@ -1264,7 +1129,7 @@
                 "height": 4,
                 "width": 12,
                 "x": 0,
-                "y": 8
+                "y": 34
             }
         }
     ]

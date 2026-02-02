@@ -35,6 +35,7 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
+        "iissvcs",
         "CERTLM.MSC"
       ],
       "service_checks": {

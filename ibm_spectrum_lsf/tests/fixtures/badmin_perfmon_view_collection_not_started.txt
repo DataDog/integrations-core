@@ -1,1 +1,0 @@
-Performance metric sampling has not been started

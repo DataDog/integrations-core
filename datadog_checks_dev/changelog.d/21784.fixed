@@ -1,0 +1,1 @@
+Add a fallback mechanism when mount_logs is True and no manifest is present in the integration

@@ -33,9 +33,9 @@ services:
 
   mockbin:
     container_name: mockbin
-    image: kennethreitz/httpbin
+    image: mashape/mockbin
     ports:
-      - "8080:80"
+      - "8080:8080"
 
   tinyproxy:
     container_name: tinyproxy
