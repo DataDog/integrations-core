@@ -85,8 +85,8 @@ class TestStart:
                 id='Latest stable release',
             ),
             pytest.param(
-                'datadog/agent-dev:master-jmx-win-servercore',
-                'datadog/agent-dev:master-py3-jmx-win-servercore',
+                'registry.datadoghq.com/agent-dev:master-jmx-win-servercore',
+                'registry.datadoghq.com/agent-dev:master-py3-jmx-win-servercore',
                 False,
                 id='Servercore without version',
             ),

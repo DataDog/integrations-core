@@ -16,7 +16,7 @@ on:
       agent-image-windows:
         required: false
         description: Agent 7 image on Windows
-        default: "datadog/agent:7-rc-servercore"
+        default: "registry.datadoghq.com/agent:7-rc-servercore"
         type: string
       test-py2:
         required: false
