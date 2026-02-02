@@ -997,7 +997,6 @@ files:
         example: <PROCEDURE_NAME>
     - name: proc_only_if
       description: Run this SQL before each call to `stored_procedure`. Only if it returns 1 then call the proc.
-      fleet_configurable: true
       value:
         type: string
         example: <SQL_QUERY>
