@@ -96,6 +96,19 @@ class CollectSettings(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class CollectColumnStats(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
+    max_tables: Optional[float] = None
+    run_sync: Optional[bool] = None
+
+
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -256,6 +269,7 @@ class InstanceConfig(BaseModel):
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
+    collect_column_stats: Optional[CollectColumnStats] = None
     collect_wal_metrics: Optional[bool] = None
     custom_metrics: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None

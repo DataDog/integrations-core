@@ -100,6 +100,17 @@ def instance_collect_schemas():
     )
 
 
+def instance_collect_column_stats():
+    return instance.CollectColumnStats(
+        enabled=False,
+        collection_interval=14400,
+        max_tables=500,
+        include_tables=[],
+        exclude_tables=[],
+        run_sync=False,
+    )
+
+
 def instance_obfuscator_options():
     return instance.ObfuscatorOptions(
         obfuscation_mode="obfuscate_and_normalize",
