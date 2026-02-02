@@ -71,6 +71,7 @@
       - .+:
           type: gauge
       ````
+  fleet_configurable: true
   value:
     example:
       - <METRIC_1>
@@ -202,6 +203,7 @@
           type: string
 - name: tag_by_endpoint
   description: Whether to include an endpoint tag or not.
+  fleet_configurable: true
   hidden: true
   value:
     type: boolean
@@ -214,6 +216,7 @@
     Labels defined in `exclude_labels` will take precedence in case of overlap.
 
     Note: Label filtering happens before `rename_labels`.
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -246,6 +249,7 @@
 - name: ignore_connection_errors
   description: |
     Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
