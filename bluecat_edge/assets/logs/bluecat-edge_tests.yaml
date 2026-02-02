@@ -3,233 +3,140 @@ tests:
  -
   sample: |-
     {
-      "queryClassId" : 1,
-      "query" : "beacons.gcp.gvt2.com.",
-      "latency" : 13,
-      "answers" : [ {
-        "recordType" : "CNAME",
-        "domainName" : "beacons.gcp.gvt2.com.",
-        "parsed" : true,
-        "rData" : "beacons-handoff.gcp.gvt2.com."
-      }, {
-        "recordType" : "CNAME",
-        "domainName" : "beacons-handoff.gcp.gvt2.com.",
-        "parsed" : true,
-        "rData" : "gce-beacons.gcp.gvt2.com."
-      }, {
-        "recordType" : "A",
-        "domainName" : "gce-beacons.gcp.gvt2.com.",
-        "parsed" : true,
-        "rData" : "35.206.70.60"
-      } ],
-      "source" : "10.40.12.130",
-      "queryType" : "A",
-      "queryId" : 55695,
-      "queryProtocol" : "UDP",
-      "queriedNamespaces" : [ {
-        "latency" : 13,
-        "name" : "Default",
-        "rCode" : "NOERROR",
-        "responseData" : {
-          "answers" : [ {
-            "recordType" : "CNAME",
-            "domainName" : "beacons.gcp.gvt2.com.",
-            "parsed" : true,
-            "rData" : "beacons-handoff.gcp.gvt2.com."
-          }, {
-            "recordType" : "CNAME",
-            "domainName" : "beacons-handoff.gcp.gvt2.com.",
-            "parsed" : true,
-            "rData" : "gce-beacons.gcp.gvt2.com."
-          }, {
-            "recordType" : "A",
-            "domainName" : "gce-beacons.gcp.gvt2.com.",
-            "parsed" : true,
-            "rData" : "35.206.70.60"
-          } ],
-          "questions" : [ {
-            "classId" : 1,
-            "recordType" : "A",
-            "domainName" : "beacons.gcp.gvt2.com."
-          } ],
-          "header" : {
-            "rCode" : "NOERROR",
-            "id" : 55695
-          },
-          "time" : 1768561963113
-        },
-        "id" : "97e3ecb9-f066-11f0-96fb-06915da638a5",
-        "cycle" : 0
-      } ],
-      "actionTaken" : "query-response",
-      "response" : "NOERROR",
-      "identity" : {
-        "identityId" : "identity_id_example",
-        "userId" : "example@test.bluecat.com"
+      "site_details" : {
+        "name" : "Site Testing",
+        "id" : "a56e996d-cd54-45c5-8bed-5de015612e0b"
       },
-      "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b96",
-      "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f44",
-      "threats" : [ {
-        "type" : "DGA",
-        "indicators" : [ "DGA_ADVANCED" ]
-      } ],
-      "time" : 1768561963100,
-      "id" : "1768561963100750D3C0AFB5B0C59968900C3D51AE369"
-    }
-  result:
-    custom:
-      actionTaken: "query-response"
-      answers:
-       -
-        recordType: "CNAME"
-        domainName: "beacons.gcp.gvt2.com."
-        parsed: true
-        rData: "beacons-handoff.gcp.gvt2.com."
-       -
-        recordType: "CNAME"
-        domainName: "beacons-handoff.gcp.gvt2.com."
-        parsed: true
-        rData: "gce-beacons.gcp.gvt2.com."
-       -
-        recordType: "A"
-        domainName: "gce-beacons.gcp.gvt2.com."
-        parsed: true
-        rData: "35.206.70.60"
-      dns:
-        flags:
-          rcode: "NOERROR"
-        id: 55695
-        question:
-          name: "beacons.gcp.gvt2.com."
-          type: "A"
-      drsId: "87a16e58-11d3-4d45-a574-af92520d3b96"
-      duration: 13
-      id: "1768561963100750D3C0AFB5B0C59968900C3D51AE369"
-      identity:
-        identityId: "identity_id_example"
-      network:
-        client:
-          geoip: {}
-          ip: "10.40.12.130"
-      queriedNamespaces:
-       -
-        latency: 13
-        name: "Default"
-        rCode: "NOERROR"
-        responseData:
-          answers:
-           -
-            recordType: "CNAME"
-            domainName: "beacons.gcp.gvt2.com."
-            parsed: true
-            rData: "beacons-handoff.gcp.gvt2.com."
-           -
-            recordType: "CNAME"
-            domainName: "beacons-handoff.gcp.gvt2.com."
-            parsed: true
-            rData: "gce-beacons.gcp.gvt2.com."
-           -
-            recordType: "A"
-            domainName: "gce-beacons.gcp.gvt2.com."
-            parsed: true
-            rData: "35.206.70.60"
-          questions:
-           -
-            classId: 1
-            recordType: "A"
-            domainName: "beacons.gcp.gvt2.com."
-          header:
-            rCode: "NOERROR"
-            id: 55695
-          time: 1768561963113
-        id: "97e3ecb9-f066-11f0-96fb-06915da638a5"
-        cycle: 0
-      queryClassId: 1
-      queryProtocol: "UDP"
-      siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f44"
-      threats:
-       -
-        type: "DGA"
-        indicators:
-         - "DGA_ADVANCED"
-      time: 1768561963100
-      usr:
-        id: "example@test.bluecat.com"
-    message: |-
-      {
+      "vendor" : {
+        "endpoint" : "dns-query-logs"
+      },
+      "query_log" : {
         "queryClassId" : 1,
-        "query" : "beacons.gcp.gvt2.com.",
-        "latency" : 13,
-        "answers" : [ {
-          "recordType" : "CNAME",
-          "domainName" : "beacons.gcp.gvt2.com.",
-          "parsed" : true,
-          "rData" : "beacons-handoff.gcp.gvt2.com."
-        }, {
-          "recordType" : "CNAME",
-          "domainName" : "beacons-handoff.gcp.gvt2.com.",
-          "parsed" : true,
-          "rData" : "gce-beacons.gcp.gvt2.com."
-        }, {
-          "recordType" : "A",
-          "domainName" : "gce-beacons.gcp.gvt2.com.",
-          "parsed" : true,
-          "rData" : "35.206.70.60"
-        } ],
-        "source" : "10.40.12.130",
-        "queryType" : "A",
-        "queryId" : 55695,
+        "query" : "10.13.40.10.in-addr.arpa.",
+        "latency" : 12,
+        "source" : "10.41.13.131",
+        "queryType" : "PTR",
+        "queryId" : 1,
         "queryProtocol" : "UDP",
         "queriedNamespaces" : [ {
-          "latency" : 13,
+          "latency" : 11,
           "name" : "Default",
-          "rCode" : "NOERROR",
+          "rCode" : "NXDOMAIN",
           "responseData" : {
-            "answers" : [ {
-              "recordType" : "CNAME",
-              "domainName" : "beacons.gcp.gvt2.com.",
-              "parsed" : true,
-              "rData" : "beacons-handoff.gcp.gvt2.com."
-            }, {
-              "recordType" : "CNAME",
-              "domainName" : "beacons-handoff.gcp.gvt2.com.",
-              "parsed" : true,
-              "rData" : "gce-beacons.gcp.gvt2.com."
-            }, {
-              "recordType" : "A",
-              "domainName" : "gce-beacons.gcp.gvt2.com.",
-              "parsed" : true,
-              "rData" : "35.206.70.60"
-            } ],
             "questions" : [ {
               "classId" : 1,
-              "recordType" : "A",
-              "domainName" : "beacons.gcp.gvt2.com."
+              "recordType" : "PTR",
+              "domainName" : "10.13.40.10.in-addr.arpa."
             } ],
             "header" : {
-              "rCode" : "NOERROR",
-              "id" : 55695
+              "rCode" : "NXDOMAIN",
+              "id" : 1
             },
-            "time" : 1768561963113
+            "time" : 1768561943109
           },
-          "id" : "97e3ecb9-f066-11f0-96fb-06915da638a5",
+          "id" : "97e3ecb9-f066-11f0-96fb-06915da638a8",
           "cycle" : 0
         } ],
         "actionTaken" : "query-response",
-        "response" : "NOERROR",
+        "response" : "NXDOMAIN",
         "identity" : {
           "identityId" : "identity_id_example",
           "userId" : "example@test.bluecat.com"
         },
-        "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b96",
-        "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f44",
-        "threats" : [ {
-          "type" : "DGA",
-          "indicators" : [ "DGA_ADVANCED" ]
-        } ],
-        "time" : 1768561963100,
-        "id" : "1768561963100750D3C0AFB5B0C59968900C3D51AE369"
+        "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b90",
+        "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f49",
+        "time" : 1770033982000,
+        "id" : "17685619430971F61B04D4186D474A54EBAF987E153D9"
+      }
+    }
+  result:
+    custom:
+      query_log:
+        actionTaken: "query-response"
+        drsId: "87a16e58-11d3-4d45-a574-af92520d3b90"
+        id: "17685619430971F61B04D4186D474A54EBAF987E153D9"
+        identity:
+          identityId: "identity_id_example"
+          userId: "example@test.bluecat.com"
+        latency: 12
+        queriedNamespaces:
+         -
+          latency: 11
+          name: "Default"
+          rCode: "NXDOMAIN"
+          responseData:
+            questions:
+             -
+              classId: 1
+              recordType: "PTR"
+              domainName: "10.13.40.10.in-addr.arpa."
+            header:
+              rCode: "NXDOMAIN"
+              id: 1
+            time: 1768561943109
+          id: "97e3ecb9-f066-11f0-96fb-06915da638a8"
+          cycle: 0
+        query: "10.13.40.10.in-addr.arpa."
+        queryClassId: 1
+        queryId: 1
+        queryProtocol: "UDP"
+        queryType: "PTR"
+        response: "NXDOMAIN"
+        siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f49"
+        source: "10.41.13.131"
+        time: 1770033982000
+      site_details:
+        id: "a56e996d-cd54-45c5-8bed-5de015612e0b"
+        name: "Site Testing"
+      vendor:
+        endpoint: "dns-query-logs"
+    message: |-
+      {
+        "site_details" : {
+          "name" : "Site Testing",
+          "id" : "a56e996d-cd54-45c5-8bed-5de015612e0b"
+        },
+        "vendor" : {
+          "endpoint" : "dns-query-logs"
+        },
+        "query_log" : {
+          "queryClassId" : 1,
+          "query" : "10.13.40.10.in-addr.arpa.",
+          "latency" : 12,
+          "source" : "10.41.13.131",
+          "queryType" : "PTR",
+          "queryId" : 1,
+          "queryProtocol" : "UDP",
+          "queriedNamespaces" : [ {
+            "latency" : 11,
+            "name" : "Default",
+            "rCode" : "NXDOMAIN",
+            "responseData" : {
+              "questions" : [ {
+                "classId" : 1,
+                "recordType" : "PTR",
+                "domainName" : "10.13.40.10.in-addr.arpa."
+              } ],
+              "header" : {
+                "rCode" : "NXDOMAIN",
+                "id" : 1
+              },
+              "time" : 1768561943109
+            },
+            "id" : "97e3ecb9-f066-11f0-96fb-06915da638a8",
+            "cycle" : 0
+          } ],
+          "actionTaken" : "query-response",
+          "response" : "NXDOMAIN",
+          "identity" : {
+            "identityId" : "identity_id_example",
+            "userId" : "example@test.bluecat.com"
+          },
+          "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b90",
+          "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f49",
+          "time" : 1770033982000,
+          "id" : "17685619430971F61B04D4186D474A54EBAF987E153D9"
+        }
       }
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1768561963100
