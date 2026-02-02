@@ -142,3 +142,69 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
     )
+
+
+@not_windows_ci
+def test_custom_queries_readonly_blocks_writes(dd_agent_check, init_config, instance_docker):
+    """Verify custom queries cannot execute write operations"""
+    # Create a temporary test table for write operations
+    if pyodbc:
+        conn = pyodbc.connect(instance_docker['connection_string'])
+        cursor = conn.cursor()
+        cursor.execute("IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'test_readonly_table') CREATE TABLE test_readonly_table (id INT, value NVARCHAR(50))")
+        cursor.execute("INSERT INTO test_readonly_table VALUES (1, 'test')")
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    write_queries = [
+        'INSERT INTO test_readonly_table VALUES (2, \'test2\')',
+        'UPDATE test_readonly_table SET value = \'updated\' WHERE id = 1',
+        'DELETE FROM test_readonly_table WHERE id = 1',
+        'CREATE TABLE test_write_table (id INT)',
+        'DROP TABLE IF EXISTS test_write_table',
+    ]
+
+    try:
+        for query in write_queries:
+            instance_docker['custom_queries'] = [
+                {
+                    'query': query,
+                    'columns': [{'name': 'result', 'type': 'gauge'}],
+                    'metric_prefix': 'sqlserver',
+                }
+            ]
+
+            # Should fail with read-only error
+            with pytest.raises(Exception) as exc_info:
+                dd_agent_check({'init_config': init_config, 'instances': [instance_docker]})
+
+            # Verify error message indicates read-only restriction
+            error_msg = str(exc_info.value).lower()
+            assert 'read' in error_msg or 'write' in error_msg or 'permission' in error_msg or 'cannot' in error_msg, \
+                f"Expected read-only error for query '{query}', got: {exc_info.value}"
+    finally:
+        # Clean up test table
+        if pyodbc:
+            conn = pyodbc.connect(instance_docker['connection_string'])
+            cursor = conn.cursor()
+            cursor.execute("IF EXISTS (SELECT * FROM sys.tables WHERE name = 'test_readonly_table') DROP TABLE test_readonly_table")
+            cursor.execute("IF EXISTS (SELECT * FROM sys.tables WHERE name = 'test_write_table') DROP TABLE test_write_table")
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+
+@not_windows_ci
+def test_custom_queries_readonly_allows_reads(dd_agent_check, init_config, instance_docker):
+    """Verify custom queries can still execute read operations"""
+    instance_docker['custom_queries'] = [
+        {
+            'query': 'SELECT 1 as test_value',
+            'columns': [{'name': 'test_value', 'type': 'gauge'}],
+            'metric_prefix': 'sqlserver',
+        }
+    ]
+
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_docker]})
+    aggregator.assert_metric('sqlserver.test_value', value=1)

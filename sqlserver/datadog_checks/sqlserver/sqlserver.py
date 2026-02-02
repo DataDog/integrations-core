@@ -1062,8 +1062,21 @@ class SQLServer(DatabaseCheck):
                 ctx = construct_use_statement(db)
                 self.log.debug("changing cursor context via use statement: %s", ctx)
                 cursor.execute(ctx)
-            cursor.execute(query)
-            return cursor.fetchall()
+
+            # Enforce read-only mode for custom queries to prevent data modification
+            # Note: SQL Server uses SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+            # which prevents reads from being blocked but doesn't prevent writes.
+            # We'll use a transaction with rollback to prevent writes.
+            cursor.execute("BEGIN TRANSACTION")
+            try:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                # Always rollback to ensure no writes are committed
+                cursor.execute("ROLLBACK TRANSACTION")
+                return rows
+            except Exception:
+                cursor.execute("ROLLBACK TRANSACTION")
+                raise
 
     def do_stored_procedure_check(self):
         """
