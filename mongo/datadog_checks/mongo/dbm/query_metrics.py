@@ -66,7 +66,7 @@ class MongoQueryMetrics(DBMAsyncJob):
 
     This is available in MongoDB 7.0+ for Atlas deployments and MongoDB 8.0+ for self-hosted.
 
-    The implementation follows the pattern established by PostgresStatementMetrics:
+    The implementation flow:
     1. Collect raw statistics from $queryStats
     2. Normalize and reconstruct queries for unified obfuscation
     3. Compute derivative metrics using StatementMetrics
@@ -116,31 +116,25 @@ class MongoQueryMetrics(DBMAsyncJob):
 
         # Check MongoDB version
         # Atlas supports $queryStats in MongoDB 7.0+, self-hosted requires 8.0+
-        if not self._check._mongo_version:
+        if not self._check._mongo_version_parsed:
             self._check.log.debug("MongoDB version not available yet, skipping query metrics collection")
             return False
 
-        try:
-            mongo_version = Version(self._check._mongo_version.split('-')[0])
+        # Determine minimum version based on hosting type
+        is_atlas = deployment.hosting_type == HostingType.ATLAS
+        min_version = MINIMUM_MONGODB_VERSION_ATLAS if is_atlas else MINIMUM_MONGODB_VERSION_SELF_HOSTED
 
-            # Determine minimum version based on hosting type
-            is_atlas = deployment.hosting_type == HostingType.ATLAS
-            min_version = MINIMUM_MONGODB_VERSION_ATLAS if is_atlas else MINIMUM_MONGODB_VERSION_SELF_HOSTED
-            version_requirement = "7.0+" if is_atlas else "8.0+"
-
-            if mongo_version < min_version:
-                if not self._version_warning_logged:
-                    self._check.log.warning(
-                        "Query metrics collection requires MongoDB %s for %s deployments. "
-                        "Current version: %s. Skipping collection.",
-                        version_requirement,
-                        "Atlas" if is_atlas else "self-hosted",
-                        self._check._mongo_version,
-                    )
-                    self._version_warning_logged = True
-                return False
-        except Exception as e:
-            self._check.log.debug("Could not parse MongoDB version: %s", e)
+        if self._check._mongo_version_parsed < min_version:
+            if not self._version_warning_logged:
+                version_requirement = "7.0+" if is_atlas else "8.0+"
+                self._check.log.warning(
+                    "Query metrics collection requires MongoDB %s for %s deployments. "
+                    "Current version: %s. Skipping collection.",
+                    version_requirement,
+                    "Atlas" if is_atlas else "self-hosted",
+                    self._check._mongo_version,
+                )
+                self._version_warning_logged = True
             return False
 
         return True
@@ -188,8 +182,6 @@ class MongoQueryMetrics(DBMAsyncJob):
                 "(7.0+ for Atlas, 8.0+ for self-hosted).",
                 e,
             )
-        except Exception as e:
-            self._check.log.exception("Unexpected error while collecting query metrics: %s", e)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self) -> list[QueryMetricsRow]:

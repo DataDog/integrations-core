@@ -314,8 +314,7 @@ instances:
 
     ## Configure collection of MongoDB query metrics using $queryStats aggregation pipeline.
     ## This feature requires MongoDB 7.0+ for Atlas deployments or 8.0+ for self-hosted, and the clusterMonitor role.
-    ## Query metrics provide aggregated performance statistics for normalized queries,
-    ## similar to pg_stat_statements for PostgreSQL.
+    ## Query metrics provide aggregated performance statistics for normalized queries.
     #
     # query_metrics:
 
