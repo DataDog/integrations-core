@@ -82,6 +82,20 @@ ddev env stop pgbouncer py3.11-1.23
 
 Run specific tests with `ddev --no-interactive test <INTEGRATION> -- -k <PYTEST_FILTER_STRING>`, for example `ddev --no-interactive test kuma -- -k test_code_class_injection -s`.
 
+### Recreating Environments
+
+Add `--recreate` or `-r` to recreate test environments from scratch:
+
+```shell
+# Unit/integration tests - recreates Hatch environments
+ddev test -r <INTEGRATION>
+
+# E2E tests - recreates both Hatch environments and Docker containers/volumes
+ddev env test --dev -r <INTEGRATION> <ENV>
+```
+
+For E2E tests, `--recreate` performs `docker compose down --volumes` followed by `docker compose up -d --force-recreate`.
+
 ## Code Formatting
 
 Format code with `ddev test -fs <INTEGRATION>`. For example, for the pgbouncer integration, run `ddev test -fs pgbouncer`.
