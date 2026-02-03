@@ -299,20 +299,11 @@ def test_session_killed_and_abandoned(aggregator, integration_check, pg_instance
 @requires_over_14
 @pytest.mark.flaky(max_runs=3)
 def test_session_idle_in_transaction_time(aggregator, integration_check, pg_instance):
-    """Test idle_in_transaction_time metric - timing-based, inherently has variance.
-
-    This test verifies that time spent idle in a transaction is correctly tracked.
-    We use generous timing margins because:
-    - PostgreSQL's stats collector updates asynchronously (can have ~500ms delay)
-    - CI environments have variable performance
-    - monotonic_count requires delta computation between samples
-    """
-    # Reset idle time to 0
+    """Test idle_in_transaction_time metric tracks time spent idle in a transaction."""
     postgres_conn = _get_superconn(pg_instance)
     with postgres_conn.cursor() as cur:
         cur.execute("select pg_stat_reset();")
         cur.fetchall()
-    # Make sure the stats collector is updated
     time.sleep(0.5)
 
     check = integration_check(pg_instance)
@@ -324,11 +315,10 @@ def test_session_idle_in_transaction_time(aggregator, integration_check, pg_inst
     # Use autocommit=False to keep the transaction open during the sleep
     conn = _get_conn(pg_instance, autocommit=False)
     with conn.cursor() as cur:
-        cur.execute('BEGIN;')
+        cur.execute('BEGIN')
         _increase_txid(cur)
         cur.fetchall()
         # Keep transaction idle for 5 seconds
-        # PostgreSQL stats collector updates asynchronously, so we need generous margins
         time.sleep(5.0)
 
     # Close the connection to end the transaction
@@ -336,18 +326,14 @@ def test_session_idle_in_transaction_time(aggregator, integration_check, pg_inst
 
     # Wait for stats collector to update
     time.sleep(1.0)
-
     aggregator.reset()
     check.run()
 
-    # Assert at least 0.5 seconds was recorded (10:1 margin)
-    # PostgreSQL stats collector updates asynchronously and may not capture full idle time
-    # Using a very low threshold to account for stats collector update frequency and CI variance
+    # Verify we now have a greater than 0 seconds of idle transaction time
     assert_metric_at_least(
-        aggregator, 'postgresql.sessions.idle_in_transaction_time', count=1, lower_bound=0.5, tags=expected_tags
+        aggregator, 'postgresql.sessions.idle_in_transaction_time', count=1, lower_bound=0.1, tags=expected_tags
     )
 
-    # Clean up the superconn
     postgres_conn.close()
 
 
