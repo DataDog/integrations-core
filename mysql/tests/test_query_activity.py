@@ -15,11 +15,12 @@ from threading import Event
 import mock
 import pymysql
 import pytest
+from packaging.version import parse as parse_version
+
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
-from packaging.version import parse as parse_version
 
 from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT
 
@@ -394,28 +395,20 @@ def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
-    # Test that the activity collection rate limiter is configured correctly
-    # and that collections actually happen. We avoid testing exact timing
-    # as that is inherently flaky in CI environments.
+    # test the activity collection loop rate limit
     aggregator.reset()
-    collection_interval = 0.5
+    collection_interval = 0.1
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
+    start = time.time()
     dd_run_check(check)
-
-    # Verify the rate limiter is configured with the expected rate
-    expected_rate = 1.0 / collection_interval
-    assert check._query_activity._rate_limiter.rate_limit_s == expected_rate
-    assert check._query_activity.collection_interval == collection_interval
-
-    # Wait long enough for at least one collection to occur, then verify it did
-    time.sleep(collection_interval * 3)
+    time.sleep(1)
     check.cancel()
-
+    time_elapsed = time.time() - start
+    max_collections = int(1 / collection_interval * time_elapsed) + 1
     metrics = aggregator.metrics("dd.mysql.activity.collect_activity.payload_size")
-    # Simply verify that at least one collection happened
-    assert len(metrics) >= 1, "Expected at least one activity collection to occur"
+    assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
 @pytest.mark.integration
