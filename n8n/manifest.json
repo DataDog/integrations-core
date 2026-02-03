@@ -49,16 +49,16 @@
         "N8N overview": "assets/dashboards/n8n_overview.json"
     },
     "monitors": {
-        "[n8n] Combined Queue Health (Backlog OR Wait Time)": "assets/monitors/combined_queue_health.json",
-        "[n8n] High Queue Backlog Size": "assets/monitors/high_queue_backlog.json",
-        "[n8n] High Queue Wait Time (Oldest Queued Age)": "assets/monitors/high_queue_wait_time.json",
-        "[n8n] High Job Failure Rate (Queue Jobs)": "assets/monitors/job_failure_rate.json",
-        "[n8n] Queue Processing Stalled (No Dequeues)": "assets/monitors/queue_processing_stalled.json",
-        "[n8n] Stale Queue Consumer (No Dequeue Activity)": "assets/monitors/stale_queue_consumer.json",
-        "[n8n] Worker Heartbeat Stale (No Recent Activity)": "assets/monitors/worker_heartbeat_stale.json",
-        "[n8n] Workflow Duration Exceeds SLO (p95)": "assets/monitors/workflow_duration_slo.json",
-        "[n8n] Workflow Execution Failures Anomaly": "assets/monitors/workflow_execution_anomaly.json",
-        "[n8n] High Workflow Failure Rate": "assets/monitors/workflow_failure_rate.json"
+        "Combined Queue Health (Backlog OR Wait Time)": "assets/monitors/combined_queue_health.json",
+        "High Queue Backlog Size": "assets/monitors/high_queue_backlog.json",
+        "High Queue Wait Time (Oldest Queued Age)": "assets/monitors/high_queue_wait_time.json",
+        "High Job Failure Rate (Queue Jobs)": "assets/monitors/job_failure_rate.json",
+        "Queue Processing Stalled (No Dequeues)": "assets/monitors/queue_processing_stalled.json",
+        "Stale Queue Consumer (No Dequeue Activity)": "assets/monitors/stale_queue_consumer.json",
+        "Worker Heartbeat Stale (No Recent Activity)": "assets/monitors/worker_heartbeat_stale.json",
+        "Workflow Duration Exceeds SLO (p95)": "assets/monitors/workflow_duration_slo.json",
+        "Workflow Execution Failures Anomaly": "assets/monitors/workflow_execution_anomaly.json",
+        "High Workflow Failure Rate": "assets/monitors/workflow_failure_rate.json"
     },
     "saved_views": {}
   },
