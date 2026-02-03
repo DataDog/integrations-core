@@ -52,7 +52,6 @@ tests:
       ide_shepherd:
         activity_name: "updated"
         class_name: "Application Security Posture Finding"
-      isAlert: false
       network:
         ip:
           attributes:
@@ -188,7 +187,6 @@ tests:
       ide_shepherd:
         activity_name: "installed"
         class_name: "Detection Finding"
-      isAlert: true
       network:
         ip:
           attributes:
