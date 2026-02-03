@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     multiple=True,
     help='Environment variables to pass to the Agent e.g. -e DD_URL=app.datadoghq.com -e DD_API_KEY=foobar',
 )
+@click.option('--recreate', '-r', is_flag=True, help='Recreate environments from scratch')
 @click.option('--junit', is_flag=True, hidden=True)
 @click.option('--python-filter', envvar='PYTHON_FILTER', hidden=True)
 @click.option('--new-env', is_flag=True, hidden=True)
@@ -53,6 +54,7 @@ def test_command(
     local_base: bool,
     agent_build: str | None,
     extra_env_vars: tuple[str, ...],
+    recreate: bool,
     junit: bool,
     python_filter: str | None,
     new_env: bool,
@@ -147,6 +149,7 @@ def test_command(
                     test,
                     target_spec=f'{intg_name}:{env_name}',
                     pytest_args=pytest_args,
+                    recreate=recreate,
                     junit=junit,
                     hide_header=True,
                     e2e=True,
