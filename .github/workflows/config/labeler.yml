@@ -667,12 +667,13 @@ integration/ibm_was:
   - any-glob-to-any-file:
     - ibm_was/**/*
 integration/iboss:
-- iboss/**/*
-integration/ide_shepherd:
-- ide_shepherd/**/*
 - changed-files:
   - any-glob-to-any-file:
     - iboss/**/*
+integration/ide-shepherd:
+- changed-files:
+  - any-glob-to-any-file:
+    - ide-shepherd/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
