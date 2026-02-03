@@ -35,11 +35,11 @@ files:
         If any one of the POST, PUT, DELETE, or PATCH method is specified, you can choose to send data in the body of the
         request with the data parameter.
         SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
+      enabled: false
       value:
         anyOf:
         - type: object
         - type: string
-        enabled: false
         example:
           <KEY>: <VALUE>
     - name: content_match
