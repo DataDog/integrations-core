@@ -1,1 +1,0 @@
-Enforce read-only mode for custom_queries to prevent data modification using SET SESSION TRANSACTION READ ONLY
