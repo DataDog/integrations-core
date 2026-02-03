@@ -1,1 +1,0 @@
-Automatically check for agent branch existence before updating build_agent.yaml during release branch creation and tagging.
