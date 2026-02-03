@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4775a4f7-3e41-49db-8a3f-846d18f1a4c8",
   "app_id": "n8n",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -47,7 +48,18 @@
     "dashboards": {
         "N8N overview": "assets/dashboards/n8n_overview.json"
     },
-    "monitors": {},
+    "monitors": {
+        "[n8n] Combined Queue Health (Backlog OR Wait Time)": "assets/monitors/combined_queue_health.json",
+        "[n8n] High Queue Backlog Size": "assets/monitors/high_queue_backlog.json",
+        "[n8n] High Queue Wait Time (Oldest Queued Age)": "assets/monitors/high_queue_wait_time.json",
+        "[n8n] High Job Failure Rate (Queue Jobs)": "assets/monitors/job_failure_rate.json",
+        "[n8n] Queue Processing Stalled (No Dequeues)": "assets/monitors/queue_processing_stalled.json",
+        "[n8n] Stale Queue Consumer (No Dequeue Activity)": "assets/monitors/stale_queue_consumer.json",
+        "[n8n] Worker Heartbeat Stale (No Recent Activity)": "assets/monitors/worker_heartbeat_stale.json",
+        "[n8n] Workflow Duration Exceeds SLO (p95)": "assets/monitors/workflow_duration_slo.json",
+        "[n8n] Workflow Execution Failures Anomaly": "assets/monitors/workflow_execution_anomaly.json",
+        "[n8n] High Workflow Failure Rate": "assets/monitors/workflow_failure_rate.json"
+    },
     "saved_views": {}
   },
   "author": {
