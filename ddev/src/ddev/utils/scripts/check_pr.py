@@ -237,7 +237,10 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
         if not changelog_entries:
             if not changelog_needed:
                 continue
-            msg = f'Package "{target}" has changes that require a changelog. Please run `ddev release changelog new` to add it.'
+            msg = (
+                f'Package "{target}" has changes that require a changelog. '
+                'Please run `ddev release changelog new` to add it.'
+            )
             errors.extend(
                 (
                     msg,
