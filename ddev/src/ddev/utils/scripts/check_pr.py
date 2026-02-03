@@ -163,12 +163,12 @@ def get_noncore_repo_changelog_errors(git_diff: str, suffix: str, private: bool 
     return errors
 
 
-def extract_filenames(git_diff: str) -> Iterator[str]:
+def extract_filenames(git_diff: str) -> Iterator[tuple[str, bool]]:
     """
-    Extract filenames of added or modified files from a git diff.
+    Extract filenames from a git diff.
 
-    Deleted files are skipped since they are not relevant for validation
-    (e.g., changelog fragments being removed during releases).
+    Yields tuples of (filename, is_deleted) where is_deleted is True if the file
+    was removed in the diff.
     """
     # Binary files in the diff are shown different from non-binary files.
     # Example:
@@ -192,25 +192,26 @@ def extract_filenames(git_diff: str) -> Iterator[str]:
             if line.startswith('/dev/null and '):
                 # New binary file
                 filename = line.split(maxsplit=2)[-1][2:]
+                is_deleted = False
             elif line.endswith(' and /dev/null'):
-                # Deleted binary file - skip
-                continue
+                # Deleted binary file
+                filename = line.split(maxsplit=2)[0][2:]
+                is_deleted = True
             else:
                 # Modified binary file
                 _, _, filename = line.partition(' and b/')
+                is_deleted = False
 
-            yield filename
+            yield filename, is_deleted
             continue
 
         # --- a/file
         # +++ /dev/null
         before = before.split(maxsplit=1)[1]
         after = after.split(maxsplit=1)[1]
-        if after == '/dev/null':
-            # Deleted file - skip
-            continue
-        filename = after[2:]
-        yield filename
+        is_deleted = after == '/dev/null'
+        filename = before[2:] if is_deleted else after[2:]
+        yield filename, is_deleted
 
 
 def gh_annotation(fpath, linenum, msg):
@@ -223,20 +224,24 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
 
     The validation reflects this so it's different from extras and marketplace.
     '''
-    targets: defaultdict[str, list[str]] = defaultdict(list)
-    for filename in extract_filenames(git_diff):
+    targets: defaultdict[str, list[tuple[str, bool]]] = defaultdict(list)
+    for filename, is_deleted in extract_filenames(git_diff):
         target, _, path = filename.partition('/')
         if path:
-            targets[target].append(path)
+            targets[target].append((path, is_deleted))
 
     errors: list[str] = []
     fragments_dir = 'changelog.d'
     for target, files in sorted(targets.items()):
-        changelog_needed = requires_changelog(target, iter(files))
-        changelog_entries = [f for f in files if f.startswith(fragments_dir)]
-        if not changelog_entries:
+        # All files (including deleted) count toward requiring a changelog
+        changelog_needed = requires_changelog(target, (f for f, _ in files))
+        changelog_entries = [(f, deleted) for f, deleted in files if f.startswith(fragments_dir)]
+        # Only added (not deleted) changelog entries satisfy the changelog requirement
+        added_changelog_entries = [f for f, deleted in changelog_entries if not deleted]
+        if not added_changelog_entries:
             if not changelog_needed:
                 continue
+
             msg = (
                 f'Package "{target}" has changes that require a changelog. '
                 'Please run `ddev release changelog new` to add it.'
@@ -248,7 +253,11 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
                 )
             )
             continue
-        for entry_path in changelog_entries:
+
+        for entry_path, is_deleted in changelog_entries:
+            # Skip validation for deleted changelog entries (e.g., during releases)
+            if is_deleted:
+                continue
             full_entry_path = f'{target}/{entry_path}'
             if not changelog_needed:
                 msg = (

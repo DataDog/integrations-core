@@ -124,6 +124,24 @@ index dfad2dae7569..000000000000
 \\ No newline at end of file
 '''
 
+# Simulates deleting a source file. Unlike deleted changelog fragments,
+# this should still require a changelog entry.
+EXAMPLE_DELETED_SOURCE_FILE = '''\
+diff --git a/snowflake/datadog_checks/snowflake/legacy_check.py b/snowflake/datadog_checks/snowflake/legacy_check.py
+deleted file mode 100644
+index 9e83ef8f4b0c..000000000000
+--- a/snowflake/datadog_checks/snowflake/legacy_check.py
++++ /dev/null
+@@ -1,10 +0,0 @@
+-# Legacy check implementation
+-class LegacySnowflakeCheck:
+-    def __init__(self):
+-        pass
+-
+-    def check(self):
+-        pass
+'''
+
 
 @pytest.mark.parametrize(
     'diff_content',
@@ -188,6 +206,17 @@ def test_validation_passes(diff_content, testing_context, capsys):
                 "for this change. To fix this please run:%0Arm snowflake/changelog.d/123.added\n"
             ),
             id='changelog not needed',
+        ),
+        pytest.param(
+            EXAMPLE_DELETED_SOURCE_FILE,
+            (
+                'Package "snowflake" has changes that require a changelog. '
+                'Please run `ddev release changelog new` to add it.\n'
+                '::error file=snowflake/changelog.d/123.fixed,line=0::'
+                'Package "snowflake" has changes that require a changelog. '
+                'Please run `ddev release changelog new` to add it.\n'
+            ),
+            id='deleted source file requires changelog',
         ),
     ],
 )
