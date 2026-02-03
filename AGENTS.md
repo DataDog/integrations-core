@@ -58,7 +58,7 @@ Run E2E tests by following these steps:
 
 2. Start a specific environment:
    ```shell
-   ddev env start <INTEGRATION> <ENV>
+   ddev env start --dev <INTEGRATION> <ENV>
    ```
 
 3. Run the E2E tests in that environment:
