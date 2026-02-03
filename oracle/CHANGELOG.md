@@ -1,11 +1,5 @@
 # CHANGELOG - oracle
 
-## 2026-02-02
-
-***Fixed***:
-
-* Remove obsolete Oracle resources and README information ([#22423](https://github.com/DataDog/integrations-core/pull/22423))
-
 ## 6.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
