@@ -18,6 +18,7 @@
   description: |
     Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
     the health of the `server`.
+  fleet_configurable: true
   value:
     example: true
     type: boolean
@@ -30,6 +31,7 @@
   hidden: true
   description: |
     The namespace to be prepended to all metrics and service checks.
+  fleet_configurable: true
   value:
     type: string
     pattern: '\w*'
