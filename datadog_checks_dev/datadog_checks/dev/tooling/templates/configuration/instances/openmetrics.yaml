@@ -2,6 +2,7 @@
   required: true
   description: |
     The URL exposing metrics in the OpenMetrics format.
+  fleet_configurable: true
   value:
     type: string
 - name: namespace
@@ -142,6 +143,7 @@
       - .+:
           type: gauge
       ```
+  fleet_configurable: true
   value:
     example:
       - <METRIC_1>
