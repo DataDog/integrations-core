@@ -6,7 +6,7 @@
 
 The HubSpot Content Hub integration collects Activity Logs (audit, login, security) and Analytics Metrics (breakdown categories, content types), sending them to Datadog for detailed analysis. The logs are parsed and enriched for efficient searching, while the metrics provide insights into content performance.
 
-Enrich your telemetry with metadata from HubSpot using Datadog [Reference Tables][5]. By mapping value fields to a primary key, you can automatically append these fields to logs or events containing that key.
+Use Datadog [Reference Tables][5] to enrich your telemetry with metadata from HubSpot. You can map value fields to a primary key to automatically append these fields to logs or events containing that key.
 
 The integration includes dashboards that show and analyze both Activity Logs and Analytics Metrics, making it easier to monitor and understand trends and issues.
 
