@@ -205,15 +205,37 @@ def build_image():
 
     if not args.no_run:
         with temporary_directory() as temp_dir:
+            docker_cmd = ['docker', 'run', '--rm']
             mount_dir = temp_dir / 'mnt'
             mount_dir.mkdir()
             internal_mount_dir = 'C:\\mnt' if windows_image else '/home'
+            docker_cmd.extend(
+                [
+                    '-v',
+                    f'{mount_dir}:{internal_mount_dir}',
+                    # We don't want to write bytecode because we don't benefit from its optimization
+                    # and anything created within container mounts cannot be removed by the host.
+                    '-e',
+                    'PYTHONDONTWRITEBYTECODE=1',
+                ]
+            )
 
             dependency_file = mount_dir / 'requirements.in'
             dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
             shutil.copy(HERE / 'deps' / 'build_dependencies.txt', mount_dir)
             shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
             shutil.copytree(HERE / 'patches', mount_dir / 'patches')
+
+            deps_dir = HERE.parent / '.deps'
+            shutil.copytree(deps_dir / 'resolved', mount_dir / 'resolved')
+            docker_cmd.extend(
+                [
+                    '-e',
+                    f'DD_TARGET_NAME={image}',
+                    '-e',
+                    f"DD_PYTHON_VERSION={os.environ['PYTHON_VERSION']}",
+                ]
+            )
 
             # Create outputs on the host so they can be removed
             wheels_dir = mount_dir / 'wheels'
@@ -232,13 +254,13 @@ def build_image():
             if args.digest:
                 script_args.append('--use-built-index')
 
-            check_process([
-                'docker', 'run', '--rm',
-                '-v', f'{mount_dir}:{internal_mount_dir}',
-                # Anything created within directories mounted to the container cannot be removed by the host
-                '-e', 'PYTHONDONTWRITEBYTECODE=1',
-                image_name, *script_args,
-            ])
+            check_process(
+                docker_cmd
+                + [
+                    image_name,
+                    *script_args,
+                ]
+            )
 
             output_dir = Path(args.output_dir)
             output_dir.parent.mkdir(parents=True, exist_ok=True)
