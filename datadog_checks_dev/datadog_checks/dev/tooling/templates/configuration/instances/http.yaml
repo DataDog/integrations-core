@@ -285,6 +285,7 @@
     must have been processed using the `openssl rehash` command. See:
     https://www.openssl.org/docs/man3.2/man1/c_rehash.html
 - name: tls_protocols_allowed
+  fleet_configurable: true
   value:
     example:
     - 'SSLv3'
