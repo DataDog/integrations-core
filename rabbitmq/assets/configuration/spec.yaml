@@ -80,6 +80,7 @@ files:
           example: guest
       - name: rabbitmq_pass
         description: The password to use for the RabbitMQ Management Plugin
+        secret: true
         value:
           type: string
           example: guest
