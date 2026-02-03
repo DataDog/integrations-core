@@ -19,7 +19,7 @@ To integrate HubSpot with Datadog, Datadog connects to HubSpot using OAuth. The 
 1. Navigate to the [Integrations Page][2] and search for the "HubSpot Content Hub" integration.
 2. Click the tile.
 3. To add an account to install the integration, click the **Add Account** button.
-4. After reading the instructions in the modal and choosing your telemetry and reference tables settings, click the **Authorize** button, which redirects you to the HubSpot login page.
+4. Read the instructions in the modal and choose your telemetry and reference tables settings. Then, click the **Authorize** button, which redirects you to the HubSpot login page.
 5. After logging in, you are prompted to select which HubSpot account you want to grant access to.
 6. Click **Authorize**.
 7. You're redirected back to Datadog's HubSpot tile with a new account. Datadog recommends changing the account name to something that is easier to remember. You can add multiple accounts with access to different organizations.
