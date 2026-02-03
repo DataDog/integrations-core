@@ -182,7 +182,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true"
                       },
                       "indexes": [
                         "*"
@@ -234,7 +234,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true"
                       },
                       "indexes": [
                         "*"
@@ -297,7 +297,7 @@
                       ],
                       "group_by": {
                         "fields": [
-                          "@metadata.environment.ide_flavor"
+                          "@ocsf.metadata.environment.ide_flavor"
                         ],
                         "limit": 10,
                         "sort": {
@@ -360,14 +360,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@metadata.environment.ide_flavor"
+                          "@ocsf.metadata.environment.ide_flavor"
                         ],
                         "limit": 10,
                         "sort": {
@@ -495,7 +495,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true"
                       },
                       "indexes": [
                         "*"
@@ -627,7 +627,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:vscode"
+                        "query": "source:ide-shepherd @ocsf.metadata.environment.ide_flavor:vscode"
                       },
                       "indexes": [
                         "*"
@@ -675,7 +675,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:vscode"
+                        "query": "source:ide-shepherd @ocsf.metadata.environment.ide_flavor:vscode"
                       },
                       "indexes": [
                         "*"
@@ -722,7 +722,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:vscode"
                       },
                       "indexes": [
                         "*"
@@ -768,14 +768,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @class_uid:2007 @metadata.environment.ide_flavor:vscode"
+                        "query": "source:ide-shepherd @ocsf.class_uid:2007 @ocsf.metadata.environment.ide_flavor:vscode"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@application.name"
+                          "@ocsf.application.name"
                         ],
                         "limit": 10,
                         "sort": {
@@ -837,14 +837,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:vscode"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@resources.uid"
+                          "@ocsf.resources.uid"
                         ],
                         "limit": 10,
                         "sort": {
@@ -906,14 +906,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:vscode"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@observables.name"
+                          "@ocsf.observables.name"
                         ],
                         "limit": 10,
                         "sort": {
@@ -975,7 +975,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:vscode"
                       },
                       "indexes": [
                         "*"
@@ -1054,14 +1054,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:vscode @class_uid:2007"
+                        "query": "source:ide-shepherd @ocsf.metadata.environment.ide_flavor:vscode @ocsf.class_uid:2007"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@activity_id"
+                          "@ocsf.activity_id"
                         ],
                         "limit": 10,
                         "sort": {
@@ -1122,7 +1122,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:vscode"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:vscode"
                       },
                       "indexes": [
                         "*"
@@ -1189,7 +1189,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:cursor"
+                        "query": "source:ide-shepherd @ocsf.metadata.environment.ide_flavor:cursor"
                       },
                       "indexes": [
                         "*"
@@ -1237,7 +1237,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:cursor"
+                        "query": "source:ide-shepherd @ocsf.metadata.environment.ide_flavor:cursor"
                       },
                       "indexes": [
                         "*"
@@ -1284,7 +1284,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:cursor"
                       },
                       "indexes": [
                         "*"
@@ -1330,14 +1330,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @class_uid:2007 @metadata.environment.ide_flavor:cursor"
+                        "query": "source:ide-shepherd @ocsf.class_uid:2007 @ocsf.metadata.environment.ide_flavor:cursor"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@application.name"
+                          "@ocsf.application.name"
                         ],
                         "limit": 10,
                         "sort": {
@@ -1399,14 +1399,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:cursor"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@resources.uid"
+                          "@ocsf.resources.uid"
                         ],
                         "limit": 10,
                         "sort": {
@@ -1468,14 +1468,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:cursor"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@observables.name"
+                          "@ocsf.observables.name"
                         ],
                         "limit": 10,
                         "sort": {
@@ -1537,7 +1537,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:cursor"
                       },
                       "indexes": [
                         "*"
@@ -1616,14 +1616,14 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @metadata.environment.ide_flavor:cursor @class_uid:2007"
+                        "query": "source:ide-shepherd @ocsf.metadata.environment.ide_flavor:cursor @ocsf.class_uid:2007"
                       },
                       "indexes": [
                         "*"
                       ],
                       "group_by": {
                         "fields": [
-                          "@activity_id"
+                          "@ocsf.activity_id"
                         ],
                         "limit": 10,
                         "sort": {
@@ -1684,7 +1684,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:ide-shepherd @isAlert:true @metadata.environment.ide_flavor:cursor"
+                        "query": "source:ide-shepherd @ocsf.is_alert:true @ocsf.metadata.environment.ide_flavor:cursor"
                       },
                       "indexes": [
                         "*"
