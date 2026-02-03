@@ -15,6 +15,7 @@ files:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.enabled: true
     - name: stats_url
+      legacy: true
       display_priority: 1
       description: |
         The check will collect and parse metrics from the admin /stats/ endpoint.
@@ -31,6 +32,7 @@ files:
         type: string
     - name: included_metrics
       hidden: true
+      legacy: true
       description: |
         Includes metrics using regular expressions.
         The filtering occurs before tag extraction, so you have the option
@@ -49,6 +51,7 @@ files:
           - cluster\.(in|out)\..*
     - name: excluded_metrics
       hidden: true
+      legacy: true
       description: |
         Excludes metrics using regular expressions.
         The filtering occurs before tag extraction, so you have the option
@@ -67,6 +70,7 @@ files:
           - ^http\..*
     - name: cache_metrics
       hidden: true
+      legacy: true
       description: |
         Results are cached by default to decrease CPU utilization, at
         the expense of some memory. Disable by setting this to false.
@@ -75,6 +79,7 @@ files:
         example: true
     - name: parse_unknown_metrics
       hidden: true
+      legacy: true
       description: |
         Attempt parsing of metrics that are unknown and will otherwise be skipped.
       value:
@@ -82,6 +87,7 @@ files:
         example: false
     - name: collect_server_info
       hidden: true
+      legacy: true
       description: |
         Collect Envoy version by accessing the `/server_info` endpoint.
         Disable this if this endpoint is not reachable by the agent.
@@ -90,6 +96,7 @@ files:
         example: true
     - name: disable_legacy_cluster_tag
       hidden: true
+      legacy: true
       description: |
         Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
         which has been renamed to `envoy_cluster` and `virtual_envoy_cluster`.

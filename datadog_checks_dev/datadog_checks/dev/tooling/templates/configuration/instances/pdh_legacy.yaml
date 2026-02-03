@@ -1,4 +1,5 @@
 - name: host
+  legacy: true
   required: false
   description: |
     The host the current check connects to.
@@ -7,16 +8,19 @@
     example: .
     type: string
 - name: username
+  legacy: true
   required: false
   description: The username from the credentials needed to connect to the host.
   value:
     type: string
 - name: password
+  legacy: true
   required: false
   description: The password from the credentials needed to connect to the host.
   value:
     type: string
 - name: additional_metrics
+  legacy: true
   required: false
   description: |
     The additional metrics is a list of items that represent additional counters to collect.
@@ -43,6 +47,7 @@
       items:
         type: string
 - name: counter_data_types
+  legacy: true
   required: false
   description: |
     counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> elements that
