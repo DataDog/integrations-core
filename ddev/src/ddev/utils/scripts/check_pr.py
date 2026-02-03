@@ -164,6 +164,17 @@ def get_noncore_repo_changelog_errors(git_diff: str, suffix: str, private: bool 
 
 
 def extract_filenames(git_diff: str) -> Iterator[str]:
+    """
+    Extract filenames of added or modified files from a git diff.
+
+    Deleted files are skipped since they are not relevant for validation
+    (e.g., changelog fragments being removed during releases).
+    """
+    # Binary files in the diff are shown different from non-binary files.
+    # Example:
+    # Binary files /dev/null and b/foo/archive.tar.gz differ
+    binary_indicator = 'Binary files '
+
     for modification in re.split(r'^diff --git ', git_diff, flags=re.MULTILINE):
         if not modification:
             continue
@@ -176,15 +187,16 @@ def extract_filenames(git_diff: str) -> Iterator[str]:
         metadata, *_ = re.split(r'^@@ ', modification, flags=re.MULTILINE)
         *_, before, after = metadata.strip().splitlines()
 
-        # Binary files /dev/null and b/foo/archive.tar.gz differ
-        binary_indicator = 'Binary files '
         if after.startswith(binary_indicator):
             line = after[len(binary_indicator) :].rsplit(maxsplit=1)[0]
             if line.startswith('/dev/null and '):
+                # New binary file
                 filename = line.split(maxsplit=2)[-1][2:]
             elif line.endswith(' and /dev/null'):
-                filename = line.split(maxsplit=2)[0][2:]
+                # Deleted binary file - skip
+                continue
             else:
+                # Modified binary file
                 _, _, filename = line.partition(' and b/')
 
             yield filename
@@ -194,7 +206,10 @@ def extract_filenames(git_diff: str) -> Iterator[str]:
         # +++ /dev/null
         before = before.split(maxsplit=1)[1]
         after = after.split(maxsplit=1)[1]
-        filename = before[2:] if after == '/dev/null' else after[2:]
+        if after == '/dev/null':
+            # Deleted file - skip
+            continue
+        filename = after[2:]
         yield filename
 
 
@@ -214,20 +229,21 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
         if path:
             targets[target].append(path)
 
-    fragments_dir = 'changelog.d'
     errors: list[str] = []
+    fragments_dir = 'changelog.d'
     for target, files in sorted(targets.items()):
         changelog_needed = requires_changelog(target, iter(files))
         changelog_entries = [f for f in files if f.startswith(fragments_dir)]
-        if not changelog_entries and not changelog_needed:
-            continue
-        if not changelog_entries and changelog_needed:
-            msg = (
-                f'Package "{target}" has changes that require a changelog. '
-                + 'Please run `ddev release changelog new` to add it.'
+        if not changelog_entries:
+            if not changelog_needed:
+                continue
+            msg = f'Package "{target}" has changes that require a changelog. Please run `ddev release changelog new` to add it.'
+            errors.extend(
+                (
+                    msg,
+                    gh_annotation(f'{target}/changelog.d/{pr_number}.fixed', 0, msg),
+                )
             )
-            errors.append(msg)
-            errors.append(gh_annotation(f'{target}/changelog.d/{pr_number}.fixed', 0, msg))
             continue
         for entry_path in changelog_entries:
             full_entry_path = f'{target}/{entry_path}'
@@ -236,8 +252,7 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
                     "You added a changelog, but it's not needed for this change. To fix this please run:\n"
                     + f'rm {full_entry_path}'
                 )
-                errors.append(msg)
-                errors.append(gh_annotation(full_entry_path, 0, msg))
+                errors.extend((msg, gh_annotation(full_entry_path, 0, msg)))
             entry_parents, entry_fname = os.path.split(entry_path)
             entry_pr_num, _, entry_fname_rest = entry_fname.partition(".")
             if int(entry_pr_num) != pr_number:
@@ -246,17 +261,14 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
                     'Your changelog entry has the wrong PR number. To fix this please run:\n'
                     + f'mv {full_entry_path} {target}/{correct_entry_path}'
                 )
-                errors.append(msg)
-                errors.append(gh_annotation(full_entry_path, 0, msg))
+                errors.extend((msg, gh_annotation(full_entry_path, 0, msg)))
             change_type, _, _ = entry_fname_rest.partition(".")
             if change_type not in VALID_CHANGE_TYPES:
                 msg = (
                     f'Your changelog entry "{full_entry_path}" has an invalid change type, please rename the file. '
                     f'Valid types are:\n{" ".join(VALID_CHANGE_TYPES)}'
                 )
-                errors.append(msg)
-                errors.append(gh_annotation(full_entry_path, 0, msg))
-
+                errors.extend((msg, gh_annotation(full_entry_path, 0, msg)))
     return errors
 
 
