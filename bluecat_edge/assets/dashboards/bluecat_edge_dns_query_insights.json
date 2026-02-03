@@ -659,7 +659,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@duration"
+                                                "metric": "@query_log.latency"
                                             },
                                             "storage": "hot"
                                         }
