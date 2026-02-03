@@ -41,7 +41,9 @@ Integrate Cisco Secure Client with Datadog to gain insights into AnyConnect logs
 
 
 <br>
-<b>Note</b>: To forward Cisco Secure Client logs, you must configure syslog on the Cisco firewall platform that you're using with Cisco Secure Client (FTD, Meraki, or ASA; see below for instructions for each platform).
+
+**Note**: To forward Cisco Secure Client logs, you must configure syslog on the Cisco firewall platform that you're using with Cisco Secure Client (FTD, Meraki, or ASA; see below for instructions for each platform).
+
 </br>
 
 #### Configure Syslog on Cisco FTD Firewall using FMC
