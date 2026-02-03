@@ -330,8 +330,6 @@ class MongoQueryMetrics(DBMAsyncJob):
     def _get_query_metrics_payloads(self, payload_wrapper: dict, rows: list) -> list[str]:
         """
         Generate batched payloads for query metrics.
-
-        Follows the PostgreSQL pattern of binary splitting for oversized payloads.
         """
         payloads = []
         max_size = 20000000  # 20MB max payload size
