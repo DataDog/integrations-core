@@ -82,11 +82,10 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
 
 ## Configure Datadog Forwarder
 
-Refer to the [Datadog Forwarder][2] documentation for detailed configuration guidance.
-- During the Datadog Forwarder configuration, set the **source** as follows:
-    - For **CloudFormation** deployments, set `DdSource` to `crowdstrike-fdr`.
-    - For **Terraform** deployments, set `dd_source` to `crowdstrike-fdr`.
-    - For **Manual** deployments, set the `DD_SOURCE` environment variable to `crowdstrike-fdr`.
+See the [Datadog Forwarder][2] documentation for detailed configuration instructions. When configuring the Datadog Forwarder, set the **source** as follows:
+- For CloudFormation deployments, set `DdSource` to `crowdstrike-fdr`.
+- For Terraform deployments, set `dd_source` to `crowdstrike-fdr`.
+- For manual deployments, set the `DD_SOURCE` environment variable to `crowdstrike-fdr`.
 
 ## Data Collected
 
