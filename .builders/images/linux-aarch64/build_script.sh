@@ -23,6 +23,7 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
         VERSION="${kafka_version}" \
         SHA256="3bd351601d8ebcbc99b9a1316cae1b83b00edbcf9411c34287edf1791c507600" \
         RELATIVE_PATH="librdkafka-{{version}}" \
+        PATCHES="0001-Avoid-includes-intended-to-bring-getentropy-in-when-.patch" \
         bash install-from-source.sh --enable-sasl --enable-curl
     always_build+=("confluent-kafka")
 
