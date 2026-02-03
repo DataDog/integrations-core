@@ -14,7 +14,6 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Genesys
   enabled: true
   filter:
     query: source:genesys
