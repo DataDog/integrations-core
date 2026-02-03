@@ -88,7 +88,9 @@ Format code with `ddev test -fs <INTEGRATION>`. For example, for the pgbouncer i
 
 ## Changelog Management
 
-Changelog entries are typically generated using the `ddev` command and are required for all Python changes in `datadog_checks` subdirectories. Changelog entries are not required for changes in tests or assets.
+Changelog entries are required for all Python changes in `datadog_checks` subdirectories. Changelog entries are not required for changes in tests or assets.
+
+**IMPORTANT:** Changelog files MUST be created using the `ddev release changelog new` command. Do not create or edit changelog files manually.
 
 Changelog files are named `<PR_NUMBER>.<TYPE>` and placed in the integration's `changelog.d/` directory.
 
