@@ -123,6 +123,11 @@ def test_command(
     active = set(active_envs)
     for env_name in env_names:
         env_active = env_name in active
+
+        # If recreating and environment is already active, stop it first to get a fresh environment
+        if recreate and env_active:
+            ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=False)
+
         ctx.invoke(
             start,
             intg_name=intg_name,
@@ -132,7 +137,7 @@ def test_command(
             agent_build=agent_build,
             extra_env_vars=extra_env_vars,
             hide_help=True,
-            ignore_state=env_active,
+            ignore_state=env_active and not recreate,
         )
 
         env_data = storage.get(integration.name, env_name)
