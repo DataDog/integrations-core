@@ -1,4 +1,5 @@
 name: vSphere
+fleet_configurable: true
 files:
 - name: vsphere.yaml
   options:
@@ -10,11 +11,13 @@ files:
         REST API options
         Those options are used when making vSphere REST API calls to retrieve vSphere tags
         when `collect_tags` instance config is enabled.
+      fleet_configurable: true
       options:
         - template: init_config/http
   - template: instances
     options:
       - name: host
+        fleet_configurable: true
         required: true
         display_priority: 1
         description: The host used to resolve the vCenter IP. It is either a FQDN or an IP.
@@ -22,6 +25,7 @@ files:
           type: string
           example: <HOSTNAME>
       - name: username
+        fleet_configurable: true
         required: true
         display_priority: 1
         description: |
@@ -31,6 +35,7 @@ files:
           type: string
           example: <USERNAME>
       - name: password
+        fleet_configurable: true
         required: true
         display_priority: 1
         description: |
@@ -41,6 +46,7 @@ files:
           type: string
           example: <PASSWORD>
       - name: use_legacy_check_version
+        fleet_configurable: true
         required: true
         display_priority: 1
         description: |
@@ -52,6 +58,7 @@ files:
       - name: infrastructure_mode
         description: |
           The infrastructure mode to use. Valid values are 'full' (default) and 'basic'.
+        fleet_configurable: true
         value:
           type: string
           example: full
@@ -63,6 +70,7 @@ files:
           Warning: Depending on the size of the vSphere environment, metric collection can be slow,
           very CPU intensive and put pressure on the vCenter Server
           If you want more control on the metrics to collect, see `metric_filters`
+        fleet_configurable: true
         value:
           type: integer
           example: 1
@@ -75,6 +83,7 @@ files:
           If you want both, we suggest creating an additional instance connecting to the same vCenter
           in this configuration file, but you can also set this field to 'both'. This is not recommended
           as the collection of historical metrics will negatively impact the collection of your realtime metrics.
+        fleet_configurable: true
         value:
           type: string
           example: realtime
@@ -86,6 +95,7 @@ files:
           By default this parameter will be 'true' if `collection_type: realtime` and 'false' if
           `collection_type: historical`
           If `collect_events_only: true`, this option has no effect and events will be collected.
+        fleet_configurable: true
         value:
           type: boolean
           display_default: null
@@ -95,22 +105,26 @@ files:
           Some events might contain invalid types.
           Instead of having the whole event batch fail. Using the fallback will process events one by one
           and skip any event with parsing issues.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
       - name: collect_events_only
         description: Collect events only. If enabled, historical and realtime metrics won't be collected.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
       - name: ssl_verify
         description: Set to false to disable SSL verification, when connecting to vCenter
+        fleet_configurable: true
         value:
           type: boolean
           example: true
       - name: ssl_cafile
         description: |
           Set to the absolute file path of CA certificates in PEM format
+        fleet_configurable: true
         value:
           type: string
           example: "<FILE_PATH>"
@@ -118,6 +132,7 @@ files:
         description: |
           Set to the absolute file path of a directory containing CA certificates
           in PEM format
+        fleet_configurable: true
         value:
           type: string
           example: "<DIRECTORY_PATH>"
@@ -125,6 +140,7 @@ files:
         description: |
           If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
           Disable those by setting `tls_ignore_warning` to true.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
@@ -157,6 +173,7 @@ files:
                   historical metrics
           Note3: If no filters are set for a resource type, all resources of that resource type are collected.
 
+        fleet_configurable: true
         value:
           example:
             - resource: vm
@@ -284,6 +301,7 @@ files:
               items:
                 type: string
       - name: event_resource_filters
+        fleet_configurable: true
         description: |
           For events that can be filtered by resources, specify which resources to collect these events for.
 
@@ -310,6 +328,7 @@ files:
           items:
             type: string
       - name: include_events
+        fleet_configurable: true
         description: |
           The events that should be collected by the vSphere integration.
 
@@ -343,6 +362,7 @@ files:
                 items:
                   type: string
       - name: collect_tags
+        fleet_configurable: true
         description: |
           If true, the vSphere Tags will be collected.
           The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
@@ -358,6 +378,7 @@ files:
           type: boolean
           example: false
       - name: tags_prefix
+        fleet_configurable: true
         description: |
           Custom tags attached to vSphere resources will be prefixed with this prefix when collected.
           Example use cases:
@@ -373,6 +394,7 @@ files:
           type: string
           example: ''
       - name: collect_attributes
+        fleet_configurable: true
         description: |
           If true, the vSphere attributes will be collected and submitted as Datadog tags.
           The final tag sent to Datadog is composed of 'attribute_prefix' + vSphere attribute category as key and
@@ -385,6 +407,7 @@ files:
           type: boolean
           example: false
       - name: collect_property_metrics
+        fleet_configurable: true
         description: |
           If true, the vSphere integration will collect additional metrics about the resource types
           you have configured to monitor. These are configuration properties such as disk information
@@ -397,6 +420,7 @@ files:
           type: boolean
           example: false
       - name: collect_vsan_data
+        fleet_configurable: true
         description: |
           If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
           Ensure that you have the vSAN Performance Service enabled:
@@ -406,6 +430,7 @@ files:
           type: boolean
           example: false
       - name: attributes_prefix
+        fleet_configurable: true
         description: |
           Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
           Example use cases:
@@ -422,6 +447,7 @@ files:
           type: string
           example: ''
       - name: use_guest_hostname
+        fleet_configurable: true
         description: |
           If true, the check will use the guest hostname for VMs instead of the VM name
           This requires the VM to have VMware tools installed in it. If the guest hostname is
@@ -434,6 +460,7 @@ files:
           type: boolean
           example: false
       - name: vm_hostname_suffix_tag
+        fleet_configurable: true
         description: |
           If specified, the integration will submit hostnames as <VM_NAME-SUFFIX> where suffix is the
           value of the given tag key
@@ -443,6 +470,7 @@ files:
           type: string
           example: <TAG_KEY>
       - name: threads_count
+        fleet_configurable: true
         description: |
           This integration is using threads internally when making queries against the vCenter API.
           Increasing this value will put more charge onto your vCenter server but may improve performances.
@@ -450,6 +478,7 @@ files:
           type: integer
           example: 4
       - name: excluded_host_tags
+        fleet_configurable: true
         description: |
           The vSphere integration collects tags for every ESXi host or VM in your environment.
           Those tags can be `vcenter_server`, vsphere_type`, `vsphere_host`, `vsphere_folder`, `vsphere_cluster`
@@ -468,6 +497,7 @@ files:
           example:
             - <HOST_TAG>
       - name: metrics_per_query
+        fleet_configurable: true
         description: |
           This value is used to determine the number of metrics the check will retrieve in the same API call.
           If too many API calls are made by the check, consider increasing this value
@@ -478,6 +508,7 @@ files:
           display_default: 500
           example: 50
       - name: max_historical_metrics
+        fleet_configurable: true
         description: |
           This value is used to determine the number of historical metrics the check will retrieve in the same API call.
           Historical metrics collection is limited by the "config.vpxd.stats.maxQueryMetrics" configuration option
@@ -488,6 +519,7 @@ files:
           type: integer
           example: 256
       - name: batch_tags_collector_size
+        fleet_configurable: true
         description: |
           To fetch tags from your resources, queries are batched. If tags cannot be collected
           it might be that the batch size is too big.
@@ -495,6 +527,7 @@ files:
           type: integer
           example: 200
       - name: batch_property_collector_size
+        fleet_configurable: true
         description: |
           This value is used to determine the maximum number of MORs returned by vCenter in the same API call,
           when exploring the infrastructure.
@@ -505,6 +538,7 @@ files:
           type: integer
           example: 500
       - name: refresh_infrastructure_cache_interval
+        fleet_configurable: true
         description: |
           Number of seconds between each discovering and caching of your vSphere environment
           Consider increasing this value if your environment is large, as caching can take some time to complete.
@@ -512,12 +546,14 @@ files:
           type: integer
           example: 300
       - name: refresh_metrics_metadata_cache_interval
+        fleet_configurable: true
         description: |
           Number of seconds between each refresh of the metrics metadata cache
         value:
           type: integer
           example: 1800
       - name: include_datastore_cluster_folder_tag
+        fleet_configurable: true
         description: |
           If a datastore is part of a datastore cluster, the tag "vsphere_datastore_cluster" indicating the datastore
           cluster name is sent along with datastore metrics.
@@ -528,6 +564,7 @@ files:
           type: boolean
           example: true
       - name: hostname_transform
+        fleet_configurable: true
         description: |
           Should be either 'upper' or 'lower' or 'default'
           If 'upper', the check will convert the vSphere hostname to uppercase.
@@ -538,6 +575,7 @@ files:
           type: string
           example: default
       - name: rest_api_options
+        fleet_configurable: true
         description: |
           REST API options
           The options are used when making vSphere REST API calls to retrieve vSphere tags
@@ -547,6 +585,7 @@ files:
       - name: connection_reset_timeout
         description: |
           The time interval in seconds at which the agent should re-authenticate using the provided credentials
+        fleet_configurable: true
         value:
           type: integer
           example: 900
