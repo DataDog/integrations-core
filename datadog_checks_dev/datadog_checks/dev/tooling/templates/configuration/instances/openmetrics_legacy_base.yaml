@@ -1,6 +1,7 @@
 - name: prometheus_url
   required: true
   description: The URL where your application metrics are exposed by Prometheus.
+  fleet_configurable: true
   value:
     type: string
 - name: namespace
@@ -14,6 +15,7 @@
   description: |
     List of metrics to be fetched from the prometheus endpoint, if there's a
     value it'll be renamed. This list should contain at least one metric.
+  fleet_configurable: true
   value:
     type: array
     example:
@@ -83,6 +85,7 @@
     type: object
 - name: send_histograms_buckets
   description: Set send_histograms_buckets to true to send the histograms bucket.
+  fleet_configurable: true
   value:
     example: true
     type: boolean
@@ -91,6 +94,7 @@
     Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
 
     Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -149,6 +153,7 @@
     If set to true, adds a bearer token authentication header.
     If set to 'tls_only', only adds a bearer token authentication header if the endpoint is secure https.
     Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
+  fleet_configurable: true
   value:
     example: false
     anyOf:

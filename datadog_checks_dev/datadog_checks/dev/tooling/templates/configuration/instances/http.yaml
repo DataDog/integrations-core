@@ -261,6 +261,7 @@
     If `tls_verify` is disabled, security warnings are logged by the check.
     Disable those by setting `tls_ignore_warning` to true.
 - name: tls_cert
+  fleet_configurable: true
   value:
     example: <CERT_PATH>
     type: string
@@ -269,6 +270,7 @@
     number of CA certificates needed to establish the certificate's authenticity for
     use when connecting to services. It may also contain an unencrypted private key to use.
 - name: tls_private_key
+  fleet_configurable: true
   value:
     example: <PRIVATE_KEY_PATH>
     type: string
@@ -276,6 +278,7 @@
     The unencrypted private key to use for `tls_cert` when connecting to services. This is
     required if `tls_cert` is set and it does not already contain a private key.
 - name: tls_ca_cert
+  fleet_configurable: true
   value:
     example: <CA_CERT_PATH>
     type: string
