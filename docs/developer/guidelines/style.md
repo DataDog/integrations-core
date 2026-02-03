@@ -70,9 +70,9 @@ The `mypy-args` defines the [mypy command line option][mypy-command-line] for th
 - `--check-untyped-defs`: Type-checks the interior of functions without type annotations.
 - `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations.
 
-The `datadog_checks/ tests/` arguments in `mypy-files` represent the list of files that `mypy` should type check. Feel free to edit them as desired, including removing `tests/` (if you'd prefer to not type-check the test suite), or targeting specific files (when doing partial type checking).
+The `datadog_checks/ tests/` arguments in `mypy-files` represent the list of files that `mypy` should type check. Feel free to edit them as desired, including removing `tests/` (if you'd prefer to not type-check the test suite), or targeting specific files (when doing partial type checking). If no files are listed, `mypy` will type-check the entire integration.
 
-Note that there is a default configuration in the [`mypy.ini`][mypy-ini] file.
+Note that the default configuration lives in the root `pyproject.toml` file of the `integrations-core` repository.
 
 ### Example
 
