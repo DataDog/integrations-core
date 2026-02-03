@@ -1,4 +1,5 @@
 name: RabbitMQ
+fleet_configurable: true
 files:
 - name: rabbitmq.yaml
   options:
@@ -19,9 +20,11 @@ files:
         description: |
           Settings for talking to the Prometheus plugin of RabbitMQ.
           Specify this section to trigger metric collection from the Prometheus plugin endpoints.
+        fleet_configurable: true
         enabled: true
         options:
           - name: url
+            fleet_configurable: true
             enabled: true
             required: true
             description: |
@@ -70,27 +73,32 @@ files:
         description: |
           For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
           url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
+        fleet_configurable: true
         value:
           type: string
           example: http://localhost:15672/api/
       - name: rabbitmq_user
         description: The username to use for the RabbitMQ Management Plugin
+        fleet_configurable: true
         value:
           type: string
           example: guest
       - name: rabbitmq_pass
         description: The password to use for the RabbitMQ Management Plugin
         secret: true
+        fleet_configurable: true
         value:
           type: string
           example: guest
       - name: tag_families
         description: To tag queue "families" based off of regex matching.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
       - name: collect_node_metrics
         description: Node metrics are collected by default. Setting this parameter to false skips node metric collection.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -124,6 +132,7 @@ files:
           Use the `queues` parameters to specify the queues you'd like to collect metrics on.
           The default maximum number of queues is 200. Exceeding this limit can cause 
           data loss. To increase the maximum, contact customer support.
+        fleet_configurable: true
         value:
           type: array
           items:
@@ -145,6 +154,7 @@ files:
             - myqueue
             - myvhost/myqueue
           If you have no vhost defined in this example, your pattern is compared to "/myqueue".
+        fleet_configurable: true
         value:
           type: array
           items:
@@ -156,6 +166,7 @@ files:
           Use the `exchanges` parameters to specify the exchanges you'd like to collect metrics on.
           The default maximum number of exchanges is 50. Exceeding this limit can cause 
           data loss. To increase the maximum, contact customer support.
+        fleet_configurable: true
         value:
           type: array
           items:
@@ -177,6 +188,7 @@ files:
             - myexchange
             - myvhost/myexchange
           If you have no vhost defined in this example, your pattern is compared to "/myexchange".
+        fleet_configurable: true
         value:
           type: array
           items:
@@ -190,6 +202,7 @@ files:
           API and the metric `rabbitmq.connections` is collected.
           If you prefer only certain vhosts to be monitored with service checks
           and the number of `connections` then you can list the vhosts you care about in this parameter.
+        fleet_configurable: true
         value:
           type: array
           items:
