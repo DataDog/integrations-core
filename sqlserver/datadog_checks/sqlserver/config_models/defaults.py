@@ -13,7 +13,7 @@ def shared_propagate_agent_tags():
 
 
 def instance_adoprovider():
-    return 'SQLOLEDB'
+    return 'MSOLEDBSQL'
 
 
 def instance_autodiscovery_db_service_check():

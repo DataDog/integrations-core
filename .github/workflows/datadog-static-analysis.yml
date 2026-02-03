@@ -4,6 +4,8 @@ name: Datadog Static Analysis
 
 jobs:
   static-analysis:
+    # Dependabot PRs don't have access to the required secrets
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     name: Datadog Static Analyzer
     steps:
