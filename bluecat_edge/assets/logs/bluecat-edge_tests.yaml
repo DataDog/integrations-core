@@ -4,49 +4,45 @@ tests:
   sample: |-
     {
       "site_details" : {
-        "name" : "Site Testing",
-        "id" : "a56e996d-cd54-45c5-8bed-5de015612e0b"
+        "name" : "House India",
+        "id" : "955ff30b-93a9-4f13-9de1-aeaa25190f48"
       },
       "vendor" : {
         "endpoint" : "dns-query-logs"
       },
       "query_log" : {
         "queryClassId" : 1,
-        "query" : "10.13.40.10.in-addr.arpa.",
-        "latency" : 12,
+        "query" : "amazon.in.",
+        "latency" : 0,
         "source" : "10.41.13.131",
-        "queryType" : "PTR",
-        "queryId" : 1,
-        "queryProtocol" : "UDP",
-        "queriedNamespaces" : [ {
-          "latency" : 11,
-          "name" : "Default",
-          "rCode" : "NXDOMAIN",
-          "responseData" : {
-            "questions" : [ {
-              "classId" : 1,
-              "recordType" : "PTR",
-              "domainName" : "10.13.40.10.in-addr.arpa."
-            } ],
-            "header" : {
-              "rCode" : "NXDOMAIN",
-              "id" : 1
-            },
-            "time" : 1768561943109
+        "matchedPolicies" : [ {
+          "criteria" : {
+            "queryDomain" : "amazon.in"
           },
-          "id" : "97e3ecb9-f066-11f0-96fb-06915da638a8",
-          "cycle" : 0
+          "name" : "Local Policy",
+          "id" : "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575",
+          "eventType" : "block"
         } ],
-        "actionTaken" : "query-response",
+        "queryType" : "A",
+        "queryId" : 8121,
+        "appliedPolicyId" : "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575",
+        "queryProtocol" : "UDP",
+        "actionTaken" : "block",
         "response" : "NXDOMAIN",
         "identity" : {
           "identityId" : "identity_id_example",
           "userId" : "example@test.bluecat.com"
         },
-        "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b90",
-        "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f49",
-        "time" : 1770033982000,
-        "id" : "17685619430971F61B04D4186D474A54EBAF987E153D9"
+        "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b99",
+        "authority" : [ {
+          "recordType" : "SOA",
+          "domainName" : ".",
+          "parsed" : true,
+          "rData" : "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
+        } ],
+        "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f48",
+        "time" : 1770186142000,
+        "id" : "1768799730903712CBD65A6B0963C276D07800E643DBG"
       }
     }
   service: "bluecatedge"
@@ -55,45 +51,42 @@ tests:
       dns:
         flags:
           rcode: "NXDOMAIN"
-        id: 1
+        id: 8121
         question:
-          name: "10.13.40.10.in-addr.arpa."
-          type: "PTR"
+          name: "amazon.in."
+          type: "A"
       network:
         client:
           geoip: {}
           ip: "10.41.13.131"
       query_log:
-        actionTaken: "query-response"
-        drsId: "87a16e58-11d3-4d45-a574-af92520d3b90"
-        id: "17685619430971F61B04D4186D474A54EBAF987E153D9"
+        actionTaken: "block"
+        appliedPolicyId: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
+        authority:
+         -
+          recordType: "SOA"
+          domainName: "."
+          parsed: true
+          rData: "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
+        drsId: "87a16e58-11d3-4d45-a574-af92520d3b99"
+        id: "1768799730903712CBD65A6B0963C276D07800E643DBG"
         identity:
           identityId: "identity_id_example"
-        latency : 12
-        queriedNamespaces:
+        latency: 0
+        matchedPolicies:
          -
-          latency: 11
-          name: "Default"
-          rCode: "NXDOMAIN"
-          responseData:
-            questions:
-             -
-              classId: 1
-              recordType: "PTR"
-              domainName: "10.13.40.10.in-addr.arpa."
-            header:
-              rCode: "NXDOMAIN"
-              id: 1
-            time: 1768561943109
-          id: "97e3ecb9-f066-11f0-96fb-06915da638a8"
-          cycle: 0
+          criteria:
+            queryDomain: "amazon.in"
+          name: "Local Policy"
+          id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
+          eventType: "block"
         queryClassId: 1
         queryProtocol: "UDP"
-        siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f49"
-        time: 1770033982000
+        siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
+        time: 1770186142000
       site_details:
-        id: "a56e996d-cd54-45c5-8bed-5de015612e0b"
-        name: "Site Testing"
+        id: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
+        name: "House India"
       usr:
         id: "example@test.bluecat.com"
       vendor:
@@ -101,52 +94,48 @@ tests:
     message: |-
       {
         "site_details" : {
-          "name" : "Site Testing",
-          "id" : "a56e996d-cd54-45c5-8bed-5de015612e0b"
+          "name" : "House India",
+          "id" : "955ff30b-93a9-4f13-9de1-aeaa25190f48"
         },
         "vendor" : {
           "endpoint" : "dns-query-logs"
         },
         "query_log" : {
           "queryClassId" : 1,
-          "query" : "10.13.40.10.in-addr.arpa.",
-          "latency" : 12,
+          "query" : "amazon.in.",
+          "latency" : 0,
           "source" : "10.41.13.131",
-          "queryType" : "PTR",
-          "queryId" : 1,
-          "queryProtocol" : "UDP",
-          "queriedNamespaces" : [ {
-            "latency" : 11,
-            "name" : "Default",
-            "rCode" : "NXDOMAIN",
-            "responseData" : {
-              "questions" : [ {
-                "classId" : 1,
-                "recordType" : "PTR",
-                "domainName" : "10.13.40.10.in-addr.arpa."
-              } ],
-              "header" : {
-                "rCode" : "NXDOMAIN",
-                "id" : 1
-              },
-              "time" : 1768561943109
+          "matchedPolicies" : [ {
+            "criteria" : {
+              "queryDomain" : "amazon.in"
             },
-            "id" : "97e3ecb9-f066-11f0-96fb-06915da638a8",
-            "cycle" : 0
+            "name" : "Local Policy",
+            "id" : "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575",
+            "eventType" : "block"
           } ],
-          "actionTaken" : "query-response",
+          "queryType" : "A",
+          "queryId" : 8121,
+          "appliedPolicyId" : "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575",
+          "queryProtocol" : "UDP",
+          "actionTaken" : "block",
           "response" : "NXDOMAIN",
           "identity" : {
             "identityId" : "identity_id_example",
             "userId" : "example@test.bluecat.com"
           },
-          "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b90",
-          "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f49",
-          "time" : 1770033982000,
-          "id" : "17685619430971F61B04D4186D474A54EBAF987E153D9"
+          "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b99",
+          "authority" : [ {
+            "recordType" : "SOA",
+            "domainName" : ".",
+            "parsed" : true,
+            "rData" : "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
+          } ],
+          "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f48",
+          "time" : 1770186142000,
+          "id" : "1768799730903712CBD65A6B0963C276D07800E643DBG"
         }
       }
     service: "bluecatedge"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1770033982000
+    timestamp: 1770186142000
