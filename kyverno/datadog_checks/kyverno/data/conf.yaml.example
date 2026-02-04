@@ -46,7 +46,7 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## Endpoint exposing the Kyver Controller's Prometheus metrics. For more information refer to:
+    ## Endpoint exposing the Kyverno Controller's Prometheus metrics. For more information refer to:
     ## https://kyverno.io/docs/monitoring/
     #
   - openmetrics_endpoint: http://localhost:8000/metrics
