@@ -1,0 +1,10 @@
+name: Control-M
+files:
+- name: control_m.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
