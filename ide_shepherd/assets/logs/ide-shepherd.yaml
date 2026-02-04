@@ -191,9 +191,9 @@ pipeline:
       source: ocsf.activity_id
       target: activity_name
       lookupTable: |-
-        1,installed
-        2,updated
-        3,uninstalled
+        1,Create
+        2,Update
+        3,Close
       type: lookup-processor
     - type: attribute-remapper
       name: Map `activity_name` to `ide_shepherd.activity_name`

@@ -47,10 +47,10 @@ tests:
     }
   result:
     custom:
-      activity_name: "updated"
+      activity_name: "Update"
       class_name: "Application Security Posture Finding"
       ide_shepherd:
-        activity_name: "updated"
+        activity_name: "Update"
         class_name: "Application Security Posture Finding"
       network:
         ip:
@@ -182,10 +182,10 @@ tests:
     }
   result:
     custom:
-      activity_name: "installed"
+      activity_name: "Create"
       class_name: "Detection Finding"
       ide_shepherd:
-        activity_name: "installed"
+        activity_name: "Create"
         class_name: "Detection Finding"
       network:
         ip:
