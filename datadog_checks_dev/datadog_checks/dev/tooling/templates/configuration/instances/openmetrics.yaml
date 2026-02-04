@@ -376,6 +376,7 @@
   description: |
     Whether or not to cache data from metrics that are defined by regular expressions rather
     than the full metric name.
+  fleet_configurable: true
   value:
     example: true
     type: boolean

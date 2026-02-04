@@ -7,6 +7,7 @@
 - name: namespace
   hidden: true
   description: The namespace to be prepended to all metrics.
+  fleet_configurable: true
   value:
     type: string
     example: service
