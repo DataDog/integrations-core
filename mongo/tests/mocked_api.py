@@ -118,6 +118,10 @@ class MockedDB(object):
         elif pipeline[0] == {"$shardedDataDistribution": {}}:
             with open(os.path.join(HERE, "fixtures", "$shardedDataDistribution"), 'r') as f:
                 return iter(json.load(f, object_hook=json_util.object_hook))
+        elif '$queryStats' in pipeline[0]:
+            # mock the $queryStats aggregation used for query metrics (MongoDB 8.0+)
+            with open(os.path.join(HERE, "fixtures", f"$queryStats-{self.deployment}"), 'r') as f:
+                return iter(json.load(f, object_hook=json_util.object_hook))
         return []
 
 
