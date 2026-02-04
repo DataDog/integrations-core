@@ -2,7 +2,15 @@
 
 <!-- towncrier release notes start -->
 
-## 23.3.3 / 2025-12-16
+## 23.3.4 / 2026-01-21
+
+***Fixed***:
+
+* Correct postgres Unix socket path example in conf.yaml.example ([#22200](https://github.com/DataDog/integrations-core/pull/22200))
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+  Optimize StatementMetrics cache to only store fields we need to compute statement metrics. ([#22358](https://github.com/DataDog/integrations-core/pull/22358)) ([#22376](https://github.com/DataDog/integrations-core/pull/22376))
+
+## 23.3.3 / 2025-12-16 / Agent 7.74.0
 
 ***Fixed***:
 

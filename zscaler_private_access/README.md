@@ -26,6 +26,10 @@ Datadog uses its built-in log pipelines to parse and enrich these logs, facilita
 
 The Zscaler Private Access check is included in the [Datadog Agent][1] package. No additional installation is needed on your server. 
 
+### Network placement 
+
+Place the Datadog Agent in the same subnet as the Zscaler App Connector so that log traffic stays on a trusted network segment.
+
 ### Configuration
 
 #### Log collection

@@ -7,7 +7,7 @@ Datadog monitors every aspect of your Istio environment, so you can:
 - Break down the performance of your service mesh with [request, bandwidth, and resource consumption metrics](#metrics).
 - Map network communication between containers, pods, and services over the mesh with [Cloud Network Monitoring][1].
 - Drill into distributed traces for applications transacting over the mesh with [APM][2].
-- Use [Datadog App and API Protection][30] to secure your Istio service mesh with real-time threat detection and blocking at the edge of your infrastructure.
+- Use [Datadog App and API Protection][30] to secure your Istio service mesh with real-time threat detection and blocking at the edge of your infrastructure. See this [Datadog blog post][32] to learn more about securing your APIs via Istio.
 
 To learn more about monitoring your Istio environment with Datadog, [see the Monitor blog post][3].
 
@@ -290,3 +290,4 @@ Additional helpful documentation, links, and articles:
 [27]: https://istio.io/latest/docs/tasks/observability/logs/access-log/
 [30]: https://docs.datadoghq.com/security/application_security/?source=istio-tile-overview
 [31]: https://docs.datadoghq.com/security/application_security/setup/istio/?source=istio-tile-setup
+[32]: https://www.datadoghq.com/blog/app-api-protection-envoy-istio-nginx-haproxy/

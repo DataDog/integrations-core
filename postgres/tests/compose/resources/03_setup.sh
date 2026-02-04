@@ -45,6 +45,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     plan JSON;
 
     BEGIN
+      SET TRANSACTION READ ONLY;
+
       OPEN curs FOR EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON) ', l_query);
       FETCH curs INTO plan;
       CLOSE curs;
