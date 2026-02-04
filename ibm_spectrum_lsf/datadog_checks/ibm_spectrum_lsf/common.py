@@ -88,12 +88,12 @@ def transform_time_left(val: str) -> int:
         return int(val) * 60
 
 
+@dataclass
 class RecentlyCompletedJobIDs:
-    def __init__(self) -> None:
-        self.completed_job_ids: list[str] = []
+        _completed_job_ids: list[str] = field(default_factory=list)
 
-    def set_job_ids(self, job_ids: list[str]) -> None:
-        self.completed_job_ids = job_ids
+    def set(self, job_ids: list[str]) -> None:
+        self._completed_job_ids = job_ids
 
-    def get_job_ids(self) -> list[str]:
-        return self.completed_job_ids.copy()
+    def get(self) -> list[str]:
+        return self._completed_job_ids.copy()
