@@ -164,6 +164,25 @@ def test_validate_license_headers_skips_blacklisted_folders(tmp_path, relpath):
     assert validate_license_headers(check_path, ignore=[pathlib.Path("tests/docker")]) == []
 
 
+def test_validate_license_headers_skips_blacklisted_files(tmp_path):
+    # Test to ensure errors are not thrown for files that are blacklisted
+    check_path = tmp_path / "check"
+    nested_path = check_path / "datadog_checks" / "check"
+    nested_path.mkdir(parents=True)
+
+    _write_file_without_license(nested_path / "ignored_file.py")
+    _write_file_without_license(nested_path / "checked_file.py")
+
+    errors = validate_license_headers(
+        check_path,
+        ignore=[pathlib.Path("datadog_checks/check/ignored_file.py")],
+        get_previous=_make_get_previous(),
+    )
+
+    assert len(errors) == 1
+    assert errors[0].path == "datadog_checks/check/checked_file.py"
+
+
 def test_validate_license_headers_returns_error_on_new_file_with_header_not_matching_template(tmp_path):
     check_path = tmp_path / "check"
     check_path.mkdir()

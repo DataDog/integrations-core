@@ -19,10 +19,7 @@
             "include_tags": true,
             "new_group_delay": 60,
             "notify_no_data": false,
-            "avalanche_window": 10,
-            "silenced": {
-                "*": null
-            }
+            "avalanche_window": 10
         },
         "priority": null,
         "restricted_roles": null

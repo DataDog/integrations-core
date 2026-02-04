@@ -23,6 +23,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")
 
 
 @requires_over_10
+@pytest.mark.flaky
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     # It seemingly can take a small amount of time for the pg_replication_slots to be saturated

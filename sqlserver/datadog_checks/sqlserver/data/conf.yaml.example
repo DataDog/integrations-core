@@ -328,14 +328,13 @@ instances:
     #
     # db_fragmentation_object_names: []
 
-    ## @param adoprovider - string - optional - default: SQLOLEDB
-    ## Choose the ADO provider.  Note that the (default) provider
-    ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
+    ## @param adoprovider - string - optional - default: MSOLEDBSQL
+    ## Choose the ADO provider.  Note that SQLOLEDB is deprecated.  To use the MSOLEDBSQL
     ## provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
     ## You will also need to download the new provider from
     ## https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
     #
-    # adoprovider: SQLOLEDB
+    # adoprovider: MSOLEDBSQL
 
     ## @param connector - string - optional - default: adodbapi
     ## Change the connection method from adodbapi (the default) to
@@ -802,9 +801,20 @@ instances:
         #
         # collection_interval: 600
 
+        ## @param max_tables - integer - optional - default: 300
+        ## Set the maximum number of tables to collect. Defaults to 300.
+        #
+        # max_tables: 300
+
         ## @param max_execution_time - number - optional - default: 10
         ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
         ## Capped by `collect_schemas.collection_interval`
+        ##
+        ##
+        ## <<< DEPRECATED >>>
+        ##
+        ## Agent version: 7.74.0
+        ## Migration: This option no longer has any effect.
         #
         # max_execution_time: 10
 

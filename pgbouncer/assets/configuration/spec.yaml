@@ -21,24 +21,30 @@ files:
         description: If `database_url` is not used, set up the host to connect to with the `host` parameter.
         value:
           type: string
+        fleet_configurable: true
       - name: port
         description: If `database_url` is not used, set up the port to connect to with the `port` parameter.
         value:
           type: integer
+        fleet_configurable: true
       - name: username
         description: If `database_url` is not used, set up the user name to use with the `username` parameter.
         value:
           type: string
+        fleet_configurable: true
       - name: password
         description: |
           If `database_url` is not used, set up the password to use with the `password` parameter.
+        secret: true
         value:
           type: string
+        fleet_configurable: true
       - name: use_cached
         description: Cache and re-use PostgreSQL connection or create a new one at each check run.
         value:
           example: true
           type: boolean
+        fleet_configurable: true
       - name: collect_per_client_metrics
         description: |
           Whether to collect detailed per-client metrics.
@@ -47,6 +53,7 @@ files:
         value:
           example: false
           type: boolean
+        fleet_configurable: true
       - name: collect_per_server_metrics
         description: |
           Whether to collect detailed per-server metrics.
@@ -55,6 +62,7 @@ files:
         value:
           example: false
           type: boolean
+        fleet_configurable: true
       - template: instances/default
   - template: logs
     example:

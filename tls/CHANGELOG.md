@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 5.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+***Fixed***:
+
+* Fix AttributeError in fetch_intermediate_certs ([#21851](https://github.com/DataDog/integrations-core/pull/21851))
+
 ## 5.2.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:

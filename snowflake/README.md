@@ -1,5 +1,9 @@
 # Agent Check: Snowflake
 
+**Deprecation Notice:** The Agent based Snowflake integration is officially deprecated and no longer supported. Please 
+  utilize the updated [Snowflake Integration](https://docs.datadoghq.com/integrations/snowflake-web/). 
+
+  
 ## Overview
 
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 

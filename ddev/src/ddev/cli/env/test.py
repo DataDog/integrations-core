@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import click
@@ -139,6 +140,9 @@ def test_command(
             env_vars[AppEnvVars.REPO] = app.repo.name
 
             with EnvVars(env_vars):
+                # Pass through DDEV_TEST_ENABLE_TRACING since ctx.invoke bypasses envvar parsing
+                ddtrace_env = os.environ.get(AppEnvVars.TEST_ENABLE_TRACING, '')
+                ddtrace = ddtrace_env.lower() in ('1', 'true', 'yes')
                 ctx.invoke(
                     test,
                     target_spec=f'{intg_name}:{env_name}',
@@ -146,6 +150,7 @@ def test_command(
                     junit=junit,
                     hide_header=True,
                     e2e=True,
+                    ddtrace=ddtrace,
                 )
         finally:
             ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=env_active)

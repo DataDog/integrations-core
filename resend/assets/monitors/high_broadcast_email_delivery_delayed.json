@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "created_at": "2025-09-24",
+  "last_updated_at": "2025-09-24",
+  "title": "High broadcast email delivery delayed rate for domain",
+  "description": "Alert when a high number of broadcast email experience delayed delivery.",
+  "definition": {
+	"id": 236192075,
+	"name": "[Resend] High broadcast email delivery delayed rate for domain",
+	"type": "log alert",
+	"query": "logs(\"source:resend service:events @type:email.delivery_delayed @data.broadcast_id:*\").index(\"*\").rollup(\"count\").by(\"@resend.domain\").last(\"1h\") > 50",
+	"message": "The number of recent delayed delivery from broadcast email for {{[resend.domain].name}} is {{#is_alert}}high{{/is_alert}}{{#is_alert_recovery}}back below threshold{{/is_alert_recovery}}. @example@example.com",
+	"tags": [
+		"source:resend"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 50
+		},
+		"enable_logs_sample": true,
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": true,
+		"new_group_delay": 60
+	},
+	"priority": null
+  },
+  "tags": [
+    "integration:resend"
+  ]
+}

@@ -9,6 +9,7 @@ class AppEnvVars:
     # https://no-color.org
     NO_COLOR = 'NO_COLOR'
     FORCE_COLOR = 'FORCE_COLOR'
+    TEST_ENABLE_TRACING = 'DDEV_TEST_ENABLE_TRACING'
 
 
 class ConfigEnvVars:

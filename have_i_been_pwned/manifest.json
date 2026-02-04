@@ -3,7 +3,7 @@
   "app_uuid": "9afc329a-e4bc-44c0-97a6-ccd7151feca2",
   "app_id": "have-i-been-pwned",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

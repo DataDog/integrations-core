@@ -36,6 +36,7 @@ files:
         description: |
           The password of the read-only credentials to connect to vCenter.
           see https://app.datadoghq.com/account/settings#integrations/vsphere
+        secret: true
         value:
           type: string
           example: <PASSWORD>

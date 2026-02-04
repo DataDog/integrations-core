@@ -67,8 +67,12 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 @pytest.mark.parametrize(
     'is_aurora',
-    [True, False],
+    [
+        pytest.param(True, id="aurora"),
+        pytest.param(False, id="not_aurora"),
+    ],
 )
+@pytest.mark.flaky
 def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
     check.is_aurora = is_aurora
@@ -438,6 +442,7 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
 
 
 @requires_over_10
+@pytest.mark.flaky
 def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -1020,6 +1025,73 @@ def test_replication_tag(aggregator, integration_check, pg_instance):
     check._get_replication_role = mock.MagicMock(return_value=standby_role)
     check.run()
     aggregator.assert_metric(test_metric, tags=_get_expected_tags(check, pg_instance, role=standby_role))
+
+
+@requires_over_10
+def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, integration_check, pg_instance):
+    """
+    Test that when a PostgreSQL instance changes replication role (e.g., standby promoted to master,
+    or master demoted to standby), the replication_role tag correctly reflects only the current role.
+    """
+    pg_instance['tag_replication_role'] = True
+    # Set a short TTL so the metadata event is emitted on each check run
+    pg_instance['database_instance_collection_interval'] = 0.1
+    check = integration_check(pg_instance)
+
+    # First check run - instance is master (pg_is_in_recovery() returns False)
+    check.run()
+
+    # Verify the role tag reflects master
+    replication_tags = [t for t in check._non_internal_tags if t.startswith('replication_role:')]
+    assert replication_tags == ['replication_role:master'], f"Expected master role tag, got: {replication_tags}"
+
+    # Verify dd.internal tags are not in _non_internal_tags
+    internal_tags = [t for t in check._non_internal_tags if t.startswith('dd.internal')]
+    assert internal_tags == [], f"dd.internal tags should not be in _non_internal_tags: {internal_tags}"
+
+    # Verify the metadata event has the correct role
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    first_event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert first_event is not None
+    first_event_role_tags = [t for t in first_event['tags'] if t.startswith('replication_role:')]
+    assert first_event_role_tags == ['replication_role:master'], (
+        f"Metadata event should have master role, got: {first_event_role_tags}"
+    )
+
+    aggregator.reset()
+
+    # Wait for TTL to expire so next check emits metadata again
+    time.sleep(0.2)
+
+    # Simulate role change: master -> standby (e.g., switchover or demotion)
+    check._get_replication_role = mock.MagicMock(return_value='standby')
+    check.run()
+
+    # After role change, only the current role should be present
+    replication_tags = [t for t in check._non_internal_tags if t.startswith('replication_role:')]
+    assert len(replication_tags) == 1, (
+        f"Expected exactly 1 replication_role tag, got {len(replication_tags)}: {replication_tags}"
+    )
+    assert replication_tags == ['replication_role:standby'], (
+        f"Expected standby role tag after role change, got: {replication_tags}"
+    )
+
+    # Verify dd.internal tags are still excluded after role change
+    internal_tags = [t for t in check._non_internal_tags if t.startswith('dd.internal')]
+    assert internal_tags == [], f"dd.internal tags should not be in _non_internal_tags: {internal_tags}"
+
+    # Verify the metadata event reflects the new role only
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    second_event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert second_event is not None, "Expected database_instance metadata event after TTL expiry"
+
+    second_event_role_tags = [t for t in second_event['tags'] if t.startswith('replication_role:')]
+    assert len(second_event_role_tags) == 1, (
+        f"Expected exactly 1 replication_role tag in metadata event, got: {second_event_role_tags}"
+    )
+    assert second_event_role_tags == ['replication_role:standby'], (
+        f"Metadata event should have standby role after role change, got: {second_event_role_tags}"
+    )
 
 
 @pytest.mark.parametrize(

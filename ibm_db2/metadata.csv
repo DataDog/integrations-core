@@ -14,7 +14,7 @@ ibm_db2.bufferpool.group.column.hit_percent,gauge,,percent,,The percentage of ti
 ibm_db2.bufferpool.group.data.hit_percent,gauge,,percent,,The percentage of time that the group database manager did not need to load a page from disk to service a data page request.,1,ibm_db2,,
 ibm_db2.bufferpool.group.hit_percent,gauge,,percent,,The percentage of time that the group database manager did not need to load a page from disk to service a page request.,1,ibm_db2,,
 ibm_db2.bufferpool.group.index.hit_percent,gauge,,percent,,The percentage of time that the group database manager did not need to load a page from disk to service an index page request.,1,ibm_db2,,
-ibm_db2.bufferpool.group.xda.hit_percent,gauge,,percent,,The percentage of time that the group database manager did not need to load a page from disk to service an index page request.,1,ibm_db2,,
+ibm_db2.bufferpool.group.xda.hit_percent,gauge,,percent,,The percentage of XML storage object (XDA) pages that are found in memory (buffer pool) rather than requiring a physical read from disk.,1,ibm_db2,,
 ibm_db2.bufferpool.hit_percent,gauge,,percent,,The percentage of time that the database manager did not need to load a page from disk to service a page request.,1,ibm_db2,,
 ibm_db2.bufferpool.index.hit_percent,gauge,,percent,,The percentage of time that the database manager did not need to load a page from disk to service an index page request.,1,ibm_db2,,
 ibm_db2.bufferpool.index.reads.logical,count,,get,,"The number of index pages read from the logical table space containers for temporary, regular and large table spaces.",0,ibm_db2,,

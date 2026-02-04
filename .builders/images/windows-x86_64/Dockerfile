@@ -85,11 +85,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.13.7"
+ENV PYTHON_VERSION="3.13.11"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash 'b12e2e82461ac8e51fc43289050bc8eb937a32d84ce4d242e2c88258c37cf2bb'; `
+      -Hash '30d4654b3eac7ddfdf2682db4c8dcb490f3055f4f33c6906d6b828f680152101'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -127,11 +127,11 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV OPENSSL_VERSION="3.5.4"
+ENV OPENSSL_VERSION="3.6.1"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash '967311f84955316969bdb1d8d4b983718ef42338639c621ec4c34fddef355e99'; `
+      -Hash 'b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
@@ -154,7 +154,7 @@ RUN Get-RemoteFile `
     RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.16.0"
+ENV CURL_VERSION="8.18.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

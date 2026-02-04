@@ -17,8 +17,8 @@ files:
     options:
     - name: host
       description: |
-        The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
-        e.g. `/var/run/postgresql/.s.PGSQL.5432`.
+        The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
+        e.g. `/var/run/postgresql`.
       value:
         type: string
         display_default: "localhost"
@@ -34,6 +34,7 @@ files:
         display_default: "datadog"
     - name: password
       description: The password associated with the Datadog user.
+      secret: true
       value:
         type: string
     - name: dbname
@@ -363,16 +364,20 @@ files:
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
-        NOTE:
-        For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
-        Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
+
+        When unset, this defaults to `true` for Postgres 10+ (uses `pg_ls_waldir` via SQL) and `false` for
+        Postgres 9.6 and below (requires local filesystem access to the WAL directory).
+
+        Set to `true` explicitly for Postgres 9.6 and below only if the Agent runs on the same host as the
+        database and has read access to the WAL directory. You must also configure `data_directory`.
       value:
         type: boolean
         example: true
+        display_default: null
     - name: data_directory
       description: |
-        The data directory of your postgres installation
-        Required when collecting WAL metrics on Postgres 9.6.
+        The data directory of your postgres installation.
+        Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
       value:
         type: string
         example: /usr/local/pgsql/data
@@ -466,7 +471,13 @@ files:
               - "cloudsqladmin"
               - "rdsadmin"
             display_default:
+              - "template0"
+              - "template1"
+              - "rdsadmin"
+              - "azure_maintenance"
               - "cloudsqladmin"
+              - "alloydbadmin"
+              - "alloydbmetadata"
         - name: refresh
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
           value:
@@ -561,7 +572,7 @@ files:
             Set the max number of full statement text samples to collect per hour per query.
           value:
             type: number
-            default: 10000
+            default: 1
         - name: incremental_query_metrics
           hidden: true
           description: |
@@ -754,6 +765,12 @@ files:
             type: number
             example: 300
             display_default: 300
+        - name: max_query_duration
+          description: |
+            Maximum duration of the query to collect schema information in seconds.
+          value:
+            type: number
+            display_default: 60
         - name: max_columns
           description: |
             Maximum amount of columns the Agent collects per table.
@@ -780,7 +797,7 @@ files:
               - "mydb"
         - name: exclude_databases
           description: |
-            A list of regex patterns to exclude databases. 
+            A list of regex patterns to exclude databases.
             Any database whose name matches any one of these patterns will be excluded.
             If empty, all databases matching other filters are included.
           value:
@@ -789,6 +806,14 @@ files:
               type: string
             example:
               - "privatedb.*"
+            default:
+              - "template0"
+              - "template1"
+              - "rdsadmin"
+              - "azure_maintenance"
+              - "cloudsqladmin"
+              - "alloydbadmin"
+              - "alloydbmetadata"
         - name: include_schemas
           description: |
             A list of regex patterns to include schemas. 

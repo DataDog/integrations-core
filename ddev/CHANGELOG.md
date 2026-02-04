@@ -2,6 +2,40 @@
 
 <!-- towncrier release notes start -->
 
+## 14.2.0 / 2026-01-28
+
+***Added***:
+
+* Add option to periodically check for new version of ddev from PyPi ([#20658](https://github.com/DataDog/integrations-core/pull/20658))
+* Added feature to track new integrations released ([#22057](https://github.com/DataDog/integrations-core/pull/22057))
+* Automatically check for agent branch existence before updating build_agent.yaml during release branch creation and tagging. ([#22241](https://github.com/DataDog/integrations-core/pull/22241))
+* Add watt-hour as valid metric units ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add DynamicD tool for generating realistic fake telemetry data using AI ([#22328](https://github.com/DataDog/integrations-core/pull/22328))
+
+***Fixed***:
+
+* Improve logging and UX for Docker Agent lifecycle commands (start-up, local packages, post-install, stop) in E2E testing ([#22042](https://github.com/DataDog/integrations-core/pull/22042))
+* Ensure ddtrace is used with pytest for every package to emit CI visibility tracking by updating the hatch plugin and `ddev env test` command. ([#22355](https://github.com/DataDog/integrations-core/pull/22355))
+* Handle missing merge base commits in `ddev size status` by falling back to local lockfiles. ([#22357](https://github.com/DataDog/integrations-core/pull/22357))
+* Add pagination when fetching previous sizes in `ddev size status` ([#22361](https://github.com/DataDog/integrations-core/pull/22361))
+* Update ddev validate labeler to work with labeler v5+ ([#22436](https://github.com/DataDog/integrations-core/pull/22436))
+
+## 14.1.0 / 2025-12-18
+
+***Added***:
+
+* Bump datatog_checks_dev to get its latest features. ([#22171](https://github.com/DataDog/integrations-core/pull/22171))
+
+***Fixed***:
+
+* Ensure correct commit attribution when sending size metrics by requiring an explicit commit in the ddev size status command. ([#21993](https://github.com/DataDog/integrations-core/pull/21993))
+
+## 14.0.2 / 2025-11-21
+
+***Fixed***:
+
+* Bump `datadog-checks-dev` to 35.3.1. ([#21944](https://github.com/DataDog/integrations-core/pull/21944))
+
 ## 14.0.1 / 2025-11-19
 
 ***Fixed***:
