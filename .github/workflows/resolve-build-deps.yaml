@@ -260,7 +260,6 @@ jobs:
 
   publish:
     name: Publish artifacts and update lockfiles via PR
-    if: needs.check-should-run.outputs.should_run_build == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.'))))
     needs:
     - build
     - build-macos
