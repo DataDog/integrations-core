@@ -10,7 +10,7 @@
   "definition": {
     "name": "[n8n] Stale Queue Consumer (No Dequeue Activity)",
     "type": "query alert",
-    "query": "max(last_15m):derivative(sum:n8n.queue.job.dequeued.count{*} by {host}.as_count()) <= 0",
+    "query": "sum(last_15m):derivative(sum:n8n.queue.job.dequeued.count{*} by {host}.as_count()) <= 0",
     "message": "{{#is_alert}}No dequeue activity on {{host.name}}. Stale consumers or stuck worker deployment detected.{{/is_alert}}{{#is_warning}}Dequeue activity on {{host.name}} unusually low.{{/is_warning}}{{#is_recovery}}Dequeue activity resumed on {{host.name}}.{{/is_recovery}}",
     "tags": [
       "integration:n8n",
