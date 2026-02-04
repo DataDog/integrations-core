@@ -6,9 +6,9 @@ While Supabase supports a self-hosted version, this integration only supports Su
 
 With this integration, you can, per Supabase project:
 - Collect essential Postgres Database metrics and monitor critical behavior on primary and replica instances.
-- Collect Postgres server OS metrics and monitor CPU/Filesystem/Memory/Network load.
+- Collect Postgres server OS metrics and monitor CPU, filesystem, memory, and network load.
 - Collect Postgres database logs which can include slow statements, errors, and audit statements.
-- Collect Supabase application layer logs from edge functions and Auth/REST/Storage/Realtime APIs.
+- Collect Supabase application layer logs from edge functions and Auth, REST, Storage, and Realtime APIs.
 - Collect business logic log messages from your edge function applications.
 
 ## Setup
@@ -16,7 +16,7 @@ With this integration, you can, per Supabase project:
 The Supabase Cloud integration requires the `service_role` API key to retrieve metrics from the hosted project's
 [metrics endpoint][4]. If you want to collect logs, you also need a [Personal Access Token][7] to access the Supabase [Management API][6]. 
 
-If your Postgres log volume exceeds 200 messages/sec, Datadog recommends using the
+If your Postgres log volume exceeds 200 messages per second, Datadog recommends using the
 [Datadog Log Drain][3] instead of this integration's log collection feature.
 
 **Important**: If you have a Datadog Log Drain configured for your Supabase project, disable it before enabling log collection via this integration to avoid duplicate logs.
@@ -25,7 +25,7 @@ If your Postgres log volume exceeds 200 messages/sec, Datadog recommends using t
 
 1. Log in to [Supabase][2] as an administrator.
 2. Navigate to **Project Settings** > **API Keys**.
-3. On the **Legacy API Keys** tab, retrieve the service_role API key.
+3. On the **Legacy API Keys** tab, retrieve the `service_role` API key.
 
 ### Generate a Personal Access Token
 A Personal Access Token (PAT) is required to access the Supabase Management API and collect logs.
