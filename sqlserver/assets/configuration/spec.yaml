@@ -78,7 +78,7 @@ files:
       value:
         type: boolean
         example: false
-      default: false
+        default: false
     - name: database_identifier
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -108,7 +108,6 @@ files:
             - instance_name: The resolved instance name of the instance.
             - full_server_name: The resolved full server name of the instance i.e. the value returned by `@@SERVERNAME`.
             In addition, you can use any key from the `tags` section of the configuration.
-          default: "$resolved_hostname"
     - name: database_autodiscovery
       description: |
         Auto-discover and monitor databases. Supported for the metrics check.
@@ -483,14 +482,13 @@ files:
           type: string
     - name: adoprovider
       description: |
-        Choose the ADO provider.  Note that the (default) provider
-        SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
+        Choose the ADO provider.  Note that SQLOLEDB is deprecated.  To use the MSOLEDBSQL
         provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
         You will also need to download the new provider from
         https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
       value:
         type: string
-        example: SQLOLEDB
+        example: MSOLEDBSQL
     - name: connector
       description: |
         Change the connection method from adodbapi (the default) to
