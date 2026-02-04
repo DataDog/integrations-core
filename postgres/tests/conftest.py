@@ -123,6 +123,41 @@ def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
         c.cancel()
 
 
+@pytest.fixture(scope="function")
+def dbm_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
+    """
+    Creates a check with test mode enabled for deterministic DBM job testing.
+
+    Test mode enables synchronization primitives on DBMAsyncJob instances,
+    allowing tests to wait for specific job completions rather than using
+    time.sleep() with guessed execution counts.
+
+    Usage:
+        def test_example(dbm_check, dbm_instance):
+            check = dbm_check(dbm_instance)
+            check.run()
+
+            # Wait for exactly 3 job completions on statement_samples
+            check.statement_samples.wait_for_completion(count=3, timeout=10)
+
+            # Assert on collected data
+            ...
+    """
+    checks = []
+
+    def _check(instance: dict, init_config: dict = None):
+        nonlocal checks
+        c = PostgreSql('postgres', init_config or {}, [instance])
+        c.enable_test_mode()
+        checks.append(c)
+        return c
+
+    yield _check
+
+    for c in checks:
+        c.cancel()
+
+
 @pytest.fixture
 def pg_instance():
     return copy.deepcopy(INSTANCE)
