@@ -330,6 +330,84 @@ class DBMAsyncJob(object):
         if self._features is None:
             self._features = [None]
 
+        # Test coordination - lazily initialized to avoid overhead in production.
+        # These are only created when enable_test_mode() is called.
+        self._test_mode = False
+        self._job_completion_event: threading.Event | None = None
+        self._job_completion_count = 0
+        self._job_completion_lock: threading.Lock | None = None
+
+    def enable_test_mode(self):
+        """
+        Enable test synchronization primitives.
+
+        When enabled, each job completion increments the completion counter
+        and signals the completion event. This allows tests to wait for a
+        specific number of job executions using wait_for_completion().
+
+        This method should only be called in test code.
+        """
+        self._test_mode = True
+        # Lazily create synchronization primitives only when needed
+        self._job_completion_event = threading.Event()
+        self._job_completion_lock = threading.Lock()
+
+    def wait_for_completion(self, count: int = 1, timeout: float = 10.0) -> bool:
+        """
+        Block until run_job() has completed `count` times since the last call.
+
+        This method is useful for tests that need to wait for a deterministic
+        number of job executions rather than relying on time-based sleeps.
+
+        Args:
+            count: Number of completions to wait for
+            timeout: Maximum time to wait in seconds
+
+        Returns:
+            True if the requested completions occurred, False if timed out
+
+        Raises:
+            RuntimeError: If test mode is not enabled
+        """
+        if not self._test_mode or self._job_completion_lock is None or self._job_completion_event is None:
+            raise RuntimeError("wait_for_completion requires test mode to be enabled via enable_test_mode()")
+
+        start = time.time()
+        while True:
+            with self._job_completion_lock:
+                if self._job_completion_count >= count:
+                    self._job_completion_count -= count
+                    return True
+            if time.time() - start > timeout:
+                return False
+            # Use event wait with small timeout for efficiency
+            self._job_completion_event.wait(timeout=0.05)
+            self._job_completion_event.clear()
+
+    def reset_completion_count(self):
+        """
+        Reset the completion counter to zero.
+
+        Useful for tests that need to verify completions across multiple
+        phases of a test without accumulated counts from previous phases.
+        """
+        if self._job_completion_lock is not None and self._job_completion_event is not None:
+            with self._job_completion_lock:
+                self._job_completion_count = 0
+                self._job_completion_event.clear()
+
+    def _on_job_complete(self):
+        """
+        Hook called after each job execution completes.
+
+        In test mode, increments the completion counter and signals the
+        completion event for test coordination via wait_for_completion().
+        """
+        if self._test_mode and self._job_completion_lock is not None and self._job_completion_event is not None:
+            with self._job_completion_lock:
+                self._job_completion_count += 1
+            self._job_completion_event.set()
+
     def cancel(self):
         """
         Send a signal to cancel the job loop asynchronously.
@@ -463,11 +541,13 @@ class DBMAsyncJob(object):
         if self._rate_limiter.shall_execute():
             self._rate_limiter.update_last_time()
             self._run_job_traced()
+            self._on_job_complete()
 
     def _run_job_rate_limited(self):
         try:
             self._last_run_start = time.time()
             self._run_job_traced()
+            self._on_job_complete()
         except:
             raise
         finally:

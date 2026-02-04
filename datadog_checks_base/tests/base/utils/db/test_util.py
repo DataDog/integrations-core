@@ -448,6 +448,85 @@ def test_dbm_async_job_inactive_stop(aggregator):
     aggregator.assert_metric("dd.test-dbms.async_job.inactive_stop", tags=['job:test-job'])
 
 
+# =============================================================================
+# Test Mode functionality tests
+# =============================================================================
+
+
+def test_dbm_async_job_test_mode_not_enabled_raises():
+    """Test that wait_for_completion raises RuntimeError if test mode is not enabled."""
+    job = JobForTesting(AgentCheck())
+    with pytest.raises(RuntimeError, match="test mode"):
+        job.wait_for_completion()
+
+
+def test_dbm_async_job_wait_for_completion_async():
+    """Test wait_for_completion with async job execution."""
+    job = JobForTesting(AgentCheck(), rate_limit=100)  # Fast rate for test
+    job.enable_test_mode()
+    job.run_job_loop([])
+
+    # Wait for exactly 3 completions
+    result = job.wait_for_completion(count=3, timeout=5)
+    assert result is True
+    assert job.count_executed >= 3
+
+    job.cancel()
+    job._job_loop_future.result()
+
+
+def test_dbm_async_job_wait_for_completion_sync():
+    """Test wait_for_completion with sync job execution."""
+    job = JobForTesting(AgentCheck(), run_sync=True, rate_limit=100)
+    job.enable_test_mode()
+
+    # Run job loop multiple times (sync mode)
+    for _ in range(3):
+        job.run_job_loop([])
+        time.sleep(0.02)  # Small delay to allow rate limiter to reset
+
+    # Should have at least 3 completions tracked
+    result = job.wait_for_completion(count=3, timeout=1)
+    assert result is True
+
+
+def test_dbm_async_job_wait_for_completion_timeout():
+    """Test wait_for_completion returns False on timeout."""
+    job = JobForTesting(AgentCheck(), rate_limit=0.5)  # Slow rate
+    job.enable_test_mode()
+    job.run_job_loop([])
+
+    # Try to wait for more completions than possible in short timeout
+    result = job.wait_for_completion(count=100, timeout=0.1)
+    assert result is False
+
+    job.cancel()
+    job._job_loop_future.result()
+
+
+def test_dbm_async_job_wait_for_completion_consumes_count_and_reset():
+    """Test that wait_for_completion consumes the count and reset_completion_count works."""
+    job = JobForTesting(AgentCheck(), rate_limit=100)  # Fast rate
+    job.enable_test_mode()
+    job.run_job_loop([])
+
+    # Wait for 2 completions
+    assert job.wait_for_completion(count=2, timeout=5) is True
+    initial_count = job.count_executed
+
+    # Wait for 2 more - count should be consumed so new completions are needed
+    assert job.wait_for_completion(count=2, timeout=5) is True
+    assert job.count_executed >= initial_count + 2
+
+    job.cancel()
+    job._job_loop_future.result()
+
+    # Test reset clears any remaining count
+    job.reset_completion_count()
+    with job._job_completion_lock:
+        assert job._job_completion_count == 0
+
+
 @pytest.mark.parametrize(
     "input",
     [
