@@ -123,7 +123,8 @@ class ClickhouseCheck(AgentCheck):
                 # https://clickhouse.com/docs/integrations/language-clients/python/driver-api#multi-threaded-applications
                 autogenerate_session_id=False,
                 # https://clickhouse.com/docs/integrations/python#settings-argument
-                settings={},
+                # https://clickhouse.com/docs/operations/settings/settings#readonly
+                settings={'readonly': 1},
             )
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
