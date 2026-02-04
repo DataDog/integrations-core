@@ -379,7 +379,9 @@ integration/crowdstrike_fdr:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
 integration/cyberark_endpoint_privilege_manager:
-- cyberark_endpoint_privilege_manager/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - cyberark_endpoint_privilege_manager/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
