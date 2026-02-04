@@ -2,9 +2,12 @@ name: 'Dependency Review'
 on:
   pull_request:
     paths:
+      # Review dependencies
       - '**/pyproject.toml'
       - '**/hatch.toml'
       - 'agent_requirements.in'
+      # Validate all workflows and actions
+      - '.github/**'
 
 permissions:
   contents: read
