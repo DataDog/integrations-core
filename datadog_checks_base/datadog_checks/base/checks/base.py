@@ -401,7 +401,7 @@ class AgentCheck(object):
 
     @property
     def security_config(self):
-        # type: () -> dict
+        # type: () -> SecurityConfig
         """
         Returns the integration security configuration, loaded once and cached.
 
@@ -409,6 +409,8 @@ class AgentCheck(object):
         """
         if self.__security_config is None:
             self.__security_config = SecurityConfig(
+                check_name=self.name,
+                provider=self.provider,
                 ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
                 file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
                 trusted_providers=datadog_agent.get_config('integration_trusted_providers')

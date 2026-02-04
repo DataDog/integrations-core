@@ -59,16 +59,17 @@ class SecurityConfig:
         """
         Check if the given file path is in the allowlist.
 
+        The allowlist is used to allow specific paths even from untrusted providers.
+        An empty allowlist means no paths are explicitly allowed.
+
         Args:
             path: The file path to validate
 
         Returns:
-            True if the path is allowed, False otherwise.
-            An empty allowlist means all paths are allowed.
+            True if the path is in the allowlist, False otherwise.
         """
         if not self.file_paths_allowlist:
-            # Empty allowlist means all paths are allowed (backward compatibility)
-            return True
+            return False
         return any(path.startswith(allowed) for allowed in self.file_paths_allowlist)
 
     def is_check_excluded(self, check_name: str) -> bool:
