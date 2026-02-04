@@ -1,4 +1,3 @@
-
 aerospike==7.1.1; sys_platform != 'win32' and sys_platform != 'darwin'
 aws-requests-auth==0.4.3
 azure-identity==1.24.0
