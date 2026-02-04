@@ -45,6 +45,7 @@ files:
         openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false
     - template: instances/openmetrics_legacy_base
+      legacy: true
       hidden: true
       overrides:
         prometheus_url.required: false
