@@ -45,21 +45,30 @@ def test_labeler_integration_not_in_config_file(fake_repo, ddev):
 def test_labeler_invalid_configuration(fake_repo, ddev):
     (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
         """changelog/no-changelog:
-- any:
-  - requirements-agent-release.txt
-  - '*/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - requirements-agent-release.txt
+    - '*/__about__.py'
 - all:
-  - '!*/datadog_checks/**'
-  - '!*/pyproject.toml'
-  - '!ddev/src/**'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '!*/datadog_checks/**'
+      - '!*/pyproject.toml'
+      - '!ddev/src/**'
 integration/datadog_checks_tests_helper:
-- datadog_checks_tests_helper/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - datadog_checks_tests_helper/**/*
 integration/dummy:
-- dummy/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy/**/*
 integration/dummy2:
 - something
 release:
-- '*/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - '*/__about__.py'
     """,
     )
 
@@ -114,21 +123,30 @@ def test_labeler_fix_existing_integration_in_config(fake_repo, ddev):
     (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
         """\
 changelog/no-changelog:
-- any:
-  - requirements-agent-release.txt
-  - '*/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - requirements-agent-release.txt
+    - '*/__about__.py'
 - all:
-  - '!*/datadog_checks/**'
-  - '!*/pyproject.toml'
-  - '!ddev/src/**'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '!*/datadog_checks/**'
+      - '!*/pyproject.toml'
+      - '!ddev/src/**'
 integration/datadog_checks_tests_helper:
-- datadog_checks_tests_helper/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - datadog_checks_tests_helper/**/*
 integration/dummy:
-- dummy/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy/**/*
 integration/dummy2:
 - something
 release:
-- '*/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - '*/__about__.py'
 """,
     )
 
@@ -146,25 +164,34 @@ release:
 def labeler_test_config(integrations):
     config = """\
 changelog/no-changelog:
-- any:
-  - requirements-agent-release.txt
-  - '*/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - requirements-agent-release.txt
+    - '*/__about__.py'
 - all:
-  - '!*/datadog_checks/**'
-  - '!*/pyproject.toml'
-  - '!ddev/src/**'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '!*/datadog_checks/**'
+      - '!*/pyproject.toml'
+      - '!ddev/src/**'
 integration/datadog_checks_tests_helper:
-- datadog_checks_tests_helper/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - datadog_checks_tests_helper/**/*
 """
 
     for integration in integrations:
         config += f"""\
 integration/{integration}:
-- {integration}/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - {integration}/**/*
 """
     config += """\
 release:
-- '*/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - '*/__about__.py'
 """
 
     return config
