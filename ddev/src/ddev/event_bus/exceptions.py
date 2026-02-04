@@ -46,3 +46,12 @@ class ProcessorSuccessHookError(MessageProcessingError):
         self.processor_name = processor_name
         self.message = message
         self.original_exception = original_exception
+
+
+class FatalProcessingError(Exception):
+    """
+    Raised by hooks or processors to signal that the Orchestrator should
+    stop processing immediately and shutdown gracefully.
+    """
+
+    pass

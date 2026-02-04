@@ -14,7 +14,7 @@ from dataclasses import dataclass
 import pytest
 from pytest_mock import MockerFixture
 
-from ddev.event_bus.exceptions import ProcessorQueueError
+from ddev.event_bus.exceptions import FatalProcessingError, ProcessorQueueError
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage, EventBusOrchestrator, SyncProcessor
 
 # Test Structure Documentation
@@ -220,6 +220,7 @@ def test_workflow_success(
 def test_processor_processing_failure(
     orchestrator: MockOrchestrator,
     secretary: Secretary,
+    caplog: pytest.LogCaptureFixture,
     memo_content: str,
     expected_error_type: type[Exception],
 ) -> None:
@@ -236,8 +237,15 @@ def test_processor_processing_failure(
     assert failed_msg.id == "failed_memo"
     assert isinstance(error, expected_error_type)
 
+    # Check that MessageProcessingError was logged (as the task failure)
+    # The log format is "Task failed: %s" where %s is the exception repr
+    assert "Error processing message by processor" in caplog.text
+    assert "Processing failed intentionally" in caplog.text
 
-def test_processor_success_hook_failure(orchestrator: MockOrchestrator, secretary: Secretary) -> None:
+
+def test_processor_success_hook_failure(
+    orchestrator: MockOrchestrator, secretary: Secretary, caplog: pytest.LogCaptureFixture
+) -> None:
     orchestrator.submit_message(Memo("hook_fail_memo", content="fail_success_hook"))
     orchestrator.run()
 
@@ -248,6 +256,10 @@ def test_processor_success_hook_failure(orchestrator: MockOrchestrator, secretar
 
     # Error hook should NOT be called for success hook failure
     assert len(secretary.failed_deliveries) == 0
+
+    # Check that ProcessorSuccessHookError was logged
+    assert "Error in 'on_success' hook for processor" in caplog.text
+    assert "Success hook failed intentionally" in caplog.text
 
 
 def test_mixed_messages(orchestrator: MockOrchestrator, secretary: Secretary, analyst: Analyst) -> None:
@@ -336,6 +348,8 @@ def test_processor_on_error_failure(
     assert "finalize" in orchestrator.events
     # We should have logged the error
     assert "Error hook failed intentionally" in caplog.text
+    # And the task should have failed with the original processing error wrapped
+    assert "Error processing message by processor" in caplog.text
 
 
 def test_no_subscribers() -> None:
@@ -365,9 +379,33 @@ def test_initialization_failure() -> None:
 
     # Finalize should still be called
     assert "finalize" in orchestrator.events
+    assert isinstance(orchestrator.finalized_exception, RuntimeError)
+    assert str(orchestrator.finalized_exception) == "Init failed"
+
+
+def test_finalize_receives_exception_on_process_messages_failure(mocker: MockerFixture) -> None:
+    """
+    Ensure that exceptions raised during message processing (after initialization)
+    are passed to the finalize hook, similar to test_initialization_failure.
+    """
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1)
+
+    # Mock process_messages to raise an exception
+    mocker.patch.object(orchestrator, "process_messages", side_effect=RuntimeError("Process failed"))
+
+    with pytest.raises(RuntimeError, match="Process failed"):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert isinstance(orchestrator.finalized_exception, RuntimeError)
+    assert str(orchestrator.finalized_exception) == "Process failed"
 
 
 def test_queue_retrieval_error(orchestrator: MockOrchestrator, mocker: MockerFixture) -> None:
+    # Patch asyncio.sleep to skip the wait
+    mocker.patch("asyncio.sleep")
+
     call_count = 0
 
     original_get = orchestrator._queue.get
@@ -395,8 +433,17 @@ def test_max_timeout_interruption(orchestrator: MockOrchestrator) -> None:
     orchestrator._grace_period = 5.0  # Long grace period
 
     class SlowProcessor(AsyncProcessor[Memo]):
+        def __init__(self, name: str):
+            super().__init__(name)
+            # Used to validate that the task is cancelled after the timeout happens
+            self.cancelled = False
+
         async def process_message(self, message: Memo):
-            await asyncio.sleep(2.0)
+            try:
+                await asyncio.sleep(2.0)
+            except asyncio.CancelledError:
+                self.cancelled = True
+                raise
 
     slow_processor = SlowProcessor("slow_processor")
     orchestrator.register_processor(slow_processor, [Memo])
@@ -405,6 +452,8 @@ def test_max_timeout_interruption(orchestrator: MockOrchestrator) -> None:
 
     with assert_time(0.5, 1.5):
         orchestrator.run()
+
+    assert slow_processor.cancelled
 
 
 def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secretary: Secretary) -> None:
@@ -444,3 +493,31 @@ def test_processor_submit_without_bus() -> None:
     processor = Secretary("orphan")
     with pytest.raises(ProcessorQueueError, match="This processor has not been added"):
         processor.submit_message(Memo("fail"))
+
+
+def test_fatal_processing_error_stops_orchestrator(
+    orchestrator: MockOrchestrator, caplog: pytest.LogCaptureFixture
+) -> None:
+    # Capture the original method to preserve its behavior (tracking received messages)
+    original_on_message = orchestrator.on_message_received
+
+    async def on_message_fatal(message: BaseMessage):
+        await original_on_message(message)
+        if message.id == "fatal_msg":
+            raise FatalProcessingError("Fatal error triggered")
+
+    # Monkey patch the instance method
+    orchestrator.on_message_received = on_message_fatal  # type: ignore
+
+    orchestrator.submit_message(Memo("fatal_msg"))
+    orchestrator.submit_message(Memo("ignored_msg"))
+
+    orchestrator.run()
+
+    # Should stop
+    assert "finalize" in orchestrator.events
+    assert "Fatal error processing on_message_received hook" in caplog.text
+
+    # Assert that only the first message was processed/received by the hook
+    assert len(orchestrator.received_messages) == 1
+    assert orchestrator.received_messages[0].id == "fatal_msg"

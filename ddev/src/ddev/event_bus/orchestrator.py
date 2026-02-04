@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from abc import ABC, abstractmethod
 from concurrent.futures import Executor, ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import assert_never
 
-from .exceptions import MessageProcessingError, ProcessorQueueError, ProcessorSuccessHookError
+from .exceptions import FatalProcessingError, MessageProcessingError, ProcessorQueueError, ProcessorSuccessHookError
 
 
 @dataclass
@@ -194,19 +195,36 @@ class EventBusOrchestrator(ABC):
 
         start_time = asyncio.get_running_loop().time()
 
-        while not await self.__should_stop(start_time, running_tasks, get_task):
-            wait_set = running_tasks | {get_task}
-            # We use a small timeout to check for max_timeout periodically. If we leave this here blocking
-            # we can keep the loop alive much longer than the max_timeout.
-            done, _ = await asyncio.wait(wait_set, return_when=asyncio.FIRST_COMPLETED, timeout=1.0)
+        try:
+            while not await self.__should_stop(start_time, running_tasks, get_task):
+                wait_set = running_tasks | {get_task}
+                # We use a small timeout to check for max_timeout periodically. If we leave this here blocking
+                # we can keep the loop alive much longer than the max_timeout.
+                done, _ = await asyncio.wait(wait_set, return_when=asyncio.FIRST_COMPLETED, timeout=1.0)
 
-            current_get_task = get_task
-            if current_get_task in done:
-                get_task = await self.__process_new_message(current_get_task, running_tasks)
-                if get_task is None:
-                    break
+                current_get_task = get_task
+                if current_get_task in done:
+                    get_task = await self.__process_new_message(current_get_task, running_tasks)
+                    if get_task is None:
+                        break
 
-            self.__process_finished_tasks(done, current_get_task, running_tasks)
+                self.__process_finished_tasks(done, current_get_task, running_tasks)
+        finally:
+            # If we exit the loop and tasks are still running (e.g. timeout or forced break),
+            # we must clean them up before returning to ensure finalize() runs in a safe state.
+            if running_tasks:
+                self._logger.info("Cancelling %s remaining tasks...", len(running_tasks))
+                for task in running_tasks:
+                    task.cancel()
+
+                # Wait for them to actually finish cancelling
+                await asyncio.wait(running_tasks)
+
+            # Also ensure the get_task is dead if it's still around
+            if get_task and not get_task.done():
+                get_task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await get_task
 
     async def __should_stop(self, start_time: float, running_tasks: set[asyncio.Task], get_task: asyncio.Task) -> bool:
         """
@@ -255,21 +273,39 @@ class EventBusOrchestrator(ABC):
         Processes a new message from the queue.
         """
         try:
+            # Separate the get_task result check to handle its specific errors
             msg = get_task.result()
-            await self.on_message_received(msg)
-            self._handle_message(msg, running_tasks)
         except asyncio.CancelledError:
-            # If get_Task was cancelled it means we should shutdown, this is only cancelled by a global shutdown
-            # or because we decided we should stop polling.
+            # get_task was cancelled, stop polling
             return None
         except Exception as e:
-            # If we get an error retrieving a message, we should log it and continue polling
-            # The max timeout should take care of killing the orchestrator and we avoid stopping
-            # everything for a single issue.
             self._logger.error("Error retrieving message from queue: %s", e)
 
+            # Wait briefly to re-submit a get_task again in case there is a transient issue.
+            await asyncio.sleep(1.0)
+
+            # Re-create the get_task to keep the loop alive
+            return asyncio.create_task(self._queue.get())
+
+        # If we successfully got a message, process it
+        try:
+            await self.on_message_received(msg)
+        except asyncio.CancelledError:
+            # If the await suspension raises a CancelledError, we should respect
+            # the global shutdown.
+            raise
+        except FatalProcessingError as e:
+            # If the hook raises a FatalProcessingError, we should stop the orchestrator.
+            self._logger.error("Fatal error processing on_message_received hook: %s", e)
+            return None
+        except Exception as e:
+            self._logger.warning("Error in on_message_received: %s", e)
+
+        # Launch the processors
+        self._handle_message(msg, running_tasks)
+
         # Always create a new get task if we consumed one
-        return asyncio.create_task(self._queue.get()) if get_task.done() else get_task
+        return asyncio.create_task(self._queue.get())
 
     def __process_finished_tasks(
         self,
