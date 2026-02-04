@@ -14,13 +14,12 @@ With this integration, you can, per Supabase project:
 ## Setup
 
 The Supabase Cloud integration requires the `service_role` API key to retrieve metrics from the hosted project's
-[metrics endpoint][4] and the use of a [Personal Access Token][7] to access the Supabase [Management API][6] for reading logs
-if you choose to do so. 
+[metrics endpoint][4]. If you want to collect logs, you also need a [Personal Access Token][7] to access the Supabase [Management API][6]. 
 
-If your Postgres log volume is continually greater than 200 messages/sec, Datadog recommends that you enable the 
-[Datadog Log Drain][3] in your Supabase project and not select log collection via this integration.
-If you choose to collect logs via this integration and currently have a Datadog Log Drain set up for your Supabase project, please disable it before proceeding. 
-The logs collected from the Management API will be duplicate to those of the Log Drain.
+If your Postgres log volume exceeds 200 messages/sec, Datadog recommends using the
+[Datadog Log Drain][3] instead of this integration's log collection feature.
+
+**Important**: If you have a Datadog Log Drain configured for your Supabase project, disable it before enabling log collection via this integration to avoid duplicate logs.
 
 ### Retrieve the service_role API key
 
@@ -29,30 +28,30 @@ The logs collected from the Management API will be duplicate to those of the Log
 3. On the **Legacy API Keys** tab, retrieve the service_role API key.
 
 ### Generate a Personal Access Token
-A Personal Access Token, PAT, is required to access the Supabase Management API and collect logs. The PAT inherits
-the same permissions as the user who creates it. Since this integration only reads from the API, you have the option
-to generate the PAT from a user in your organization with read-only permissions.
+A Personal Access Token (PAT) is required to access the Supabase Management API and collect logs.
 
-1. Log in to [Supabase][2] as an administrator.
-2. (Optional) Create a user with read-only permissions and log in as that user.
-   1. From the dashboard, navigate to **Team**
-   2. Click **Invite member**
+1. Log in to [Supabase][2] as an administrator or a user with appropriate permissions.
+
+   **Note**: The Personal Access Token inherits the same permissions as the user who creates it. Since this integration only reads from the API, you can optionally create a user with read-only permissions:
+   1. From the dashboard, navigate to **Team**.
+   2. Click **Invite member**.
    3. In the **Member-role** dropdown, select **Read-only**.
    4. Complete the invitation and log in as the new user.
+
 2. Navigate to the [Access Tokens page][7] of the dashboard.
-3. Click on **Generate new token**.
-4. Enter a name for the token, select the **Expires in** value _Never_ and click **Generate token**.
-5. Note the token value at the top of the Access Tokens page and copy it for later use as it will not be displayed again.
+3. Click **Generate new token**.
+4. Enter a name for the token, select **Never** for **Expires in**, and click **Generate token**.
+5. Copy the token value displayed at the top of the page. Store it securely, as it won't be displayed again.
 
 ### Connect your Supabase Cloud project to Datadog
 
-1. Add your Supabase hosted project ID and service_role API key    
-    |Parameters|Description|
+1. Add your Supabase hosted project ID and `service_role` API key
+    |Parameter|Description|
     |--------------------|--------------------|
-    |Project ID|Supabase project ID: E.g. `https://supabase.com/dashboard/project/<project_id>/settings/general`.|
-    |Service_role API Key|API key needed for communication with the Metrics endpoint.|
+    |Project ID|Supabase project ID. For example: `https://supabase.com/dashboard/project/<project_id>/settings/general`.|
+    |`service_role` API key|API key needed for communication with the Metrics endpoint.|
     |Collect Logs|Enable this option to collect logs from your Supabase project instead of using a [Datadog Log Drain][3].|
-    |Personal Access Token|Token needed for communication with the Management API.|
+    |Personal Access Token|Token needed for communication with the Management API. Required only if **Collect Logs** is enabled.|
 
 2. Click the **Save** button to save your settings.
 
@@ -62,16 +61,13 @@ to generate the PAT from a user in your organization with read-only permissions.
 
 See [metadata.csv][5] for the full list of metrics provided by this integration.
 
-If your project contains a Postgres read replica **and** you provide a Personal Access Token to the integration,
-the integration will also collect metrics from the read replica, tagging the metrics with the appropriate
+If your project contains a Postgres read replica **and** you provide a Personal Access Token,
+the integration also collects metrics from the read replica and tags them with the appropriate
 `supabase_identifier` value.
 
 ### Logs
 
-When you enable this integration for your Supabase hosted project and choose to collect logs, all Postgres and application log
-messages will be collected using the [Management API][6]. Alternatively, a [Datadog Log Drain][3] in Supabase can be used to 
-deliver logs to Datadog. Regardless of how the log messages are delivered, this integration leverages Datadog's built-in log pipelines 
-to parse and enrich the logs, facilitating easy search and detailed insights.
+When you enable log collection for this integration, all Postgres and application log messages are collected using the [Management API][6]. Alternatively, you can use a [Datadog Log Drain][3] in Supabase to deliver logs to Datadog. Regardless of the delivery method, this integration uses Datadog's built-in log pipelines to parse and enrich the logs for easier searching and more detailed insights.
 
 ### Events
 
