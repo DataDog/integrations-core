@@ -112,12 +112,7 @@ instances:
 
     ## @param cat_allocation_stats - boolean - optional - default: false
     ## Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
-    ## Collects disk usage metrics per node and detailed shard placement metrics.
-    ## The elasticsearch.shards metric includes index and prirep tags for monitoring
-    ## shard placement skew and imbalance between nodes.
-    ## Tags: node_name:<node>, index:<index_name>, prirep:primary or prirep:replica
-    ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html
-    ##      https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html
+    ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
     #
     # cat_allocation_stats: false
 
