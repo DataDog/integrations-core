@@ -45,7 +45,7 @@ A Personal Access Token (PAT) is required to access the Supabase Management API 
 
 ### Connect your Supabase Cloud project to Datadog
 
-1. Add your Supabase hosted project ID and `service_role` API key
+1. In the Datadog app, navigate to the [Supabase Cloud integration tile][8] and add your Supabase hosted project ID and `service_role` API key:
     |Parameter|Description|
     |--------------------|--------------------|
     |Project ID|Supabase project ID. For example: `https://supabase.com/dashboard/project/<project_id>/settings/general`.|
@@ -53,7 +53,7 @@ A Personal Access Token (PAT) is required to access the Supabase Management API 
     |Collect Logs|Enable this option to collect logs from your Supabase project instead of using a [Datadog Log Drain][3].|
     |Personal Access Token|Token needed for communication with the Management API. Required only if **Collect Logs** is enabled.|
 
-2. Click the **Save** button to save your settings.
+2. Click **Save**.
 
 ## Data Collected
 
@@ -88,3 +88,4 @@ Need help? Contact [Datadog support][1].
 [5]: https://github.com/DataDog/integrations-core/blob/master/supabase_cloud/metadata.csv
 [6]: https://supabase.com/docs/reference/api/introduction
 [7]: https://supabase.com/dashboard/account/tokens
+[8]: https://app.datadoghq.com/integrations/supabase-cloud
