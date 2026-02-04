@@ -361,6 +361,7 @@
     example: 16
     type: number
 - name: log_requests
+  fleet_configurable: true
   value:
     example: false
     type: boolean
