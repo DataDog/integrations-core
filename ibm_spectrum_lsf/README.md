@@ -95,7 +95,7 @@ View more information about setting environment variables for the Datadog Agent 
 
     Since collecting these metrics can add extra load on your server, we recommend setting a higher collection interval for these metrics, or at least 60. The exact interval depends on the load and size of your cluster. View IBM Spectrum LSF's [recommendations][13] for managing high query load.
 
-    Similarly, the `bhist` command collects information about completed jobs, which can be query-intensive, so we recommend monitoring this command with the `min_collection_interval` set to 60.
+    Similarly, the `bhist` command collects information about completed jobs, which can be query-intensive, so we recommend monitoring this command with the `min_collection_interval` set to 60 or higher. The `bhist_details` command involves running `bhist -l` for each completed job, so we recommend monitoring it with a higher `min_collection_interval` along with `bhist`.
 
     Here is a sample configuration monitoring all available metrics:
 
@@ -117,6 +117,7 @@ View more information about setting environment variables for the Datadog Agent 
       metric_sources:
         - badmin_perfmon
         - bhist
+        - bhist_details
       min_collection_interval: 60
     ```
 
