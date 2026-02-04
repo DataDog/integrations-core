@@ -230,7 +230,7 @@ class PostgresSchemaCollector(SchemaCollector):
                         query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
 
                 cursor.execute(query)
-                return cursor.fetchall()
+                return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):
