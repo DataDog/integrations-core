@@ -47,6 +47,17 @@ tests:
     }
   result:
     custom:
+      dns:
+        flags:
+          rcode: "NXDOMAIN"
+        id: 8121
+        question:
+          name: "amazon.in."
+          type: "A"
+      network:
+        client:
+          geoip: {}
+          ip: "10.41.13.131"
       query_log:
         actionTaken: "block"
         appliedPolicyId: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
@@ -60,7 +71,6 @@ tests:
         id: "1768799730903712CBD65A6B0963C276D07800E643DBG"
         identity:
           identityId: "identity_id_example"
-          userId: "example@test.bluecat.com"
         latency: 0
         matchedPolicies:
          -
@@ -69,18 +79,15 @@ tests:
           name: "Local Policy"
           id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
           eventType: "block"
-        query: "amazon.in."
         queryClassId: 1
-        queryId: 8121
         queryProtocol: "UDP"
-        queryType: "A"
-        response: "NXDOMAIN"
         siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
-        source: "10.41.13.131"
         time: 1770186142000
       site_details:
         id: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
         name: "House India"
+      usr:
+        id: "example@test.bluecat.com"
       vendor:
         endpoint: "dns-query-logs"
     message: |-
@@ -129,3 +136,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1770186142000
