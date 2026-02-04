@@ -2,6 +2,7 @@
     "manifest_version": "2.0.0",
     "app_uuid": "96a55a72-deb6-4afe-9f96-e5816d56f755",
     "app_id": "cyberark-endpoint-privilege-manager",
+    "owner": "saas-integrations",
     "display_on_public_website": false,
     "tile": {
         "overview": "README.md#Overview",
