@@ -142,3 +142,112 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
     )
+
+@not_windows_ci
+def test_enforce_readonly_queries_setting(dd_agent_check, instance_docker_defaults, sa_conn):
+    """
+    Test that enforce_readonly_queries setting controls write access.
+
+    Verifies by comparing actual outcomes (metrics collected, rows inserted)
+    with and without the setting enabled.
+    """
+    from datadog_checks.base import AgentCheck
+
+    # ==================================================================
+    # SETUP: Create test table for write verification
+    # ==================================================================
+    with sa_conn.cursor() as cursor:
+        cursor.execute('IF OBJECT_ID(\'test_readonly_check\', \'U\') IS NOT NULL DROP TABLE test_readonly_check')
+        cursor.execute('CREATE TABLE test_readonly_check (id INT)')
+        sa_conn.commit()
+
+    # ==================================================================
+    # PHASE 1: Read query WITH enforce_readonly_queries=True (default)
+    # Expected: Metrics ARE collected (reads work)
+    # ==================================================================
+    instance = instance_docker_defaults.copy()
+    instance['enforce_readonly_queries'] = True
+    instance['custom_queries'] = [
+        {
+            'query': 'SELECT COUNT(*) as table_count FROM sys.tables',
+            'columns': [{'name': 'table_count', 'type': 'gauge'}],
+            'tags': ['test:read_enabled'],
+        }
+    ]
+
+    aggregator = dd_agent_check(instance)
+    aggregator.assert_service_check('sqlserver.can_connect', status=AgentCheck.OK)
+    aggregator.assert_metric('sqlserver.table_count', at_least=1)
+
+    # ==================================================================
+    # PHASE 2: Write query WITH enforce_readonly_queries=True
+    # Expected: Row is NOT inserted (table remains empty)
+    # ==================================================================
+    instance['custom_queries'] = [
+        {
+            'query': 'INSERT INTO test_readonly_check VALUES (1)',
+            'columns': [{'name': 'result', 'type': 'gauge'}],
+            'tags': ['test:write_blocked'],
+        }
+    ]
+
+    dd_agent_check(instance)
+
+    with sa_conn.cursor() as cursor:
+        cursor.execute('SELECT COUNT(*) FROM test_readonly_check')
+        row_count = cursor.fetchone()[0]
+    assert row_count == 0, (
+        f"Expected 0 rows (write blocked) but found {row_count}. "
+        f"Write should be blocked when enforce_readonly_queries=True"
+    )
+
+    # ==================================================================
+    # PHASE 3: Read query WITHOUT enforce_readonly_queries=False
+    # Expected: Metrics ARE collected (reads still work)
+    # ==================================================================
+    instance['enforce_readonly_queries'] = False
+    instance['custom_queries'] = [
+        {
+            'query': 'SELECT COUNT(*) as table_count FROM sys.tables',
+            'columns': [{'name': 'table_count', 'type': 'gauge'}],
+            'tags': ['test:read_disabled'],
+        }
+    ]
+
+    aggregator = dd_agent_check(instance)
+    aggregator.assert_metric('sqlserver.table_count', at_least=1)
+
+    # ==================================================================
+    # PHASE 4: Write query WITHOUT enforce_readonly_queries=False
+    # Expected: Row IS inserted (table has 1 row)
+    # This proves OUR setting controls access, not DB user permissions
+    # ==================================================================
+    with sa_conn.cursor() as cursor:
+        cursor.execute('TRUNCATE TABLE test_readonly_check')
+        sa_conn.commit()
+
+    instance['custom_queries'] = [
+        {
+            'query': 'INSERT INTO test_readonly_check VALUES (999)',
+            'columns': [{'name': 'result', 'type': 'gauge'}],
+            'tags': ['test:write_allowed'],
+        }
+    ]
+
+    dd_agent_check(instance)
+
+    with sa_conn.cursor() as cursor:
+        cursor.execute('SELECT COUNT(*) FROM test_readonly_check')
+        row_count = cursor.fetchone()[0]
+    assert row_count == 1, (
+        f"Expected 1 row (write succeeded) but found {row_count}. "
+        f"Write should succeed when enforce_readonly_queries=False. "
+        f"If this fails, DB user may lack write permissions."
+    )
+
+    # ==================================================================
+    # CLEANUP
+    # ==================================================================
+    with sa_conn.cursor() as cursor:
+        cursor.execute('DROP TABLE test_readonly_check')
+        sa_conn.commit()

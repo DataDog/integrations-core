@@ -620,12 +620,17 @@ class Connection(object):
             username = None
             password = None
 
+        # Check enforce_readonly_queries setting (hidden, defaults to True)
+        enforce_readonly_queries = self.instance.get('enforce_readonly_queries', True)
+
         # The connection resiliency feature is supported on Microsoft Azure SQL Database
         # and SQL Server 2014 (and later) server versions. See the SQLServer docs for more information
         # https://docs.microsoft.com/en-us/sql/connect/odbc/connection-resiliency?view=sql-server-ver15
         conn_str = ''
         if self.server_version >= self.SQLSERVER_2014:
             conn_str += 'ConnectRetryCount=2;'
+        if enforce_readonly_queries:
+            conn_str += 'ApplicationIntent=ReadOnly;'
         if dsn:
             conn_str += 'DSN={};'.format(dsn)
         if driver:
@@ -648,11 +653,19 @@ class Connection(object):
         else:
             _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
 
+        # Check enforce_readonly_queries setting (hidden, defaults to True)
+        enforce_readonly_queries = self.instance.get('enforce_readonly_queries', True)
+
         retry_conn_count = ''
         if self.server_version >= self.SQLSERVER_2014:
             retry_conn_count = 'ConnectRetryCount=2;'
-        conn_str = '{}Provider={};Data Source={};Initial Catalog={};'.format(
-            retry_conn_count, self.adoprovider, host, database
+
+        app_intent = ''
+        if enforce_readonly_queries:
+            app_intent = 'ApplicationIntent=ReadOnly;'
+
+        conn_str = '{}{}Provider={};Data Source={};Initial Catalog={};'.format(
+            retry_conn_count, app_intent, self.adoprovider, host, database
         )
 
         if username:
