@@ -24,8 +24,8 @@ class QueueManagerProcessMatcher(ConditionLimiter):
     def condition(self, pattern, logger):
         logger.debug('Searching for a process that matches: %s', pattern.pattern)
         for process in psutil.process_iter(['cmdline']):
-            # if not process.info['cmdline']:
-            #    continue
+            if not process.info['cmdline']:
+                continue
             command = join_command_args(process.info['cmdline'])
             if pattern.search(command):
                 logger.debug('Process found: %s', command)
