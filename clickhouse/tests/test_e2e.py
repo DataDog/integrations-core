@@ -64,6 +64,7 @@ def test_enforce_readonly_queries_setting(dd_agent_check, instance, clickhouse_c
             'query': 'SELECT count() FROM system.tables',
             'columns': [{'name': 'table_count', 'type': 'gauge'}],
             'tags': ['test:read_enabled'],
+            'metric_prefix': 'clickhouse.query',
         }
     ]
 
@@ -102,6 +103,7 @@ def test_enforce_readonly_queries_setting(dd_agent_check, instance, clickhouse_c
             'query': 'SELECT count() FROM system.tables',
             'columns': [{'name': 'table_count', 'type': 'gauge'}],
             'tags': ['test:read_disabled'],
+            'metric_prefix': 'clickhouse.query',
         }
     ]
 
