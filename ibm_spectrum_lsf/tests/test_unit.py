@@ -695,7 +695,7 @@ def test_populate_completed_job_ids_only_when_bhist_details_enabled(
         patch(
             'datadog_checks.ibm_spectrum_lsf.processors.BHistProcessor.get_completed_job_ids'
         ) as mock_get_completed_job_ids,
-        patch.object(check.completed_job_ids, 'set_job_ids') as mock_set_job_ids,
+        patch.object(check.completed_job_ids, 'set') as mock_set_job_ids,
     ):
         dd_run_check(check)
 

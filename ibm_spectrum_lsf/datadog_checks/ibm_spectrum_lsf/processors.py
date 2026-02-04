@@ -643,7 +643,7 @@ class BHistProcessor(LSFMetricsProcessor):
         # only populate registry with job IDs if bhist_details is enabled
         if self.config.metric_sources and 'bhist_details' in self.config.metric_sources:
             completed_job_ids = self.get_completed_job_ids()
-            self.completed_job_ids.set_job_ids(completed_job_ids)
+            self.completed_job_ids.set(completed_job_ids)
 
         return base_metrics
 
@@ -677,7 +677,7 @@ class BHistDetailsProcessor(LSFMetricsProcessor):
         return self.client.bhist_l(job_id)
 
     def get_bhist_details(self) -> list[tuple[str, str]]:
-        base_job_ids = self.completed_job_ids.get_job_ids()
+        base_job_ids = self.completed_job_ids.get()
         if not base_job_ids:
             self.log.debug("No completed job IDs in registry")
             return []
