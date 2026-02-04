@@ -113,3 +113,26 @@ def expected_metrics():
         with open(os.path.join(HERE, 'results', file_name), 'r') as f:
             metrics.extend(json.load(f))
     return metrics
+
+
+@pytest.fixture(scope='session')
+def teradata_conn():
+    """
+    Provides a direct Teradata database connection for e2e tests.
+    Only available when USE_TD_SANDBOX is True (real sandbox environment).
+    """
+    if not USE_TD_SANDBOX:
+        pytest.skip('teradata_conn fixture only available in sandbox environment')
+
+    import teradatasql
+
+    conn = teradatasql.connect(
+        host=TERADATA_SERVER,
+        user=TERADATA_DD_USER,
+        password=TERADATA_DD_PW,
+        database='AdventureWorksDW',
+    )
+
+    yield conn
+
+    conn.close()

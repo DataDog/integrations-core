@@ -155,5 +155,15 @@ files:
         auth_data: username@@userpassword
       value:
         type: string
+    - name: enforce_readonly_queries
+      description: |
+        Enforce read-only mode for all database connections to prevent data modification.
+        When enabled, all queries including custom_queries cannot perform write operations
+        (INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, etc.).
+      hidden: true
+      value:
+        type: boolean
+        example: true
+        display_default: true
     - template: instances/db
     - template: instances/default

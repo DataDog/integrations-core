@@ -71,21 +71,26 @@ class TeradataCheck(AgentCheck, ConfigMixin):
 
     def initialize_config(self):
         # type: (Any) -> None
-        self._connect_params = json.dumps(
-            {
-                'host': self.config.server,
-                'account': self.config.account if self.config.account is not None else '',
-                'database': self.config.database,
-                'dbs_port': str(self.config.port),
-                'logmech': self.config.auth_mechanism,
-                'logdata': self.config.auth_data if self.config.auth_data is not None else '',
-                'user': self.config.username if self.config.username is not None else '',
-                'password': self.config.password if self.config.password is not None else '',
-                'https_port': str(self.config.https_port),
-                'sslmode': self.config.ssl_mode if self.config.ssl_mode is not None else '',
-                'sslprotocol': self.config.ssl_protocol if self.config.ssl_protocol is not None else '',
-            }
-        )
+        connect_params = {
+            'host': self.config.server,
+            'account': self.config.account if self.config.account is not None else '',
+            'database': self.config.database,
+            'dbs_port': str(self.config.port),
+            'logmech': self.config.auth_mechanism,
+            'logdata': self.config.auth_data if self.config.auth_data is not None else '',
+            'user': self.config.username if self.config.username is not None else '',
+            'password': self.config.password if self.config.password is not None else '',
+            'https_port': str(self.config.https_port),
+            'sslmode': self.config.ssl_mode if self.config.ssl_mode is not None else '',
+            'sslprotocol': self.config.ssl_protocol if self.config.ssl_protocol is not None else '',
+        }
+
+        # Enforce read-only mode for all database connections
+        if self.config.enforce_readonly_queries:
+            connect_params['startup'] = 'SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY'
+            connect_params['runstartup'] = 'true'
+
+        self._connect_params = json.dumps(connect_params)
 
         global_tags = [
             'teradata_server:{}'.format(self.instance.get('server')),
