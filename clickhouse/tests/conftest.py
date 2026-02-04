@@ -44,6 +44,20 @@ def instance():
     return deepcopy(common.CONFIG)
 
 
+@pytest.fixture(scope='session')
+def clickhouse_conn():
+    """Provide a direct ClickHouse connection for test verification (bypasses integration)."""
+    client = clickhouse_connect.get_client(
+        host=common.CONFIG['server'],
+        port=common.CONFIG['port'],
+        username=common.CONFIG['username'],
+        password=common.CONFIG['password'],
+        database=common.CONFIG.get('db', 'default'),
+    )
+    yield client
+    client.close()
+
+
 def ping_clickhouse(host, port, username, password):
     def _ping_clickhouse():
         client = clickhouse_connect.get_client(

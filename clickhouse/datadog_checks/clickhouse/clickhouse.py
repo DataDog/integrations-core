@@ -106,6 +106,9 @@ class ClickhouseCheck(AgentCheck):
                 self._client = None
 
         try:
+            # Check enforce_readonly_queries setting (hidden, defaults to True)
+            enforce_readonly_queries = self.instance.get('enforce_readonly_queries', True)
+
             client = clickhouse_connect.get_client(
                 # https://clickhouse.com/docs/integrations/python#connection-arguments
                 host=self._server,
@@ -124,7 +127,7 @@ class ClickhouseCheck(AgentCheck):
                 autogenerate_session_id=False,
                 # https://clickhouse.com/docs/integrations/python#settings-argument
                 # https://clickhouse.com/docs/operations/settings/settings#readonly
-                settings={'readonly': 1},
+                settings={'readonly': 1 if enforce_readonly_queries else 0},
             )
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
