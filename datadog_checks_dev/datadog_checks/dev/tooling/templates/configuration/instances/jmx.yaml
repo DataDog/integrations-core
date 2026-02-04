@@ -117,6 +117,7 @@
 
 - name: rmi_registry_ssl
   description: Whether or not the Agent should connect to the RMI registry using SSL.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
