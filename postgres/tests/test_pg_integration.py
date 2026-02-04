@@ -1045,6 +1045,10 @@ def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, 
     replication_tags = [t for t in check._non_internal_tags if t.startswith('replication_role:')]
     assert replication_tags == ['replication_role:master'], f"Expected master role tag, got: {replication_tags}"
 
+    # Verify dd.internal tags are not in _non_internal_tags
+    internal_tags = [t for t in check._non_internal_tags if t.startswith('dd.internal')]
+    assert internal_tags == [], f"dd.internal tags should not be in _non_internal_tags: {internal_tags}"
+
     # Verify the metadata event has the correct role
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     first_event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
@@ -1071,6 +1075,10 @@ def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, 
     assert replication_tags == ['replication_role:standby'], (
         f"Expected standby role tag after role change, got: {replication_tags}"
     )
+
+    # Verify dd.internal tags are still excluded after role change
+    internal_tags = [t for t in check._non_internal_tags if t.startswith('dd.internal')]
+    assert internal_tags == [], f"dd.internal tags should not be in _non_internal_tags: {internal_tags}"
 
     # Verify the metadata event reflects the new role only
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
