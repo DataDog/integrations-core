@@ -521,6 +521,7 @@ class ESCheck(AgentCheck):
 
         # Group shards by node, index, and prirep to count them
         from collections import Counter
+
         shard_counts = Counter()
 
         for shard in cat_shards_data:
@@ -543,7 +544,7 @@ class ESCheck(AgentCheck):
             tags = base_tags + [
                 'node_name:{}'.format(node.lower()),
                 'index:{}'.format(index),
-                'prirep:{}'.format(prirep)
+                'prirep:{}'.format(prirep),
             ]
             self.gauge('elasticsearch.shards', count, tags=tags)
 
