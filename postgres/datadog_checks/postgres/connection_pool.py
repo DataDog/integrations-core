@@ -228,6 +228,8 @@ class LRUConnectionPoolManager:
         with conn.cursor() as cur:
             if self.statement_timeout is not None:
                 cur.execute("SET statement_timeout = %s", (self.statement_timeout,))
+            # Enforce read-only mode for all queries to prevent data modification
+            cur.execute("SET default_transaction_read_only = ON")
 
     def _create_pool(self, dbname: str) -> ConnectionPool:
         """
