@@ -390,6 +390,7 @@
 - name: telemetry
   description: |
     Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
+  fleet_configurable: true
   value:
     example: false
     type: boolean

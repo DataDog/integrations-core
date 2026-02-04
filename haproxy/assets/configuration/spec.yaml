@@ -43,6 +43,7 @@ files:
     - name: url
       fleet_configurable: true
       enabled: true
+      legacy: true
       value:
         example: http://localhost/admin?stats
         type: string
@@ -55,6 +56,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: status_check
       fleet_configurable: true
+      legacy: true
       value:
         example: false
         type: boolean
@@ -66,6 +68,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_aggregates_only
       fleet_configurable: true
+      legacy: true
       value:
         anyOf:
           - type: boolean
@@ -83,6 +86,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_status_metrics
       fleet_configurable: true
+      legacy: true
       value:
         example: false
         type: boolean
@@ -92,6 +96,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_status_metrics_by_host
       fleet_configurable: true
+      legacy: true
       value:
         example: false
         type: boolean
@@ -102,6 +107,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collate_status_tags_per_host
       fleet_configurable: true
+      legacy: true
       value:
         example: true
         type: boolean
@@ -112,6 +118,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: count_status_by_service
       fleet_configurable: true
+      legacy: true
       value:
         example: true
         type: boolean
@@ -122,6 +129,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: tag_service_check_by_host
       fleet_configurable: true
+      legacy: true
       value:
         example: false
         type: boolean
@@ -131,6 +139,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: services_include
+      legacy: true
       value:
         example:
         - <SERVICE_NAME_1>
@@ -145,6 +154,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: services_exclude
       fleet_configurable: true
+      legacy: true
       value:
         example:
         - .*
@@ -158,6 +168,7 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: disable_legacy_service_tag
       fleet_configurable: true
+      legacy: true
       value:
         example: false
         type: boolean
@@ -167,6 +178,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: active_tag
+      legacy: true
       value:
         example: false
         type: boolean
@@ -177,12 +189,14 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: enable_service_check
       fleet_configurable: true
+      legacy: true
       value:
         example: false
         type: boolean
       description: |
         Enable the Haproxy service check.
     - name: tags_regex
+      legacy: true
       value:
         type: string
       description: |
@@ -196,6 +210,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: startup_grace_seconds
+      legacy: true
       value:
         example: 0
         type: number
