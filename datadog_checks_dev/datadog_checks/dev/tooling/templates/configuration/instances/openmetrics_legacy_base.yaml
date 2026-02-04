@@ -39,6 +39,7 @@
   description: |
     Send a service check reporting about the health of the Prometheus endpoint.
     The service check is named <NAMESPACE>.prometheus.health
+  fleet_configurable: true
   value:
     type: boolean
     example: true
@@ -101,6 +102,7 @@
     type: boolean
 - name: send_monotonic_counter
   description: Set send_monotonic_counter to true to send counters as monotonic counter.
+  fleet_configurable: true
   value:
     example: true
     type: boolean
@@ -114,6 +116,7 @@
     type: boolean
 - name: send_distribution_counts_as_monotonic
   description: If set to true, sends histograms and summary counters as monotonic counters (instead of gauges).
+  fleet_configurable: true
   value:
     example: false
     type: boolean
