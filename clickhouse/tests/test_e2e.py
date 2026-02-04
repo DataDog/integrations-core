@@ -64,13 +64,12 @@ def test_enforce_readonly_queries_setting(dd_agent_check, instance, clickhouse_c
             'query': 'SELECT count() FROM system.tables',
             'columns': [{'name': 'table_count', 'type': 'gauge'}],
             'tags': ['test:read_enabled'],
-            'metric_prefix': 'clickhouse.query',
         }
     ]
 
     aggregator = dd_agent_check(instance)
     aggregator.assert_service_check('clickhouse.can_connect', status=AgentCheck.OK)
-    aggregator.assert_metric('clickhouse.query.table_count', at_least=1)
+    aggregator.assert_metric('clickhouse.table_count', at_least=1)
 
     # ==================================================================
     # PHASE 2: Write query WITH enforce_readonly_queries=True
@@ -103,12 +102,11 @@ def test_enforce_readonly_queries_setting(dd_agent_check, instance, clickhouse_c
             'query': 'SELECT count() FROM system.tables',
             'columns': [{'name': 'table_count', 'type': 'gauge'}],
             'tags': ['test:read_disabled'],
-            'metric_prefix': 'clickhouse.query',
         }
     ]
 
     aggregator = dd_agent_check(instance)
-    aggregator.assert_metric('clickhouse.query.table_count', at_least=1)
+    aggregator.assert_metric('clickhouse.table_count', at_least=1)
 
     # ==================================================================
     # PHASE 4: Write query WITHOUT enforce_readonly_queries=False
