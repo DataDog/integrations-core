@@ -1,0 +1,33 @@
+name: Kata Containers
+files:
+- name: kata_containers.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: sandbox_storage_paths
+      description: |
+        List of paths where Kata sandbox information is stored.
+        Default paths are for Go runtime (/run/vc/sbs) and Rust runtime (/run/kata).
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - /run/vc/sbs
+          - /run/kata
+    - name: collect_pod_metrics
+      description: |
+        Enable collection of pod-level metrics.
+      value:
+        type: boolean
+        example: true
+    - name: timeout
+      description: |
+        Timeout in seconds for connecting to each sandbox socket.
+      value:
+        type: integer
+        example: 5
+    - template: instances/default
