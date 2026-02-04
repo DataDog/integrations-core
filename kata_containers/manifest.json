@@ -1,0 +1,52 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "2821c94b-4c57-4412-9513-39349465a8e1",
+  "app_id": "kata-containers",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Kata Containers sandboxes and collect performance metrics from shims, hypervisors, and guest VMs.",
+    "title": "Kata Containers",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Containers",
+      "Offering::Integration",
+      "Queried Data Type::Metrics",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 70129476,
+      "source_type_name": "Kata Containers",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kata.",
+        "check": "kata.running_shim_count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
