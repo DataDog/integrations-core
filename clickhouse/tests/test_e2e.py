@@ -78,7 +78,7 @@ def test_enforce_readonly_queries_setting(dd_agent_check, instance, clickhouse_c
     instance['custom_queries'] = [
         {
             'query': 'INSERT INTO test_readonly_check VALUES (1)',
-            'columns': [],
+            'columns': [{'name': 'result', 'type': 'gauge'}],
             'tags': ['test:write_blocked'],
         }
     ]
@@ -118,7 +118,7 @@ def test_enforce_readonly_queries_setting(dd_agent_check, instance, clickhouse_c
     instance['custom_queries'] = [
         {
             'query': 'INSERT INTO test_readonly_check VALUES (999)',
-            'columns': [],
+            'columns': [{'name': 'result', 'type': 'gauge'}],
             'tags': ['test:write_allowed'],
         }
     ]
