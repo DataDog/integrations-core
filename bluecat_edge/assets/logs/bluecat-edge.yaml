@@ -22,16 +22,6 @@ facets:
     name: Question Type
     path: dns.question.type
     source: log
-  - facetType: range
-    groups:
-      - Measure
-    name: Duration
-    path: duration
-    source: log
-    type: double
-    unit:
-      family: time
-      name: nanosecond
   - groups:
       - Geoip
     name: City Name
@@ -79,7 +69,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Bluecat Edge
+  name: BlueCat Edge
   enabled: true
   filter:
     query: source:bluecat-edge
@@ -126,16 +116,6 @@ pipeline:
         - query_log.response
       sourceType: attribute
       target: dns.flags.rcode
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `query_log.latency` to `duration`
-      enabled: true
-      sources:
-        - query_log.latency
-      sourceType: attribute
-      target: duration
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
