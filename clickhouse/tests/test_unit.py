@@ -34,7 +34,35 @@ def test_config(instance):
             verify=True,
             client_name='datadog-test-clickhouse',
             compress=False,
-            settings={},
+            settings={'readonly': 1},  # enforce_readonly_queries defaults to True
+            autogenerate_session_id=False,
+        )
+
+
+def test_config_readonly_disabled(instance):
+    """Test that enforce_readonly_queries can be disabled."""
+    instance['enforce_readonly_queries'] = False
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test-clickhouse'
+
+    with mock.patch('clickhouse_connect.get_client') as m:
+        mock_client = mock.MagicMock()
+        m.return_value = mock_client
+        check.connect()
+        m.assert_called_once_with(
+            host=instance['server'],
+            port=instance['port'],
+            username=instance['username'],
+            password=instance['password'],
+            database='default',
+            connect_timeout=10.0,
+            send_receive_timeout=10.0,
+            secure=False,
+            ca_cert=None,
+            verify=True,
+            client_name='datadog-test-clickhouse',
+            compress=False,
+            settings={'readonly': 0},  # enforce_readonly_queries=False
             autogenerate_session_id=False,
         )
 
