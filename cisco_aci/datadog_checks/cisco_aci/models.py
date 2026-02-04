@@ -226,6 +226,8 @@ class InterfaceMetadata(BaseModel):
     admin_status: Optional[AdminStatus] = Field(default=None)
     oper_status: Optional[OperStatus] = Field(default=None)
     integration: Optional[str] = Field(default='cisco-aci')
+    type: Optional[str] = Field(default=None)
+    is_physical: Optional[bool] = Field(default=None)
 
     model_config = ConfigDict(validate_assignment=True, use_enum_values=True)
 
