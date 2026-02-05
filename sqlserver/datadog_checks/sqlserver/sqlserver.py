@@ -756,7 +756,7 @@ class SQLServer(DatabaseCheck):
         cached = self._sql_counter_types.get(counter_name)
         if cached:
             return cached
-        with self.connection.get_managed_cursor() as cursor:
+        with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
             (sql_counter_type,) = cursor.fetchone()
             if sql_counter_type == PERF_LARGE_RAW_BASE:
@@ -1041,13 +1041,13 @@ class SQLServer(DatabaseCheck):
             # statement are returned as part of the result set, so we disable for the entire connection
             # this is important mostly for custom_queries or the stored_procedure feature
             # https://docs.microsoft.com/en-us/sql/t-sql/statements/set-nocount-transact-sql
-            with self.connection.get_managed_cursor() as cursor:
+            with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
                 if not self._config.only_custom_queries:
                     # restore the current database after executing dynamic queries
                     # this is to ensure the current database context is not changed
-                    with self.connection.restore_current_database_context():
+                    with self.connection.restore_current_database_context(KEY_PREFIX):
                         if self.database_metrics:
                             for database_metric in self.database_metrics:
                                 database_metric.execute()
@@ -1055,11 +1055,11 @@ class SQLServer(DatabaseCheck):
                 # reuse the connection for custom queries
                 self._query_manager.execute()
             finally:
-                with self.connection.get_managed_cursor() as cursor:
+                with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     cursor.execute("SET NOCOUNT OFF")
 
     def execute_query_raw(self, query, db=None):
-        with self.connection.get_managed_cursor() as cursor:
+        with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             if db:
                 ctx = construct_use_statement(db)
                 self.log.debug("changing cursor context via use statement: %s", ctx)

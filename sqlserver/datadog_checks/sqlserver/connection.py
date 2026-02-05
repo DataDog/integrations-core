@@ -66,7 +66,6 @@ def split_sqlserver_host_port(host):
 # supporting escaping using braces, letting the client library or the database ultimately decide what's valid
 CONNECTION_STRING_SPECIAL_CHARACTERS = set('=;{}')
 
-
 def parse_connection_string_properties(cs):
     """
     Parses the properties portion of a SQL Server connection string (i.e. "key1=value1;key2=value2;...") into a map of
@@ -692,28 +691,28 @@ class Connection(object):
 
         return None
 
-    def _get_current_database_context(self):
+    def _get_current_database_context(self, key_prefix):
         """
         Get the current database name.
         """
-        with self.get_managed_cursor() as cursor:
+        with self.get_managed_cursor(key_prefix) as cursor:
             cursor.execute('select DB_NAME()')
             data = cursor.fetchall()
             return data[0][0]
 
     @contextmanager
-    def restore_current_database_context(self):
+    def restore_current_database_context(self, key_prefix):
         """
         Restores the default database after executing use statements.
         """
-        current_db = self._get_current_database_context()
+        current_db = self._get_current_database_context(key_prefix)
         try:
             yield
         finally:
             if current_db:
                 try:
                     self.log.debug("Restoring the original database context %s", current_db)
-                    with self.get_managed_cursor() as cursor:
+                    with self.get_managed_cursor(key_prefix) as cursor:
                         cursor.execute(construct_use_statement(current_db))
                 except Exception as e:
                     self.log.error("Failed to switch back to the original database context %s: %s", current_db, e)

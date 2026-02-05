@@ -555,9 +555,9 @@ def test_restore_current_database_context(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
     with check.connection.open_managed_default_connection(KEY_PREFIX):
-        current_db = check.connection._get_current_database_context()
-        with check.connection.restore_current_database_context():
-            with check.connection.get_managed_cursor() as cursor:
+        current_db = check.connection._get_current_database_context(KEY_PREFIX)
+        with check.connection.restore_current_database_context(KEY_PREFIX):
+            with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 cursor.execute("USE tempdb")
                 assert check.connection._get_current_database_context() == "tempdb"
         assert check.connection._get_current_database_context() == current_db
