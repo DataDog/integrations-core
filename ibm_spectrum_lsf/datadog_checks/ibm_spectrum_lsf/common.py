@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from dataclasses import dataclass, field
 
 FLOAT_PATTERN = re.compile(r"\D+$")
 
@@ -86,3 +87,14 @@ def transform_time_left(val: str) -> int:
         return int(parts[0]) * 3600 + int(parts[1]) * 60
     else:
         return int(val) * 60
+
+
+@dataclass
+class RecentlyCompletedJobIDs:
+    _completed_job_ids: list[str] = field(default_factory=list)
+
+    def set(self, job_ids: list[str]) -> None:
+        self._completed_job_ids = job_ids
+
+    def get(self) -> list[str]:
+        return self._completed_job_ids.copy()

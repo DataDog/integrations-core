@@ -15,6 +15,13 @@ def get_mock_output(method):
         return f.read().strip(), "", 0
 
 
+def get_mock_bhist_l(job_id):
+    try:
+        return get_mock_output(f'bhist_{job_id}')
+    except FileNotFoundError:
+        return "", f"Job <{job_id}> not found", 1
+
+
 @pytest.fixture
 def mock_client():
     client = mock.create_autospec(LSFClient)
@@ -32,6 +39,7 @@ def mock_client():
     client.badmin_perfmon_start = mock.Mock()
     client.badmin_perfmon_stop = mock.Mock()
     client.bhist.return_value = get_mock_output('bhist')
+    client.bhist_l.side_effect = get_mock_bhist_l
 
     yield client
 

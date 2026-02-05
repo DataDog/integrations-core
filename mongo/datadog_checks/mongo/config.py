@@ -110,6 +110,7 @@ class MongoConfig(object):
         self._slow_operations_config = instance.get('slow_operations', {})
         # Backward compatibility: check new names first, then fall back to old names
         self._schemas_config = instance.get('collect_schemas', instance.get('schemas', {}))
+        self._query_metrics_config = instance.get('query_metrics', {})
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
@@ -227,6 +228,25 @@ class MongoConfig(object):
             'max_collections': int(max_collections) if max_collections else None,
             'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
             'collect_search_indexes': is_affirmative(self._schemas_config.get('collect_search_indexes', False)),
+        }
+
+    @property
+    def query_metrics(self):
+        # Query metrics requires MongoDB 8.0+ and uses $queryStats aggregation pipeline
+        # Disabled by default - must be explicitly enabled unlike other DBM features
+        enabled = False
+        if self.dbm_enabled is True and is_affirmative(self._query_metrics_config.get('enabled', False)):
+            enabled = True
+        return {
+            'enabled': enabled,
+            'collection_interval': self._query_metrics_config.get('collection_interval', 10),
+            'run_sync': is_affirmative(self._query_metrics_config.get('run_sync', False)),
+            'full_statement_text_cache_max_size': int(
+                self._query_metrics_config.get('full_statement_text_cache_max_size', 10000)
+            ),
+            'full_statement_text_samples_per_hour_per_query': int(
+                self._query_metrics_config.get('full_statement_text_samples_per_hour_per_query', 1)
+            ),
         }
 
     def _get_database_autodiscovery_config(self, instance):
