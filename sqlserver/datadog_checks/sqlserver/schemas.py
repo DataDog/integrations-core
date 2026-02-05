@@ -197,26 +197,28 @@ class SQLServerSchemaCollector(SchemaCollector):
                 "name": cursor_row.get("schema_name"),
                 "id": str(cursor_row.get("schema_id")),  # Backend expects a string
                 "owner_name": cursor_row.get("owner_name"),
-                "tables": [
-                    {
-                        k: v
-                        for k, v in {
-                            "id": str(cursor_row.get("table_id")),  # Backend expects a string
-                            "name": cursor_row.get("table_name"),
-                            "columns": [column for column in columns if column.get("name") is not None],
-                            "indexes": [index for index in indexes if index.get("name") is not None],
-                            "foreign_keys": [
-                                foreign_key
-                                for foreign_key in foreign_keys
-                                if foreign_key.get("foreign_key_name") is not None
-                            ],
-                            "partitions": {"partition_count": partition_count},
-                        }.items()
-                        if v is not None
-                    }
-                ]
-                if cursor_row.get("table_name") is not None
-                else [],
+                "tables": (
+                    [
+                        {
+                            k: v
+                            for k, v in {
+                                "id": str(cursor_row.get("table_id")),  # Backend expects a string
+                                "name": cursor_row.get("table_name"),
+                                "columns": [column for column in columns if column.get("name") is not None],
+                                "indexes": [index for index in indexes if index.get("name") is not None],
+                                "foreign_keys": [
+                                    foreign_key
+                                    for foreign_key in foreign_keys
+                                    if foreign_key.get("foreign_key_name") is not None
+                                ],
+                                "partitions": {"partition_count": partition_count},
+                            }.items()
+                            if v is not None
+                        }
+                    ]
+                    if cursor_row.get("table_name") is not None
+                    else []
+                ),
             }
         ]
         return object
