@@ -11,7 +11,10 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-_OP_SPLIT = re.compile(r"\s*\b(?:AND|OR|/|,|\+|\band/or\b)\b\s*", re.IGNORECASE)
+# Split license expressions on operators (AND, OR, and/or) and separators (/, ,, +).
+# Use negative lookbehind (?<!-) and lookahead (?!-) to avoid matching "-or-" or "-and-"
+# inside SPDX identifiers like "GPL-2.0-or-later" or "LGPL-2.1-or-later".
+_OP_SPLIT = re.compile(r'\s*(?:(?<!-)\b(?:AND|OR)\b(?!-)|/|,|\+|\band/or\b)\s*', re.IGNORECASE)
 # SPDX ids are typically: letters/digits plus . + -
 # and may appear as LicenseRef-* / DocumentRef-*:LicenseRef-*
 _ID = re.compile(r"(DocumentRef-[A-Za-z0-9.+-]+:)?LicenseRef-[A-Za-z0-9.+-]+|[A-Za-z0-9.+-]+")
@@ -350,11 +353,12 @@ def split_license_expression_simple(expr: str) -> list[str]:
         chunk = re.split(r"\s+\bWITH\b\s+", chunk, flags=re.IGNORECASE)[0].strip()
 
         # Extract tokens; keep ones that look like SPDX-ish ids
+        chunk_start_len = len(parts)
         for token in _ID.findall(chunk):
             if token:
                 parts.append(token if isinstance(token, str) else token[0])
-        if not parts:
-            # If we couldn't extract any ID, try to use the whole chunk
+        if len(parts) == chunk_start_len:
+            # If we couldn't extract any ID from this chunk, try to use the whole chunk
             # as a fallback, stripping any remaining noise.
             fallback = re.sub(r'\s+', ' ', chunk).strip()
             if fallback:
