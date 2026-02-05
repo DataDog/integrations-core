@@ -343,7 +343,7 @@ def split_license_expression_simple(expr: str) -> list[str]:
     # Normalize parens to spaces
     expr = expr.replace("(", " ").replace(")", " ")
 
-    parts = []
+    parts: list[str] = []
     for chunk in _OP_SPLIT.split(expr):
         chunk = chunk.strip()
         if not chunk:
