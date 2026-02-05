@@ -356,6 +356,7 @@
 - name: request_size
   description: |
     The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+  fleet_configurable: true
   value:
     example: 16
     type: number
