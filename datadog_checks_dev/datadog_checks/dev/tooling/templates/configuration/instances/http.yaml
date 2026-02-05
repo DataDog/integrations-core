@@ -377,6 +377,7 @@
     type: boolean
   description: Whether or not to persist cookies and use connection pooling for improved performance.
 - name: allow_redirects
+  fleet_configurable: true
   value:
     example: true
     type: boolean
