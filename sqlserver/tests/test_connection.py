@@ -25,6 +25,7 @@ from datadog_checks.sqlserver.connection_errors import (
 
 from .common import CHECK_NAME, SQLSERVER_YEAR
 
+KEY_PREFIX="dbm-test-"
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
@@ -292,8 +293,8 @@ def test_query_timeout(instance_docker):
     instance_docker['command_timeout'] = 1
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             # should complete quickly
             cursor.execute("select 1")
             assert cursor.fetchall(), "should have a result here"
@@ -315,18 +316,18 @@ def test_connection_cleanup(instance_docker):
     check.initialize_connection()
 
     # regular operation
-    with check.connection.open_managed_default_connection():
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
         assert len(check.connection._conns) == 1
-        with check.connection.get_managed_cursor() as cursor:
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             cursor.execute("select 1")
             assert len(check.connection._conns) == 1
     assert len(check.connection._conns) == 0, "connection should have been closed"
 
     # db exception
     with pytest.raises(Exception) as e:
-        with check.connection.open_managed_default_connection():
+        with check.connection.open_managed_default_connection(KEY_PREFIX):
             assert len(check.connection._conns) == 1
-            with check.connection.get_managed_cursor() as cursor:
+            with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 assert len(check.connection._conns) == 1
                 cursor.execute("gimme some data")
     assert "incorrect syn" in str(e).lower()
@@ -334,9 +335,9 @@ def test_connection_cleanup(instance_docker):
 
     # application exception
     with pytest.raises(Exception) as e:
-        with check.connection.open_managed_default_connection():
+        with check.connection.open_managed_default_connection(KEY_PREFIX):
             assert len(check.connection._conns) == 1
-            with check.connection.get_managed_cursor():
+            with check.connection.get_managed_cursor(KEY_PREFIX):
                 assert len(check.connection._conns) == 1
                 raise Exception("oops")
     assert "oops" in str(e)
@@ -486,7 +487,7 @@ def test_connection_error_reporting(
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     connection = Connection(check.init_config, check.instance, check.handle_service_check)
     with pytest.raises(SQLConnectionError) as excinfo:
-        with connection.open_managed_default_connection():
+        with connection.open_managed_default_connection(KEY_PREFIX):
             pytest.fail("connection should not have succeeded")
 
     message = str(excinfo.value).lower()
@@ -552,7 +553,7 @@ def test_format_connection_error(
 def test_restore_current_database_context(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
-    with check.connection.open_managed_default_connection():
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
         current_db = check.connection._get_current_database_context()
         with check.connection.restore_current_database_context():
             with check.connection.get_managed_cursor() as cursor:
