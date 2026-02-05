@@ -18,10 +18,20 @@ files:
         - ci_runner_errors
         - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
         - ci_ssh_docker_machines_provider_machine_states
+        - gitlab_runner_acceptable_job_queuing_duration_exceeded_total
+        - gitlab_runner_api_request_statuses_total
         - gitlab_runner_autoscaling_machine_creation_duration_seconds
         - gitlab_runner_autoscaling_machine_states
+        - gitlab_runner_concurrent
         - gitlab_runner_errors_total
+        - gitlab_runner_job_duration_seconds
+        - gitlab_runner_job_queue_duration_seconds
+        - gitlab_runner_job_stage_duration_seconds
         - gitlab_runner_jobs
+        - gitlab_runner_jobs_total
+        - gitlab_runner_limit
+        - gitlab_runner_request_concurrency
+        - gitlab_runner_request_concurrency_exceeded_total
         - gitlab_runner_version_info
         - go_gc_duration_seconds
         - go_goroutines
