@@ -32,7 +32,7 @@ datadog-ceph==4.3.0; sys_platform != 'win32'
 datadog-cert-manager==6.2.0
 datadog-checkpoint-harmony-endpoint==1.1.0
 datadog-checkpoint-quantum-firewall==1.2.0
-datadog-checks-base==37.27.1
+datadog-checks-base==37.28.0
 datadog-checks-dependency-provider==3.2.0
 datadog-checks-downloader==9.0.0
 datadog-cilium==6.2.0
@@ -112,8 +112,8 @@ datadog-ivanti-connect-secure==1.2.0
 datadog-jboss-wildfly==3.3.0
 datadog-journald==3.2.0
 datadog-juniper-srx-firewall==1.2.0
-datadog-kafka-actions==2.0.1
-datadog-kafka-consumer==6.11.0
+datadog-kafka-actions==2.1.0
+datadog-kafka-consumer==6.12.0
 datadog-kafka==4.3.0
 datadog-karpenter==3.2.0
 datadog-keda==2.2.0
