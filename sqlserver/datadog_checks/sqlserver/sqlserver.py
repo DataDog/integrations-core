@@ -125,6 +125,8 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 KEY_PREFIX = "dbm-sqlserver-"
+
+
 class SQLServer(DatabaseCheck):
     __NAMESPACE__ = "sqlserver"
 

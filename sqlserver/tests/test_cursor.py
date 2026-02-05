@@ -7,7 +7,8 @@ from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
 
-KEY_PREFIX="dbm-test-"
+KEY_PREFIX = "dbm-test-"
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

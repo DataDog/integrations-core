@@ -338,7 +338,8 @@ VALUES (
 );
 """
 
-KEY_PREFIX="dbm-test-"
+KEY_PREFIX = "dbm-test-"
+
 
 @pytest.fixture
 def agent_jobs_instance(instance_docker):

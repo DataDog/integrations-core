@@ -25,7 +25,8 @@ from datadog_checks.sqlserver.connection_errors import (
 
 from .common import CHECK_NAME, SQLSERVER_YEAR
 
-KEY_PREFIX="dbm-test-"
+KEY_PREFIX = "dbm-test-"
+
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
