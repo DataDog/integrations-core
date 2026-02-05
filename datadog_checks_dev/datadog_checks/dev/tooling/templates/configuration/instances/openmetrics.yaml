@@ -260,6 +260,7 @@
 - name: hostname_label
   description: |
     Override the hostname for every metric submission with the value of one of its labels.
+  fleet_configurable: true
   value:
     type: string
 - name: hostname_format
@@ -309,6 +310,7 @@
     the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
     initial value can be assumed for counters. This requires keeping metrics in memory until the entire
     response is received.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
