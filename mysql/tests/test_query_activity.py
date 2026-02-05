@@ -418,10 +418,10 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     assert len(metrics) >= 1, "Expected at least one activity collection to occur"
 
     # Verify we didn't exceed the rate limit by a large margin.
-    # Use a generous 2x multiplier to avoid flakiness while still catching
+    # Use a 1.2x multiplier to avoid flakiness while still catching
     # egregious rate limiter failures (e.g., if it was completely disabled).
     max_expected = int(elapsed / collection_interval) + 1
-    assert len(metrics) <= max_expected * 2, (
+    assert len(metrics) <= max_expected * 1.2, (
         f"Rate limiter may be broken: got {len(metrics)} collections in {elapsed:.2f}s, "
         f"expected at most ~{max_expected} (with 2x tolerance: {max_expected * 2})"
     )
