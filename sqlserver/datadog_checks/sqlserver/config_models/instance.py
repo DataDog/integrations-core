@@ -179,6 +179,7 @@ class DbMemoryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collection_interval: Optional[int] = Field(None, examples=[300])
     enabled: Optional[bool] = Field(None, examples=[False])
 
 
