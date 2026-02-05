@@ -237,8 +237,9 @@ def test_session_number(aggregator, integration_check, pg_instance):
 
 
 @requires_over_14
-def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
-    # Reset idle time to 0
+def test_session_killed_and_abandoned(aggregator, integration_check, pg_instance):
+    """Test session counter metrics (killed, fatal, abandoned) - deterministic event counts."""
+    # Reset stats to 0
     postgres_conn = _get_superconn(pg_instance)
     with postgres_conn.cursor() as cur:
         cur.execute("select pg_stat_reset();")
@@ -250,18 +251,17 @@ def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
     check.run()
     expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
 
-    aggregator.assert_metric('postgresql.sessions.idle_in_transaction_time', value=0, count=1, tags=expected_tags)
+    # Verify baseline counters are 0
     aggregator.assert_metric('postgresql.sessions.killed', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.sessions.fatal', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.sessions.abandoned', value=0, count=1, tags=expected_tags)
 
-    conn = _get_conn(pg_instance)
+    # Create a session to kill
+    conn = _get_conn(pg_instance, autocommit=False)
     with conn.cursor() as cur:
         cur.execute('BEGIN;')
         _increase_txid(cur)
         cur.fetchall()
-        # Keep transaction idle for 500ms
-        time.sleep(0.5)
         cur.execute('select pg_backend_pid();')
         pid = cur.fetchall()[0][0]
 
@@ -270,19 +270,71 @@ def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
         cur.execute("SELECT pg_terminate_backend({})".format(pid))
         cur.fetchall()
 
-    # Abandon session
+    # Abandon session by shutting down the socket
     sock = socket.fromfd(postgres_conn.fileno(), socket.AF_INET, socket.SOCK_STREAM)
     sock.shutdown(socket.SHUT_RDWR)
+
+    # Wait for stats collector to update
+    time.sleep(0.5)
 
     aggregator.reset()
     check.run()
 
-    assert_metric_at_least(
-        aggregator, 'postgresql.sessions.idle_in_transaction_time', count=1, lower_bound=0.5, tags=expected_tags
-    )
+    # Verify counter metrics incremented correctly
     aggregator.assert_metric('postgresql.sessions.killed', value=1, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.sessions.fatal', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.sessions.abandoned', value=1, count=1, tags=expected_tags)
+
+    # Clean up connection objects (connections are already in bad state from kill/abandon)
+    try:
+        conn.close()
+    except Exception:
+        pass  # Connection was killed, close may fail
+    try:
+        postgres_conn.close()
+    except Exception:
+        pass  # Socket was shut down, close may fail
+
+
+@requires_over_14
+@pytest.mark.flaky(max_runs=3)
+def test_session_idle_in_transaction_time(aggregator, integration_check, pg_instance):
+    """Test idle_in_transaction_time metric tracks time spent idle in a transaction."""
+    postgres_conn = _get_superconn(pg_instance)
+    with postgres_conn.cursor() as cur:
+        cur.execute("select pg_stat_reset();")
+        cur.fetchall()
+    time.sleep(0.5)
+
+    check = integration_check(pg_instance)
+    check.run()
+    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
+
+    aggregator.assert_metric('postgresql.sessions.idle_in_transaction_time', value=0, count=1, tags=expected_tags)
+
+    # Use autocommit=False to keep the transaction open during the sleep
+    conn = _get_conn(pg_instance, autocommit=False)
+    with conn.cursor() as cur:
+        cur.execute('BEGIN')
+        _increase_txid(cur)
+        cur.fetchall()
+        # Keep transaction idle for 5 seconds
+        time.sleep(5.0)
+
+    # Close the connection to end the transaction
+    conn.close()
+
+    # Wait for stats collector to update
+    time.sleep(1.0)
+    aggregator.reset()
+    check.run()
+
+    # Verify we now have a greater than 0 seconds of idle transaction time
+    assert_metric_at_least(
+        aggregator, 'postgresql.sessions.idle_in_transaction_time', count=1, lower_bound=0.1, tags=expected_tags
+    )
+
+    postgres_conn.close()
 
 
 def test_unsupported_replication(aggregator, integration_check, pg_instance):

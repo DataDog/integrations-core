@@ -166,6 +166,7 @@ files:
           example: <USERNAME>
       - name: sasl_plain_password
         description: Password for sasl PLAIN or SCRAM authentication.
+        secret: true
         value:
           type: string
           example: <PASSWORD>
