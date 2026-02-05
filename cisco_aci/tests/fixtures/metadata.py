@@ -145,7 +145,6 @@ INTERFACE_METADATA = [
         'name': 'eth1/1',
         'oper_status': 1,
         'status': 'up',
-        'type': '',
         'is_physical': True,
     },
     {
@@ -162,7 +161,6 @@ INTERFACE_METADATA = [
         'name': 'eth1/2',
         'oper_status': 1,
         'status': 'up',
-        'type': '',
         'is_physical': True,
     },
     {
@@ -179,7 +177,6 @@ INTERFACE_METADATA = [
         'name': 'eth1/3',
         'oper_status': 2,
         'status': 'down',
-        'type': '',
         'is_physical': True,
     },
     {
@@ -196,7 +193,6 @@ INTERFACE_METADATA = [
         'name': 'eth1/1',
         'oper_status': 1,
         'status': 'up',
-        'type': '',
         'is_physical': True,
     },
     {
@@ -213,7 +209,6 @@ INTERFACE_METADATA = [
         'name': 'eth1/2',
         'oper_status': 1,
         'status': 'up',
-        'type': '',
         'is_physical': True,
     },
     {
@@ -230,7 +225,6 @@ INTERFACE_METADATA = [
         'name': 'eth1/3',
         'oper_status': 2,
         'status': 'down',
-        'type': '',
         'is_physical': True,
     },
     {
@@ -247,7 +241,6 @@ INTERFACE_METADATA = [
         'name': 'eth5/1',
         'oper_status': 1,
         'status': 'up',
-        'type': '',
         'is_physical': True,
     },
     {
@@ -264,7 +257,6 @@ INTERFACE_METADATA = [
         'name': 'eth5/2',
         'oper_status': 1,
         'status': 'up',
-        'type': '',
         'is_physical': True,
     },
     {
@@ -281,7 +273,6 @@ INTERFACE_METADATA = [
         'name': 'eth7/1',
         'oper_status': 2,
         'status': 'down',
-        'type': '',
         'is_physical': True,
     },
 ]
