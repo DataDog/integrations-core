@@ -559,8 +559,8 @@ def test_restore_current_database_context(instance_docker):
         with check.connection.restore_current_database_context(KEY_PREFIX):
             with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 cursor.execute("USE tempdb")
-                assert check.connection._get_current_database_context() == "tempdb"
-        assert check.connection._get_current_database_context() == current_db
+                assert check.connection._get_current_database_context(KEY_PREFIX) == "tempdb"
+        assert check.connection._get_current_database_context(KEY_PREFIX) == current_db
 
 
 @pytest.mark.unit
