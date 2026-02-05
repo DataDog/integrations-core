@@ -20,7 +20,10 @@ DATABASE_MEMORY_METRICS_QUERY = """
         SUM(CASE WHEN page_type IN (4, 5, 6, 7, 8, 9, 10) THEN 1 ELSE 0 END) as other_page_count
     FROM sys.dm_os_buffer_descriptors WITH (NOLOCK)
     WHERE database_id != 32767  -- Exclude Resource Database
+        AND database_id > 0  -- Exclude invalid database IDs
+        AND DB_NAME(database_id) IS NOT NULL  -- Ensure database name exists
     GROUP BY database_id
+    HAVING COUNT(*) > 0  -- Only include databases with pages in buffer pool
     OPTION (MAXDOP 1)  -- Prevent parallelism for consistent performance
 """
 
@@ -60,7 +63,34 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
         Returns the interval in seconds at which to collect database memory metrics.
         Note: Querying sys.dm_os_buffer_descriptors can be resource intensive on systems with large buffer pools.
         '''
-        return self.config.database_metrics_config["db_memory_metrics"].get("collection_interval", 300)
+        value = self.config.database_metrics_config["db_memory_metrics"].get("collection_interval", 300)
+        # Validate to ensure it's a reasonable positive integer
+        if not isinstance(value, (int, float)) or value < 60:
+            self.log.warning("Invalid collection_interval value: %s, using default of 300", value)
+            return 300
+        # Convert to int and cap at a reasonable maximum (1 hour)
+        value = int(value)
+        if value > 3600:
+            self.log.warning("collection_interval value too high: %s, capping at 3600", value)
+            return 3600
+        return value
+
+    @property
+    def min_page_count(self) -> int:
+        '''
+        Returns the minimum number of pages a database must have in the buffer pool to be reported.
+        This helps reduce noise from databases with minimal memory usage.
+        '''
+        value = self.config.database_metrics_config["db_memory_metrics"].get("min_page_count", 1)
+        # Validate to prevent SQL injection - must be a positive integer
+        if not isinstance(value, int) or value < 0:
+            self.log.warning("Invalid min_page_count value: %s, using default of 1", value)
+            return 1
+        # Cap at a reasonable maximum to prevent issues
+        if value > 1000000:  # ~7.8GB worth of pages
+            self.log.warning("min_page_count value too high: %s, capping at 1000000", value)
+            return 1000000
+        return value
 
     @property
     def enabled(self) -> bool:
@@ -68,9 +98,19 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
-        # Add collection interval to the query mapping
+        # Add collection interval to the query mapping and apply min_page_count filter
         query_mapping = DATABASE_MEMORY_METRICS_QUERY_MAPPING.copy()
         query_mapping['collection_interval'] = self.collection_interval
+
+        # Modify query to apply min_page_count filter if set
+        # Use validated integer value to prevent SQL injection
+        min_count = self.min_page_count
+        if min_count > 1:
+            # Ensure min_count is an integer (redundant but safe)
+            min_count = int(min_count)
+            query = query_mapping['query'].replace("HAVING COUNT(*) > 0", f"HAVING COUNT(*) >= {min_count}")
+            query_mapping['query'] = query
+
         return [query_mapping]
 
     @property
@@ -90,7 +130,10 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}(" f"enabled={self.enabled}, " f"collection_interval={self.collection_interval})"
+            f"{self.__class__.__name__}("
+            f"enabled={self.enabled}, "
+            f"collection_interval={self.collection_interval}, "
+            f"min_page_count={self.min_page_count})"
         )
 
     def _build_query_executors(self):
@@ -131,15 +174,29 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
                         len(result),
                     )
 
+                    # Warn if query is taking too long (more than 5 seconds)
+                    if elapsed_time_ms > 5000:
+                        self.log.warning(
+                            "Database memory metrics query took %d ms, consider increasing collection_interval "
+                            "or min_page_count to reduce load",
+                            elapsed_time_ms,
+                        )
+
                     # Process each row (database) separately
+                    databases_processed = 0
+                    metrics_submitted = 0
                     for row in result:
                         try:
                             database_name = row[0]
                             if not database_name:
                                 continue
 
+                            # Sanitize database name for tagging (handle special characters)
+                            # This prevents issues with database names containing colons or other special chars
+                            safe_db_name = str(database_name).replace(':', '_').replace(',', '_')
+
                             # Add database tags for each metric
-                            tags = ctx.tags + [f'db:{database_name}', f'database:{database_name}']
+                            tags = ctx.tags + [f'db:{safe_db_name}', f'database:{safe_db_name}']
 
                             # Submit metrics for this database
                             for i, column in enumerate(ctx.columns):
@@ -147,6 +204,8 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
                                     value = row[i]
                                     if value is not None:
                                         self.check.gauge(f"sqlserver.{column['name']}", value, tags=tags)
+                                        metrics_submitted += 1
+                            databases_processed += 1
                         except Exception as e:
                             self.log.warning(
                                 "Error processing database memory metrics for row %s: %s",
@@ -154,6 +213,14 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
                                 str(e),
                             )
                             continue
+
+                    # Log summary statistics
+                    if databases_processed > 0:
+                        self.log.debug(
+                            "Successfully processed %d databases and submitted %d metrics",
+                            databases_processed,
+                            metrics_submitted,
+                        )
 
         except Exception as e:
             self.log.error(

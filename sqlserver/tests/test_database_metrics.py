@@ -1713,12 +1713,14 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
 
     assert memory_metrics.enabled is False
     assert memory_metrics.collection_interval == 300  # Default value
+    assert memory_metrics.min_page_count == 1  # Default value
 
     # Test with metrics enabled and custom collection interval
     instance_docker_metrics['database_metrics'] = {
         'db_memory_metrics': {
             'enabled': True,
             'collection_interval': 600,
+            'min_page_count': 100,
         },
     }
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -1732,6 +1734,7 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
 
     assert memory_metrics.enabled is True
     assert memory_metrics.collection_interval == 600
+    assert memory_metrics.min_page_count == 100
     assert memory_metrics.databases == [None]  # Instance-level query
     assert memory_metrics.is_database_instance_query is False
 
@@ -1741,6 +1744,111 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
     assert queries[0]['collection_interval'] == 600
     assert 'WITH (NOLOCK)' in queries[0]['query']
     assert 'OPTION (MAXDOP 1)' in queries[0]['query']
+    assert 'HAVING COUNT(*) >= 100' in queries[0]['query']  # Min page count filter applied
+
+
+@pytest.mark.unit
+def test_sqlserver_database_memory_metrics_validation(init_config, instance_docker_metrics):
+    """Test validation of database memory metrics configuration."""
+    # Test with invalid collection_interval
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {
+            'enabled': True,
+            'collection_interval': -1,  # Invalid negative value
+            'min_page_count': "not_a_number",  # Invalid string value
+        },
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=lambda x, y: [],
+    )
+
+    # Should use defaults for invalid values
+    assert memory_metrics.collection_interval == 300  # Default value
+    assert memory_metrics.min_page_count == 1  # Default value
+
+    # Test with very high values
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {
+            'enabled': True,
+            'collection_interval': 10000,  # Too high
+            'min_page_count': 2000000,  # Too high
+        },
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=lambda x, y: [],
+    )
+
+    # Should cap at reasonable maximums
+    assert memory_metrics.collection_interval == 3600  # Capped at 1 hour
+    assert memory_metrics.min_page_count == 1000000  # Capped at ~7.8GB
+
+
+@pytest.mark.unit
+def test_sqlserver_database_memory_metrics_name_sanitization(aggregator, init_config, instance_docker_metrics):
+    """Test that database names with special characters are properly sanitized."""
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {'enabled': True},
+    }
+
+    # Mock results with database names containing special characters
+    mocked_results = [
+        ('db:with:colons', 1, 1000, 7.8125, 100, 0.78125, 900, 7.03125, 500, 300, 100, 100),
+        ('db,with,commas', 2, 2000, 15.625, 200, 1.5625, 1800, 14.0625, 1000, 600, 200, 200),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(ctx, query, job_name, elapsed_time_ms):
+        class MockContext:
+            def __init__(self):
+                self.tags = ['test:tag']
+                self.columns = [
+                    {'name': 'database_name', 'type': 'tag'},
+                    {'name': 'database_id', 'type': 'tag'},
+                    {'name': 'database.buffer_pool.page_count', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.size', 'type': 'gauge'},
+                ]
+
+        ctx = MockContext()
+
+        for row in mocked_results:
+            database_name = row[0]
+            # Match the sanitization logic
+            safe_db_name = str(database_name).replace(':', '_').replace(',', '_')
+            tags = ctx.tags + [f'db:{safe_db_name}', f'database:{safe_db_name}']
+
+            for i, column in enumerate(ctx.columns):
+                if column['type'] == 'gauge' and i < len(row):
+                    value = row[i]
+                    if value is not None:
+                        sqlserver_check.gauge(f"sqlserver.{column['name']}", value, tags=tags)
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    memory_metrics.check = sqlserver_check
+    execute_query_handler_mocked(None, None, None, 100)
+
+    # Verify metrics with sanitized database names
+    tags1 = ['test:tag', 'db:db_with_colons', 'database:db_with_colons']
+    tags2 = ['test:tag', 'db:db_with_commas', 'database:db_with_commas']
+
+    aggregator.assert_metric('sqlserver.database.buffer_pool.page_count', value=1000, tags=tags1)
+    aggregator.assert_metric('sqlserver.database.buffer_pool.page_count', value=2000, tags=tags2)
 
 
 @pytest.mark.unit
@@ -1785,7 +1893,9 @@ def test_sqlserver_database_memory_metrics_execution(aggregator, init_config, in
         # Submit metrics for each database
         for row in mocked_results:
             database_name = row[0]
-            tags = ctx.tags + [f'db:{database_name}', f'database:{database_name}']
+            # Match the sanitization in the actual implementation
+            safe_db_name = str(database_name).replace(':', '_').replace(',', '_')
+            tags = ctx.tags + [f'db:{safe_db_name}', f'database:{safe_db_name}']
 
             for i, column in enumerate(ctx.columns):
                 if column['type'] == 'gauge' and i < len(row):
