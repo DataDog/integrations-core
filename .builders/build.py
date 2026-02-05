@@ -109,6 +109,9 @@ def build_macos():
         shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
         shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
+        deps_dir = HERE.parent / '.deps'
+        shutil.copytree(deps_dir / 'resolved', mount_dir / 'resolved')
+
         prefix_path = builder_root / 'prefix'
         env = {
             **os.environ,
@@ -126,6 +129,8 @@ def build_macos():
             'CXXFLAGS': f'-I{prefix_path}/include -O2',
             # Build command for extra platform-specific build steps
             'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
+            # For figuring out which existing lockfile to load.
+            'DD_TARGET_NAME': image,
         }
 
         if not args.skip_setup:
@@ -233,7 +238,7 @@ def build_image():
                     '-e',
                     f'DD_TARGET_NAME={image}',
                     '-e',
-                    f"DD_PYTHON_VERSION={os.environ['PYTHON_VERSION']}",
+                    f"PYTHON_VERSION={os.environ['PYTHON_VERSION']}",
                 ]
             )
 
@@ -254,13 +259,11 @@ def build_image():
             if args.digest:
                 script_args.append('--use-built-index')
 
-            check_process(
-                docker_cmd
-                + [
-                    image_name,
-                    *script_args,
-                ]
-            )
+            check_process([
+                *docker_cmd,
+                image_name,
+                *script_args,
+            ])
 
             output_dir = Path(args.output_dir)
             output_dir.parent.mkdir(parents=True, exist_ok=True)

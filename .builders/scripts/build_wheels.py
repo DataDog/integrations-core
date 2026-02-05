@@ -327,7 +327,7 @@ def main():
                 'pip',
                 'wheel',
                 '-r',
-                str(MOUNT_DIR / 'resolved' / f'{os.environ["DD_TARGET_NAME"]}_{os.environ["DD_PYHON_VERSION"]}.txt'),
+                str(MOUNT_DIR / 'resolved' / f'{os.environ["DD_TARGET_NAME"]}_{os.environ["PYTHON_VERSION"]}.txt'),
                 '--wheel-dir',
                 str(staged_wheel_dir),
                 '--index-url',
