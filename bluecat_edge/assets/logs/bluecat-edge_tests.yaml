@@ -45,7 +45,6 @@ tests:
         "id" : "1768799730903712CBD65A6B0963C276D07800E643DBG"
       }
     }
-  service: "bluecatedge"
   result:
     custom:
       dns:
@@ -135,7 +134,6 @@ tests:
           "id" : "1768799730903712CBD65A6B0963C276D07800E643DBG"
         }
       }
-    service: "bluecatedge"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1770186142000
