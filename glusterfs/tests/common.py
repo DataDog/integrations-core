@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-GLUSTER_VERSION = os.getenv('GLUSTER_VERSION')
+GLUSTER_VERSION = os.getenv("GLUSTER_VERSION")
 
-CHECK = 'glusterfs'
-INSTANCE = {'use_sudo': False}
-E2E_INIT_CONFIG = {'gstatus_path': 'docker exec gluster-node-1 gstatus'}
-CONFIG = {'init_config': E2E_INIT_CONFIG, 'instances': [INSTANCE]}
+CHECK = "glusterfs"
+INSTANCE = {"use_sudo": False}
+E2E_INIT_CONFIG = {"gstatus_path": "docker exec gluster-node-1 gstatus"}
+CONFIG = {"init_config": E2E_INIT_CONFIG, "instances": [INSTANCE]}
+# Trigger tests
 
 EXPECTED_METRICS = [
     "glusterfs.brick.block_size",
