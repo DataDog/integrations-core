@@ -66,6 +66,7 @@ def split_sqlserver_host_port(host):
 # supporting escaping using braces, letting the client library or the database ultimately decide what's valid
 CONNECTION_STRING_SPECIAL_CHARACTERS = set('=;{}')
 
+
 def parse_connection_string_properties(cs):
     """
     Parses the properties portion of a SQL Server connection string (i.e. "key1=value1;key2=value2;...") into a map of
