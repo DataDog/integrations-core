@@ -954,6 +954,10 @@ integration/mysql:
 - changed-files:
   - any-glob-to-any-file:
     - mysql/**/*
+integration/n8n:
+- changed-files:
+  - any-glob-to-any-file:
+    - n8n/**/*
 integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
