@@ -1,0 +1,1 @@
+Add query metrics collection using $queryStats aggregation pipeline (MongoDB 7.0+ for Atlas deployments or 8.0+ for self-hosted)

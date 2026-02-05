@@ -46,6 +46,7 @@ files:
       description: |
         The raw connection string used to connect to the system, ignoring all of the above options.
       fleet_configurable: true
+      secret: true
       value:
         type: string
     - name: severity_threshold
