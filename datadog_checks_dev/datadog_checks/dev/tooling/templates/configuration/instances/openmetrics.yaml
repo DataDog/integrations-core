@@ -258,6 +258,7 @@
 - name: hostname_label
   description: |
     Override the hostname for every metric submission with the value of one of its labels.
+  fleet_configurable: true
   value:
     type: string
 - name: hostname_format
