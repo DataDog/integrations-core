@@ -398,6 +398,7 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test the activity collection loop rate limit
     aggregator.reset()
     collection_interval = 0.1
+    warmup_interval = 0.5
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
@@ -406,7 +407,8 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dd_run_check(check)
 
     # Wait long enough for at least one collection to occur
-    time.sleep(collection_interval * 3)
+    # Giving time to warm up the connection with the db
+    time.sleep(warmup_interval + collection_interval * 3)
     check.cancel()
     elapsed = time.time() - start
 
