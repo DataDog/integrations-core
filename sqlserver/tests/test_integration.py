@@ -1102,9 +1102,9 @@ def test_table_size_metrics_with_indexes(aggregator, dd_run_check, instance_dock
     row_count_metrics = aggregator.metrics('sqlserver.table.row_count')
     test_table_metrics = [m for m in row_count_metrics if all(tag in m.tags for tag in expected_table_tags)]
     assert len(test_table_metrics) > 0, f"No row_count metrics found for table {table_name}"
-    assert test_table_metrics[0].value == expected_row_count, (
-        f"Expected row_count={expected_row_count}, got {test_table_metrics[0].value}"
-    )
+    assert (
+        test_table_metrics[0].value == expected_row_count
+    ), f"Expected row_count={expected_row_count}, got {test_table_metrics[0].value}"
 
 
 @pytest.mark.integration
