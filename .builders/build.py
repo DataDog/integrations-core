@@ -128,7 +128,7 @@ def build_macos():
             'CFLAGS': f'-I{prefix_path}/include -O2',
             'CXXFLAGS': f'-I{prefix_path}/include -O2',
             # Build command for extra platform-specific build steps
-            'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
+            'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh',
             # For figuring out which existing lockfile to load.
             'DD_TARGET_NAME': image,
         }
