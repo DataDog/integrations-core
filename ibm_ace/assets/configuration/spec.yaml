@@ -91,7 +91,6 @@ files:
         example: false
         type: boolean
     - name: tls_cipher_spec
-      type: string
       description: |
         The TLS cipher to use. It should match the value of the channel's SSLCIPH attribute.
       value:
