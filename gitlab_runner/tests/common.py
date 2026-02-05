@@ -30,13 +30,22 @@ CUSTOM_TAGS = ['optional:tag1']
 # When we stand up a clean test infrastructure some of those metrics might not
 # be available yet, hence we validate a stable subset
 ALLOWED_METRICS = [
+    'acceptable_job_queuing_duration_exceeded_total',
+    'api_request_statuses_total',
     'ci_runner_errors',
     'ci_runner_version_info',
+    'concurrent',
+    'job_duration_seconds',
+    'job_queue_duration_seconds',
+    'job_stage_duration_seconds',
+    'limit',
     'process_max_fds',
     'process_open_fds',
     'process_resident_memory_bytes',
     'process_start_time_seconds',
     'process_virtual_memory_bytes',
+    'request_concurrency',
+    'request_concurrency_exceeded_total',
 ]
 
 CONFIG = {

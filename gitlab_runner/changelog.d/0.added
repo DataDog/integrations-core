@@ -1,0 +1,1 @@
+Add support for 9 additional GitLab Runner metrics: api_request_statuses_total, concurrent, job_duration_seconds, job_queue_duration_seconds, acceptable_job_queuing_duration_exceeded_total, job_stage_duration_seconds, limit, request_concurrency, and request_concurrency_exceeded_total.
