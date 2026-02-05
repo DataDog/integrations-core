@@ -35,14 +35,14 @@ tests:
      - "log_type:system"
     timestamp: 1768504726000
  -
-  sample: "Jan 14 02:32:17 2026 30133 4 3.4.0 collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
+  sample: "Jan  4 02:32:17 2026 30133 4 3.4.0 collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
   tags:
    - "log_type:system"
   result:
     custom:
       level: 4
       pid: 30133
-      timestamp: 1768357937000
+      timestamp: 1767493937000
       version: "3.4.0"
     message: "collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
     status: "warn"
