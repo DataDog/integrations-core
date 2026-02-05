@@ -3,12 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 import click
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+
+_OP_SPLIT = re.compile(r"\s*\b(?:AND|OR|/|,|\+|\band/or\b)\b\s*", re.IGNORECASE)
+# SPDX ids are typically: letters/digits plus . + -
+# and may appear as LicenseRef-* / DocumentRef-*:LicenseRef-*
+_ID = re.compile(r"(DocumentRef-[A-Za-z0-9.+-]+:)?LicenseRef-[A-Za-z0-9.+-]+|[A-Za-z0-9.+-]+")
 
 
 def format_attribution_line(package_name, license_id, package_copyright):
@@ -330,6 +336,32 @@ def read_file_lines(file, encoding='utf-8'):
         return f.readlines()
 
 
+def split_license_expression_simple(expr: str) -> list[str]:
+    # Normalize parens to spaces
+    expr = expr.replace("(", " ").replace(")", " ")
+
+    parts = []
+    for chunk in _OP_SPLIT.split(expr):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+
+        # Handle "WITH" exceptions by taking the left side license id.
+        chunk = re.split(r"\s+\bWITH\b\s+", chunk, flags=re.IGNORECASE)[0].strip()
+
+        # Extract tokens; keep ones that look like SPDX-ish ids
+        for token in _ID.findall(chunk):
+            if token:
+                parts.append(token if isinstance(token, str) else token[0])
+        if not parts:
+            # If we couldn't extract any ID, try to use the whole chunk
+            # as a fallback, stripping any remaining noise.
+            fallback = re.sub(r'\s+', ' ', chunk).strip()
+            if fallback:
+                parts.append(fallback)
+    return parts
+
+
 @click.command(short_help='Validate third-party license list')
 @click.option('--sync', '-s', is_flag=True, help='Generate the `LICENSE-3rdparty.csv` file')
 @click.pass_obj
@@ -420,13 +452,7 @@ def licenses(app: Application, sync: bool):
         for package_license in data['licenses']:
             package_license = package_license.strip('"')
 
-            expanded_licenses = []
-            for separator in (' and/or ', '/', ' OR ', ' or '):
-                if separator in package_license:
-                    expanded_licenses.extend(package_license.split(separator))
-                    break
-            else:
-                expanded_licenses.append(package_license)
+            expanded_licenses = split_license_expression_simple(package_license)
 
             for expanded_license in expanded_licenses:
                 normalized_license = expanded_license.lower()
