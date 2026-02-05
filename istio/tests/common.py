@@ -359,6 +359,11 @@ ISTIO_AGENT_METRICS = [
     'istio.mesh.agent.outgoing_latency.count',
     'istio.mesh.agent.go.memstats.mspan_sys_bytes',
     'istio.mesh.agent.pilot.conflict.outbound_listener.tcp_over_current_http',
+    'istio.mesh.agent.cert_expiry_seconds',
+    'istio.mesh.agent.dns_requests.count',
+    'istio.mesh.agent.dns_upstream_request_duration_seconds.bucket',
+    'istio.mesh.agent.dns_upstream_request_duration_seconds.sum',
+    'istio.mesh.agent.dns_upstream_request_duration_seconds.count',
 ]
 
 NON_CONFORMING_METRICS = [

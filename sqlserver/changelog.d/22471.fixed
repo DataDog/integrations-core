@@ -1,0 +1,1 @@
+Fixed an issue where schema collection thread connections could get abruptly closed from the main check loop
