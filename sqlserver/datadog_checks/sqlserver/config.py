@@ -205,7 +205,7 @@ class SQLServerConfig:
             "db_backup_metrics": {'enabled': True, 'collection_interval': DEFAULT_LONG_METRICS_COLLECTION_INTERVAL},
             "db_files_metrics": {'enabled': True},
             "db_stats_metrics": {'enabled': True},
-            "db_memory_metrics": {'enabled': False},
+            "db_memory_metrics": {'enabled': False, 'collection_interval': 300},
             "db_fragmentation_metrics": {
                 'enabled': False,
                 'enabled_tempdb': False,

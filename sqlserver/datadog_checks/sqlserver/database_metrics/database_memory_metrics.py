@@ -18,9 +18,10 @@ DATABASE_MEMORY_METRICS_QUERY = """
         SUM(CASE WHEN page_type = 2 THEN 1 ELSE 0 END) as index_page_count,
         SUM(CASE WHEN page_type = 3 THEN 1 ELSE 0 END) as text_page_count,
         SUM(CASE WHEN page_type IN (4, 5, 6, 7, 8, 9, 10) THEN 1 ELSE 0 END) as other_page_count
-    FROM sys.dm_os_buffer_descriptors
+    FROM sys.dm_os_buffer_descriptors WITH (NOLOCK)
     WHERE database_id != 32767  -- Exclude Resource Database
     GROUP BY database_id
+    OPTION (MAXDOP 1)  -- Prevent parallelism for consistent performance
 """
 
 DATABASE_MEMORY_METRICS_QUERY_MAPPING = {
@@ -54,14 +55,23 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
         return self.config.database_metrics_config["db_memory_metrics"]["enabled"]
 
     @property
-    def enabled(self):
-        if not self.include_database_memory_metrics:
-            return False
-        return True
+    def collection_interval(self) -> int:
+        '''
+        Returns the interval in seconds at which to collect database memory metrics.
+        Note: Querying sys.dm_os_buffer_descriptors can be resource intensive on systems with large buffer pools.
+        '''
+        return self.config.database_metrics_config["db_memory_metrics"].get("collection_interval", 300)
+
+    @property
+    def enabled(self) -> bool:
+        return self.include_database_memory_metrics
 
     @property
     def queries(self):
-        return [DATABASE_MEMORY_METRICS_QUERY_MAPPING]
+        # Add collection interval to the query mapping
+        query_mapping = DATABASE_MEMORY_METRICS_QUERY_MAPPING.copy()
+        query_mapping['collection_interval'] = self.collection_interval
+        return [query_mapping]
 
     @property
     def databases(self):
@@ -72,17 +82,15 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
         return [None]
 
     @property
-    def is_database_instance_query(self):
+    def is_database_instance_query(self) -> bool:
         """
-        Returns True since we're querying at the instance level but reporting per database.
+        Returns False since we handle the database tagging manually in execute_query_handler.
         """
         return False
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}("
-            f"enabled={self.enabled}, "
-            f"include_database_memory_metrics={self.include_database_memory_metrics})"
+            f"{self.__class__.__name__}(" f"enabled={self.enabled}, " f"collection_interval={self.collection_interval})"
         )
 
     def _build_query_executors(self):
@@ -103,17 +111,33 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
     def execute_query_handler(self, ctx, query, job_name, elapsed_time_ms):
         """
         Executes the query and processes results with proper database tagging.
+        Includes error handling and logging for production stability.
         """
-        with ctx.executor(self.check.autodiscovery_query_timeout) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query)
-                result = cursor.fetchall()
+        try:
+            with ctx.executor(self.check.autodiscovery_query_timeout) as conn:
+                with conn.cursor() as cursor:
+                    self.log.debug("Executing database memory metrics query")
+                    cursor.execute(query)
+                    result = cursor.fetchall()
 
-                if result:
+                    if not result:
+                        self.log.debug("No database memory metrics results returned")
+                        return
+
+                    # Log query execution time for monitoring
+                    self.log.debug(
+                        "Database memory metrics query completed in %d ms with %d databases",
+                        elapsed_time_ms,
+                        len(result),
+                    )
+
                     # Process each row (database) separately
                     for row in result:
-                        database_name = row[0]
-                        if database_name:
+                        try:
+                            database_name = row[0]
+                            if not database_name:
+                                continue
+
                             # Add database tags for each metric
                             tags = ctx.tags + [f'db:{database_name}', f'database:{database_name}']
 
@@ -123,3 +147,17 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
                                     value = row[i]
                                     if value is not None:
                                         self.check.gauge(f"sqlserver.{column['name']}", value, tags=tags)
+                        except Exception as e:
+                            self.log.warning(
+                                "Error processing database memory metrics for row %s: %s",
+                                row[0] if row and len(row) > 0 else "unknown",
+                                str(e),
+                            )
+                            continue
+
+        except Exception as e:
+            self.log.error(
+                "Failed to execute database memory metrics query: %s",
+                str(e),
+                exc_info=self.log.isEnabledFor(self.log.DEBUG),
+            )

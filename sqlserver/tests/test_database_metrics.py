@@ -22,6 +22,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverAvailabilityReplicasMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseMemoryMetrics,
     SqlserverDatabaseReplicationStatsMetrics,
     SqlserverDatabaseStatsMetrics,
     SqlserverDBFragmentationMetrics,
@@ -1692,3 +1693,216 @@ def test_sqlserver_database_metrics_init(
     assert len(database_file_metrics) == 1
     assert database_file_metrics[0].enabled is True
     assert 'tempdb' in database_file_metrics[0].databases
+
+
+@pytest.mark.unit
+def test_sqlserver_database_memory_metrics_configuration(init_config, instance_docker_metrics):
+    """Test database memory metrics configuration and properties."""
+    # Test with metrics disabled
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {'enabled': False},
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=lambda x, y: [],
+    )
+
+    assert memory_metrics.enabled is False
+    assert memory_metrics.collection_interval == 300  # Default value
+
+    # Test with metrics enabled and custom collection interval
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {
+            'enabled': True,
+            'collection_interval': 600,
+        },
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=lambda x, y: [],
+    )
+
+    assert memory_metrics.enabled is True
+    assert memory_metrics.collection_interval == 600
+    assert memory_metrics.databases == [None]  # Instance-level query
+    assert memory_metrics.is_database_instance_query is False
+
+    # Check query configuration
+    queries = memory_metrics.queries
+    assert len(queries) == 1
+    assert queries[0]['collection_interval'] == 600
+    assert 'WITH (NOLOCK)' in queries[0]['query']
+    assert 'OPTION (MAXDOP 1)' in queries[0]['query']
+
+
+@pytest.mark.unit
+def test_sqlserver_database_memory_metrics_execution(aggregator, init_config, instance_docker_metrics):
+    """Test database memory metrics execution and metric submission."""
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {'enabled': True},
+    }
+
+    # Mock results from sys.dm_os_buffer_descriptors query
+    mocked_results = [
+        ('master', 1, 1000, 7.8125, 100, 0.78125, 900, 7.03125, 500, 300, 100, 100),
+        ('tempdb', 2, 5000, 39.0625, 1000, 7.8125, 4000, 31.25, 2500, 1500, 500, 500),
+        ('msdb', 4, 2000, 15.625, 200, 1.5625, 1800, 14.0625, 1000, 600, 200, 200),
+        ('datadog_test', 5, 3000, 23.4375, 300, 2.34375, 2700, 21.09375, 1500, 900, 300, 300),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(ctx, query, job_name, elapsed_time_ms):
+        # Mock the execute_query_handler to return test data
+        class MockContext:
+            def __init__(self):
+                self.tags = ['test:tag']
+                self.columns = [
+                    {'name': 'database_name', 'type': 'tag'},
+                    {'name': 'database_id', 'type': 'tag'},
+                    {'name': 'database.buffer_pool.page_count', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.size', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.dirty_page_count', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.dirty_pages', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.clean_page_count', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.clean_pages', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.data_page_count', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.index_page_count', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.text_page_count', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.other_page_count', 'type': 'gauge'},
+                ]
+
+        ctx = MockContext()
+
+        # Submit metrics for each database
+        for row in mocked_results:
+            database_name = row[0]
+            tags = ctx.tags + [f'db:{database_name}', f'database:{database_name}']
+
+            for i, column in enumerate(ctx.columns):
+                if column['type'] == 'gauge' and i < len(row):
+                    value = row[i]
+                    if value is not None:
+                        sqlserver_check.gauge(f"sqlserver.{column['name']}", value, tags=tags)
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    memory_metrics.check = sqlserver_check
+
+    # Build and execute query executors
+    executors = memory_metrics._build_query_executors()
+    assert len(executors) == 1
+
+    # Execute the mocked query handler directly
+    execute_query_handler_mocked(None, None, None, 100)
+
+    # Verify metrics were submitted correctly
+    for db_name in ['master', 'tempdb', 'msdb', 'datadog_test']:
+        tags = ['test:tag', f'db:{db_name}', f'database:{db_name}']
+
+        aggregator.assert_metric('sqlserver.database.buffer_pool.page_count', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.size', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.dirty_page_count', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.dirty_pages', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.clean_page_count', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.clean_pages', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.data_page_count', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.index_page_count', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.text_page_count', tags=tags)
+        aggregator.assert_metric('sqlserver.database.buffer_pool.other_page_count', tags=tags)
+
+    # Verify specific values for master database
+    master_tags = ['test:tag', 'db:master', 'database:master']
+    aggregator.assert_metric('sqlserver.database.buffer_pool.page_count', value=1000, tags=master_tags)
+    aggregator.assert_metric('sqlserver.database.buffer_pool.size', value=7.8125, tags=master_tags)
+
+
+@pytest.mark.unit
+def test_sqlserver_database_memory_metrics_error_handling(init_config, instance_docker_metrics):
+    """Test error handling in database memory metrics."""
+    import logging
+
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {'enabled': True},
+    }
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    # Create a mock logger to capture log messages
+    mock_logger = mock.Mock(spec=logging.Logger)
+    mock_logger.isEnabledFor.return_value = False
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=lambda x, y: [],
+    )
+    memory_metrics.log = mock_logger
+    memory_metrics.check = sqlserver_check
+
+    # Test error in query execution
+    class MockContext:
+        def executor(self, timeout):
+            raise Exception("Database connection error")
+
+    ctx = MockContext()
+
+    # This should handle the error gracefully
+    memory_metrics.execute_query_handler(ctx, "SELECT 1", "test_job", 100)
+
+    # Verify error was logged
+    mock_logger.error.assert_called_once()
+    error_message = mock_logger.error.call_args[0][0]
+    assert "Failed to execute database memory metrics query" in error_message
+
+    # Test error handling for individual row processing
+    class MockContextWithCursor:
+        def __init__(self):
+            self.tags = ['test:tag']
+            self.columns = [
+                {'name': 'database_name', 'type': 'tag'},
+                {'name': 'database.buffer_pool.page_count', 'type': 'gauge'},
+            ]
+
+        def executor(self, timeout):
+            return self
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def cursor(self):
+            return self
+
+        def execute(self, query):
+            pass
+
+        def fetchall(self):
+            # Return data that will cause an error during processing
+            return [(None,), ('valid_db', 'invalid_number')]
+
+    ctx = MockContextWithCursor()
+    mock_logger.reset_mock()
+
+    memory_metrics.execute_query_handler(ctx, "SELECT 1", "test_job", 100)
+
+    # Verify warning was logged for row processing error
+    if mock_logger.warning.called:
+        warning_message = mock_logger.warning.call_args[0][0]
+        assert "Error processing database memory metrics" in warning_message
