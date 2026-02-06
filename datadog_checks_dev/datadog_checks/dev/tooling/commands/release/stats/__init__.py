@@ -9,8 +9,9 @@ from .stats import merged_prs, report
 ALL_COMMANDS = (report, merged_prs)
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='A collection of tasks to generate reports about releases')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def stats():
+    """Generate release statistics."""
     pass
 
 

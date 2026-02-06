@@ -9,8 +9,9 @@ from ddev.cli.dep.sync import sync
 from ddev.cli.dep.updates import updates
 
 
-@click.group(short_help='Manage dependencies')
+@click.group()
 def dep():
+    """Manage dependencies."""
     pass
 
 

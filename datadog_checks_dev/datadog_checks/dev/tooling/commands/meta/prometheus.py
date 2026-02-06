@@ -70,8 +70,9 @@ def set_up_stream(ctx, endpoint, filehandle):
     ctx.fail("Please specify an endpoint or a file.")
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='Prometheus utilities')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def prom():
+    """Manage Prometheus metrics."""
     pass
 
 

@@ -19,8 +19,9 @@ ALL_COMMANDS = [
 ]
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='SNMP utilities')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def snmp():
+    """Manage SNMP profiles and MIBs."""
     pass
 
 

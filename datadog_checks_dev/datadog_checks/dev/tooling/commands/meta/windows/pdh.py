@@ -84,8 +84,9 @@ COUNTER_TYPES = {
 }
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='PDH utilities')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def pdh():
+    """Manage Windows PDH performance counters."""
     pass
 
 

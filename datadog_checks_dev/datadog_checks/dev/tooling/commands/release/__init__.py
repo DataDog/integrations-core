@@ -15,8 +15,9 @@ from .upload import upload
 ALL_COMMANDS = [build, changelog, make, show, stats, tag, upload]
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the release of checks')
+@click.group(context_settings=CONTEXT_SETTINGS)
 def release():
+    """Manage the releases of checks."""
     pass
 
 
