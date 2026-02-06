@@ -6,7 +6,7 @@
       "id": 2220119315921113,
       "definition": {
         "type": "image",
-        "url": "https://github.com/DataDog/IDE-SHEPHERD-extension/blob/main/resources/icons/icon.png",
+        "url": "https://raw.githubusercontent.com/DataDog/IDE-SHEPHERD-extension/refs/heads/main/resources/icons/icon.png",
         "sizing": "cover",
         "has_background": true,
         "has_border": true,
