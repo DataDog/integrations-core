@@ -209,7 +209,8 @@ pipeline:
               sources:
                 - network.client.port
               target: ocsf.src_endpoint.port
-              targetType: integer
+              targetType: attribute
+              targetFormat: integer
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
