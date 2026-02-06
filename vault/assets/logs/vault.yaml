@@ -131,7 +131,7 @@ pipeline:
   name: Vault
   enabled: true
   filter:
-    query: source:vault OR source:vault-enterprise
+    query: source:(vault OR vault-enterprise)
   processors:
     - type: grok-parser
       name: Parsing Vault Server logs
