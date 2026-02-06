@@ -262,3 +262,27 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1742361341385
+ -
+  sample: |-
+    { "message": "The zone Test_Zone was deleted. [virtualization instance: .].", "level": "Information", "Event": { "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event", "EventData": { "Data": { "VirtualizationID": ".", "Zone": "Test_Zone" } }, "System": { "Correlation": "", "Task": "ZONE_OP", "Keywords": "0x4000000000080000", "Channel": "Microsoft-Windows-DNSServer/Audit", "Opcode": "Info", "Security": { "UserID": "S-1-5-21-2225675242-3203514982-4229196803-500" }, "Provider": { "Guid": "{eb79061a-a566-4698-9119-3ed2807060e7}", "Name": "Microsoft-Windows-DNSServer" }, "TimeCreated": { "SystemTime": "2025-03-27T08:19:20.219Z" }, "EventRecordID": "245", "Execution": { "ThreadID": "7020", "ProcessID": "2892" }, "Version": "0", "Computer": "DDS-DNS.dds-dns.local", "EventID": "513", "Level": "4" } } }
+  result: null
+ - 
+  sample: |-
+    { "message": "The zone Test_Primary_Zone is paused. [virtualization instance: .].", "level": "Information", "Event": { "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event", "EventData": { "Data": { "VirtualizationID": ".", "Zone": "Test_Primary_Zone" } }, "System": { "Correlation": "", "Task": "ZONE_OP", "Keywords": "0x4000000000080000", "Channel": "Microsoft-Windows-DNSServer/Audit", "Opcode": "Info", "Security": { "UserID": "S-1-5-21-2225675242-3203514982-4229196803-500" }, "Provider": { "Guid": "{eb79061a-a566-4698-9119-3ed2807060e7}", "Name": "Microsoft-Windows-DNSServer" }, "TimeCreated": { "SystemTime": "2025-03-27T08:19:20.219Z" }, "EventRecordID": "289", "Execution": { "ThreadID": "6824", "ProcessID": "2892" }, "Version": "0", "Computer": "DDS-DNS.dds-dns.local", "EventID": "559", "Level": "4" } } }
+  result: null
+ - 
+  sample: |-
+    { "message": "A request to restart the DNS server service has been received.", "level": "Information", "Event": { "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event", "EventData": "", "System": { "Correlation": "", "Task": "SERVER_OP", "Keywords": "0x4000000020000000", "Channel": "Microsoft-Windows-DNSServer/Audit", "Opcode": "0", "Security": { "UserID": "S-1-5-21-2225675242-3203514982-4229196803-500" }, "Provider": { "Guid": "{eb79061a-a566-4698-9119-3ed2807060e7}", "Name": "Microsoft-Windows-DNSServer" }, "TimeCreated": { "SystemTime": "2026-01-15T16:05:21.123Z" }, "EventRecordID": "12388", "Execution": { "ThreadID": "3484", "ProcessID": "2996" }, "Version": "0", "Computer": "DDS-DNS.dds-dns.local", "EventID": "548", "Level": "4" } } }
+  result: null
+ - 
+  sample: |-
+    { "message": "The DNSKEY with Key Protocol DNSSec, Base64 Data 0x3235372033203133205A6843613372474C6F665A636E64464E326156643D3D and Crypto Algorithm RSA/SHA-256 has been added at the trust point test_dnskey.TrustAnchors.", "level": "Information", "Event": { "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event", "EventData": { "Data": { "KeyProtocol": "DNSSec", "BufferSize": "31", "Base64Data": "3235372033203133205A6843613372474C6F665A636E64464E326156643D3D", "CryptoAlgorithm": "RSA/SHA-256", "Name": "test_dnskey.TrustAnchors" } }, "System": { "Correlation": "", "Task": "DNSSEC_OP", "Keywords": "0x4000000100000000", "Channel": "Microsoft-Windows-DNSServer/Audit", "Opcode": "Info", "Security": { "UserID": "S-1-5-21-2225675242-3203514982-4229196803-500" }, "Provider": { "Guid": "{eb79061a-a566-4698-9119-3ed2807060e7}", "Name": "Microsoft-Windows-DNSServer" }, "TimeCreated": { "SystemTime": "2025-03-27T08:19:20.219Z" }, "EventRecordID": "282", "Execution": { "ThreadID": "2300", "ProcessID": "2892" }, "Version": "0", "Computer": "DDS-DNS.dds-dns.local", "EventID": "544", "Level": "4" } } }
+  result: null
+ - 
+  sample: |-
+    { "message": "Rollover was started on the type KSK with GUID {60901E33-AD11-429B-BBC8-0234171931C0} of zone Test_Primary_Zone.", "level": "Information", "Event": { "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event", "EventData": { "Data": { "Type": "KSK", "Zone": "Test_Primary_Zone", "GUID": "{60901E33-AD11-429B-BBC8-0234171931C0}" } }, "System": { "Correlation": "", "Task": "DNSSEC_OP", "Keywords": "0x4000000000800000", "Channel": "Microsoft-Windows-DNSServer/Audit", "Opcode": "Info", "Security": { "UserID": "S-1-5-18" }, "Provider": { "Guid": "{eb79061a-a566-4698-9119-3ed2807060e7}", "Name": "Microsoft-Windows-DNSServer" }, "TimeCreated": { "SystemTime": "2025-03-27T08:19:20.219Z" }, "EventRecordID": "447", "Execution": { "ThreadID": "5756", "ProcessID": "2892" }, "Version": "0", "Computer": "DDS-DNS.dds-dns.local", "EventID": "528", "Level": "4" } } }
+  result: null
+ - 
+  sample: |-
+    { "message": "A resource record scavenging cycle has been started on the DNS Server.", "level": "Information", "Event": { "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event", "EventData": "", "System": { "Correlation": "", "Task": "SERVER_OP", "Keywords": "0x4000002000000000", "Channel": "Microsoft-Windows-DNSServer/Audit", "Opcode": "Info", "Security": { "UserID": "S-1-5-21-2225675242-3203514982-4229196803-500" }, "Provider": { "Guid": "{eb79061a-a566-4698-9119-3ed2807060e7}", "Name": "Microsoft-Windows-DNSServer" }, "TimeCreated": { "SystemTime": "2025-03-27T08:19:20.219Z" }, "EventRecordID": "315", "Execution": { "ThreadID": "7644", "ProcessID": "2892" }, "Version": "0", "Computer": "DDS-DNS.dds-dns.local", "EventID": "552", "Level": "4" } } }
+  result: null
