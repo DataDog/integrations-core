@@ -43,6 +43,7 @@ files:
         type: boolean
     - name: client_token
       description: Client token necessary to collect metrics.
+      secret: true
       value:
         example: <CLIENT_TOKEN>
         type: string

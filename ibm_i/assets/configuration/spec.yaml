@@ -39,6 +39,7 @@ files:
     - name: connection_string
       description: |
         The raw connection string used to connect to the system, ignoring all of the above options.
+      secret: true
       value:
         type: string
     - name: severity_threshold
