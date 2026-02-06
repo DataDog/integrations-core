@@ -161,7 +161,7 @@ class TestCreateTopologyLinkMetadata:
                         'portDesc': 'topology/pod-1/paths-201/pathep-[eth5/1]',
                         'sysName': 'SP201',
                         'sysDesc': 'topology/pod-1/node-201',
-                        'mgmtIp': '10.0.200.99',  # Non-matching IP
+                        'mgmtIp': '192.168.1.100',  # OOB Management IP
                     }
                 }
             }
@@ -186,7 +186,7 @@ class TestCreateTopologyLinkMetadata:
         assert link.remote.device.dd_id == 'default:10.0.200.5'
         assert link.remote.interface.dd_id == 'default:10.0.200.5:cisco-aci-eth5/1'
         assert (
-            link.remote.device.ip == '192.168.1.100'
+            link.remote.device.ip_address == '192.168.1.100'
         )  # this IP is still set, but the dd_id should use the correct IP now.
 
         assert link.local.device.dd_id == 'default:10.0.200.0'
@@ -234,7 +234,7 @@ class TestCreateTopologyLinkMetadata:
         # With skip_ip_match=False and non-matching IP, remote device should NOT have dd_id
         assert not hasattr(link.remote.device, 'dd_id') or link.remote.device.dd_id is None
         assert not hasattr(link.remote.interface, 'dd_id') or link.remote.interface.dd_id is None
-        assert link.remote.device.ip == '192.168.1.100'
+        assert link.remote.device.ip_address == '192.168.1.100'
 
         assert link.local.device.dd_id == 'default:10.0.200.0'
         assert link.local.interface.dd_id == 'default:10.0.200.0:cisco-aci-eth1/49'

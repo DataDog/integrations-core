@@ -766,6 +766,10 @@ def test_fabric_topology_with_ip_mismatch_using_fixtures(aggregator):
                 f"Remote device should NOT have dd_id when IP doesn't match"
                 f" and skip_ip_match is False, got: {remote_dd_id}"
             )
+            assert link['remote']['interface'].get('dd_id') is None, (
+                f"Remote interface should NOT have dd_id when IP doesn't match"
+                f" and skip_ip_match is False, got: {link['remote']['interface'].get('dd_id')}"
+            )
 
     # Now test WITH skip_ip_match enabled
     aggregator.reset()
@@ -805,4 +809,8 @@ def test_fabric_topology_with_ip_mismatch_using_fixtures(aggregator):
         for link in links:
             assert link['remote']['device']['dd_id'] is not None, (
                 "Remote device SHOULD have dd_id when skip_ip_match is True, even with IP mismatch"
+            )
+
+            assert link['remote']['interface']['dd_id'] is not None, (
+                "Remote interface SHOULD have dd_id when skip_ip_match is True, even with IP mismatch"
             )
