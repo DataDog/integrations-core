@@ -11,10 +11,10 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-# Split license expressions on operators (AND, OR, and/or) and separators (/, ,, +).
+# Split license expressions on operators (AND, OR, and/or) and separators (/, +).
 # Use negative lookbehind (?<!-) and lookahead (?!-) to avoid matching "-or-" or "-and-"
 # inside SPDX identifiers like "GPL-2.0-or-later" or "LGPL-2.1-or-later".
-_OP_SPLIT = re.compile(r'\s*(?:(?<!-)\b(?:AND|OR)\b(?!-)|/|,|\+|\band/or\b)\s*', re.IGNORECASE)
+_OP_SPLIT = re.compile(r'\s*(?:(?<!-)\b(?:AND|OR)\b(?!-)|/|\+|\band/or\b)\s*', re.IGNORECASE)
 # SPDX ids are typically: letters/digits plus . + -
 # and may appear as LicenseRef-* / DocumentRef-*:LicenseRef-*
 _ID = re.compile(r"(DocumentRef-[A-Za-z0-9.+-]+:)?LicenseRef-[A-Za-z0-9.+-]+|[A-Za-z0-9.+-]+")
