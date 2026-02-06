@@ -117,17 +117,6 @@ pipeline:
         - 'pam_unix(sshd:session): session closed for user marc.szalkiewicz'
         - 'Accepted publickey for toptop from 172.22.179.72 port 58599 ssh2: RSA 01:fa:c1:75:ee:fbxxxx:xxxxx'
         - 'Received disconnect from 172.22.179.72: 11: disconnected by user'
-    - type: attribute-remapper
-      name: Map `network.client.port` to `network.client.port`
-      enabled: true
-      sources:
-        - network.client.port
-      sourceType: attribute
-      target: network.client.port
-      targetType: attribute
-      targetFormat: integer
-      preserveSource: false
-      overrideOnConflict: false
     - type: pipeline
       name: OCSF pipeline for SSH Authentication [3002]
       enabled: true
@@ -220,6 +209,7 @@ pipeline:
               sources:
                 - network.client.port
               target: ocsf.src_endpoint.port
+              targetType: integer
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper

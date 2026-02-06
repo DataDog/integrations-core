@@ -62,7 +62,7 @@ tests:
       network:
         client:
           ip: "172.22.179.72"
-          port: 58599
+          port: "58599"
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -140,7 +140,7 @@ tests:
       network:
         client:
           ip: "192.168.1.100"
-          port: 22334
+          port: "22334"
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -193,7 +193,7 @@ tests:
       network:
         client:
           ip: "192.168.1.100"
-          port: 49630
+          port: "49630"
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -248,7 +248,7 @@ tests:
       network:
         client:
           ip: "192.168.1.100"
-          port: 49630
+          port: "49630"
       ocsf:
         category_name: "Identity & Access Management"
         category_uid: 3
