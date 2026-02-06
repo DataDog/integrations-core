@@ -156,7 +156,7 @@ def get_remote_device_dd_id(device_map, remote_device_dn, mgmt_ip, should_topolo
     if device_id:
         if should_topology_skip_ip_match:
             return device_id
-        if mgmt_ip and device_id.endswith(mgmt_ip):
+        if device_id.endswith(mgmt_ip):
             return device_id
     return None
 
