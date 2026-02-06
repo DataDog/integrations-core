@@ -2,6 +2,9 @@
 id: vault
 metric_id: vault
 backend_only: false
+installation_sources:
+  - vault
+  - vault-enterprise
 facets:
   - groups:
       - Web Access
