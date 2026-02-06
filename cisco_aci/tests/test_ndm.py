@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
 from datadog_checks.cisco_aci import ndm
 
 
@@ -144,7 +143,7 @@ class TestGetRemoteDeviceDdId:
 class TestCreateTopologyLinkMetadata:
     """Test the create_topology_link_metadata function with topology_skips_ip_match"""
 
-    def test_create_topology_with_skip_ip_match_enabled(self):
+    def test_create_topology_with_conflicting_ips_and_skip_ip_match(self):
         """Test that topology links are created even when IP doesn't match if skip_ip_match is True"""
         import logging
 
@@ -183,11 +182,17 @@ class TestCreateTopologyLinkMetadata:
 
         assert len(links) == 1
         link = links[0]
-        # With skip_ip_match=True, the remote device should have a dd_id even though IP doesn't match
-        assert link.remote.device.dd_id == 'default:10.0.200.5'
-        assert link.local.device.dd_id == 'default:10.0.200.0'
 
-    def test_create_topology_without_skip_ip_match_non_matching_ip(self):
+        assert link.remote.device.dd_id == 'default:10.0.200.5'
+        assert link.remote.interface.dd_id == 'default:10.0.200.5:cisco-aci-eth5/1'
+        assert (
+            link.remote.device.ip == '192.168.1.100'
+        )  # this IP is still set, but the dd_id should use the correct IP now.
+
+        assert link.local.device.dd_id == 'default:10.0.200.0'
+        assert link.local.interface.dd_id == 'default:10.0.200.0:cisco-aci-eth1/49'
+
+    def test_create_topology_with_non_matching_ip_and_skip_ip_match_false(self):
         """Test that topology links lack remote dd_id when IP doesn't match and skip_ip_match is False"""
         import logging
 
@@ -205,7 +210,7 @@ class TestCreateTopologyLinkMetadata:
                         'portDesc': 'topology/pod-1/paths-201/pathep-[eth5/1]',
                         'sysName': 'SP201',
                         'sysDesc': 'topology/pod-1/node-201',
-                        'mgmtIp': '10.0.200.99',  # Non-matching IP
+                        'mgmtIp': '192.168.1.100',  # OOB Management IP
                     }
                 }
             }
@@ -228,7 +233,11 @@ class TestCreateTopologyLinkMetadata:
         link = links[0]
         # With skip_ip_match=False and non-matching IP, remote device should NOT have dd_id
         assert not hasattr(link.remote.device, 'dd_id') or link.remote.device.dd_id is None
+        assert not hasattr(link.remote.interface, 'dd_id') or link.remote.interface.dd_id is None
+        assert link.remote.device.ip == '192.168.1.100'
+
         assert link.local.device.dd_id == 'default:10.0.200.0'
+        assert link.local.interface.dd_id == 'default:10.0.200.0:cisco-aci-eth1/49'
 
     def test_create_topology_with_matching_ip(self):
         """Test that topology links work normally when IP matches regardless of skip_ip_match setting"""
@@ -261,21 +270,23 @@ class TestCreateTopologyLinkMetadata:
         namespace = 'default'
 
         # Test with skip_ip_match=False
-        links = list(
-            ndm.create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace, False)
-        )
+        links = list(ndm.create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace, False))
 
         assert len(links) == 1
         link = links[0]
-        assert link.remote.device.dd_id == 'default:10.0.200.5'
         assert link.local.device.dd_id == 'default:10.0.200.0'
+        assert link.local.interface.dd_id == 'default:10.0.200.0:cisco-aci-eth1/49'
+
+        assert link.remote.device.dd_id == 'default:10.0.200.5'
+        assert link.remote.interface.dd_id == 'default:10.0.200.5:cisco-aci-eth5/1'
 
         # Test with skip_ip_match=True - should also work
-        links = list(
-            ndm.create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace, True)
-        )
+        links = list(ndm.create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace, True))
 
         assert len(links) == 1
         link = links[0]
-        assert link.remote.device.dd_id == 'default:10.0.200.5'
         assert link.local.device.dd_id == 'default:10.0.200.0'
+        assert link.local.interface.dd_id == 'default:10.0.200.0:cisco-aci-eth1/49'
+
+        assert link.remote.device.dd_id == 'default:10.0.200.5'
+        assert link.remote.interface.dd_id == 'default:10.0.200.5:cisco-aci-eth5/1'

@@ -31,6 +31,7 @@ class FakeFabricSessionWrapperWithIPMismatch(common.FakeFabricSessionWrapper):
 
         return response
 
+
 node101 = '10.0.200.0'
 node102 = '10.0.200.1'
 node201 = '10.0.200.5'
@@ -683,6 +684,7 @@ def assert_check_metrics(aggregator):
     )
     aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=['cisco'])
 
+
 def test_fabric_topology_skip_ip_match(aggregator):
     """Test that topology_skips_ip_match configuration is properly passed through the system"""
     config_with_skip_ip_match = {
@@ -760,8 +762,10 @@ def test_fabric_topology_with_ip_mismatch_using_fixtures(aggregator):
         for link in links:
             # dd_id might not be in the dict at all, or be None
             remote_dd_id = link['remote']['device'].get('dd_id')
-            assert remote_dd_id is None, \
-                f"Remote device should NOT have dd_id when IP doesn't match and skip_ip_match is False, got: {remote_dd_id}"
+            assert remote_dd_id is None, (
+                f"Remote device should NOT have dd_id when IP doesn't match"
+                f" and skip_ip_match is False, got: {remote_dd_id}"
+            )
 
     # Now test WITH skip_ip_match enabled
     aggregator.reset()
@@ -799,5 +803,6 @@ def test_fabric_topology_with_ip_mismatch_using_fixtures(aggregator):
 
         # Remote devices SHOULD have dd_id because we're skipping IP validation
         for link in links:
-            assert link['remote']['device']['dd_id'] is not None, \
+            assert link['remote']['device']['dd_id'] is not None, (
                 "Remote device SHOULD have dd_id when skip_ip_match is True, even with IP mismatch"
+            )
