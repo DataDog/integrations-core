@@ -101,6 +101,9 @@ supervisor = ['BSD-3-Clause-Modification']
 prometheus-client = ['Apache-2.0']
 # https://github.com/GrahamDumpleton/wrapt/blob/develop/LICENSE
 wrapt = ['BSD-3-Clause']
+# orjson: PyPI reports "MPL-2.0 AND (Apache-2.0 OR MIT)" which the validator does not parse
+# https://github.com/ijl/orjson/blob/main/LICENSE-MIT
+orjson = ['MPL-2.0', 'Apache-2.0', 'MIT']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
