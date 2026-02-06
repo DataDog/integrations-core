@@ -237,6 +237,7 @@ SELECT table_name as `table_name`,
        column_key as `column_key`,
        extra as `extra`
 FROM INFORMATION_SCHEMA.COLUMNS
+%WHERE%
 """
 
 SQL_SCHEMAS_INDEXES = """\
@@ -255,6 +256,7 @@ SELECT
         'sub_part', sub_part
     )) as `columns`
 FROM INFORMATION_SCHEMA.STATISTICS
+%WHERE%
 GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
 """
 
@@ -274,7 +276,9 @@ SELECT
         'sub_part', sub_part
     )) as `columns`
 FROM INFORMATION_SCHEMA.STATISTICS
+%WHERE%
 GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
+
 """
 
 SQL_SCHEMAS_FOREIGN_KEYS = """\
