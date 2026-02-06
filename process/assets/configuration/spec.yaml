@@ -1,4 +1,5 @@
 name: Process
+fleet_configurable: true
 files:
 - name: process.yaml
   options:
@@ -9,6 +10,7 @@ files:
           Changes the check refresh rate of the matching pid list every X seconds except if it
           detects a change before. You might want to set it low if you want to
           alert on process service checks.
+        fleet_configurable: true
         value:
           type: integer
           example: 120
@@ -16,6 +18,7 @@ files:
         description: |
           The check maintains a list of PIDs for which it got access denied. It won't try to look at them again for the
           duration in seconds specified by access_denied_cache_duration.
+        fleet_configurable: true
         value:
           type: integer
           example: 120
@@ -24,6 +27,7 @@ files:
           The check maintains a list of running processes shared among all instances, that is used to generate the
           matching pid list on each instance. It won't try to look at them again for the duration in seconds
           specified by shared_process_list_cache_duration.
+        fleet_configurable: true
         value:
           type: integer
           example: 120
@@ -48,6 +52,7 @@ files:
       options:
       - name: name
         description: Used to uniquely identify your metrics as they are tagged with this name in Datadog.
+        fleet_configurable: true
         required: true
         value:
           type: string
@@ -58,6 +63,7 @@ files:
           parameter `exact_match: false`.
 
           Note: Exactly one of search_string, pid or pid_file must be specified per instance.
+        fleet_configurable: true
         value:
           type: array
           items:
@@ -79,6 +85,7 @@ files:
             * agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make sure to grant it read access to
               the PID files you specify in this option.
             * Exactly one of search_string, pid or pid_file must be specified per instance.
+        fleet_configurable: true
         value:
           type: string
       - name: exact_match
@@ -95,6 +102,7 @@ files:
           Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have access to the full
           command line of processes running under a different user. This option cannot be used in such cases.
           https://docs.datadoghq.com/integrations/process/#configuration
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -102,6 +110,7 @@ files:
         description: |
           When getting the number of files descriptors, dd-agent user might
           get a denied access. Set this to false to not ignore issue a warning if that happens.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -124,6 +133,7 @@ files:
         description: |
           If true, the check also collects metrics from all child processes of a matched process.
           Please be aware that the collection is recursive, and might take some time depending on the use case.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
@@ -133,10 +143,12 @@ files:
 
           Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that may not have access to the name
           of the user running the processes. This option cannot be used in such cases.
+        fleet_configurable: true
         value:
           type: string
       - name: try_sudo
         description: If set to `true`, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
