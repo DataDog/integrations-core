@@ -220,7 +220,9 @@ class MySqlSchemaCollector(SchemaCollector):
                 cursor.execute(columns_query, (table_name, table_schema))
                 columns = cursor.fetchall()
                 # Get indexes
-                indexes_query = SQL_SCHEMAS_INDEXES_NO_JSON.replace("%WHERE%", "WHERE table_name = %s AND table_schema = %s")
+                indexes_query = SQL_SCHEMAS_INDEXES_NO_JSON.replace(
+                    "%WHERE%", "WHERE table_name = %s AND table_schema = %s"
+                )
                 cursor.execute(indexes_query, (table_name, table_schema))
                 indexes_rows = cursor.fetchall()
                 indexes_dict = {}
@@ -234,12 +236,14 @@ class MySqlSchemaCollector(SchemaCollector):
                             "expression": index_row.get("expression"),
                             "columns": [],
                         }
-                    indexes_dict[index_row.get("name")]["columns"].append({
-                        "name": index_row.get("column_name"),
-                        "collation": index_row.get("collation"),
-                        "nullable": index_row.get("nullable"),
-                        "sub_part": index_row.get("sub_part"),
-                    })
+                    indexes_dict[index_row.get("name")]["columns"].append(
+                        {
+                            "name": index_row.get("column_name"),
+                            "collation": index_row.get("collation"),
+                            "nullable": index_row.get("nullable"),
+                            "sub_part": index_row.get("sub_part"),
+                        }
+                    )
                 indexes = list(indexes_dict.values())
                 # Get foreign keys
                 foreign_keys_query = SQL_SCHEMAS_FOREIGN_KEYS.replace(
@@ -264,14 +268,16 @@ class MySqlSchemaCollector(SchemaCollector):
                             "partition_description": partition_row.get("partition_description"),
                             "subpartitions": [],
                         }
-                    partitions_dict[partition_row.get("name")]["subpartitions"].append({
-                        "name": partition_row.get("subpartition_name"),
-                        "subpartition_ordinal_position": partition_row.get("subpartition_ordinal_position"),
-                        "subpartition_method": partition_row.get("subpartition_method"),
-                        "subpartition_expression": partition_row.get("subpartition_expression"),
-                        "table_rows": partition_row.get("table_rows"),
-                        "data_length": partition_row.get("data_length"),
-                    })
+                    partitions_dict[partition_row.get("name")]["subpartitions"].append(
+                        {
+                            "name": partition_row.get("subpartition_name"),
+                            "subpartition_ordinal_position": partition_row.get("subpartition_ordinal_position"),
+                            "subpartition_method": partition_row.get("subpartition_method"),
+                            "subpartition_expression": partition_row.get("subpartition_expression"),
+                            "table_rows": partition_row.get("table_rows"),
+                            "data_length": partition_row.get("data_length"),
+                        }
+                    )
                 partitions = list(partitions_dict.values())
         else:
             columns = json.loads(cursor_row.get("columns") or "[]")

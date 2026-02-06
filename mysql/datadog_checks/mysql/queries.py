@@ -289,7 +289,7 @@ SELECT
     cardinality as `cardinality`,
     index_type as `index_type`,
     non_unique as `non_unique`,
-    NULL as `expression`,    
+    NULL as `expression`,
     column_name,
     collation,
     nullable,
