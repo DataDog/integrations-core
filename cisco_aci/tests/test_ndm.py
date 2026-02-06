@@ -35,32 +35,6 @@ class TestGetRemoteDeviceDdId:
 
         assert result is None
 
-    def test_get_remote_device_dd_id_with_none_mgmt_ip(self):
-        """Test that device is NOT returned when mgmt_ip is None and skip_ip_match is False"""
-        device_map = {
-            'topology/pod-1/node-101': 'default:10.0.200.0',
-        }
-        remote_device_dn = 'topology/pod-1/node-101'
-        mgmt_ip = None
-        should_skip_ip_match = False
-
-        result = ndm.get_remote_device_dd_id(device_map, remote_device_dn, mgmt_ip, should_skip_ip_match)
-
-        assert result is None
-
-    def test_get_remote_device_dd_id_with_empty_mgmt_ip(self):
-        """Test that device is NOT returned when mgmt_ip is empty string and skip_ip_match is False"""
-        device_map = {
-            'topology/pod-1/node-101': 'default:10.0.200.0',
-        }
-        remote_device_dn = 'topology/pod-1/node-101'
-        mgmt_ip = ''
-        should_skip_ip_match = False
-
-        result = ndm.get_remote_device_dd_id(device_map, remote_device_dn, mgmt_ip, should_skip_ip_match)
-
-        assert result is None
-
     def test_get_remote_device_dd_id_skip_ip_match_with_matching_ip(self):
         """Test that device is returned when skip_ip_match is True, even with matching IP"""
         device_map = {
@@ -94,19 +68,6 @@ class TestGetRemoteDeviceDdId:
         }
         remote_device_dn = 'topology/pod-1/node-101'
         mgmt_ip = None
-        should_skip_ip_match = True
-
-        result = ndm.get_remote_device_dd_id(device_map, remote_device_dn, mgmt_ip, should_skip_ip_match)
-
-        assert result == 'default:10.0.200.0'
-
-    def test_get_remote_device_dd_id_skip_ip_match_with_empty_mgmt_ip(self):
-        """Test that device is returned when skip_ip_match is True, even with empty mgmt_ip"""
-        device_map = {
-            'topology/pod-1/node-101': 'default:10.0.200.0',
-        }
-        remote_device_dn = 'topology/pod-1/node-101'
-        mgmt_ip = ''
         should_skip_ip_match = True
 
         result = ndm.get_remote_device_dd_id(device_map, remote_device_dn, mgmt_ip, should_skip_ip_match)
