@@ -21,7 +21,9 @@ from datadog_checks.mysql.queries import (
     SQL_SCHEMAS_FOREIGN_KEYS,
     SQL_SCHEMAS_INDEXES,
     SQL_SCHEMAS_INDEXES_8_0_13,
+    SQL_SCHEMAS_INDEXES_NO_JSON,
     SQL_SCHEMAS_PARTITION,
+    SQL_SCHEMAS_PARTITION_NO_JSON,
     SQL_SCHEMAS_TABLES,
 )
 
@@ -153,7 +155,7 @@ class MySqlSchemaCollector(SchemaCollector):
         if not self._supports_json_aggregation():
             # For non json versions we just get the schemas and tables
             # We'll query for associated data in the _map_row method
-            return """SELECT
+            return f"""SELECT
                 `schemas`.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
                 tables.table_name, tables.engine, tables.row_format, tables.create_time
                 FROM ({schemas_query}) `schemas`
@@ -209,27 +211,68 @@ class MySqlSchemaCollector(SchemaCollector):
         }
 
         if not self._supports_json_aggregation():
-            # We need to fetch the related data for each table
-            # Use a key_prefix to get a separate connection to avoid conflicts with the main connection
-            with self._check._mysql_metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
+            # We need to fetch the related data for each table for pre-json aggregation versions
+            with closing(self._check._mysql_metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
                 table_name = cursor_row.get("table_name")
                 table_schema = cursor_row.get("schema_name")
+                # Get columns
                 columns_query = SQL_SCHEMAS_COLUMNS.replace("%WHERE%", "WHERE table_name = %s AND table_schema = %s")
                 cursor.execute(columns_query, (table_name, table_schema))
-                columns = cursor.fetchall_dict()
-                indexes_query = SQL_SCHEMAS_INDEXES.replace("%WHERE%", "WHERE table_name = %s AND table_schema = %s")
+                columns = cursor.fetchall()
+                # Get indexes
+                indexes_query = SQL_SCHEMAS_INDEXES_NO_JSON.replace("%WHERE%", "WHERE table_name = %s AND table_schema = %s")
                 cursor.execute(indexes_query, (table_name, table_schema))
-                indexes = cursor.fetchall_dict()
+                indexes_rows = cursor.fetchall()
+                indexes_dict = {}
+                for index_row in indexes_rows:
+                    if index_row.get("name") not in indexes_dict:
+                        indexes_dict[index_row.get("name")] = {
+                            "name": index_row.get("name"),
+                            "cardinality": index_row.get("cardinality"),
+                            "index_type": index_row.get("index_type"),
+                            "non_unique": index_row.get("non_unique"),
+                            "expression": index_row.get("expression"),
+                            "columns": [],
+                        }
+                    indexes_dict[index_row.get("name")]["columns"].append({
+                        "name": index_row.get("column_name"),
+                        "collation": index_row.get("collation"),
+                        "nullable": index_row.get("nullable"),
+                        "sub_part": index_row.get("sub_part"),
+                    })
+                indexes = list(indexes_dict.values())
+                # Get foreign keys
                 foreign_keys_query = SQL_SCHEMAS_FOREIGN_KEYS.replace(
-                    "%WHERE%", "WHERE table_name = %s AND table_schema = %s"
+                    "%WHERE%", "AND kcu.table_name = %s AND kcu.table_schema = %s"
                 )
                 cursor.execute(foreign_keys_query, (table_name, table_schema))
-                foreign_keys = cursor.fetchall_dict()
-                partition_query = SQL_SCHEMAS_PARTITION.replace(
-                    "%WHERE%", "WHERE table_name = %s AND table_schema = %s"
+                foreign_keys = cursor.fetchall()
+                # Get partitions
+                partition_query = SQL_SCHEMAS_PARTITION_NO_JSON.replace(
+                    "%WHERE%", "AND table_name = %s AND table_schema = %s"
                 )
                 cursor.execute(partition_query, (table_name, table_schema))
-                partitions = cursor.fetchall_dict()
+                partitions_rows = cursor.fetchall()
+                partitions_dict = {}
+                for partition_row in partitions_rows:
+                    if partition_row.get("name") not in partitions_dict:
+                        partitions_dict[partition_row.get("name")] = {
+                            "name": partition_row.get("name"),
+                            "partition_ordinal_position": partition_row.get("partition_ordinal_position"),
+                            "partition_method": partition_row.get("partition_method"),
+                            "partition_expression": partition_row.get("partition_expression"),
+                            "partition_description": partition_row.get("partition_description"),
+                            "subpartitions": [],
+                        }
+                    partitions_dict[partition_row.get("name")]["subpartitions"].append({
+                        "name": partition_row.get("subpartition_name"),
+                        "subpartition_ordinal_position": partition_row.get("subpartition_ordinal_position"),
+                        "subpartition_method": partition_row.get("subpartition_method"),
+                        "subpartition_expression": partition_row.get("subpartition_expression"),
+                        "table_rows": partition_row.get("table_rows"),
+                        "data_length": partition_row.get("data_length"),
+                    })
+                partitions = list(partitions_dict.values())
         else:
             columns = json.loads(cursor_row.get("columns") or "[]")
             indexes = json.loads(cursor_row.get("indexes") or "[]")
