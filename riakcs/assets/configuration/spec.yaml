@@ -13,6 +13,7 @@ files:
         type: string
     - name: access_secret
       description: The corresponding RiakCS access secret.
+      secret: true
       value:
         type: string
     - name: is_secure

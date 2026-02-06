@@ -65,6 +65,7 @@ def create_interface_metadata(phys_if, address, namespace):
         description=eth.attributes.desc,
         mac_address=eth.attributes.router_mac,
         admin_status=eth.attributes.admin_st,
+        is_physical=True,
     )
     if eth.ethpm_phys_if:
         interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
