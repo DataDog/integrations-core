@@ -62,8 +62,18 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     LANGUAGE sql
     SECURITY DEFINER;
 
+    CREATE OR REPLACE FUNCTION datadog.column_stats()
+    RETURNS TABLE (
+        schemaname name, tablename name, attname name,
+        n_distinct real, avg_width integer, null_frac real
+    ) AS
+    $$ SELECT schemaname, tablename, attname, n_distinct, avg_width, null_frac FROM pg_stats; $$
+    LANGUAGE sql
+    SECURITY DEFINER;
+
     ALTER FUNCTION datadog.explain_statement(l_query text, out explain json) OWNER TO postgres;
     ALTER FUNCTION datadog.pg_stat_activity() owner to postgres;
+    ALTER FUNCTION datadog.column_stats() OWNER TO postgres;
 
     -- datadog.explain_statement_noaccess is not part of the standard setup
     -- it's added only for the purpose of testing an explain function owned by a user with inadequate permissions

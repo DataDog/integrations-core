@@ -32,6 +32,7 @@ from datadog_checks.postgres.connection_pool import (
 )
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.health import PostgresHealth
+from datadog_checks.postgres.column_stats import ColumnStatsCollector
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -165,6 +166,7 @@ class PostgreSql(DatabaseCheck):
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
+        self.column_stats = ColumnStatsCollector(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
@@ -470,12 +472,15 @@ class PostgreSql(DatabaseCheck):
             self.statement_samples.cancel()
             self.statement_metrics.cancel()
             self.metadata_samples.cancel()
+            self.column_stats.cancel()
             if self.statement_metrics._job_loop_future:
                 self.statement_metrics._job_loop_future.result()
             if self.statement_samples._job_loop_future:
                 self.statement_samples._job_loop_future.result()
             if self.metadata_samples._job_loop_future:
                 self.metadata_samples._job_loop_future.result()
+            if self.column_stats._job_loop_future:
+                self.column_stats._job_loop_future.result()
         self._close_db_pool()
 
     def _clean_state(self):
@@ -1140,6 +1145,7 @@ class PostgreSql(DatabaseCheck):
                     self.statement_metrics.run_job_loop(tags)
                     self.statement_samples.run_job_loop(tags)
                     self.metadata_samples.run_job_loop(tags)
+                    self.column_stats.run_job_loop(tags)
                 if self._config.collect_wal_metrics is True:
                     # collect wal metrics for pg < 10 only when explicitly enabled
                     # (requires local filesystem access to the WAL directory)

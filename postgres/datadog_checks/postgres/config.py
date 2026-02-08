@@ -154,6 +154,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
                 **dict_defaults.instance_collect_schemas().model_dump(),
                 **(instance.get('collect_schemas', {})),
             },
+            "collect_column_stats": {
+                **dict_defaults.instance_collect_column_stats().model_dump(),
+                **(instance.get('collect_column_stats', {})),
+            },
             # Cloud
             "aws": {
                 **Aws(managed_authentication=ManagedAuthentication()).model_dump(),

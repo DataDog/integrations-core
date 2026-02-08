@@ -180,7 +180,6 @@ files:
         in encrypted form on disk.
 
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-      secret: true
       value:
         type: string
         default: null
@@ -859,6 +858,61 @@ files:
               type: string
             example:
               - "customer.*"
+
+    - name: collect_column_stats
+      description: |
+        Enable collection of column statistics from pg_stats.
+        Requires the `datadog.column_stats()` function to be created in the database.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of column statistics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the column statistics collection interval (in seconds).
+          value:
+            type: number
+            example: 14400
+            display_default: 14400
+        - name: max_tables
+          description: |
+            Maximum number of tables to collect column statistics for.
+          value:
+            type: number
+            example: 500
+            display_default: 500
+        - name: include_tables
+          description: |
+            A list of regex patterns to include tables.
+            Any table whose name matches any one of these patterns will be included.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "users.*"
+        - name: exclude_tables
+          description: |
+            A list of regex patterns to exclude tables.
+            Any table whose name matches any one of these patterns will be excluded.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "temp_.*"
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the column statistics collection synchronously. This is useful for testing purposes.
+          value:
+            type: boolean
+            example: false
 
     - name: aws
       description: |
