@@ -102,7 +102,7 @@ def instance_collect_schemas():
 
 def instance_collect_column_stats():
     return instance.CollectColumnStats(
-        enabled=False,
+        enabled=True,
         collection_interval=14400,
         max_tables=500,
         include_tables=[],

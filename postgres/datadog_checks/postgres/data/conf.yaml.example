@@ -638,10 +638,10 @@ instances:
     #
     # collect_column_stats:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of column statistics. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 14400
         ## Set the column statistics collection interval (in seconds).
