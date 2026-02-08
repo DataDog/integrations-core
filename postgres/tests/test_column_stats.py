@@ -164,8 +164,8 @@ def test_collect_column_stats_include_and_exclude(integration_check, dbm_instanc
     """Test that exclude takes precedence when both include and exclude match."""
     _analyze_tables(pg_instance)
     # Include all tables starting with 'p', but exclude 'pgtable'
-    dbm_instance['collect_column_stats']['include_tables'] = ['p.*']
-    dbm_instance['collect_column_stats']['exclude_tables'] = ['pgtable']
+    dbm_instance['collect_column_stats']['include_tables'] = ['^p.*']
+    dbm_instance['collect_column_stats']['exclude_tables'] = ['^pgtable$']
     check = integration_check(dbm_instance)
     run_one_check(check)
     events = aggregator.get_event_platform_events("dbm-column-stats")
