@@ -31,8 +31,8 @@ from datadog_checks.postgres.connection_pool import (
     TokenProvider,
 )
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
-from datadog_checks.postgres.health import PostgresHealth
 from datadog_checks.postgres.column_stats import ColumnStatsCollector
+from datadog_checks.postgres.health import PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (

@@ -419,7 +419,14 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
                 validation_result.add_warning(f'Invalid regex pattern in autodiscovery exclude: {exclude_pattern}')
 
     # If the user provided config explicitly enables these features, we add a warning if dbm is not enabled
-    dbm_required = ['query_activity', 'query_samples', 'query_metrics', 'collect_settings', 'collect_schemas']
+    dbm_required = [
+        'query_activity',
+        'query_samples',
+        'query_metrics',
+        'collect_settings',
+        'collect_schemas',
+        'collect_column_stats',
+    ]
     for feature in dbm_required:
         if instance.get(feature, {}).get('enabled') and not config.dbm:
             validation_result.add_warning(f'The `{feature}` feature requires the `dbm` option to be enabled.')

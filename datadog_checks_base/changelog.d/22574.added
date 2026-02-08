@@ -1,0 +1,1 @@
+Add database_monitoring_column_stats method to DatabaseCheck for column statistics event submission.
