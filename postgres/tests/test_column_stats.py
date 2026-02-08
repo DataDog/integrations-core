@@ -147,3 +147,55 @@ def test_collect_column_stats_function_not_found(integration_check, pg_instance,
     run_one_check(check)
     events = aggregator.get_event_platform_events("dbm-column-stats")
     assert len(events) == 0, "Expected no events when function doesn't exist"
+
+
+def test_collect_column_stats_collection_interval_in_event(integration_check, dbm_instance, pg_instance, aggregator):
+    """Test that the configured collection_interval appears in the emitted event."""
+    _analyze_tables(pg_instance)
+    dbm_instance['collect_column_stats']['collection_interval'] = 7200
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+    events = aggregator.get_event_platform_events("dbm-column-stats")
+    assert len(events) > 0, "Expected at least one column stats event"
+    assert events[0]['collection_interval'] == 7200
+
+
+def test_collect_column_stats_include_and_exclude(integration_check, dbm_instance, pg_instance, aggregator):
+    """Test that exclude takes precedence when both include and exclude match."""
+    _analyze_tables(pg_instance)
+    # Include all tables starting with 'p', but exclude 'pgtable'
+    dbm_instance['collect_column_stats']['include_tables'] = ['p.*']
+    dbm_instance['collect_column_stats']['exclude_tables'] = ['pgtable']
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+    events = aggregator.get_event_platform_events("dbm-column-stats")
+    for event in events:
+        for table_entry in event['column_stats']:
+            assert table_entry['table'] != 'pgtable', "pgtable should be excluded"
+            assert table_entry['table'].startswith('p'), (
+                f"Expected only tables starting with 'p' but got '{table_entry['table']}'"
+            )
+
+
+def test_collect_column_stats_default_config(integration_check, pg_instance, aggregator):
+    """Test that minimal config (just enabled + run_sync) uses correct defaults."""
+    _analyze_tables(pg_instance)
+    pg_instance['dbm'] = True
+    pg_instance['min_collection_interval'] = 0.1
+    pg_instance['query_samples'] = {'enabled': False}
+    pg_instance['query_activity'] = {'enabled': False}
+    pg_instance['query_metrics'] = {'enabled': False}
+    pg_instance['collect_settings'] = {'enabled': False}
+    pg_instance['collect_schemas'] = {'enabled': False}
+    pg_instance['collect_column_stats'] = {
+        'enabled': True,
+        'run_sync': True,
+    }
+    check = integration_check(pg_instance)
+    run_one_check(check)
+    collector = check.column_stats
+    # Verify defaults
+    assert collector.collection_interval == 14400
+    assert collector.max_tables == 500
+    assert collector.include_tables == []
+    assert collector.exclude_tables == []
