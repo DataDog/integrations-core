@@ -444,6 +444,7 @@ def apply_features(config: InstanceConfig, validation_result: ValidationResult):
     validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
+    validation_result.add_feature(FeatureKey.COLLECT_COLUMN_STATS, config.collect_column_stats.enabled and config.dbm)
 
 
 METRIC_TYPES = {
