@@ -475,7 +475,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.tid
               targetFormat: integer
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `Event.System.Execution.ProcessID` to `ocsf.actor.process.pid`
@@ -484,7 +484,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.pid
               targetFormat: integer
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `Event.System.Security.UserID` to `ocsf.actor.user.uid`
@@ -940,7 +940,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.tid
               targetFormat: integer
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `Event.System.Execution.ProcessID` to `ocsf.actor.process.pid`
@@ -949,7 +949,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.pid
               targetFormat: integer
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `Event.System.Security.UserID` to `ocsf.actor.user.uid`
