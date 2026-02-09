@@ -465,7 +465,6 @@ istio.ztunnel.xds.connection_terminations.total,count,,connection,,"[OpenMetrics
 istio.ztunnel.connection.opens.total,count,,connection,,"[OpenMetrics V1 and V2 and Istio v1.24+] Total connections opened in ztunnel",0,istio,ztunnel connection opens,
 istio.ztunnel.connection.closes.total,count,,connection,,"[OpenMetrics V1 and V2 and Istio v1.24+] Total connections closed in ztunnel",0,istio,ztunnel connection closes,
 istio.ztunnel.connection.termination.total,count,,connection,,"[OpenMetrics V1 and V2 and Istio v1.24+] Total connection terminations in ztunnel",0,istio,ztunnel connection terminations,
-istio.ztunnel.build,gauge,,,,"[OpenMetrics V1 and V2 and Istio v1.24+] Ztunnel build information",0,istio,ztunnel build info,
 istio.waypoint.request.count,count,,request,,"[OpenMetrics V1 and V2 and Istio v1.24+] Total HTTP requests through waypoint proxy",0,istio,waypoint requests,
 istio.waypoint.request.duration.milliseconds.count,count,,request,,"[OpenMetrics V1 and V2 and Istio v1.24+] Count of HTTP request durations through waypoint proxy",0,istio,waypoint request duration count,
 istio.waypoint.request.duration.milliseconds.sum,count,,millisecond,,"[OpenMetrics V1 and V2 and Istio v1.24+] Sum of HTTP request durations through waypoint proxy",0,istio,waypoint request duration sum,

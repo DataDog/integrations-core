@@ -287,8 +287,6 @@ ZTUNNEL_METRICS = {
     'istio_connection_opens_total': 'connection.opens.total',
     'istio_connection_closes_total': 'connection.closes.total',
     'istio_connection_termination_total': 'connection.termination.total',
-    # Build info
-    'istio_build': 'build',
 }
 
 
