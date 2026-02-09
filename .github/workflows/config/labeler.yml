@@ -138,6 +138,10 @@ integration/aspdotnet:
 - changed-files:
   - any-glob-to-any-file:
     - aspdotnet/**/*
+integration/arctic_wolf_aurora_endpoint_security:
+- changed-files:
+  - any-glob-to-any-file:
+    - arctic_wolf_aurora_endpoint_security/**/*
 integration/authorize_net:
 - changed-files:
   - any-glob-to-any-file:

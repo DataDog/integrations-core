@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "da21a0d6-d2ba-446b-9a5e-5f14c1d2e37b",
   "app_id": "arctic-wolf-aurora-endpoint-security",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
