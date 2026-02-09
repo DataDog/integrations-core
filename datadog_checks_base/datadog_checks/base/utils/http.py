@@ -18,6 +18,7 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests.exceptions import HTTPError as RequestsHTTPError
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
@@ -310,8 +311,17 @@ class HTTPXResponseAdapter:
                 out = part.decode(self._response.encoding or 'utf-8', errors='replace') if decode_unicode else part
                 yield out
 
+    def json(self, **kwargs):
+        """Parse response body as JSON. Compatible with requests Response.json()."""
+        return self._response.json(**kwargs)
+
     def raise_for_status(self) -> None:
-        self._response.raise_for_status()
+        try:
+            self._response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            # Re-raise as requests-style HTTPError so code that catches
+            # requests.HTTPError or expects response on the exception still works.
+            raise RequestsHTTPError(e.args[0] if e.args else None, response=self) from e
 
     def close(self) -> None:
         self._response.close()
@@ -761,14 +771,17 @@ class RequestsWrapper(object):
 
 
 def _make_httpx_auth(config, logger):
-    """Build httpx-compatible auth from config. Supports basic; others fall back to None with warning."""
+    """Build httpx-compatible auth from config. Supports basic; others fall back to None with warning.
+    Returns a (username, password) tuple for basic auth so options match what tests expect (e.g. cisco_aci).
+    httpx accepts both tuple and BasicAuth.
+    """
     auth_type = config['auth_type'].lower()
     if auth_type not in AUTH_TYPES:
         auth_type = 'basic'
 
     if auth_type == 'basic':
         if config['username'] is not None and config['password'] is not None:
-            return httpx.BasicAuth(config['username'], config['password'])
+            return (config['username'], config['password'])
         return None
 
     # Digest, Kerberos, NTLM, AWS: not yet implemented for httpx in Phase 1; log and skip auth
@@ -792,6 +805,20 @@ def _parse_uds_url(url):
         uds_path = path
         path = '/'
     return uds_path, 'http://localhost' + path
+
+
+class _HTTPXSessionLike:
+    """Minimal session-like object for backward compatibility with code that calls self.http.session.close()."""
+
+    __slots__ = ('_wrapper',)
+
+    def __init__(self, wrapper):
+        self._wrapper = wrapper
+
+    def close(self):
+        if getattr(self._wrapper, '_client', None) is not None:
+            self._wrapper._client.close()
+            self._wrapper._client = None
 
 
 class HTTPXWrapper:
@@ -928,6 +955,11 @@ class HTTPXWrapper:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
+
+    @property
+    def session(self):
+        """Backward compatibility: expose an object with close() for code that does self.http.session.close()."""
+        return _HTTPXSessionLike(self)
 
     def get(self, url, **options):
         return self._request('get', url, options)
