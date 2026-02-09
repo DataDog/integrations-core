@@ -1,7 +1,8 @@
 name: Build Integration Wheel
 
 # Reusable workflow for building a single integration wheel with SLSA provenance attestation
-# This workflow is the core building block called by other release workflows
+# This workflow builds the wheel and stores artifacts on GitHub for validation and upload by the TUF repo
+# No direct S3 uploads are performed - all distribution is handled by agent-integrations-tuf
 
 on:
   workflow_call:
@@ -18,24 +19,25 @@ on:
         description: "Git reference to checkout (commit SHA, branch, or tag)"
         required: true
         type: string
-      target-bucket:
-        description: "S3 bucket to upload to (agent-integration-wheels-dev/staging/prod)"
-        required: false
-        type: string
-        default: "agent-integration-wheels-dev"
     outputs:
-      wheel-path:
-        description: "Path to the built wheel file"
-        value: ${{ jobs.build-and-attest.outputs.wheel-path }}
-      wheel-digest:
-        description: "SHA256 digest of the wheel"
-        value: ${{ jobs.build-and-attest.outputs.wheel-digest }}
+      integration-name:
+        description: "Name of the integration that was built"
+        value: ${{ jobs.build-and-attest.outputs.integration-name }}
       wheel-version:
         description: "Version of the built wheel"
         value: ${{ jobs.build-and-attest.outputs.wheel-version }}
-      attestation-path:
-        description: "Path to the SLSA provenance attestation"
-        value: ${{ jobs.build-and-attest.outputs.attestation-path }}
+      wheel-digest:
+        description: "SHA256 digest of the wheel"
+        value: ${{ jobs.build-and-attest.outputs.wheel-digest }}
+      wheel-artifact-name:
+        description: "Name of the GitHub artifact containing the wheel"
+        value: ${{ jobs.build-and-attest.outputs.wheel-artifact-name }}
+      attestation-artifact-name:
+        description: "Name of the GitHub artifact containing the attestation"
+        value: ${{ jobs.build-and-attest.outputs.attestation-artifact-name }}
+      target-artifact-name:
+        description: "Name of the GitHub artifact containing the TUF target file"
+        value: ${{ jobs.build-and-attest.outputs.target-artifact-name }}
 
   # Allow manual testing via workflow_dispatch
   workflow_dispatch:
@@ -57,11 +59,6 @@ on:
         required: true
         type: string
         default: "master"
-      target-bucket:
-        description: "S3 bucket to upload to (agent-integration-wheels-dev/staging/prod)"
-        required: false
-        type: string
-        default: "agent-integration-wheels-dev"
 
   # TODO: Remove this PR trigger after testing is complete
   pull_request:
@@ -80,10 +77,12 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      wheel-path: ${{ steps.outputs.outputs.wheel-path }}
-      wheel-digest: ${{ steps.outputs.outputs.wheel-digest }}
+      integration-name: ${{ steps.outputs.outputs.integration-name }}
       wheel-version: ${{ steps.outputs.outputs.wheel-version }}
-      attestation-path: ${{ steps.outputs.outputs.attestation-path }}
+      wheel-digest: ${{ steps.outputs.outputs.wheel-digest }}
+      wheel-artifact-name: ${{ steps.outputs.outputs.wheel-artifact-name }}
+      attestation-artifact-name: ${{ steps.outputs.outputs.attestation-artifact-name }}
+      target-artifact-name: ${{ steps.outputs.outputs.target-artifact-name }}
 
     steps:
       - name: Checkout source repository
@@ -166,14 +165,15 @@ jobs:
             ATTESTATION_PATH="${{ steps.attest.outputs.bundle-path }}"
           fi
 
+          # Generate TUF target file with metadata
+          # Repository URL will be determined by the TUF repo during upload
           release target \
             --integration "${{ steps.build.outputs.integration }}" \
             --version "${{ steps.build.outputs.version }}" \
             --wheel-digest "${{ steps.build.outputs.wheel_digest }}" \
             --wheel-size "${{ steps.build.outputs.wheel_size }}" \
             --wheel-filename "${{ steps.build.outputs.wheel_filename }}" \
-            --attestation-path "$ATTESTATION_PATH" \
-            --repository-url "https://agent-integration-wheels-dev.s3.amazonaws.com" \
+            --attestation-digest "$(sha256sum "$ATTESTATION_PATH" | cut -d' ' -f1)" \
             --output-dir targets
 
           echo "Generated TUF target file: targets/datadog-${{ steps.build.outputs.integration }}/${{ steps.build.outputs.version }}.yaml"
@@ -208,41 +208,18 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      # TODO: Implement S3 upload when infrastructure is ready
-      # This section will be uncommented and configured once S3 buckets are available
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
-      #   with:
-      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-      #     aws-region: us-east-1
-
-      # - name: Upload to S3
-      #   run: |
-      #     INTEGRATION="${{ inputs.integration-name }}"
-      #     VERSION="${{ steps.version.outputs.version }}"
-      #     BUCKET="${{ inputs.target-bucket }}"
-      #     WHEEL_FILE="${{ steps.digest.outputs.wheel-file }}"
-      #     DIGEST="${{ steps.digest.outputs.digest }}"
-      #
-      #     # Upload wheel to s3://{bucket}/wheels/datadog-{integration}/
-      #     aws s3 cp "${WHEEL_FILE}" "s3://${BUCKET}/wheels/datadog-${INTEGRATION}/"
-      #
-      #     # Upload attestation to s3://{bucket}/attestations/{digest}.json
-      #     aws s3 cp "${WHEEL_FILE}.build.jsonl" "s3://${BUCKET}/attestations/${DIGEST}.json"
-      #
-      #     echo "Uploaded wheel and attestation to S3"
-
       - name: Set job outputs
         id: outputs
         run: |
-          # Use build outputs
-          echo "wheel-path=${{ steps.build.outputs.wheel_path }}" >> $GITHUB_OUTPUT
-          echo "wheel-digest=${{ steps.build.outputs.wheel_digest }}" >> $GITHUB_OUTPUT
-          echo "wheel-version=${{ steps.build.outputs.version }}" >> $GITHUB_OUTPUT
+          # Integration metadata
+          INTEGRATION="${{ steps.build.outputs.integration }}"
+          VERSION="${{ steps.build.outputs.version }}"
 
-          # Attestation path depends on environment
-          if [ "${{ env.ACT }}" = "true" ]; then
-            echo "attestation-path=${{ steps.mock_attest.outputs.bundle-path }}" >> $GITHUB_OUTPUT
-          else
-            echo "attestation-path=${{ steps.attest.outputs.bundle-path }}" >> $GITHUB_OUTPUT
-          fi
+          echo "integration-name=${INTEGRATION}" >> $GITHUB_OUTPUT
+          echo "wheel-version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "wheel-digest=${{ steps.build.outputs.wheel_digest }}" >> $GITHUB_OUTPUT
+
+          # Artifact names for downstream consumption by TUF repo
+          echo "wheel-artifact-name=wheel-${INTEGRATION}-${VERSION}" >> $GITHUB_OUTPUT
+          echo "attestation-artifact-name=attestation-${INTEGRATION}-${VERSION}" >> $GITHUB_OUTPUT
+          echo "target-artifact-name=target-${INTEGRATION}-${VERSION}" >> $GITHUB_OUTPUT

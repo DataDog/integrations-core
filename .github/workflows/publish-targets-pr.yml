@@ -1,6 +1,12 @@
 name: Publish Targets to PR
 
 # Reusable workflow that collects target artifacts and pushes to TUF repo PR branch
+# After pushing the target files, this workflow triggers the TUF repository's validation
+# workflow via repository_dispatch, passing metadata needed to download wheel and attestation
+# artifacts from this workflow run for provenance verification and S3 upload
+#
+# Required secrets:
+#   TUF_REPO_DISPATCH_TOKEN: GitHub PAT with repo scope for DataDog/agent-integrations-tuf
 
 on:
   workflow_call:
@@ -144,3 +150,42 @@ jobs:
             --body "$PR_BODY" \
             --base main \
             --head update-tuf-targets
+
+      - name: Trigger TUF repository validation workflow
+        if: steps.commit.outputs.has-changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.TUF_REPO_DISPATCH_TOKEN }}
+        run: |
+          echo "Triggering validation workflow in TUF repository..."
+
+          # Prepare payload with artifact metadata for TUF repo to download
+          PAYLOAD=$(jq -n \
+            --arg run_id "${{ github.run_id }}" \
+            --arg source_repo "${{ github.repository }}" \
+            --arg source_ref "${{ github.ref }}" \
+            --arg commit_sha "${{ github.sha }}" \
+            --arg workflow "${{ github.workflow }}" \
+            --arg actor "${{ github.actor }}" \
+            '{
+              run_id: $run_id,
+              source_repo: $source_repo,
+              source_ref: $source_ref,
+              commit_sha: $commit_sha,
+              workflow: $workflow,
+              actor: $actor,
+              artifacts_base_url: "https://github.com/\($source_repo)/actions/runs/\($run_id)"
+            }'
+          )
+
+          echo "Payload: $PAYLOAD"
+
+          # Trigger repository_dispatch event on TUF repo
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/DataDog/agent-integrations-tuf/dispatches \
+            -f event_type='validate-and-publish' \
+            -f "client_payload=$PAYLOAD"
+
+          echo "✓ Successfully triggered TUF repository validation workflow"

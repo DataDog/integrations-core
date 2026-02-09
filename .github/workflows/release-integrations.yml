@@ -1,7 +1,8 @@
 name: Release Integration Wheels
 
-# Full release workflow that orchestrates building and releasing multiple integration wheels
-# This workflow dispatches individual build jobs and collects the generated TUF targets
+# Full release workflow that orchestrates building multiple integration wheels
+# This workflow dispatches individual build jobs, collects artifacts on GitHub,
+# and triggers the TUF repository to validate and publish to S3
 
 on:
   workflow_dispatch:
@@ -23,11 +24,6 @@ on:
         required: true
         type: string
         default: "master"
-      target-bucket:
-        description: "S3 bucket to upload to (agent-integration-wheels-dev/staging/prod)"
-        required: false
-        type: string
-        default: "agent-integration-wheels-dev"
       release-cli-ref:
         description: "Git commit SHA of agent-integrations-wheels-release to use"
         required: true
@@ -117,7 +113,6 @@ jobs:
       integration-name: ${{ matrix.integration }}
       source-repo: ${{ inputs.source-repo || 'integrations-core' }}
       source-repo-ref: ${{ inputs.source-repo-ref || 'master' }}
-      target-bucket: ${{ inputs.target-bucket || 'agent-integration-wheels-dev' }}
 
   publish-targets:
     name: Publish targets to PR
