@@ -1,0 +1,132 @@
+name: Release Integration Wheels
+
+# Full release workflow that orchestrates building and releasing multiple integration wheels
+# This workflow dispatches individual build jobs and collects the generated TUF targets
+
+on:
+  workflow_dispatch:
+    inputs:
+      integrations:
+        description: 'JSON array of integrations to release (e.g., ["postgres", "mysql", "redis"])'
+        required: true
+        type: string
+      source-repo:
+        description: "Source repository name (integrations-core, integrations-extras, or marketplace)"
+        required: true
+        type: choice
+        options:
+          - integrations-core
+          - integrations-extras
+          - marketplace
+      source-repo-ref:
+        description: "Git reference to checkout (commit SHA, branch, or tag)"
+        required: true
+        type: string
+        default: "master"
+      target-bucket:
+        description: "S3 bucket to upload to (agent-integration-wheels-dev/staging/prod)"
+        required: false
+        type: string
+        default: "agent-integration-wheels-dev"
+      release-cli-ref:
+        description: "Git commit SHA of agent-integrations-wheels-release to use"
+        required: true
+        type: string
+
+  # TODO: Remove this PR trigger after testing is complete
+  pull_request:
+    branches:
+      - main
+      - 01-16-add_build_workflow
+      - 01-28-add_release_workflow
+
+permissions:
+  contents: write # Create branches and open PRs
+  pull-requests: write # Create PRs
+  id-token: write # For OIDC (passed to build jobs)
+  attestations: write # Create attestations (passed to build jobs)
+
+jobs:
+  setup:
+    name: Setup and validate inputs
+    runs-on: ubuntu-latest
+    outputs:
+      integration-list: ${{ steps.validate.outputs.integration-list }}
+      integration-count: ${{ steps.validate.outputs.integration-count }}
+
+    steps:
+      - name: Checkout release CLI
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: '3.11'
+
+      - name: Install release CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install ./
+
+      - name: Validate integrations input
+        id: validate
+        run: |
+          # For PR testing, use a small default list
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            INTEGRATIONS='["postgres", "aws_neuron", "lustre"]'
+          else
+            INTEGRATIONS='${{ inputs.integrations }}'
+          fi
+
+          echo "Validating integrations: $INTEGRATIONS"
+
+          # Run validation command
+          RESULT=$(release validate-integrations "$INTEGRATIONS" --max-count 256)
+          echo "$RESULT"
+
+          # Parse validation result
+          VALID=$(echo "$RESULT" | jq -r '.valid')
+          if [ "$VALID" != "true" ]; then
+            echo "Validation failed!"
+            exit 1
+          fi
+
+          # Extract outputs
+          COUNT=$(echo "$RESULT" | jq -r '.count')
+          INTEGRATION_LIST=$(echo "$RESULT" | jq -c '.integrations')
+
+          echo "Successfully validated $COUNT integration(s)"
+
+          # Set outputs
+          echo "integration-list=$INTEGRATION_LIST" >> $GITHUB_OUTPUT
+          echo "integration-count=$COUNT" >> $GITHUB_OUTPUT
+
+  build:
+    name: ${{ matrix.integration }}
+    needs: setup
+    strategy:
+      max-parallel: 256
+      fail-fast: false
+      matrix:
+        integration: ${{ fromJson(needs.setup.outputs.integration-list) }}
+
+    # Call the reusable build workflow
+    uses: ./.github/workflows/build-integration.yml
+    with:
+      integration-name: ${{ matrix.integration }}
+      source-repo: ${{ inputs.source-repo || 'integrations-core' }}
+      source-repo-ref: ${{ inputs.source-repo-ref || 'master' }}
+      target-bucket: ${{ inputs.target-bucket || 'agent-integration-wheels-dev' }}
+
+  publish-targets:
+    name: Publish targets to PR
+    needs: [setup, build]
+    # Only run on workflow_dispatch, not on PR
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/publish-targets-pr.yml
+    with:
+      commit-message: |
+        Add TUF targets for ${{ needs.setup.outputs.integration-count }} integration(s)
+
+        Integrations: ${{ needs.setup.outputs.integration-list }}
+        Source: ${{ inputs.source-repo }}@${{ inputs.source-repo-ref }}
