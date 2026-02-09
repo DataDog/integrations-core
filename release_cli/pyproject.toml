@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "release"
+version = "0.1.0"
+description = "Agent integrations wheel building and release pipeline"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "Datadog Agent Integrations Team"}
+]
+dependencies = [
+    "pyyaml>=6.0",
+    "build>=1.0.0",
+    "click>=8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+release = "release.cli:main"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--verbose",
+    "--cov=src/release",
+    "--cov-report=term-missing",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]

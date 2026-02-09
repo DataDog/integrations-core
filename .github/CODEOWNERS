@@ -21,6 +21,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /.builders/images/                 @DataDog/agent-integrations @DataDog/agent-build
 /.builders/patches/                @DataDog/agent-integrations @DataDog/agent-build
 
+# Release CLI
+/release_cli/                      @DataDog/agent-integrations
+
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations
 /datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-integrations @DataDog/container-integrations
