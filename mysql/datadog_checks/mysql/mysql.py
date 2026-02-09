@@ -767,13 +767,14 @@ class MySql(DatabaseCheck):
                 )
 
     def _collect_replication_metrics(self, db, results, above_560):
-        # Get replica stats
         replica_stats = self._get_replica_stats(db)
         replicas_connected = self._get_replicas_connected_count(db, above_560)
 
-        # Only return REPLICA_VARS if we have actual replication data
-        # This prevents reporting traditional replication metrics for pure group replication setups
-        has_traditional_replication = replica_stats or replicas_connected.get('Replicas_connected', 0) > 0
+        # When group replication is not active, always report traditional replication metrics
+        # so _check_replication_status can emit WARNING for sources with 0 replicas.
+        has_traditional_replication = (
+            replica_stats or replicas_connected.get('Replicas_connected', 0) > 0 or not self._group_replication_active
+        )
         if has_traditional_replication:
             results.update(replica_stats)
             results.update(replicas_connected)

@@ -110,8 +110,7 @@ services:
       interval: 2s
       retries: 20
 
-  # Traditional replica that replicates from node1 (the group replication primary)
-  # This creates a hybrid topology for testing both metric types
+  # Traditional replica of node1
   traditional-replica:
     image: mysql/mysql-server:${MYSQL_VERSION}
     container_name: traditional-replica

@@ -603,21 +603,37 @@ def test_set_cluster_tags(
         assert len(replication_role_tags) == 0
 
 
-def test_collect_replication_metrics_returns_empty_when_no_data():
-    """Test that _collect_replication_metrics returns {} when no traditional replication is configured."""
+def test_collect_replication_metrics_returns_empty_for_pure_group_replication():
+    """Test that _collect_replication_metrics returns {} for a pure group replication node."""
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
 
-    # Mock methods to return empty data (no traditional replication)
+    mysql_check._group_replication_active = True
     mysql_check._get_replica_stats = mock.MagicMock(return_value={})
     mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
 
     results = {}
     replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
 
-    # Should return empty dict when no traditional replication data
     assert replication_metrics == {}
-    # Results should not be updated
     assert results == {}
+
+
+def test_collect_replication_metrics_returns_vars_for_traditional_source_with_zero_replicas():
+    """Test that a traditional source with 0 connected replicas still returns REPLICA_VARS
+    so _check_replication_status can emit a WARNING for replica-loss detection."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    mysql_check._group_replication_active = False
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == REPLICA_VARS
+    assert results.get('Replicas_connected') == 0
 
 
 def test_collect_replication_metrics_returns_vars_when_replica():
@@ -626,7 +642,6 @@ def test_collect_replication_metrics_returns_vars_when_replica():
 
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
 
-    # Mock: this node is a traditional replica
     replica_stats = {
         'Seconds_Behind_Source': {'channel:default': 5},
         'Slave_IO_Running': {'channel:default': 'Yes'},
@@ -638,9 +653,7 @@ def test_collect_replication_metrics_returns_vars_when_replica():
     results = {}
     replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
 
-    # Should return REPLICA_VARS when this node is a replica
     assert replication_metrics == REPLICA_VARS
-    # Results should be updated with replica stats
     assert 'Seconds_Behind_Source' in results
 
 
@@ -650,14 +663,37 @@ def test_collect_replication_metrics_returns_vars_when_has_replicas_connected():
 
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
 
-    # Mock: this node is a primary with replicas connected
     mysql_check._get_replica_stats = mock.MagicMock(return_value={})
     mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 2})
 
     results = {}
     replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
 
-    # Should return REPLICA_VARS when replicas are connected
     assert replication_metrics == REPLICA_VARS
-    # Results should be updated with replicas connected count
     assert results.get('Replicas_connected') == 2
+
+
+def test_source_with_zero_replicas_emits_warning_service_check(aggregator, instance_basic):
+    """Test that a source with 0 connected replicas emits WARNING for replica-loss detection."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
+    mysql_check.service_check_tags = ['foo:bar']
+    mysql_check.global_variables._variables = {'log_bin': 'ON'}
+
+    mocked_results = {
+        'Replicas_connected': 0,
+    }
+
+    mysql_check._check_replication_status(mocked_results)
+
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.WARNING,
+        tags=['foo:bar', 'replication_mode:source'],
+        count=1,
+    )
+    aggregator.assert_service_check(
+        'mysql.replication.replica_running',
+        status=MySql.WARNING,
+        tags=['foo:bar', 'replication_mode:source'],
+        count=1,
+    )
