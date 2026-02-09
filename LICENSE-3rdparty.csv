@@ -39,6 +39,7 @@ oauthlib,PyPI,BSD-3-Clause,Copyright (c) The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,Copyright OpenStack <openstack-discuss@lists.openstack.org>
 orjson,PyPI,Apache-2.0,
 orjson,PyPI,MIT,
+orjson,PyPI,MPL-2.0,
 packaging,PyPI,Apache-2.0,Copyright (c) Donald Stufft and individual contributors.
 packaging,PyPI,BSD-3-Clause,Copyright (c) Donald Stufft and individual contributors.
 paramiko,PyPI,LGPL-2.1-only,Copyright (C) 2009 Jeff Forcier
