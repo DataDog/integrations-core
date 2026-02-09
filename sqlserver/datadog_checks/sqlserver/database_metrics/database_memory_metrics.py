@@ -4,27 +4,19 @@
 
 from .base import SqlserverDatabaseMetricsBase
 
+# Excldue internal databases
+# 32767: mssqlsystemresource
+# 32761: model_msdb
+# 32762: model_replicatedmaster
 DATABASE_MEMORY_METRICS_QUERY = """
     SELECT
         DB_NAME(database_id) as database_name,
         database_id,
-        COUNT(*) as page_count,
         COUNT(*) * 8 / 1024.0 as buffer_pool_size_mb,
-        SUM(CAST(is_modified AS INT)) as dirty_page_count,
-        SUM(CAST(is_modified AS INT)) * 8 / 1024.0 as dirty_pages_mb,
-        (COUNT(*) - SUM(CAST(is_modified AS INT))) as clean_page_count,
-        (COUNT(*) - SUM(CAST(is_modified AS INT))) * 8 / 1024.0 as clean_pages_mb,
-        SUM(CASE WHEN page_type = 1 THEN 1 ELSE 0 END) as data_page_count,
-        SUM(CASE WHEN page_type = 2 THEN 1 ELSE 0 END) as index_page_count,
-        SUM(CASE WHEN page_type = 3 THEN 1 ELSE 0 END) as text_page_count,
-        SUM(CASE WHEN page_type IN (4, 5, 6, 7, 8, 9, 10) THEN 1 ELSE 0 END) as other_page_count
+        SUM(CAST(is_modified AS INT)) * 8 / 1024.0 as dirty_pages_mb
     FROM sys.dm_os_buffer_descriptors WITH (NOLOCK)
-    WHERE database_id != 32767  -- Exclude Resource Database
-        AND database_id > 0  -- Exclude invalid database IDs
-        AND DB_NAME(database_id) IS NOT NULL  -- Ensure database name exists
-    GROUP BY database_id
-    HAVING COUNT(*) > 0  -- Only include databases with pages in buffer pool
-    OPTION (MAXDOP 1)  -- Prevent parallelism for consistent performance
+    WHERE database_id NOT IN (32767,32761,32762)
+    GROUP BY database_id;
 """
 
 DATABASE_MEMORY_METRICS_QUERY_MAPPING = {
@@ -33,16 +25,8 @@ DATABASE_MEMORY_METRICS_QUERY_MAPPING = {
     "columns": [
         {"name": "database_name", "type": "tag"},
         {"name": "database_id", "type": "tag"},
-        {"name": "database.buffer_pool.page_count", "type": "gauge"},
         {"name": "database.buffer_pool.size", "type": "gauge"},
-        {"name": "database.buffer_pool.dirty_page_count", "type": "gauge"},
         {"name": "database.buffer_pool.dirty_pages", "type": "gauge"},
-        {"name": "database.buffer_pool.clean_page_count", "type": "gauge"},
-        {"name": "database.buffer_pool.clean_pages", "type": "gauge"},
-        {"name": "database.buffer_pool.data_page_count", "type": "gauge"},
-        {"name": "database.buffer_pool.index_page_count", "type": "gauge"},
-        {"name": "database.buffer_pool.text_page_count", "type": "gauge"},
-        {"name": "database.buffer_pool.other_page_count", "type": "gauge"},
     ],
 }
 
