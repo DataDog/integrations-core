@@ -435,7 +435,10 @@ def _add_dog_user(conn):
     # need to get better exception in order to raise errors in the future
     except Exception:
         if MYSQL_FLAVOR == 'mariadb':
-            cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
+            if MYSQL_VERSION_PARSED >= parse_version('10.5.0'):
+                cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
+            else:
+                cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
         cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
 
 
