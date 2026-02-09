@@ -194,6 +194,7 @@ files:
         in encrypted form on disk.
 
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      secret: true
       value:
         type: string
         default: null

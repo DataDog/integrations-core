@@ -8,6 +8,7 @@ files:
   - template: instances
     options:
       - name: use_preview
+        legacy: true
         description: |
           Deprecated and unused. The Prometheus-based check is the default and only implementation.
         hidden: true

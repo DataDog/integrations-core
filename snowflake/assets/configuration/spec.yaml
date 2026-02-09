@@ -24,6 +24,7 @@ files:
           example: <PROXY_USER>
       - name: proxy_password
         description: The password to authenticate your proxy server.
+        secret: true
         value:
           type: string
           example: <PROXY_PASSWORD>
