@@ -21,7 +21,9 @@ from datadog_checks.mysql.queries import (
     SQL_SCHEMAS_FOREIGN_KEYS,
     SQL_SCHEMAS_INDEXES,
     SQL_SCHEMAS_INDEXES_8_0_13,
+    SQL_SCHEMAS_INDEXES_NO_JSON,
     SQL_SCHEMAS_PARTITION,
+    SQL_SCHEMAS_PARTITION_NO_JSON,
     SQL_SCHEMAS_TABLES,
 )
 
@@ -150,6 +152,18 @@ class MySqlSchemaCollector(SchemaCollector):
 
         limit = int(self._config.max_tables or 1_000_000)
 
+        if not self._supports_json_aggregation():
+            # For non json versions we just get the schemas and tables
+            # We'll query for associated data in the _map_row method
+            return f"""SELECT
+                `schemas`.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
+                tables.table_name, tables.engine, tables.row_format, tables.create_time
+                FROM ({schemas_query}) `schemas`
+                LEFT JOIN ({tables_query}) tables ON `schemas`.schema_name = tables.schema_name
+                ORDER BY tables.table_name
+                LIMIT {limit}
+            """
+
         query = f"""
             SELECT schema_tables.schema_name, schema_tables.table_name,
                 schema_tables.engine, schema_tables.row_format, schema_tables.create_time,
@@ -165,13 +179,17 @@ class MySqlSchemaCollector(SchemaCollector):
                 ORDER BY tables.table_name
                 LIMIT {limit}
             ) schema_tables
-                LEFT JOIN ({columns_query}) columns ON schema_tables.table_name = columns.table_name and
+                LEFT JOIN ({columns_query.replace("%WHERE%", "")}) columns ON
+                    schema_tables.table_name = columns.table_name AND
                     schema_tables.schema_name = columns.schema_name
-                LEFT JOIN ({indexes_query}) indexes ON schema_tables.table_name = indexes.table_name and
+                LEFT JOIN ({indexes_query.replace("%WHERE%", "")}) indexes ON
+                    schema_tables.table_name = indexes.table_name AND
                     schema_tables.schema_name = indexes.schema_name
-                LEFT JOIN ({constraints_query}) constraints ON schema_tables.table_name = constraints.table_name and
+                LEFT JOIN ({constraints_query.replace("%WHERE%", "")}) constraints ON
+                    schema_tables.table_name = constraints.table_name AND
                     schema_tables.schema_name = constraints.schema_name
-                LEFT JOIN ({partition_query}) partitions ON schema_tables.table_name = partitions.table_name
+                LEFT JOIN ({partition_query.replace("%WHERE%", "")}) partitions ON
+                    schema_tables.table_name = partitions.table_name
             GROUP BY schema_tables.schema_name, schema_tables.table_name,
             schema_tables.engine, schema_tables.row_format, schema_tables.create_time
             ;
@@ -191,6 +209,82 @@ class MySqlSchemaCollector(SchemaCollector):
             "default_character_set_name": cursor_row.get("default_character_set_name"),
             "default_collation_name": cursor_row.get("default_collation_name"),
         }
+
+        if not self._supports_json_aggregation():
+            # We need to fetch the related data for each table for pre-json aggregation versions
+            with closing(self._check._mysql_metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+                table_name = cursor_row.get("table_name")
+                table_schema = cursor_row.get("schema_name")
+                # Get columns
+                columns_query = SQL_SCHEMAS_COLUMNS.replace("%WHERE%", "WHERE table_name = %s AND table_schema = %s")
+                cursor.execute(columns_query, (table_name, table_schema))
+                columns = cursor.fetchall()
+                # Get indexes
+                indexes_query = SQL_SCHEMAS_INDEXES_NO_JSON.replace(
+                    "%WHERE%", "WHERE table_name = %s AND table_schema = %s"
+                )
+                cursor.execute(indexes_query, (table_name, table_schema))
+                indexes_rows = cursor.fetchall()
+                indexes_dict = {}
+                for index_row in indexes_rows:
+                    if index_row.get("name") not in indexes_dict:
+                        indexes_dict[index_row.get("name")] = {
+                            "name": index_row.get("name"),
+                            "cardinality": index_row.get("cardinality"),
+                            "index_type": index_row.get("index_type"),
+                            "non_unique": index_row.get("non_unique"),
+                            "expression": index_row.get("expression"),
+                            "columns": [],
+                        }
+                    indexes_dict[index_row.get("name")]["columns"].append(
+                        {
+                            "name": index_row.get("column_name"),
+                            "collation": index_row.get("collation"),
+                            "nullable": index_row.get("nullable"),
+                            "sub_part": index_row.get("sub_part"),
+                        }
+                    )
+                indexes = list(indexes_dict.values())
+                # Get foreign keys
+                foreign_keys_query = SQL_SCHEMAS_FOREIGN_KEYS.replace(
+                    "%WHERE%", "AND kcu.table_name = %s AND kcu.table_schema = %s"
+                )
+                cursor.execute(foreign_keys_query, (table_name, table_schema))
+                foreign_keys = cursor.fetchall()
+                # Get partitions
+                partition_query = SQL_SCHEMAS_PARTITION_NO_JSON.replace(
+                    "%WHERE%", "AND table_name = %s AND table_schema = %s"
+                )
+                cursor.execute(partition_query, (table_name, table_schema))
+                partitions_rows = cursor.fetchall()
+                partitions_dict = {}
+                for partition_row in partitions_rows:
+                    if partition_row.get("name") not in partitions_dict:
+                        partitions_dict[partition_row.get("name")] = {
+                            "name": partition_row.get("name"),
+                            "partition_ordinal_position": partition_row.get("partition_ordinal_position"),
+                            "partition_method": partition_row.get("partition_method"),
+                            "partition_expression": partition_row.get("partition_expression"),
+                            "partition_description": partition_row.get("partition_description"),
+                            "subpartitions": [],
+                        }
+                    partitions_dict[partition_row.get("name")]["subpartitions"].append(
+                        {
+                            "name": partition_row.get("subpartition_name"),
+                            "subpartition_ordinal_position": partition_row.get("subpartition_ordinal_position"),
+                            "subpartition_method": partition_row.get("subpartition_method"),
+                            "subpartition_expression": partition_row.get("subpartition_expression"),
+                            "table_rows": partition_row.get("table_rows"),
+                            "data_length": partition_row.get("data_length"),
+                        }
+                    )
+                partitions = list(partitions_dict.values())
+        else:
+            columns = json.loads(cursor_row.get("columns") or "[]")
+            indexes = json.loads(cursor_row.get("indexes") or "[]")
+            foreign_keys = json.loads(cursor_row.get("foreign_keys") or "[]")
+            partitions = json.loads(cursor_row.get("partitions") or "[]")
+
         # Map the cursor row to the expected schema, and strip out None values
         object["tables"] = [
             {
@@ -207,7 +301,7 @@ class MySqlSchemaCollector(SchemaCollector):
                                 **{k: v_ for k, v_ in v.items() if k == 'default' or v_ is not None},
                                 'nullable': v['nullable'] == 'YES',
                             }
-                            for v in json.loads(cursor_row.get("columns")) or []
+                            for v in columns or []
                             if v and v.get('name') is not None
                         }.values()
                     ),
@@ -233,16 +327,12 @@ class MySqlSchemaCollector(SchemaCollector):
                                     if v2 is not None
                                 }
                             }
-                            for v in json.loads(cursor_row.get("indexes")) or []
+                            for v in indexes or []
                             if v and v.get('name') is not None
                         }.values()
                     ),
                     "foreign_keys": list(
-                        {
-                            v['name']: v
-                            for v in (json.loads(cursor_row.get("foreign_keys")) or [])
-                            if v and v.get('name') is not None
-                        }.values()
+                        {v['name']: v for v in foreign_keys or [] if v and v.get('name') is not None}.values()
                     ),
                     "partitions": list(
                         {
@@ -255,10 +345,10 @@ class MySqlSchemaCollector(SchemaCollector):
                                         if v2 and v2.get('name') is not None
                                     }.values()
                                 ),
-                                "data_length": sum(v2.get('data_length', 0) for v2 in (v['subpartitions'] or [])),
-                                "table_rows": sum(v2.get('table_rows', 0) for v2 in (v['subpartitions'] or [])),
+                                "data_length": sum(v2.get('data_length', 0) or 0 for v2 in (v['subpartitions'] or [])),
+                                "table_rows": sum(v2.get('table_rows', 0) or 0 for v2 in (v['subpartitions'] or [])),
                             }
-                            for v in (json.loads(cursor_row.get("partitions")) or [])
+                            for v in partitions or []
                             if v and v.get('name') is not None
                         }.values()
                     ),
