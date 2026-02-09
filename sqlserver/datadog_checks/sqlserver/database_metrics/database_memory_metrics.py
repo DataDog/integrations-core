@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
+
 from .base import SqlserverDatabaseMetricsBase
 
 # Excldue internal databases
@@ -147,7 +149,7 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
                                 if column['type'] == 'gauge' and i < len(row):
                                     value = row[i]
                                     if value is not None:
-                                        self.check.gauge(f"sqlserver.{column['name']}", value, tags=tags)
+                                        self.check.gauge(f"{column['name']}", value, tags=tags)
                                         metrics_submitted += 1
                             databases_processed += 1
                         except Exception as e:
@@ -170,5 +172,5 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
             self.log.error(
                 "Failed to execute database memory metrics query: %s",
                 str(e),
-                exc_info=self.log.isEnabledFor(self.log.DEBUG),
+                exc_info=self.log.isEnabledFor(logging.DEBUG),
             )

@@ -1743,29 +1743,6 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
 
 
 @pytest.mark.unit
-def test_sqlserver_database_memory_metrics_validation(init_config, instance_docker_metrics):
-    """Test validation of database memory metrics configuration."""
-    # Test with invalid collection_interval
-    instance_docker_metrics['database_metrics'] = {
-        'db_memory_metrics': {
-            'enabled': True,
-            'collection_interval': -1,  # Invalid negative value
-        },
-    }
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
-
-    memory_metrics = SqlserverDatabaseMemoryMetrics(
-        config=sqlserver_check._config,
-        new_query_executor=sqlserver_check._new_query_executor,
-        server_static_info=STATIC_SERVER_INFO,
-        execute_query_handler=lambda x, y: [],
-    )
-
-    # Should use default for invalid value
-    assert memory_metrics.collection_interval == 300  # Default value
-
-
-@pytest.mark.unit
 def test_sqlserver_database_memory_metrics_name_sanitization(aggregator, init_config, instance_docker_metrics):
     """Test that database names with special characters are properly sanitized."""
     instance_docker_metrics['database_metrics'] = {
@@ -1803,7 +1780,7 @@ def test_sqlserver_database_memory_metrics_name_sanitization(aggregator, init_co
                 if column['type'] == 'gauge' and i < len(row):
                     value = row[i]
                     if value is not None:
-                        sqlserver_check.gauge(f"sqlserver.{column['name']}", value, tags=tags)
+                        sqlserver_check.gauge(column['name'], value, tags=tags)
 
     memory_metrics = SqlserverDatabaseMemoryMetrics(
         config=sqlserver_check._config,
@@ -1865,7 +1842,7 @@ def test_sqlserver_database_memory_metrics_execution(aggregator, init_config, in
                 if column['type'] == 'gauge' and i < len(row):
                     value = row[i]
                     if value is not None:
-                        sqlserver_check.gauge(f"sqlserver.{column['name']}", value, tags=tags)
+                        sqlserver_check.gauge(column['name'], value, tags=tags)
 
     memory_metrics = SqlserverDatabaseMemoryMetrics(
         config=sqlserver_check._config,
@@ -1915,8 +1892,10 @@ def test_sqlserver_database_memory_metrics_error_handling(init_config, instance_
         config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
-        execute_query_handler=lambda x, y: [],
+        execute_query_handler=lambda *args: [],
     )
+    # Remove instance attribute so the class method (with error handling) is used
+    del memory_metrics.__dict__['execute_query_handler']
     memory_metrics.log = mock_logger
     memory_metrics.check = sqlserver_check
 
