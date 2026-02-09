@@ -394,6 +394,7 @@
 - name: ignore_tags
   description: |
     A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
+  fleet_configurable: true
   value:
     type: array
     items:
