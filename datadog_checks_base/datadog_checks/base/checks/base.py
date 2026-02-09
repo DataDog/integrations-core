@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     import unicodedata as _module_unicodedata
 
     from datadog_checks.base.utils.diagnose import Diagnosis
-    from datadog_checks.base.utils.http import RequestsWrapper
+    from datadog_checks.base.utils.http import HTTPXWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
 
 inspect: _module_inspect = lazy_loader.load('inspect')
@@ -109,10 +109,10 @@ class AgentCheck(object):
 
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
-    # Used by `self.http` for an instance of RequestsWrapper
+    # Used by `self.http` for an instance of HTTPXWrapper
     HTTP_CONFIG_REMAPPER = None
 
-    # Used by `create_tls_context` for an instance of RequestsWrapper
+    # Used by `create_tls_context` for an instance of HTTPXWrapper
     TLS_CONFIG_REMAPPER = None
 
     # Used by `self.set_metadata` for an instance of MetadataManager
@@ -371,7 +371,7 @@ class AgentCheck(object):
         return limit
 
     @property
-    def http(self) -> RequestsWrapper:
+    def http(self) -> HTTPXWrapper:
         """
         Provides logic to yield consistent network behavior based on user configuration.
 
@@ -379,9 +379,9 @@ class AgentCheck(object):
         """
         if not hasattr(self, '_http'):
             # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
+            from datadog_checks.base.utils.http import HTTPXWrapper
 
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            self._http = HTTPXWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
