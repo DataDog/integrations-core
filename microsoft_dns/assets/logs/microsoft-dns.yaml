@@ -469,18 +469,18 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.tid` to `ocsf.actor.process.tid`
+            - name: Map `Event.System.Execution.ThreadID` to `ocsf.actor.process.tid`
               sources:
-                - ocsf.actor.process.tid
+                - Event.System.Execution.ThreadID
               sourceType: attribute
               target: ocsf.actor.process.tid
               targetFormat: integer
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.pid` to `ocsf.actor.process.pid`
+            - name: Map `Event.System.Execution.ProcessID` to `ocsf.actor.process.pid`
               sources:
-                - ocsf.actor.process.pid
+                - Event.System.Execution.ProcessID
               sourceType: attribute
               target: ocsf.actor.process.pid
               targetFormat: integer
@@ -650,24 +650,6 @@ pipeline:
               target: ocsf.metadata.log_provider
               targetFormat: string
               preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.process.tid` to `ocsf.actor.process.tid`
-              sources:
-                - ocsf.actor.process.tid
-              sourceType: attribute
-              target: ocsf.actor.process.tid
-              targetFormat: integer
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.process.pid` to `ocsf.actor.process.pid`
-              sources:
-                - ocsf.actor.process.pid
-              sourceType: attribute
-              target: ocsf.actor.process.pid
-              targetFormat: integer
-              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `Event.System.Version` to `ocsf.metadata.log_version`
@@ -952,18 +934,18 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.tid` to `ocsf.actor.process.tid`
+            - name: Map `Event.System.Execution.ThreadID` to `ocsf.actor.process.tid`
               sources:
-                - ocsf.actor.process.tid
+                - Event.System.Execution.ThreadID
               sourceType: attribute
               target: ocsf.actor.process.tid
               targetFormat: integer
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.pid` to `ocsf.actor.process.pid`
+            - name: Map `Event.System.Execution.ProcessID` to `ocsf.actor.process.pid`
               sources:
-                - ocsf.actor.process.pid
+                - Event.System.Execution.ProcessID
               sourceType: attribute
               target: ocsf.actor.process.pid
               targetFormat: integer
@@ -1063,25 +1045,13 @@ pipeline:
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@evt.id:(519 OR 519 OR 522 OR 542)"
+                    query: "@evt.id:(515 OR 519 OR 522 OR 542)"
                   name: Create
                   id: 1
                 - filter:
                     query: "@evt.id:(516 OR 518 OR 520 OR 523 OR 543)"
                   name: Delete
                   id: 4
-                - filter:
-                    query: "@evt.id:(515 OR 519 OR 522 OR 542)"
-                  name: Create
-                  id: 1
-                - filter:
-                    query: "@evt.id:(534 OR 535 OR 521)"
-                  name: Other
-                  id: 99
-                - filter:
-                    query: "@evt.id:(534 OR 535 OR 521)"
-                  name: Other
-                  id: 99
                 - filter:
                     query: "@evt.id:521"
                   name: Other
@@ -1168,6 +1138,33 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `Event.System.TimeCreated.SystemTime` to `ocsf.metadata.original_time`
+              sources:
+                - Event.System.TimeCreated.SystemTime
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Correlation` to `ocsf.metadata.correlation_uid`
+              sources:
+                - Event.System.Correlation
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.EventRecordID` to `ocsf.metadata.uid`
+              sources:
+                - Event.System.EventRecordID
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
@@ -1228,6 +1225,15 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.pid
               targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Security.UserID` to `ocsf.actor.user.uid`
+              sources:
+                - Event.System.Security.UserID
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
@@ -1393,30 +1399,6 @@ pipeline:
                   name: Create
                   id: 1
                 - filter:
-                    query: "@evt.id:(514 OR 564 OR 567 OR 570 OR 572 OR 576)"
-                  name: Update
-                  id: 3
-                - filter:
-                    query: "@evt.id:(513 OR 517 OR 571 OR 575 OR 580 OR 581 OR 582)"
-                  name: Delete
-                  id: 4
-                - filter:
-                    query: "@evt.id:(534 OR 535 OR 559 OR 560 OR 561 OR 562 OR 563)"
-                  name: Other
-                  id: 99
-                - filter:
-                    query: "@evt.id:(514 OR 564 OR 566 OR 567 OR 570 OR 572 OR 576)"
-                  name: Update
-                  id: 3
-                - filter:
-                    query: "@evt.id:(534 OR 535 OR 559 OR 560 OR 561 OR 562 OR 563 OR 564)"
-                  name: Other
-                  id: 99
-                - filter:
-                    query: "@evt.id:(514 OR 566 OR 567 OR 570 OR 572 OR 576)"
-                  name: Update
-                  id: 3
-                - filter:
                     query: "@evt.id:(514 OR 517 OR 566 OR 567 OR 570 OR 572 OR 576)"
                   name: Update
                   id: 3
@@ -1514,6 +1496,33 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `Event.System.TimeCreated.SystemTime` to `ocsf.metadata.original_time`
+              sources:
+                - Event.System.TimeCreated.SystemTime
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Correlation` to `ocsf.metadata.correlation_uid`
+              sources:
+                - Event.System.Correlation
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.EventRecordID` to `ocsf.metadata.uid`
+              sources:
+                - Event.System.EventRecordID
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
@@ -1574,6 +1583,15 @@ pipeline:
               sourceType: attribute
               target: ocsf.actor.process.pid
               targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Security.UserID` to `ocsf.actor.user.uid`
+              sources:
+                - Event.System.Security.UserID
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
