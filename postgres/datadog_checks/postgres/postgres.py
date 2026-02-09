@@ -1098,6 +1098,8 @@ class PostgreSql(DatabaseCheck):
 
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
+        # Reset _non_internal_tags to prevent stale dynamic tags (e.g., replication_role) from accumulating
+        self._non_internal_tags = [t for t in copy.copy(self.tags) if not t.startswith("dd.internal")]
         tags_to_add = []
         try:
             # Check version

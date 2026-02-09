@@ -439,11 +439,18 @@ def test_channel_status_no_duplicates(aggregator, get_check, instance, dd_run_ch
     aggregator.assert_service_check("ibm_mq.channel.status", check.OK, tags=tags, count=1)
 
 
-def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run_check):
+@pytest.mark.parametrize(
+    'cmdline_value',
+    [
+        pytest.param(['amqpcsea', 'baz'], id='wrong process'),
+        pytest.param(None, id='defunct process'),
+    ],
+)
+def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run_check, cmdline_value):
     class ProcessMock(object):
         @property
         def info(self):
-            return {'cmdline': ['amqpcsea', 'baz']}
+            return {'cmdline': cmdline_value}
 
     instance['queue_manager'] = 'foo'
     instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
