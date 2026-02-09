@@ -492,7 +492,7 @@ pipeline:
                 - Event.System.Security.UserID
               sourceType: attribute
               target: ocsf.actor.user.uid
-              targetFormat: integer
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
@@ -720,7 +720,7 @@ pipeline:
                 - Event.System.Security.UserID
               sourceType: attribute
               target: ocsf.actor.user.uid
-              targetFormat: integer
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
@@ -975,7 +975,7 @@ pipeline:
                 - Event.System.Security.UserID
               sourceType: attribute
               target: ocsf.actor.user.uid
-              targetFormat: integer
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
