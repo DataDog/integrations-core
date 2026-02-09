@@ -102,6 +102,7 @@
     the domain used in the check. For NTLM Auth, append
     the username to domain, not as the `username` parameter.
 - name: kerberos_auth
+  fleet_configurable: true
   value:
     example: disabled
     type: string
@@ -119,6 +120,7 @@
 
     See https://github.com/requests/requests-kerberos#mutual-authentication
 - name: kerberos_cache
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -133,6 +135,7 @@
 
     See https://github.com/requests/requests-kerberos#delegation
 - name: kerberos_force_initiate
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -150,6 +153,7 @@
 
     See https://github.com/requests/requests-kerberos#hostname-override
 - name: kerberos_principal
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -158,6 +162,7 @@
 
     See https://github.com/requests/requests-kerberos#explicit-principal
 - name: kerberos_keytab
+  fleet_configurable: true
   value:
     example: <KEYTAB_FILE_PATH>
     type: string
