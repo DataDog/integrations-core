@@ -6,8 +6,15 @@ from collections import ChainMap
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
-from .constants import ISTIOD_NAMESPACE
-from .metrics import ISTIOD_METRICS, ISTIOD_VERSION, MESH_METRICS, construct_metrics_config
+from .constants import ISTIOD_NAMESPACE, WAYPOINT_NAMESPACE, ZTUNNEL_NAMESPACE
+from .metrics import (
+    ISTIOD_METRICS,
+    ISTIOD_VERSION,
+    MESH_METRICS,
+    WAYPOINT_METRICS,
+    ZTUNNEL_METRICS,
+    construct_metrics_config,
+)
 
 
 class IstioCheckV2(OpenMetricsBaseCheckV2):
@@ -19,9 +26,20 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
 
     def _parse_config(self):
         self.scraper_configs = []
-        mesh_endpoint = self.instance.get("istio_mesh_endpoint")
+        istio_mode = self.instance.get("istio_mode", "sidecar")
         istiod_endpoint = self.instance.get("istiod_endpoint")
         istiod_namespace = self.instance.get("namespace", ISTIOD_NAMESPACE)
+
+        if istio_mode == "ambient":
+            self._parse_ambient_config(istiod_endpoint, istiod_namespace)
+        elif istio_mode == "sidecar":
+            self._parse_sidecar_config(istiod_endpoint, istiod_namespace)
+        else:
+            raise ConfigurationError(f"Invalid istio_mode '{istio_mode}'. Must be either 'sidecar' or 'ambient'.")
+
+    def _parse_sidecar_config(self, istiod_endpoint, istiod_namespace):
+        """Parse configuration for sidecar mode (traditional Istio deployment)."""
+        mesh_endpoint = self.instance.get("istio_mesh_endpoint")
         mesh_namespace = istiod_namespace + ".mesh"
 
         if not mesh_endpoint and not istiod_endpoint:
@@ -31,6 +49,29 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
 
         if mesh_endpoint:
             self.scraper_configs.append(self._generate_config(mesh_endpoint, MESH_METRICS, mesh_namespace))
+        if istiod_endpoint:
+            self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, istiod_namespace))
+
+    def _parse_ambient_config(self, istiod_endpoint, istiod_namespace):
+        """Parse configuration for ambient mode (sidecar-less Istio deployment)."""
+        ztunnel_endpoint = self.instance.get("ztunnel_endpoint")
+        waypoint_endpoint = self.instance.get("waypoint_endpoint")
+
+        if not ztunnel_endpoint and not waypoint_endpoint and not istiod_endpoint:
+            raise ConfigurationError(
+                "In ambient mode, must specify at least one of: "
+                "`ztunnel_endpoint`, `waypoint_endpoint`, or `istiod_endpoint`."
+            )
+
+        # Ztunnel provides L4 TCP metrics for ambient mesh
+        if ztunnel_endpoint:
+            self.scraper_configs.append(self._generate_config(ztunnel_endpoint, ZTUNNEL_METRICS, ZTUNNEL_NAMESPACE))
+
+        # Waypoint provides L7 HTTP/gRPC metrics (optional in ambient mode)
+        if waypoint_endpoint:
+            self.scraper_configs.append(self._generate_config(waypoint_endpoint, WAYPOINT_METRICS, WAYPOINT_NAMESPACE))
+
+        # Control plane metrics are the same for both modes
         if istiod_endpoint:
             self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, istiod_namespace))
 
