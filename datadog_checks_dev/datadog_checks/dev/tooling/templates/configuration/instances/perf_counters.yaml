@@ -7,23 +7,27 @@
 - name: username
   description: |
     The username used to connect to the `server`.
+  fleet_configurable: true
   value:
     type: string
 - name: password
   description: |
     The password of `username`.
+  fleet_configurable: true
   value:
     type: string
 - name: enable_health_service_check
   description: |
     Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
     the health of the `server`.
+  fleet_configurable: true
   value:
     example: true
     type: boolean
 - name: server_tag
   description: |
     The name used for tagging `server`. The value defined here replaces the `server:` tag key.
+  fleet_configurable: true
   value:
     type: string
 - name: namespace  # Only shown for the `windows_performance_counters` provider integration
