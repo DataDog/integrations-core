@@ -345,8 +345,8 @@ class MySqlSchemaCollector(SchemaCollector):
                                         if v2 and v2.get('name') is not None
                                     }.values()
                                 ),
-                                "data_length": sum(v2.get('data_length', 0) for v2 in (v['subpartitions'] or [])),
-                                "table_rows": sum(v2.get('table_rows', 0) for v2 in (v['subpartitions'] or [])),
+                                "data_length": sum(v2.get('data_length', 0) or 0 for v2 in (v['subpartitions'] or [])),
+                                "table_rows": sum(v2.get('table_rows', 0) or 0 for v2 in (v['subpartitions'] or [])),
                             }
                             for v in partitions or []
                             if v and v.get('name') is not None

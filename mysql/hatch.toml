@@ -50,7 +50,7 @@ version = [
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.36"] },
+  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.18", "8.0.36"] },
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
 ]
 name."8.0-group".env-vars = [
