@@ -250,7 +250,6 @@ files:
             Note: Querying sys.dm_os_buffer_descriptors can be resource intensive on large systems.
             Set `db_memory_metrics.enabled` to true to enable collection of database memory metrics. Defaults to false.
             Set `db_memory_metrics.collection_interval` to configure the collection interval in seconds. Defaults to 300.
-            Set `db_memory_metrics.min_page_count` to filter databases with fewer pages than threshold. Defaults to 1.
           value:
             type: object
             properties:

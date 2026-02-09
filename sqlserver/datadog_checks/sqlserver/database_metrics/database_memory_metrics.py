@@ -47,34 +47,7 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
         Returns the interval in seconds at which to collect database memory metrics.
         Note: Querying sys.dm_os_buffer_descriptors can be resource intensive on systems with large buffer pools.
         '''
-        value = self.config.database_metrics_config["db_memory_metrics"].get("collection_interval", 300)
-        # Validate to ensure it's a reasonable positive integer
-        if not isinstance(value, (int, float)) or value < 60:
-            self.log.warning("Invalid collection_interval value: %s, using default of 300", value)
-            return 300
-        # Convert to int and cap at a reasonable maximum (1 hour)
-        value = int(value)
-        if value > 3600:
-            self.log.warning("collection_interval value too high: %s, capping at 3600", value)
-            return 3600
-        return value
-
-    @property
-    def min_page_count(self) -> int:
-        '''
-        Returns the minimum number of pages a database must have in the buffer pool to be reported.
-        This helps reduce noise from databases with minimal memory usage.
-        '''
-        value = self.config.database_metrics_config["db_memory_metrics"].get("min_page_count", 1)
-        # Validate to prevent SQL injection - must be a positive integer
-        if not isinstance(value, int) or value < 0:
-            self.log.warning("Invalid min_page_count value: %s, using default of 1", value)
-            return 1
-        # Cap at a reasonable maximum to prevent issues
-        if value > 1000000:  # ~7.8GB worth of pages
-            self.log.warning("min_page_count value too high: %s, capping at 1000000", value)
-            return 1000000
-        return value
+        return self.config.database_metrics_config["db_memory_metrics"].get("collection_interval", 300)
 
     @property
     def enabled(self) -> bool:
@@ -82,19 +55,8 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
-        # Add collection interval to the query mapping and apply min_page_count filter
         query_mapping = DATABASE_MEMORY_METRICS_QUERY_MAPPING.copy()
         query_mapping['collection_interval'] = self.collection_interval
-
-        # Modify query to apply min_page_count filter if set
-        # Use validated integer value to prevent SQL injection
-        min_count = self.min_page_count
-        if min_count > 1:
-            # Ensure min_count is an integer (redundant but safe)
-            min_count = int(min_count)
-            query = query_mapping['query'].replace("HAVING COUNT(*) > 0", f"HAVING COUNT(*) >= {min_count}")
-            query_mapping['query'] = query
-
         return [query_mapping]
 
     @property
@@ -116,8 +78,7 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
-            f"collection_interval={self.collection_interval}, "
-            f"min_page_count={self.min_page_count})"
+            f"collection_interval={self.collection_interval})"
         )
 
     def _build_query_executors(self):
@@ -161,8 +122,7 @@ class SqlserverDatabaseMemoryMetrics(SqlserverDatabaseMetricsBase):
                     # Warn if query is taking too long (more than 5 seconds)
                     if elapsed_time_ms > 5000:
                         self.log.warning(
-                            "Database memory metrics query took %d ms, consider increasing collection_interval "
-                            "or min_page_count to reduce load",
+                            "Database memory metrics query took %d ms, consider increasing collection_interval",
                             elapsed_time_ms,
                         )
 

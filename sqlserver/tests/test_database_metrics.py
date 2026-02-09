@@ -1713,14 +1713,12 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
 
     assert memory_metrics.enabled is False
     assert memory_metrics.collection_interval == 300  # Default value
-    assert memory_metrics.min_page_count == 1  # Default value
 
     # Test with metrics enabled and custom collection interval
     instance_docker_metrics['database_metrics'] = {
         'db_memory_metrics': {
             'enabled': True,
             'collection_interval': 600,
-            'min_page_count': 100,
         },
     }
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -1734,7 +1732,6 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
 
     assert memory_metrics.enabled is True
     assert memory_metrics.collection_interval == 600
-    assert memory_metrics.min_page_count == 100
     assert memory_metrics.databases == [None]  # Instance-level query
     assert memory_metrics.is_database_instance_query is False
 
@@ -1753,7 +1750,6 @@ def test_sqlserver_database_memory_metrics_validation(init_config, instance_dock
         'db_memory_metrics': {
             'enabled': True,
             'collection_interval': -1,  # Invalid negative value
-            'min_page_count': "not_a_number",  # Invalid string value
         },
     }
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -1765,30 +1761,8 @@ def test_sqlserver_database_memory_metrics_validation(init_config, instance_dock
         execute_query_handler=lambda x, y: [],
     )
 
-    # Should use defaults for invalid values
+    # Should use default for invalid value
     assert memory_metrics.collection_interval == 300  # Default value
-    assert memory_metrics.min_page_count == 1  # Default value
-
-    # Test with very high values
-    instance_docker_metrics['database_metrics'] = {
-        'db_memory_metrics': {
-            'enabled': True,
-            'collection_interval': 10000,  # Too high
-            'min_page_count': 2000000,  # Too high
-        },
-    }
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
-
-    memory_metrics = SqlserverDatabaseMemoryMetrics(
-        config=sqlserver_check._config,
-        new_query_executor=sqlserver_check._new_query_executor,
-        server_static_info=STATIC_SERVER_INFO,
-        execute_query_handler=lambda x, y: [],
-    )
-
-    # Should cap at reasonable maximums
-    assert memory_metrics.collection_interval == 3600  # Capped at 1 hour
-    assert memory_metrics.min_page_count == 1000000  # Capped at ~7.8GB
 
 
 @pytest.mark.unit
