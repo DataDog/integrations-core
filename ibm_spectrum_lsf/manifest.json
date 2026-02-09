@@ -44,7 +44,8 @@
         "High Pending Jobs": "assets/monitors/high_pending_jobs.json"
     },
     "saved_views": {
-      "IBM Spectrum LSF Job Error Logs": "assets/saved_views/job_errors.json"
+      "IBM Spectrum LSF Job Error Logs": "assets/saved_views/job_errors.json",
+      "IBM Spectrum LSF System Error Logs": "assets/saved_views/system_errors.json"
     }
   },
   "author": {
