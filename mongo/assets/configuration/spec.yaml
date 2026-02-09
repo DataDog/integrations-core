@@ -1,4 +1,5 @@
 name: MongoDB
+fleet_configurable: true
 files:
 - name: mongo.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: hosts
+      fleet_configurable: true
       enabled: true
       description: |
         The host (and optional port number) where the mongod instance (or mongos instances for
@@ -45,11 +47,13 @@ files:
     - name: username
       description: |
         The username to use for authentication.
+      fleet_configurable: true
       value:
         type: string
     - name: password
       description: |
         The password to use for authentication.
+      fleet_configurable: true
       secret: true
       value:
         type: string
@@ -59,6 +63,7 @@ files:
         In order to leverage the DNS seed list, use a connection_scheme of `mongodb+srv` rather than the standard
         `mongodb`.
         For more information, see: https://www.mongodb.com/docs/manual/reference/connection-string/
+      fleet_configurable: true
       value:
         type: string
         example: mongodb
@@ -68,6 +73,7 @@ files:
         This is also the authentication database to use if a `username` and `password` is set but the `authSource` is not
         specified in `options`. If `database` is not set and the `authSource` is not specified in `options`,
         the check will attempt to authenticate `username` to the admin database.
+      fleet_configurable: true
       value:
         type: string
     - name: options
@@ -77,10 +83,12 @@ files:
 
         NOTE: For monitoring replica set, do not use the replicaSet parameter as the Agent expects to always
         connect to the same host. Instead configure one check instance for each node.
+      fleet_configurable: true
       value:
         type: object
         properties: []
     - name: dbnames
+      fleet_configurable: true
       legacy: true
       deprecation:
         Agent version: "7.56.0"
@@ -101,15 +109,23 @@ files:
       description: |
         Define the configuration for database autodiscovery.
         Complete this section if you want to auto-discover databases on this MongoDB instance.
+      fleet_configurable: true
       options:
         - name: enabled
           description: Enable database autodiscovery.
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
           value:
             type: boolean
             example: false
             display_default: false
         - name: max_databases
           description: The maximum number of databases this host should monitor.
+          fleet_configurable: true
           value:
             type: integer
             example: 100
@@ -123,6 +139,7 @@ files:
             Character casing is ignored. The regular expressions start matching from
             the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
             Defaults to `.*` to include everything.
+          fleet_configurable: true
           value:
             type: array
             items:
@@ -139,6 +156,7 @@ files:
             so to match anywhere, prepend `.*`. For exact matches append `$`.
             In case of conflicts, database exclusion via `exclude` takes precedence over
             those found via `include`
+          fleet_configurable: true
           value:
             type: array
             items:
@@ -155,12 +173,16 @@ files:
           description: |
             The maximum number of collections to collect metrics from per database.
             Defaults to 100.
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
           value:
             type: integer
             example: 100
             display_default: 100
         - name: refresh_interval
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+          fleet_configurable: true
           value:
             type: integer
             example: 600
@@ -168,6 +190,7 @@ files:
     - name: dbm
       description: |
         Set to `true` enable Database Monitoring.
+      fleet_configurable: true
       enabled: false
       value:
         type: boolean
@@ -180,6 +203,7 @@ files:
         Please note that the cluster name must be unique for each MongoDB cluster.
 
         Required when `dbm` is enabled.
+      fleet_configurable: true
       value:
         type: string
     - name: reported_database_hostname
@@ -187,9 +211,11 @@ files:
         Set the reported database hostname for the connected mongodb instance. This value overrides the mongodb hostname
         detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
         when connecting to a remote database through a proxy.
+      fleet_configurable: true
       value:
         type: string
     - name: database_instance_collection_interval
+      fleet_configurable: true
       hidden: true
       description: |
         Set the database instance collection interval (in seconds). The database instance collection sends
@@ -201,6 +227,7 @@ files:
         display_default: false
     - name: operation_samples
       description: Configure collection of MongoDB operation samples and explain plans.
+      fleet_configurable: true
       options:
         - name: enabled
           description: |
@@ -212,6 +239,12 @@ files:
           description: |
             Set the operation samples collection interval in seconds. Each collection involves capturing
             current operations with $currentOp aggregation pipeline and explain plans for each operation.
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
           value:
             type: number
             example: 10
@@ -225,11 +258,14 @@ files:
 
             NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
             as it requires the execution of the query to collect additional execution and plan data.
+          fleet_configurable: true
+          fleet_configurable: true
           value:
             type: string
             example: queryPlanner
     - name: slow_operations
       description: Configure collection of MongoDB slow operations.
+      fleet_configurable: true
       options:
         - name: enabled
           description: |
@@ -247,6 +283,7 @@ files:
         - name: max_operations
           description: |
             Set the maximum number of slow operations to collect per interval.
+          fleet_configurable: true
           value:
             type: number
             example: 1000
@@ -265,6 +302,7 @@ files:
             example: queryPlanner
     - name: collect_schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
+      fleet_configurable: true
       options:
         - name: enabled
           description: |
@@ -284,6 +322,8 @@ files:
             Set the sample size for each collection. The sample size is the number of documents to sample
             from each collection.
             NOTE: Increasing the sample size for better schema inference accuracy may impact performance.
+          fleet_configurable: true
+          fleet_configurable: true
           value:
             type: number
             example: 10
@@ -300,6 +340,8 @@ files:
         - name: max_depth
           description: |
             Set the maximum depth of nested documents to sample.
+          fleet_configurable: true
+          fleet_configurable: true
           value:
             type: number
             example: 5
@@ -307,10 +349,13 @@ files:
           description: |
             Set to `true` to collect search indexes for each collection.
             NOTE: This option is only applicable to MongoDB Atlas clusters.
+          fleet_configurable: true
+          fleet_configurable: true
           value:
             type: boolean
             example: false
     - name: schemas
+      fleet_configurable: true
       deprecation:
         Agent version: 7.69.0
         Migration: Use `collect_schemas` instead.
@@ -370,6 +415,7 @@ files:
 
         See MongoDB documentation for details:
         https://www.mongodb.com/docs/manual/reference/operator/aggregation/queryStats/
+      fleet_configurable: true
       options:
         - name: enabled
           description: |
@@ -472,6 +518,7 @@ files:
     - name: metrics_collection_interval
       description: |
         The interval in seconds at which to collect certain types of metrics.
+      fleet_configurable: true
       hidden: true
       options:
         - name: collection
@@ -485,6 +532,9 @@ files:
           description: |
             The interval in seconds at which to collect collection indexes stats metrics.
             Only applicable when `collections_indexes_stats` is set to `true`.
+          fleet_configurable: true
+          fleet_configurable: true
+          fleet_configurable: true
           value:
             type: integer
             example: 300
@@ -492,18 +542,21 @@ files:
           description: |
             The interval in seconds at which to collect sharded data distribution metrics.
             Only applicable when `sharded_data_distribution` is added to `additional_metrics`.
+          fleet_configurable: true
           value:
             type: integer
             example: 300
         - name: db_stats
           description: |
             The interval in seconds at which to collect db stats metrics.
+          fleet_configurable: true
           value:
             type: integer
             example: 15
         - name: session_stats
           description: |
             The interval in seconds at which to collect session stats metrics.
+          fleet_configurable: true
           value:
             type: integer
             example: 15
@@ -537,6 +590,7 @@ files:
         (`admin`, `local`, and `config`).
         By default, this option is enabled (`true`), meaning stats for system databases are collected.
         Set to `false` to disable collection of stats for all system databases.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -549,6 +603,7 @@ files:
         Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause
         processing delays and high CPU usage on the instance.
         https://www.mongodb.com/docs/manual/reference/command/dbStats/#std-label-dbStats-freeStorage
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -556,6 +611,7 @@ files:
     - name: add_node_tag_to_events
       description: |
         Adds the Mongo node to events as a tag rather than creating a seperate host for the event.
+      fleet_configurable: true
       hidden: true
       value:
         type: boolean
@@ -571,6 +627,7 @@ files:
         "ISODate\(\s*\)|Date\(\s*\)" (e.g. "Date()")
         "new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)"
           (e.g. "new Date(ISODate().getTime() - 60 * 1000)")
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -616,6 +673,7 @@ files:
         with DocumentDB integration telemetry.
 
         These values are only applied when `dbm: true` option is set.
+      fleet_configurable: true
       options:
         - name: instance_endpoint
           description: |
@@ -624,6 +682,7 @@ files:
 
             For more information on instance endpoints,
             see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_Endpoint.html
+          fleet_configurable: true
           value:
             type: string
             example: mydocdb.c0xa1xvklawc.us-east-1.docdb.amazonaws.com
@@ -634,10 +693,12 @@ files:
 
             For more information on cluster identifiers,
             see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_DBCluster.html
+          fleet_configurable: true
           value:
             type: string
             example: mydocdb
     - name: server
+      fleet_configurable: true
       legacy: true
       deprecation:
         Agent version: "8.0.0"
