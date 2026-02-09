@@ -202,6 +202,9 @@ def _obfuscate_sql(query, options=None):
 def test_statement_metrics_prepared_statements(
     aggregator, dd_run_check, dbm_instance, bob_conn, collect_prepared_statements
 ):
+    if MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION_PARSED < parse_version('10.5.0'):
+        pytest.skip("prepared_statements_instances is unavailable on MariaDB < 10.5")
+    
     dbm_instance['query_metrics']['only_query_recent_statements'] = False
     dbm_instance['query_metrics']['collect_prepared_statements'] = collect_prepared_statements
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
