@@ -684,35 +684,3 @@ def _supports_json_aggregation(mysql_version):
     if mysql_version.flavor.lower() == 'mariadb':
         return mysql_version.version_compatible(JSON_AGGREGATION_MARIADB)
     return mysql_version.version_compatible(JSON_AGGREGATION_MYSQL)
-
-
-@pytest.fixture
-def skip_unless_legacy_schema_collector(mysql_version):
-    """
-    Fixture that skips the test if the runtime MySQL version supports JSON aggregation.
-
-    Usage:
-        def test_my_legacy_test(skip_unless_legacy_schema_collector, ...):
-            # Test code here - will only run on MySQL < 8.0.19 or MariaDB < 10.5.0
-    """
-    if _supports_json_aggregation(mysql_version):
-        pytest.skip(
-            f"Legacy schema collector test - skipping for {mysql_version.flavor} {mysql_version.version} "
-            "(supports JSON aggregation)"
-        )
-
-
-@pytest.fixture
-def skip_unless_new_schema_collector(mysql_version):
-    """
-    Fixture that skips the test if the runtime MySQL version does NOT support JSON aggregation.
-
-    Usage:
-        def test_my_new_collector_test(skip_unless_new_schema_collector, ...):
-            # Test code here - will only run on MySQL >= 8.0.19 or MariaDB >= 10.5.0
-    """
-    if not _supports_json_aggregation(mysql_version):
-        pytest.skip(
-            f"New schema collector test - skipping for {mysql_version.flavor} {mysql_version.version} "
-            "(no JSON aggregation support)"
-        )
