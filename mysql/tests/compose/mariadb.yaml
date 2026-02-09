@@ -3,7 +3,6 @@ services:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
       - MARIADB_REPLICATION_MODE=master
       - MARIADB_REPLICATION_USER=my_repl_user
       - MARIADB_REPLICATION_PASSWORD=my_repl_password
@@ -21,7 +20,6 @@ services:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
       - MASTER_HOST=mysql-master
       - MASTER_PORT=3306
       - MARIADB_REPLICATION_MODE=slave
