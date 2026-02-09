@@ -4,6 +4,7 @@
   description: |
     The host the current check connects to.
     "." means the current host
+  fleet_configurable: true
   value:
     example: .
     type: string
@@ -11,12 +12,14 @@
   legacy: true
   required: false
   description: The username from the credentials needed to connect to the host.
+  fleet_configurable: true
   value:
     type: string
 - name: password
   legacy: true
   required: false
   description: The password from the credentials needed to connect to the host.
+  fleet_configurable: true
   value:
     type: string
 - name: additional_metrics
