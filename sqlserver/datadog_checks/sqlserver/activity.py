@@ -481,8 +481,8 @@ class SqlserverActivity(DBMAsyncJob):
 
         # re-use the check's conn module, but set extra_key=dbm-activity- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 connections = self._get_active_connections(cursor)
                 request_cols = self._get_exec_requests_cols_cached(cursor, DM_EXEC_REQUESTS_COLS)
                 input_buffer_columns, input_buffer_join = self._get_input_buffer_columns_and_join()
