@@ -9,10 +9,9 @@ files:
     options:
     - name: cluster_file
       description: |
-        A path to the cluster file specifing connection to the FoundationDB.
+        A path to the cluster file specifying connection to the FoundationDB.
         If the check does not pass, it will rely on the binding library to find
-        the file using standard locations (e.g. `/etc/foundationdb/fdb.cluster` or
-        `/etc/foundationdb/fdb.cluster`).
+        the file using standard locations (e.g. `/etc/foundationdb/fdb.cluster`).
       value:
         example: /var/lib/foundationdb/fdb.cluster
         type: string
@@ -29,7 +28,7 @@ files:
       value:
         type: string
     - name: tls_password
-      description: The byte-string representing the passcode for unencrypting the private key
+      description: The byte-string representing the passcode for decrypting the private key
       secret: true
       value:
         type: string
