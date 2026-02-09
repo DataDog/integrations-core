@@ -1,0 +1,75 @@
+name: 'Tag Job with Datadog CI'
+description: 'Tags the current job with custom tags for CI Visibility in Datadog'
+
+inputs:
+  tags:
+    description: 'Comma-separated list of tags to add (e.g., "custom_tag:value,another_tag:value2")'
+    required: true
+  dd_api_key:
+    description: 'Datadog API key'
+    required: true
+  dd_site:
+    description: 'Datadog site (e.g., datadoghq.com, datad0g.com)'
+    required: false
+    default: 'datadoghq.com'
+
+runs:
+  using: 'composite'
+  steps:
+    # Update this job to inclue any reason why the job should be skipped.
+    - name: Check if job should be tagged
+      id: check_tagging
+      shell: bash
+      env:
+        IS_PR: ${{ github.event_name == 'pull_request' }}
+        PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
+      run: |
+        should_skip="false"
+        skip_reason=""
+
+        if [[ "$IS_PR" == "true" ]]; then
+          if [[ "$PR_AUTHOR" == "dependabot[bot]" ]]; then
+            # Dependabot has no access to secrets so we can't tag the job.
+            should_skip="true"
+            skip_reason="Action is being run from a PR with dependabot as author"
+          elif [[ "$IS_FORK" == "true" ]]; then
+            # Forked repos have no access to secrets so we can't tag the job.
+            should_skip="true"
+            skip_reason="Action is being run from a fork"
+          fi
+        fi
+
+        echo "should_skip=$should_skip" >> $GITHUB_OUTPUT
+        echo "skip_reason=$skip_reason" >> $GITHUB_OUTPUT
+
+    - name: Log skip reason
+      if: steps.check_tagging.outputs.should_skip == 'true'
+      shell: bash
+      run: |
+        echo "Skipping tagging. Reason: ${{ steps.check_tagging.outputs.skip_reason }}"
+
+    - name: Set up Node.js
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+      with:
+        node-version: '20'
+
+    - name: Install datadog-ci and tag job
+      if: steps.check_tagging.outputs.should_skip != 'true'
+      shell: bash
+      env:
+        DATADOG_API_KEY: ${{ inputs.dd_api_key }}
+        DATADOG_SITE: ${{ inputs.dd_site }}
+        TAGS: ${{ inputs.tags }}
+      run: |
+        npm install -g @datadog/datadog-ci
+
+        # Convert comma-separated tags to --tags flag format
+        # e.g., "tag1:value1,tag2:value2" becomes "--tags tag1:value1 --tags tag2:value2"
+        TAGS_ARGS=""
+        IFS=',' read -ra TAG_ARRAY <<< "$TAGS"
+        for tag in "${TAG_ARRAY[@]}"; do
+          TAGS_ARGS="$TAGS_ARGS --tags $tag"
+        done
+
+        datadog-ci tag --level job $TAGS_ARGS

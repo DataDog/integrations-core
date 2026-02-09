@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.13.0 / 2026-02-04
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 6.12.0 / 2026-02-04
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
 ## 6.11.0 / 2026-01-21
 
 ***Added***:

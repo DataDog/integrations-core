@@ -50,7 +50,7 @@ EXPECTED_DEFAULTS = {
     'collect_database_size_metrics': True,
     'collect_default_database': True,
     'collect_bloat_metrics': False,
-    'collect_wal_metrics': True,
+    'collect_wal_metrics': None,  # Version-aware: defaults to True for PG 10+, False for PG 9.6 and below
     'tag_replication_role': True,
     'table_count_limit': 200,
     'max_relations': 300,
@@ -120,6 +120,20 @@ EXPECTED_DEFAULTS = {
         'max_columns': 50,
         'collection_interval': 600,
         'max_query_duration': 60,
+        'include_databases': [],
+        'exclude_databases': [
+            'template0',
+            'template1',
+            'rdsadmin',
+            'azure_maintenance',
+            'cloudsqladmin',
+            'alloydbadmin',
+            'alloydbmetadata',
+        ],
+        'include_schemas': [],
+        'exclude_schemas': [],
+        'include_tables': [],
+        'exclude_tables': [],
     },
     # === DBM: Obfuscator options ===
     'obfuscator_options': {
@@ -145,7 +159,15 @@ EXPECTED_DEFAULTS = {
         'global_view_db': 'postgres',
         'max_databases': 100,
         'refresh': 600,
-        'exclude': ['cloudsqladmin', 'rdsadmin', 'alloydbadmin', 'alloydbmetadata'],
+        'exclude': [
+            'template0',
+            'template1',
+            'rdsadmin',
+            'azure_maintenance',
+            'cloudsqladmin',
+            'alloydbadmin',
+            'alloydbmetadata',
+        ],
         'include': ['.*'],
     },
     # === DBM: Lock metrics ===

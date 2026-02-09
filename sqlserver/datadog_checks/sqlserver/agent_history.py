@@ -178,8 +178,8 @@ class SqlserverAgentHistory(DBMAsyncJob):
         Collects all current agent activity for the SQLServer intance.
         :return:
         """
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 history_rows = self._get_new_agent_job_history(cursor)
                 history_event = self._create_agent_jobs_history_event(history_rows)
                 payload = json.dumps(history_event, default=default_json_event_encoding)
