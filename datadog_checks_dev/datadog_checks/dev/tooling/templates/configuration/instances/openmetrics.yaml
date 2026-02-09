@@ -17,6 +17,7 @@
   description: |
     A prefix that is removed from all exposed metric names, if present.
     All configuration options will use the prefix-less name.
+  fleet_configurable: true
   value:
     type: string
     example: <PREFIX>_
@@ -258,6 +259,7 @@
 - name: hostname_label
   description: |
     Override the hostname for every metric submission with the value of one of its labels.
+  fleet_configurable: true
   value:
     type: string
 - name: hostname_format
@@ -394,6 +396,7 @@
 - name: ignore_tags
   description: |
     A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
+  fleet_configurable: true
   value:
     type: array
     items:
