@@ -37,6 +37,7 @@ class IncludeEvent(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    event: Optional[str] = None
     excluded_messages: Optional[tuple[str, ...]] = None
 
 
