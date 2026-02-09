@@ -81,6 +81,7 @@ files:
         type: object
         properties: []
     - name: dbnames
+      legacy: true
       deprecation:
         Agent version: "7.56.0"
         Migration: |
@@ -637,6 +638,7 @@ files:
             type: string
             example: mydocdb
     - name: server
+      legacy: true
       deprecation:
         Agent version: "8.0.0"
         Migration: |
