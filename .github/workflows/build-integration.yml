@@ -1,0 +1,247 @@
+name: Build Integration Wheel
+
+# Reusable workflow for building a single integration wheel with SLSA provenance attestation
+# This workflow is the core building block called by other release workflows
+
+on:
+  workflow_call:
+    inputs:
+      integration-name:
+        description: "Name of the integration to build (e.g., postgres, mysql)"
+        required: true
+        type: string
+      source-repo:
+        description: "Source repository name (integrations-core, integrations-extras, or marketplace)"
+        required: true
+        type: string
+      source-repo-ref:
+        description: "Git reference to checkout (commit SHA, branch, or tag)"
+        required: true
+        type: string
+      target-bucket:
+        description: "S3 bucket to upload to (agent-integration-wheels-dev/staging/prod)"
+        required: false
+        type: string
+        default: "agent-integration-wheels-dev"
+    outputs:
+      wheel-path:
+        description: "Path to the built wheel file"
+        value: ${{ jobs.build-and-attest.outputs.wheel-path }}
+      wheel-digest:
+        description: "SHA256 digest of the wheel"
+        value: ${{ jobs.build-and-attest.outputs.wheel-digest }}
+      wheel-version:
+        description: "Version of the built wheel"
+        value: ${{ jobs.build-and-attest.outputs.wheel-version }}
+      attestation-path:
+        description: "Path to the SLSA provenance attestation"
+        value: ${{ jobs.build-and-attest.outputs.attestation-path }}
+
+  # Allow manual testing via workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      integration-name:
+        description: "Name of the integration to build (e.g., postgres, mysql)"
+        required: true
+        type: string
+      source-repo:
+        description: "Source repository name (integrations-core, integrations-extras, or marketplace)"
+        required: true
+        type: choice
+        options:
+          - integrations-core
+          - integrations-extras
+          - marketplace
+      source-repo-ref:
+        description: "Git reference to checkout (commit SHA, branch, or tag)"
+        required: true
+        type: string
+        default: "master"
+      target-bucket:
+        description: "S3 bucket to upload to (agent-integration-wheels-dev/staging/prod)"
+        required: false
+        type: string
+        default: "agent-integration-wheels-dev"
+
+  # TODO: Remove this PR trigger after testing is complete
+  pull_request:
+    branches:
+      - 01-28-add_release_cli
+
+permissions:
+  contents: read # Checkout source code
+  id-token: write # Generate OIDC token for Sigstore signing
+  attestations: write # Create attestations
+
+jobs:
+  build-and-attest:
+    name: Build ${{ inputs.integration-name || 'postgres (PR test)' }}
+    runs-on: ubuntu-latest
+
+    outputs:
+      wheel-path: ${{ steps.outputs.outputs.wheel-path }}
+      wheel-digest: ${{ steps.outputs.outputs.wheel-digest }}
+      wheel-version: ${{ steps.outputs.outputs.wheel-version }}
+      attestation-path: ${{ steps.outputs.outputs.attestation-path }}
+
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # For PR testing, use defaults; otherwise use inputs
+          repository: DataDog/${{ inputs.source-repo || 'integrations-core' }}
+          ref: ${{ inputs.source-repo-ref || 'master' }}
+          # Persist credentials for provenance generation
+          persist-credentials: true
+          # Sparse checkout - only get the integration directory
+          sparse-checkout: |
+            ${{ inputs.integration-name || 'postgres' }}
+          sparse-checkout-cone-mode: false
+
+      - name: Checkout release package
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: DataDog/agent-integrations-wheels-release
+          path: release-package
+          ref: 01-16-add_build_workflow # TODO: Pin to specific commit SHA in production
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install release CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install release-package/
+
+      - name: Build wheel
+        id: build
+        run: |
+          set -eo pipefail  # Exit on error and propagate pipeline failures
+
+          # Use input if provided (workflow_call), otherwise use default for PR testing
+          if [ -n "${{ inputs.integration-name }}" ]; then
+            INTEGRATION="${{ inputs.integration-name }}"
+          else
+            INTEGRATION="postgres"
+          fi
+
+          # Run build command and capture JSON output
+          BUILD_OUTPUT=$(release build "$INTEGRATION")
+          echo "$BUILD_OUTPUT"
+
+          # Parse JSON output and set GitHub Actions outputs
+          echo "integration=$(echo "$BUILD_OUTPUT" | jq -r '.integration')" >> $GITHUB_OUTPUT
+          echo "version=$(echo "$BUILD_OUTPUT" | jq -r '.version')" >> $GITHUB_OUTPUT
+          echo "wheel_path=$(echo "$BUILD_OUTPUT" | jq -r '.wheel_path')" >> $GITHUB_OUTPUT
+          echo "wheel_digest=$(echo "$BUILD_OUTPUT" | jq -r '.wheel_digest')" >> $GITHUB_OUTPUT
+          echo "wheel_size=$(echo "$BUILD_OUTPUT" | jq -r '.wheel_size')" >> $GITHUB_OUTPUT
+          echo "wheel_filename=$(echo "$BUILD_OUTPUT" | jq -r '.wheel_filename')" >> $GITHUB_OUTPUT
+
+      - name: Generate SLSA provenance attestation
+        # Skip when running locally with act (requires GitHub OIDC)
+        if: ${{ !env.ACT }}
+        id: attest
+        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        with:
+          subject-path: ${{ steps.build.outputs.wheel_path }}
+
+      - name: Create mock attestation for local testing
+        # Only when running locally with act
+        if: ${{ env.ACT }}
+        id: mock_attest
+        run: |
+          echo '{"mock": "attestation for local testing"}' > mock-attestation.jsonl
+          echo "bundle-path=mock-attestation.jsonl" >> $GITHUB_OUTPUT
+
+      - name: Generate TUF target file
+        run: |
+          # Use real or mock attestation path
+          if [ "${{ env.ACT }}" = "true" ]; then
+            ATTESTATION_PATH="${{ steps.mock_attest.outputs.bundle-path }}"
+          else
+            ATTESTATION_PATH="${{ steps.attest.outputs.bundle-path }}"
+          fi
+
+          release target \
+            --integration "${{ steps.build.outputs.integration }}" \
+            --version "${{ steps.build.outputs.version }}" \
+            --wheel-digest "${{ steps.build.outputs.wheel_digest }}" \
+            --wheel-size "${{ steps.build.outputs.wheel_size }}" \
+            --wheel-filename "${{ steps.build.outputs.wheel_filename }}" \
+            --attestation-path "$ATTESTATION_PATH" \
+            --repository-url "https://agent-integration-wheels-dev.s3.amazonaws.com" \
+            --output-dir targets
+
+          echo "Generated TUF target file: targets/datadog-${{ steps.build.outputs.integration }}/${{ steps.build.outputs.version }}.yaml"
+
+      - name: Upload wheel artifact
+        # Skip when running locally with act (requires GitHub Actions runtime)
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: wheel-${{ steps.build.outputs.integration }}-${{ steps.build.outputs.version }}
+          path: ${{ steps.build.outputs.wheel_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload attestation artifact
+        # Skip when running locally with act (attestation not generated)
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: attestation-${{ steps.build.outputs.integration }}-${{ steps.build.outputs.version }}
+          path: ${{ steps.attest.outputs.bundle-path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload TUF target artifact
+        # Skip when running locally with act (requires GitHub Actions runtime)
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: target-${{ steps.build.outputs.integration }}-${{ steps.build.outputs.version }}
+          path: targets/
+          if-no-files-found: error
+          retention-days: 30
+
+      # TODO: Implement S3 upload when infrastructure is ready
+      # This section will be uncommented and configured once S3 buckets are available
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+      #     aws-region: us-east-1
+
+      # - name: Upload to S3
+      #   run: |
+      #     INTEGRATION="${{ inputs.integration-name }}"
+      #     VERSION="${{ steps.version.outputs.version }}"
+      #     BUCKET="${{ inputs.target-bucket }}"
+      #     WHEEL_FILE="${{ steps.digest.outputs.wheel-file }}"
+      #     DIGEST="${{ steps.digest.outputs.digest }}"
+      #
+      #     # Upload wheel to s3://{bucket}/wheels/datadog-{integration}/
+      #     aws s3 cp "${WHEEL_FILE}" "s3://${BUCKET}/wheels/datadog-${INTEGRATION}/"
+      #
+      #     # Upload attestation to s3://{bucket}/attestations/{digest}.json
+      #     aws s3 cp "${WHEEL_FILE}.build.jsonl" "s3://${BUCKET}/attestations/${DIGEST}.json"
+      #
+      #     echo "Uploaded wheel and attestation to S3"
+
+      - name: Set job outputs
+        id: outputs
+        run: |
+          # Use build outputs
+          echo "wheel-path=${{ steps.build.outputs.wheel_path }}" >> $GITHUB_OUTPUT
+          echo "wheel-digest=${{ steps.build.outputs.wheel_digest }}" >> $GITHUB_OUTPUT
+          echo "wheel-version=${{ steps.build.outputs.version }}" >> $GITHUB_OUTPUT
+
+          # Attestation path depends on environment
+          if [ "${{ env.ACT }}" = "true" ]; then
+            echo "attestation-path=${{ steps.mock_attest.outputs.bundle-path }}" >> $GITHUB_OUTPUT
+          else
+            echo "attestation-path=${{ steps.attest.outputs.bundle-path }}" >> $GITHUB_OUTPUT
+          fi
