@@ -1743,8 +1743,6 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
     assert len(queries) == 1
     assert queries[0]['collection_interval'] == 600
     assert 'WITH (NOLOCK)' in queries[0]['query']
-    assert 'OPTION (MAXDOP 1)' in queries[0]['query']
-    assert 'HAVING COUNT(*) >= 100' in queries[0]['query']  # Min page count filter applied
 
 
 @pytest.mark.unit
@@ -1802,8 +1800,8 @@ def test_sqlserver_database_memory_metrics_name_sanitization(aggregator, init_co
 
     # Mock results with database names containing special characters
     mocked_results = [
-        ('db:with:colons', 1, 1000, 7.8125, 100, 0.78125, 900, 7.03125, 500, 300, 100, 100),
-        ('db,with,commas', 2, 2000, 15.625, 200, 1.5625, 1800, 14.0625, 1000, 600, 200, 200),
+        ('db:with:colons', 1, 7.8125, 0.78125),
+        ('db,with,commas', 2, 15.625, 1.5625),
     ]
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -1815,8 +1813,8 @@ def test_sqlserver_database_memory_metrics_name_sanitization(aggregator, init_co
                 self.columns = [
                     {'name': 'database_name', 'type': 'tag'},
                     {'name': 'database_id', 'type': 'tag'},
-                    {'name': 'database.buffer_pool.page_count', 'type': 'gauge'},
                     {'name': 'database.buffer_pool.size', 'type': 'gauge'},
+                    {'name': 'database.buffer_pool.dirty_pages', 'type': 'gauge'},
                 ]
 
         ctx = MockContext()
@@ -1847,8 +1845,8 @@ def test_sqlserver_database_memory_metrics_name_sanitization(aggregator, init_co
     tags1 = ['test:tag', 'db:db_with_colons', 'database:db_with_colons']
     tags2 = ['test:tag', 'db:db_with_commas', 'database:db_with_commas']
 
-    aggregator.assert_metric('sqlserver.database.buffer_pool.page_count', value=1000, tags=tags1)
-    aggregator.assert_metric('sqlserver.database.buffer_pool.page_count', value=2000, tags=tags2)
+    aggregator.assert_metric('sqlserver.database.buffer_pool.size', value=7.8125, tags=tags1)
+    aggregator.assert_metric('sqlserver.database.buffer_pool.size', value=15.625, tags=tags2)
 
 
 @pytest.mark.unit
@@ -1860,10 +1858,10 @@ def test_sqlserver_database_memory_metrics_execution(aggregator, init_config, in
 
     # Mock results from sys.dm_os_buffer_descriptors query
     mocked_results = [
-        ('master', 1, 1000, 7.8125, 100, 0.78125, 900, 7.03125, 500, 300, 100, 100),
-        ('tempdb', 2, 5000, 39.0625, 1000, 7.8125, 4000, 31.25, 2500, 1500, 500, 500),
-        ('msdb', 4, 2000, 15.625, 200, 1.5625, 1800, 14.0625, 1000, 600, 200, 200),
-        ('datadog_test', 5, 3000, 23.4375, 300, 2.34375, 2700, 21.09375, 1500, 900, 300, 300),
+        ('master', 1, 7.8125, 0.78125),
+        ('tempdb', 2, 39.0625, 7.8125),
+        ('msdb', 4, 15.625, 1.5625),
+        ('datadog_test', 5, 23.4375, 2.34375),
     ]
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -1876,16 +1874,8 @@ def test_sqlserver_database_memory_metrics_execution(aggregator, init_config, in
                 self.columns = [
                     {'name': 'database_name', 'type': 'tag'},
                     {'name': 'database_id', 'type': 'tag'},
-                    {'name': 'database.buffer_pool.page_count', 'type': 'gauge'},
                     {'name': 'database.buffer_pool.size', 'type': 'gauge'},
-                    {'name': 'database.buffer_pool.dirty_page_count', 'type': 'gauge'},
                     {'name': 'database.buffer_pool.dirty_pages', 'type': 'gauge'},
-                    {'name': 'database.buffer_pool.clean_page_count', 'type': 'gauge'},
-                    {'name': 'database.buffer_pool.clean_pages', 'type': 'gauge'},
-                    {'name': 'database.buffer_pool.data_page_count', 'type': 'gauge'},
-                    {'name': 'database.buffer_pool.index_page_count', 'type': 'gauge'},
-                    {'name': 'database.buffer_pool.text_page_count', 'type': 'gauge'},
-                    {'name': 'database.buffer_pool.other_page_count', 'type': 'gauge'},
                 ]
 
         ctx = MockContext()
@@ -1923,21 +1913,13 @@ def test_sqlserver_database_memory_metrics_execution(aggregator, init_config, in
     for db_name in ['master', 'tempdb', 'msdb', 'datadog_test']:
         tags = ['test:tag', f'db:{db_name}', f'database:{db_name}']
 
-        aggregator.assert_metric('sqlserver.database.buffer_pool.page_count', tags=tags)
         aggregator.assert_metric('sqlserver.database.buffer_pool.size', tags=tags)
-        aggregator.assert_metric('sqlserver.database.buffer_pool.dirty_page_count', tags=tags)
         aggregator.assert_metric('sqlserver.database.buffer_pool.dirty_pages', tags=tags)
-        aggregator.assert_metric('sqlserver.database.buffer_pool.clean_page_count', tags=tags)
-        aggregator.assert_metric('sqlserver.database.buffer_pool.clean_pages', tags=tags)
-        aggregator.assert_metric('sqlserver.database.buffer_pool.data_page_count', tags=tags)
-        aggregator.assert_metric('sqlserver.database.buffer_pool.index_page_count', tags=tags)
-        aggregator.assert_metric('sqlserver.database.buffer_pool.text_page_count', tags=tags)
-        aggregator.assert_metric('sqlserver.database.buffer_pool.other_page_count', tags=tags)
 
     # Verify specific values for master database
     master_tags = ['test:tag', 'db:master', 'database:master']
-    aggregator.assert_metric('sqlserver.database.buffer_pool.page_count', value=1000, tags=master_tags)
     aggregator.assert_metric('sqlserver.database.buffer_pool.size', value=7.8125, tags=master_tags)
+    aggregator.assert_metric('sqlserver.database.buffer_pool.dirty_pages', value=0.78125, tags=master_tags)
 
 
 @pytest.mark.unit
@@ -1985,7 +1967,7 @@ def test_sqlserver_database_memory_metrics_error_handling(init_config, instance_
             self.tags = ['test:tag']
             self.columns = [
                 {'name': 'database_name', 'type': 'tag'},
-                {'name': 'database.buffer_pool.page_count', 'type': 'gauge'},
+                {'name': 'database.buffer_pool.size', 'type': 'gauge'},
             ]
 
         def executor(self, timeout):
