@@ -67,6 +67,7 @@ on:
   pull_request:
     branches:
       - 01-28-add_release_cli
+      - dk/port-release-workflows
 
 permissions:
   contents: read # Checkout source code
@@ -114,7 +115,7 @@ jobs:
       - name: Install release CLI
         run: |
           python -m pip install --upgrade pip
-          pip install release-package/
+          pip install ./release_cli
 
       - name: Build wheel
         id: build

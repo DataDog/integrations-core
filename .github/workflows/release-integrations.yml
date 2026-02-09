@@ -39,6 +39,7 @@ on:
       - main
       - 01-16-add_build_workflow
       - 01-28-add_release_workflow
+      - dk/port-release-workflows
 
 permissions:
   contents: write # Create branches and open PRs
@@ -61,12 +62,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install release CLI
         run: |
           python -m pip install --upgrade pip
-          pip install ./
+          pip install ./release_cli
 
       - name: Validate integrations input
         id: validate
