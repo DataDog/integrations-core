@@ -65,9 +65,7 @@ class TestCreateTopologyLinkMetadata:
         }
         namespace = 'default'
 
-        links = list(
-            ndm.create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace)
-        )
+        links = list(ndm.create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace))
 
         assert len(links) == 1
         link = links[0]
