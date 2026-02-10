@@ -1,4 +1,5 @@
 name: "Infiniband"
+fleet_configurable: true
 files:
   - name: infiniband.yaml
     example_name: conf.yaml.example
@@ -11,6 +12,7 @@ files:
           - name: infiniband_path
             description: |
               The path to the infiniband directory.
+            fleet_configurable: true
             value:
               example: "/sys/class/infiniband"
               type: string
@@ -19,6 +21,7 @@ files:
             description: |
               A list of devices to exclude from the check. Devices are located in the infiniband directory. 
               The devices are located by default in /sys/class/infiniband.
+            fleet_configurable: true
             value:
               example:
                 - "mlx5_0"
@@ -43,6 +46,7 @@ files:
               A list of additional hardware counters to collect. The counter names are the files in which the 
               counter values are stored. These are located inside 
               /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
+            fleet_configurable: true
             value:
               example:
                 - "additional_hw_counter"
@@ -71,6 +75,7 @@ files:
               items:
                 type: string
           - name: collection_type
+            fleet_configurable: true
             hidden: true
             description: |
               The type of collection to use. Available options are `gauge`, `monotonic_count`, and `both`.
