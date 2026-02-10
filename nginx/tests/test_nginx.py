@@ -7,6 +7,9 @@ import mock
 import pytest
 import requests
 
+from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT_SSL, TAGS_WITH_HOST, TAGS_WITH_HOST_AND_PORT, USING_VTS
+from .utils import mocked_perform_request, requires_static_version
+
 
 def _get_ssl_error_types():
     try:
@@ -18,9 +21,6 @@ def _get_ssl_error_types():
 
 
 SSL_ERROR_TYPES = _get_ssl_error_types()
-
-from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT_SSL, TAGS_WITH_HOST, TAGS_WITH_HOST_AND_PORT, USING_VTS
-from .utils import mocked_perform_request, requires_static_version
 
 pytestmark = [pytest.mark.skipif(USING_VTS, reason='Using VTS'), pytest.mark.integration]
 
