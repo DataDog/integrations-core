@@ -417,9 +417,12 @@ class HTTPXWrapper:
                 if not isinstance(proxy_url, str) or not proxy_url:
                     proxy_url = None
 
-            headers = dict(new_options['headers']) if new_options['headers'] else {}
-            if extra_headers:
-                headers.update(extra_headers)
+            def _request_headers():
+                h = dict(new_options['headers']) if new_options['headers'] else {}
+                if extra_headers:
+                    h.update(extra_headers)
+                return h
+
             auth = new_options['auth']
             cert = new_options['cert']
 
@@ -434,12 +437,28 @@ class HTTPXWrapper:
                     transport=transport,
                     timeout=timeout_httpx,
                     follow_redirects=new_options['allow_redirects'],
-                    headers=headers,
                     auth=auth,
                     trust_env=False,
                 )
                 try:
-                    response = client.request(method.upper(), request_url, **request_kwargs)
+                    if self.auth_token_handler:
+                        try:
+                            response = client.request(
+                                method.upper(), request_url, headers=_request_headers(), **request_kwargs
+                            )
+                            response.raise_for_status()
+                        except Exception as e:
+                            self.logger.debug('Renewing auth token, as an error occurred: %s', e)
+                            self.handle_auth_token(
+                                method=method, url=url, default_options=self.options, error=str(e)
+                            )
+                            response = client.request(
+                                method.upper(), request_url, headers=_request_headers(), **request_kwargs
+                            )
+                    else:
+                        response = client.request(
+                            method.upper(), request_url, headers=_request_headers(), **request_kwargs
+                        )
                     return HTTPXResponseAdapter(response, self.request_size)
                 finally:
                     client.close()
@@ -452,7 +471,6 @@ class HTTPXWrapper:
                         cert=cert,
                         timeout=timeout_httpx,
                         follow_redirects=new_options['allow_redirects'],
-                        headers=headers,
                         auth=auth,
                         proxy=proxy_url,
                         trust_env=False,
@@ -464,14 +482,22 @@ class HTTPXWrapper:
 
                 if self.auth_token_handler:
                     try:
-                        response = client.request(method.upper(), request_url, **request_kwargs)
+                        response = client.request(
+                            method.upper(), request_url, headers=_request_headers(), **request_kwargs
+                        )
                         response.raise_for_status()
                     except Exception as e:
                         self.logger.debug('Renewing auth token, as an error occurred: %s', e)
-                        self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                        response = client.request(method.upper(), request_url, **request_kwargs)
+                        self.handle_auth_token(
+                            method=method, url=url, default_options=self.options, error=str(e)
+                        )
+                        response = client.request(
+                            method.upper(), request_url, headers=_request_headers(), **request_kwargs
+                        )
                 else:
-                    response = client.request(method.upper(), request_url, **request_kwargs)
+                    response = client.request(
+                        method.upper(), request_url, headers=_request_headers(), **request_kwargs
+                    )
 
                 return HTTPXResponseAdapter(response, self.request_size)
 
