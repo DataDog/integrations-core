@@ -37,7 +37,7 @@ on:
         type: string
       agent-image-py2:
         required: false
-        default: "datadog/agent:6-rc"
+        default: "registry.datadoghq.com/agent:6-rc"
         type: string
       agent-image-windows:
         required: false
