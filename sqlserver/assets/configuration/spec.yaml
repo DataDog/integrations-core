@@ -517,6 +517,7 @@ files:
         for example:
         * "OLE DB" provider uses "MultiSubnetFailover=Yes"
         * "ADO" provider uses "MultiSubnetFailover=True"
+      secret: true
       value:
         type: string
         example: "<CONNECTION_STRING>"
