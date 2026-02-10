@@ -1,0 +1,1 @@
+Add optional httpx-backed HTTP client via use_httpx option (default false). New module datadog_checks.base.utils.httpx provides HTTPXWrapper with the same API as RequestsWrapper.

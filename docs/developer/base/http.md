@@ -8,6 +8,11 @@ popular [requests][requests-github] library and ensures consistent behavior acro
 The wrapper automatically parses and uses configuration from the `instance`, `init_config`, and Agent config. Also, this
 is only done once during initialization and cached to reduce the overhead of every call.
 
+By default, the HTTP client is backed by the `requests` library. You can opt in to an `httpx`-backed client by setting
+the option **`use_httpx`** to `true` in `init_config` or in the instance configuration (instance takes precedence).
+When `use_httpx` is true, `self.http` returns a wrapper that uses the same API but is implemented with `httpx`. The
+default is `false` (requests-based wrapper).
+
 For example, to make a GET request you would use:
 
 ```python

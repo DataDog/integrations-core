@@ -64,6 +64,7 @@ if TYPE_CHECKING:
 
     from datadog_checks.base.utils.diagnose import Diagnosis
     from datadog_checks.base.utils.http import RequestsWrapper
+    from datadog_checks.base.utils.httpx import HTTPXWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
 
 inspect: _module_inspect = lazy_loader.load('inspect')
@@ -109,7 +110,7 @@ class AgentCheck(object):
 
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
-    # Used by `self.http` for an instance of RequestsWrapper
+    # Used by `self.http` for an instance of RequestsWrapper or HTTPXWrapper (when use_httpx is True)
     HTTP_CONFIG_REMAPPER = None
 
     # Used by `create_tls_context` for an instance of RequestsWrapper
@@ -371,17 +372,27 @@ class AgentCheck(object):
         return limit
 
     @property
-    def http(self) -> RequestsWrapper:
+    def http(self) -> RequestsWrapper | HTTPXWrapper:
         """
         Provides logic to yield consistent network behavior based on user configuration.
 
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
+
+        When the instance or init_config option ``use_httpx`` is true, returns an HTTP client
+        backed by httpx (same API as the default requests-based wrapper). Default is false
+        (requests-based wrapper).
         """
         if not hasattr(self, '_http'):
             # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
+            use_httpx = is_affirmative((self.instance or {}).get('use_httpx', self.init_config.get('use_httpx', False)))
+            if use_httpx:
+                from datadog_checks.base.utils.httpx import HTTPXWrapper
 
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+                self._http = HTTPXWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            else:
+                from datadog_checks.base.utils.http import RequestsWrapper
+
+                self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
