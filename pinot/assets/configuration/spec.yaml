@@ -1,0 +1,41 @@
+name: Pinot
+files:
+- name: pinot.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - name: controller_endpoint
+      description: |
+        Endpoint exposing the Pinot Controller's Prometheus metrics via JMX Exporter.
+      value:
+        display_default: null
+        example: http://pinot-controller:8009/metrics
+        type: string
+    - name: server_endpoint
+      description: |
+        Endpoint exposing the Pinot Server's Prometheus metrics via JMX Exporter.
+      value:
+        display_default: null
+        example: http://pinot-server:8008/metrics
+        type: string
+    - name: broker_endpoint
+      description: |
+        Endpoint exposing the Pinot Broker's Prometheus metrics via JMX Exporter.
+      value:
+        display_default: null
+        example: http://pinot-broker:8007/metrics
+        type: string
+    - name: minion_endpoint
+      description: |
+        Endpoint exposing the Pinot Minion's Prometheus metrics via JMX Exporter.
+      value:
+        display_default: null
+        example: http://pinot-minion:8006/metrics
+        type: string
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.hidden: true

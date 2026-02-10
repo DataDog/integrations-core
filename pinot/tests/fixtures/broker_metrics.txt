@@ -1,0 +1,20 @@
+# HELP jvm_memory_bytes_used Used bytes of a given JVM memory area.
+# TYPE jvm_memory_bytes_used gauge
+jvm_memory_bytes_used{area="heap"} 1.073741824e+08
+jvm_memory_bytes_used{area="nonheap"} 5.36870912e+07
+# HELP jvm_threads_current Current thread count of a JVM
+# TYPE jvm_threads_current gauge
+jvm_threads_current 60
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 200.5
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 384
+# HELP pinot_broker_helix_connected_Value Helix connected status
+# TYPE pinot_broker_helix_connected_Value gauge
+pinot_broker_helix_connected_Value 1
+# HELP pinot_broker_queriesKilled_Count Queries killed count
+# TYPE pinot_broker_queriesKilled_Count gauge
+pinot_broker_queriesKilled_Count 5
+

@@ -1,0 +1,31 @@
+services:
+  pinot:
+    image: apachepinot/pinot:${PINOT_VERSION:-1.4.0}
+    container_name: pinot
+    hostname: pinot
+    ports:
+      # ZooKeeper (internal port 2123 -> host 12123)
+      - "12123:2123"
+      # Controller (internal port 9000 -> host 19000)
+      - "19000:9000"
+      # Broker (internal port 8000 -> host 18000)
+      - "18000:8000"
+      # Server (internal port 7050 -> host 17050)
+      - "17050:7050"
+      # Minion (internal port 6000 -> host 16000)
+      - "16000:6000"
+      # JMX Prometheus exporter (internal port 8009 -> host 18009)
+      - "18009:8009"
+    environment:
+      # Enable JMX Prometheus exporter for metrics using built-in config
+      JAVA_OPTS: >-
+        -javaagent:/opt/pinot/etc/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=8009:/opt/pinot/etc/jmx_prometheus_javaagent/configs/pinot.yml
+        -Xms512m
+        -Xmx1g
+    command: ["QuickStart", "-type", "batch"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s

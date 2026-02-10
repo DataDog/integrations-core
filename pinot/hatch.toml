@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[envs.default.env-vars]
+PINOT_VERSION = "1.4.0"
+
+[[envs.default.matrix]]
+python = ["3.13"]
+
+[envs.latest.env-vars]
+PINOT_VERSION = "latest"

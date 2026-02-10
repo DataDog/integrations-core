@@ -1,0 +1,33 @@
+# HELP jvm_memory_bytes_used Used bytes of a given JVM memory area.
+# TYPE jvm_memory_bytes_used gauge
+jvm_memory_bytes_used{area="heap"} 2.147483648e+08
+jvm_memory_bytes_used{area="nonheap"} 6.7108864e+07
+# HELP jvm_memory_bytes_committed Committed (bytes) of a given JVM memory area.
+# TYPE jvm_memory_bytes_committed gauge
+jvm_memory_bytes_committed{area="heap"} 4.294967296e+09
+jvm_memory_bytes_committed{area="nonheap"} 8.388608e+07
+# HELP jvm_threads_current Current thread count of a JVM
+# TYPE jvm_threads_current gauge
+jvm_threads_current 100
+# HELP jvm_threads_daemon Daemon thread count of a JVM
+# TYPE jvm_threads_daemon gauge
+jvm_threads_daemon 80
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 300.5
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 512
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 65536
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 1.073741824e+09
+# HELP pinot_server_helix_connected_Value Helix connected status
+# TYPE pinot_server_helix_connected_Value gauge
+pinot_server_helix_connected_Value 1
+# HELP pinot_server_queries_Count Total queries count
+# TYPE pinot_server_queries_Count gauge
+pinot_server_queries_Count 10000
+
