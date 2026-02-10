@@ -5,6 +5,8 @@ mypy-args = [
   "--check-untyped-defs",
   "--follow-imports",
   "silent",
+]
+mypy-files = [
   "datadog_checks/mysql/statements.py",
 ]
 mypy-deps = [

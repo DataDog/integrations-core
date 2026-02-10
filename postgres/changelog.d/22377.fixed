@@ -1,0 +1,1 @@
+Fixes collect_wal_metrics config default on 9.6 and below to correctly default to disabled

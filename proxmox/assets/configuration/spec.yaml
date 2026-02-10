@@ -1,4 +1,5 @@
 name: Proxmox
+fleet_configurable: true
 files:
 - name: proxmox.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: proxmox_server
+      fleet_configurable: true
       display_priority: 5
       description: |
         Proxmox API endpoint.
@@ -17,6 +19,7 @@ files:
         type: string
       required: true
     - name: collect_tasks
+      fleet_configurable: true
       display_priority: 5
       description: |
         Whether or not to collect Proxmox tasks as events.
@@ -26,6 +29,7 @@ files:
         display_default: false
       required: false
     - name: collected_task_types
+      fleet_configurable: true
       display_priority: 5
       description: |
         Which Proxmox task types to collect. When `collect_tasks` is enabled, the integration will collect
@@ -59,6 +63,7 @@ files:
           'property' is the kind of property on which to apply the filter and must be one of these values:
              - resource_name (default) to filter on the resource name (defined by Proxmox)
              - hostname (available only for VMs and nodes) to filter on the hostname
+      fleet_configurable: true
       value:
           example:
             - resource: vm
@@ -90,7 +95,7 @@ files:
     - template: instances/default
       overrides:
         empty_default_hostname.display_priority: 1
-        empty_default_hostname.default: true
+        empty_default_hostname.value.default: true
         empty_default_hostname.value.example: true
         empty_default_hostname.description: |
           The Proxmox integration is a check where metrics are usually unrelated to the host on which the Agent

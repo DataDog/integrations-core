@@ -37,11 +37,11 @@ deps = [
     "binary==1.0.2",
     "cachetools==6.2.0",
     "cryptography==45.0.6",
-    "ddtrace==3.16.4",
+    "ddtrace==3.19.5",
     "jellyfish==1.2.0",
     "lazy-loader==0.4",
     "prometheus-client==0.22.1",
-    "protobuf==6.32.0",
+    "protobuf==6.33.5",
     "pydantic==2.11.7",
     "python-dateutil==2.9.0.post0",
     "pywin32==311; sys_platform == 'win32'",
@@ -65,7 +65,7 @@ http = [
     "requests-oauthlib==2.0.0",
 ]
 json = [
-    "orjson==3.11.3",
+    "orjson==3.11.7",
 ]
 kube = [
     "kubernetes==33.1.0",

@@ -2,15 +2,57 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a9265d8a-1531-4f1a-9719-54b03a1f0634",
   "app_id": "valence-security",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
-    "support": "README.md#Support",
+    "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Valence Security alerts and audit logs",
     "title": "Valence Security",
-    "media": [],
+    "media": [
+      {
+        "caption": "Valence Security Overview",
+        "image_url": "images/valence_security_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Overview",
+        "image_url": "images/valence_security_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Alert Insights",
+        "image_url": "images/valence_security_alert_insights_1_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Alert Insights",
+        "image_url": "images/valence_security_alert_insights_1_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Alert Insights",
+        "image_url": "images/valence_security_alert_insights_2_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Alert Insights",
+        "image_url": "images/valence_security_alert_insights_2_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Audit Insights",
+        "image_url": "images/valence_security_audit_insights_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Valence Security Audit Insights",
+        "image_url": "images/valence_security_audit_insights_dark.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -26,7 +68,15 @@
       "source_type_name": "Valence Security",
       "events": {
         "creates_events": false
-      }    
+      }
+    },
+    "dashboards": {
+      "Valence Security Overview": "assets/dashboards/valence_security_overview.json",
+      "Valence Security Alert Insights": "assets/dashboards/valence_security_alert_insights.json",
+      "Valence Security Audit Insights": "assets/dashboards/valence_security_audit_insights.json"
+    },
+    "logs": {
+      "source": "valence-security"
     }
   },
   "author": {

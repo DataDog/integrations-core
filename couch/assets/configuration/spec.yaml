@@ -1,4 +1,5 @@
 name: CouchDB
+fleet_configurable: true
 files:
 - name: couch.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: server
+      fleet_configurable: true
       required: true
       description: The Couch server's url.
       display_priority: 3
@@ -22,6 +24,7 @@ files:
         the collection of these metrics could be slow and resource-intensive. If 
         you're affected by performance issues, set `enable_per_db_metrics` to 
         `false`.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -36,6 +39,7 @@ files:
         parameter accordingly.
 
         This parameter only has an effect if `enable_per_db_metrics` is set to `true`.
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -50,6 +54,7 @@ files:
         the exclusion takes precedence.
 
         This parameter only has an effect if `enable_per_db_metrics` is set to `true`.
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -59,17 +64,20 @@ files:
           - <DATABASE_2>
     - name: max_dbs_per_check
       description: Number of databases to scan per check.
+      fleet_configurable: true
       value:
         type: integer
         example: 50
     - name: name
       description: CouchDB 2.x only. If not provided, the check scans up to max_nodes_per_check nodes of the cluster.
+      fleet_configurable: true
       value:
         type: string
         example: <ERLANG_NAME>
         display_default: null
     - name: max_nodes_per_check
       description: CouchDB 2.x only. How many nodes each check reports if no name is provided.
+      fleet_configurable: true
       value:
         type: integer
         example: 10
