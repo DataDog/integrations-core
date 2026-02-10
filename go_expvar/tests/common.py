@@ -17,7 +17,12 @@ GO_EXPVAR_URL_PATH = "/debug/vars"
 
 URL_WITH_PATH = "{}{}".format(URL, GO_EXPVAR_URL_PATH)
 
-INSTANCE = {"expvar_url": URL, 'tags': ['my_tag'], 'metrics': [{'path': 'num_calls', "type": "rate"}]}
+INSTANCE = {
+    "expvar_url": URL,
+    'tags': ['my_tag'],
+    'metrics': [{'path': 'num_calls', "type": "rate"}],
+    'use_httpx': True,
+}
 
 CHECK_GAUGES = [
     'go_expvar.memstats.alloc',
