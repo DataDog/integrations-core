@@ -9,6 +9,7 @@ import requests
 
 try:
     import httpx
+
     SSL_ERROR_TYPES = (requests.exceptions.SSLError, httpx.ConnectError)
 except ImportError:
     httpx = None
