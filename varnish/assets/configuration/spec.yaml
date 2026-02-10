@@ -1,4 +1,5 @@
 name: Varnish
+fleet_configurable: true
 files:
   - name: varnish.yaml
     options:
@@ -8,6 +9,7 @@ files:
       - template: instances
         options:
           - name: varnishstat
+            fleet_configurable: true
             required: true
             description: |
               The full path to the varnishstat binary and can contain additional arguments.
@@ -29,6 +31,7 @@ files:
               Version 4.1.7 has been released and includes a fix for this.
               Using the exclusion blob with a broken version silences the integration.
               However, you can still use the inclusion blob with those versions.
+            fleet_configurable: true
             value:
               type: array
               items:
@@ -39,6 +42,7 @@ files:
             description: |
               The name used in the varnishstat command for the
               -n argument which will add a name:<INSTANCE_NAME> tag to all metrics.
+            fleet_configurable: true
             value:
               type: string
               example: <INSTANCE_NAME>
@@ -50,12 +54,14 @@ files:
               in order to support service discovery.
 
               The service check is tagged by backend.
+            fleet_configurable: true
             value:
               type: string
               example: /usr/bin/varnishadm
               display_default: null
           - name: secretfile
             description: The path to the varnish secretfile used in the varnishadm command, if enabled.
+            fleet_configurable: true
             value:
               type: string
               example: /etc/varnish/secret
@@ -63,6 +69,7 @@ files:
             description: |
               The parameters for specifying the host to connect to varnishadm.
               Used in version 4.1.0 and above.
+            fleet_configurable: true
             value:
               type: string
               example: localhost
@@ -70,6 +77,7 @@ files:
             description: |
               The parameters for specifying the port to connect to varnishadm.
               Used in version 4.1.0 and above.
+            fleet_configurable: true
             value:
               type: integer
               example: 6082

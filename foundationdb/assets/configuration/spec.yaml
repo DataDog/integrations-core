@@ -1,4 +1,5 @@
 name: FoundationDB
+fleet_configurable: true
 files:
 - name: foundationdb.yaml
   options:
@@ -13,33 +14,40 @@ files:
         If the check does not pass, it will rely on the binding library to find
         the file using standard locations (e.g. `/etc/foundationdb/fdb.cluster` or
         `/etc/foundationdb/fdb.cluster`).
+      fleet_configurable: true
       value:
         example: /var/lib/foundationdb/fdb.cluster
         type: string
     - name: tls_certificate_file
       description: Path to the file from which the local certificates can be loaded
+      fleet_configurable: true
       value:
         type: string
     - name: tls_key_file
       description: Path to the file from which to load the private key
+      fleet_configurable: true
       value:
         type: string
     - name: tls_verify_peers
       description: The byte-string for the verification of peer certificates and sessions
+      fleet_configurable: true
       value:
         type: string
     - name: tls_password
       description: The byte-string representing the passcode for unencrypting the private key
+      fleet_configurable: true
       secret: true
       value:
         type: string
     - name: tls_ca_file
       description: Path to the file containing the CA certificates to trust
+      fleet_configurable: true
       value:
         type: string
     - name: custom_queries
       description: |
         Define custom queries to collect custom metrics from your FoundationDB
+      fleet_configurable: true
       value:
         type: array
         items:
