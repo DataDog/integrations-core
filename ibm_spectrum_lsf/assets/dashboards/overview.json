@@ -14,6 +14,12 @@
             "default": "*",
             "name": "lsf_host",
             "prefix": "lsf_host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "job_id",
+            "prefix": "job_id"
         }
     ],
     "title": "IBM Spectrum LSF Overview",
@@ -261,43 +267,22 @@
                     },
                     {
                         "definition": {
-                            "has_search_bar": "auto",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "HOST",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.cluster.hosts{$lsf_cluster_name,$lsf_host} by {lsf_cluster_name,lsf_admin,lsf_management_host}"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "title": "Hosts",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(source:ibm_spectrum_lsf)",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "show_status": true,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "Monitors",
+                            "type": "manage_status"
                         },
-                        "id": 8971447330741819,
+                        "id": 160337321495986,
                         "layout": {
                             "height": 2,
                             "width": 6,
@@ -921,7 +906,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Current slot utilization",
                             "title_align": "left",
                             "title_size": "16",
@@ -1076,7 +1060,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Current memory utilization",
                             "title_align": "left",
                             "title_size": "16",
@@ -1623,7 +1606,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:ibm_spectrum_lsf.job.run_time{status:run,$lsf_cluster_name} by {job_id}"
+                                            "query": "sum:ibm_spectrum_lsf.job.run_time{status:run,$lsf_cluster_name,$job_id} by {job_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1671,7 +1654,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.mem{status:run,$lsf_cluster_name} by {job_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.mem{status:run,$lsf_cluster_name,$job_id} by {job_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1737,43 +1720,43 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.mem{$lsf_cluster_name} by {job_id,status,queue,project,user}"
+                                            "query": "avg:ibm_spectrum_lsf.job.mem{$lsf_cluster_name,$job_id} by {job_id,status,queue,project,user}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ibm_spectrum_lsf.job.run_time{$lsf_cluster_name} by {job_id,status,queue,project,user}"
+                                            "query": "avg:ibm_spectrum_lsf.job.run_time{$lsf_cluster_name,$job_id} by {job_id,status,queue,project,user}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:ibm_spectrum_lsf.job.cpu_used{$lsf_cluster_name} by {job_id,status,queue,project,user}"
+                                            "query": "avg:ibm_spectrum_lsf.job.cpu_used{$lsf_cluster_name,$job_id} by {job_id,status,queue,project,user}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "avg:ibm_spectrum_lsf.job.time_left{$lsf_cluster_name} by {job_id,status,queue,project,user}"
+                                            "query": "avg:ibm_spectrum_lsf.job.time_left{$lsf_cluster_name,$job_id} by {job_id,status,queue,project,user}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "avg:ibm_spectrum_lsf.job.percent_complete{$lsf_cluster_name} by {job_id,status,queue,project,user}"
+                                            "query": "avg:ibm_spectrum_lsf.job.percent_complete{$lsf_cluster_name,$job_id} by {job_id,status,queue,project,user}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query6",
-                                            "query": "avg:ibm_spectrum_lsf.job.idle_factor{$lsf_cluster_name} by {job_id,status,queue,project,user}"
+                                            "query": "avg:ibm_spectrum_lsf.job.idle_factor{$lsf_cluster_name,$job_id} by {job_id,status,queue,project,user}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query7",
-                                            "query": "avg:ibm_spectrum_lsf.job.swap{$lsf_cluster_name} by {job_id,status,queue,project,user}"
+                                            "query": "avg:ibm_spectrum_lsf.job.swap{$lsf_cluster_name,$job_id} by {job_id,status,queue,project,user}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -1856,7 +1839,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending{$lsf_cluster_name}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending{$lsf_cluster_name,$job_id}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -1886,7 +1869,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1+query2"
+                                            "formula": "query1 + query2"
                                         }
                                     ],
                                     "queries": [
@@ -1894,13 +1877,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.total{$lsf_cluster_name}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.total{$lsf_cluster_name,$job_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name,$job_id}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -1935,7 +1918,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name} by {job_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name,$job_id} by {job_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2011,43 +1994,43 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending{$lsf_cluster_name} by {job_id,job_name,task_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name} by {job_id,job_name,task_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.total{$lsf_cluster_name} by {job_id,job_name,task_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.total{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query6",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.unknown{$lsf_cluster_name} by {job_id,job_name,task_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.unknown{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query7",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.user_suspended{$lsf_cluster_name} by {job_id,job_name,task_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.user_suspended{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query8",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.system_suspended{$lsf_cluster_name} by {job_id,job_name,task_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.system_suspended{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query9",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending_user_suspended{$lsf_cluster_name} by {job_id,job_name,task_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending_user_suspended{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -2084,6 +2067,297 @@
                 "width": 12,
                 "x": 0,
                 "y": 36
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_pink",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Recently Completed Job Details",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query2) / count_not_null(query1) * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{status:failure} by {job_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{*} by {job_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Average percentage of failed jobs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4771382205464867,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "automatic"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{*} by {status,job_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Succeeded vs failed jobs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 451557783744454,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{*} by {job_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Recently succeeded Job IDs",
+                            "type": "treemap"
+                        },
+                        "id": 5960464135917817,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "AVG MEM",
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "MAX MEM",
+                                            "cell_display_mode": "number",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "MEM EFF",
+                                            "cell_display_mode": "number",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "CPU AVG EFF",
+                                            "cell_display_mode": "number",
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "alias": "CPU TIME",
+                                            "cell_display_mode": "number",
+                                            "formula": "query7"
+                                        },
+                                        {
+                                            "alias": "CPU PEAK",
+                                            "cell_display_mode": "number",
+                                            "formula": "query8"
+                                        },
+                                        {
+                                            "alias": "CPU PEAK DUR",
+                                            "cell_display_mode": "number",
+                                            "formula": "query9"
+                                        },
+                                        {
+                                            "alias": "EXIT CODE",
+                                            "cell_display_mode": "number",
+                                            "formula": "query10",
+                                            "number_format": {
+                                                "precision": "integer"
+                                            }
+                                        },
+                                        {
+                                            "alias": "SUCCESS?",
+                                            "cell_display_mode": "number",
+                                            "formula": "query11",
+                                            "number_format": {
+                                                "precision": "integer"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.avg_memory{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.max_memory{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.mem_efficiency{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.cpu_average_efficiency{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.cpu_time{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query8",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.cpu_peak{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query9",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.cpu_peak_duration{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query10",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.exit_code{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query11",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.success{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Time spent in each state per job",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 8327708072979630,
+                        "layout": {
+                            "height": 4,
+                            "width": 12,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 3848803486214635,
+            "layout": {
+                "height": 7,
+                "width": 12,
+                "x": 0,
+                "y": 43
             }
         },
         {
@@ -2178,7 +2452,7 @@
                         },
                         "id": 7272907804067032,
                         "layout": {
-                            "height": 4,
+                            "height": 5,
                             "width": 12,
                             "x": 0,
                             "y": 0
@@ -2188,10 +2462,10 @@
             },
             "id": 599422311875556,
             "layout": {
-                "height": 5,
+                "height": 6,
                 "width": 12,
                 "x": 0,
-                "y": 43
+                "y": 50
             }
         },
         {
@@ -2764,7 +3038,163 @@
                 "height": 7,
                 "width": 12,
                 "x": 0,
-                "y": 48
+                "y": 56
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_pink",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "View logs related to the IBM Spectrum LSF management host and its daemons.  ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5377070382842880,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "View output from individual jobs. Scope by `job_id` to see information relating to a specific job. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3587387881695771,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:ibm_spectrum_lsf log_type:system",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "System logs ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 3768227703496988,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:ibm_spectrum_lsf log_type:job @job_id:$job_id.value",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Job logs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 4778064320826134,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 7445442869666916,
+            "layout": {
+                "height": 6,
+                "width": 12,
+                "x": 0,
+                "y": 63
             }
         }
     ]
