@@ -96,9 +96,7 @@ def test_no_version(check, instance, caplog):
 
     r = mock.MagicMock()
     with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(
-            status_code=200, content=b'{}', headers={'server': 'nginx'}
-        )
+        r.get.return_value = mock.MagicMock(status_code=200, content=b'{}', headers={'server': 'nginx'})
 
         c.check(instance)
 

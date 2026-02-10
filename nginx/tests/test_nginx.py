@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import httpx
 import mock
 import pytest
-import httpx
 import requests
 
 from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT_SSL, TAGS_WITH_HOST, TAGS_WITH_HOST_AND_PORT, USING_VTS
