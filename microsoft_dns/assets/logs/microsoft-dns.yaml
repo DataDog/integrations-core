@@ -442,15 +442,6 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `message` to `ocsf.message`
-              sources:
-                - message
-              sourceType: attribute
-              target: ocsf.message
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `evt.id` to `ocsf.metadata.event_code`
               sources:
                 - evt.id
@@ -623,15 +614,6 @@ pipeline:
               target: ocsf.metadata.product.name
               targetFormat: string
               preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `message` to `ocsf.message`
-              sources:
-                - message
-              sourceType: attribute
-              target: ocsf.message
-              targetFormat: string
-              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `evt.id` to `ocsf.metadata.event_code`
@@ -907,15 +889,6 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `message` to `ocsf.message`
-              sources:
-                - message
-              sourceType: attribute
-              target: ocsf.message
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `evt.id` to `ocsf.metadata.event_code`
               sources:
                 - evt.id
@@ -1181,15 +1154,6 @@ pipeline:
               target: ocsf.metadata.product.name
               targetFormat: string
               preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `message` to `ocsf.message`
-              sources:
-                - message
-              sourceType: attribute
-              target: ocsf.message
-              targetFormat: string
-              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `evt.id` to `ocsf.metadata.event_code`
@@ -1539,15 +1503,6 @@ pipeline:
               target: ocsf.metadata.product.name
               targetFormat: string
               preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `message` to `ocsf.message`
-              sources:
-                - message
-              sourceType: attribute
-              target: ocsf.message
-              targetFormat: string
-              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `evt.id` to `ocsf.metadata.event_code`
