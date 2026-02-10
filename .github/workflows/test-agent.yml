@@ -28,11 +28,6 @@ on:
         description: Agent 6 image
         default: "registry.datadoghq.com/agent:6-rc"
         type: string
-      agent-image-windows-py2:
-        required: false
-        description: Agent 6 image on Windows
-        default: "datadog/agent-dev:master-py2-win-servercore" # todo: support registry.datadoghq.com
-        type: string
 
 jobs:
   test:
@@ -46,7 +41,6 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       skip-ddev-tests: true
       context: "test-agent"
     secrets: inherit
