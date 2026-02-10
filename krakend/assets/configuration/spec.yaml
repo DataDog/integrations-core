@@ -27,7 +27,6 @@ files:
         Defaults to `true`, meaning Datadog will collect these metrics if available.
         This setting in `init_config` provides a default for all instances; it can be overridden per instance.
       fleet_configurable: true
-      fleet_configurable: true
       value:
         type: boolean
         example: true
