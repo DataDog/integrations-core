@@ -46,7 +46,6 @@ deps = [
     "python-dateutil==2.9.0.post0",
     "pywin32==311; sys_platform == 'win32'",
     "pyyaml==6.0.2",
-    "httpx==0.28.1",
     "requests-toolbelt==1.0.0",
     "requests-unixsocket2==1.0.0",
     "requests==2.32.5",
