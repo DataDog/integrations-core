@@ -1,0 +1,1 @@
+Fix `replication_role` tag not updating correctly after a PostgreSQL failover or promotion.

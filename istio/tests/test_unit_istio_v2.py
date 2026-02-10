@@ -120,6 +120,28 @@ def test_istio_agent(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+def test_istio_agent_dns_metrics(aggregator, dd_run_check, mock_http_response):
+    """
+    Test DNS metrics from istio-proxy merged endpoint
+    """
+    mock_http_response(file_path=get_fixture_path('1.5', 'istio-merged.txt'))
+    check = Istio('istio', {}, [common.MOCK_V2_MESH_INSTANCE])
+    dd_run_check(check)
+
+    # Verify DNS metrics are collected
+    dns_metrics = [
+        'istio.mesh.agent.dns_requests.count',
+        'istio.mesh.agent.dns_upstream_request_duration_seconds.bucket',
+        'istio.mesh.agent.dns_upstream_request_duration_seconds.sum',
+        'istio.mesh.agent.dns_upstream_request_duration_seconds.count',
+    ]
+
+    for metric in dns_metrics:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
 @pytest.mark.parametrize(
     'exclude_labels, expected_exclude_labels',
     [

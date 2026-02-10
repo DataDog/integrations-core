@@ -14,6 +14,7 @@ ALLOWED_OPTION_FIELDS = {
     'hidden',
     'display_priority',
     'deprecation',
+    'legacy',
     'multiple',
     'multiple_instances_defined',
     'metadata_tags',
