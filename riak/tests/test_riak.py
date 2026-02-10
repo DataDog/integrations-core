@@ -3,11 +3,16 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-from requests import ConnectionError
+import requests
+import httpx
 
 from datadog_checks.riak import Riak
 
 from . import common
+
+# When use_httpx is True the check uses HTTPXWrapper and raises httpx.ConnectError;
+# otherwise it uses RequestsWrapper and raises requests.ConnectionError.
+CONNECTION_ERROR_TYPES = (requests.exceptions.ConnectionError, httpx.ConnectError)
 
 
 @pytest.mark.integration
@@ -31,10 +36,11 @@ def test_check(aggregator, check, instance):
 
 @pytest.mark.unit
 def test_bad_config(aggregator, instance):
-    instance.update({"url": "http://localhost:5985"})
+    instance = instance.copy()
+    instance.update({"url": "http://localhost:5985", "use_httpx": True})
     check = Riak('riak', {}, [instance])
 
-    with pytest.raises(ConnectionError):
+    with pytest.raises(CONNECTION_ERROR_TYPES):
         check.check(instance)
 
     sc_tags = ['my_tag', 'url:http://localhost:5985']
