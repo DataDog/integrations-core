@@ -28,7 +28,6 @@ files:
           example: true
       - name: server
         fleet_configurable: true
-        fleet_configurable: true
         secret: true
         required: true
         description: |
