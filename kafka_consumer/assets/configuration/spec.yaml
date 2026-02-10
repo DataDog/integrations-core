@@ -222,6 +222,22 @@ files:
             The client secret.
           value:
             type: string
+        - name: scope
+          enabled: false
+          description: |
+            The OAuth scope to request. Required by most identity providers.
+            For example, a custom scope like 'kafka' or 'api://default'.
+          value:
+            type: string
+        - name: extensions
+          enabled: false
+          description: |
+            SASL/OAUTHBEARER extensions to pass to the broker.
+            For Confluent Cloud, this typically includes the logical cluster ID
+            and optionally the identity pool ID.
+            Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
+          value:
+            type: string
       - template: instances/tls
       - name: tls_crlfile
         description: |
