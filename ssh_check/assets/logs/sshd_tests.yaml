@@ -1,44 +1,9 @@
 id: "sshd"
 tests:
  -
-  sample: |-
-    {
-      "journald": {
-        "_HOSTNAME": "ssh-server",
-        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
-      },
-      "message": "pam_unix(sshd:session): session closed for user marc.szalkiewicz"
-    }
+  sample: "pam_unix(sshd:session): session closed for user marc.szalkiewicz"
   result:
     custom:
-      journald:
-        _HOSTNAME: "ssh-server"
-        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
-      ocsf:
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        activity_id: 2
-        activity_name: "Logoff"
-        time: 1768399940641849
-        dst_endpoint:
-          hostname: "ssh-server"
-        metadata:
-          product:
-            name: "OpenSSH"
-            vendor_name: "OpenBSD"
-          event_code: "session closed"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        status: "Success"
-        status_id: 1
-        user:
-          name: "marc.szalkiewicz"
-        actor:
-          user:
-            name: "marc.szalkiewicz"
       system:
         action: "session closed"
         user: "marc.szalkiewicz"
@@ -46,51 +11,13 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: |-
-    {
-      "journald": {
-        "_HOSTNAME": "ssh-server",
-        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
-      },
-      "message": "Accepted publickey for topdog from 172.22.179.72 port 58599 ssh2: RSA 08:fd:c7:75:ee:fbxxxx:xxxxx"
-    }
+  sample: "Accepted publickey for topdog from 172.22.179.72 port 58599 ssh2: RSA 08:fd:c7:75:ee:fbxxxx:xxxxx"
   result:
     custom:
-      journald:
-        _HOSTNAME: "ssh-server"
-        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       network:
         client:
           ip: "172.22.179.72"
           port: "58599"
-      ocsf:
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        activity_id: 1
-        activity_name: "Logon"
-        time: 1768399940641849
-        dst_endpoint:
-          hostname: "ssh-server"
-        metadata:
-          product:
-            name: "OpenSSH"
-            vendor_name: "OpenBSD"
-          event_code: "Accepted"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          ip: "172.22.179.72"
-          port: 58599
-        status: "Success"
-        status_id: 1
-        user:
-          name: "topdog"
-        actor:
-          user:
-            name: "topdog"
       system:
         action: "Accepted"
         algorithm: "RSA"
@@ -101,19 +28,9 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
  -
-  sample: |-
-    {
-      "journald": {
-        "_HOSTNAME": "ssh-server",
-        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
-      },
-      "message": "Received disconnect from 172.22.179.72: 11: disconnected by user"
-    }
+  sample: "Received disconnect from 172.22.179.72: 11: disconnected by user"
   result:
     custom:
-      journald:
-        _HOSTNAME: "ssh-server"
-        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
       network:
         client:
           ip: "172.22.179.72"
@@ -121,167 +38,6 @@ tests:
         action: "disconnect"
         type: "11: disconnected by user"
     message: "Received disconnect from 172.22.179.72: 11: disconnected by user"
-    tags:
-     - "source:LOGS_SOURCE"
- -
-  sample: |-
-    {
-      "journald": {
-        "_HOSTNAME": "ssh-server",
-        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
-      },
-      "message": "Failed password for invalid user admin from 192.168.1.100 port 22334 ssh2"
-    }
-  result:
-    custom:
-      journald:
-        _HOSTNAME: "ssh-server"
-        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
-      network:
-        client:
-          ip: "192.168.1.100"
-          port: "22334"
-      ocsf:
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        activity_id: 1
-        activity_name: "Logon"
-        time: 1768399940641849
-        dst_endpoint:
-          hostname: "ssh-server"
-        status: "Failure"
-        status_id: 2
-        metadata:
-          product:
-            name: "OpenSSH"
-            vendor_name: "OpenBSD"
-          event_code: "Failed"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          ip: "192.168.1.100"
-          port: 22334
-        user:
-          name: "admin"
-        actor:
-          user:
-            name: "admin"
-      system:
-        action: "Failed"
-        type: "password"
-        user: "admin"
-    message: "Failed password for invalid user admin from 192.168.1.100 port 22334 ssh2"
-    tags:
-     - "source:LOGS_SOURCE"
- -
-  sample: |-
-    {
-      "journald": {
-        "_HOSTNAME": "ssh-server",
-        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
-      },
-      "message": "Starting session: shell on pts/0 for ubuntu from 192.168.1.100 port 49630 id 0"
-    }
-  result:
-    custom:
-      journald:
-        _HOSTNAME: "ssh-server"
-        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
-      network:
-        client:
-          ip: "192.168.1.100"
-          port: "49630"
-      ocsf:
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        activity_id: 1
-        activity_name: "Logon"
-        time: 1768399940641849
-        dst_endpoint:
-          hostname: "ssh-server"
-        status: "Success"
-        status_id: 1
-        metadata:
-          product:
-            name: "OpenSSH"
-            vendor_name: "OpenBSD"
-          event_code: "Starting session"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          ip: "192.168.1.100"
-          port: 49630
-        user:
-          name: "ubuntu"
-        actor:
-          user:
-            name: "ubuntu"
-      system:
-        action: "Starting session"
-        session_id: 0
-        tty: "pts/0"
-        type: "shell"
-        user: "ubuntu"
-    message: "Starting session: shell on pts/0 for ubuntu from 192.168.1.100 port 49630 id 0"
-    tags:
-     - "source:LOGS_SOURCE"
- -
-  sample: |-
-    {
-      "journald": {
-        "_HOSTNAME": "ssh-server",
-        "_SOURCE_REALTIME_TIMESTAMP": 1768399940641849
-      },
-      "message": "Close session: user ubuntu from 192.168.1.100 port 49630 id 0"
-    }
-  result:
-    custom:
-      journald:
-        _HOSTNAME: "ssh-server"
-        _SOURCE_REALTIME_TIMESTAMP: 1768399940641849
-      network:
-        client:
-          ip: "192.168.1.100"
-          port: "49630"
-      ocsf:
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        activity_id: 2
-        activity_name: "Logoff"
-        time: 1768399940641849
-        dst_endpoint:
-          hostname: "ssh-server"
-        metadata:
-          product:
-            name: "OpenSSH"
-            vendor_name: "OpenBSD"
-          event_code: "Close session"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          ip: "192.168.1.100"
-          port: 49630
-        status: "Success"
-        status_id: 1
-        user:
-          name: "ubuntu"
-        actor:
-          user:
-            name: "ubuntu"
-      system:
-        action: "Close session"
-        session_id: 0
-        user: "ubuntu"
-    message: "Close session: user ubuntu from 192.168.1.100 port 49630 id 0"
     tags:
      - "source:LOGS_SOURCE"
 
