@@ -27,7 +27,6 @@ class Fabric:
 
         # Config for submitting device/interface metadata to NDM
         self.send_ndm_metadata = self.instance.get('send_ndm_metadata', False)
-        self.topology_skips_ip_match = self.instance.get('topology_skips_ip_match', False)
 
         # grab some functions from the check
         self.gauge = check.gauge
@@ -52,9 +51,7 @@ class Fabric:
             lldp_adj_eps = self.api.get_lldp_adj_eps()
             cdp_adj_eps = self.api.get_cdp_adj_eps()
             device_map = ndm.get_device_ip_mapping(devices)
-            links = ndm.create_topology_link_metadata(
-                self.log, lldp_adj_eps, cdp_adj_eps, device_map, self.namespace, self.topology_skips_ip_match
-            )
+            links = ndm.create_topology_link_metadata(self.log, lldp_adj_eps, cdp_adj_eps, device_map, self.namespace)
 
             collect_timestamp = int(time.time())
             batches = ndm.batch_payloads(self.namespace, devices, interfaces, links, collect_timestamp)

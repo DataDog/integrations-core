@@ -685,27 +685,17 @@ def assert_check_metrics(aggregator):
     aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=['cisco'])
 
 
-def test_fabric_topology_skip_ip_match(aggregator):
-    """Test that topology_skips_ip_match configuration is properly passed through the system"""
-    config_with_skip_ip_match = {
-        'aci_urls': common.ACI_URLS,
-        'username': common.USERNAME,
-        'pwd': common.PASSWORD,
-        'tenant': ['DataDog'],
-        "tags": ["project:cisco_aci"],
-        "send_ndm_metadata": True,
-        "topology_skips_ip_match": True,  # Enable IP matching skip
-    }
-
-    check = CiscoACICheck(common.CHECK_NAME, {}, [config_with_skip_ip_match])
+def test_fabric_topology_links_created(aggregator):
+    """Test that topology links are created with remote device dd_ids"""
+    check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
     api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
     api.wrapper_factory = common.FakeFabricSessionWrapper
-    check._api_cache[hash_mutable(config_with_skip_ip_match)] = api
+    check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
 
     with freeze_time("2012-01-14 03:21:34"):
         check.check({})
 
-        # Verify that topology links are still created
+        # Verify that topology links are created
         ndm_metadata = aggregator.get_event_platform_events("network-devices-metadata")
         assert len(ndm_metadata) > 0
 
@@ -716,83 +706,24 @@ def test_fabric_topology_skip_ip_match(aggregator):
                 links.extend(event['links'])
 
         # Verify we have topology links
-        assert len(links) > 0, "Should have topology links even with topology_skips_ip_match enabled"
+        assert len(links) > 0, "Should have topology links"
 
         # Verify that links have remote device dd_ids
-        # (with the fixture data, IPs match so this would work either way, but verifies the plumbing)
         for link in links:
             assert link['remote']['device']['dd_id'] is not None, "Remote device should have dd_id"
 
 
-def test_fabric_topology_with_ip_mismatch_using_fixtures(aggregator):
-    """Test topology link creation using fixtures with modified LLDP data to simulate IP mismatches"""
-    # Config WITHOUT skip_ip_match - should not create links with dd_id when IPs don't match
-    config_without_skip = {
-        'aci_urls': common.ACI_URLS,
-        'username': common.USERNAME,
-        'pwd': common.PASSWORD,
-        'tenant': ['DataDog'],
-        "tags": ["project:cisco_aci"],
-        "send_ndm_metadata": True,
-        "topology_skips_ip_match": False,  # Default behavior
-    }
-
-    check = CiscoACICheck(common.CHECK_NAME, {}, [config_without_skip])
+def test_fabric_topology_with_ip_mismatch(aggregator):
+    """Test that topology links are created even when LLDP management IP doesn't match device IP"""
+    check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
     api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
     api.wrapper_factory = FakeFabricSessionWrapperWithIPMismatch  # Use custom wrapper with IP mismatch
-    check._api_cache[hash_mutable(config_without_skip)] = api
+    check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
 
     with freeze_time("2012-01-14 03:21:34"):
         check.check({})
 
-        # Verify that topology links are created but without remote dd_id
-        ndm_metadata = aggregator.get_event_platform_events("network-devices-metadata")
-        assert len(ndm_metadata) > 0
-
-        # Extract links from metadata
-        links = []
-        for event in ndm_metadata:
-            if 'links' in event and event['links']:
-                links.extend(event['links'])
-
-        # Should have some links
-        assert len(links) > 0, "Should have topology links"
-
-        # But remote devices should NOT have dd_id because IPs don't match
-        for link in links:
-            # dd_id might not be in the dict at all, or be None
-            remote_dd_id = link['remote']['device'].get('dd_id')
-            assert remote_dd_id is None, (
-                f"Remote device should NOT have dd_id when IP doesn't match"
-                f" and skip_ip_match is False, got: {remote_dd_id}"
-            )
-            assert link['remote']['interface'].get('dd_id') is None, (
-                f"Remote interface should NOT have dd_id when IP doesn't match"
-                f" and skip_ip_match is False, got: {link['remote']['interface'].get('dd_id')}"
-            )
-
-    # Now test WITH skip_ip_match enabled
-    aggregator.reset()
-
-    config_with_skip = {
-        'aci_urls': common.ACI_URLS,
-        'username': common.USERNAME,
-        'pwd': common.PASSWORD,
-        'tenant': ['DataDog'],
-        "tags": ["project:cisco_aci"],
-        "send_ndm_metadata": True,
-        "topology_skips_ip_match": True,  # Enable skip
-    }
-
-    check2 = CiscoACICheck(common.CHECK_NAME, {}, [config_with_skip])
-    api2 = Api(common.ACI_URLS, check2.http, common.USERNAME, password=common.PASSWORD, log=check2.log)
-    api2.wrapper_factory = FakeFabricSessionWrapperWithIPMismatch  # Same wrapper with IP mismatch
-    check2._api_cache[hash_mutable(config_with_skip)] = api2
-
-    with freeze_time("2012-01-14 03:21:34"):
-        check2.check({})
-
-        # Verify that topology links now have remote dd_id despite IP mismatch
+        # Verify that topology links are created with remote dd_id despite IP mismatch
         ndm_metadata = aggregator.get_event_platform_events("network-devices-metadata")
         assert len(ndm_metadata) > 0
 
@@ -805,12 +736,12 @@ def test_fabric_topology_with_ip_mismatch_using_fixtures(aggregator):
         # Should have links
         assert len(links) > 0, "Should have topology links"
 
-        # Remote devices SHOULD have dd_id because we're skipping IP validation
+        # Remote devices SHOULD have dd_id even with IP mismatch (IP matching is always skipped)
         for link in links:
             assert link['remote']['device']['dd_id'] is not None, (
-                "Remote device SHOULD have dd_id when skip_ip_match is True, even with IP mismatch"
+                "Remote device should have dd_id even with IP mismatch"
             )
 
             assert link['remote']['interface']['dd_id'] is not None, (
-                "Remote interface SHOULD have dd_id when skip_ip_match is True, even with IP mismatch"
+                "Remote interface should have dd_id even with IP mismatch"
             )

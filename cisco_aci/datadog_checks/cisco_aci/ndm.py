@@ -73,9 +73,7 @@ def create_interface_metadata(phys_if, address, namespace):
     return interface
 
 
-def create_topology_link_metadata(
-    logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace, should_topology_skip_ip_match
-):
+def create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace):
     """
     Create a TopologyLinkMetadata object from LLDP or CDP (only LLDP is supported as of right now)
     """
@@ -95,9 +93,7 @@ def create_topology_link_metadata(
             ),
         )
 
-        remote_device_dd_id = get_remote_device_dd_id(
-            device_map, lldp_attrs.remote_device_dn, lldp_attrs.mgmt_ip, should_topology_skip_ip_match
-        )
+        remote_device_dd_id = get_remote_device_dd_id(device_map, lldp_attrs.remote_device_dn)
         remote_device = TopologyLinkDevice(
             name=lldp_attrs.sys_name,
             description=lldp_attrs.sys_desc,
@@ -147,17 +143,14 @@ def create_topology_link_metadata(
         )
 
 
-def get_remote_device_dd_id(device_map, remote_device_dn, mgmt_ip, should_topology_skip_ip_match) -> str | None:
+def get_remote_device_dd_id(device_map, remote_device_dn) -> str | None:
     """
     Get the Cisco DN for a remote device, if the device is in the device map then
     check that it matches the management IP of the LLDP neighbor, then return it
     """
     device_id = device_map.get(remote_device_dn, "")
     if device_id:
-        if should_topology_skip_ip_match:
-            return device_id
-        if device_id.endswith(mgmt_ip):
-            return device_id
+        return device_id
     return None
 
 
