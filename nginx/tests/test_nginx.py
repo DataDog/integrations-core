@@ -7,13 +7,17 @@ import mock
 import pytest
 import requests
 
-try:
-    import httpx
 
-    SSL_ERROR_TYPES = (requests.exceptions.SSLError, httpx.ConnectError)
-except ImportError:
-    httpx = None
-    SSL_ERROR_TYPES = (requests.exceptions.SSLError,)
+def _get_ssl_error_types():
+    try:
+        import httpx
+
+        return (requests.exceptions.SSLError, httpx.ConnectError)
+    except ImportError:
+        return (requests.exceptions.SSLError,)
+
+
+SSL_ERROR_TYPES = _get_ssl_error_types()
 
 from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT_SSL, TAGS_WITH_HOST, TAGS_WITH_HOST_AND_PORT, USING_VTS
 from .utils import mocked_perform_request, requires_static_version
@@ -122,3 +126,20 @@ def test_metadata_plus(_, aggregator, check, datadog_agent):
     nginx_check.check(instance)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.unit
+def test_get_ssl_error_types_without_httpx():
+    """Cover the ImportError branch of _get_ssl_error_types when httpx is not available."""
+    import builtins
+
+    real_import = builtins.__import__
+
+    def import_mock(name, *args, **kwargs):
+        if name == 'httpx':
+            raise ImportError('No module named httpx')
+        return real_import(name, *args, **kwargs)
+
+    with mock.patch('builtins.__import__', side_effect=import_mock):
+        result = _get_ssl_error_types()
+    assert result == (requests.exceptions.SSLError,)
