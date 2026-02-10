@@ -85,6 +85,7 @@ files:
           example: guest
       - name: rabbitmq_pass
         description: The password to use for the RabbitMQ Management Plugin
+        secret: true
         fleet_configurable: true
         value:
           type: string

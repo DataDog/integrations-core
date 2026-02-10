@@ -1,4 +1,5 @@
 name: iboss
+fleet_configurable: true
 files:
 - name: iboss.yaml
   options:
