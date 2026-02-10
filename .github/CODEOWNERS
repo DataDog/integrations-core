@@ -766,10 +766,10 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cisco_secure_client/manifest.json                                   @DataDog/agent-integrations @DataDog/documentation
 /cisco_secure_client/assets/logs/                                    @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/ide-shepehr/                                              @DataDog/saas-integrations @DataDog/agent-integrations
-/ide-shepherd/*.md                                                @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
-/ide-shepherd/manifest.json                                       @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
-/ide-shepherd/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+/ide-shepherd/                                                        @DataDog/saas-integrations @DataDog/agent-integrations
+/ide-shepherd/*.md                                                    @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
+/ide-shepherd/manifest.json                                           @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
+/ide-shepherd/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
