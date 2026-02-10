@@ -14,7 +14,7 @@ import requests
 import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import HTTPXWrapper, RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -88,7 +88,7 @@ class TestAttribute:
         check = AgentCheck('test', {}, [{}])
 
         assert check.http == check._http
-        assert isinstance(check.http, HTTPXWrapper)
+        assert isinstance(check.http, RequestsWrapper)
 
 
 class TestTLSCiphers:
