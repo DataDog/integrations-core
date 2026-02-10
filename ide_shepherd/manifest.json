@@ -1,0 +1,54 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "5d9de6e0-fb16-4a1b-b195-4d6c08a082c7",
+  "app_id": "ide-shepherd",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor and protect IDE extensions and workspace tasks in VS Code and Cursor from malicious activities in real-time.",
+    "title": "IDE Shepherd",
+    "media": [
+        {
+            "media_type": "image",
+            "caption": "IDE Shepherd - Dashboard",
+            "image_url": "images/ide-shepherd-dashboard.png"
+        }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Developer Tools",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 69427021,
+      "source_type_name": "IDE Shepherd",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+        "ide-shepherd-events": "assets/dashboards/ide_shepherd_events.json"
+    },
+    "logs": {
+      "source": "ide-shepherd"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
