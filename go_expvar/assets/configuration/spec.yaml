@@ -35,6 +35,7 @@ files:
 
         You can also specify a `type` for the metrics. One of:
          * count
+         * monotonic_counter
          * gauge (the default)
          * rate (note that this shows up as a gauge in Datadog that is meant to be seen as a "per second rate")
       fleet_configurable: true
