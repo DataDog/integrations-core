@@ -5,6 +5,7 @@ import os
 
 import mock
 import pytest
+import httpx
 import requests
 
 from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT_SSL, TAGS_WITH_HOST, TAGS_WITH_HOST_AND_PORT, USING_VTS
@@ -56,8 +57,8 @@ def test_connect_ssl(check, instance_ssl, aggregator):
     check_no_ssl.check(instance_ssl)
     aggregator.assert_metric("nginx.net.connections", tags=TAGS_WITH_HOST + ['port:{}'.format(PORT_SSL)], count=1)
 
-    # assert ssl validation throws an error
-    with pytest.raises(requests.exceptions.SSLError):
+    # assert ssl validation throws an error (requests vs httpx raise different types)
+    with pytest.raises((requests.exceptions.SSLError, httpx.ConnectError)):
         instance_ssl['ssl_validation'] = True
         check_ssl = check(instance_ssl)
         check_ssl.check(instance_ssl)

@@ -32,6 +32,7 @@ INSTANCE = {
     'nginx_status_url': 'http://{}:{}/nginx_status'.format(HOST, PORT),
     'tags': TAGS,
     'disable_generic_tags': True,
+    'use_httpx': True,
 }
 
 

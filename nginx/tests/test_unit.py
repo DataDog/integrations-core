@@ -65,6 +65,7 @@ def test_nest_payload(check, instance):
 def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
     instance = deepcopy(instance)
     instance.update(extra_config)
+    instance['use_httpx'] = False  # use requests so Session mock applies
 
     c = check(instance)
 
@@ -89,11 +90,15 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
 
 
 def test_no_version(check, instance, caplog):
+    instance = deepcopy(instance)
+    instance['use_httpx'] = False  # use requests so Session mock applies
     c = check(instance)
 
     r = mock.MagicMock()
     with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content=b'{}', headers={'server': 'nginx'})
+        r.get.return_value = mock.MagicMock(
+            status_code=200, content=b'{}', headers={'server': 'nginx'}
+        )
 
         c.check(instance)
 
