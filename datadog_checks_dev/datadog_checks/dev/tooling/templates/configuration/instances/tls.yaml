@@ -41,6 +41,7 @@
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_private_key_password
   secret: true
+  fleet_configurable: true
   value:
     example: <PRIVATE_KEY_PASSWORD>
     type: string
@@ -60,6 +61,7 @@
     The list of ciphers suites to use when connecting to an endpoint. If not specified, 
     `ALL` ciphers are used. For list of ciphers see: 
     https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+  fleet_configurable: true
   value:
     type: array
     items:

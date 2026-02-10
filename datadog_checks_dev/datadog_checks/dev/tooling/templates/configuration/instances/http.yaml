@@ -1,4 +1,5 @@
 - name: proxy
+  fleet_configurable: true
   value:
     example:
       http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
@@ -94,6 +95,7 @@
   description: The password to use if services are behind basic or NTLM auth.
   fleet_configurable: true
 - name: ntlm_domain
+  fleet_configurable: true
   value:
     example: <NTLM_DOMAIN>\<USERNAME>
     type: string
@@ -102,6 +104,7 @@
     the domain used in the check. For NTLM Auth, append
     the username to domain, not as the `username` parameter.
 - name: kerberos_auth
+  fleet_configurable: true
   value:
     example: disabled
     type: string
@@ -119,12 +122,14 @@
 
     See https://github.com/requests/requests-kerberos#mutual-authentication
 - name: kerberos_cache
+  fleet_configurable: true
   value:
     type: string
   description: |
     Sets the KRB5CCNAME environment variable.
     It should point to a credential cache with a valid TGT.
 - name: kerberos_delegate
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -133,6 +138,7 @@
 
     See https://github.com/requests/requests-kerberos#delegation
 - name: kerberos_force_initiate
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -142,6 +148,7 @@
 
     See https://github.com/requests/requests-kerberos#preemptive-authentication
 - name: kerberos_hostname
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -150,6 +157,7 @@
 
     See https://github.com/requests/requests-kerberos#hostname-override
 - name: kerberos_principal
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -158,6 +166,7 @@
 
     See https://github.com/requests/requests-kerberos#explicit-principal
 - name: kerberos_keytab
+  fleet_configurable: true
   value:
     example: <KEYTAB_FILE_PATH>
     type: string
@@ -165,6 +174,7 @@
 - name: auth_token
   fleet_configurable: true
   secret: true
+  fleet_configurable: true
   value:
     example:
       reader:
@@ -220,6 +230,7 @@
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_host
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -231,6 +242,7 @@
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_service
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -262,6 +274,7 @@
     If `tls_verify` is disabled, security warnings are logged by the check.
     Disable those by setting `tls_ignore_warning` to true.
 - name: tls_cert
+  fleet_configurable: true
   value:
     example: <CERT_PATH>
     type: string
@@ -270,6 +283,7 @@
     number of CA certificates needed to establish the certificate's authenticity for
     use when connecting to services. It may also contain an unencrypted private key to use.
 - name: tls_private_key
+  fleet_configurable: true
   value:
     example: <PRIVATE_KEY_PATH>
     type: string
@@ -287,6 +301,7 @@
     must have been processed using the `openssl rehash` command. See:
     https://www.openssl.org/docs/man3.2/man1/c_rehash.html
 - name: tls_protocols_allowed
+  fleet_configurable: true
   value:
     example:
     - 'SSLv3'
@@ -308,6 +323,7 @@
     The list of ciphers suites to use when connecting to an endpoint. If not specified, 
     `ALL` ciphers are used. For list of ciphers see: 
     https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -317,6 +333,7 @@
       - 'TLS_CHACHA20_POLY1305_SHA256'
       - 'TLS_AES_128_GCM_SHA256'
 - name: headers
+  fleet_configurable: true
   value:
     example:
       Host: <ALTERNATIVE_HOSTNAME>
@@ -329,6 +346,7 @@
 
     This overrides any default headers.
 - name: extra_headers
+  fleet_configurable: true
   value:
     example:
       Host: <ALTERNATIVE_HOSTNAME>
@@ -357,6 +375,7 @@
 - name: request_size
   description: |
     The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+  fleet_configurable: true
   value:
     example: 16
     type: number

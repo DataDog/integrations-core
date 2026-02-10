@@ -196,6 +196,7 @@
         pid:
         - '23'
         - '42'
+  fleet_configurable: true
   value:
     type: object
     additionalProperties:
@@ -238,6 +239,7 @@
 - name: rename_labels
   description: |
     A mapping of label names to their new names.
+  fleet_configurable: true
   value:
     example:
       <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
@@ -261,12 +263,14 @@
 - name: hostname_label
   description: |
     Override the hostname for every metric submission with the value of one of its labels.
+  fleet_configurable: true
   value:
     type: string
 - name: hostname_format
   description: |
     When `hostname_label` is set, this instructs the check how to format the values. The string
     `<HOSTNAME>` is replaced by the value of the label defined by `hostname_label`.
+  fleet_configurable: true
   value:
     example: <HOSTNAME>
     type: string
@@ -330,6 +334,7 @@
     to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
     label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
     to all other metrics if their value is equal to `23` or `42`.
+  fleet_configurable: true
   value:
     example:
       metric_a: true
@@ -362,6 +367,7 @@
     for improved performance.
 
     Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+  fleet_configurable: true
   value:
     type: boolean
     example: true
@@ -378,6 +384,7 @@
   description: |
     Whether or not to cache data from metrics that are defined by regular expressions rather
     than the full metric name.
+  fleet_configurable: true
   value:
     example: true
     type: boolean
@@ -385,6 +392,7 @@
   description: |
     Whether or not the parser will strictly adhere to the OpenMetrics specification,
     regardless of the received `Content-Type` header.
+  fleet_configurable: true
   hidden: true
   value:
     example: false
