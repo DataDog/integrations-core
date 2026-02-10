@@ -10,14 +10,14 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.dev import TempDir
-from datadog_checks.dev.fs import write_file
 from datadog_checks.base.utils.httpx import (
     HTTPXResponseAdapter,
     HTTPXWrapper,
     _make_httpx_auth,
     _parse_uds_url,
 )
+from datadog_checks.dev import TempDir
+from datadog_checks.dev.fs import write_file
 
 
 class TestMakeHttpxAuth:
@@ -250,7 +250,11 @@ class TestHTTPXWrapper:
             return httpx.Response(200)
 
         mock_client = httpx.Client(transport=httpx.MockTransport(handler))
-        instance = {'skip_proxy': False, 'proxy': {'http': 'http://proxy:3128'}, 'no_proxy': 'http://direct.example.com'}
+        instance = {
+            'skip_proxy': False,
+            'proxy': {'http': 'http://proxy:3128'},
+            'no_proxy': 'http://direct.example.com',
+        }
         wrapper = HTTPXWrapper(instance, {})
         with mock.patch('datadog_checks.base.utils.httpx.httpx.Client', return_value=mock_client):
             response = wrapper.get('http://direct.example.com/')

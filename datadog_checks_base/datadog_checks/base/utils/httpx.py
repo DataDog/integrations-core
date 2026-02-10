@@ -449,9 +449,7 @@ class HTTPXWrapper:
                             response.raise_for_status()
                         except Exception as e:
                             self.logger.debug('Renewing auth token, as an error occurred: %s', e)
-                            self.handle_auth_token(
-                                method=method, url=url, default_options=self.options, error=str(e)
-                            )
+                            self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
                             response = client.request(
                                 method.upper(), request_url, headers=_request_headers(), **request_kwargs
                             )
@@ -488,16 +486,12 @@ class HTTPXWrapper:
                         response.raise_for_status()
                     except Exception as e:
                         self.logger.debug('Renewing auth token, as an error occurred: %s', e)
-                        self.handle_auth_token(
-                            method=method, url=url, default_options=self.options, error=str(e)
-                        )
+                        self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
                         response = client.request(
                             method.upper(), request_url, headers=_request_headers(), **request_kwargs
                         )
                 else:
-                    response = client.request(
-                        method.upper(), request_url, headers=_request_headers(), **request_kwargs
-                    )
+                    response = client.request(method.upper(), request_url, headers=_request_headers(), **request_kwargs)
 
                 return HTTPXResponseAdapter(response, self.request_size)
 
