@@ -1,0 +1,1 @@
+Add --recreate/-r flag to ddev env test command to recreate environments from scratch before running tests

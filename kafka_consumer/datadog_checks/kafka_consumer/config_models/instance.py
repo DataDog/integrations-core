@@ -36,6 +36,8 @@ class SaslOauthTokenProvider(BaseModel):
     )
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
+    extensions: Optional[str] = None
+    scope: Optional[str] = None
     url: Optional[str] = None
 
 

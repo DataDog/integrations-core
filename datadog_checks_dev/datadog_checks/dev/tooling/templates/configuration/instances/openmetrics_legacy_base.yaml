@@ -180,6 +180,7 @@
   description: |
     A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
     The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
+  fleet_configurable: true
   value:
     type: array
     items:

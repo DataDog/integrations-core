@@ -25,6 +25,7 @@ files:
               type: string
           - name: mysql_password
             description: Password to use to connect to MySQL in order to gather metrics.
+            secret: true
             value:
               type: string
           - name: mysql_db

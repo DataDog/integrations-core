@@ -98,15 +98,15 @@ class SQLServerSchemaCollector(SchemaCollector):
 
     def _get_databases(self):
         database_names = self._check.get_databases()
-        with self._check.connection.open_managed_default_connection(key_prefix=KEY_PREFIX):
-            with self._check.connection.get_managed_cursor(key_prefix=KEY_PREFIX) as cursor:
+        with self._check.connection.open_managed_default_connection(KEY_PREFIX):
+            with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 db_names_formatted = ",".join(["'{}'".format(t) for t in database_names])
                 return execute_query(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):
-        with self._check.connection.open_managed_default_connection(key_prefix=KEY_PREFIX):
-            with self._check.connection.get_managed_cursor(key_prefix=KEY_PREFIX) as cursor:
+        with self._check.connection.open_managed_default_connection(KEY_PREFIX):
+            with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 switch_db_statement = construct_use_statement(database_name)
                 cursor.execute(switch_db_statement)
                 query = self._get_tables_query()
@@ -167,8 +167,8 @@ class SQLServerSchemaCollector(SchemaCollector):
         if self._is_2016_or_earlier:
             # We need to fetch the related data for each table
             # Use a key_prefix to get a separate connection to avoid conflicts with the main connection
-            with self._check.connection.open_managed_default_connection(key_prefix=KEY_PREFIX_PRE_2017):
-                with self._check.connection.get_managed_cursor(key_prefix=KEY_PREFIX_PRE_2017) as cursor:
+            with self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017):
+                with self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017) as cursor:
                     switch_db_statement = construct_use_statement(database.get("name"))
                     cursor.execute(switch_db_statement)
                     table_id = str(cursor_row.get("table_id"))
