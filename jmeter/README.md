@@ -46,7 +46,7 @@ To start reporting metrics to Datadog:
 
 The plugin has the following configuration options:
 
-| Name       | Required | Default value | description|
+| Name       | Required | Default value | Description|
 |------------|:--------:|---------------|------------|
 |apiKey | true | NA | Your Datadog API key.|
 |datadogUrl | false | https://api.datadoghq.com/api/ | You can configure a different endpoint, for instance https://api.datadoghq.eu/api/ if your Datadog instance is in the EU. |
