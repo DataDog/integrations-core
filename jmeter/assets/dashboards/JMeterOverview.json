@@ -136,6 +136,7 @@
                 {
                   "formulas": [
                     {
+                      "alias": "Failed",
                       "formula": "default_zero(query1)"
                     }
                   ],
@@ -157,7 +158,43 @@
               "x": 2,
               "y": 1,
               "width": 2,
-              "height": 2
+              "height": 1
+            }
+          },
+          {
+            "id": 4609727636317193,
+            "definition": {
+              "title": "Failed assertions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Failed",
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jmeter.assertions.failed{$sample_label,$test_run_id,$statistics_mode,$runner_id,$runner_mode,$assertion_name}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 2,
+              "height": 1
             }
           },
           {
@@ -1508,6 +1545,7 @@
                   "response_format": "scalar",
                   "formulas": [
                     {
+                      "alias": "Failed",
                       "formula": "default_zero(query1)"
                     }
                   ],
