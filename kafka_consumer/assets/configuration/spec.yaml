@@ -266,7 +266,7 @@ files:
           description: |
             Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
             This maps to librdkafka's `https.ca.location` property, which is separate from
-            the broker connection's `ssl.ca.location` (configured via the top-level `tls_ca_cert`).
+            the broker connection's `ssl.ca.location` (configured through the top-level `tls_ca_cert`).
           value:
             type: string
             example: /path/to/oauth_ca_cert.pem
