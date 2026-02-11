@@ -174,7 +174,6 @@
 - name: auth_token
   fleet_configurable: true
   secret: true
-  fleet_configurable: true
   value:
     example:
       reader:
@@ -361,7 +360,6 @@
     The timeout for accessing services.
 
     This overrides the `timeout` setting in `init_config`.
-  fleet_configurable: true
 - name: connect_timeout
   fleet_configurable: true
   value:
