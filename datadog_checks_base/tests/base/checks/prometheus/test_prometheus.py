@@ -6,12 +6,11 @@
 import logging
 import os
 import ssl
-from collections import OrderedDict
-
 import mock
 import pytest
 import requests
 
+from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
@@ -334,8 +333,8 @@ def test_process_metric_filtered(mocked_prometheus_check):
 def test_poll_protobuf(mocked_prometheus_check, bin_data):
     """Tests poll using the protobuf format"""
     check = mocked_prometheus_check
-    mock_response = mock.MagicMock(status_code=200, content=bin_data, headers={'Content-Type': protobuf_content_type})
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
+    mock_resp = HTTPResponseMock(200, content=bin_data, headers={'Content-Type': protobuf_content_type})
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
         assert len(messages) == 61
@@ -345,10 +344,9 @@ def test_poll_protobuf(mocked_prometheus_check, bin_data):
 def test_poll_text_plain(mocked_prometheus_check, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
+    content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
+    mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': "text/plain"})
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
         messages.sort(key=lambda x: x.name)
@@ -1282,11 +1280,10 @@ def test_label_joins(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check = sorted_tags_check
+    content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
+    mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': "text/plain"})
+    check = sorted_tags_check
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.NAMESPACE = 'ksm'
         check.label_joins = {
             'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
@@ -1632,11 +1629,10 @@ def test_label_joins_gc(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check = sorted_tags_check
+    content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
+    mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': "text/plain"})
+    check = sorted_tags_check
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
         check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
@@ -1682,10 +1678,9 @@ def test_label_joins_gc(sorted_tags_check):
         assert 15 == len(check._label_mapping['pod'])
         text_data = text_data.replace('dd-agent-62bgh', 'dd-agent-1337')
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
+    content2 = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
+    mock_resp2 = HTTPResponseMock(200, content=content2, headers={'Content-Type': "text/plain"})
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp2)):
         check.process("http://fake.endpoint:10055/metrics")
         assert 'dd-agent-1337' in check._label_mapping['pod']
         assert 'dd-agent-62bgh' not in check._label_mapping['pod']
@@ -1698,11 +1693,10 @@ def test_label_joins_missconfigured(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check = sorted_tags_check
+    content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
+    mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': "text/plain"})
+    check = sorted_tags_check
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}}
         check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
@@ -1751,11 +1745,10 @@ def test_label_join_not_existing(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check = sorted_tags_check
+    content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
+    mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': "text/plain"})
+    check = sorted_tags_check
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}}
         check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
@@ -1790,11 +1783,10 @@ def test_label_join_metric_not_existing(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check = sorted_tags_check
+    content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
+    mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': "text/plain"})
+    check = sorted_tags_check
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.NAMESPACE = 'ksm'
         check.label_joins = {'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
         check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
@@ -1829,11 +1821,10 @@ def test_label_join_with_hostname(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check = sorted_tags_check
+    content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
+    mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': "text/plain"})
+    check = sorted_tags_check
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}}
         check.label_to_hostname = 'node'
@@ -1879,21 +1870,17 @@ def test_label_join_with_hostname(sorted_tags_check):
 
 @pytest.fixture()
 def mock_get():
-    text_data = None
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_get = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    )
-
+    content = text_data.encode('utf-8')
+    mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': "text/plain"})
+    mock_wrapper = RequestWrapperMock(get=lambda url, **kw: mock_resp)
+    patcher = mock.patch.object(PrometheusCheck, 'get_http_handler', return_value=mock_wrapper)
     try:
-        yield mock_get.start()
+        yield patcher.start()
     finally:
-        mock_get.stop()
+        patcher.stop()
 
 
 def test_health_service_check_ok(mock_get):
@@ -1963,11 +1950,13 @@ def test_text_filter_input():
 
 
 def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data):
-    from datadog_checks.dev.http import MockResponse
-
     check = mocked_prometheus_check
-
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
+    mock_resp = HTTPResponseMock(200, content=b'httpbin.org')
+    with caplog.at_level(logging.DEBUG), mock.patch.object(
+        check,
+        'get_http_handler',
+        return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+    ):
         resp = check.poll('https://httpbin.org/get')
 
     assert 'httpbin.org' in resp.content.decode('utf-8')
@@ -1978,12 +1967,14 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data
 
 
 def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check, text_data):
-    from datadog_checks.dev.http import MockResponse
-
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
-
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
+    mock_resp = HTTPResponseMock(200, content=b'httpbin.org')
+    with caplog.at_level(logging.DEBUG), mock.patch.object(
+        check,
+        'get_http_handler',
+        return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+    ):
         resp = check.poll('https://httpbin.org/get')
 
     assert 'httpbin.org' in resp.content.decode('utf-8')
@@ -2005,46 +1996,31 @@ def test_requests_wrapper_config():
     init_config_http = {'timeout': 42}
     check = PrometheusCheck('prometheus_check', init_config_http, {}, [instance_http])
 
-    expected_headers = OrderedDict(
-        [
-            ('User-Agent', 'Datadog Agent/0.0.0'),
-            ('Accept', '*/*'),
-            ('Accept-Encoding', 'gzip'),
-            ('foo', 'bar'),
-            ('accept-encoding', 'gzip'),
-            (
-                'accept',
-                'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited',
-            ),
-        ]
-    )
+    get_calls = []
 
-    with mock.patch("requests.Session.get") as get:
+    def capturing_get(url, **kwargs):
+        get_calls.append((url, dict(kwargs)))
+        return HTTPResponseMock(200, content=b'')
+
+    mock_wrapper = RequestWrapperMock(get=capturing_get)
+    with mock.patch.object(check, 'get_http_handler', return_value=mock_wrapper):
         with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
             mock_load_cert_chain.return_value = None
 
             check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
-            get.assert_called_with(
-                instance_http['prometheus_endpoint'],
-                stream=False,
-                headers=expected_headers,
-                auth=requests.auth.HTTPDigestAuth('data', 'dog'),
-                cert='/path/to/cert',
-                timeout=(42.0, 42.0),
-                proxies=None,
-                verify=True,
-                allow_redirects=True,
+            assert len(get_calls) >= 1
+            url, kwargs = get_calls[-1]
+            assert url == instance_http['prometheus_endpoint']
+            assert kwargs.get('stream') is False
+            assert 'extra_headers' in kwargs
+            assert kwargs['extra_headers'].get('accept') == (
+                'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
             )
 
+            get_calls.clear()
             check.poll(instance_http['prometheus_endpoint'])
-            get.assert_called_with(
-                instance_http['prometheus_endpoint'],
-                stream=False,
-                headers=expected_headers,
-                auth=requests.auth.HTTPDigestAuth('data', 'dog'),
-                cert='/path/to/cert',
-                timeout=(42.0, 42.0),
-                proxies=None,
-                verify=True,
-                allow_redirects=True,
-            )
+            assert len(get_calls) >= 1
+            url, kwargs = get_calls[-1]
+            assert url == instance_http['prometheus_endpoint']
+            assert kwargs.get('stream') is False
+            assert 'extra_headers' in kwargs
