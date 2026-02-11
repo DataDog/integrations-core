@@ -7,6 +7,18 @@ HTTP test helpers: MockResponse (requests-based) and protocol-based mocks for im
 Use HTTPResponseMock and RequestWrapperMock when testing code that uses check.http or get_http_handler,
 so tests do not depend on requests/httpx and work with either wrapper. Use mock_response / mock_http_response
 fixtures (in datadog_checks.dev.plugin.pytest) for the legacy Session.get patch pattern.
+
+When to use which:
+- **RequestWrapperMock / HTTPResponseMock**: Use in tests where the *subject under test*
+  is a *check* (or any code) that calls ``check.http`` or ``get_http_handler``. Inject
+  RequestWrapperMock so the test does not depend on requests/httpx and works with either
+  wrapper. Example:
+  ``with RequestWrapperMock(check, get=lambda url, **kw: HTTPResponseMock(200, content=b'...')):``
+  or ``mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=...))``.
+- **Legacy base tests:** Tests that target RequestsWrapper itself (e.g. test_api.py,
+  test_proxy.py, test_tls_and_certs.py) currently use ``requests.Session.get`` or similar
+  patches. They are legacy and will be removed when the requests library is removed; use
+  RequestWrapperMock for all new check-level tests.
 """
 from __future__ import annotations
 
@@ -22,21 +34,47 @@ class HTTPResponseMock:
     """
     Mock HTTP response that satisfies HTTPResponseProtocol (see datadog_checks.base.utils.http_protocol).
     Use in tests to provide response data without requests or httpx.
+
+    Accepts the same convenience kwargs as MockResponse where applicable: file_path (read into
+    content), content (str or bytes), json_data, headers, status_code, encoding. Optional
+    normalize_content: if True and content is a str starting with \\n, dedent it.
     """
 
     def __init__(
         self,
+        *args: Any,
+        content: bytes | str = b'',
+        file_path: str | None = None,
+        json_data: Any = None,
         status_code: int = 200,
-        content: bytes = b'',
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
-        json_data: Any = None,
+        normalize_content: bool = True,
+        **kwargs: Any,
     ) -> None:
+        """Accepts MockResponse-style (content first) or HTTPResponseMock(200, content=b'...') (status_code first)."""
+        if args and isinstance(args[0], int):
+            status_code = args[0]
+            content = args[1] if len(args) >= 2 else content
+        elif args:
+            content = args[0]
+        if file_path is not None:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+        elif json_data is not None:
+            content = json.dumps(json_data).encode('utf-8')
+        elif isinstance(content, str):
+            if normalize_content and content.startswith('\n'):
+                content = dedent(content[1:])
+            content = content.encode('utf-8')
+        elif not isinstance(content, bytes):
+            content = b''
         self._content = content
-        self._status_code = status_code
+        self._status_code = int(status_code) if status_code is not None else 200
         self._headers = dict(headers or {})
         self._encoding = encoding or 'utf-8'
         self._json_data = json_data
+        self.raw = BytesIO(self._content)
 
     @property
     def content(self) -> bytes:
@@ -57,6 +95,11 @@ class HTTPResponseMock:
     @property
     def status_code(self) -> int:
         return self._status_code
+
+    @property
+    def text(self) -> str:
+        """Compatibility with code that expects response.text (e.g. MockResponse)."""
+        return self._content.decode(self._encoding or 'utf-8', errors='replace')
 
     def iter_content(
         self,
@@ -99,6 +142,12 @@ class HTTPResponseMock:
             )
 
     def close(self) -> None:
+        pass
+
+    def __enter__(self) -> 'HTTPResponseMock':
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         pass
 
     def json(self, **kwargs: Any) -> Any:

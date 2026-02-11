@@ -286,37 +286,57 @@ def dd_default_hostname():
 
 @pytest.fixture
 def mock_response():
-    # Lazily import `requests` as it may be costly under certain conditions
-    global MockResponse
-    if MockResponse is None:
-        from datadog_checks.dev.http import MockResponse
+    """Yield HTTPResponseMock so fixtures use the protocol-based mock (single path)."""
+    from datadog_checks.dev.http import HTTPResponseMock
 
-    yield MockResponse
+    yield HTTPResponseMock
 
 
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
-    yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.Session.get'), return_value=mock_response(*args, **kwargs)
-    )
+    """
+    Patch HTTP by patching the check class's get_http_handler with RequestWrapperMock.
+    First positional argument must be a class with get_http_handler (e.g. OpenMetricsBaseCheck);
+    remaining args/kwargs are passed to mock_response to build the response.
+    Does not patch requests.Session.get.
+    """
+
+    def _mock(*args, **kwargs):
+        if not args or not isinstance(args[0], type) or not hasattr(args[0], 'get_http_handler'):
+            raise ValueError(
+                'mock_http_response requires a check class as first argument (e.g. OpenMetricsBaseCheck). '
+                'Pass the class, then response args: mock_http_response(MyCheck, content=..., file_path=..., etc.).'
+            )
+        from datadog_checks.dev.http import RequestWrapperMock
+
+        handler_target = args[0]
+        response = mock_response(*args[1:], **kwargs)
+        return mocker.patch.object(
+            handler_target,
+            'get_http_handler',
+            return_value=RequestWrapperMock(get=lambda url, **kw: response),
+        )
+
+    yield _mock
 
 
 @pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list],
         *,
         mode: Literal["default"],
-        default_response: MockResponse,
+        default_response,
         method: str = ...,
         url_arg_index: int = ...,
         url_kwarg_name: str = ...,
         strict: bool = ...,
+        handler_target: Optional[type] = ...,
     ): ...
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list],
         *,
         mode: Literal["cycle", "exhaust"],
         default_response: None = None,
@@ -324,15 +344,17 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         url_arg_index: int = ...,
         url_kwarg_name: str = ...,
         strict: bool = ...,
+        handler_target: Optional[type] = ...,
     ): ...
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
-        default_response: MockResponse | None = None,
+        default_response=None,
         method: str = 'requests.Session.get',
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,
+        handler_target: Optional[type] = None,
     ):
         """
         Mocks HTTP responses for specific endpoints.
@@ -343,8 +365,8 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         url_arg_index: The index of the URL argument in the args tuple. e.g. for requests.get(url), url_arg_index=0
         url_kwarg_name: The name of the URL key in the kwargs dict. e.g. for requests.get(url=url), url_kwarg_name="url"
         strict: If True, an error is raised if the endpoint is not found. Otherwise, a 404 response is returned.
+        handler_target: If set (e.g. OpenMetricsBaseCheck), patch get_http_handler with RequestWrapperMock instead of Session.get.
         """
-
         if default_response is None and mode == 'default':
             raise ValueError("default_response is required when mode is 'default'")
         elif default_response is not None and mode != 'default':
@@ -358,22 +380,33 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         elif mode == 'exhaust' or mode == 'default':
             queues = {url: iter(resps) for url, resps in responses_by_endpoint.items()}
 
-        def side_effect(*args, **kwargs):
-            url = kwargs.get(url_kwarg_name) or args[url_arg_index]
+        not_found_response = mock_response(status_code=404)
+
+        def dispatch_by_url(url):
             if url not in queues:
                 if strict:
                     raise ValueError(f"Endpoint {url} not found in mocked responses")
-                else:
-                    return MockResponse(status_code=404)
-            else:
-                try:
-                    return next(queues[url])
-                except StopIteration:
-                    if mode == 'exhaust':
-                        raise StopIteration(f"No more responses available for endpoint {url}")
-                    elif mode == 'default':
-                        return default_response
+                return not_found_response
+            try:
+                return next(queues[url])
+            except StopIteration:
+                if mode == 'exhaust':
+                    raise StopIteration(f"No more responses available for endpoint {url}")
+                elif mode == 'default':
+                    return default_response
 
+        def side_effect(*args, **kwargs):
+            url = kwargs.get(url_kwarg_name) or args[url_arg_index]
+            return dispatch_by_url(url)
+
+        if handler_target is not None and hasattr(handler_target, 'get_http_handler'):
+            from datadog_checks.dev.http import RequestWrapperMock
+
+            return mocker.patch.object(
+                handler_target,
+                'get_http_handler',
+                return_value=RequestWrapperMock(get=lambda url, **kw: dispatch_by_url(url)),
+            )
         return mocker.patch(method, autospec=True, side_effect=side_effect)
 
     yield _mock
