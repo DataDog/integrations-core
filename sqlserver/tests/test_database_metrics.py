@@ -1741,12 +1741,10 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
     assert 'WITH (NOLOCK)' in queries[0]['query']
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.unit
 @pytest.mark.parametrize('include_db_memory_metrics', [True, False])
 def test_sqlserver_database_memory_metrics(
     aggregator,
-    dd_run_check,
     init_config,
     instance_docker_metrics,
     include_db_memory_metrics,
@@ -1765,6 +1763,13 @@ def test_sqlserver_database_memory_metrics(
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
+    # Set up tags that are normally populated by check() via a live DB connection
+    sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME] = "stubbed.hostname"
+    sqlserver_check.tag_manager.set_tag("database_hostname", "stubbed.hostname", replace=True)
+    sqlserver_check.tag_manager.set_tag("database_instance", "stubbed.hostname", replace=True)
+    sqlserver_check.tag_manager.set_tag("dd.internal.resource:database_instance", "stubbed.hostname", replace=True)
+    sqlserver_check.tag_manager.set_tag("sqlserver_servername", "stubbed.hostname", replace=True, normalize=True)
+
     def execute_query_handler_mocked(query, db=None):
         return mocked_results
 
@@ -1775,9 +1780,7 @@ def test_sqlserver_database_memory_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._database_metrics = [memory_metrics]
-
-    dd_run_check(sqlserver_check)
+    memory_metrics.execute()
 
     if not include_db_memory_metrics:
         assert memory_metrics.enabled is False
