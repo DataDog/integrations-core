@@ -287,6 +287,20 @@ class TestHTTPXWrapper:
             wrapper.get('http://example.com/', extra_headers={'X-Custom': 'value'})
         assert any(h.get('x-custom') == 'value' for h in seen_headers)
 
+    def test_params_passed_as_query_string(self):
+        seen_urls = []
+
+        def handler(request):
+            seen_urls.append(str(request.url))
+            return httpx.Response(200)
+
+        mock_client = httpx.Client(transport=httpx.MockTransport(handler))
+        wrapper = HTTPXWrapper({}, {})
+        with mock.patch('datadog_checks.base.utils.httpx.httpx.Client', return_value=mock_client):
+            wrapper.get('http://example.com/api', params={'foo': 'bar', 'baz': 'qux'})
+        assert len(seen_urls) == 1
+        assert 'foo=bar' in seen_urls[0] and 'baz=qux' in seen_urls[0]
+
     def test_init_with_basic_auth(self):
         instance = {'username': 'u', 'password': 'p'}
         wrapper = HTTPXWrapper(instance, {})

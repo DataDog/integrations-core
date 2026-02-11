@@ -427,7 +427,7 @@ class HTTPXWrapper:
             cert = new_options['cert']
 
             request_kwargs: dict = {}
-            for key in ('json', 'content', 'data', 'files'):
+            for key in ('params', 'json', 'content', 'data', 'files'):
                 if key in new_options:
                     request_kwargs[key] = new_options[key]
 
