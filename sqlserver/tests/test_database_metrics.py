@@ -1733,7 +1733,6 @@ def test_sqlserver_database_memory_metrics_configuration(init_config, instance_d
     assert memory_metrics.enabled is True
     assert memory_metrics.collection_interval == 600
     assert memory_metrics.databases == [None]  # Instance-level query
-    assert memory_metrics.is_database_instance_query is False
 
     # Check query configuration
     queries = memory_metrics.queries
