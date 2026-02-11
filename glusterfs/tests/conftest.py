@@ -4,6 +4,7 @@
 import copy
 import json
 import os
+import pathlib
 from unittest import mock
 
 import pytest
@@ -49,9 +50,7 @@ def config():
 @pytest.fixture()
 def mock_gstatus_data():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gstatus.txt')
-    with open(f_name) as f:
-        data = f.read()
-
+    data = pathlib.Path(f_name).read_text()
     with mock.patch('datadog_checks.glusterfs.check.GlusterfsCheck.get_gstatus_output', return_value=(data, "", 0)):
         yield
 
@@ -97,7 +96,7 @@ def gstatus_ready():
         raise Exception("No volume data from gstatus yet")
     for vol in volume_summary:
         healinfo = vol.get('healinfo', [])
-        if not any(h.get('status', '').lower() == 'connected' for h in healinfo):
+        if all(h.get('status', '').lower() != 'connected' for h in healinfo):
             raise Exception("Heal info not ready yet")
 
 
