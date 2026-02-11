@@ -79,6 +79,7 @@ class KafkaClient:
             )
             extras_parameters["sasl.oauthbearer.scope"] = self.config._sasl_oauth_token_provider.get("scope")
             extras_parameters["sasl.oauthbearer.extensions"] = self.config._sasl_oauth_token_provider.get("extensions")
+            extras_parameters["https.ca.location"] = self.config._sasl_oauth_tls_ca_cert
 
         for key, value in extras_parameters.items():
             # Do not add the value if it's not specified
