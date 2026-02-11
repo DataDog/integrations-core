@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 deps = [
     "boto3==1.40.21",
     "cachetools==6.2.0",
-    "cryptography==45.0.6",
+    "cryptography==46.0.5",
     "pymysql==1.1.2",
 ]
 
