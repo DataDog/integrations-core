@@ -1,28 +1,33 @@
 name: Silverstripe CMS
+fleet_configurable: true
 files:
 - name: silverstripe_cms.yaml
   options:
   - template: instances
     options:
     - name: SILVERSTRIPE_DATABASE_TYPE
+      fleet_configurable: true
       required: true
       description: "Silverstripe Database Type (MySQL or PostgreSQL)."
       value:
         type: string
         example: "<DATABASE_TYPE>"
     - name: SILVERSTRIPE_DATABASE_NAME
+      fleet_configurable: true
       required: true
       description: "Silverstripe Database Name."
       value:
         type: string
         example: "<DATABASE_NAME>"
     - name: SILVERSTRIPE_DATABASE_SERVER_IP
+      fleet_configurable: true
       required: true
       description: "Silverstripe Database Server IP."
       value:
         type: string
         example: "<IP_ADDRESS>"
     - name: SILVERSTRIPE_DATABASE_PORT
+      fleet_configurable: true
       required: true
       description: "Silverstripe Database Port."
       value:
@@ -31,12 +36,14 @@ files:
         maximum: 65535
         example: 5432
     - name: SILVERSTRIPE_DATABASE_USERNAME
+      fleet_configurable: true
       required: true
       description: "Silverstripe Database Username."
       value:
         type: string
         example: "<USERNAME>"
     - name: SILVERSTRIPE_DATABASE_PASSWORD
+      fleet_configurable: true
       required: true
       description: "Silverstripe Database Password."
       value:
