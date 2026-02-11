@@ -2,7 +2,7 @@
 
 ## General Development Guidelines
 
-* Auto-format code with `ddev test -fs`.
+- Auto-format code with `ddev test -fs`.
 
 ## Python Type Hinting
 
@@ -52,16 +52,19 @@ Run unit and integration tests with `ddev --no-interactive test <INTEGRATION>`. 
 Run E2E tests by following these steps:
 
 1. List available environments for the integration:
+
    ```shell
    ddev env show <INTEGRATION>
    ```
 
 2. Start a specific environment:
+
    ```shell
    ddev env start --dev <INTEGRATION> <ENV>
    ```
 
 3. Run the E2E tests in that environment:
+
    ```shell
    ddev env test --dev <INTEGRATION> <ENV>
    ```
@@ -82,6 +85,20 @@ ddev env stop pgbouncer py3.11-1.23
 
 Run specific tests with `ddev --no-interactive test <INTEGRATION> -- -k <PYTEST_FILTER_STRING>`, for example `ddev --no-interactive test kuma -- -k test_code_class_injection -s`.
 
+### Recreating Environments
+
+Add `--recreate` to recreate test environments from scratch:
+
+```shell
+# Unit/integration tests - recreates Hatch environments
+ddev test --recreate <INTEGRATION>
+
+# E2E tests - recreates both Hatch environments and Docker containers/volumes
+ddev env test --dev --recreate <INTEGRATION> <ENV>
+```
+
+For E2E tests, `--recreate` performs `docker compose down --volumes` followed by `docker compose up -d --force-recreate`.
+
 ## Code Formatting
 
 Format code with `ddev test -fs <INTEGRATION>`. For example, for the pgbouncer integration, run `ddev test -fs pgbouncer`.
@@ -96,9 +113,9 @@ Changelog files are named `<PR_NUMBER>.<TYPE>` and placed in the integration's `
 
 ### Version Bumping Behavior
 
-* `fixed` - Bug fixes. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1)
-* `added` - New features. Bumps the **minor** version (e.g., 1.0.0 → 1.1.0)
-* `changed` - Breaking changes or significant modifications. Bumps the **major** version (e.g., 1.0.0 → 2.0.0)
+- `fixed` - Bug fixes. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1)
+- `added` - New features. Bumps the **minor** version (e.g., 1.0.0 → 1.1.0)
+- `changed` - Breaking changes or significant modifications. Bumps the **major** version (e.g., 1.0.0 → 2.0.0)
 
 ### Command Format
 

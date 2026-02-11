@@ -1,11 +1,13 @@
 - name: prometheus_url
   required: true
   description: The URL where your application metrics are exposed by Prometheus.
+  fleet_configurable: true
   value:
     type: string
 - name: namespace
   hidden: true
   description: The namespace to be prepended to all metrics.
+  fleet_configurable: true
   value:
     type: string
     example: service
@@ -14,6 +16,7 @@
   description: |
     List of metrics to be fetched from the prometheus endpoint, if there's a
     value it'll be renamed. This list should contain at least one metric.
+  fleet_configurable: true
   value:
     type: array
     example:
@@ -171,6 +174,7 @@
   description: |
     A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
     The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
+  fleet_configurable: true
   value:
     type: array
     items:
