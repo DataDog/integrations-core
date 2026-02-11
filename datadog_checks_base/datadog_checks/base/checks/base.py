@@ -63,8 +63,7 @@ if TYPE_CHECKING:
     import unicodedata as _module_unicodedata
 
     from datadog_checks.base.utils.diagnose import Diagnosis
-    from datadog_checks.base.utils.http import RequestsWrapper
-    from datadog_checks.base.utils.httpx import HTTPXWrapper
+    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
     from datadog_checks.base.utils.metadata import MetadataManager
 
 inspect: _module_inspect = lazy_loader.load('inspect')
@@ -110,7 +109,7 @@ class AgentCheck(object):
 
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
-    # Used by `self.http` for an instance of RequestsWrapper or HTTPXWrapper (when use_httpx is True)
+    # Used by `self.http` for an instance of HTTPClientProtocol (RequestsWrapper or HTTPXWrapper when use_httpx is True)
     HTTP_CONFIG_REMAPPER = None
 
     # Used by `create_tls_context` for an instance of RequestsWrapper
@@ -372,7 +371,7 @@ class AgentCheck(object):
         return limit
 
     @property
-    def http(self) -> RequestsWrapper | HTTPXWrapper:
+    def http(self) -> HTTPClientProtocol:
         """
         Provides logic to yield consistent network behavior based on user configuration.
 
