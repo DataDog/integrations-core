@@ -261,11 +261,6 @@ files:
               type: integer
               example: 300
               display_default: 300
-            - name: min_page_count
-              type: integer
-              example: 128
-              display_default: 1
-              description: Minimum pages in buffer pool to report database metrics
         - name: db_fragmentation_metrics
           description: |
             Configure collection of database fragmentation metrics.
