@@ -181,9 +181,6 @@ class DbMemoryMetrics(BaseModel):
     )
     collection_interval: Optional[int] = Field(None, examples=[300])
     enabled: Optional[bool] = Field(None, examples=[False])
-    min_page_count: Optional[int] = Field(
-        None, description='Minimum pages in buffer pool to report database metrics', examples=[128]
-    )
 
 
 class DbStatsMetrics(BaseModel):
