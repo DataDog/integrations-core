@@ -4,7 +4,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import io
 import logging
 import math
 import os
@@ -166,9 +165,7 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
     check = mocked_prometheus_check
     content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
     mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': text_content_type})
-    with mock.patch.object(
-        check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)
-    ):
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         response = check.poll(mocked_prometheus_scraper_config)
         messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
         messages.sort(key=lambda x: x.name)
@@ -181,9 +178,7 @@ def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_co
     check = mocked_prometheus_check
     content = ensure_bytes(text_data)
     mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': 'application/octet-stream'})
-    with mock.patch.object(
-        check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)
-    ):
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         response = check.poll(mocked_prometheus_scraper_config)
         messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
         assert len(messages) == 40
@@ -1703,9 +1698,7 @@ def test_ignore_metrics_multiple_wildcards(
 
     content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
     mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': text_content_type})
-    with mock.patch.object(
-        check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)
-    ):
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.process(config)
 
         # Make sure metrics are ignored
@@ -1812,9 +1805,7 @@ def test_metrics_with_ignore_label_values(
     expected_tags = ['cause:nxdomain']
     content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
     mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': text_content_type})
-    with mock.patch.object(
-        check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)
-    ):
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.process(config)
 
         # Make sure metrics are ignored
@@ -1864,9 +1855,7 @@ def test_match_metrics_multiple_wildcards(
 
     content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
     mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': text_content_type})
-    with mock.patch.object(
-        check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)
-    ):
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.process(config)
 
         aggregator.assert_metric('prometheus.go_memstats_mcache_inuse_bytes', count=1)
@@ -2315,9 +2304,7 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
 
     content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
     mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': text_content_type})
-    with mock.patch.object(
-        check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)
-    ):
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.process(mocked_prometheus_scraper_config)
         assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
         assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
@@ -2476,9 +2463,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
 
     content = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
     mock_resp = HTTPResponseMock(200, content=content, headers={'Content-Type': text_content_type})
-    with mock.patch.object(
-        check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)
-    ):
+    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp)):
         check.process(mocked_prometheus_scraper_config)
         assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
         assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
@@ -2685,10 +2670,13 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, 
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
     mock_resp = HTTPResponseMock(200, content=b'httpbin.org')
-    with caplog.at_level(logging.DEBUG), mock.patch.object(
-        check,
-        'get_http_handler',
-        return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+    with (
+        caplog.at_level(logging.DEBUG),
+        mock.patch.object(
+            check,
+            'get_http_handler',
+            return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+        ),
     ):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
@@ -2714,10 +2702,13 @@ def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_che
     scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
 
     mock_resp = HTTPResponseMock(200, content=b'httpbin.org')
-    with caplog.at_level(logging.DEBUG), mock.patch.object(
-        check,
-        'get_http_handler',
-        return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+    with (
+        caplog.at_level(logging.DEBUG),
+        mock.patch.object(
+            check,
+            'get_http_handler',
+            return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+        ),
     ):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 

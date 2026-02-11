@@ -6,6 +6,7 @@
 import logging
 import os
 import ssl
+
 import mock
 import pytest
 import requests
@@ -1680,7 +1681,9 @@ def test_label_joins_gc(sorted_tags_check):
 
     content2 = text_data.encode('utf-8') if isinstance(text_data, str) else text_data
     mock_resp2 = HTTPResponseMock(200, content=content2, headers={'Content-Type': "text/plain"})
-    with mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp2)):
+    with mock.patch.object(
+        check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp2)
+    ):
         check.process("http://fake.endpoint:10055/metrics")
         assert 'dd-agent-1337' in check._label_mapping['pod']
         assert 'dd-agent-62bgh' not in check._label_mapping['pod']
@@ -1952,10 +1955,13 @@ def test_text_filter_input():
 def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data):
     check = mocked_prometheus_check
     mock_resp = HTTPResponseMock(200, content=b'httpbin.org')
-    with caplog.at_level(logging.DEBUG), mock.patch.object(
-        check,
-        'get_http_handler',
-        return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+    with (
+        caplog.at_level(logging.DEBUG),
+        mock.patch.object(
+            check,
+            'get_http_handler',
+            return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+        ),
     ):
         resp = check.poll('https://httpbin.org/get')
 
@@ -1970,10 +1976,13 @@ def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
     mock_resp = HTTPResponseMock(200, content=b'httpbin.org')
-    with caplog.at_level(logging.DEBUG), mock.patch.object(
-        check,
-        'get_http_handler',
-        return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+    with (
+        caplog.at_level(logging.DEBUG),
+        mock.patch.object(
+            check,
+            'get_http_handler',
+            return_value=RequestWrapperMock(get=lambda url, **kw: mock_resp, ignore_tls_warning=True),
+        ),
     ):
         resp = check.poll('https://httpbin.org/get')
 
