@@ -1,4 +1,5 @@
 name: Calico
+fleet_configurable: true
 files:
   - name: calico.yaml
     options:
