@@ -1,4 +1,5 @@
 name: OpenLDAP
+fleet_configurable: true
 files:
 - name: openldap.yaml
   options:
@@ -11,27 +12,32 @@ files:
       description: |
         Full URL of your LDAP server. Use `ldaps` or `ldap` to indicate whether to
         use TLS or not, or `ldapi` to connect to a UNIX socket.
+      fleet_configurable: true
       required: True
       value:
         example: ldaps://localhost:636
         type: string
     - name: username
       description: The Distinguished Name of the user that can read the monitor database.
+      fleet_configurable: true
       value:
         type: string
         example: <USER_DISTINGUISHED_NAME>
     - name: password
       description: Password associated with `username`
+      fleet_configurable: true
       secret: true
       value:
         type: string
     - name: ssl_verify
       description: Whether or not to perform server certificate validation.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
     - name: ssl_key
       description: Path to the client private key file, in PEM format.
+      fleet_configurable: true
       value:
         type: string
         example: <KEY_PEM_PATH>
@@ -39,6 +45,7 @@ files:
       description: |
         Path to the client certificate file in PEM format.
         If you don't specify a key, the path is taken from the certificate file.
+      fleet_configurable: true
       value:
         type: string
         example: <CLIENT_CERT_PATH>
@@ -46,6 +53,7 @@ files:
       description: |
         Path to a directory containing CA certificates,
         or a file containing a bundle of certificates, in PEM format.
+      fleet_configurable: true
       value:
         type: string
         example: <CA_CERT_PATH>
@@ -64,6 +72,7 @@ files:
                                           for the monitor backend. Set to empty string `""` for an anonymous bind.
         * `password` - string - optional: The password associated with `username`.
       secret: true
+      fleet_configurable: true
       value:
         type: array
         items:
