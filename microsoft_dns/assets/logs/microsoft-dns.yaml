@@ -1320,7 +1320,7 @@ pipeline:
               name: Expire
             - name: Reload
               filter:
-                query: "@evt.id:(561 OR 564)"
+                query: "@evt.id:561"
           target: other_entity_activity
         - type: category-processor
           name: Category processor for creating `entity.type` for 99
@@ -1363,7 +1363,7 @@ pipeline:
                   name: Create
                   id: 1
                 - filter:
-                    query: "@evt.id:(514 OR 517 OR 566 OR 567 OR 570 OR 572 OR 576)"
+                    query: "@evt.id:(514 OR 517 OR 564 OR 566 OR 567 OR 570 OR 572 OR 576)"
                   name: Update
                   id: 3
                 - filter:
@@ -1375,7 +1375,7 @@ pipeline:
                   name: Resume
                   id: 13
                 - filter:
-                    query: "@evt.id:(534 OR 535 OR 559 OR 561 OR 562 OR 563 OR 564)"
+                    query: "@evt.id:(534 OR 535 OR 559 OR 561 OR 562 OR 563)"
                   name: Other
                   id: 99
               targets:
