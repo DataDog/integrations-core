@@ -380,6 +380,30 @@ def mock_http_response_per_endpoint(mocker, mock_response):
 
 
 @pytest.fixture
+def http_response_mock():
+    """
+    Yields HTTPResponseMock: a protocol-based mock response (no requests/httpx).
+    Use for tests that replace check.http or get_http_handler with RequestWrapperMock.
+    """
+    from datadog_checks.dev.http import HTTPResponseMock
+
+    yield HTTPResponseMock
+
+
+@pytest.fixture
+def request_wrapper_mock():
+    """
+    Yields RequestWrapperMock: a protocol-based mock HTTP client (no requests/httpx).
+    Use as a context manager with a check to patch check._http, e.g.:
+        with request_wrapper_mock(check, get=lambda url, **kwargs: http_response_mock(200, content=b'...')):
+            dd_run_check(check(instance))
+    """
+    from datadog_checks.dev.http import RequestWrapperMock
+
+    yield RequestWrapperMock
+
+
+@pytest.fixture
 def mock_performance_objects(mocker, dd_default_hostname):
     def mock_perf_objects(
         perf_objects,  # type: Dict[str, Tuple[List[Optional[str]], Dict[str, List[float]]]]
