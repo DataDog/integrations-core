@@ -1,0 +1,716 @@
+id: supabase-cloud
+tests:
+ -
+  sample: |-
+    {
+      "data" : {
+        "identifier" : "olhhkaxwbugmyoapfigo",
+        "metadata" : [ {
+          "host" : "db-olhhkaxwbugmyoapfigo",
+          "parsed" : [ {
+            "transaction_id" : 0,
+            "backend_type" : "not initialized",
+            "error_severity" : "LOG",
+            "process_id" : 2508255,
+            "connection_from" : "::1:34635",
+            "sql_state_code" : "00000",
+            "query_id" : 0,
+            "session_start_time" : "2026-01-08 12:31:23 UTC",
+            "session_id" : "695fa39b.2645df",
+            "session_line_num" : 1,
+            "timestamp" : "2026-01-08 12:31:23.990 UTC"
+          } ]
+        } ],
+        "project" : "olhhkaxwbugmyoapfigo",
+        "event_message" : "connection received: host=::1 port=34635",
+        "id" : "75760464-320d-4b85-9770-2373c3948e19",
+        "timestamp" : 1767875483990000
+      },
+      "service" : "postgres_logs"
+    }
+  result:
+    custom:
+      data:
+        event_message: "connection received: host=::1 port=34635"
+        id: "75760464-320d-4b85-9770-2373c3948e19"
+        identifier: "olhhkaxwbugmyoapfigo"
+        metadata:
+         -
+          host: "db-olhhkaxwbugmyoapfigo"
+          parsed:
+           -
+            transaction_id: 0
+            backend_type: "not initialized"
+            error_severity: "LOG"
+            process_id: 2508255
+            connection_from: "::1:34635"
+            sql_state_code: "00000"
+            query_id: 0
+            session_start_time: "2026-01-08 12:31:23 UTC"
+            session_id: "695fa39b.2645df"
+            session_line_num: 1
+            timestamp: "2026-01-08 12:31:23.990 UTC"
+        project: "olhhkaxwbugmyoapfigo"
+        timestamp: 1767875483990000
+      service: "postgres_logs"
+      supabase:
+        event_timestamp: 1.76787548399E12
+    message: |-
+      {
+        "data" : {
+          "identifier" : "olhhkaxwbugmyoapfigo",
+          "metadata" : [ {
+            "host" : "db-olhhkaxwbugmyoapfigo",
+            "parsed" : [ {
+              "transaction_id" : 0,
+              "backend_type" : "not initialized",
+              "error_severity" : "LOG",
+              "process_id" : 2508255,
+              "connection_from" : "::1:34635",
+              "sql_state_code" : "00000",
+              "query_id" : 0,
+              "session_start_time" : "2026-01-08 12:31:23 UTC",
+              "session_id" : "695fa39b.2645df",
+              "session_line_num" : 1,
+              "timestamp" : "2026-01-08 12:31:23.990 UTC"
+            } ]
+          } ],
+          "project" : "olhhkaxwbugmyoapfigo",
+          "event_message" : "connection received: host=::1 port=34635",
+          "id" : "75760464-320d-4b85-9770-2373c3948e19",
+          "timestamp" : 1767875483990000
+        },
+        "service" : "postgres_logs"
+      }
+    service: "postgres_logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767875483990
+ -
+  sample: |-
+    {
+      "data" : {
+        "metadata" : {
+          "res" : {
+            "headers" : {
+              "content_type" : "image/png",
+              "cache_control" : "max-age=3600",
+              "etag" : "\"946be759c5aacaf9d27f759aa0b0ef70\"",
+              "last_modified" : "Mon, 03 Nov 2025 22:31:56 GMT",
+              "content_length" : "7966809"
+            },
+            "statusCode" : 200
+          },
+          "appVersion" : "1.28.4",
+          "role" : "service_role",
+          "level" : "info",
+          "responseTime" : 102.1930320262909,
+          "project" : "olhhkaxwbugmyoapfigo",
+          "resources" : [ "/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f" ],
+          "reqId" : "998f535f94bef278-IAD",
+          "context" : {
+            "host" : "ip-10-109-31-170.ec2.internal",
+            "pid" : 1,
+            "type" : "request"
+          },
+          "tenantId" : "olhhkaxwbugmyoapfigo",
+          "region" : "us-east-1",
+          "operation" : "storage.object.get_authenticated",
+          "req" : {
+            "traceId" : "998f535f94bef278-IAD",
+            "headers" : {
+              "x_forwarded_port" : "443",
+              "cf_ray" : "998f535f94bef278-IAD",
+              "x_forwarded_host" : "olhhkaxwbugmyoapfigo.supabase.co",
+              "cf_connecting_ip" : "69.140.101.160",
+              "host" : "storage-api-canary-lb-us-east-1-ext.storage.supabase.com",
+              "x_forwarded_proto" : "https",
+              "user_agent" : "supabase-py/storage3 v2.21.1",
+              "x_forwarded_prefix" : "/storage/v1",
+              "accept" : "*/*"
+            },
+            "hostname" : "storage-api-canary-lb-us-east-1-ext.storage.supabase.com",
+            "method" : "GET",
+            "remotePort" : 9238,
+            "region" : "us-east-1",
+            "remoteAddress" : "10.109.54.41",
+            "url" : "/object/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f"
+          }
+        },
+        "project" : "olhhkaxwbugmyoapfigo",
+        "event_message" : "olhhkaxwbugmyoapfigo | GET | 200 | 10.109.54.41 | 998f535f94bef278-IAD | /object/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f | supabase-py/storage3 v2.21.1",
+        "id" : "508b677d-9cc7-4509-b3bd-a466b9cae888",
+        "timestamp" : 1767875771311534
+      },
+      "service" : "storage_logs"
+    }
+  result:
+    custom:
+      data:
+        event_message: "olhhkaxwbugmyoapfigo | GET | 200 | 10.109.54.41 | 998f535f94bef278-IAD | /object/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f | supabase-py/storage3 v2.21.1"
+        id: "508b677d-9cc7-4509-b3bd-a466b9cae888"
+        metadata:
+          appVersion: "1.28.4"
+          context:
+            host: "ip-10-109-31-170.ec2.internal"
+            pid: 1
+            type: "request"
+          level: "info"
+          operation: "storage.object.get_authenticated"
+          project: "olhhkaxwbugmyoapfigo"
+          region: "us-east-1"
+          req:
+            headers:
+              accept: "*/*"
+              cf_connecting_ip: "69.140.101.160"
+              cf_ray: "998f535f94bef278-IAD"
+              host: "storage-api-canary-lb-us-east-1-ext.storage.supabase.com"
+              user_agent: "supabase-py/storage3 v2.21.1"
+              x_forwarded_host: "olhhkaxwbugmyoapfigo.supabase.co"
+              x_forwarded_port: "443"
+              x_forwarded_prefix: "/storage/v1"
+              x_forwarded_proto: "https"
+            hostname: "storage-api-canary-lb-us-east-1-ext.storage.supabase.com"
+            method: "GET"
+            region: "us-east-1"
+            remoteAddress: "10.109.54.41"
+            remotePort: 9238
+            traceId: "998f535f94bef278-IAD"
+            url: "/object/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f"
+          reqId: "998f535f94bef278-IAD"
+          res:
+            headers:
+              cache_control: "max-age=3600"
+              content_length: "7966809"
+              content_type: "image/png"
+              etag: "\"946be759c5aacaf9d27f759aa0b0ef70\""
+              last_modified: "Mon, 03 Nov 2025 22:31:56 GMT"
+            statusCode: 200
+          resources:
+           - "/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f"
+          responseTime: 102.1930320262909
+          role: "service_role"
+          tenantId: "olhhkaxwbugmyoapfigo"
+        project: "olhhkaxwbugmyoapfigo"
+        timestamp: 1767875771311534
+      service: "storage_logs"
+      supabase:
+        event_timestamp: 1.767875771311534E12
+    message: |-
+      {
+        "data" : {
+          "metadata" : {
+            "res" : {
+              "headers" : {
+                "content_type" : "image/png",
+                "cache_control" : "max-age=3600",
+                "etag" : "\"946be759c5aacaf9d27f759aa0b0ef70\"",
+                "last_modified" : "Mon, 03 Nov 2025 22:31:56 GMT",
+                "content_length" : "7966809"
+              },
+              "statusCode" : 200
+            },
+            "appVersion" : "1.28.4",
+            "role" : "service_role",
+            "level" : "info",
+            "responseTime" : 102.1930320262909,
+            "project" : "olhhkaxwbugmyoapfigo",
+            "resources" : [ "/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f" ],
+            "reqId" : "998f535f94bef278-IAD",
+            "context" : {
+              "host" : "ip-10-109-31-170.ec2.internal",
+              "pid" : 1,
+              "type" : "request"
+            },
+            "tenantId" : "olhhkaxwbugmyoapfigo",
+            "region" : "us-east-1",
+            "operation" : "storage.object.get_authenticated",
+            "req" : {
+              "traceId" : "998f535f94bef278-IAD",
+              "headers" : {
+                "x_forwarded_port" : "443",
+                "cf_ray" : "998f535f94bef278-IAD",
+                "x_forwarded_host" : "olhhkaxwbugmyoapfigo.supabase.co",
+                "cf_connecting_ip" : "69.140.101.160",
+                "host" : "storage-api-canary-lb-us-east-1-ext.storage.supabase.com",
+                "x_forwarded_proto" : "https",
+                "user_agent" : "supabase-py/storage3 v2.21.1",
+                "x_forwarded_prefix" : "/storage/v1",
+                "accept" : "*/*"
+              },
+              "hostname" : "storage-api-canary-lb-us-east-1-ext.storage.supabase.com",
+              "method" : "GET",
+              "remotePort" : 9238,
+              "region" : "us-east-1",
+              "remoteAddress" : "10.109.54.41",
+              "url" : "/object/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f"
+            }
+          },
+          "project" : "olhhkaxwbugmyoapfigo",
+          "event_message" : "olhhkaxwbugmyoapfigo | GET | 200 | 10.109.54.41 | 998f535f94bef278-IAD | /object/images/elreejwiuaxwgxuferdihyytiyidyi.png-426fb893-1d94-4654-9d92-ade5a545b67f | supabase-py/storage3 v2.21.1",
+          "id" : "508b677d-9cc7-4509-b3bd-a466b9cae888",
+          "timestamp" : 1767875771311534
+        },
+        "service" : "storage_logs"
+      }
+    service: "storage_logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767875771311
+ -
+  sample: |-
+    {
+      "data" : {
+        "metadata" : {
+          "level" : "info",
+          "context" : {
+            "file" : "lib/realtime_web/channels/realtime_channel/message_dispatcher.ex",
+            "application" : "realtime",
+            "gl" : "<0.3252.0>",
+            "line" : 64,
+            "domain" : [ "elixir" ],
+            "function" : "maybe_log/4",
+            "module" : "Elixir.RealtimeWeb.RealtimeChannel.MessageDispatcher",
+            "vm" : {
+              "node" : "realtime@2600:1f10:4c1b:cc02:a102:319c:812c:cd9b"
+            },
+            "mfa" : [ "Elixir.RealtimeWeb.RealtimeChannel.MessageDispatcher", "maybe_log", "4" ],
+            "pid" : "<0.53814579.0>",
+            "time" : 1762222961583901
+          },
+          "project" : "olhhkaxwbugmyoapfigo",
+          "external_id" : "olhhkaxwbugmyoapfigo",
+          "region" : "us-east-1"
+        },
+        "project" : "olhhkaxwbugmyoapfigo",
+        "event_message" : "Received message on realtime:room:ff6bed44-a05b-4afe-b210-e22dfec26588:released with payload: %Phoenix.Socket.Broadcast{\n  topic: \"olhhkaxwbugmyoapfigo:room:ff6bed44-a05b-4afe-b210-e22dfec26588:released\",\n  event: \"broadcast\",\n  payload: %{\n    \"event\" => \"room:ff6bed44-a05b-4afe-b210-e22dfec26588:released\",\n    \"payload\" => %{\"message\" => \"Hello World\"},\n    \"type\" => \"broadcast\"\n  }\n}",
+        "id" : "e2e81ab6-3a0b-489d-b5b2-42727e2ce561",
+        "timestamp" : 1767875700130828
+      },
+      "service" : "realtime_logs"
+    }
+  result:
+    custom:
+      data:
+        event_message: |-
+          Received message on realtime:room:ff6bed44-a05b-4afe-b210-e22dfec26588:released with payload: %Phoenix.Socket.Broadcast{
+            topic: "olhhkaxwbugmyoapfigo:room:ff6bed44-a05b-4afe-b210-e22dfec26588:released",
+            event: "broadcast",
+            payload: %{
+              "event" => "room:ff6bed44-a05b-4afe-b210-e22dfec26588:released",
+              "payload" => %{"message" => "Hello World"},
+              "type" => "broadcast"
+            }
+          }
+        id: "e2e81ab6-3a0b-489d-b5b2-42727e2ce561"
+        metadata:
+          context:
+            application: "realtime"
+            domain:
+             - "elixir"
+            file: "lib/realtime_web/channels/realtime_channel/message_dispatcher.ex"
+            function: "maybe_log/4"
+            gl: "<0.3252.0>"
+            line: 64
+            mfa:
+             - "Elixir.RealtimeWeb.RealtimeChannel.MessageDispatcher"
+             - "maybe_log"
+             - "4"
+            module: "Elixir.RealtimeWeb.RealtimeChannel.MessageDispatcher"
+            pid: "<0.53814579.0>"
+            time: 1762222961583901
+            vm:
+              node: "realtime@2600:1f10:4c1b:cc02:a102:319c:812c:cd9b"
+          external_id: "olhhkaxwbugmyoapfigo"
+          level: "info"
+          project: "olhhkaxwbugmyoapfigo"
+          region: "us-east-1"
+        project: "olhhkaxwbugmyoapfigo"
+        timestamp: 1767875700130828
+      service: "realtime_logs"
+      supabase:
+        event_timestamp: 1.767875700130828E12
+        realtime:
+          message_name: "room:ff6bed44-a05b-4afe-b210-e22dfec26588:released"
+    message: |-
+      {
+        "data" : {
+          "metadata" : {
+            "level" : "info",
+            "context" : {
+              "file" : "lib/realtime_web/channels/realtime_channel/message_dispatcher.ex",
+              "application" : "realtime",
+              "gl" : "<0.3252.0>",
+              "line" : 64,
+              "domain" : [ "elixir" ],
+              "function" : "maybe_log/4",
+              "module" : "Elixir.RealtimeWeb.RealtimeChannel.MessageDispatcher",
+              "vm" : {
+                "node" : "realtime@2600:1f10:4c1b:cc02:a102:319c:812c:cd9b"
+              },
+              "mfa" : [ "Elixir.RealtimeWeb.RealtimeChannel.MessageDispatcher", "maybe_log", "4" ],
+              "pid" : "<0.53814579.0>",
+              "time" : 1762222961583901
+            },
+            "project" : "olhhkaxwbugmyoapfigo",
+            "external_id" : "olhhkaxwbugmyoapfigo",
+            "region" : "us-east-1"
+          },
+          "project" : "olhhkaxwbugmyoapfigo",
+          "event_message" : "Received message on realtime:room:ff6bed44-a05b-4afe-b210-e22dfec26588:released with payload: %Phoenix.Socket.Broadcast{\n  topic: \"olhhkaxwbugmyoapfigo:room:ff6bed44-a05b-4afe-b210-e22dfec26588:released\",\n  event: \"broadcast\",\n  payload: %{\n    \"event\" => \"room:ff6bed44-a05b-4afe-b210-e22dfec26588:released\",\n    \"payload\" => %{\"message\" => \"Hello World\"},\n    \"type\" => \"broadcast\"\n  }\n}",
+          "id" : "e2e81ab6-3a0b-489d-b5b2-42727e2ce561",
+          "timestamp" : 1767875700130828
+        },
+        "service" : "realtime_logs"
+      }
+    service: "realtime_logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767875700130
+ -
+  sample: |-
+    {
+      "data" : {
+        "metadata" : {
+          "actor" : {
+            "metadata" : {
+              "ip" : "2601:140:9700:2530:592e:b9e0:9087:24bb",
+              "tokenType" : "jwt",
+              "email" : "carl.house@example.com"
+            },
+            "id" : "422d98bd-72d6-49c0-af12-bf4767a89b0a",
+            "type" : "user"
+          },
+          "occurred_at" : "2025-11-11T12:14:37.849Z",
+          "level" : "info",
+          "context" : {
+            "host" : "ip-172-17-9-247.ec2.internal",
+            "pid" : 1
+          },
+          "namespace" : "LoggerAudit",
+          "action" : {
+            "metadata" : {
+              "route" : "/v1/projects/:ref/api-keys/:id",
+              "method" : "deleteApiKey",
+              "status" : 200
+            },
+            "name" : "Deletes an API key for the project"
+          },
+          "permission_group" : {
+            "project_ref" : "olhhkaxwbugmyoapfigo"
+          },
+          "request_id" : "7fe34edd-d2de-4a89-8a7a-47b484d74e75",
+          "target" : {
+            "metadata" : {
+              "project_ref" : "olhhkaxwbugmyoapfigo"
+            },
+            "description" : "Deletes an API key for the project"
+          }
+        },
+        "project" : "olhhkaxwbugmyoapfigo",
+        "event_message" : "DELETE | olhhkaxwbugmyoapfigo | [no-organization-slug] | /v1/projects/:ref/api-keys/:id | 422d98bd-72d6-49c0-af12-bf4767a89b0a | carl.house@example.com | 7fe34edd-d2de-4a89-8a7a-47b484d74e75",
+        "id" : "733129a7-a98b-459f-a665-c801d5963546",
+        "request_id" : "7fe34edd-d2de-4a89-8a7a-47b484d74e75",
+        "timestamp" : 1767875701725344
+      },
+      "service" : "mgmt_api_logs"
+    }
+  result:
+    custom:
+      data:
+        event_message: "DELETE | olhhkaxwbugmyoapfigo | [no-organization-slug] | /v1/projects/:ref/api-keys/:id | 422d98bd-72d6-49c0-af12-bf4767a89b0a | carl.house@example.com | 7fe34edd-d2de-4a89-8a7a-47b484d74e75"
+        id: "733129a7-a98b-459f-a665-c801d5963546"
+        metadata:
+          action:
+            metadata:
+              method: "deleteApiKey"
+              route: "/v1/projects/:ref/api-keys/:id"
+              status: 200
+            name: "Deletes an API key for the project"
+          actor:
+            id: "422d98bd-72d6-49c0-af12-bf4767a89b0a"
+            metadata:
+              email: "carl.house@example.com"
+              ip: "2601:140:9700:2530:592e:b9e0:9087:24bb"
+              tokenType: "jwt"
+            type: "user"
+          context:
+            host: "ip-172-17-9-247.ec2.internal"
+            pid: 1
+          level: "info"
+          namespace: "LoggerAudit"
+          occurred_at: "2025-11-11T12:14:37.849Z"
+          permission_group:
+            project_ref: "olhhkaxwbugmyoapfigo"
+          request_id: "7fe34edd-d2de-4a89-8a7a-47b484d74e75"
+          target:
+            description: "Deletes an API key for the project"
+            metadata:
+              project_ref: "olhhkaxwbugmyoapfigo"
+        project: "olhhkaxwbugmyoapfigo"
+        request_id: "7fe34edd-d2de-4a89-8a7a-47b484d74e75"
+        timestamp: 1767875701725344
+      service: "mgmt_api_logs"
+      supabase:
+        event_timestamp: 1.767875701725344E12
+    message: |-
+      {
+        "data" : {
+          "metadata" : {
+            "actor" : {
+              "metadata" : {
+                "ip" : "2601:140:9700:2530:592e:b9e0:9087:24bb",
+                "tokenType" : "jwt",
+                "email" : "carl.house@example.com"
+              },
+              "id" : "422d98bd-72d6-49c0-af12-bf4767a89b0a",
+              "type" : "user"
+            },
+            "occurred_at" : "2025-11-11T12:14:37.849Z",
+            "level" : "info",
+            "context" : {
+              "host" : "ip-172-17-9-247.ec2.internal",
+              "pid" : 1
+            },
+            "namespace" : "LoggerAudit",
+            "action" : {
+              "metadata" : {
+                "route" : "/v1/projects/:ref/api-keys/:id",
+                "method" : "deleteApiKey",
+                "status" : 200
+              },
+              "name" : "Deletes an API key for the project"
+            },
+            "permission_group" : {
+              "project_ref" : "olhhkaxwbugmyoapfigo"
+            },
+            "request_id" : "7fe34edd-d2de-4a89-8a7a-47b484d74e75",
+            "target" : {
+              "metadata" : {
+                "project_ref" : "olhhkaxwbugmyoapfigo"
+              },
+              "description" : "Deletes an API key for the project"
+            }
+          },
+          "project" : "olhhkaxwbugmyoapfigo",
+          "event_message" : "DELETE | olhhkaxwbugmyoapfigo | [no-organization-slug] | /v1/projects/:ref/api-keys/:id | 422d98bd-72d6-49c0-af12-bf4767a89b0a | carl.house@example.com | 7fe34edd-d2de-4a89-8a7a-47b484d74e75",
+          "id" : "733129a7-a98b-459f-a665-c801d5963546",
+          "request_id" : "7fe34edd-d2de-4a89-8a7a-47b484d74e75",
+          "timestamp" : 1767875701725344
+        },
+        "service" : "mgmt_api_logs"
+      }
+    service: "mgmt_api_logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767875701725
+ -
+  sample: |-
+    {
+      "data" : {
+        "identifier" : "olhhkaxwbugmyoapfigo",
+        "metadata" : [ {
+          "host" : "db-olhhkaxwbugmyoapfigo",
+          "parsed" : [ {
+            "transaction_id" : 0,
+            "backend_type" : "client backend",
+            "error_severity" : "LOG",
+            "process_id" : 2508097,
+            "sql_state_code" : "00000",
+            "database_name" : "postgres",
+            "query_id" : 3396884957797646000,
+            "user_name" : "supabase_admin",
+            "session_start_time" : "2026-01-08 12:24:12 UTC",
+            "session_id" : "695fa1ec.264541",
+            "session_line_num" : 3,
+            "command_tag" : "authentication",
+            "virtual_transaction_id" : "43/67688",
+            "connection_from" : "::1:39047",
+            "timestamp" : "2026-01-08 12:24:12.132 UTC"
+          } ]
+        } ],
+        "project" : "olhhkaxwbugmyoapfigo",
+        "event_message" : "connection authorized: user=supabase_admin database=postgres application_name=postgres_exporter",
+        "id" : "07370876-7054-403d-91de-62a9f4a3984d",
+        "timestamp" : 1767875052132000
+      },
+      "service" : "postgres_logs"
+    }
+  result:
+    custom:
+      data:
+        event_message: "connection authorized: user=supabase_admin database=postgres application_name=postgres_exporter"
+        id: "07370876-7054-403d-91de-62a9f4a3984d"
+        identifier: "olhhkaxwbugmyoapfigo"
+        metadata:
+         -
+          host: "db-olhhkaxwbugmyoapfigo"
+          parsed:
+           -
+            transaction_id: 0
+            backend_type: "client backend"
+            error_severity: "LOG"
+            process_id: 2508097
+            sql_state_code: "00000"
+            database_name: "postgres"
+            query_id: 3396884957797646000
+            user_name: "supabase_admin"
+            session_start_time: "2026-01-08 12:24:12 UTC"
+            session_id: "695fa1ec.264541"
+            session_line_num: 3
+            command_tag: "authentication"
+            virtual_transaction_id: "43/67688"
+            connection_from: "::1:39047"
+            timestamp: "2026-01-08 12:24:12.132 UTC"
+        project: "olhhkaxwbugmyoapfigo"
+        timestamp: 1767875052132000
+      service: "postgres_logs"
+      supabase:
+        event_timestamp: 1.767875052132E12
+        pg_authorization: "user=supabase_admin database=postgres application_name=postgres_exporter"
+    message: |-
+      {
+        "data" : {
+          "identifier" : "olhhkaxwbugmyoapfigo",
+          "metadata" : [ {
+            "host" : "db-olhhkaxwbugmyoapfigo",
+            "parsed" : [ {
+              "transaction_id" : 0,
+              "backend_type" : "client backend",
+              "error_severity" : "LOG",
+              "process_id" : 2508097,
+              "sql_state_code" : "00000",
+              "database_name" : "postgres",
+              "query_id" : 3396884957797646000,
+              "user_name" : "supabase_admin",
+              "session_start_time" : "2026-01-08 12:24:12 UTC",
+              "session_id" : "695fa1ec.264541",
+              "session_line_num" : 3,
+              "command_tag" : "authentication",
+              "virtual_transaction_id" : "43/67688",
+              "connection_from" : "::1:39047",
+              "timestamp" : "2026-01-08 12:24:12.132 UTC"
+            } ]
+          } ],
+          "project" : "olhhkaxwbugmyoapfigo",
+          "event_message" : "connection authorized: user=supabase_admin database=postgres application_name=postgres_exporter",
+          "id" : "07370876-7054-403d-91de-62a9f4a3984d",
+          "timestamp" : 1767875052132000
+        },
+        "service" : "postgres_logs"
+      }
+    service: "postgres_logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767875052132
+ -
+  sample: |-
+    {
+      "data" : {
+        "identifier" : "olhhkaxwbugmyoapfigo",
+        "metadata" : [ {
+          "host" : "db-olhhkaxwbugmyoapfigo",
+          "parsed" : [ {
+            "transaction_id" : 0,
+            "backend_type" : "client backend",
+            "error_severity" : "LOG",
+            "process_id" : 2508445,
+            "sql_state_code" : "00000",
+            "database_name" : "postgres",
+            "query_id" : 5730846908687305000,
+            "user_name" : "postgres",
+            "session_start_time" : "2026-01-08 12:42:16 UTC",
+            "session_id" : "695fa628.26469d",
+            "session_line_num" : 14,
+            "command_tag" : "SELECT",
+            "virtual_transaction_id" : "4/0",
+            "application_name" : "psql",
+            "connection_from" : "2601:140:9700:2530:e902:9d6c:db7e:7d61:50670",
+            "timestamp" : "2026-01-08 12:42:32.078 UTC"
+          } ]
+        } ],
+        "project" : "olhhkaxwbugmyoapfigo",
+        "event_message" : "duration: 3.529 ms  statement: SELECT c.relname, NULL::pg_catalog.text FROM pg_catalog.pg_class c WHERE c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND (c.relname) LIKE 'wo%' AND pg_catalog.pg_table_is_visible(c.oid) AND c.relnamespace <> (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'pg_catalog')\nUNION ALL\nSELECT NULL::pg_catalog.text, n.nspname FROM pg_catalog.pg_namespace n WHERE n.nspname LIKE 'wo%' AND n.nspname NOT LIKE E'pg\\\\_%'\nLIMIT 1000",
+        "id" : "33a88b83-4199-442c-b316-220442327d1f",
+        "timestamp" : 1767876152078000
+      },
+      "service" : "postgres_logs"
+    }
+  result:
+    custom:
+      data:
+        event_message: |-
+          duration: 3.529 ms  statement: SELECT c.relname, NULL::pg_catalog.text FROM pg_catalog.pg_class c WHERE c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND (c.relname) LIKE 'wo%' AND pg_catalog.pg_table_is_visible(c.oid) AND c.relnamespace <> (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'pg_catalog')
+          UNION ALL
+          SELECT NULL::pg_catalog.text, n.nspname FROM pg_catalog.pg_namespace n WHERE n.nspname LIKE 'wo%' AND n.nspname NOT LIKE E'pg\\_%'
+          LIMIT 1000
+        id: "33a88b83-4199-442c-b316-220442327d1f"
+        identifier: "olhhkaxwbugmyoapfigo"
+        metadata:
+         -
+          host: "db-olhhkaxwbugmyoapfigo"
+          parsed:
+           -
+            transaction_id: 0
+            backend_type: "client backend"
+            error_severity: "LOG"
+            process_id: 2508445
+            sql_state_code: "00000"
+            database_name: "postgres"
+            query_id: 5730846908687305000
+            user_name: "postgres"
+            session_start_time: "2026-01-08 12:42:16 UTC"
+            session_id: "695fa628.26469d"
+            session_line_num: 14
+            command_tag: "SELECT"
+            virtual_transaction_id: "4/0"
+            application_name: "psql"
+            connection_from: "2601:140:9700:2530:e902:9d6c:db7e:7d61:50670"
+            timestamp: "2026-01-08 12:42:32.078 UTC"
+        project: "olhhkaxwbugmyoapfigo"
+        timestamp: 1767876152078000
+      service: "postgres_logs"
+      supabase:
+        event_timestamp: 1.767876152078E12
+        pg_duration: 3.529
+        sql_statement: |-
+          SELECT c.relname, NULL::pg_catalog.text FROM pg_catalog.pg_class c WHERE c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND (c.relname) LIKE 'wo%' AND pg_catalog.pg_table_is_visible(c.oid) AND c.relnamespace <> (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'pg_catalog')
+          UNION ALL
+          SELECT NULL::pg_catalog.text, n.nspname FROM pg_catalog.pg_namespace n WHERE n.nspname LIKE 'wo%' AND n.nspname NOT LIKE E'pg\\_%'
+          LIMIT 1000
+    message: |-
+      {
+        "data" : {
+          "identifier" : "olhhkaxwbugmyoapfigo",
+          "metadata" : [ {
+            "host" : "db-olhhkaxwbugmyoapfigo",
+            "parsed" : [ {
+              "transaction_id" : 0,
+              "backend_type" : "client backend",
+              "error_severity" : "LOG",
+              "process_id" : 2508445,
+              "sql_state_code" : "00000",
+              "database_name" : "postgres",
+              "query_id" : 5730846908687305000,
+              "user_name" : "postgres",
+              "session_start_time" : "2026-01-08 12:42:16 UTC",
+              "session_id" : "695fa628.26469d",
+              "session_line_num" : 14,
+              "command_tag" : "SELECT",
+              "virtual_transaction_id" : "4/0",
+              "application_name" : "psql",
+              "connection_from" : "2601:140:9700:2530:e902:9d6c:db7e:7d61:50670",
+              "timestamp" : "2026-01-08 12:42:32.078 UTC"
+            } ]
+          } ],
+          "project" : "olhhkaxwbugmyoapfigo",
+          "event_message" : "duration: 3.529 ms  statement: SELECT c.relname, NULL::pg_catalog.text FROM pg_catalog.pg_class c WHERE c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND (c.relname) LIKE 'wo%' AND pg_catalog.pg_table_is_visible(c.oid) AND c.relnamespace <> (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'pg_catalog')\nUNION ALL\nSELECT NULL::pg_catalog.text, n.nspname FROM pg_catalog.pg_namespace n WHERE n.nspname LIKE 'wo%' AND n.nspname NOT LIKE E'pg\\\\_%'\nLIMIT 1000",
+          "id" : "33a88b83-4199-442c-b316-220442327d1f",
+          "timestamp" : 1767876152078000
+        },
+        "service" : "postgres_logs"
+      }
+    service: "postgres_logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1767876152078
