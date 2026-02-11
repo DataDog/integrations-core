@@ -199,6 +199,8 @@ def _assert_complex_config(
 
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
 
+    operation_time_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
+
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
         group_replication_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
@@ -212,8 +214,6 @@ def _assert_complex_config(
             count=1,
         )
         operation_time_metrics.extend(variables.GROUP_REPLICATION_OPERATION_TIME_METRICS)
-    else:
-        operation_time_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
