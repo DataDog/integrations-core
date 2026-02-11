@@ -213,4 +213,113 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1768229664570
+ -
+  sample: '{"__type":"$$EventMessageAudit","id":"5fc5a070-c466-464d-bb74-aea49d1cc188","ts":"2026-02-10T13:52:09.642+00:00","eventName":"n8n.audit.user.login.failed","message":"n8n.audit.user.login.failed","payload":{"authenticationMethod":"email","userEmail":"user@example.com","reason":"wrong credentials"}}'
+  result:
+    custom:
+      n8n:
+        event_name: "n8n.audit.user.login.failed"
+        event_type: "$$EventMessageAudit"
+      payload:
+        authenticationMethod: "email"
+        reason: "wrong credentials"
+      usr:
+        email: "user@example.com"
+    message: "n8n.audit.user.login.failed"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1739191929642
+ -
+  sample: '{"__type":"$$EventMessageWorkflow","id":"78c6f458-a6da-48cb-97c7-c1423e929ff9","ts":"2026-02-10T13:56:48.856+00:00","eventName":"n8n.workflow.started","message":"n8n.workflow.started","payload":{"executionId":"1","workflowId":"zfrNWGdkvgMkbASXocI4M","isManual":false,"workflowName":"My workflow"}}'
+  result:
+    custom:
+      n8n:
+        event_name: "n8n.workflow.started"
+        event_type: "$$EventMessageWorkflow"
+        execution_id: "1"
+        is_manual: false
+        workflow_id: "zfrNWGdkvgMkbASXocI4M"
+        workflow_name: "My workflow"
+    message: "n8n.workflow.started"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1739192208856
+ -
+  sample: '{"__type":"$$EventMessageWorkflow","id":"b8e362ed-0866-49b9-aaaf-765d1d26b08c","ts":"2026-02-10T14:04:09.052+00:00","eventName":"n8n.workflow.failed","message":"n8n.workflow.failed","payload":{"userId":"2418b79a-bbc5-4c77-9af4-2cbd1da13bce","executionId":"3","success":false,"isManual":true,"workflowId":"zfrNWGdkvgMkbASXocI4M","workflowName":"My workflow","lastNodeExecuted":"Code in Python","errorMessage":"Python runner unavailable: Python 3 is missing from this system"}}'
+  result:
+    custom:
+      error:
+        message: "Python runner unavailable: Python 3 is missing from this system"
+      n8n:
+        event_name: "n8n.workflow.failed"
+        event_type: "$$EventMessageWorkflow"
+        execution_id: "3"
+        is_manual: true
+        success: false
+        workflow_id: "zfrNWGdkvgMkbASXocI4M"
+        workflow_name: "My workflow"
+      payload:
+        lastNodeExecuted: "Code in Python"
+      usr:
+        id: "2418b79a-bbc5-4c77-9af4-2cbd1da13bce"
+    message: "n8n.workflow.failed"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1739192649052
+ -
+  sample: '{"__type":"$$EventMessageNode","id":"bd2e741a-b34b-4321-955c-0db2a8441c7b","ts":"2026-02-10T13:56:48.858+00:00","eventName":"n8n.node.started","message":"n8n.node.started","payload":{"workflowId":"zfrNWGdkvgMkbASXocI4M","workflowName":"My workflow","executionId":"1","nodeType":"n8n-nodes-base.manualTrigger","nodeName":"When clicking Execute workflow","nodeId":"d1dc7423-e925-4d74-8e7d-a94f15383156"}}'
+  result:
+    custom:
+      n8n:
+        event_name: "n8n.node.started"
+        event_type: "$$EventMessageNode"
+        execution_id: "1"
+        node_id: "d1dc7423-e925-4d74-8e7d-a94f15383156"
+        node_name: "When clicking Execute workflow"
+        node_type: "n8n-nodes-base.manualTrigger"
+        workflow_id: "zfrNWGdkvgMkbASXocI4M"
+        workflow_name: "My workflow"
+    message: "n8n.node.started"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1739192208858
+ -
+  sample: '{"__type":"$$EventMessageWorkflow","id":"580403cd-7218-4aea-abbb-7fa71b5843d8","ts":"2026-02-10T13:56:48.861+00:00","eventName":"n8n.workflow.success","message":"n8n.workflow.success","payload":{"userId":"2418b79a-bbc5-4c77-9af4-2cbd1da13bce","executionId":"1","success":true,"isManual":true,"workflowId":"zfrNWGdkvgMkbASXocI4M","workflowName":"My workflow"}}'
+  result:
+    custom:
+      n8n:
+        event_name: "n8n.workflow.success"
+        event_type: "$$EventMessageWorkflow"
+        execution_id: "1"
+        is_manual: true
+        success: true
+        workflow_id: "zfrNWGdkvgMkbASXocI4M"
+        workflow_name: "My workflow"
+      usr:
+        id: "2418b79a-bbc5-4c77-9af4-2cbd1da13bce"
+    message: "n8n.workflow.success"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1739192208861
+ -
+  sample: '{"__type":"$$EventMessageRunner","id":"4ce6b554-5c71-4eae-b354-6bd07add38d8","ts":"2026-02-10T14:04:15.806+00:00","eventName":"n8n.runner.task.requested","message":"n8n.runner.task.requested","payload":{"taskId":"a6y1eLnD","nodeId":"ece1a8d5-ed64-434d-9f4b-e026482d2f3f","workflowId":"zfrNWGdkvgMkbASXocI4M","executionId":"4"}}'
+  result:
+    custom:
+      n8n:
+        event_name: "n8n.runner.task.requested"
+        event_type: "$$EventMessageRunner"
+        execution_id: "4"
+        node_id: "ece1a8d5-ed64-434d-9f4b-e026482d2f3f"
+        task_id: "a6y1eLnD"
+        workflow_id: "zfrNWGdkvgMkbASXocI4M"
+    message: "n8n.runner.task.requested"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1739192655806
 
