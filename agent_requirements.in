@@ -61,7 +61,7 @@ securesystemslib[crypto,pynacl]==0.28.0
 semver==3.0.4
 service-identity[idna]==24.2.0
 simplejson==3.20.1
-snowflake-connector-python==3.17.2
+snowflake-connector-python==4.0.0
 supervisor==4.3.0
 tuf==4.0.0
 urllib3==2.6.3
