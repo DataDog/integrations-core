@@ -80,13 +80,9 @@ class KafkaConfig:
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 
-        # Use the OAuth-specific CA cert if provided, otherwise fall back to the general tls_ca_cert.
-        # This is passed as librdkafka's https.ca.location, which is used for HTTPS requests
-        # such as the OIDC token endpoint, separate from ssl.ca.location used for broker connections.
-        oauth_tls_ca_cert = (
+        self._sasl_oauth_tls_ca_cert = (
             self._sasl_oauth_token_provider.get("tls_ca_cert") if self._sasl_oauth_token_provider else None
         )
-        self._sasl_oauth_tls_ca_cert = oauth_tls_ca_cert or self._tls_ca_cert
 
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
