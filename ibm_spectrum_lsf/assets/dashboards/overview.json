@@ -118,83 +118,6 @@
                             "precision": 2,
                             "requests": [
                                 {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">=",
-                                            "palette": "white_on_green",
-                                            "value": 1
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.can_connect{$lsf_cluster_name} by {lsf_cluster_name}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "title": "Integration health",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 6771546389415127,
-                        "layout": {
-                            "height": 2,
-                            "width": 3,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.cluster.hosts{$lsf_cluster_name,$lsf_host}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "title": "Number of hosts",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 5643960385090535,
-                        "layout": {
-                            "height": 2,
-                            "width": 3,
-                            "x": 3,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -222,9 +145,9 @@
                         "id": 7973328972909343,
                         "layout": {
                             "height": 2,
-                            "width": 3,
+                            "width": 2,
                             "x": 0,
-                            "y": 2
+                            "y": 0
                         }
                     },
                     {
@@ -260,9 +183,57 @@
                         "id": 4003443785919076,
                         "layout": {
                             "height": 2,
-                            "width": 3,
-                            "x": 3,
-                            "y": 2
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:ibm_spectrum_lsf.job.completed.details.status{status:failure} by {job_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Recently failed jobs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4759760515653934,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 0
                         }
                     },
                     {
@@ -284,10 +255,10 @@
                         },
                         "id": 160337321495986,
                         "layout": {
-                            "height": 2,
+                            "height": 4,
                             "width": 6,
                             "x": 0,
-                            "y": 4
+                            "y": 2
                         }
                     }
                 ]
@@ -308,6 +279,27 @@
                 "title": "Hosts",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "View system information about all the hosts in your IBM Spectrum LSF cluster and determine if any are overloaded.  Reported by `lshosts` and `lsload` metric [sources](https://github.com/DataDog/integrations-core/tree/master/ibm_spectrum_lsf#configuration)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 1604685332734391,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "has_search_bar": "auto",
@@ -430,7 +422,7 @@
                             "height": 2,
                             "width": 12,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -478,7 +470,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -526,7 +518,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 4,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -574,7 +566,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 8,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -641,7 +633,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 0,
-                            "y": 4
+                            "y": 5
                         }
                     },
                     {
@@ -689,7 +681,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 4,
-                            "y": 4
+                            "y": 5
                         }
                     },
                     {
@@ -737,14 +729,14 @@
                             "height": 2,
                             "width": 4,
                             "x": 8,
-                            "y": 4
+                            "y": 5
                         }
                     }
                 ]
             },
             "id": 4228094515257936,
             "layout": {
-                "height": 7,
+                "height": 8,
                 "width": 12,
                 "x": 0,
                 "y": 7
@@ -755,34 +747,13 @@
                 "background_color": "vivid_pink",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Performance Metrics",
+                "title": "Cluster Performance Metrics",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
                             "background_color": "pink",
-                            "content": "Job Scheduling\n",
-                            "font_size": "16",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "center",
-                            "tick_edge": "bottom",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "top"
-                        },
-                        "id": 667644274827311,
-                        "layout": {
-                            "height": 1,
-                            "width": 4,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "pink",
-                            "content": "Cluster Performance",
+                            "content": "View overall cluster performance metrics, such as how mbatchd and other management processes are performing. Reported by `badmin_perfmon` metric [source](https://github.com/DataDog/integrations-core/tree/master/ibm_spectrum_lsf#configuration)\n ",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": true,
@@ -795,8 +766,8 @@
                         "id": 3984888538188175,
                         "layout": {
                             "height": 1,
-                            "width": 8,
-                            "x": 4,
+                            "width": 12,
+                            "x": 0,
                             "y": 0
                         }
                     },
@@ -872,44 +843,48 @@
                     },
                     {
                         "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
+                            "autoscale": true,
+                            "precision": 2,
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 90
+                                        }
+                                    ],
                                     "formulas": [
                                         {
-                                            "alias": "slot utilization",
-                                            "formula": "max(query1, 0)"
+                                            "formula": "max(query1, 0)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
                                         {
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.perfmon.slots.utilization.current{$lsf_cluster_name} by {lsf_cluster_name}"
+                                            "query": "max:ibm_spectrum_lsf.perfmon.slots.utilization.current{$lsf_cluster_name}"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "show_legend": true,
                             "title": "Current slot utilization",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "timeseries"
+                            "type": "query_value"
                         },
                         "id": 2278683475102867,
                         "layout": {
@@ -1026,44 +1001,48 @@
                     },
                     {
                         "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
+                            "autoscale": true,
+                            "precision": 2,
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 90
+                                        }
+                                    ],
                                     "formulas": [
                                         {
-                                            "alias": "slot utilization",
-                                            "formula": "max(query1, 0)"
+                                            "formula": "max(query1, 0)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
                                         {
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.perfmon.memory.utilization.current{$lsf_cluster_name} by {lsf_cluster_name}"
+                                            "query": "avg:ibm_spectrum_lsf.perfmon.memory.utilization.current{$lsf_cluster_name}"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "show_legend": true,
                             "title": "Current memory utilization",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "timeseries"
+                            "type": "query_value"
                         },
                         "id": 8887177560040561,
                         "layout": {
@@ -1268,7 +1247,7 @@
                 "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 14
+                "y": 15
             }
         },
         {
@@ -1279,6 +1258,27 @@
                 "title": "Jobs Overview",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "View an overview of how many jobs are pending and running per server. Reported by `bqueues` and `bhosts` metric [sources](https://github.com/DataDog/integrations-core/tree/master/ibm_spectrum_lsf#configuration)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5623102013338475,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -1324,7 +1324,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1372,7 +1372,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 4,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1410,7 +1410,7 @@
                             "height": 2,
                             "width": 2,
                             "x": 8,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1448,7 +1448,7 @@
                             "height": 2,
                             "width": 2,
                             "x": 10,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1563,17 +1563,17 @@
                             "height": 3,
                             "width": 12,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 6817158111507870,
             "layout": {
-                "height": 6,
+                "height": 7,
                 "width": 12,
                 "x": 0,
-                "y": 22
+                "y": 23
             }
         },
         {
@@ -1584,6 +1584,27 @@
                 "title": "Running and Pending Jobs",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Get an overview of jobs that are currently running or pending, such as how long they have been running or their estimated completion percentage. Reported by `bjobs` metric [source](https://github.com/DataDog/integrations-core/tree/master/ibm_spectrum_lsf#configuration)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5395156289933534,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -1629,7 +1650,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1677,7 +1698,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1801,18 +1822,18 @@
                             "height": 4,
                             "width": 12,
                             "x": 0,
-                            "y": 3
+                            "y": 4
                         }
                     }
                 ]
             },
             "id": 5968819315710349,
             "layout": {
-                "height": 8,
+                "height": 9,
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 28
+                "y": 30
             }
         },
         {
@@ -1825,306 +1846,76 @@
                 "widgets": [
                     {
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending{$lsf_cluster_name,$job_id}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "timeseries_background": {
-                                "type": "area"
-                            },
-                            "title": "Average time spent pending",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            "background_color": "pink",
+                            "content": "Get insights into jobs that have recently completed, such as if they failed and their exit codes. There is also a detailed breakdown of their memory and cpu usage while running. Reported by `bhist` and `bhist_details` metric [sources](https://github.com/DataDog/integrations-core/tree/master/ibm_spectrum_lsf#configuration)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
                         },
-                        "id": 6525118674344878,
+                        "id": 2447665250670375,
                         "layout": {
-                            "height": 2,
-                            "width": 3,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 + query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.total{$lsf_cluster_name,$job_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name,$job_id}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "timeseries_background": {
-                                "type": "area"
-                            },
-                            "title": "Average time from submission to completion",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 4382155583311284,
-                        "layout": {
-                            "height": 2,
-                            "width": 3,
-                            "x": 3,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name,$job_id} by {job_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "Job run times",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "heatmap",
-                            "yaxis": {
-                                "include_zero": true,
-                                "max": "auto",
-                                "min": "auto",
-                                "scale": "linear"
-                            }
-                        },
-                        "id": 7250416483107477,
-                        "layout": {
-                            "height": 2,
-                            "width": 6,
-                            "x": 6,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "has_search_bar": "auto",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "pending",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "running",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query3"
-                                        },
-                                        {
-                                            "alias": "total",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query5"
-                                        },
-                                        {
-                                            "alias": "unknown",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query6"
-                                        },
-                                        {
-                                            "alias": "User suspended",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query7"
-                                        },
-                                        {
-                                            "alias": "system suspended",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query8"
-                                        },
-                                        {
-                                            "alias": "pending user suspended",
-                                            "cell_display_mode": "bar",
-                                            "formula": "query9"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query5",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.total{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query6",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.unknown{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query7",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.user_suspended{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query8",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.system_suspended{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query9",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending_user_suspended{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "title": "Time spent in each state per job",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
-                        },
-                        "id": 7472451928673893,
-                        "layout": {
-                            "height": 4,
+                            "height": 1,
                             "width": 12,
                             "x": 0,
-                            "y": 2
+                            "y": 0
                         }
-                    }
-                ]
-            },
-            "id": 2731416481104275,
-            "layout": {
-                "height": 7,
-                "width": 12,
-                "x": 0,
-                "y": 36
-            }
-        },
-        {
-            "definition": {
-                "background_color": "vivid_pink",
-                "layout_type": "ordered",
-                "show_title": true,
-                "title": "Recently Completed Job Details",
-                "type": "group",
-                "widgets": [
+                    },
                     {
                         "definition": {
                             "autoscale": true,
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
-                                            "formula": "count_not_null(query2) / count_not_null(query1) * 100",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
+                                            "formula": "count_not_null(query2)"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{status:failure} by {job_id}"
-                                        },
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{*} by {job_id}"
+                                            "query": "sum:ibm_spectrum_lsf.job.completed.details.status{status:failure} by {job_id}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
                             "timeseries_background": {
-                                "type": "area"
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
                             },
-                            "title": "Average percentage of failed jobs",
+                            "title": "Recently failed jobs",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 4771382205464867,
+                        "id": 5997014349172641,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 2,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2168,21 +1959,34 @@
                             "title_size": "16",
                             "type": "sunburst"
                         },
-                        "id": 451557783744454,
+                        "id": 6734609428635055,
                         "layout": {
-                            "height": 2,
+                            "height": 4,
                             "width": 4,
-                            "x": 4,
-                            "y": 0
+                            "x": 2,
+                            "y": 1
                         }
                     },
                     {
                         "definition": {
+                            "has_search_bar": "auto",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
+                                            "alias": "pending",
+                                            "cell_display_mode": "bar",
                                             "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "running",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "total",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query5"
                                         }
                                     ],
                                     "queries": [
@@ -2190,24 +1994,108 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{*} by {job_id}"
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.pending{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.running{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.total{$lsf_cluster_name,$job_id} by {job_id,job_name,task_id}"
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
                                     }
                                 }
                             ],
-                            "title": "Recently succeeded Job IDs",
-                            "type": "treemap"
+                            "time": {},
+                            "title": "Time spent in each state per job",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
                         },
-                        "id": 5960464135917817,
+                        "id": 1902847225218244,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 25
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 25
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query2) / count_not_null(query1) * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{status:failure} by {job_id}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ibm_spectrum_lsf.job.completed.details.status{*} by {job_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Average percentage of failed jobs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4771382205464867,
                         "layout": {
                             "height": 2,
-                            "width": 4,
-                            "x": 8,
-                            "y": 0
+                            "width": 2,
+                            "x": 0,
+                            "y": 3
                         }
                     },
                     {
@@ -2337,7 +2225,7 @@
                                     }
                                 }
                             ],
-                            "title": "Time spent in each state per job",
+                            "title": "Job performance",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
@@ -2347,17 +2235,17 @@
                             "height": 4,
                             "width": 12,
                             "x": 0,
-                            "y": 2
+                            "y": 5
                         }
                     }
                 ]
             },
-            "id": 3848803486214635,
+            "id": 2731416481104275,
             "layout": {
-                "height": 7,
+                "height": 10,
                 "width": 12,
                 "x": 0,
-                "y": 43
+                "y": 39
             }
         },
         {
@@ -2368,6 +2256,27 @@
                 "title": "Queues",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Get insights into each queue and its current capacity. See which queues have a high number of pending jobs. Reported by `bqueues` metric [sources](https://github.com/DataDog/integrations-core/tree/master/ibm_spectrum_lsf#configuration)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 2531625721504298,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "has_search_bar": "auto",
@@ -2452,10 +2361,10 @@
                         },
                         "id": 7272907804067032,
                         "layout": {
-                            "height": 5,
+                            "height": 4,
                             "width": 12,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     }
                 ]
@@ -2465,7 +2374,7 @@
                 "height": 6,
                 "width": 12,
                 "x": 0,
-                "y": 50
+                "y": 49
             }
         },
         {
@@ -2476,6 +2385,27 @@
                 "title": "GPU Information",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "View information about GPUs, such as whether there are GPU slots available to run workloads. Reported by `lsload_gpu` and `bhosts_gpu` metric [sources](https://github.com/DataDog/integrations-core/tree/master/ibm_spectrum_lsf#configuration)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 7106125188413504,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "autoscale": true,
@@ -2515,7 +2445,7 @@
                             "height": 2,
                             "width": 2,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2562,7 +2492,7 @@
                             "height": 2,
                             "width": 2,
                             "x": 2,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2609,7 +2539,7 @@
                             "height": 2,
                             "width": 2,
                             "x": 4,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2656,7 +2586,7 @@
                             "height": 2,
                             "width": 2,
                             "x": 6,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2703,7 +2633,7 @@
                             "height": 2,
                             "width": 2,
                             "x": 8,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2750,7 +2680,7 @@
                             "height": 2,
                             "width": 2,
                             "x": 10,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2884,7 +2814,7 @@
                             "height": 2,
                             "width": 12,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -2932,7 +2862,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 0,
-                            "y": 4
+                            "y": 5
                         }
                     },
                     {
@@ -2980,7 +2910,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 4,
-                            "y": 4
+                            "y": 5
                         }
                     },
                     {
@@ -3028,17 +2958,17 @@
                             "height": 2,
                             "width": 4,
                             "x": 8,
-                            "y": 4
+                            "y": 5
                         }
                     }
                 ]
             },
             "id": 5899485736989366,
             "layout": {
-                "height": 7,
+                "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 56
+                "y": 55
             }
         },
         {
