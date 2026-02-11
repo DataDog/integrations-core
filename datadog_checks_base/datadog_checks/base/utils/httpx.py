@@ -430,6 +430,7 @@ class HTTPXWrapper:
             for key in ('params', 'json', 'content', 'data', 'files'):
                 if key in new_options:
                     request_kwargs[key] = new_options[key]
+            request_kwargs['timeout'] = timeout_httpx
 
             if uds_path:
                 transport = httpx.HTTPTransport(uds=uds_path, verify=verify, cert=cert)
