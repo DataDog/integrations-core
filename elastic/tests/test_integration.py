@@ -369,7 +369,7 @@ def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_ta
 
     # Verify tags are present - we should have index and prirep tags
     metrics = aggregator.metrics('elasticsearch.shards')
-    assert len(metrics) > 0, "Expected at least one elasticsearch.shards metric"
+    assert metrics, "Expected at least one elasticsearch.shards metric"
 
     # Check that at least one metric has both index and prirep tags
     has_index_tag = False
