@@ -382,6 +382,10 @@ integration/crio:
 - changed-files:
   - any-glob-to-any-file:
     - crio/**/*
+integration/cyberark_endpoint_privilege_manager:
+- changed-files:
+  - any-glob-to-any-file:
+    - cyberark_endpoint_privilege_manager/**/*
 integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
