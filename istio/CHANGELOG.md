@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.0-beta.1 / 2026-02-11
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add DNS and certificate expiry metrics to Istio integration ([#22463](https://github.com/DataDog/integrations-core/pull/22463))
+
 ## 9.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
