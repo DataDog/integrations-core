@@ -29,7 +29,7 @@ files:
         If using the user auth, enter the `username` and `pwd` configuration.
       fleet_configurable: true
       enabled: true
-      value:f
+      value:
         type: string
     - name: tenant
       description: |
