@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5d9de6e0-fb16-4a1b-b195-4d6c08a082c7",
   "app_id": "ide-shepherd",
-  "owner": "saas-integrations",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
