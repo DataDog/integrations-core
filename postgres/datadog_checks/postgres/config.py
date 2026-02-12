@@ -320,7 +320,7 @@ def apply_cloud_defaults(args: dict, instance: dict, validation_result: Validati
     if (
         not instance.get("aws", {}).get("managed_authentication", None)
         and args.get('aws', {}).get('region')
-        and not args.get('password')
+        and args.get('password') is None
     ):
         # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
         args['aws'] = {
