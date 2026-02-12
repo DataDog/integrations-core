@@ -1,4 +1,5 @@
 name: Argo Workflows
+fleet_configurable: true
 files:
 - name: argo_workflows.yaml
   options:

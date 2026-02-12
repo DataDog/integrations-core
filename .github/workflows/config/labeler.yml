@@ -286,6 +286,10 @@ integration/cisco_sdwan:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_sdwan/**/*
+integration/cisco_secure_client:
+- changed-files:
+  - any-glob-to-any-file:
+    - cisco_secure_client/**/*
 integration/cisco_secure_email_threat_defense:
 - changed-files:
   - any-glob-to-any-file:
