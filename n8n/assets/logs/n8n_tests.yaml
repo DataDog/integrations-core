@@ -297,6 +297,7 @@ tests:
       error:
         message: "Python runner unavailable: Python 3 is missing from this system"
       id: "b8e362ed-0866-49b9-aaaf-765d1d26b08c"
+      level: "error"
       n8n:
         event_name: "n8n.workflow.failed"
         event_type: "$$EventMessageWorkflow"
