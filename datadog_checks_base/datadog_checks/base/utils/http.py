@@ -17,6 +17,7 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
@@ -28,6 +29,7 @@ from datadog_checks.base.utils import _http_utils
 
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .http_exceptions import HTTPError as SharedHTTPError, SSLError as SharedSSLError
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -215,6 +217,12 @@ class ResponseWrapper(ObjectProxy):
             chunk_size = self.__default_chunk_size
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+
+    def raise_for_status(self):
+        try:
+            self.__wrapped__.raise_for_status()
+        except requests.HTTPError as e:
+            raise SharedHTTPError(str(e) or 'HTTP error', response=self) from e
 
     def __enter__(self):
         return self
@@ -491,18 +499,23 @@ class RequestsWrapper(object):
                 self._mount_https_adapter(session, ChainMap(get_tls_config_from_options(new_options), self.tls_config))
             request_method = getattr(session, method)
 
-            if self.auth_token_handler:
-                try:
+            try:
+                if self.auth_token_handler:
+                    try:
+                        response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                        response.raise_for_status()
+                    except Exception as e:
+                        self.logger.debug('Renewing auth token, as an error occurred: %s', e)
+                        self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+                        response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                else:
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
-                    response.raise_for_status()
-                except Exception as e:
-                    self.logger.debug('Renewing auth token, as an error occurred: %s', e)
-                    self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
-            else:
-                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            return ResponseWrapper(response, self.request_size)
+                return ResponseWrapper(response, self.request_size)
+            except RequestsConnectionError as e:
+                raise ConnectionError(str(e)) from e
+            except SSLError as e:
+                raise SharedSSLError(str(e)) from e
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:

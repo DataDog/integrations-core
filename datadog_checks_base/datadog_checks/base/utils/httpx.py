@@ -129,7 +129,7 @@ class HTTPXResponseAdapter:
         return self._response.json(**kwargs)
 
     def raise_for_status(self) -> None:
-        from requests.exceptions import HTTPError as RequestsHTTPError
+        from datadog_checks.base.utils.http_exceptions import HTTPError
 
         if 400 <= self._response.status_code:
             msg = '{} Client Error for url'.format(self._response.status_code)
@@ -140,7 +140,7 @@ class HTTPXResponseAdapter:
                     msg = '{} {} for url: {}'.format(self._response.status_code, reason, url)
             except (RuntimeError, AttributeError):
                 pass
-            raise RequestsHTTPError(msg, response=self)
+            raise HTTPError(msg, response=self)
 
     def close(self) -> None:
         self._response.close()

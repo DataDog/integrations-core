@@ -134,7 +134,7 @@ class HTTPResponseMock:
 
     def raise_for_status(self) -> None:
         if 400 <= self._status_code:
-            from requests.exceptions import HTTPError
+            from datadog_checks.base.utils.http_exceptions import HTTPError
 
             raise HTTPError(
                 '{} Client Error for url'.format(self._status_code),
