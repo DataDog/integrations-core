@@ -36,6 +36,8 @@ class SaslOauthTokenProvider(BaseModel):
     )
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
+    extensions: Optional[str] = None
+    scope: Optional[str] = None
     url: Optional[str] = None
 
 
@@ -54,6 +56,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_cluster_monitoring: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     kafka_client_api_version: Optional[str] = None
     kafka_connect_str: Union[str, tuple[str, ...]]
     metric_patterns: Optional[MetricPatterns] = None

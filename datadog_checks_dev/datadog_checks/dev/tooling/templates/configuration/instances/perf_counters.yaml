@@ -34,6 +34,7 @@
   hidden: true
   description: |
     The namespace to be prepended to all metrics and service checks.
+  fleet_configurable: true
   value:
     type: string
     pattern: '\w*'
@@ -42,12 +43,14 @@
     hidden: true
 - template: common/perf_counters.metrics
   name: extra_metrics  # Hidden for the `windows_performance_counters` provider integration
+  fleet_configurable: true
 - name: use_legacy_check_version
   hidden: true
   required: false
   description: |
     For backward compatibility reasons, it is possible to use a legacy version of the 
     integration by setting this field to "true".
+  fleet_configurable: true
   value:
       type: boolean
       example: false
