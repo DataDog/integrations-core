@@ -54,7 +54,7 @@ tests:
           event_code: "USER_MAC_CONFIG_CHANGE"
           original_time: "1.736329118112E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -135,7 +135,7 @@ tests:
           event_code: "USER_AUTH"
           original_time: "1.740139921923E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           profiles:
            - "host"
@@ -185,7 +185,7 @@ tests:
           event_code: "MAC_STATUS"
           original_time: "1.740386730535E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -231,7 +231,7 @@ tests:
           event_code: "AVC"
           original_time: "1.669185724533E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -282,7 +282,7 @@ tests:
           event_code: "USER_SELINUX_ERR"
           original_time: "1.669714331555E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -332,7 +332,7 @@ tests:
           event_code: "USER_ROLE_CHANGE"
           original_time: "1.741000050325E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -375,7 +375,7 @@ tests:
           event_code: "MAC_CONFIG_CHANGE"
           original_time: "1.678360880644E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -448,7 +448,7 @@ tests:
           event_code: "ADD_GROUP"
           original_time: "1.740980591704E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           profiles:
            - "host"
@@ -527,7 +527,7 @@ tests:
           event_code: "DEL_GROUP"
           original_time: "1.765794074279E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           profiles:
            - "host"
@@ -603,7 +603,7 @@ tests:
           event_code: "ADD_USER"
           original_time: "1.635509157089E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           profiles:
            - "host"
@@ -682,7 +682,7 @@ tests:
           event_code: "DEL_USER"
           original_time: "1.740379094277E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           profiles:
            - "host"
@@ -764,7 +764,7 @@ tests:
           event_code: "USER_CHAUTHTOK"
           original_time: "1.63550918986E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           profiles:
            - "host"
@@ -850,7 +850,7 @@ tests:
           event_code: "ROLE_ASSIGN"
           original_time: "1.74072094567E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           profiles:
            - "host"
@@ -940,7 +940,7 @@ tests:
           event_code: "ROLE_REMOVE"
           original_time: "1.740130059788E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           profiles:
            - "host"
@@ -1019,7 +1019,7 @@ tests:
           event_code: "PATH"
           original_time: "1.740378301873E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -1085,7 +1085,7 @@ tests:
           event_code: "PATH"
           original_time: "1.740378301873E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -1150,7 +1150,7 @@ tests:
           event_code: "PATH"
           original_time: "1.740378301873E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -1216,7 +1216,7 @@ tests:
           event_code: "PATH"
           original_time: "1.740378301873E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -1254,7 +1254,7 @@ tests:
           event_code: "DAEMON_CONFIG"
           original_time: "1.740139921923E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -1301,7 +1301,7 @@ tests:
           event_code: "DAEMON_ABORT"
           original_time: "1.740139921923E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -1347,7 +1347,7 @@ tests:
           event_code: "MAC_POLICY_LOAD"
           original_time: "1.740139921923E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"
@@ -1391,7 +1391,7 @@ tests:
           event_code: "CONFIG_CHANGE"
           original_time: "1.740139921923E9"
           product:
-            name: "Linux Audit"
+            name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
         severity: "Unknown"

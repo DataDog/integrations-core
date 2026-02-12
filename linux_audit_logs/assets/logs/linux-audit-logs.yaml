@@ -448,7 +448,7 @@ pipeline:
         - type: string-builder-processor
           name: Add product name
           enabled: true
-          template: Linux Audit
+          template: Auditd
           target: ocsf.metadata.product.name
           replaceMissing: false
         - type: string-builder-processor
