@@ -694,7 +694,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 /supply_chain_firewall/                                              @DataDog/saas-integrations @DataDog/agent-integrations
 /supply_chain_firewall/*.md                                          @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
 /supply_chain_firewall/manifest.json                                 @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
-/supply_chain_firewall/assets/logs/                                  @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+/supply_chain_firewall/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /cloudgen_firewall/                                                  @DataDog/agent-integrations
 /cloudgen_firewall/*.md                                              @DataDog/agent-integrations @DataDog/documentation
