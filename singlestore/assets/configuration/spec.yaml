@@ -1,4 +1,5 @@
 name: SingleStore
+fleet_configurable: true
 files:
 - name: singlestore.yaml
   options:
@@ -10,28 +11,33 @@ files:
     options:
     - name: host
       description: The hostname or IP of the SingleStore database
+      fleet_configurable: true
       required: true
       value:
         type: string
     - name: port
       description: The port of the SingleStore database.
+      fleet_configurable: true
       required: false
       value:
         type: integer
         example: 3306
     - name: username
       description: The username to use for connecting to the SingleStore database.
+      fleet_configurable: true
       required: false
       value:
         type: string
     - name: password
       description: The password to use for connecting to the SingleStore database.
+      fleet_configurable: true
       required: false
       secret: true
       value:
         type: string
     - name: connect_timeout
       description: Timeout in seconds before throwing an exception when connecting.
+      fleet_configurable: true
       required: false
       value:
         type: integer
@@ -46,6 +52,7 @@ files:
       description: |
         Collect additional system metrics from the MV_SYSINFO_* tables. Disabled by default to limit
         the number of metrics being collected.
+      fleet_configurable: true
       required: false
       value:
         type: boolean
@@ -54,6 +61,7 @@ files:
       description: |
         Whether or not to open the connection on a secure TLS socket. Use in conjunction with
         `tls_verify` for verifying the validity of the server certificate.
+      fleet_configurable: true
       required: false
       value:
         type: boolean
