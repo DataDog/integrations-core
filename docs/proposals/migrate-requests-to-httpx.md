@@ -106,9 +106,6 @@ Add a new class in the same module as `RequestsWrapper` with:
 
 - [`datadog_checks_base/datadog_checks/base/utils/http.py`](datadog_checks_base/datadog_checks/base/utils/http.py): `RequestsWrapper`, auth helpers, TLS adapters, auth_token handlers.
 - [`datadog_checks_base/datadog_checks/base/checks/base.py`](datadog_checks_base/datadog_checks/base/checks/base.py): `AgentCheck.http` property.
-- [`datadog_checks_base/datadog_checks/base/checks/prometheus/mixins.py`](datadog_checks_base/datadog_checks/base/checks/prometheus/mixins.py): `get_http_handler` for Prometheus.
-- [`datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py`](datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py): `get_http_handler` for OpenMetrics.
-- [`datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/scraper/base_scraper.py`](datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/scraper/base_scraper.py): Scraper’s `self.http = RequestsWrapper(...)`.
 
 ### Integrations that instantiate RequestsWrapper directly
 
