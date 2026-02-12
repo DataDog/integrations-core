@@ -295,26 +295,38 @@ def mock_response():
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
     """
-    Patch HTTP by patching the check class's get_http_handler with RequestWrapperMock.
-    First positional argument must be a class with get_http_handler (e.g. OpenMetricsBaseCheck);
-    remaining args/kwargs are passed to mock_response to build the response.
+    Patch HTTP so openmetrics/prometheus checks get a mock response.
+    First positional argument may be a class with get_http_handler (e.g. OpenMetricsBaseCheck);
+    if so, that class is patched and remaining args/kwargs are passed to mock_response.
+    If the first argument is not such a class, all args/kwargs are passed to mock_response
+    and the v2 scraper's RequestsWrapper is patched (OpenMetricsBaseCheckV2 and compat
+    use scrapers that create RequestsWrapper in base_scraper).
     Does not patch requests.Session.get.
     """
 
     def _mock(*args, **kwargs):
-        if not args or not isinstance(args[0], type) or not hasattr(args[0], 'get_http_handler'):
-            raise ValueError(
-                'mock_http_response requires a check class as first argument (e.g. OpenMetricsBaseCheck). '
-                'Pass the class, then response args: mock_http_response(MyCheck, content=..., file_path=..., etc.).'
-            )
         from datadog_checks.dev.http import RequestWrapperMock
 
-        handler_target = args[0]
-        response = mock_response(*args[1:], **kwargs)
-        return mocker.patch.object(
-            handler_target,
-            'get_http_handler',
-            return_value=RequestWrapperMock(get=lambda url, **kw: response),
+        if args and isinstance(args[0], type) and hasattr(args[0], 'get_http_handler'):
+            handler_target = args[0]
+            response = mock_response(*args[1:], **kwargs)
+            return mocker.patch.object(
+                handler_target,
+                'get_http_handler',
+                return_value=RequestWrapperMock(get=lambda url, **kw: response),
+            )
+        # OpenMetricsBaseCheckV2 scrapers use base_scraper.RequestsWrapper; legacy OpenMetricsBaseCheck
+        # uses mixins.get_http_handler which builds RequestsWrapper from mixins. Patch both.
+        response = mock_response(*args, **kwargs)
+        wrapper_mock = RequestWrapperMock(get=lambda url, **kw: response)
+        wrapper_mock.options = {'headers': {'Accept': '*/*'}}
+        mocker.patch(
+            'datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper.RequestsWrapper',
+            return_value=wrapper_mock,
+        )
+        return mocker.patch(
+            'datadog_checks.base.checks.openmetrics.mixins.RequestsWrapper',
+            return_value=wrapper_mock,
         )
 
     yield _mock

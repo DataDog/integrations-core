@@ -208,6 +208,14 @@ class RequestWrapperMock:
         self.session = _MockSession()
         self.ignore_tls_warning = ignore_tls_warning
 
+    @property
+    def text(self) -> str:
+        """Compat for legacy tests that access .text on the handler (e.g. mock_http_response(...).return_value.text)."""
+        resp = self._response('get', '', **{})
+        if hasattr(resp, 'text'):
+            return resp.text
+        return resp.content.decode('utf-8', errors='replace') if resp.content else ''
+
     def _response(self, method: str, url: str, **options: Any) -> HTTPResponseMock:
         handler = self._handlers.get(method)
         if handler is not None:
