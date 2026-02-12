@@ -105,7 +105,9 @@ SELECT attname                          AS name,
        Format_type(atttypid, atttypmod) AS data_type,
        NOT attnotnull                   AS nullable,
        pg_get_expr(adbin, adrelid)      AS default,
-       attrelid AS table_id
+       attrelid AS table_id,
+       attisdropped                     AS is_dropped,
+       attstorage::text                 AS storage_type
 FROM   pg_attribute
        LEFT JOIN pg_attrdef ad
               ON adrelid = attrelid

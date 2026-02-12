@@ -22,7 +22,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16674"
+                                "table_id": "16674",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -30,7 +32,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16674"
+                                "table_id": "16674",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -38,7 +42,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16674"
+                                "table_id": "16674",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -46,7 +52,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16674"
+                                "table_id": "16674",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -54,7 +62,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16674"
+                                "table_id": "16674",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -100,7 +110,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16707"
+                                "table_id": "16707",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -108,7 +120,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16707"
+                                "table_id": "16707",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -116,7 +130,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16707"
+                                "table_id": "16707",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -124,7 +140,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16707"
+                                "table_id": "16707",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -132,7 +150,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16707"
+                                "table_id": "16707",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -178,7 +198,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16695"
+                                "table_id": "16695",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -186,7 +208,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16695"
+                                "table_id": "16695",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -194,7 +218,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16695"
+                                "table_id": "16695",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -202,7 +228,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16695"
+                                "table_id": "16695",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -210,7 +238,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16695"
+                                "table_id": "16695",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -256,7 +286,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16683",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -264,7 +296,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16683",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -272,7 +306,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16683",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -280,7 +316,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16683",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -288,7 +326,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16683",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -334,7 +374,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16677",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -342,7 +384,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16677",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -350,7 +394,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16677",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -358,7 +404,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16677",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -366,7 +414,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16677",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -412,7 +462,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16716"
+                                "table_id": "16716",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -420,7 +472,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16716"
+                                "table_id": "16716",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -428,7 +482,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16716"
+                                "table_id": "16716",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -436,7 +492,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16716"
+                                "table_id": "16716",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "personid",
@@ -444,7 +502,9 @@
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('pgtable_personid_seq'::regclass)",
-                                "table_id": "16716"
+                                "table_id": "16716",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [],
@@ -490,7 +550,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16736"
+                                "table_id": "16736",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "name",
@@ -498,7 +560,9 @@
                                 "data_type": "text",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16736"
+                                "table_id": "16736",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -574,7 +638,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16701"
+                                "table_id": "16701",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -582,7 +648,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16701"
+                                "table_id": "16701",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -590,7 +658,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16701"
+                                "table_id": "16701",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -598,7 +668,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16701"
+                                "table_id": "16701",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -606,7 +678,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16701"
+                                "table_id": "16701",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -652,7 +726,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16661"
+                                "table_id": "16661",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -660,7 +736,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16661"
+                                "table_id": "16661",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -668,7 +746,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16661"
+                                "table_id": "16661",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "personid",
@@ -676,7 +756,9 @@
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('persons_personid_seq'::regclass)",
-                                "table_id": "16661"
+                                "table_id": "16661",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "city",
@@ -684,7 +766,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": "'New York'::character varying",
-                                "table_id": "16661"
+                                "table_id": "16661",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -736,7 +820,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16680",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -744,7 +830,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16680",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -752,7 +840,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16680",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -760,7 +850,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16680",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -768,7 +860,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16680",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -814,7 +908,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16698"
+                                "table_id": "16698",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -822,7 +918,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16698"
+                                "table_id": "16698",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -830,7 +928,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16698"
+                                "table_id": "16698",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -838,7 +938,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16698"
+                                "table_id": "16698",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -846,7 +948,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16698"
+                                "table_id": "16698",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -892,7 +996,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": false,
                                 "default": null,
-                                "table_id": "16726"
+                                "table_id": "16726",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "country",
@@ -900,7 +1006,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16726"
+                                "table_id": "16726",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [
@@ -962,7 +1070,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16686"
+                                "table_id": "16686",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -970,7 +1080,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16686"
+                                "table_id": "16686",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -978,7 +1090,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16686"
+                                "table_id": "16686",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -986,7 +1100,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16686"
+                                "table_id": "16686",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -994,7 +1110,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16686"
+                                "table_id": "16686",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -1040,7 +1158,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": false,
                                 "default": null,
-                                "table_id": "16655"
+                                "table_id": "16655",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "country",
@@ -1048,7 +1168,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16655"
+                                "table_id": "16655",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [
@@ -1110,7 +1232,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16671"
+                                "table_id": "16671",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -1118,7 +1242,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16671"
+                                "table_id": "16671",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -1126,7 +1252,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16671"
+                                "table_id": "16671",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -1134,7 +1262,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16671"
+                                "table_id": "16671",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -1142,7 +1272,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16671"
+                                "table_id": "16671",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -1188,7 +1320,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16710",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -1196,7 +1330,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16710",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -1204,7 +1340,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16710",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -1212,7 +1350,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16710",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "personid",
@@ -1220,7 +1360,9 @@
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16710",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [
@@ -1282,7 +1424,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16692"
+                                "table_id": "16692",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -1290,7 +1434,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16692"
+                                "table_id": "16692",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -1298,7 +1444,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16692"
+                                "table_id": "16692",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -1306,7 +1454,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16692"
+                                "table_id": "16692",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -1314,7 +1464,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16692"
+                                "table_id": "16692",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -1360,7 +1512,9 @@
                                 "data_type": "text",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16758"
+                                "table_id": "16758",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "id",
@@ -1368,7 +1522,9 @@
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('test_part_id_seq'::regclass)",
-                                "table_id": "16758"
+                                "table_id": "16758",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [
@@ -1447,7 +1603,9 @@
                                 "data_type": "text",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16792"
+                                "table_id": "16792",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "id",
@@ -1455,7 +1613,9 @@
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('test_part_no_activity_id_seq'::regclass)",
-                                "table_id": "16792"
+                                "table_id": "16792",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [
@@ -1519,7 +1679,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16721"
+                                "table_id": "16721",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -1527,7 +1689,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16721"
+                                "table_id": "16721",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -1535,7 +1699,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16721"
+                                "table_id": "16721",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -1543,7 +1709,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16721"
+                                "table_id": "16721",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "personid",
@@ -1551,7 +1719,9 @@
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('pg_newtable_personid_seq'::regclass)",
-                                "table_id": "16721"
+                                "table_id": "16721",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [],
@@ -1597,7 +1767,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16704"
+                                "table_id": "16704",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -1605,7 +1777,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16704"
+                                "table_id": "16704",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -1613,7 +1787,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16704"
+                                "table_id": "16704",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -1621,7 +1797,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16704"
+                                "table_id": "16704",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -1629,7 +1807,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16704"
+                                "table_id": "16704",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -1675,7 +1855,9 @@
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16689",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
@@ -1683,7 +1865,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16689",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
@@ -1691,7 +1875,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16689",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
@@ -1699,7 +1885,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16689",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
@@ -1707,7 +1895,9 @@
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16689",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -1753,7 +1943,9 @@
                                 "data_type": "text",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16785"
+                                "table_id": "16785",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "id",
@@ -1761,7 +1953,9 @@
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('test_part_no_children_id_seq'::regclass)",
-                                "table_id": "16785"
+                                "table_id": "16785",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [
