@@ -153,7 +153,9 @@ def test_first_scrape_handler(
             # V2 scrapers are created once and keep the same http wrapper; patch does not
             # apply to existing scrapers. Inject a failure response into each scraper.
             fail_resp = HTTPResponseMock(500, content=b'')
-            fail_wrapper = RequestWrapperMock(get=lambda url, **kw: fail_resp)
+            fail_wrapper = RequestWrapperMock(
+                get=lambda url, resp=fail_resp, **kw: resp,
+            )
             fail_wrapper.options.setdefault('headers', {})
             saved_http = {ep: s.http for ep, s in check.scrapers.items()}
             for scraper in check.scrapers.values():

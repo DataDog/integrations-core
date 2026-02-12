@@ -15,7 +15,7 @@ def test_basic(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
         # TYPE go_memstats_gc_sys_bytes gauge
         go_memstats_gc_sys_bytes 901120
-        """
+        """,
     )
     check = get_check({'metrics': ['.+']})
     dd_run_check(check)
@@ -40,7 +40,7 @@ def test_tags(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
         # TYPE go_memstats_gc_sys_bytes gauge
         go_memstats_gc_sys_bytes{bar="foo"} 901120
-        """
+        """,
     )
     check = get_check({'metrics': ['.+']})
     dd_run_check(check)

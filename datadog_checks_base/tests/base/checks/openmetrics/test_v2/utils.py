@@ -4,9 +4,7 @@
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 # Patch target for mock_http_response: scraper calls self.http.get(endpoint, ...).
-OPENMETRICS_SCRAPER_HTTP_TARGET = (
-    'datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper.RequestsWrapper.get'
-)
+OPENMETRICS_SCRAPER_HTTP_TARGET = 'datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper.RequestsWrapper.get'
 
 
 def get_check(instance=None, init_config=None):

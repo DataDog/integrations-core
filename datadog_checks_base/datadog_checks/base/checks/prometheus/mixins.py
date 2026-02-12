@@ -14,7 +14,8 @@ from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.base.utils.http_exceptions import HTTPError as SharedHTTPError, SSLError as SharedSSLError
+from datadog_checks.base.utils.http_exceptions import HTTPError as SharedHTTPError
+from datadog_checks.base.utils.http_exceptions import SSLError as SharedSSLError
 from datadog_checks.base.utils.prometheus import metrics_pb2
 
 

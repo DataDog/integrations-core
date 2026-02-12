@@ -20,7 +20,7 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
         go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
-        """
+        """,
     )
     check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
     dd_run_check(check)
@@ -39,7 +39,7 @@ def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
         go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
-        """
+        """,
     )
     check = get_check({'metrics': ['.+'], 'tag_by_endpoint': False})
     dd_run_check(check)
@@ -57,7 +57,7 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
         # HELP state Node state
         # TYPE state gauge
         state{bar="baz"} 3
-        """
+        """,
     )
     check = get_check(
         {'metrics': ['.+', {'state': {'type': 'service_check', 'status_map': {'3': 'ok'}}}], 'tags': ['foo:bar']}
@@ -123,7 +123,7 @@ def test_custom_transformer(aggregator, dd_run_check, mock_http_response):
         envoy_server_worker_0_watchdog_mega_miss{} 1
         # TYPE envoy_server_worker_1_watchdog_mega_miss counter
         envoy_server_worker_1_watchdog_mega_miss{} 0
-        """
+        """,
     )
     check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
     dd_run_check(check)

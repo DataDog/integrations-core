@@ -12,7 +12,7 @@ def test_named(aggregator, dd_run_check, mock_http_response):
         # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
         # TYPE process_cpu_seconds_total counter
         process_cpu_seconds_total{foo="bar"} 5.2
-        """
+        """,
     )
     check = get_check(
         {
@@ -43,7 +43,7 @@ def test_integer(aggregator, dd_run_check, mock_http_response):
         # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
         # TYPE process_cpu_seconds_total counter
         process_cpu_seconds_total{foo="bar"} 5.2
-        """
+        """,
     )
     check = get_check(
         {'metrics': [{'process_cpu_seconds': {'name': 'process_cpu_usage', 'type': 'temporal_percent', 'scale': 1}}]}

@@ -6,8 +6,8 @@ import os
 import pytest
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from tests.base.checks.openmetrics.test_v2.utils import OPENMETRICS_SCRAPER_HTTP_TARGET
 from datadog_checks.dev import get_here
+from tests.base.checks.openmetrics.test_v2.utils import OPENMETRICS_SCRAPER_HTTP_TARGET
 
 from ..bench_utils import AMAZON_MSK_JMX_METRICS_MAP, AMAZON_MSK_JMX_METRICS_OVERRIDES
 

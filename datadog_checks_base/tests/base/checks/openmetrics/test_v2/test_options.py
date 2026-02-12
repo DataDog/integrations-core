@@ -17,7 +17,7 @@ class TestNamespace:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'namespace': 'foo'})
         check.__NAMESPACE__ = ''
@@ -38,7 +38,7 @@ class TestRawMetricPrefix:
             # HELP foo_go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE foo_go_memstats_alloc_bytes gauge
             foo_go_memstats_alloc_bytes 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['go_memstats_alloc_bytes'], 'raw_metric_prefix': 'foo_'})
         dd_run_check(check)
@@ -58,7 +58,7 @@ class TestEnableHealthServiceCheck:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'tags': ['foo:bar']})
         dd_run_check(check)
@@ -120,7 +120,7 @@ class TestHostnameLabel:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'hostname_label': 'foo'})
         dd_run_check(check)
@@ -144,7 +144,7 @@ class TestHostnameFormat:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'hostname_label': 'foo', 'hostname_format': 'region_<HOSTNAME>'})
         dd_run_check(check)
@@ -199,7 +199,7 @@ class TestExcludeIncludeLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{foo="bar", zip="zap"} 6.396288e+06
-            """
+            """,
         )
 
         check = get_check({'metrics': ['.+'], 'include_labels': included_labels, 'exclude_labels': excluded_labels})
@@ -220,7 +220,7 @@ class TestRenameLabels:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}})
         dd_run_check(check)
@@ -246,7 +246,7 @@ class TestExcludeMetrics:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{foo="bar"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'exclude_metrics': ['^go_memstats_(alloc|free)_bytes$']})
         dd_run_check(check)
@@ -272,7 +272,7 @@ class TestExcludeMetricsByLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{foo="baz"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'exclude_metrics_by_labels': {'foo': ['ba(t|z)']}})
         dd_run_check(check)
@@ -296,7 +296,7 @@ class TestExcludeMetricsByLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{foo="baz"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'exclude_metrics_by_labels': {'foo': True}})
         dd_run_check(check)
@@ -318,7 +318,7 @@ class TestRawLineFilters:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{foo=""} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'raw_line_filters': ['=""']})
         dd_run_check(check)
@@ -338,7 +338,7 @@ class TestMetrics:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes untyped
             go_memstats_alloc_bytes 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': [{'.+': {'type': 'gauge'}}]})
         dd_run_check(check)
@@ -364,7 +364,7 @@ class TestShareLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{bar="baz"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': True}})
         dd_run_check(check)
@@ -400,7 +400,7 @@ class TestShareLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{bar="baz"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'labels': ['baz']}}})
         dd_run_check(check)
@@ -439,7 +439,7 @@ class TestShareLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{bar="baz",baz="bar"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'match': ['baz']}}})
         dd_run_check(check)
@@ -478,7 +478,7 @@ class TestShareLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{bar="baz",baz="bar"} 6.396288e+06
-            """
+            """,
         )
         check = get_check(
             {'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'match': ['baz'], 'labels': ['pod']}}}
@@ -520,7 +520,7 @@ class TestShareLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{bar="baz"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'values': values}}})
         dd_run_check(check)
@@ -556,7 +556,7 @@ class TestShareLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{bar="baz"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'values': [9000]}}})
         dd_run_check(check)
@@ -586,7 +586,7 @@ class TestShareLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{bar="baz"} 6.396288e+06
-            """
+            """,
         )
         check = get_check(
             {
@@ -625,7 +625,7 @@ class TestShareLabels:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            """
+            """,
         )
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': True}})
         dd_run_check(check)
@@ -679,7 +679,7 @@ class TestShareLabels:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            """
+            """,
         )
         check = get_check(
             {'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': True}, 'cache_shared_labels': False}
@@ -716,7 +716,7 @@ class TestShareLabels:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            """
+            """,
         )
 
         dd_run_check(check)
@@ -742,7 +742,7 @@ class TestShareLabels:
             # HELP target Target metadata
             # TYPE target info
             target_info{env="prod", region="europe"} 1.0
-            """
+            """,
         )
 
         dd_run_check(check)
@@ -768,7 +768,7 @@ class TestShareLabels:
             # HELP target Target metadata
             # TYPE target info
             target_info{env="prod", region="europe"} 1.0
-            """
+            """,
         )
 
         dd_run_check(check)
@@ -804,7 +804,7 @@ class TestShareLabels:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            """
+            """,
         )
 
         dd_run_check(check_var)
@@ -825,7 +825,7 @@ class TestShareLabels:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar2"} 6.396288e+06
-            """
+            """,
         )
 
         dd_run_check(check_var)
@@ -855,7 +855,7 @@ class TestShareLabels:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{bar="foo"} 6.396288e+06
-            """
+            """,
         )
 
         dd_run_check(check_var)
@@ -879,7 +879,7 @@ class TestShareLabels:
             # HELP go_memstats_free_bytes Number of bytes free and available for use.
             # TYPE go_memstats_free_bytes gauge
             go_memstats_free_bytes{bar2="baz2"} 6.396288e+06
-            """
+            """,
         )
 
         dd_run_check(check_var)
@@ -909,7 +909,7 @@ class TestIgnoreTags:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes 6.396288e+06
-            """
+            """,
         )
         all_tags = ['foo', 'foobar', 'bar', 'bar:baz', 'bar:bar']
         ignored_tags = ['foo', 'bar:baz']
@@ -930,7 +930,7 @@ class TestIgnoreTags:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes 6.396288e+06
-            """
+            """,
         )
         all_tags = ['foo', 'foobar', 'bar', 'bar:baz', 'bar:bar']
         ignored_tags = ['foo*', '.*baz']
@@ -951,7 +951,7 @@ class TestIgnoreTags:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes 6.396288e+06
-            """
+            """,
         )
         all_tags = ['foo', 'foobar', 'bar:baz', 'bar:bar']
         ignored_tags = ['^foo', '.+:bar$']

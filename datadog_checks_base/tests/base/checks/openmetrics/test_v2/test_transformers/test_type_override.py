@@ -51,7 +51,7 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
         # HELP bux The metricset and metric samples are a non counter type
         # TYPE bux histogram
         bux 4
-        """
+        """,
     )
     check = get_check(
         {

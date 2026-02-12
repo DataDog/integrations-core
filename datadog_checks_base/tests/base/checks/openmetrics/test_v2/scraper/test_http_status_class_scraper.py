@@ -8,9 +8,9 @@ from typing import Optional
 import pytest
 
 from datadog_checks.base.checks.openmetrics.v2.base import OpenMetricsBaseCheckV2
-from tests.base.checks.openmetrics.test_v2.utils import OPENMETRICS_SCRAPER_HTTP_TARGET
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper, decorators
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from tests.base.checks.openmetrics.test_v2.utils import OPENMETRICS_SCRAPER_HTTP_TARGET
 
 RESPONSE_TEMPLATE = """
 # HELP http_client_request_size_total

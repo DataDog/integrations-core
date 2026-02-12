@@ -13,7 +13,7 @@ def test_known(aggregator, dd_run_check, mock_http_response):
         # HELP state Node state
         # TYPE state gauge
         state{foo="bar"} 3
-        """
+        """,
     )
     check = get_check({'metrics': [{'state': {'type': 'service_check', 'status_map': {'3': 'ok'}}}]})
     dd_run_check(check)
@@ -30,7 +30,7 @@ def test_unknown(aggregator, dd_run_check, mock_http_response):
         # HELP state Node state
         # TYPE state gauge
         state{foo="bar"} 3
-        """
+        """,
     )
     check = get_check({'metrics': [{'state': {'type': 'service_check', 'status_map': {'7': 'ok'}}}]})
     dd_run_check(check)

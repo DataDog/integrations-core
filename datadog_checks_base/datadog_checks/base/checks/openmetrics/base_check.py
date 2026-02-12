@@ -5,7 +5,8 @@ from copy import deepcopy
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.http_exceptions import HTTPError as SharedHTTPError, SSLError as SharedSSLError
+from datadog_checks.base.utils.http_exceptions import HTTPError as SharedHTTPError
+from datadog_checks.base.utils.http_exceptions import SSLError as SharedSSLError
 from datadog_checks.base.utils.tracing import traced_class
 
 from .mixins import OpenMetricsScraperMixin

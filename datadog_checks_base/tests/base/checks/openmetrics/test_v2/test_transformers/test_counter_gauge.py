@@ -15,7 +15,7 @@ def test(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_frees_total Total number of frees.
         # TYPE go_memstats_frees_total counter
         go_memstats_frees_total{bar="foo"} 1.28219257e+08
-        """
+        """,
     )
     check = get_check(
         {

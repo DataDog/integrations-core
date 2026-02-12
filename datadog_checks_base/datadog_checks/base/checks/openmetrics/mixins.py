@@ -19,7 +19,8 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.base.utils.http_exceptions import HTTPError as SharedHTTPError, SSLError as SharedSSLError
+from datadog_checks.base.utils.http_exceptions import HTTPError as SharedHTTPError
+from datadog_checks.base.utils.http_exceptions import SSLError as SharedSSLError
 
 
 class OpenMetricsScraperMixin(object):

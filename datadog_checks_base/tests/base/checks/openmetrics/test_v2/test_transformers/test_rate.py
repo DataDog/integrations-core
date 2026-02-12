@@ -12,7 +12,7 @@ def test(aggregator, dd_run_check, mock_http_response):
         # HELP istio_requests_total requests_total
         # TYPE istio_requests_total counter
         istio_requests_total 6.396288e+06
-        """
+        """,
     )
     check = get_check({'metrics': [{'istio_requests': {'type': 'rate'}}]})
     dd_run_check(check)

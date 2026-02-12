@@ -15,7 +15,7 @@ def test_basic(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
         # TYPE go_memstats_alloc_bytes_total counter
         go_memstats_alloc_bytes_total 2.58684656e+08
-        """
+        """,
     )
     check = get_check({'metrics': [{'go_memstats_alloc_bytes': {'type': 'native_dynamic'}}]})
     dd_run_check(check)

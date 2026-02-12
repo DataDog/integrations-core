@@ -14,11 +14,13 @@ legacy. One testing path keeps tests simple and future work minimal.
   HTTPResponseMock), ``mock_http_response(patch_target, ...)``, and
   ``mock_http_response_per_endpoint(responses_by_endpoint, ...)``. All three
   fixtures use these mock classes so tests do not depend on requests/httpx.
-  Example (direct patch): ``mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: HTTPResponseMock(200, content=b'...')))``.
+  Example (direct patch): ``mock.patch.object(check, 'get_http_handler',
+  return_value=RequestWrapperMock(get=lambda url, **kw: HTTPResponseMock(200, content=b'...')))``.
   Example (fixture): ``mock_http_response('module.path.ToPatch', content=b'...')``.
 - **Legacy tests**: Migrate to the above pattern; do not add legacy-only branches to
   fixtures or helpers.
 """
+
 from __future__ import annotations
 
 import json

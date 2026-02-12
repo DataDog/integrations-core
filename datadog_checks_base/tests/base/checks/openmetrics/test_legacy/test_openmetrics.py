@@ -1835,9 +1835,7 @@ def test_metrics_with_ignore_label_values(
 
     # Make sure metrics are ignored
     aggregator.assert_metric('prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:auth'])
-    aggregator.assert_metric(
-        'prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:recursive']
-    )
+    aggregator.assert_metric('prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:recursive'])
     aggregator.assert_metric('prometheus.skydns.dns.cache_missed', count=0)
     # Make sure we don't ignore other metrics
     aggregator.assert_metric('prometheus.skydns.dns.error.count', count=1, tags=expected_tags + ['system:reverse'])
@@ -2578,9 +2576,7 @@ def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, 
     )
 
 
-def test_health_service_check_failing(
-    aggregator, mocker, mocked_prometheus_check, mocked_prometheus_scraper_config
-):
+def test_health_service_check_failing(aggregator, mocker, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """Tests endpoint health service check failing (connection failure simulated via mock)."""
     check = mocked_prometheus_check
 

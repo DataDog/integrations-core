@@ -301,6 +301,7 @@ def dd_default_hostname():
 # For manual patching: HTTPResponseMock, RequestWrapperMock from datadog_checks.dev.http.
 # -----------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_response():
     """Yield the HTTPResponseMock class. Used by mock_http_response* fixtures."""

@@ -29,7 +29,8 @@ from datadog_checks.base.utils import _http_utils
 
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
-from .http_exceptions import HTTPError as SharedHTTPError, SSLError as SharedSSLError
+from .http_exceptions import HTTPError as SharedHTTPError
+from .http_exceptions import SSLError as SharedSSLError
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -130,11 +131,11 @@ def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, t
         if err is not None:
             raise err
         else:
-            raise socket.error('No valid addresses found, try checking your IPv6 connectivity')  # noqa: G
+            raise socket.error('No valid addresses found, try checking your IPv6 connectivity')  # noqa: B904
     except socket.gaierror as e:
         err_code, message = e.args
         if err_code == socket.EAI_NODATA or err_code == socket.EAI_NONAME:
-            raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: G
+            raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: B904
 
         raise
 

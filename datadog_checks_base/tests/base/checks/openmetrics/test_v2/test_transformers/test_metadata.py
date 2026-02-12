@@ -12,7 +12,7 @@ def test_basic(aggregator, datadog_agent, dd_run_check, mock_http_response):
         # HELP kubernetes_build_info A metric with a constant '1' value labeled by major, minor, git version, git commit, git tree state, build date, Go version, and compiler from which Kubernetes was built, and platform on which it is running.
         # TYPE kubernetes_build_info gauge
         kubernetes_build_info{buildDate="2016-11-18T23:57:26Z",compiler="gc",gitCommit="3872cb93abf9482d770e651b5fe14667a6fca7e0",gitTreeState="dirty",gitVersion="v1.6.0-alpha.0.680+3872cb93abf948-dirty",goVersion="go1.7.3",major="1",minor="6+",platform="linux/amd64"} 1
-        """  # noqa: E501
+        """,  # noqa: E501
     )
     check = get_check(
         {'metrics': [{'kubernetes_build_info': {'name': 'version', 'type': 'metadata', 'label': 'gitVersion'}}]}
@@ -42,7 +42,7 @@ def test_options(aggregator, datadog_agent, dd_run_check, mock_http_response):
         # HELP kubernetes_build_info A metric with a constant '1' value labeled by major, minor, git version, git commit, git tree state, build date, Go version, and compiler from which Kubernetes was built, and platform on which it is running.
         # TYPE kubernetes_build_info gauge
         kubernetes_build_info{buildDate="2016-11-18T23:57:26Z",compiler="gc",gitCommit="3872cb93abf9482d770e651b5fe14667a6fca7e0",gitTreeState="dirty",gitVersion="v1.6.0-alpha.0.680+3872cb93abf948-dirty",goVersion="go1.7.3",major="1",minor="6+",platform="linux/amd64"} 1
-        """  # noqa: E501
+        """,  # noqa: E501
     )
     check = get_check(
         {
