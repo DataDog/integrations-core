@@ -9,6 +9,7 @@ Used when a check opts in via the base check's use_httpx option.
 from __future__ import annotations
 
 import logging
+import ssl
 from collections import ChainMap
 from contextlib import ExitStack
 from urllib.parse import unquote, urlparse
@@ -33,8 +34,21 @@ from .http import (
     quote_uds_url,
     should_bypass_proxy,
 )
+from .http_exceptions import SSLError as SharedSSLError
 
 LOGGER = logging.getLogger(__name__)
+
+
+def _map_httpx_request_error(e: BaseException) -> None:
+    """Re-raise httpx connection/SSL errors as shared exception types. Never returns."""
+    if isinstance(e, httpx.ConnectError):
+        cause = getattr(e, '__cause__', None)
+        if isinstance(cause, ssl.SSLError) or 'SSL' in str(e).upper():
+            raise SharedSSLError(str(e)) from e
+        raise ConnectionError(str(e)) from e
+    if isinstance(e, httpx.ConnectTimeout):
+        raise ConnectionError(str(e)) from e
+    raise
 
 
 class HTTPXResponseAdapter:
@@ -459,6 +473,8 @@ class HTTPXWrapper:
                             method.upper(), request_url, headers=_request_headers(), **request_kwargs
                         )
                     return HTTPXResponseAdapter(response, self.request_size)
+                except (httpx.ConnectError, httpx.ConnectTimeout) as e:
+                    _map_httpx_request_error(e)
                 finally:
                     client.close()
             else:
@@ -479,22 +495,26 @@ class HTTPXWrapper:
                     else:
                         stack.enter_context(client)
 
-                if self.auth_token_handler:
-                    try:
+                try:
+                    if self.auth_token_handler:
+                        try:
+                            response = client.request(
+                                method.upper(), request_url, headers=_request_headers(), **request_kwargs
+                            )
+                            response.raise_for_status()
+                        except Exception as e:
+                            self.logger.debug('Renewing auth token, as an error occurred: %s', e)
+                            self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+                            response = client.request(
+                                method.upper(), request_url, headers=_request_headers(), **request_kwargs
+                            )
+                    else:
                         response = client.request(
                             method.upper(), request_url, headers=_request_headers(), **request_kwargs
                         )
-                        response.raise_for_status()
-                    except Exception as e:
-                        self.logger.debug('Renewing auth token, as an error occurred: %s', e)
-                        self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                        response = client.request(
-                            method.upper(), request_url, headers=_request_headers(), **request_kwargs
-                        )
-                else:
-                    response = client.request(method.upper(), request_url, headers=_request_headers(), **request_kwargs)
-
-                return HTTPXResponseAdapter(response, self.request_size)
+                    return HTTPXResponseAdapter(response, self.request_size)
+                except (httpx.ConnectError, httpx.ConnectTimeout) as e:
+                    _map_httpx_request_error(e)
 
     def __del__(self) -> None:
         try:
