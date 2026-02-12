@@ -12,6 +12,7 @@
 - name: password
   description: |
     The password of `username`.
+  secret: true
   value:
     type: string
 - name: enable_health_service_check
