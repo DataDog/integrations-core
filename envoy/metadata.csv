@@ -786,7 +786,7 @@ envoy.server.days_until_first_cert_expiring,gauge,,day,,[Legacy] Number of days 
 envoy.server.concurrency,gauge,,,,[Legacy] Number of worker threads,0,envoy,,
 envoy.server.debug_assertion_failures,count,,,,[Legacy] Number of debug assertion failures detected in a release build if compiled with -define log_debug_assert_in_release=enabled or zero otherwise,-1,envoy,,
 envoy.server.hot_restart_epoch,gauge,,,,[Legacy] Current hot restart epoch,0,envoy,,
-envoy.server.state,gauge,,,,[Legacy] Current State of the Server,0,envoy,,
+envoy.server.state,gauge,,,,[OpenMetrics V2 and Legacy] Current State of the Server,0,envoy,,
 envoy.server.watchdog_mega_miss,count,,,,[Legacy] Number of mega misses,-1,envoy,,
 envoy.server.watchdog_miss,count,,,,[Legacy] Number of standard misses,-1,envoy,,
 envoy.filesystem.write_buffered,count,,occurrence,,[Legacy] Total number of times file data is moved to Envoy's internal flush buffer,0,envoy,,
