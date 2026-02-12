@@ -240,11 +240,6 @@ files:
             Set the operation samples collection interval in seconds. Each collection involves capturing
             current operations with $currentOp aggregation pipeline and explain plans for each operation.
           fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
           value:
             type: number
             example: 10
@@ -258,7 +253,6 @@ files:
 
             NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
             as it requires the execution of the query to collect additional execution and plan data.
-          fleet_configurable: true
           fleet_configurable: true
           value:
             type: string
@@ -323,7 +317,6 @@ files:
             from each collection.
             NOTE: Increasing the sample size for better schema inference accuracy may impact performance.
           fleet_configurable: true
-          fleet_configurable: true
           value:
             type: number
             example: 10
@@ -341,7 +334,6 @@ files:
           description: |
             Set the maximum depth of nested documents to sample.
           fleet_configurable: true
-          fleet_configurable: true
           value:
             type: number
             example: 5
@@ -349,7 +341,6 @@ files:
           description: |
             Set to `true` to collect search indexes for each collection.
             NOTE: This option is only applicable to MongoDB Atlas clusters.
-          fleet_configurable: true
           fleet_configurable: true
           value:
             type: boolean
@@ -532,8 +523,6 @@ files:
           description: |
             The interval in seconds at which to collect collection indexes stats metrics.
             Only applicable when `collections_indexes_stats` is set to `true`.
-          fleet_configurable: true
-          fleet_configurable: true
           fleet_configurable: true
           value:
             type: integer
