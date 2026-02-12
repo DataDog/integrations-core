@@ -23,7 +23,7 @@ pipeline:
   name: N8N
   enabled: true
   filter:
-    query: source:n8n
+    query: source:n8n OR service:n8n
   processors:
     - type: grok-parser
       name: Parse N8N text logs
@@ -252,8 +252,5 @@ pipeline:
           name: error
         - filter:
             query: '@eventName:*success'
-          name: info
-        - filter:
-            query: '@eventName:*'
           name: info
       target: level

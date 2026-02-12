@@ -230,7 +230,6 @@ tests:
   result:
     custom:
       id: "5fc5a070-c466-464d-bb74-aea49d1cc188"
-      level: "error"
       n8n:
         event_name: "n8n.audit.user.login.failed"
         event_type: "$$EventMessageAudit"
@@ -262,7 +261,6 @@ tests:
   result:
     custom:
       id: "78c6f458-a6da-48cb-97c7-c1423e929ff9"
-      level: "info"
       n8n:
         event_name: "n8n.workflow.started"
         event_type: "$$EventMessageWorkflow"
@@ -299,7 +297,6 @@ tests:
       error:
         message: "Python runner unavailable: Python 3 is missing from this system"
       id: "b8e362ed-0866-49b9-aaaf-765d1d26b08c"
-      level: "error"
       n8n:
         event_name: "n8n.workflow.failed"
         event_type: "$$EventMessageWorkflow"
@@ -337,7 +334,6 @@ tests:
   result:
     custom:
       id: "bd2e741a-b34b-4321-955c-0db2a8441c7b"
-      level: "info"
       n8n:
         event_name: "n8n.node.started"
         event_type: "$$EventMessageNode"
@@ -372,7 +368,6 @@ tests:
   result:
     custom:
       id: "580403cd-7218-4aea-abbb-7fa71b5843d8"
-      level: "info"
       n8n:
         event_name: "n8n.workflow.success"
         event_type: "$$EventMessageWorkflow"
@@ -406,7 +401,6 @@ tests:
   result:
     custom:
       id: "4ce6b554-5c71-4eae-b354-6bd07add38d8"
-      level: "info"
       n8n:
         event_name: "n8n.runner.task.requested"
         event_type: "$$EventMessageRunner"
