@@ -495,7 +495,8 @@ class RequestsWrapper(object):
             for hook in self.request_hooks:
                 stack.enter_context(hook())
 
-            session = self.session if persist else self._create_session()
+            # Use injected session (for testing) or persistent session; otherwise create a new one.
+            session = self.session if (persist or self._session is not None) else self._create_session()
             if url.startswith('https'):
                 self._mount_https_adapter(session, ChainMap(get_tls_config_from_options(new_options), self.tls_config))
             request_method = getattr(session, method)
@@ -529,7 +530,7 @@ class RequestsWrapper(object):
             certs = self.fetch_intermediate_certs(hostname, port)
             if not certs:
                 raise e
-            session = self.session if persist else self._create_session()
+            session = self.session if (persist or self._session is not None) else self._create_session()
             if parsed_url.scheme == "https":
                 self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
             request_method = getattr(session, method)
