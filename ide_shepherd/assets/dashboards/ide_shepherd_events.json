@@ -1,12 +1,12 @@
 {
-  "title": "IDE-SHEPHERD",
+  "title": "IDE Shepherd",
   "description": "This dashboard provides insights into IDE-SHEPHERD events.",
   "widgets": [
     {
       "id": 2220119315921113,
       "definition": {
         "type": "image",
-        "url": "https://raw.githubusercontent.com/DataDog/IDE-SHEPHERD-extension/refs/heads/main/resources/icons/icon.png",
+        "url": "https://raw.githubusercontent.com/DataDog/IDE-SHEPHERD-extension/refs/heads/main/resources/icons/icon.pngg",
         "sizing": "cover",
         "has_background": true,
         "has_border": true,
@@ -24,7 +24,7 @@
       "id": 5508499080175210,
       "definition": {
         "type": "note",
-        "content": "[IDE-SHEPHERD](https://github.com/DataDog/IDE-SHEPHERD-extension) is an VS Code/Cursor security extension designed to monitor extensions and workspaces in real-time for malicious activity. \n\nThis dashboard offers a comprehensive overview of IDE activities, extensions lifecycles and reported security events.\n\nFor more information, see IDE-SHEPHERD [documentation](https://docs.datadoghq.com/integrations/ide-shepherd/).\n\n**Tips**\n\n-   Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n-   Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "content": "[IDE Shepherd](https://github.com/DataDog/IDE-SHEPHERD-extension) is a security extension for VS Code and Cursor designed to monitor extensions and workspaces in real-time for malicious activity. \n\nThis dashboard offers a comprehensive overview of IDE activities, extensions lifecycles and reported security events.\n\nFor more information, see the IDE Shepherd [documentation](https://docs.datadoghq.com/integrations/ide-shepherd/).\n\n**Tips**\n\n-   Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n-   Clone this dashboard to rearrange, modify and add widgets and visualizations.",        
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",

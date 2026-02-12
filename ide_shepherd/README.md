@@ -2,9 +2,9 @@
 
 ## Overview
 
-[IDE Shepherd][1] is a real-time security monitoring and protection tool for IDE environments. It monitors extension and workspace task activities in VS Code and Cursor, actively blocking malicious behaviors to protect developer endpoints from supply chain attacks and compromised extensions. IDE Shepherd hence enables security teams to detect and respond to threats in real-time by providing observability into security and extension lifecycle events (installation, updates, and uninstallation).
+[IDE Shepherd][1] is a real-time security monitoring and protection tool for IDE environments. It monitors extension and workspace task activities in VS Code and Cursor, actively blocking malicious behaviors to protect developer endpoints from supply chain attacks and compromised extensions. IDE Shepherd provides observability into observability into security and extension lifecycle events (installation, updates, and uninstallation), enabling security teams to detect and respond to threats in real-time.
 
-Integrate IDE Shepherd with Datadog's pre-built dashboard visualizations to gain insights into security alerts, extension activities, and workspace task monitoring. With Datadog's built-in log pipelines, you can parse and enrich these logs to facilitate easy search and detailed insights. The integration includes ready-to-use dashboards for monitoring security events, extension lifecycle, and activity patterns by IDE type and host.
+Integrate IDE Shepherd with Datadog's pre-built dashboard visualizations for insight into security alerts, extension activities, and workspace task monitoring. With Datadog's built-in log pipelines, you can parse and enrich these logs to facilitate search and detailed insights. The integration includes ready-to-use dashboards for monitoring security events, extension lifecycle, and activity patterns by IDE type and host.
 
 ## Setup
 
@@ -12,30 +12,31 @@ Integrate IDE Shepherd with Datadog's pre-built dashboard visualizations to gain
 
 **1. Install and Start Datadog Agent**
 
-First, ensure the Datadog Agent is installed and running on your system with your organization API key configured. See [Datadog Agent Installation Guide](https://docs.datadoghq.com/agent/) for installation instructions.
+First, verify the Datadog Agent is installed and running on your system with your organization API key configured. See [Datadog Agent Installation Guide](https://docs.datadoghq.com/agent/) for installation instructions.
 
 **2. Install IDE Shepherd Extension**
 
-Install the IDE Shepherd extension in VS Code or Cursor from the [IDE Shepherd repository][1].
+Install the IDE Shepherd extension in VS Code or Cursor. See the [IDE Shepherd repository][1] for installation instructions.
 
-**3. Enable Telemetry in IDE Shepherd**
+**3. Enable telemetry in IDE Shepherd**
 
 IDE Shepherd **automatically configures the Datadog Agent** when you enable telemetry for the first time:
 
-1. Open the IDE Shepherd sidebar in VS Code or Cursor
-2. Navigate to **Settings > Datadog Telemetry**
-3. Click on **Telemetry: Disabled** to enable it
-4. IDE Shepherd will automatically:
-   - Create the configuration directory: `/opt/datadog-agent/etc/conf.d/ide-shepherd.d/`
-   - Write the configuration file: `conf.yaml` with the appropriate settings
-   - Configure the agent to listen on the default port
+1. Open the IDE Shepherd sidebar in VS Code or Cursor.
+2. Navigate to **Settings > Datadog Telemetry**.
+3. Click on **Telemetry: Disabled** to enable it.
+
+IDE Shepherd automatically:
+- Creates the configuration directory: `/opt/datadog-agent/etc/conf.d/ide-shepherd.d/`
+- Writes the configuration file: `conf.yaml` with the appropriate settings
+- Configures the agent to listen on the default port
 
 
-*We recommend keeping the default port configuration. The extension will handle all the setup automatically.*
+**Note**: Keep the default port configuration. The extension handles all setup automatically.
 
 **4. Restart Datadog Agent**
 
-After the automatic configuration, IDE Shepherd will request permission to restart the Datadog Agent. If it fails, you can restart it manually with the following commands:
+After the automatic configuration, IDE Shepherd requests permission to restart the Datadog Agent. If it fails, restart it manually:
 
 ```bash
 # Linux
@@ -50,15 +51,15 @@ See [Datadog Agent Commands][2] for more details.
 
 **5. Verify Telemetry Status**
 
-Telemetry is now **sent automatically** in real-time:
+Telemetry is **sent automatically** in real-time:
 
-- Extension installed/updated/uninstalled -> OCSF event sent immediately
-- Security threat detected -> OCSF event sent immediately
+- Extension installed, updated, or uninstalled: OCSF event sent immediately
+- Security threat detected: OCSF event sent immediately
 
 You can verify the connection from the IDE Shepherd sidebar:
 
 - **Agent Status**: Shows if the Datadog Agent is up and running
-- **Agent Port**: Shows the port on which the agent is listening
+- **Agent Port**: Shows the port on which the Agent is listening
 
 ### Validation
 
@@ -66,9 +67,9 @@ You can verify the connection from the IDE Shepherd sidebar:
 
 To view your logs in Datadog:
 
-1. Go to the [Datadog Logs Explorer](https://app.datadoghq.com/logs)
-2. Filter by: `source:ide-shepherd service:ide-shepherd-telemetry`
-3. Explore security events, extension lifecycle events, and workspace task activities
+1. Go to the [Log Explorer][3]
+2. Filter by `source:ide-shepherd service:ide-shepherd-telemetry`
+3. Explore security events, extension lifecycle events, and workspace task activities.
 
 ## Data Collected
 
@@ -76,14 +77,14 @@ To view your logs in Datadog:
 
 The IDE Shepherd integration collects and forwards IDE security and activity logs to Datadog, including:
 
-- **Security Events**: Real-time alerts for malicious extension activities and blocked threats
-- **Extension Lifecycle Events**: Installation, update, and uninstallation events
-- **Extension Metadata**: Name, version, publisher information along with a risk estimate based on hardcoded heuristics.
+- **Security events**: Real-time alerts for malicious extension activities and blocked threats
+- **Extension lifecycle events**: Installation, update, and uninstallation events
+- **Extension Metadata**: Name, version, publisher information along with a risk estimate based on predefined heuristics.
 - **OCSF (Open Cybersecurity Schema Framework) classified events**: Standardized security event formats
 
 The logs are automatically enriched with:
 - OCSF class UIDs (Application Security Posture Finding, Detection Finding)
-- IDE type (VS Code, Cursor) and its version
+- IDE type (VS Code or Cursor) and its version
 - Host information
 - Security technique information for flagged behaviors
 - Observable threat indicators
@@ -98,10 +99,9 @@ The IDE Shepherd integration does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][4].
+Need help? Contact [Datadog support][3].
 
 [1]: https://github.com/DataDog/IDE-SHEPHERD-extension
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[3]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
+[3]: https://app.datadoghq.com/logs
 [4]: https://docs.datadoghq.com/help/
-[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
