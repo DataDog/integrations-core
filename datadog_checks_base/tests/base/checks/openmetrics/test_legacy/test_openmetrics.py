@@ -18,10 +18,9 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from prometheus_client.samples import Sample
 
 from datadog_checks.base import ensure_bytes
-from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.http import HTTPResponseMock, MockResponse, RequestWrapperMock
 
 text_content_type = 'text/plain; version=0.0.4'
 FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'prometheus'))

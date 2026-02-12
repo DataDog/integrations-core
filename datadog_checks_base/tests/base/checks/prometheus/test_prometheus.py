@@ -11,31 +11,14 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
+from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
 
 
 FIXTURES_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'fixtures', 'prometheus'))
-
-
-class MockResponse:
-    """
-    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
-    """
-
-    def __init__(self, content, content_type):
-        self.content = content
-        self.headers = {'Content-Type': content_type}
-
-    def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
-            yield elt
-
-    def close(self):
-        pass
 
 
 class SortedTagsPrometheusCheck(PrometheusCheck):
@@ -126,7 +109,7 @@ def test_check(mocked_prometheus_check):
 
 
 def test_parse_metric_family_protobuf(bin_data, mocked_prometheus_check):
-    response = MockResponse(bin_data, protobuf_content_type)
+    response = HTTPResponseMock(200, content=bin_data, headers={'Content-Type': protobuf_content_type})
     check = mocked_prometheus_check
 
     messages = list(check.parse_metric_family(response))
@@ -142,7 +125,7 @@ def test_parse_metric_family_protobuf(bin_data, mocked_prometheus_check):
     # override the type:
     check.type_overrides = {"go_goroutines": "summary"}
 
-    response = MockResponse(bin_data, protobuf_content_type)
+    response = HTTPResponseMock(200, content=bin_data, headers={'Content-Type': protobuf_content_type})
 
     messages = list(check.parse_metric_family(response))
 
@@ -155,7 +138,7 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
     """Test the high level method for loading metrics from text format"""
     check = mocked_prometheus_check
 
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
 
     messages = list(check.parse_metric_family(response))
     # total metrics are 41 but one is typeless and we expect it not to be
@@ -163,7 +146,7 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
     assert len(messages) == 40
     # ...unless the check ovverrides the type manually
     check.type_overrides = {"go_goroutines": "gauge"}
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     messages = list(check.parse_metric_family(response))
     assert len(messages) == 41
     # Tests correct parsing of counters
@@ -255,15 +238,15 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
 def test_parse_metric_family_unsupported(bin_data, mocked_prometheus_check):
     check = mocked_prometheus_check
     with pytest.raises(UnknownFormatError):
-        response = MockResponse(bin_data, 'application/json')
+        response = HTTPResponseMock(200, content=bin_data, headers={'Content-Type': 'application/json'})
         list(check.parse_metric_family(response))
 
 
 def test_process(bin_data, mocked_prometheus_check, ref_gauge):
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
-
-    check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
+    mock_resp = HTTPResponseMock(200, content=bin_data, headers={'Content-Type': protobuf_content_type})
+    check.poll = mock.MagicMock(return_value=mock_resp)
     check.process_metric = mock.MagicMock()
     check.process(endpoint, instance=None)
     check.poll.assert_called_with(endpoint, instance={})
@@ -274,7 +257,8 @@ def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_
     """Checks that the send_histograms_buckets parameter is passed along"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
+    mock_resp = HTTPResponseMock(200, content=bin_data, headers={'Content-Type': protobuf_content_type})
+    check.poll = mock.MagicMock(return_value=mock_resp)
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_histograms_buckets=False, instance=None)
     check.poll.assert_called_with(endpoint, instance={})
@@ -285,7 +269,8 @@ def test_process_send_monotonic_counter(bin_data, mocked_prometheus_check, ref_g
     """Checks that the send_monotonic_counter parameter is passed along"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
+    mock_resp = HTTPResponseMock(200, content=bin_data, headers={'Content-Type': protobuf_content_type})
+    check.poll = mock.MagicMock(return_value=mock_resp)
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_monotonic_counter=False, instance=None)
     check.poll.assert_called_with(endpoint, instance={})
@@ -296,7 +281,8 @@ def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge
     """Checks that an instances with tags passes them as custom tag"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
+    mock_resp = HTTPResponseMock(200, content=bin_data, headers={'Content-Type': protobuf_content_type})
+    check.poll = mock.MagicMock(return_value=mock_resp)
     check.process_metric = mock.MagicMock()
     instance = {'endpoint': 'IgnoreMe', 'tags': ['tag1:tagValue1', 'tag2:tagValue2']}
     check.process(endpoint, instance=instance)
@@ -626,7 +612,7 @@ def test_filter_sample_on_gauge(p_check):
     label2.value = "heapster-v1.4.3"
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     check._text_filter_blacklist = ["deployment=\"kube-dns\""]
     metrics = list(check.parse_metric_family(response))
@@ -660,7 +646,7 @@ def test_parse_one_gauge(p_check):
     expected_etcd_metric.metric.add().gauge.value = 1
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -703,7 +689,7 @@ def test_parse_one_counter(p_check):
     expected_etcd_metric.metric.add().counter.value = 18713
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -777,7 +763,7 @@ def test_parse_one_histograms_with_label(p_check):
     histogram_metric.histogram.sample_sum = 0.026131671
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -912,7 +898,7 @@ def test_parse_one_histogram(p_check):
     histogram_metric.histogram.sample_sum = 0.026131671
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -1035,7 +1021,7 @@ def test_parse_two_histograms_with_label(p_check):
     histogram_metric.histogram.sample_sum = 0.3097010759999998
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -1121,7 +1107,7 @@ def test_parse_one_summary(p_check):
     quantile_099.value = 25763
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -1206,7 +1192,7 @@ def test_parse_two_summaries_with_labels(p_check):
     quantile_099.value = 24627
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     metrics = list(check.parse_metric_family(response))
 
@@ -1265,7 +1251,7 @@ def test_parse_one_summary_with_none_values(p_check):
     quantile_099.value = float('nan')
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    response = HTTPResponseMock(200, content=text_data, headers={'Content-Type': 'text/plain; version=0.0.4'})
     check = p_check
     metrics = list(check.parse_metric_family(response))
     assert 1 == len(metrics)
