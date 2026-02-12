@@ -68,6 +68,7 @@ class InstanceConfig(BaseModel):
     disable_spark_job_stage_tags: Optional[bool] = None
     disable_spark_stage_metrics: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     enable_query_name_tag: Optional[bool] = None
     executor_level_metrics: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
