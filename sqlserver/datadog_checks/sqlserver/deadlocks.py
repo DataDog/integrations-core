@@ -133,8 +133,8 @@ class Deadlocks(DBMAsyncJob):
         return self._check.connection.connector
 
     def _set_xe_session_name(self):
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 if self._xe_session_name is None:
                     cursor.execute(
                         get_xe_sessions_query(dm_xe_targets=self._dm_xe_targets, dm_xe_sessions=self._dm_xe_sessions)
@@ -180,8 +180,8 @@ class Deadlocks(DBMAsyncJob):
                 f'Using XE session [{self._xe_session_name}], target [{self._xe_session_target}] to collect deadlocks'
             )
 
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 convert_xml_to_str = False
                 if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
                     convert_xml_to_str = True

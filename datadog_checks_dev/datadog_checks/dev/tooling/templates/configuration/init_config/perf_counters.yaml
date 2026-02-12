@@ -2,6 +2,7 @@
   description: |
     Whether performance object and counter names should refer to their
     locale-specific versions rather than their English name.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
