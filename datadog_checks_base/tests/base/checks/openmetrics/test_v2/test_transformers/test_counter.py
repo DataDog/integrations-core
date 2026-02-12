@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ..utils import get_check
+from ..utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 def test_basic(aggregator, dd_run_check, mock_http_response):
@@ -13,6 +13,7 @@ def test_basic(aggregator, dd_run_check, mock_http_response):
     """
 
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP foo_total Example of '_total' getting dropped
         # TYPE foo_total counter
@@ -43,6 +44,7 @@ def test_basic(aggregator, dd_run_check, mock_http_response):
 
 def test_tags(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
         # TYPE go_memstats_alloc_bytes_total counter

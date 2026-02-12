@@ -49,7 +49,7 @@ response = self.http.get(url)
 
 ## Testing
 
-To mock HTTP in tests without depending on `requests` or `httpx`, use the helpers in `datadog_checks.dev.http` (or the `http_response_mock` and `request_wrapper_mock` pytest fixtures from the dev plugin):
+To mock HTTP in tests without depending on `requests` or `httpx`, use the helpers in `datadog_checks.dev.http` and the `mock_http_response` pytest fixture for check tests:
 
 - **`HTTPResponseMock`**: Builds a response (status_code, content, headers, json_data) that satisfies the same interface as the real response.
 - **`RequestWrapperMock`**: Implements the HTTP client interface. Pass callables for `get`, `post`, etc. to control responses. As a context manager with a check instance, it patches `check.http` for the duration:

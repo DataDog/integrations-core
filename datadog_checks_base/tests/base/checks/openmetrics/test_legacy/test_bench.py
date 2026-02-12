@@ -9,6 +9,7 @@ from datadog_checks.base import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 
 from ..bench_utils import AMAZON_MSK_JMX_METRICS_MAP, AMAZON_MSK_JMX_METRICS_OVERRIDES
+from .utils import LEGACY_OPENMETRICS_HTTP_TARGET
 
 HERE = get_here()
 FIXTURE_PATH = os.path.abspath(os.path.join(os.path.dirname(HERE), '..', '..', '..', 'fixtures', 'prometheus'))
@@ -25,7 +26,7 @@ def fixture_amazon_msk_jmx_metrics():
 
 
 def test_ksm_old(benchmark, dd_run_check, mock_http_response, fixture_ksm):
-    mock_http_response(file_path=fixture_ksm)
+    mock_http_response(LEGACY_OPENMETRICS_HTTP_TARGET, file_path=fixture_ksm)
     instance = {'prometheus_url': 'foo', 'namespace': 'bar', 'metrics': ['*']}
     c = OpenMetricsBaseCheck('test', {}, [instance])
 
@@ -36,7 +37,7 @@ def test_ksm_old(benchmark, dd_run_check, mock_http_response, fixture_ksm):
 
 
 def test_amazon_msk_jmx_metrics_old(benchmark, dd_run_check, mock_http_response, fixture_amazon_msk_jmx_metrics):
-    mock_http_response(file_path=fixture_amazon_msk_jmx_metrics)
+    mock_http_response(LEGACY_OPENMETRICS_HTTP_TARGET, file_path=fixture_amazon_msk_jmx_metrics)
     instance = {
         'prometheus_url': 'foo',
         'namespace': 'bar',
@@ -52,7 +53,7 @@ def test_amazon_msk_jmx_metrics_old(benchmark, dd_run_check, mock_http_response,
 
 
 def test_label_joins_old(benchmark, dd_run_check, mock_http_response, fixture_ksm):
-    mock_http_response(file_path=fixture_ksm)
+    mock_http_response(LEGACY_OPENMETRICS_HTTP_TARGET, file_path=fixture_ksm)
     instance = {
         'prometheus_url': 'foo',
         'namespace': 'bar',

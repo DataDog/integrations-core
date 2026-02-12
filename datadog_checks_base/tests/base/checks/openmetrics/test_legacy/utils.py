@@ -4,6 +4,9 @@
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
+# Patch target for mock_http_response when testing legacy OpenMetricsBaseCheck (get_http_handler → RequestsWrapper).
+LEGACY_OPENMETRICS_HTTP_TARGET = 'datadog_checks.base.utils.http.RequestsWrapper.get'
+
 
 class LegacyCheck(OpenMetricsBaseCheckV2):
     def create_scraper(self, config):

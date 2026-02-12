@@ -4,7 +4,7 @@
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
-from .utils import get_check
+from .utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 def test_default_config(aggregator, dd_run_check, mock_http_response):
@@ -15,6 +15,7 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
             return {'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}}
 
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
@@ -33,6 +34,7 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
 
 def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
@@ -47,6 +49,7 @@ def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
 
 def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
@@ -114,6 +117,7 @@ def test_custom_transformer(aggregator, dd_run_check, mock_http_response):
             )
 
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # TYPE envoy_server_worker_0_watchdog_mega_miss counter
         envoy_server_worker_0_watchdog_mega_miss{} 1

@@ -2,23 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """
-HTTP test helpers: MockResponse (requests-based) and protocol-based mocks for implementation-agnostic tests.
+HTTP test helpers: protocol-based mocks (HTTPResponseMock, RequestWrapperMock) for
+implementation-agnostic tests. MockResponse remains for backward compatibility only.
 
-Use HTTPResponseMock and RequestWrapperMock when testing code that uses check.http or get_http_handler,
-so tests do not depend on requests/httpx and work with either wrapper. Use mock_response / mock_http_response
-fixtures (in datadog_checks.dev.plugin.pytest) for the legacy Session.get patch pattern.
+Migration stance: REPLACE legacy tests with these mocks; do NOT add code to accommodate
+legacy. One testing path keeps tests simple and future work minimal.
 
-When to use which:
-- **RequestWrapperMock / HTTPResponseMock**: Use in tests where the *subject under test*
-  is a *check* (or any code) that calls ``check.http`` or ``get_http_handler``. Inject
-  RequestWrapperMock so the test does not depend on requests/httpx and works with either
-  wrapper. Example:
-  ``with RequestWrapperMock(check, get=lambda url, **kw: HTTPResponseMock(200, content=b'...')):``
-  or ``mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=...))``.
-- **Legacy base tests:** Tests that target RequestsWrapper itself (e.g. test_api.py,
-  test_proxy.py, test_tls_and_certs.py) currently use ``requests.Session.get`` or similar
-  patches. They are legacy and will be removed when the requests library is removed; use
-  RequestWrapperMock for all new check-level tests.
+- **HTTPResponseMock / RequestWrapperMock**: Use for all check-level tests. Either
+  inject RequestWrapperMock by patching the appropriate target, or use the
+  pytest fixtures in datadog_checks.dev.plugin.pytest: ``mock_response`` (yields
+  HTTPResponseMock), ``mock_http_response(patch_target, ...)``, and
+  ``mock_http_response_per_endpoint(responses_by_endpoint, ...)``. All three
+  fixtures use these mock classes so tests do not depend on requests/httpx.
+  Example (direct patch): ``mock.patch.object(check, 'get_http_handler', return_value=RequestWrapperMock(get=lambda url, **kw: HTTPResponseMock(200, content=b'...')))``.
+  Example (fixture): ``mock_http_response('module.path.ToPatch', content=b'...')``.
+- **Legacy tests**: Migrate to the above pattern; do not add legacy-only branches to
+  fixtures or helpers.
 """
 from __future__ import annotations
 

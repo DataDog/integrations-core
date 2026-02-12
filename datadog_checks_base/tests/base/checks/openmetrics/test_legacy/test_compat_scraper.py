@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from .utils import get_legacy_check
+from tests.base.checks.openmetrics.test_v2.utils import OPENMETRICS_SCRAPER_HTTP_TARGET
+
+from .utils import LegacyCheck, get_legacy_check
 
 
 class TestRawMetricPrefix:
@@ -111,6 +113,7 @@ class TestShareLabels:
 
     def test_share_labels(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -154,6 +157,7 @@ class TestShareLabels:
 
     def test_metadata(self, aggregator, datadog_agent, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP kubernetes_build_info A metric with a constant '1' value labeled by major, minor, git version, git commit, git tree state, build date, Go version, and compiler from which Kubernetes was built, and platform on which it is running.
             # TYPE kubernetes_build_info gauge

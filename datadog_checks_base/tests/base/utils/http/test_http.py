@@ -15,6 +15,7 @@ import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.dev.http import HTTPResponseMock
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -173,17 +174,19 @@ class TestTLSCiphers:
 
 
 class TestRequestSize:
-    def test_behavior_correct(self, mock_http_response):
+    def test_behavior_correct(self):
         instance = {'request_size': 0.5}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
         chunk_size = 512
         payload_size = 1000
-        mock_http_response('a' * payload_size)
+        payload = 'a' * payload_size
+        mock_resp = HTTPResponseMock(200, content=payload.encode('utf-8'))
 
-        with http.get('https://www.google.com', stream=True) as response:
-            chunks = list(response.iter_content())
+        with mock.patch('requests.Session.get', return_value=mock_resp):
+            with http.get('https://www.google.com', stream=True) as response:
+                chunks = list(response.iter_content())
 
         assert len(chunks) == 2
         assert len(chunks[0]) == chunk_size

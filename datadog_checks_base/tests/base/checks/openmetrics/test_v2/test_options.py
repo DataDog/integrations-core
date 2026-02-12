@@ -6,12 +6,13 @@ from mock import Mock
 
 from datadog_checks.base.constants import ServiceCheck
 
-from .utils import get_check
+from .utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 class TestNamespace:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -32,6 +33,7 @@ class TestNamespace:
 class TestRawMetricPrefix:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP foo_go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE foo_go_memstats_alloc_bytes gauge
@@ -51,6 +53,7 @@ class TestRawMetricPrefix:
 class TestEnableHealthServiceCheck:
     def test_default(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -64,6 +67,7 @@ class TestEnableHealthServiceCheck:
 
     def test_enddpoint_fails(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -81,6 +85,7 @@ class TestEnableHealthServiceCheck:
 
     def test_disable_health_check(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -110,6 +115,7 @@ class TestEnableHealthServiceCheck:
 class TestHostnameLabel:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -133,6 +139,7 @@ class TestHostnameLabel:
 class TestHostnameFormat:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -181,6 +188,7 @@ class TestExcludeIncludeLabels:
         expected_c,
     ):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -207,6 +215,7 @@ class TestExcludeIncludeLabels:
 class TestRenameLabels:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -226,6 +235,7 @@ class TestRenameLabels:
 class TestExcludeMetrics:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -251,6 +261,7 @@ class TestExcludeMetrics:
 class TestExcludeMetricsByLabels:
     def test_pattern(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -274,6 +285,7 @@ class TestExcludeMetricsByLabels:
 
     def test_all(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -295,6 +307,7 @@ class TestExcludeMetricsByLabels:
 class TestRawLineFilters:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -320,6 +333,7 @@ class TestRawLineFilters:
 class TestMetrics:
     def test_unknown_type_override(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes untyped
@@ -339,6 +353,7 @@ class TestMetrics:
 class TestShareLabels:
     def test_unconditional_labels_all(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -374,6 +389,7 @@ class TestShareLabels:
 
     def test_unconditional_labels_subset(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -412,6 +428,7 @@ class TestShareLabels:
 
     def test_match_with_unconditional_labels(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -450,6 +467,7 @@ class TestShareLabels:
 
     def test_match_with_select_labels(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -491,6 +509,7 @@ class TestShareLabels:
     @pytest.mark.parametrize('values', [pytest.param([6396288], id='integer'), pytest.param(['6396288'], id='string')])
     def test_values_match(self, aggregator, dd_run_check, mock_http_response, values):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -526,6 +545,7 @@ class TestShareLabels:
 
     def test_values_no_match(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -555,6 +575,7 @@ class TestShareLabels:
 
     def test_excluded_metric(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -593,6 +614,7 @@ class TestShareLabels:
 
     def test_shared_labels_with_cache(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
             # TYPE go_memstats_gc_sys_bytes gauge
@@ -646,6 +668,7 @@ class TestShareLabels:
 
     def test_shared_labels_without_cache(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
             # TYPE go_memstats_gc_sys_bytes gauge
@@ -685,6 +708,7 @@ class TestShareLabels:
         check = get_check({'metrics': ['.+'], 'target_info': True})
 
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP target Target metadata
             # TYPE target info
@@ -710,6 +734,7 @@ class TestShareLabels:
         check = get_check({'metrics': ['.+'], 'target_info': True, 'cache_shared_labels': False})
 
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -735,6 +760,7 @@ class TestShareLabels:
         check = get_check({'metrics': ['.+'], 'target_info': True})
 
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -770,6 +796,7 @@ class TestShareLabels:
         check_var = check
 
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP target Target metadata
             # TYPE target info
@@ -790,6 +817,7 @@ class TestShareLabels:
         )
 
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP target Target metadata
             # TYPE target info
@@ -816,6 +844,7 @@ class TestShareLabels:
         check_var = check
 
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP target Target metadata
             # TYPE target info
@@ -839,6 +868,7 @@ class TestShareLabels:
         )
 
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP target Target metadata
             # TYPE target info
@@ -874,6 +904,7 @@ class TestShareLabels:
 class TestIgnoreTags:
     def test_simple_match(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -894,6 +925,7 @@ class TestIgnoreTags:
 
     def test_simple_wildcard(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
@@ -914,6 +946,7 @@ class TestIgnoreTags:
 
     def test_regex(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
+            OPENMETRICS_SCRAPER_HTTP_TARGET,
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge

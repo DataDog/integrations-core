@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ..utils import get_check
+from ..utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 def test_named(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
         # TYPE process_cpu_seconds_total counter
@@ -37,6 +38,7 @@ def test_named(aggregator, dd_run_check, mock_http_response):
 
 def test_integer(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
         # TYPE process_cpu_seconds_total counter

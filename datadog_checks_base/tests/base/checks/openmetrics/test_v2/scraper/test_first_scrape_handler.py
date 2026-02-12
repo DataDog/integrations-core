@@ -4,7 +4,8 @@
 import pytest
 
 from datadog_checks.base.stubs import datadog_agent
-from tests.base.checks.openmetrics.test_v2.utils import get_check
+from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
+from tests.base.checks.openmetrics.test_v2.utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 test_use_process_start_time_data = """\
 # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
@@ -99,7 +100,7 @@ def test_first_scrape_handler(
         aggregator.reset()
 
         if idx != 5:
-            mock_http_response(_make_test_data(process_start_time))
+            mock_http_response(OPENMETRICS_SCRAPER_HTTP_TARGET, _make_test_data(process_start_time))
             dd_run_check(check)
 
             aggregator.assert_metric(
@@ -149,8 +150,19 @@ def test_first_scrape_handler(
 
             expect_first_flush = True
         else:
-            mock_http_response("", status_code=500)
-            with pytest.raises(Exception):
-                dd_run_check(check)
+            # V2 scrapers are created once and keep the same http wrapper; patch does not
+            # apply to existing scrapers. Inject a failure response into each scraper.
+            fail_resp = HTTPResponseMock(500, content=b'')
+            fail_wrapper = RequestWrapperMock(get=lambda url, **kw: fail_resp)
+            fail_wrapper.options.setdefault('headers', {})
+            saved_http = {ep: s.http for ep, s in check.scrapers.items()}
+            for scraper in check.scrapers.values():
+                scraper.http = fail_wrapper
+            try:
+                with pytest.raises(Exception):
+                    dd_run_check(check)
+            finally:
+                for ep, scraper in check.scrapers.items():
+                    scraper.http = saved_http[ep]
 
             expect_first_flush = False

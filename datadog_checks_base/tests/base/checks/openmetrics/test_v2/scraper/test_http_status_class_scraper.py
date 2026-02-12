@@ -8,6 +8,7 @@ from typing import Optional
 import pytest
 
 from datadog_checks.base.checks.openmetrics.v2.base import OpenMetricsBaseCheckV2
+from tests.base.checks.openmetrics.test_v2.utils import OPENMETRICS_SCRAPER_HTTP_TARGET
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper, decorators
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 
@@ -78,7 +79,7 @@ def test_http_status_class_scraper(
     dd_run_check: Callable,
     target_info: bool,
 ):
-    mock_http_response(response(status_label, status_code, target_info))
+    mock_http_response(OPENMETRICS_SCRAPER_HTTP_TARGET, response(status_label, status_code, target_info))
 
     check = get_check(status_label=status_label, target_info=target_info)
     dd_run_check(check)

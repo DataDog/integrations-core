@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from ..utils import get_check
+from ..utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 @pytest.mark.parametrize(
@@ -34,6 +34,7 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
     """
 
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP foo The metricset and metric sample does not end in '_total' and is untyped.
         # TYPE foo untyped

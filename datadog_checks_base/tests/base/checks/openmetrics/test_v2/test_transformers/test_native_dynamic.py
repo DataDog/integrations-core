@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ..utils import get_check
+from ..utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 def test_basic(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge

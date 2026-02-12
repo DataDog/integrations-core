@@ -9,6 +9,7 @@ import mock
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, urljoin
 from datadog_checks.dev import get_here
+from datadog_checks.dev.http import HTTPResponseMock
 
 HERE = get_here()
 
@@ -22,12 +23,11 @@ def mock_from_file(filename):
         return f.read()
 
 
-def test_retrieve_pod_list_success(monkeypatch, mock_http_response):
+def test_retrieve_pod_list_success(monkeypatch):
     check = KubeletBase('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
-    monkeypatch.setattr(
-        check, 'perform_kubelet_query', mock_http_response(file_path=get_fixture_path('kubelet_base/pod_list_raw.dat'))
-    )
+    mock_resp = HTTPResponseMock(200, file_path=get_fixture_path('kubelet_base/pod_list_raw.dat'))
+    monkeypatch.setattr(check, 'perform_kubelet_query', lambda *args, **kwargs: mock_resp)
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("kubelet_base/pod_list_raw.json"))

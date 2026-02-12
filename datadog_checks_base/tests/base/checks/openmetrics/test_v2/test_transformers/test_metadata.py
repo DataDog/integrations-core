@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ..utils import get_check
+from ..utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 def test_basic(aggregator, datadog_agent, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP kubernetes_build_info A metric with a constant '1' value labeled by major, minor, git version, git commit, git tree state, build date, Go version, and compiler from which Kubernetes was built, and platform on which it is running.
         # TYPE kubernetes_build_info gauge
@@ -36,6 +37,7 @@ def test_basic(aggregator, datadog_agent, dd_run_check, mock_http_response):
 
 def test_options(aggregator, datadog_agent, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP kubernetes_build_info A metric with a constant '1' value labeled by major, minor, git version, git commit, git tree state, build date, Go version, and compiler from which Kubernetes was built, and platform on which it is running.
         # TYPE kubernetes_build_info gauge

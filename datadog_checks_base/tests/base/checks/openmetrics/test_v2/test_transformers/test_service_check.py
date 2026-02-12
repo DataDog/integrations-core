@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.constants import ServiceCheck
 
-from ..utils import get_check
+from ..utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 def test_known(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP state Node state
         # TYPE state gauge
@@ -24,6 +25,7 @@ def test_known(aggregator, dd_run_check, mock_http_response):
 
 def test_unknown(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OPENMETRICS_SCRAPER_HTTP_TARGET,
         """
         # HELP state Node state
         # TYPE state gauge

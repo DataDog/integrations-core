@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ..utils import get_check
+from ..utils import OPENMETRICS_SCRAPER_HTTP_TARGET, get_check
 
 
 def assert_metric_counts(aggregator, payload):
@@ -66,7 +66,7 @@ def test_default(aggregator, dd_run_check, mock_http_response):
         etcd_disk_wal_fsync_duration_seconds_sum{kind="fs",app="kubernetes"} 0.3097010759999998
         etcd_disk_wal_fsync_duration_seconds_count{kind="fs",app="kubernetes"} 751
         """
-    mock_http_response(payload)
+    mock_http_response(OPENMETRICS_SCRAPER_HTTP_TARGET, payload)
     check = get_check({'metrics': ['.+']})
     dd_run_check(check)
 
@@ -151,7 +151,7 @@ def test_disable_histogram_buckets(aggregator, dd_run_check, mock_http_response)
         etcd_disk_wal_fsync_duration_seconds_sum{kind="fs",app="kubernetes"} 0.3097010759999998
         etcd_disk_wal_fsync_duration_seconds_count{kind="fs",app="kubernetes"} 751
         """
-    mock_http_response(payload)
+    mock_http_response(OPENMETRICS_SCRAPER_HTTP_TARGET, payload)
     check = get_check({'metrics': ['.+'], 'collect_histogram_buckets': False})
     dd_run_check(check)
 
@@ -204,7 +204,7 @@ def test_non_cumulative_histogram_buckets(aggregator, dd_run_check, mock_http_re
         rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api",verb="GET"} 2.185820220000001
         rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755
         """
-    mock_http_response(payload)
+    mock_http_response(OPENMETRICS_SCRAPER_HTTP_TARGET, payload)
     check = get_check({'metrics': ['.+'], 'non_cumulative_histogram_buckets': True})
     dd_run_check(check)
 
@@ -293,7 +293,7 @@ def test_non_cumulative_histogram_buckets_single_bucket(aggregator, dd_run_check
         rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api",verb="GET"} 2.185820220000001
         rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755
         """
-    mock_http_response(payload)
+    mock_http_response(OPENMETRICS_SCRAPER_HTTP_TARGET, payload)
     check = get_check({'metrics': ['.+'], 'non_cumulative_histogram_buckets': True})
     dd_run_check(check)
 
@@ -331,7 +331,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api",verb="GET"} 2.185820220000001
         rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755
         """
-    mock_http_response(payload)
+    mock_http_response(OPENMETRICS_SCRAPER_HTTP_TARGET, payload)
     check = get_check(
         {
             'metrics': ['.+'],
@@ -463,7 +463,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api",verb="GET"} 2.185820220000001
         rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755
         """
-    mock_http_response(payload)
+    mock_http_response(OPENMETRICS_SCRAPER_HTTP_TARGET, payload)
     check = get_check(
         {
             'metrics': ['.+'],

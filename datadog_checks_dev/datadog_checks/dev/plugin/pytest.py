@@ -284,9 +284,26 @@ def dd_default_hostname():
     return socket.gethostname().lower()
 
 
+# -----------------------------------------------------------------------------
+# HTTP mocks (minimal surface, no check-specific accommodation)
+# All three fixtures use HTTPResponseMock and RequestWrapperMock from
+# datadog_checks.dev.http so tests stay implementation-agnostic (no requests/httpx).
+#
+# - mock_response: yields the HTTPResponseMock *class*. Use it to build response
+#   instances (e.g. mock_response(content=b'...') or pass to other fixtures).
+# - mock_http_response: patch a target (dotted path string) so it returns a fake
+#   response. First argument is the patch target (e.g. '...RequestsWrapper.get').
+#   Remaining args/kwargs build the response via mock_response. Each check's
+#   tests (or utils) pass the appropriate target; no check-specific logic here.
+# - mock_http_response_per_endpoint: multiple URLs, response queue; patches the
+#   given method (default requests.Session.get). Pass response lists built with
+#   mock_response (HTTPResponseMock instances) for compatibility.
+# For manual patching: HTTPResponseMock, RequestWrapperMock from datadog_checks.dev.http.
+# -----------------------------------------------------------------------------
+
 @pytest.fixture
 def mock_response():
-    """Yield HTTPResponseMock so fixtures use the protocol-based mock (single path)."""
+    """Yield the HTTPResponseMock class. Used by mock_http_response* fixtures."""
     from datadog_checks.dev.http import HTTPResponseMock
 
     yield HTTPResponseMock
@@ -295,27 +312,21 @@ def mock_response():
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
     """
-    Patch HTTP by patching the check class's get_http_handler with RequestWrapperMock.
-    First positional argument must be a class with get_http_handler (e.g. OpenMetricsBaseCheck);
-    remaining args/kwargs are passed to mock_response to build the response.
-    Does not patch requests.Session.get.
+    Patch a target so it returns a fake HTTP response. Simple and generic: first
+    argument is the patch target (dotted path string, e.g. '...RequestsWrapper.get').
+    Remaining args/kwargs are passed to mock_response to build the response.
+    Each check's tests or utils define the patch target. For multiple responses
+    in one test, patch with side_effect=[...] or handle in the test.
     """
 
-    def _mock(*args, **kwargs):
-        if not args or not isinstance(args[0], type) or not hasattr(args[0], 'get_http_handler'):
+    def _mock(patch_target, *args, **kwargs):
+        if not patch_target or not isinstance(patch_target, str):
             raise ValueError(
-                'mock_http_response requires a check class as first argument (e.g. OpenMetricsBaseCheck). '
-                'Pass the class, then response args: mock_http_response(MyCheck, content=..., file_path=..., etc.).'
+                'mock_http_response requires a patch target as first argument (dotted path string). '
+                'Example: mock_http_response("mymodule.MyClass.get", content=..., file_path=...).'
             )
-        from datadog_checks.dev.http import RequestWrapperMock
-
-        handler_target = args[0]
-        response = mock_response(*args[1:], **kwargs)
-        return mocker.patch.object(
-            handler_target,
-            'get_http_handler',
-            return_value=RequestWrapperMock(get=lambda url, **kw: response),
-        )
+        response = mock_response(*args, **kwargs)
+        return mocker.patch(patch_target, return_value=response)
 
     yield _mock
 
@@ -332,7 +343,6 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         url_arg_index: int = ...,
         url_kwarg_name: str = ...,
         strict: bool = ...,
-        handler_target: Optional[type] = ...,
     ): ...
     @overload
     def _mock(
@@ -344,7 +354,6 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         url_arg_index: int = ...,
         url_kwarg_name: str = ...,
         strict: bool = ...,
-        handler_target: Optional[type] = ...,
     ): ...
     def _mock(
         responses_by_endpoint: Dict[str, list],
@@ -354,18 +363,14 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,
-        handler_target: Optional[type] = None,
     ):
         """
-        Mocks HTTP responses for specific endpoints.
-        mode: The mode to use for the queue.
-            - 'cycle': loop through responses forever.
-            - 'exhaust': return each response once, then raise error.
-            - 'default': return responses once, then always return the default response.
-        url_arg_index: The index of the URL argument in the args tuple. e.g. for requests.get(url), url_arg_index=0
-        url_kwarg_name: The name of the URL key in the kwargs dict. e.g. for requests.get(url=url), url_kwarg_name="url"
-        strict: If True, an error is raised if the endpoint is not found. Otherwise, a 404 response is returned.
-        handler_target: If set (e.g. OpenMetricsBaseCheck), patch get_http_handler with RequestWrapperMock instead of Session.get.
+        Mocks HTTP responses for specific endpoints. Patches the given method
+        (default requests.Session.get). responses_by_endpoint values should be
+        lists of HTTPResponseMock instances (e.g. built via the mock_response
+        fixture: mock_response(content=b'...')). mode: 'cycle' | 'exhaust' |
+        'default'. url_arg_index / url_kwarg_name: where to read the URL from
+        the call. strict: raise if endpoint not in map.
         """
         if default_response is None and mode == 'default':
             raise ValueError("default_response is required when mode is 'default'")
@@ -399,41 +404,9 @@ def mock_http_response_per_endpoint(mocker, mock_response):
             url = kwargs.get(url_kwarg_name) or args[url_arg_index]
             return dispatch_by_url(url)
 
-        if handler_target is not None and hasattr(handler_target, 'get_http_handler'):
-            from datadog_checks.dev.http import RequestWrapperMock
-
-            return mocker.patch.object(
-                handler_target,
-                'get_http_handler',
-                return_value=RequestWrapperMock(get=lambda url, **kw: dispatch_by_url(url)),
-            )
         return mocker.patch(method, autospec=True, side_effect=side_effect)
 
     yield _mock
-
-
-@pytest.fixture
-def http_response_mock():
-    """
-    Yields HTTPResponseMock: a protocol-based mock response (no requests/httpx).
-    Use for tests that replace check.http or get_http_handler with RequestWrapperMock.
-    """
-    from datadog_checks.dev.http import HTTPResponseMock
-
-    yield HTTPResponseMock
-
-
-@pytest.fixture
-def request_wrapper_mock():
-    """
-    Yields RequestWrapperMock: a protocol-based mock HTTP client (no requests/httpx).
-    Use as a context manager with a check to patch check._http, e.g.:
-        with request_wrapper_mock(check, get=lambda url, **kwargs: http_response_mock(200, content=b'...')):
-            dd_run_check(check(instance))
-    """
-    from datadog_checks.dev.http import RequestWrapperMock
-
-    yield RequestWrapperMock
 
 
 @pytest.fixture
