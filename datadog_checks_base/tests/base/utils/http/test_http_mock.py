@@ -7,12 +7,12 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
 from datadog_checks.base.utils.http_protocol import (
     HTTPClientProtocol,
     HTTPResponseProtocol,
     HTTPSessionLike,
 )
+from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
 
 
 class TestHTTPResponseMock:

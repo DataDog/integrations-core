@@ -365,7 +365,8 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         url_arg_index: The index of the URL argument in the args tuple. e.g. for requests.get(url), url_arg_index=0
         url_kwarg_name: The name of the URL key in the kwargs dict. e.g. for requests.get(url=url), url_kwarg_name="url"
         strict: If True, an error is raised if the endpoint is not found. Otherwise, a 404 response is returned.
-        handler_target: If set (e.g. OpenMetricsBaseCheck), patch get_http_handler with RequestWrapperMock instead of Session.get.
+        handler_target: If set (e.g. OpenMetricsBaseCheck), patch get_http_handler with
+            RequestWrapperMock instead of Session.get.
         """
         if default_response is None and mode == 'default':
             raise ValueError("default_response is required when mode is 'default'")

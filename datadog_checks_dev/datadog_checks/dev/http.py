@@ -20,6 +20,7 @@ When to use which:
   patches. They are legacy and will be removed when the requests library is removed; use
   RequestWrapperMock for all new check-level tests.
 """
+
 from __future__ import annotations
 
 import json
