@@ -8,13 +8,13 @@ from collections import defaultdict
 from fnmatch import fnmatchcase
 from math import isinf, isnan
 
-import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPError as SharedHTTPError, SSLError as SharedSSLError
 from datadog_checks.base.utils.prometheus import metrics_pb2
 
 
@@ -38,7 +38,7 @@ class PrometheusScraperMixin(object):
     # need to be within a check in the end
 
     UNWANTED_LABELS = ["le", "quantile"]  # are specifics keys for prometheus itself
-    REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
+    STREAM_CHUNK_SIZE = 1024 * 10  # 10kb chunk size when streaming HTTP response (e.g. iter_lines)
 
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
@@ -170,7 +170,7 @@ class PrometheusScraperMixin(object):
 
     def parse_metric_family(self, response):
         """
-        Parse the MetricFamily from a valid requests.Response object to provide a MetricFamily object (see [0])
+        Parse the MetricFamily from a valid HTTP response object to provide a MetricFamily object (see [0]).
 
         The text format uses iter_lines() generator.
 
@@ -180,7 +180,7 @@ class PrometheusScraperMixin(object):
         [0] https://github.com/prometheus/client_model/blob/086fe7ca28bde6cec2acd5223423c1475a362858/metrics.proto#L76-%20%20L81  # noqa: E501
         [1] https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/AbstractMessageLite#writeDelimitedTo(java.io.OutputStream)  # noqa: E501
 
-        :param response: requests.Response
+        :param response: HTTP response (e.g. from wrapper get())
         :return: metrics_pb2.MetricFamily()
         """  # noqa: E501
         if 'application/vnd.google.protobuf' in response.headers['Content-Type']:
@@ -206,7 +206,7 @@ class PrometheusScraperMixin(object):
                 yield message
 
         elif 'text/plain' in response.headers['Content-Type']:
-            input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
+            input_gen = response.iter_lines(chunk_size=self.STREAM_CHUNK_SIZE, decode_unicode=True)
             if self._text_filter_blacklist:
                 input_gen = self._text_filter_input(input_gen)
 
@@ -545,15 +545,13 @@ class PrometheusScraperMixin(object):
         the PrometheusFormat class.
         Custom headers can be added to the default headers.
 
-        Returns a valid requests.Response, raise requests.HTTPError if the status code of the requests.Response
-        isn't valid - see response.raise_for_status()
-
-        The caller needs to close the requests.Response
+        Returns a valid HTTP response, or raises HTTPError if the status code
+        isn't valid - see response.raise_for_status(). The caller needs to close the response.
 
         :param endpoint: string url endpoint
         :param pFormat: the preferred format defined in PrometheusFormat
         :param headers: extra headers
-        :return: requests.Response
+        :return: HTTP response
         """
         if headers is None:
             headers = {}
@@ -573,7 +571,7 @@ class PrometheusScraperMixin(object):
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)
-        except requests.exceptions.SSLError:
+        except SharedSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
         except IOError:
@@ -591,7 +589,7 @@ class PrometheusScraperMixin(object):
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"), AgentCheck.OK, tags=["endpoint:" + endpoint]
                 )
             return response
-        except requests.HTTPError:
+        except SharedHTTPError:
             response.close()
             if self.health_service_check:
                 self._submit_service_check(

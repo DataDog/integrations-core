@@ -1,0 +1,1 @@
+Use shared HTTP exceptions (HTTPError) and built-in ConnectionError; allow removing requests from exception paths.

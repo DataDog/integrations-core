@@ -10,7 +10,6 @@ from math import isinf, isnan
 from os.path import isfile
 from re import compile
 
-import requests
 from prometheus_client.samples import Sample
 
 from datadog_checks.base.agent import datadog_agent
@@ -20,6 +19,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPError as SharedHTTPError, SSLError as SharedSSLError
 
 
 class OpenMetricsScraperMixin(object):
@@ -446,7 +446,7 @@ class OpenMetricsScraperMixin(object):
 
     def parse_metric_family(self, response, scraper_config):
         """
-        Parse the MetricFamily from a valid `requests.Response` object to provide a MetricFamily object.
+        Parse the MetricFamily from a valid HTTP response object to provide a MetricFamily object.
         The text format uses iter_lines() generator.
         """
         if response.encoding is None:
@@ -818,10 +818,10 @@ class OpenMetricsScraperMixin(object):
 
     def poll(self, scraper_config, headers=None):
         """
-        Returns a valid `requests.Response`, otherwise raise requests.HTTPError if the status code of the
-        response isn't valid - see `response.raise_for_status()`
+        Returns a valid HTTP response, otherwise raise HTTPError if the status code of the
+        response isn't valid - see `response.raise_for_status()`.
 
-        The caller needs to close the requests.Response.
+        The caller needs to close the response.
 
         Custom headers can be added to the default headers.
         """
@@ -835,7 +835,7 @@ class OpenMetricsScraperMixin(object):
 
         try:
             response = self.send_request(endpoint, scraper_config, headers)
-        except requests.exceptions.SSLError:
+        except SharedSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
         except IOError:
@@ -847,7 +847,7 @@ class OpenMetricsScraperMixin(object):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
             return response
-        except requests.HTTPError:
+        except SharedHTTPError:
             response.close()
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
