@@ -43,6 +43,7 @@ files:
       - name: use_legacy_check_version
         required: true
         display_priority: 1
+        legacy: true
         description: |
           For backward compatibility reasons, it is possible to use a deprecated version of the vSphere
           integration by setting this field to "true".
@@ -338,7 +339,7 @@ files:
             properties:
               - name: event
                 type: string
-                name: excluded_messages
+              - name: excluded_messages
                 type: array
                 items:
                   type: string
