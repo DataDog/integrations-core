@@ -14,6 +14,24 @@ from .fixtures.metadata import (
     EXPECTED_METADATA_EVENTS,
 )
 
+
+class FakeFabricSessionWrapperWithIPMismatch(common.FakeFabricSessionWrapper):
+    """Custom session wrapper that modifies LLDP fixture data to simulate IP mismatches"""
+
+    def make_request(self, path):
+        response = super().make_request(path)
+
+        # Modify LLDP adjacency data to have non-matching management IPs
+        if 'imdata' in response:
+            for item in response['imdata']:
+                if 'lldpAdjEp' in item:
+                    # Change the management IP to simulate a mismatch
+                    if 'attributes' in item['lldpAdjEp']:
+                        item['lldpAdjEp']['attributes']['mgmtIp'] = '192.168.1.100'
+
+        return response
+
+
 node101 = '10.0.200.0'
 node102 = '10.0.200.1'
 node201 = '10.0.200.5'
@@ -665,3 +683,65 @@ def assert_check_metrics(aggregator):
         'datadog.cisco_aci.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=['cisco']
     )
     aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=['cisco'])
+
+
+def test_fabric_topology_links_created(aggregator):
+    """Test that topology links are created with remote device dd_ids"""
+    check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
+    api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
+    api.wrapper_factory = common.FakeFabricSessionWrapper
+    check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
+
+    with freeze_time("2012-01-14 03:21:34"):
+        check.check({})
+
+        # Verify that topology links are created
+        ndm_metadata = aggregator.get_event_platform_events("network-devices-metadata")
+        assert len(ndm_metadata) > 0
+
+        # Extract links from metadata
+        links = []
+        for event in ndm_metadata:
+            if 'links' in event and event['links']:
+                links.extend(event['links'])
+
+        # Verify we have topology links
+        assert len(links) > 0, "Should have topology links"
+
+        # Verify that links have remote device dd_ids
+        for link in links:
+            assert link['remote']['device']['dd_id'] is not None, "Remote device should have dd_id"
+
+
+def test_fabric_topology_with_ip_mismatch(aggregator):
+    """Test that topology links are created even when LLDP management IP doesn't match device IP"""
+    check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
+    api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
+    api.wrapper_factory = FakeFabricSessionWrapperWithIPMismatch  # Use custom wrapper with IP mismatch
+    check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
+
+    with freeze_time("2012-01-14 03:21:34"):
+        check.check({})
+
+        # Verify that topology links are created with remote dd_id despite IP mismatch
+        ndm_metadata = aggregator.get_event_platform_events("network-devices-metadata")
+        assert len(ndm_metadata) > 0
+
+        # Extract links from metadata
+        links = []
+        for event in ndm_metadata:
+            if 'links' in event and event['links']:
+                links.extend(event['links'])
+
+        # Should have links
+        assert len(links) > 0, "Should have topology links"
+
+        # Remote devices SHOULD have dd_id even with IP mismatch (IP matching is always skipped)
+        for link in links:
+            assert link['remote']['device']['dd_id'] is not None, (
+                "Remote device should have dd_id even with IP mismatch"
+            )
+
+            assert link['remote']['interface']['dd_id'] is not None, (
+                "Remote interface should have dd_id even with IP mismatch"
+            )
