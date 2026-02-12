@@ -1,1 +1,1 @@
-Add pg_class optimizer and autovacuum columns to schema collection (reltuples, relpages, reloptions, relallvisible, relfrozenxid, relminmxid) and column ordering (attnum).
+Add pg_class metadata columns to schema collection including optimizer statistics (reltuples, relpages), autovacuum tracking (reloptions, relallvisible, relfrozenxid, relminmxid), table properties (relhasindex, relkind, relnatts, relchecks, relhastriggers, relrowsecurity, relispopulated, relispartition), and column ordering (attnum).

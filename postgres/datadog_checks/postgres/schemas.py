@@ -46,7 +46,15 @@ SELECT c.oid                 AS table_id,
        c.relallvisible       AS all_visible_pages,
        c.relfrozenxid::text  AS frozen_xid,
        c.relminmxid::text    AS min_mxid,
-       c.reloptions          AS table_options
+       c.reloptions          AS table_options,
+       c.relhasindex         AS has_indexes,
+       c.relkind::text       AS relation_kind,
+       c.relnatts            AS num_columns,
+       c.relchecks           AS num_check_constraints,
+       c.relhastriggers      AS has_triggers,
+       c.relrowsecurity      AS row_security_enabled,
+       c.relispopulated      AS is_populated,
+       c.relispartition      AS is_partition
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
@@ -65,7 +73,14 @@ SELECT c.oid                 AS table_id,
        c.relallvisible       AS all_visible_pages,
        c.relfrozenxid::text  AS frozen_xid,
        c.relminmxid::text    AS min_mxid,
-       c.reloptions          AS table_options
+       c.reloptions          AS table_options,
+       c.relhasindex         AS has_indexes,
+       c.relkind::text       AS relation_kind,
+       c.relnatts            AS num_columns,
+       c.relchecks           AS num_check_constraints,
+       c.relhastriggers      AS has_triggers,
+       c.relrowsecurity      AS row_security_enabled,
+       c.relispopulated      AS is_populated
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
@@ -161,13 +176,21 @@ class TableObject(TypedDict, total=False):
     num_partitions: int
     partition_key: str
 
-    # New pg_class statistics
+    # pg_class statistics and metadata
     row_count_estimate: float
     page_count: int
     all_visible_pages: int
     frozen_xid: str
     min_mxid: str
     table_options: list[str] | None
+    has_indexes: bool
+    relation_kind: str
+    num_columns: int
+    num_check_constraints: int
+    has_triggers: bool
+    row_security_enabled: bool
+    is_populated: bool
+    is_partition: bool
 
 
 class SchemaObject(TypedDict):
@@ -332,21 +355,42 @@ class PostgresSchemaCollector(SchemaCollector):
 
         # Build additional columns for schema_tables CTE
         additional_table_columns = """tables.row_count_estimate, tables.page_count, tables.all_visible_pages,
-                tables.frozen_xid, tables.min_mxid, tables.table_options"""
+                tables.frozen_xid, tables.min_mxid, tables.table_options,
+                tables.has_indexes, tables.relation_kind, tables.num_columns,
+                tables.num_check_constraints, tables.has_triggers, tables.row_security_enabled,
+                tables.is_populated"""
+
+        # Add is_partition for PG 10+
+        if VersionUtils.parse_version(str(self._check.version)) >= V10:
+            additional_table_columns += ", tables.is_partition"
 
         # Build additional columns for final SELECT
         additional_select_columns = (
             """schema_tables.row_count_estimate, schema_tables.page_count, """
             """schema_tables.all_visible_pages,
-            schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options"""
+            schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options,
+            schema_tables.has_indexes, schema_tables.relation_kind, schema_tables.num_columns,
+            schema_tables.num_check_constraints, schema_tables.has_triggers,
+            schema_tables.row_security_enabled, schema_tables.is_populated"""
         )
+
+        # Add is_partition for PG 10+
+        if VersionUtils.parse_version(str(self._check.version)) >= V10:
+            additional_select_columns += ", schema_tables.is_partition"
 
         # Build additional columns for GROUP BY
         additional_group_by_columns = (
             """schema_tables.row_count_estimate, schema_tables.page_count, """
             """schema_tables.all_visible_pages,
-                schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options"""
+                schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options,
+                schema_tables.has_indexes, schema_tables.relation_kind, schema_tables.num_columns,
+                schema_tables.num_check_constraints, schema_tables.has_triggers,
+                schema_tables.row_security_enabled, schema_tables.is_populated"""
         )
+
+        # Add is_partition for PG 10+
+        if VersionUtils.parse_version(str(self._check.version)) >= V10:
+            additional_group_by_columns += ", schema_tables.is_partition"
 
         query = f"""
             WITH
@@ -434,13 +478,21 @@ class PostgresSchemaCollector(SchemaCollector):
                                     "toast_table": cursor_row.get("toast_table"),
                                     "num_partitions": cursor_row.get("num_partitions"),
                                     "partition_key": cursor_row.get("partition_key"),
-                                    # New pg_class columns
+                                    # pg_class statistics and metadata
                                     "row_count_estimate": cursor_row.get("row_count_estimate"),
                                     "page_count": cursor_row.get("page_count"),
                                     "all_visible_pages": cursor_row.get("all_visible_pages"),
                                     "frozen_xid": cursor_row.get("frozen_xid"),
                                     "min_mxid": cursor_row.get("min_mxid"),
                                     "table_options": cursor_row.get("table_options"),
+                                    "has_indexes": cursor_row.get("has_indexes"),
+                                    "relation_kind": cursor_row.get("relation_kind"),
+                                    "num_columns": cursor_row.get("num_columns"),
+                                    "num_check_constraints": cursor_row.get("num_check_constraints"),
+                                    "has_triggers": cursor_row.get("has_triggers"),
+                                    "row_security_enabled": cursor_row.get("row_security_enabled"),
+                                    "is_populated": cursor_row.get("is_populated"),
+                                    "is_partition": cursor_row.get("is_partition"),
                                 }.items()
                                 if v is not None
                             }
