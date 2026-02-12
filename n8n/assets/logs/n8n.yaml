@@ -2,6 +2,22 @@
 id: n8n
 metric_id: n8n
 backend_only: false
+facets:
+  - groups:
+      - Error
+    name: Error Message
+    path: error.message
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
 pipeline:
   type: pipeline
   name: N8N
@@ -87,6 +103,37 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
+      name: Map payload.errorMessage to error.message
+      enabled: true
+      sources:
+        - payload.errorMessage
+      sourceType: attribute
+      target: error.message
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.userEmail and payload._email to usr.email
+      enabled: true
+      sources:
+        - payload.userEmail
+        - payload._email
+      sourceType: attribute
+      target: usr.email
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.userId to usr.id
+      enabled: true
+      sources:
+        - payload.userId
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
       name: Map eventName to n8n.event_name
       enabled: true
       sources:
@@ -107,6 +154,76 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
+      name: Map payload.executionId to n8n.execution_id
+      enabled: true
+      sources:
+        - payload.executionId
+      sourceType: attribute
+      target: n8n.execution_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.isManual to n8n.is_manual
+      enabled: true
+      sources:
+        - payload.isManual
+      sourceType: attribute
+      target: n8n.is_manual
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.nodeId to n8n.node_id
+      enabled: true
+      sources:
+        - payload.nodeId
+      sourceType: attribute
+      target: n8n.node_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.nodeName to n8n.node_name
+      enabled: true
+      sources:
+        - payload.nodeName
+      sourceType: attribute
+      target: n8n.node_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.nodeType to n8n.node_type
+      enabled: true
+      sources:
+        - payload.nodeType
+      sourceType: attribute
+      target: n8n.node_type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.success to n8n.success
+      enabled: true
+      sources:
+        - payload.success
+      sourceType: attribute
+      target: n8n.success
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.taskId to n8n.task_id
+      enabled: true
+      sources:
+        - payload.taskId
+      sourceType: attribute
+      target: n8n.task_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
       name: Map payload.workflowId to n8n.workflow_id
       enabled: true
       sources:
@@ -123,107 +240,6 @@ pipeline:
         - payload.workflowName
       sourceType: attribute
       target: n8n.workflow_name
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.executionId to n8n.execution_id
-      enabled: true
-      sources:
-        - payload.executionId
-      sourceType: attribute
-      target: n8n.execution_id
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.nodeType to n8n.node_type
-      enabled: true
-      sources:
-        - payload.nodeType
-      sourceType: attribute
-      target: n8n.node_type
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.nodeName to n8n.node_name
-      enabled: true
-      sources:
-        - payload.nodeName
-      sourceType: attribute
-      target: n8n.node_name
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.nodeId to n8n.node_id
-      enabled: true
-      sources:
-        - payload.nodeId
-      sourceType: attribute
-      target: n8n.node_id
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.userId to usr.id
-      enabled: true
-      sources:
-        - payload.userId
-      sourceType: attribute
-      target: usr.id
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.userEmail and payload._email to usr.email
-      enabled: true
-      sources:
-        - payload.userEmail
-        - payload._email
-      sourceType: attribute
-      target: usr.email
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.errorMessage to error.message
-      enabled: true
-      sources:
-        - payload.errorMessage
-      sourceType: attribute
-      target: error.message
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.success to n8n.success
-      enabled: true
-      sources:
-        - payload.success
-      sourceType: attribute
-      target: n8n.success
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.isManual to n8n.is_manual
-      enabled: true
-      sources:
-        - payload.isManual
-      sourceType: attribute
-      target: n8n.is_manual
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map payload.taskId to n8n.task_id
-      enabled: true
-      sources:
-        - payload.taskId
-      sourceType: attribute
-      target: n8n.task_id
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
