@@ -1,0 +1,1 @@
+Fix relations index metrics query to correctly exclude pg_toast tables and system catalog indexes, reducing unnecessary metric submissions and tag cardinality.
