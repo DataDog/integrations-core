@@ -1,0 +1,1 @@
+Add pg_class optimizer and autovacuum columns to schema collection (reltuples, relpages, reloptions, relallvisible, relfrozenxid, relminmxid) and column ordering (attnum).

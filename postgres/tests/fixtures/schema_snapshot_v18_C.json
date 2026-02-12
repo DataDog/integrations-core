@@ -12,192 +12,13 @@
                 "owner": "pg_database_owner",
                 "tables": [
                     {
-                        "id": "16692",
-                        "name": "personsdup7",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "personid",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16692"
-                            },
-                            {
-                                "name": "lastname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16692"
-                            },
-                            {
-                                "name": "firstname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16692"
-                            },
-                            {
-                                "name": "address",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16692"
-                            },
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16692"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
-                "tables": [
-                    {
-                        "id": "16704",
-                        "name": "personsdup11",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "personid",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16704"
-                            },
-                            {
-                                "name": "lastname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16704"
-                            },
-                            {
-                                "name": "firstname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16704"
-                            },
-                            {
-                                "name": "address",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16704"
-                            },
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16704"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
-                "tables": [
-                    {
-                        "id": "16698",
-                        "name": "personsdup9",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "personid",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16698"
-                            },
-                            {
-                                "name": "lastname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16698"
-                            },
-                            {
-                                "name": "firstname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16698"
-                            },
-                            {
-                                "name": "address",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16698"
-                            },
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16698"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
-                "tables": [
-                    {
                         "id": "16663",
                         "name": "persons",
                         "owner": "postgres",
                         "columns": [
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -205,6 +26,7 @@
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -212,6 +34,7 @@
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -219,6 +42,7 @@
                             },
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('persons_personid_seq'::regclass)",
@@ -226,6 +50,7 @@
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": "'New York'::character varying",
@@ -239,127 +64,12 @@
                                 "definition": "FOREIGN KEY (city) REFERENCES cities(city)",
                                 "table_id": "16663"
                             }
-                        ]
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
-                "tables": [
-                    {
-                        "id": "16726",
-                        "name": "pg_newtable",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "lastname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16726"
-                            },
-                            {
-                                "name": "firstname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16726"
-                            },
-                            {
-                                "name": "address",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16726"
-                            },
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16726"
-                            },
-                            {
-                                "name": "personid",
-                                "data_type": "integer",
-                                "nullable": false,
-                                "default": "nextval('pg_newtable_personid_seq'::regclass)",
-                                "table_id": "16726"
-                            }
                         ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
-                "tables": [
-                    {
-                        "id": "16695",
-                        "name": "personsdup8",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "personid",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16695"
-                            },
-                            {
-                                "name": "lastname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16695"
-                            },
-                            {
-                                "name": "firstname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16695"
-                            },
-                            {
-                                "name": "address",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16695"
-                            },
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16695"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "792",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -384,6 +94,7 @@
                         "columns": [
                             {
                                 "name": "filler",
+                                "column_number": 2,
                                 "data_type": "text",
                                 "nullable": true,
                                 "default": null,
@@ -391,6 +102,7 @@
                             },
                             {
                                 "name": "id",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('test_part_id_seq'::regclass)",
@@ -431,7 +143,12 @@
                         ],
                         "foreign_keys": [],
                         "num_partitions": 2,
-                        "partition_key": "RANGE (id)"
+                        "partition_key": "RANGE (id)",
+                        "row_count_estimate": 2001.0,
+                        "page_count": -1,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "0",
+                        "min_mxid": "0"
                     }
                 ]
             }
@@ -445,95 +162,37 @@
         "description": "Datadog test database",
         "schemas": [
             {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
+                "id": "16731",
+                "name": "public2",
+                "owner": "postgres",
                 "tables": [
                     {
-                        "id": "16674",
-                        "name": "personsdup1",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "personid",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16674"
-                            },
-                            {
-                                "name": "lastname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16674"
-                            },
-                            {
-                                "name": "firstname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16674"
-                            },
-                            {
-                                "name": "address",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16674"
-                            },
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16674"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
-                "tables": [
-                    {
-                        "id": "16656",
+                        "id": "16732",
                         "name": "cities",
                         "owner": "postgres",
                         "columns": [
                             {
                                 "name": "city",
+                                "column_number": 1,
                                 "data_type": "character varying(255)",
                                 "nullable": false,
                                 "default": null,
-                                "table_id": "16656"
+                                "table_id": "16732"
                             },
                             {
                                 "name": "country",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16656"
+                                "table_id": "16732"
                             }
                         ],
                         "indexes": [
                             {
                                 "name": "cities_pkey",
-                                "table_id": "16656",
-                                "definition": "CREATE UNIQUE INDEX cities_pkey ON public.cities USING btree (city)",
+                                "table_id": "16732",
+                                "definition": "CREATE UNIQUE INDEX cities_pkey ON public2.cities USING btree (city)",
                                 "is_unique": true,
                                 "is_exclusion": false,
                                 "is_immediate": true,
@@ -546,7 +205,215 @@
                                 "is_partial": false
                             }
                         ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "814",
+                        "min_mxid": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16683",
+                        "name": "personsdup4",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16683"
+                            },
+                            {
+                                "name": "lastname",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16683"
+                            },
+                            {
+                                "name": "firstname",
+                                "column_number": 3,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16683"
+                            },
+                            {
+                                "name": "address",
+                                "column_number": 4,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16683"
+                            },
+                            {
+                                "name": "city",
+                                "column_number": 5,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16683"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "797",
+                        "min_mxid": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16680",
+                        "name": "personsdup3",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16680"
+                            },
+                            {
+                                "name": "lastname",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16680"
+                            },
+                            {
+                                "name": "firstname",
+                                "column_number": 3,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16680"
+                            },
+                            {
+                                "name": "address",
+                                "column_number": 4,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16680"
+                            },
+                            {
+                                "name": "city",
+                                "column_number": 5,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16680"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "796",
+                        "min_mxid": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16797",
+                        "name": "test_part_no_children",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "filler",
+                                "column_number": 2,
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16797"
+                            },
+                            {
+                                "name": "id",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('test_part_no_children_id_seq'::regclass)",
+                                "table_id": "16797"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "test_part_no_children_pkey",
+                                "table_id": "16797",
+                                "definition": "CREATE UNIQUE INDEX test_part_no_children_pkey ON ONLY public.test_part_no_children USING btree (id)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "partition_key": "RANGE (id)",
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "0",
+                        "min_mxid": "0"
                     }
                 ]
             }
@@ -564,126 +431,6 @@
                 "name": "hstore",
                 "owner": "postgres",
                 "tables": []
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
-                "tables": [
-                    {
-                        "id": "16686",
-                        "name": "personsdup5",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "personid",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16686"
-                            },
-                            {
-                                "name": "lastname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16686"
-                            },
-                            {
-                                "name": "firstname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16686"
-                            },
-                            {
-                                "name": "address",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16686"
-                            },
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16686"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "pg_database_owner",
-                "tables": [
-                    {
-                        "id": "16720",
-                        "name": "pgtable",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "lastname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16720"
-                            },
-                            {
-                                "name": "firstname",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16720"
-                            },
-                            {
-                                "name": "address",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16720"
-                            },
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16720"
-                            },
-                            {
-                                "name": "personid",
-                                "data_type": "integer",
-                                "nullable": false,
-                                "default": "nextval('pgtable_personid_seq'::regclass)",
-                                "table_id": "16720"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
             }
         ]
     },
@@ -721,6 +468,7 @@
                         "columns": [
                             {
                                 "name": "filler",
+                                "column_number": 2,
                                 "data_type": "text",
                                 "nullable": true,
                                 "default": null,
@@ -728,6 +476,7 @@
                             },
                             {
                                 "name": "id",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('test_part_no_activity_id_seq'::regclass)",
@@ -753,7 +502,12 @@
                         ],
                         "foreign_keys": [],
                         "num_partitions": 2,
-                        "partition_key": "RANGE (id)"
+                        "partition_key": "RANGE (id)",
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "0",
+                        "min_mxid": "0"
                     }
                 ]
             }
@@ -772,48 +526,128 @@
                 "owner": "pg_database_owner",
                 "tables": [
                     {
-                        "id": "16710",
-                        "name": "personsdup13",
+                        "id": "16726",
+                        "name": "pg_newtable",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "lastname",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16726"
+                            },
+                            {
+                                "name": "firstname",
+                                "column_number": 3,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16726"
+                            },
+                            {
+                                "name": "address",
+                                "column_number": 4,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16726"
+                            },
+                            {
+                                "name": "city",
+                                "column_number": 5,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16726"
+                            },
+                            {
+                                "name": "personid",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('pg_newtable_personid_seq'::regclass)",
+                                "table_id": "16726"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "811",
+                        "min_mxid": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16698",
+                        "name": "personsdup9",
                         "owner": "postgres",
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16698"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16698"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16698"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16698"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16710"
+                                "table_id": "16698"
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "802",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -838,6 +672,7 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
@@ -845,6 +680,7 @@
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -852,6 +688,7 @@
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -859,6 +696,7 @@
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -866,6 +704,7 @@
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -873,7 +712,12 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "803",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -892,30 +736,102 @@
                 "owner": "pg_database_owner",
                 "tables": [
                     {
-                        "id": "16797",
-                        "name": "test_part_no_children",
+                        "id": "16704",
+                        "name": "personsdup11",
                         "owner": "postgres",
                         "columns": [
                             {
-                                "name": "filler",
-                                "data_type": "text",
+                                "name": "personid",
+                                "column_number": 1,
+                                "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16797"
+                                "table_id": "16704"
                             },
                             {
-                                "name": "id",
-                                "data_type": "integer",
+                                "name": "lastname",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16704"
+                            },
+                            {
+                                "name": "firstname",
+                                "column_number": 3,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16704"
+                            },
+                            {
+                                "name": "address",
+                                "column_number": 4,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16704"
+                            },
+                            {
+                                "name": "city",
+                                "column_number": 5,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16704"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "804",
+                        "min_mxid": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16656",
+                        "name": "cities",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "city",
+                                "column_number": 1,
+                                "data_type": "character varying(255)",
                                 "nullable": false,
-                                "default": "nextval('test_part_no_children_id_seq'::regclass)",
-                                "table_id": "16797"
+                                "default": null,
+                                "table_id": "16656"
+                            },
+                            {
+                                "name": "country",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16656"
                             }
                         ],
                         "indexes": [
                             {
-                                "name": "test_part_no_children_pkey",
-                                "table_id": "16797",
-                                "definition": "CREATE UNIQUE INDEX test_part_no_children_pkey ON ONLY public.test_part_no_children USING btree (id)",
+                                "name": "cities_pkey",
+                                "table_id": "16656",
+                                "definition": "CREATE UNIQUE INDEX cities_pkey ON public.cities USING btree (city)",
                                 "is_unique": true,
                                 "is_exclusion": false,
                                 "is_immediate": true,
@@ -929,7 +845,11 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "partition_key": "RANGE (id)"
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "790",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -948,27 +868,58 @@
                 "owner": "pg_database_owner",
                 "tables": [
                     {
-                        "id": "16743",
-                        "name": "sample_foreign_d73a8c",
+                        "id": "16720",
+                        "name": "pgtable",
                         "owner": "postgres",
                         "columns": [
                             {
-                                "name": "id",
-                                "data_type": "integer",
+                                "name": "lastname",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16743"
+                                "table_id": "16720"
                             },
                             {
-                                "name": "name",
-                                "data_type": "text",
+                                "name": "firstname",
+                                "column_number": 3,
+                                "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16743"
+                                "table_id": "16720"
+                            },
+                            {
+                                "name": "address",
+                                "column_number": 4,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16720"
+                            },
+                            {
+                                "name": "city",
+                                "column_number": 5,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16720"
+                            },
+                            {
+                                "name": "personid",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('pgtable_personid_seq'::regclass)",
+                                "table_id": "16720"
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "809",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -987,48 +938,58 @@
                 "owner": "pg_database_owner",
                 "tables": [
                     {
-                        "id": "16689",
-                        "name": "personsdup6",
+                        "id": "16710",
+                        "name": "personsdup13",
                         "owner": "postgres",
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16710"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16710"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16710"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16710"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16689"
+                                "table_id": "16710"
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "806",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -1047,48 +1008,58 @@
                 "owner": "pg_database_owner",
                 "tables": [
                     {
-                        "id": "16680",
-                        "name": "personsdup3",
+                        "id": "16674",
+                        "name": "personsdup1",
                         "owner": "postgres",
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16674"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16674"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16674"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16674"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16680"
+                                "table_id": "16674"
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "794",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -1113,6 +1084,7 @@
                         "columns": [
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -1120,6 +1092,7 @@
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -1127,6 +1100,7 @@
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -1134,6 +1108,7 @@
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -1141,6 +1116,7 @@
                             },
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": null,
@@ -1164,7 +1140,12 @@
                                 "is_partial": false
                             }
                         ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": 2.0,
+                        "page_count": 1,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "807",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -1183,103 +1164,58 @@
                 "owner": "pg_database_owner",
                 "tables": [
                     {
-                        "id": "16677",
-                        "name": "personsdup2",
+                        "id": "16686",
+                        "name": "personsdup5",
                         "owner": "postgres",
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16686"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16686"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16686"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16686"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16677"
+                                "table_id": "16686"
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "16731",
-                "name": "public2",
-                "owner": "postgres",
-                "tables": [
-                    {
-                        "id": "16732",
-                        "name": "cities",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "city",
-                                "data_type": "character varying(255)",
-                                "nullable": false,
-                                "default": null,
-                                "table_id": "16732"
-                            },
-                            {
-                                "name": "country",
-                                "data_type": "character varying(255)",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16732"
-                            }
-                        ],
-                        "indexes": [
-                            {
-                                "name": "cities_pkey",
-                                "table_id": "16732",
-                                "definition": "CREATE UNIQUE INDEX cities_pkey ON public2.cities USING btree (city)",
-                                "is_unique": true,
-                                "is_exclusion": false,
-                                "is_immediate": true,
-                                "is_clustered": false,
-                                "is_valid": true,
-                                "is_checkxmin": false,
-                                "is_ready": true,
-                                "is_live": true,
-                                "is_replident": false,
-                                "is_partial": false
-                            }
-                        ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "798",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -1304,6 +1240,7 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
@@ -1311,6 +1248,7 @@
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -1318,6 +1256,7 @@
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -1325,6 +1264,7 @@
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -1332,6 +1272,7 @@
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
@@ -1339,7 +1280,12 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "805",
+                        "min_mxid": "1"
                     }
                 ]
             }
@@ -1358,48 +1304,314 @@
                 "owner": "pg_database_owner",
                 "tables": [
                     {
-                        "id": "16683",
-                        "name": "personsdup4",
+                        "id": "16695",
+                        "name": "personsdup8",
                         "owner": "postgres",
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16695"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16695"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16695"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16695"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16683"
+                                "table_id": "16695"
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "801",
+                        "min_mxid": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16689",
+                        "name": "personsdup6",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16689"
+                            },
+                            {
+                                "name": "lastname",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16689"
+                            },
+                            {
+                                "name": "firstname",
+                                "column_number": 3,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16689"
+                            },
+                            {
+                                "name": "address",
+                                "column_number": 4,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16689"
+                            },
+                            {
+                                "name": "city",
+                                "column_number": 5,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16689"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "799",
+                        "min_mxid": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16743",
+                        "name": "sample_foreign_d73a8c",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16743"
+                            },
+                            {
+                                "name": "name",
+                                "column_number": 2,
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16743"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "0",
+                        "min_mxid": "0"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16692",
+                        "name": "personsdup7",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16692"
+                            },
+                            {
+                                "name": "lastname",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16692"
+                            },
+                            {
+                                "name": "firstname",
+                                "column_number": 3,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16692"
+                            },
+                            {
+                                "name": "address",
+                                "column_number": 4,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16692"
+                            },
+                            {
+                                "name": "city",
+                                "column_number": 5,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16692"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "800",
+                        "min_mxid": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "pg_database_owner",
+                "tables": [
+                    {
+                        "id": "16677",
+                        "name": "personsdup2",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "personid",
+                                "column_number": 1,
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16677"
+                            },
+                            {
+                                "name": "lastname",
+                                "column_number": 2,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16677"
+                            },
+                            {
+                                "name": "firstname",
+                                "column_number": 3,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16677"
+                            },
+                            {
+                                "name": "address",
+                                "column_number": 4,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16677"
+                            },
+                            {
+                                "name": "city",
+                                "column_number": 5,
+                                "data_type": "character varying(255)",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16677"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count_estimate": -1.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "795",
+                        "min_mxid": "1"
                     }
                 ]
             }
