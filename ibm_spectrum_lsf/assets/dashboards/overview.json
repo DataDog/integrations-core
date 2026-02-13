@@ -1172,6 +1172,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1192,6 +1193,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Mbatchd processed requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -2022,7 +2024,6 @@
                                     }
                                 }
                             ],
-                            "time": {},
                             "title": "Time spent in each state per job",
                             "title_align": "left",
                             "title_size": "16",
