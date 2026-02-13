@@ -394,7 +394,8 @@ class PostgresSchemaCollector(SchemaCollector):
             schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options,
             schema_tables.has_indexes, schema_tables.relation_kind, schema_tables.num_columns,
             schema_tables.num_check_constraints, schema_tables.has_triggers,
-            schema_tables.row_security_enabled, schema_tables.is_populated{', schema_tables.is_partition' if is_pg10_or_newer else ''},
+            schema_tables.row_security_enabled, schema_tables.is_populated
+            {', schema_tables.is_partition' if is_pg10_or_newer else ''},
                 array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                 array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
                 array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
@@ -411,7 +412,8 @@ class PostgresSchemaCollector(SchemaCollector):
                 schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options,
                 schema_tables.has_indexes, schema_tables.relation_kind, schema_tables.num_columns,
                 schema_tables.num_check_constraints, schema_tables.has_triggers,
-                schema_tables.row_security_enabled, schema_tables.is_populated{', schema_tables.is_partition' if is_pg10_or_newer else ''}
+                schema_tables.row_security_enabled, schema_tables.is_populated
+                {', schema_tables.is_partition' if is_pg10_or_newer else ''}
             ;
         """
 

@@ -207,9 +207,9 @@ def assert_metric_at_least(
             found_values += 1
 
     if count:
-        assert found_values == count, (
-            f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
-        )
+        assert (
+            found_values == count
+        ), f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
     if min_count:
         assert found_values >= min_count, (
             f'Expected to have at least {min_count} with tags {expected_tags} values for metric {metric_name},'
