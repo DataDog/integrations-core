@@ -403,10 +403,10 @@ class TestAuthTokenReadFile:
             write_file(token_file, '\nsecret\nsecret\n')
 
             with pytest.raises(
-                    ValueError,
-                    match='^{}$'.format(
-                        re.escape('The pattern `foo(.+)` does not match anything in file: {}'.format(token_file))
-                    ),
+                ValueError,
+                match='^{}$'.format(
+                    re.escape('The pattern `foo(.+)` does not match anything in file: {}'.format(token_file))
+                ),
             ):
                 http.get('https://www.google.com')
 

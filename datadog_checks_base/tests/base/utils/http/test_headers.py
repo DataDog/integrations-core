@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import OrderedDict
 
-import mock
 import pytest
 
 from datadog_checks.base.utils.headers import headers as agent_headers
@@ -68,7 +67,7 @@ def test_config_extra_headers_string_values():
     assert http.options['headers'] == complete_headers
 
 
-def test_extra_headers_on_http_method_call():
+def test_extra_headers_on_http_method_call(mock_http_response):
     instance = {'extra_headers': {'answer': 42}}
     init_config = {}
     http = RequestsWrapper(instance, init_config)
@@ -77,22 +76,22 @@ def test_extra_headers_on_http_method_call():
     complete_headers.update({'answer': '42'})
 
     extra_headers = {"foo": "bar"}
-    with mock.patch("requests.Session.get") as get:
-        http.get("http://example.com/hello", extra_headers=extra_headers)
+    mock_get = mock_http_response('')
+    http.get("http://example.com/hello", extra_headers=extra_headers)
 
-        expected_options = dict(complete_headers)
-        expected_options.update(extra_headers)
+    expected_options = dict(complete_headers)
+    expected_options.update(extra_headers)
 
-        get.assert_called_with(
-            "http://example.com/hello",
-            headers=expected_options,
-            auth=None,
-            cert=None,
-            proxies=None,
-            timeout=(10.0, 10.0),
-            verify=True,
-            allow_redirects=True,
-        )
+    mock_get.assert_called_with(
+        "http://example.com/hello",
+        headers=expected_options,
+        auth=None,
+        cert=None,
+        proxies=None,
+        timeout=(10.0, 10.0),
+        verify=True,
+        allow_redirects=True,
+    )
 
     # make sure the original headers are not modified
     assert http.options['headers'] == complete_headers
