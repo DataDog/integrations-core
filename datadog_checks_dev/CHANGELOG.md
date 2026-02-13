@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 35.6.0 / 2026-02-13
+
+***Added***:
+
+* Added validation for option and value level fields in the ddev validate command. ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add legacy field in spec for legacy options ([#22333](https://github.com/DataDog/integrations-core/pull/22333))
+* Add fixture to mock HTTP requests per endpoint ([#22396](https://github.com/DataDog/integrations-core/pull/22396))
+
+***Fixed***:
+
+* Validate that dependencies are in the correct section in pyproject.toml ([#21898](https://github.com/DataDog/integrations-core/pull/21898))
+* Mark the http auth_token as a secret in spec.yaml. ([#22489](https://github.com/DataDog/integrations-core/pull/22489))
+
 ## 35.5.0 / 2025-12-12
 
 ***Added***:
