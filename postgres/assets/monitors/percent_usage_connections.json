@@ -8,7 +8,7 @@
   ],
   "description": "In PostgreSQL, there is a limit of concurrent connections that can be increased. When this limit is exceeded, new users cannot establish a connection with the database. This monitor tracks the total number of connections.",
   "definition": {
-    "message": "Please check host {{host.name}}, as the Postgres connection pool is approaching saturation.",
+    "message": "## What's happening?\nPostgreSQL connection usage has exceeded 90% of the maximum allowed connections over the last 15 minutes.\n\nPlease check host {{host.name}}, as the Postgres connection pool is approaching saturation.",
     "name": "[Postgres] Number of connections is approaching connection limit on {{host.name}}",
     "options": {
       "escalation_message": "",

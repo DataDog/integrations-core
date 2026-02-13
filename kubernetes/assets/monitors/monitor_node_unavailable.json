@@ -8,7 +8,7 @@
   ],
   "description": "Kubernetes nodes can either be schedulable or unschedulable. When unschedulable, the node prevents the scheduler from placing new pods onto that node. This monitor tracks the percentage of schedulable nodes.",
   "definition": {
-    "message": "More than 20% of nodes are unschedulable on ({{kube_cluster_name.name}} cluster). \n Keep in mind that this might be expected based on your infrastructure.",
+    "message": "## What's happening?\nThe percentage of schedulable nodes is below 80% for status:schedulable over the last 15 minutes.\n\nMore than 20% of nodes are unschedulable on ({{kube_cluster_name.name}} cluster). \n Keep in mind that this might be expected based on your infrastructure.",
     "name": "[Kubernetes] Monitor Unschedulable Kubernetes Nodes",
     "options": {
       "escalation_message": "",
