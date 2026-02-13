@@ -1,4 +1,5 @@
 name: CoreDNS
+fleet_configurable: true
 files:
 - name: coredns.yaml
   options:

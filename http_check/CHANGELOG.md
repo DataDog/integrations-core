@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 12.4.0 / 2026-02-11
+
+***Security***:
+
+* Bump `cryptography` to 46.0.5 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
 ## 12.3.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

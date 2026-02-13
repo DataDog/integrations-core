@@ -12,12 +12,14 @@
   legacy: true
   required: false
   description: The username from the credentials needed to connect to the host.
+  fleet_configurable: true
   value:
     type: string
 - name: password
   legacy: true
   required: false
   description: The password from the credentials needed to connect to the host.
+  fleet_configurable: true
   value:
     type: string
 - name: additional_metrics
@@ -37,6 +39,7 @@
     <METRIC_NAME> is the name that displays in Datadog.
     <METRIC_TYPE> is from the standard choices for all Agent checks, such as gauge,
                   rate, histogram, or count.
+  fleet_configurable: true
   value:
     example:
     - ['Processor', none, '% Processor Time', processor.time, gauge]
@@ -55,6 +58,7 @@
     allow the precision in which counters are queried on a per metric basis.
     <METRIC_NAME>: The name of your metric
     <DATA_TYPE>  : The type of your metric (int or float)
+  fleet_configurable: true
   value:
       example:
         - <METRIC_NAME>,<DATA_TYPE>

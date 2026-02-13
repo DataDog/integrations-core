@@ -1,4 +1,5 @@
 name: etcd
+fleet_configurable: true
 files:
 - name: etcd.yaml
   options:
@@ -11,6 +12,7 @@ files:
         legacy: true
         description: |
           Deprecated and unused. The Prometheus-based check is the default and only implementation.
+        fleet_configurable: true
         hidden: true
         value:
           type: boolean
@@ -20,6 +22,7 @@ files:
           prometheus_url.value.example: http://localhost:2379/metrics
       - name: leader_tag
         description: Enable to tag metrics with `is_leader:true` or `is_leader:false`.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
