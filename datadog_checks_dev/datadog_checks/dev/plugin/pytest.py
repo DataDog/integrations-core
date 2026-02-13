@@ -286,7 +286,13 @@ def dd_default_hostname():
 
 @pytest.fixture
 def mock_response():
-    """Yield HTTPResponseMock so fixtures use the protocol-based mock (single path)."""
+    """
+    Yield HTTPResponseMock (the class) for building protocol-based mock responses.
+
+    Used by mock_http_response and mock_http_client. When you need the response class
+    directly (e.g. with request_wrapper_mock), request this fixture. http_response_mock
+    was removed as redundant: it yielded the same class; use mock_response instead.
+    """
     from datadog_checks.dev.http import HTTPResponseMock
 
     yield HTTPResponseMock
@@ -295,58 +301,73 @@ def mock_response():
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
     """
-    Mock HTTP in two modes (implementation-independent; uses HTTPResponseMock / RequestWrapperMock).
+    Patch a check's get_http_handler with a mock that serves responses from a queue.
 
-    **Check mode** – mock_http_response(CheckClass, ...): First argument is a check class with
-    get_http_handler (e.g. OpenMetricsBaseCheckV2, OpenMetricsBaseCheck). Patches that class's
-    get_http_handler with a RequestWrapperMock that serves responses from a per-test queue.
-    Remaining args/kwargs are passed to mock_response to build each response. Multiple calls
-    in one test enqueue responses so the check receives them in order.
+    First argument must be a check class with get_http_handler (e.g. OpenMetricsBaseCheckV2,
+    OpenMetricsBaseCheck). Patches that class's get_http_handler with a RequestWrapperMock
+    that serves responses from a per-test queue. Remaining args/kwargs are passed to
+    mock_response to build each response. Multiple calls in one test enqueue responses
+    so the check receives them in order. Implementation-independent (HTTPResponseMock /
+    RequestWrapperMock).
+    """
+    from datadog_checks.dev.http import RequestWrapperMock
 
-    **General mode** – mock_http_response(...) with no check class: Call with only response spec
-    (e.g. content=b'...', file_path=...) or no args. Returns (client, enqueue) where client is a
-    RequestWrapperMock that pops responses from an internal queue and enqueue(*args, **kwargs)
-    appends responses (built via mock_response). Use when the test has no check; inject client
-    where the HTTP wrapper is created or used.
+    response_queue = []
+
+    def _mock(handler_target, *args, **kwargs):
+        if not isinstance(handler_target, type) or not hasattr(handler_target, 'get_http_handler'):
+            raise TypeError(
+                'mock_http_response requires a check class with get_http_handler as first argument '
+                '(e.g. OpenMetricsBaseCheckV2, OpenMetricsBaseCheck)'
+            )
+        response = mock_response(*args, **kwargs)
+        response_queue.append(response)
+        if len(response_queue) == 1:
+            wrapper_mock = RequestWrapperMock(
+                get=lambda url, **kw: response_queue.pop(0),
+            )
+            wrapper_mock.options = {'headers': {'Accept': '*/*'}}
+            return mocker.patch.object(
+                handler_target,
+                'get_http_handler',
+                return_value=wrapper_mock,
+            )
+        return None
+
+    yield _mock
+
+
+@pytest.fixture
+def mock_http_client(mocker, mock_response):
+    """
+    Yield a mock HTTP client and enqueue function for tests without a check class.
+
+    Returns (client, enqueue). client is a RequestWrapperMock that pops responses from
+    an internal queue; enqueue(*args, **kwargs) appends responses (built via mock_response).
+    Optional first call with response spec (e.g. content=b'...', file_path=...) enqueues
+    that response; call with no args to get (client, enqueue) and use enqueue() only.
+    Inject client where the HTTP wrapper is created or used (e.g. patch get_http_handler).
+    Implementation-independent (HTTPResponseMock / RequestWrapperMock).
     """
     from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
 
-    response_queue = []  # check mode: per-test queue
-    general_queue = []  # general mode: queue for returned client
-    general_client = []  # [RequestWrapperMock | None]; list to allow assignment in closure
+    queue = []
+    client_ref = []
 
     def enqueue(*args, **kwargs):
-        """Append a response to the general-mode queue. Use after mock_http_response(...) returned (client, enqueue)."""
-        general_queue.append(mock_response(*args, **kwargs))
+        """Append a response to the queue."""
+        queue.append(mock_response(*args, **kwargs))
 
     def _mock(*args, **kwargs):
-        # Check mode: first arg is a check class with get_http_handler
-        if args and isinstance(args[0], type) and hasattr(args[0], 'get_http_handler'):
-            handler_target = args[0]
-            response = mock_response(*args[1:], **kwargs)
-            response_queue.append(response)
-            if len(response_queue) == 1:
-                wrapper_mock = RequestWrapperMock(
-                    get=lambda url, **kw: response_queue.pop(0),
-                )
-                wrapper_mock.options = {'headers': {'Accept': '*/*'}}
-                return mocker.patch.object(
-                    handler_target,
-                    'get_http_handler',
-                    return_value=wrapper_mock,
-                )
-            return None
-
-        # General mode: no check class; build response, enqueue, return (client, enqueue)
-        response = mock_response(*args, **kwargs)
-        general_queue.append(response)
-        if not general_client:
+        if args or kwargs:
+            queue.append(mock_response(*args, **kwargs))
+        if not client_ref:
             client = RequestWrapperMock(
-                get=lambda url, **kw: general_queue.pop(0) if general_queue else HTTPResponseMock(200, content=b''),
+                get=lambda url, **kw: queue.pop(0) if queue else HTTPResponseMock(200, content=b''),
             )
             client.options = {'headers': {'Accept': '*/*'}}
-            general_client.append(client)
-        return (general_client[0], enqueue)
+            client_ref.append(client)
+        return (client_ref[0], enqueue)
 
     yield _mock
 
@@ -445,22 +466,17 @@ def mock_http_response_per_endpoint(mocker, mock_response):
 
 
 @pytest.fixture
-def http_response_mock():
-    """
-    Yields HTTPResponseMock: a protocol-based mock response (no requests/httpx).
-    Use for tests that replace check.http or get_http_handler with RequestWrapperMock.
-    """
-    from datadog_checks.dev.http import HTTPResponseMock
-
-    yield HTTPResponseMock
-
-
-@pytest.fixture
 def request_wrapper_mock():
     """
-    Yields RequestWrapperMock: a protocol-based mock HTTP client (no requests/httpx).
-    Use as a context manager with a check to patch check._http, e.g.:
-        with request_wrapper_mock(check, get=lambda url, **kwargs: http_response_mock(200, content=b'...')):
+    Yields RequestWrapperMock for custom HTTP mock logic that mock_http_response and
+    mock_http_client do not cover (e.g. different response per URL, or raise on Nth call).
+
+    Use as a context manager with a check to patch check._http for the duration. Prefer
+    mock_http_response(CheckClass, ...) for queue-based check tests and mock_http_client
+    for (client, enqueue) when there is no check.
+
+    Example (custom get handler; use mock_response for the response class):
+        with request_wrapper_mock(check, get=lambda url, **kw: mock_response(200, content=b'...')):
             dd_run_check(check(instance))
     """
     from datadog_checks.dev.http import RequestWrapperMock

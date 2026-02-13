@@ -49,21 +49,21 @@ response = self.http.get(url)
 
 ## Testing
 
-To mock HTTP in tests without depending on `requests` or `httpx`, use the helpers in `datadog_checks.dev.http` (or the `mock_response`, `mock_http_response`, `http_response_mock`, and `request_wrapper_mock` pytest fixtures from the dev plugin).
+To mock HTTP in tests without depending on `requests` or `httpx`, use the helpers in `datadog_checks.dev.http` (or the `mock_response`, `mock_http_response`, `mock_http_client`, and `request_wrapper_mock` pytest fixtures from the dev plugin). Use `request_wrapper_mock` only when you need custom handler logic (e.g. different response per URL) that `mock_http_response` / `mock_http_client` do not provide; otherwise prefer those fixtures.
 
 **Mock HTTP design (implementation-independent):**
 
-1. **Check mode** – When testing a check that has `get_http_handler` (e.g. OpenMetrics, Prometheus), use the `mock_http_response` fixture with the check class as first argument. It patches that class’s `get_http_handler` with a `RequestWrapperMock` and a response queue:
+1. **Check tests** – Use the `mock_http_response` fixture with the check class as first argument. It patches that class’s `get_http_handler` with a `RequestWrapperMock` and a response queue:
 
    ```python
    mock_http_response(OpenMetricsBaseCheckV2, file_path=fixture_path)
    dd_run_check(check(instance))
    ```
 
-2. **General mode** – When the test does not have a check (e.g. wrapper-level or helper code), call `mock_http_response(...)` with only response spec (no check class). It returns `(client, enqueue)` where `client` is a `RequestWrapperMock` and `enqueue(...)` adds responses; inject `client` where the HTTP wrapper is created or used.
+2. **Tests without a check** – Use the `mock_http_client` fixture. It returns `(client, enqueue)` where `client` is a `RequestWrapperMock` and `enqueue(...)` adds responses; inject `client` where the HTTP wrapper is created or used.
 
    ```python
-   client, enqueue = mock_http_response(content=b'first')
+   client, enqueue = mock_http_client(content=b'first')
    enqueue(content=b'second')
    with patch('mymodule.get_http_handler', return_value=client):
        ...
