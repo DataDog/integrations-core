@@ -1,4 +1,5 @@
 name: Active Directory
+fleet_configurable: true
 files:
 - name: active_directory.yaml
   options:

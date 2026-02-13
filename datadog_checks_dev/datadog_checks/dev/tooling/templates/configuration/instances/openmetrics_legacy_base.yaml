@@ -31,6 +31,7 @@
           type: string
 - name: prometheus_metrics_prefix
   description: Removes a given <PREFIX> from exposed Prometheus metrics.
+  fleet_configurable: true
   value:
     type: string
     example: <PREFIX>_
@@ -51,6 +52,7 @@
     example: <LABEL>
 - name: label_joins
   description: Allows targeting a metric to retrieve its label with a 1:1 mapping.
+  fleet_configurable: true
   value:
     example:
       target_metric:
@@ -73,6 +75,7 @@
   description: |
     The label mapper allows you to rename labels.
     Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
+  fleet_configurable: true
   value:
     example:
       flavor: origin
@@ -112,6 +115,7 @@
   description: |
     Set send_monotonic_with_gauge to true to send counters as both monotonic counters and gauges.
     This option only works when `send_monotonic_counter` is False.
+  fleet_configurable: true
   hidden: true
   value:
     example: false
@@ -153,6 +157,7 @@
   description: |
     A list of labels to include. May be used in conjunction with `exclude_labels`.
     Labels defined in `excluded labels` will take precedence in case of overlap.
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -172,12 +177,14 @@
   description: |
     The path to a Kubernetes service account bearer token file. Make sure the file exists and is mounted correctly.
     Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
+  fleet_configurable: true
   value:
     example: <TOKEN_PATH>
     type: string
 - name: bearer_token_refresh_interval
   description: |
     The refresh interval to keep the bearer token up-to-date.
+  fleet_configurable: true
   value:
     example: 60
     type: integer
@@ -198,6 +205,7 @@
   description: |
     A mapping of labels where metrics with matching label key and values are ignored.
     Use the "*" wildcard to match all label values.
+  fleet_configurable: true
   value:
     type: object
     additionalProperties:
@@ -210,6 +218,7 @@
 - name: ignore_tags
   description: |
     A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+  fleet_configurable: true
   value:
     type: array
     items:
