@@ -1,4 +1,5 @@
 name: Mac Audit Logs
+fleet_configurable: true
 files:
 - name: mac_audit_logs.yaml
   options:
@@ -8,12 +9,14 @@ files:
   - template: instances
     options:
     - name: MONITOR
+      fleet_configurable: true
       required: true
       description: "Flag indicating Mac audit log collection status. Set to true to enable collection."
       value:
         type: boolean
         example: true
     - name: AUDIT_LOGS_DIR_PATH
+      fleet_configurable: true
       required: true
       description: "Path to the directory containing the BSM audit logs."
       value:
