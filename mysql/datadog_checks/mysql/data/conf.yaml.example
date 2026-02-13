@@ -80,7 +80,7 @@ instances:
     #
     # database_identifier:
 
-        ## @param template - string - optional - default: $resolved_hostname
+        ## @param template - string - optional - default: $env-$resolved_hostname:$port
         ## The template to use for the database identifier. The default value is `$resolved_hostname`.
         ## You can use the following variables, prefixed by `$` in the template:
         ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
